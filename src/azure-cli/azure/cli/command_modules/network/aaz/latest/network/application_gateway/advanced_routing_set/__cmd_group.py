@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "network application-gateway advanced-routing-condition-set condition",
+    "network application-gateway advanced-routing-set",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage routing conditions of an advanced routing condition set.
+    """Manage advanced routing condition sets of an application gateway.
     """
     pass
 

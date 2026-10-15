@@ -12,13 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway advanced-routing-condition-set condition list",
+    "network application-gateway advanced-routing-set condition list",
 )
 class List(AAZCommand):
     """List routing conditions.
 
     :example: List the routing conditions of an advanced routing condition set.
-        az network application-gateway advanced-routing-condition-set condition list -g MyResourceGroup --gateway-name MyAppGateway --condition-set-name MyConditionSet
+        az network application-gateway advanced-routing-set condition list -g MyResourceGroup --gateway-name MyAppGateway --condition-set-name MyConditionSet
     """
 
     _aaz_info = {

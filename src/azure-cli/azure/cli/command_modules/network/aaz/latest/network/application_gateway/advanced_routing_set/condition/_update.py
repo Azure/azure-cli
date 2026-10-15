@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway advanced-routing-condition-set update",
+    "network application-gateway advanced-routing-set condition update",
 )
 class Update(AAZCommand):
-    """Update an advanced routing condition set.
+    """Update a routing condition.
 
-    :example: Replace the routing conditions of an advanced routing condition set.
-        az network application-gateway advanced-routing-condition-set update -g MyResourceGroup --gateway-name MyAppGateway -n MyConditionSet --routing-conditions "[{condition-type:Header,property-name:x-env,property-values:[canary,beta]}]"
+    :example: Update the values of the second routing condition of an advanced routing condition set.
+        az network application-gateway advanced-routing-set condition update -g MyResourceGroup --gateway-name MyAppGateway --condition-set-name MyConditionSet --index 1 --property-values v2 v3
     """
 
     _aaz_info = {
         "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2026-01-01", "properties.advancedRoutingConditionSets[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2026-01-01", "properties.advancedRoutingConditionSets[].properties.routingConditions[]"],
         ]
     }
 
@@ -56,49 +56,38 @@ class Update(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Name of the advanced routing condition set that is unique within an Application Gateway.",
+        _args_schema.condition_set_name = AAZStrArg(
+            options=["--condition-set-name"],
+            help="Name of the advanced routing condition set.",
             required=True,
         )
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.routing_conditions = AAZListArg(
-            options=["--routing-conditions"],
-            arg_group="Properties",
-            help="Routing conditions of the condition set. All conditions must be satisfied for the referencing advanced routing rule to match.",
+        _args_schema.index = AAZIntArg(
+            options=["--index"],
+            help="Index of the routing condition.",
+            required=True,
         )
-
-        routing_conditions = cls._args_schema.routing_conditions
-        routing_conditions.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.routing_conditions.Element
-        _element.condition_type = AAZStrArg(
-            options=["condition-type"],
+        _args_schema.condition_type = AAZStrArg(
+            options=["--condition-type"],
             help="The type of request property the condition is evaluated against.",
             enum={"ClientIP": "ClientIP", "Header": "Header", "Method": "Method", "Path": "Path", "QueryString": "QueryString"},
         )
-        _element.property_name = AAZStrArg(
-            options=["property-name"],
+        _args_schema.property_name = AAZStrArg(
+            options=["--property-name"],
             help="Name of the request property the condition is evaluated against. Required when conditionType is Header or QueryString, and not applicable when conditionType is Path, ClientIP or Method.",
             nullable=True,
         )
-        _element.property_value_matcher = AAZObjectArg(
-            options=["property-value-matcher"],
+        _args_schema.property_value_matcher = AAZObjectArg(
+            options=["--property-value-matcher"],
             help="Pattern the request property is matched against. Exactly one of propertyValues or propertyValueMatcher must be specified. Not applicable when conditionType is ClientIP or Method.",
             nullable=True,
         )
-        _element.property_values = AAZListArg(
-            options=["property-values"],
+        _args_schema.property_values = AAZListArg(
+            options=["--property-values"],
             help="Values the request property is matched against. Exactly one of propertyValues or propertyValueMatcher must be specified.",
             nullable=True,
         )
 
-        property_value_matcher = cls._args_schema.routing_conditions.Element.property_value_matcher
+        property_value_matcher = cls._args_schema.property_value_matcher
         property_value_matcher.ignore_case = AAZBoolArg(
             options=["ignore-case"],
             help="Setting this parameter to truth value with force the pattern to do a case in-sensitive comparison.",
@@ -114,12 +103,10 @@ class Update(AAZCommand):
             help="The pattern, either fixed string or regular expression, that the request property value is evaluated against.",
         )
 
-        property_values = cls._args_schema.routing_conditions.Element.property_values
+        property_values = cls._args_schema.property_values
         property_values.Element = AAZStrArg(
             nullable=True,
         )
-
-        # define Arg Group "Resource.properties.advancedRoutingConditionSets[]"
         return cls._args_schema
 
     def _execute_operations(self):
@@ -159,7 +146,15 @@ class Update(AAZCommand):
             result = result.properties.advancedRoutingConditionSets
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
+                lambda e: e[1].name == self.ctx.args.condition_set_name,
+                filters
+            )
+            idx = next(filters)[0]
+            result = result[idx]
+            result = result.properties.routingConditions
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[0] == self.ctx.args.index,
                 filters
             )
             idx = next(filters)[0]
@@ -170,10 +165,19 @@ class Update(AAZCommand):
             result = result.properties.advancedRoutingConditionSets
             filters = enumerate(result)
             filters = filter(
-                lambda e: e[1].name == self.ctx.args.name,
+                lambda e: e[1].name == self.ctx.args.condition_set_name,
+                filters
+            )
+            idx = next(filters)[0]
+            result = result[idx]
+            result = result.properties.routingConditions
+            filters = enumerate(result)
+            filters = filter(
+                lambda e: e[0] == self.ctx.args.index,
                 filters
             )
             idx = next(filters, [len(result)])[0]
+            self.ctx.args.index = idx
             result[idx] = value
             return
 
@@ -3222,31 +3226,18 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("name", AAZStrType, ".name")
-            _builder.set_prop("properties", AAZObjectType)
+            _builder.set_prop("conditionType", AAZStrType, ".condition_type", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("propertyName", AAZStrType, ".property_name")
+            _builder.set_prop("propertyValueMatcher", AAZObjectType, ".property_value_matcher")
+            _builder.set_prop("propertyValues", AAZListType, ".property_values")
 
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("routingConditions", AAZListType, ".routing_conditions", typ_kwargs={"flags": {"required": True}})
-
-            routing_conditions = _builder.get(".properties.routingConditions")
-            if routing_conditions is not None:
-                routing_conditions.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.routingConditions[]")
-            if _elements is not None:
-                _elements.set_prop("conditionType", AAZStrType, ".condition_type", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("propertyName", AAZStrType, ".property_name")
-                _elements.set_prop("propertyValueMatcher", AAZObjectType, ".property_value_matcher")
-                _elements.set_prop("propertyValues", AAZListType, ".property_values")
-
-            property_value_matcher = _builder.get(".properties.routingConditions[].propertyValueMatcher")
+            property_value_matcher = _builder.get(".propertyValueMatcher")
             if property_value_matcher is not None:
                 property_value_matcher.set_prop("ignoreCase", AAZBoolType, ".ignore_case")
                 property_value_matcher.set_prop("negate", AAZBoolType, ".negate")
                 property_value_matcher.set_prop("pattern", AAZStrType, ".pattern", typ_kwargs={"flags": {"required": True}})
 
-            property_values = _builder.get(".properties.routingConditions[].propertyValues")
+            property_values = _builder.get(".propertyValues")
             if property_values is not None:
                 property_values.set_elements(AAZStrType, ".")
 

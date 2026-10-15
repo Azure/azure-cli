@@ -12,13 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway advanced-routing-condition-set condition create",
+    "network application-gateway advanced-routing-set condition create",
 )
 class Create(AAZCommand):
     """Create a routing condition.
 
     :example: Add a query string condition to an advanced routing condition set.
-        az network application-gateway advanced-routing-condition-set condition create -g MyResourceGroup --gateway-name MyAppGateway --condition-set-name MyConditionSet --condition-type QueryString --property-name version --property-values v2
+        az network application-gateway advanced-routing-set condition create -g MyResourceGroup --gateway-name MyAppGateway --condition-set-name MyConditionSet --condition-type QueryString --property-name version --property-values v2
     """
 
     _aaz_info = {

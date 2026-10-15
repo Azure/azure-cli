@@ -2257,7 +2257,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'ip': 'pip1',
             'ag': 'ag1',
-            'cs': 'network application-gateway advanced-routing-condition-set',
+            'cs': 'network application-gateway advanced-routing-set',
             'map': 'network application-gateway advanced-routing-map',
             'pool': 'appGatewayBackendPool',
             'settings': 'appGatewayBackendHttpSettings',

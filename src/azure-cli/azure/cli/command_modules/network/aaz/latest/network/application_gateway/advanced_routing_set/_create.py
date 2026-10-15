@@ -12,13 +12,18 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network application-gateway advanced-routing-condition-set delete",
+    "network application-gateway advanced-routing-set create",
 )
-class Delete(AAZCommand):
-    """Delete an advanced routing condition set.
+class Create(AAZCommand):
+    """Create an advanced routing condition set.
 
-    :example: Delete an advanced routing condition set.
-        az network application-gateway advanced-routing-condition-set delete -g MyResourceGroup --gateway-name MyAppGateway -n MyConditionSet
+    The condition set must contain at least one routing condition. All conditions must be satisfied for a referencing advanced routing rule to match.
+
+    :example: Create an advanced routing condition set that matches requests with a header value.
+        az network application-gateway advanced-routing-set create -g MyResourceGroup --gateway-name MyAppGateway -n MyConditionSet --routing-conditions "[{condition-type:Header,property-name:x-env,property-values:[canary]}]"
+
+    :example: Create an advanced routing condition set that matches requests by path pattern and query string.
+        az network application-gateway advanced-routing-set create -g MyResourceGroup --gateway-name MyAppGateway -n MyConditionSet2 --routing-conditions "[{condition-type:Path,property-value-matcher:{pattern:'/api/*'}},{condition-type:QueryString,property-name:version,property-values:[v2]}]"
     """
 
     _aaz_info = {
@@ -33,7 +38,7 @@ class Delete(AAZCommand):
     def _handler(self, command_args):
         super()._handler(command_args)
         self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, None)
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -59,14 +64,68 @@ class Delete(AAZCommand):
             help="Name of the advanced routing condition set that is unique within an Application Gateway.",
             required=True,
         )
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.routing_conditions = AAZListArg(
+            options=["--routing-conditions"],
+            arg_group="Properties",
+            help="Routing conditions of the condition set. All conditions must be satisfied for the referencing advanced routing rule to match.",
+            required=True,
+        )
+
+        routing_conditions = cls._args_schema.routing_conditions
+        routing_conditions.Element = AAZObjectArg()
+
+        _element = cls._args_schema.routing_conditions.Element
+        _element.condition_type = AAZStrArg(
+            options=["condition-type"],
+            help="The type of request property the condition is evaluated against.",
+            required=True,
+            enum={"ClientIP": "ClientIP", "Header": "Header", "Method": "Method", "Path": "Path", "QueryString": "QueryString"},
+        )
+        _element.property_name = AAZStrArg(
+            options=["property-name"],
+            help="Name of the request property the condition is evaluated against. Required when conditionType is Header or QueryString, and not applicable when conditionType is Path, ClientIP or Method.",
+        )
+        _element.property_value_matcher = AAZObjectArg(
+            options=["property-value-matcher"],
+            help="Pattern the request property is matched against. Exactly one of propertyValues or propertyValueMatcher must be specified. Not applicable when conditionType is ClientIP or Method.",
+        )
+        _element.property_values = AAZListArg(
+            options=["property-values"],
+            help="Values the request property is matched against. Exactly one of propertyValues or propertyValueMatcher must be specified.",
+        )
+
+        property_value_matcher = cls._args_schema.routing_conditions.Element.property_value_matcher
+        property_value_matcher.ignore_case = AAZBoolArg(
+            options=["ignore-case"],
+            help="Setting this parameter to truth value with force the pattern to do a case in-sensitive comparison.",
+            default=True,
+        )
+        property_value_matcher.negate = AAZBoolArg(
+            options=["negate"],
+            help="Setting this value as truth will force to check the negation of the condition given by the user in the pattern field.",
+        )
+        property_value_matcher.pattern = AAZStrArg(
+            options=["pattern"],
+            help="The pattern, either fixed string or regular expression, that the request property value is evaluated against.",
+            required=True,
+        )
+
+        property_values = cls._args_schema.routing_conditions.Element.property_values
+        property_values.Element = AAZStrArg()
+
+        # define Arg Group "Resource.properties.advancedRoutingConditionSets[]"
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.ApplicationGatewaysGet(ctx=self.ctx)()
-        self.pre_instance_delete()
-        self.InstanceDeleteByJson(ctx=self.ctx)()
-        self.post_instance_delete()
+        self.pre_instance_create()
+        self.InstanceCreateByJson(ctx=self.ctx)()
+        self.post_instance_create(self.ctx.selectors.subresource.get())
         yield self.ApplicationGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -79,12 +138,16 @@ class Delete(AAZCommand):
         pass
 
     @register_callback
-    def pre_instance_delete(self):
+    def pre_instance_create(self):
         pass
 
     @register_callback
-    def post_instance_delete(self):
+    def post_instance_create(self, instance):
         pass
+
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
+        return result
 
     class SubresourceSelector(AAZJsonSelector):
 
@@ -197,7 +260,7 @@ class Delete(AAZCommand):
             )
             _schema_on_200.id = AAZStrType()
             _schema_on_200.identity = AAZIdentityObjectType()
-            _DeleteHelper._build_schema_common_managed_service_identity_read(_schema_on_200.identity)
+            _CreateHelper._build_schema_common_managed_service_identity_read(_schema_on_200.identity)
             _schema_on_200.location = AAZStrType()
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
@@ -252,7 +315,7 @@ class Delete(AAZCommand):
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
             properties.force_firewall_policy_association = AAZBoolType(
                 serialized_name="forceFirewallPolicyAssociation",
             )
@@ -317,7 +380,7 @@ class Delete(AAZCommand):
             properties.ssl_policy = AAZObjectType(
                 serialized_name="sslPolicy",
             )
-            _DeleteHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
+            _CreateHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
             properties.ssl_profiles = AAZListType(
                 serialized_name="sslProfiles",
             )
@@ -413,19 +476,19 @@ class Delete(AAZCommand):
             properties.default_backend_address_pool = AAZObjectType(
                 serialized_name="defaultBackendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
             properties.default_backend_http_settings = AAZObjectType(
                 serialized_name="defaultBackendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
             properties.default_redirect_configuration = AAZObjectType(
                 serialized_name="defaultRedirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
             properties.default_rewrite_rule_set = AAZObjectType(
                 serialized_name="defaultRewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -449,18 +512,18 @@ class Delete(AAZCommand):
             properties.advanced_routing_condition_set = AAZObjectType(
                 serialized_name="advancedRoutingConditionSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.advanced_routing_condition_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.advanced_routing_condition_set)
             properties.auth_configs = AAZListType(
                 serialized_name="authConfigs",
             )
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_http_settings = AAZObjectType(
                 serialized_name="backendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
             properties.priority = AAZIntType(
                 flags={"required": True},
             )
@@ -471,19 +534,19 @@ class Delete(AAZCommand):
             properties.redirect_configuration = AAZObjectType(
                 serialized_name="redirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
             properties.rewrite_rule_set = AAZObjectType(
                 serialized_name="rewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
 
             auth_configs = cls._schema_on_200.properties.advanced_routing_maps.Element.properties.advanced_routing_rules.Element.properties.auth_configs
             auth_configs.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
+            _CreateHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
 
             default_auth_configs = cls._schema_on_200.properties.advanced_routing_maps.Element.properties.default_auth_configs
             default_auth_configs.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_auth_config_read(default_auth_configs.Element)
+            _CreateHelper._build_schema_application_gateway_auth_config_read(default_auth_configs.Element)
 
             authentication_certificates = cls._schema_on_200.properties.authentication_certificates
             authentication_certificates.Element = AAZObjectType()
@@ -519,7 +582,7 @@ class Delete(AAZCommand):
 
             backend_address_pools = cls._schema_on_200.properties.backend_address_pools
             backend_address_pools.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_application_gateway_backend_address_pool_read(backend_address_pools.Element)
+            _CreateHelper._build_schema_common_application_gateway_backend_address_pool_read(backend_address_pools.Element)
 
             backend_http_settings_collection = cls._schema_on_200.properties.backend_http_settings_collection
             backend_http_settings_collection.Element = AAZObjectType()
@@ -562,7 +625,7 @@ class Delete(AAZCommand):
             )
             properties.port = AAZIntType()
             properties.probe = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.probe)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.probe)
             properties.probe_enabled = AAZBoolType(
                 serialized_name="probeEnabled",
             )
@@ -589,7 +652,7 @@ class Delete(AAZCommand):
 
             authentication_certificates = cls._schema_on_200.properties.backend_http_settings_collection.Element.properties.authentication_certificates
             authentication_certificates.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(authentication_certificates.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(authentication_certificates.Element)
 
             connection_draining = cls._schema_on_200.properties.backend_http_settings_collection.Element.properties.connection_draining
             connection_draining.drain_timeout_in_sec = AAZIntType(
@@ -602,7 +665,7 @@ class Delete(AAZCommand):
 
             trusted_root_certificates = cls._schema_on_200.properties.backend_http_settings_collection.Element.properties.trusted_root_certificates
             trusted_root_certificates.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
 
             backend_settings_collection = cls._schema_on_200.properties.backend_settings_collection
             backend_settings_collection.Element = AAZObjectType()
@@ -632,7 +695,7 @@ class Delete(AAZCommand):
             )
             properties.port = AAZIntType()
             properties.probe = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.probe)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.probe)
             properties.protocol = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -645,11 +708,11 @@ class Delete(AAZCommand):
 
             trusted_root_certificates = cls._schema_on_200.properties.backend_settings_collection.Element.properties.trusted_root_certificates
             trusted_root_certificates.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
 
             custom_error_configurations = cls._schema_on_200.properties.custom_error_configurations
             custom_error_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
+            _CreateHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
 
             entra_jwt_validation_configs = cls._schema_on_200.properties.entra_jwt_validation_configs
             entra_jwt_validation_configs.Element = AAZObjectType()
@@ -709,7 +772,7 @@ class Delete(AAZCommand):
             properties.private_link_configuration = AAZObjectType(
                 serialized_name="privateLinkConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.private_link_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.private_link_configuration)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -717,9 +780,9 @@ class Delete(AAZCommand):
             properties.public_ip_address = AAZObjectType(
                 serialized_name="publicIPAddress",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.public_ip_address)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.public_ip_address)
             properties.subnet = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.subnet)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.subnet)
 
             frontend_ports = cls._schema_on_200.properties.frontend_ports
             frontend_ports.Element = AAZObjectType()
@@ -746,7 +809,7 @@ class Delete(AAZCommand):
 
             gateway_ip_configurations = cls._schema_on_200.properties.gateway_ip_configurations
             gateway_ip_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_application_gateway_ip_configuration_read(gateway_ip_configurations.Element)
+            _CreateHelper._build_schema_common_application_gateway_ip_configuration_read(gateway_ip_configurations.Element)
 
             global_configuration = cls._schema_on_200.properties.global_configuration
             global_configuration.disable_default_server_header_in_response = AAZBoolType(
@@ -782,15 +845,15 @@ class Delete(AAZCommand):
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
             properties.frontend_ip_configuration = AAZObjectType(
                 serialized_name="frontendIPConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
             properties.frontend_port = AAZObjectType(
                 serialized_name="frontendPort",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.frontend_port)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.frontend_port)
             properties.host_name = AAZStrType(
                 serialized_name="hostName",
             )
@@ -808,15 +871,15 @@ class Delete(AAZCommand):
             properties.ssl_certificate = AAZObjectType(
                 serialized_name="sslCertificate",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
             properties.ssl_profile = AAZObjectType(
                 serialized_name="sslProfile",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
 
             custom_error_configurations = cls._schema_on_200.properties.http_listeners.Element.properties.custom_error_configurations
             custom_error_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
+            _CreateHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
 
             host_names = cls._schema_on_200.properties.http_listeners.Element.properties.host_names
             host_names.Element = AAZStrType()
@@ -841,11 +904,11 @@ class Delete(AAZCommand):
             properties.frontend_ip_configuration = AAZObjectType(
                 serialized_name="frontendIPConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
             properties.frontend_port = AAZObjectType(
                 serialized_name="frontendPort",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.frontend_port)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.frontend_port)
             properties.host_names = AAZListType(
                 serialized_name="hostNames",
             )
@@ -857,11 +920,11 @@ class Delete(AAZCommand):
             properties.ssl_certificate = AAZObjectType(
                 serialized_name="sslCertificate",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
             properties.ssl_profile = AAZObjectType(
                 serialized_name="sslProfile",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
 
             host_names = cls._schema_on_200.properties.listeners.Element.properties.host_names
             host_names.Element = AAZStrType()
@@ -914,7 +977,7 @@ class Delete(AAZCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.weight_per_server = AAZIntType(
                 serialized_name="weightPerServer",
             )
@@ -944,11 +1007,11 @@ class Delete(AAZCommand):
                 serialized_name="privateEndpoint",
                 flags={"read_only": True},
             )
-            _DeleteHelper._build_schema_common_private_endpoint_read(properties.private_endpoint)
+            _CreateHelper._build_schema_common_private_endpoint_read(properties.private_endpoint)
             properties.private_link_service_connection_state = AAZObjectType(
                 serialized_name="privateLinkServiceConnectionState",
             )
-            _DeleteHelper._build_schema_common_private_link_service_connection_state_read(properties.private_link_service_connection_state)
+            _CreateHelper._build_schema_common_private_link_service_connection_state_read(properties.private_link_service_connection_state)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -1008,7 +1071,7 @@ class Delete(AAZCommand):
                 flags={"read_only": True},
             )
             properties.subnet = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.subnet)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.subnet)
 
             probes = cls._schema_on_200.properties.probes
             probes.Element = AAZObjectType()
@@ -1098,7 +1161,7 @@ class Delete(AAZCommand):
             properties.target_listener = AAZObjectType(
                 serialized_name="targetListener",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.target_listener)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.target_listener)
             properties.target_url = AAZStrType(
                 serialized_name="targetUrl",
             )
@@ -1108,15 +1171,15 @@ class Delete(AAZCommand):
 
             path_rules = cls._schema_on_200.properties.redirect_configurations.Element.properties.path_rules
             path_rules.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(path_rules.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(path_rules.Element)
 
             request_routing_rules = cls._schema_on_200.properties.redirect_configurations.Element.properties.request_routing_rules
             request_routing_rules.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(request_routing_rules.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(request_routing_rules.Element)
 
             url_path_maps = cls._schema_on_200.properties.redirect_configurations.Element.properties.url_path_maps
             url_path_maps.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(url_path_maps.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(url_path_maps.Element)
 
             request_routing_rules = cls._schema_on_200.properties.request_routing_rules
             request_routing_rules.Element = AAZObjectType()
@@ -1138,30 +1201,30 @@ class Delete(AAZCommand):
             properties.advanced_routing_map = AAZObjectType(
                 serialized_name="advancedRoutingMap",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.advanced_routing_map)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.advanced_routing_map)
             properties.auth_configs = AAZListType(
                 serialized_name="authConfigs",
             )
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_http_settings = AAZObjectType(
                 serialized_name="backendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
             properties.entra_jwt_validation_config = AAZObjectType(
                 serialized_name="entraJWTValidationConfig",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.entra_jwt_validation_config)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.entra_jwt_validation_config)
             properties.http_listener = AAZObjectType(
                 serialized_name="httpListener",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.http_listener)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.http_listener)
             properties.load_distribution_policy = AAZObjectType(
                 serialized_name="loadDistributionPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
             properties.priority = AAZIntType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -1170,22 +1233,22 @@ class Delete(AAZCommand):
             properties.redirect_configuration = AAZObjectType(
                 serialized_name="redirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
             properties.rewrite_rule_set = AAZObjectType(
                 serialized_name="rewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
             properties.rule_type = AAZStrType(
                 serialized_name="ruleType",
             )
             properties.url_path_map = AAZObjectType(
                 serialized_name="urlPathMap",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.url_path_map)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.url_path_map)
 
             auth_configs = cls._schema_on_200.properties.request_routing_rules.Element.properties.auth_configs
             auth_configs.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
+            _CreateHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
 
             rewrite_rule_sets = cls._schema_on_200.properties.rewrite_rule_sets
             rewrite_rule_sets.Element = AAZObjectType()
@@ -1235,11 +1298,11 @@ class Delete(AAZCommand):
 
             request_header_configurations = cls._schema_on_200.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.request_header_configurations
             request_header_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_header_configuration_read(request_header_configurations.Element)
+            _CreateHelper._build_schema_application_gateway_header_configuration_read(request_header_configurations.Element)
 
             response_header_configurations = cls._schema_on_200.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.response_header_configurations
             response_header_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_header_configuration_read(response_header_configurations.Element)
+            _CreateHelper._build_schema_application_gateway_header_configuration_read(response_header_configurations.Element)
 
             url_configuration = cls._schema_on_200.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.url_configuration
             url_configuration.modified_path = AAZStrType(
@@ -1281,13 +1344,13 @@ class Delete(AAZCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_settings = AAZObjectType(
                 serialized_name="backendSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_settings)
             properties.listener = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.listener)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.listener)
             properties.priority = AAZIntType(
                 flags={"required": True},
             )
@@ -1372,7 +1435,7 @@ class Delete(AAZCommand):
             properties.ssl_policy = AAZObjectType(
                 serialized_name="sslPolicy",
             )
-            _DeleteHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
+            _CreateHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
             properties.trusted_client_certificates = AAZListType(
                 serialized_name="trustedClientCertificates",
             )
@@ -1390,7 +1453,7 @@ class Delete(AAZCommand):
 
             trusted_client_certificates = cls._schema_on_200.properties.ssl_profiles.Element.properties.trusted_client_certificates
             trusted_client_certificates.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(trusted_client_certificates.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(trusted_client_certificates.Element)
 
             trusted_client_certificates = cls._schema_on_200.properties.trusted_client_certificates
             trusted_client_certificates.Element = AAZObjectType()
@@ -1469,23 +1532,23 @@ class Delete(AAZCommand):
             properties.default_backend_address_pool = AAZObjectType(
                 serialized_name="defaultBackendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
             properties.default_backend_http_settings = AAZObjectType(
                 serialized_name="defaultBackendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
             properties.default_load_distribution_policy = AAZObjectType(
                 serialized_name="defaultLoadDistributionPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_load_distribution_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_load_distribution_policy)
             properties.default_redirect_configuration = AAZObjectType(
                 serialized_name="defaultRedirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
             properties.default_rewrite_rule_set = AAZObjectType(
                 serialized_name="defaultRewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
             properties.path_rules = AAZListType(
                 serialized_name="pathRules",
             )
@@ -1514,19 +1577,19 @@ class Delete(AAZCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_http_settings = AAZObjectType(
                 serialized_name="backendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
             properties.load_distribution_policy = AAZObjectType(
                 serialized_name="loadDistributionPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
             properties.paths = AAZListType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -1535,11 +1598,11 @@ class Delete(AAZCommand):
             properties.redirect_configuration = AAZObjectType(
                 serialized_name="redirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
             properties.rewrite_rule_set = AAZObjectType(
                 serialized_name="rewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
 
             paths = cls._schema_on_200.properties.url_path_maps.Element.properties.path_rules.Element.properties.paths
             paths.Element = AAZStrType()
@@ -1728,7 +1791,7 @@ class Delete(AAZCommand):
             )
             _schema_on_200_201.id = AAZStrType()
             _schema_on_200_201.identity = AAZIdentityObjectType()
-            _DeleteHelper._build_schema_common_managed_service_identity_read(_schema_on_200_201.identity)
+            _CreateHelper._build_schema_common_managed_service_identity_read(_schema_on_200_201.identity)
             _schema_on_200_201.location = AAZStrType()
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
@@ -1783,7 +1846,7 @@ class Delete(AAZCommand):
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
             properties.force_firewall_policy_association = AAZBoolType(
                 serialized_name="forceFirewallPolicyAssociation",
             )
@@ -1848,7 +1911,7 @@ class Delete(AAZCommand):
             properties.ssl_policy = AAZObjectType(
                 serialized_name="sslPolicy",
             )
-            _DeleteHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
+            _CreateHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
             properties.ssl_profiles = AAZListType(
                 serialized_name="sslProfiles",
             )
@@ -1944,19 +2007,19 @@ class Delete(AAZCommand):
             properties.default_backend_address_pool = AAZObjectType(
                 serialized_name="defaultBackendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
             properties.default_backend_http_settings = AAZObjectType(
                 serialized_name="defaultBackendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
             properties.default_redirect_configuration = AAZObjectType(
                 serialized_name="defaultRedirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
             properties.default_rewrite_rule_set = AAZObjectType(
                 serialized_name="defaultRewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -1980,18 +2043,18 @@ class Delete(AAZCommand):
             properties.advanced_routing_condition_set = AAZObjectType(
                 serialized_name="advancedRoutingConditionSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.advanced_routing_condition_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.advanced_routing_condition_set)
             properties.auth_configs = AAZListType(
                 serialized_name="authConfigs",
             )
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_http_settings = AAZObjectType(
                 serialized_name="backendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
             properties.priority = AAZIntType(
                 flags={"required": True},
             )
@@ -2002,19 +2065,19 @@ class Delete(AAZCommand):
             properties.redirect_configuration = AAZObjectType(
                 serialized_name="redirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
             properties.rewrite_rule_set = AAZObjectType(
                 serialized_name="rewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
 
             auth_configs = cls._schema_on_200_201.properties.advanced_routing_maps.Element.properties.advanced_routing_rules.Element.properties.auth_configs
             auth_configs.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
+            _CreateHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
 
             default_auth_configs = cls._schema_on_200_201.properties.advanced_routing_maps.Element.properties.default_auth_configs
             default_auth_configs.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_auth_config_read(default_auth_configs.Element)
+            _CreateHelper._build_schema_application_gateway_auth_config_read(default_auth_configs.Element)
 
             authentication_certificates = cls._schema_on_200_201.properties.authentication_certificates
             authentication_certificates.Element = AAZObjectType()
@@ -2050,7 +2113,7 @@ class Delete(AAZCommand):
 
             backend_address_pools = cls._schema_on_200_201.properties.backend_address_pools
             backend_address_pools.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_application_gateway_backend_address_pool_read(backend_address_pools.Element)
+            _CreateHelper._build_schema_common_application_gateway_backend_address_pool_read(backend_address_pools.Element)
 
             backend_http_settings_collection = cls._schema_on_200_201.properties.backend_http_settings_collection
             backend_http_settings_collection.Element = AAZObjectType()
@@ -2093,7 +2156,7 @@ class Delete(AAZCommand):
             )
             properties.port = AAZIntType()
             properties.probe = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.probe)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.probe)
             properties.probe_enabled = AAZBoolType(
                 serialized_name="probeEnabled",
             )
@@ -2120,7 +2183,7 @@ class Delete(AAZCommand):
 
             authentication_certificates = cls._schema_on_200_201.properties.backend_http_settings_collection.Element.properties.authentication_certificates
             authentication_certificates.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(authentication_certificates.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(authentication_certificates.Element)
 
             connection_draining = cls._schema_on_200_201.properties.backend_http_settings_collection.Element.properties.connection_draining
             connection_draining.drain_timeout_in_sec = AAZIntType(
@@ -2133,7 +2196,7 @@ class Delete(AAZCommand):
 
             trusted_root_certificates = cls._schema_on_200_201.properties.backend_http_settings_collection.Element.properties.trusted_root_certificates
             trusted_root_certificates.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
 
             backend_settings_collection = cls._schema_on_200_201.properties.backend_settings_collection
             backend_settings_collection.Element = AAZObjectType()
@@ -2163,7 +2226,7 @@ class Delete(AAZCommand):
             )
             properties.port = AAZIntType()
             properties.probe = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.probe)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.probe)
             properties.protocol = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -2176,11 +2239,11 @@ class Delete(AAZCommand):
 
             trusted_root_certificates = cls._schema_on_200_201.properties.backend_settings_collection.Element.properties.trusted_root_certificates
             trusted_root_certificates.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(trusted_root_certificates.Element)
 
             custom_error_configurations = cls._schema_on_200_201.properties.custom_error_configurations
             custom_error_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
+            _CreateHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
 
             entra_jwt_validation_configs = cls._schema_on_200_201.properties.entra_jwt_validation_configs
             entra_jwt_validation_configs.Element = AAZObjectType()
@@ -2240,7 +2303,7 @@ class Delete(AAZCommand):
             properties.private_link_configuration = AAZObjectType(
                 serialized_name="privateLinkConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.private_link_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.private_link_configuration)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -2248,9 +2311,9 @@ class Delete(AAZCommand):
             properties.public_ip_address = AAZObjectType(
                 serialized_name="publicIPAddress",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.public_ip_address)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.public_ip_address)
             properties.subnet = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.subnet)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.subnet)
 
             frontend_ports = cls._schema_on_200_201.properties.frontend_ports
             frontend_ports.Element = AAZObjectType()
@@ -2277,7 +2340,7 @@ class Delete(AAZCommand):
 
             gateway_ip_configurations = cls._schema_on_200_201.properties.gateway_ip_configurations
             gateway_ip_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_application_gateway_ip_configuration_read(gateway_ip_configurations.Element)
+            _CreateHelper._build_schema_common_application_gateway_ip_configuration_read(gateway_ip_configurations.Element)
 
             global_configuration = cls._schema_on_200_201.properties.global_configuration
             global_configuration.disable_default_server_header_in_response = AAZBoolType(
@@ -2313,15 +2376,15 @@ class Delete(AAZCommand):
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
             properties.frontend_ip_configuration = AAZObjectType(
                 serialized_name="frontendIPConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
             properties.frontend_port = AAZObjectType(
                 serialized_name="frontendPort",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.frontend_port)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.frontend_port)
             properties.host_name = AAZStrType(
                 serialized_name="hostName",
             )
@@ -2339,15 +2402,15 @@ class Delete(AAZCommand):
             properties.ssl_certificate = AAZObjectType(
                 serialized_name="sslCertificate",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
             properties.ssl_profile = AAZObjectType(
                 serialized_name="sslProfile",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
 
             custom_error_configurations = cls._schema_on_200_201.properties.http_listeners.Element.properties.custom_error_configurations
             custom_error_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
+            _CreateHelper._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
 
             host_names = cls._schema_on_200_201.properties.http_listeners.Element.properties.host_names
             host_names.Element = AAZStrType()
@@ -2372,11 +2435,11 @@ class Delete(AAZCommand):
             properties.frontend_ip_configuration = AAZObjectType(
                 serialized_name="frontendIPConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
             properties.frontend_port = AAZObjectType(
                 serialized_name="frontendPort",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.frontend_port)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.frontend_port)
             properties.host_names = AAZListType(
                 serialized_name="hostNames",
             )
@@ -2388,11 +2451,11 @@ class Delete(AAZCommand):
             properties.ssl_certificate = AAZObjectType(
                 serialized_name="sslCertificate",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.ssl_certificate)
             properties.ssl_profile = AAZObjectType(
                 serialized_name="sslProfile",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.ssl_profile)
 
             host_names = cls._schema_on_200_201.properties.listeners.Element.properties.host_names
             host_names.Element = AAZStrType()
@@ -2445,7 +2508,7 @@ class Delete(AAZCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.weight_per_server = AAZIntType(
                 serialized_name="weightPerServer",
             )
@@ -2475,11 +2538,11 @@ class Delete(AAZCommand):
                 serialized_name="privateEndpoint",
                 flags={"read_only": True},
             )
-            _DeleteHelper._build_schema_common_private_endpoint_read(properties.private_endpoint)
+            _CreateHelper._build_schema_common_private_endpoint_read(properties.private_endpoint)
             properties.private_link_service_connection_state = AAZObjectType(
                 serialized_name="privateLinkServiceConnectionState",
             )
-            _DeleteHelper._build_schema_common_private_link_service_connection_state_read(properties.private_link_service_connection_state)
+            _CreateHelper._build_schema_common_private_link_service_connection_state_read(properties.private_link_service_connection_state)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -2539,7 +2602,7 @@ class Delete(AAZCommand):
                 flags={"read_only": True},
             )
             properties.subnet = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.subnet)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.subnet)
 
             probes = cls._schema_on_200_201.properties.probes
             probes.Element = AAZObjectType()
@@ -2629,7 +2692,7 @@ class Delete(AAZCommand):
             properties.target_listener = AAZObjectType(
                 serialized_name="targetListener",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.target_listener)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.target_listener)
             properties.target_url = AAZStrType(
                 serialized_name="targetUrl",
             )
@@ -2639,15 +2702,15 @@ class Delete(AAZCommand):
 
             path_rules = cls._schema_on_200_201.properties.redirect_configurations.Element.properties.path_rules
             path_rules.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(path_rules.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(path_rules.Element)
 
             request_routing_rules = cls._schema_on_200_201.properties.redirect_configurations.Element.properties.request_routing_rules
             request_routing_rules.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(request_routing_rules.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(request_routing_rules.Element)
 
             url_path_maps = cls._schema_on_200_201.properties.redirect_configurations.Element.properties.url_path_maps
             url_path_maps.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(url_path_maps.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(url_path_maps.Element)
 
             request_routing_rules = cls._schema_on_200_201.properties.request_routing_rules
             request_routing_rules.Element = AAZObjectType()
@@ -2669,30 +2732,30 @@ class Delete(AAZCommand):
             properties.advanced_routing_map = AAZObjectType(
                 serialized_name="advancedRoutingMap",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.advanced_routing_map)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.advanced_routing_map)
             properties.auth_configs = AAZListType(
                 serialized_name="authConfigs",
             )
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_http_settings = AAZObjectType(
                 serialized_name="backendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
             properties.entra_jwt_validation_config = AAZObjectType(
                 serialized_name="entraJWTValidationConfig",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.entra_jwt_validation_config)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.entra_jwt_validation_config)
             properties.http_listener = AAZObjectType(
                 serialized_name="httpListener",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.http_listener)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.http_listener)
             properties.load_distribution_policy = AAZObjectType(
                 serialized_name="loadDistributionPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
             properties.priority = AAZIntType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -2701,22 +2764,22 @@ class Delete(AAZCommand):
             properties.redirect_configuration = AAZObjectType(
                 serialized_name="redirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
             properties.rewrite_rule_set = AAZObjectType(
                 serialized_name="rewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
             properties.rule_type = AAZStrType(
                 serialized_name="ruleType",
             )
             properties.url_path_map = AAZObjectType(
                 serialized_name="urlPathMap",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.url_path_map)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.url_path_map)
 
             auth_configs = cls._schema_on_200_201.properties.request_routing_rules.Element.properties.auth_configs
             auth_configs.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
+            _CreateHelper._build_schema_application_gateway_auth_config_read(auth_configs.Element)
 
             rewrite_rule_sets = cls._schema_on_200_201.properties.rewrite_rule_sets
             rewrite_rule_sets.Element = AAZObjectType()
@@ -2766,11 +2829,11 @@ class Delete(AAZCommand):
 
             request_header_configurations = cls._schema_on_200_201.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.request_header_configurations
             request_header_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_header_configuration_read(request_header_configurations.Element)
+            _CreateHelper._build_schema_application_gateway_header_configuration_read(request_header_configurations.Element)
 
             response_header_configurations = cls._schema_on_200_201.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.response_header_configurations
             response_header_configurations.Element = AAZObjectType()
-            _DeleteHelper._build_schema_application_gateway_header_configuration_read(response_header_configurations.Element)
+            _CreateHelper._build_schema_application_gateway_header_configuration_read(response_header_configurations.Element)
 
             url_configuration = cls._schema_on_200_201.properties.rewrite_rule_sets.Element.properties.rewrite_rules.Element.action_set.url_configuration
             url_configuration.modified_path = AAZStrType(
@@ -2812,13 +2875,13 @@ class Delete(AAZCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_settings = AAZObjectType(
                 serialized_name="backendSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_settings)
             properties.listener = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.listener)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.listener)
             properties.priority = AAZIntType(
                 flags={"required": True},
             )
@@ -2903,7 +2966,7 @@ class Delete(AAZCommand):
             properties.ssl_policy = AAZObjectType(
                 serialized_name="sslPolicy",
             )
-            _DeleteHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
+            _CreateHelper._build_schema_application_gateway_ssl_policy_read(properties.ssl_policy)
             properties.trusted_client_certificates = AAZListType(
                 serialized_name="trustedClientCertificates",
             )
@@ -2921,7 +2984,7 @@ class Delete(AAZCommand):
 
             trusted_client_certificates = cls._schema_on_200_201.properties.ssl_profiles.Element.properties.trusted_client_certificates
             trusted_client_certificates.Element = AAZObjectType()
-            _DeleteHelper._build_schema_common_sub_resource_read(trusted_client_certificates.Element)
+            _CreateHelper._build_schema_common_sub_resource_read(trusted_client_certificates.Element)
 
             trusted_client_certificates = cls._schema_on_200_201.properties.trusted_client_certificates
             trusted_client_certificates.Element = AAZObjectType()
@@ -3000,23 +3063,23 @@ class Delete(AAZCommand):
             properties.default_backend_address_pool = AAZObjectType(
                 serialized_name="defaultBackendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_backend_address_pool)
             properties.default_backend_http_settings = AAZObjectType(
                 serialized_name="defaultBackendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_backend_http_settings)
             properties.default_load_distribution_policy = AAZObjectType(
                 serialized_name="defaultLoadDistributionPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_load_distribution_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_load_distribution_policy)
             properties.default_redirect_configuration = AAZObjectType(
                 serialized_name="defaultRedirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_redirect_configuration)
             properties.default_rewrite_rule_set = AAZObjectType(
                 serialized_name="defaultRewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.default_rewrite_rule_set)
             properties.path_rules = AAZListType(
                 serialized_name="pathRules",
             )
@@ -3045,19 +3108,19 @@ class Delete(AAZCommand):
             properties.backend_address_pool = AAZObjectType(
                 serialized_name="backendAddressPool",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
             properties.backend_http_settings = AAZObjectType(
                 serialized_name="backendHttpSettings",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.backend_http_settings)
             properties.firewall_policy = AAZObjectType(
                 serialized_name="firewallPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.firewall_policy)
             properties.load_distribution_policy = AAZObjectType(
                 serialized_name="loadDistributionPolicy",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.load_distribution_policy)
             properties.paths = AAZListType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -3066,11 +3129,11 @@ class Delete(AAZCommand):
             properties.redirect_configuration = AAZObjectType(
                 serialized_name="redirectConfiguration",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.redirect_configuration)
             properties.rewrite_rule_set = AAZObjectType(
                 serialized_name="rewriteRuleSet",
             )
-            _DeleteHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.rewrite_rule_set)
 
             paths = cls._schema_on_200_201.properties.url_path_maps.Element.properties.path_rules.Element.properties.paths
             paths.Element = AAZStrType()
@@ -3145,14 +3208,49 @@ class Delete(AAZCommand):
 
             return cls._schema_on_200_201
 
-    class InstanceDeleteByJson(AAZJsonInstanceDeleteOperation):
+    class InstanceCreateByJson(AAZJsonInstanceCreateOperation):
 
         def __call__(self, *args, **kwargs):
-            self.ctx.selectors.subresource.set(self._delete_instance())
+            self.ctx.selectors.subresource.set(self._create_instance())
+
+        def _create_instance(self):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType
+            )
+            _builder.set_prop("name", AAZStrType, ".name")
+            _builder.set_prop("properties", AAZObjectType)
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("routingConditions", AAZListType, ".routing_conditions", typ_kwargs={"flags": {"required": True}})
+
+            routing_conditions = _builder.get(".properties.routingConditions")
+            if routing_conditions is not None:
+                routing_conditions.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.routingConditions[]")
+            if _elements is not None:
+                _elements.set_prop("conditionType", AAZStrType, ".condition_type", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("propertyName", AAZStrType, ".property_name")
+                _elements.set_prop("propertyValueMatcher", AAZObjectType, ".property_value_matcher")
+                _elements.set_prop("propertyValues", AAZListType, ".property_values")
+
+            property_value_matcher = _builder.get(".properties.routingConditions[].propertyValueMatcher")
+            if property_value_matcher is not None:
+                property_value_matcher.set_prop("ignoreCase", AAZBoolType, ".ignore_case")
+                property_value_matcher.set_prop("negate", AAZBoolType, ".negate")
+                property_value_matcher.set_prop("pattern", AAZStrType, ".pattern", typ_kwargs={"flags": {"required": True}})
+
+            property_values = _builder.get(".properties.routingConditions[].propertyValues")
+            if property_values is not None:
+                property_values.set_elements(AAZStrType, ".")
+
+            return _instance_value
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
+class _CreateHelper:
+    """Helper class for Create"""
 
     _schema_application_gateway_auth_config_read = None
 
@@ -5627,4 +5725,4 @@ class _DeleteHelper:
         _schema.type = cls._schema_common_virtual_network_tap_read.type
 
 
-__all__ = ["Delete"]
+__all__ = ["Create"]

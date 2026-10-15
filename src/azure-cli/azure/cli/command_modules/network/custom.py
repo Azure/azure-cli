@@ -360,7 +360,7 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         )
         args_schema.http2.enum = AAZArgEnum({"Enabled": True, "Disabled": False})
         args_schema.custom_error_configurations._registered = False
-        # managed by the advanced-routing-map / advanced-routing-condition-set subgroups
+        # managed by the advanced-routing-map / advanced-routing-set subgroups
         args_schema.advanced_routing_condition_sets._registered = False
         args_schema.advanced_routing_maps._registered = False
         return args_schema
