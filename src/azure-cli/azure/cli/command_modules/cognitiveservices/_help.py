@@ -1112,6 +1112,8 @@ helps['cognitiveservices account compute create'] = """
     examples:
     - name: Create a compute resource.
       text: az cognitiveservices account compute create -g MyResourceGroup -n MyAccount --compute-name my-compute --location westus2 --pool-name my-pool --instance-type Standard_DS3_v2 --node-count 1
+    - name: Create a Spot compute resource without waiting for completion.
+      text: az cognitiveservices account compute create -g MyResourceGroup -n MyAccount --compute-name my-compute --location westus2 --pool-name my-pool --instance-type Standard_DS3_v2 --node-count 1 --vm-priority Spot --no-wait
 """
 
 helps['cognitiveservices account compute delete'] = """
@@ -1120,6 +1122,8 @@ helps['cognitiveservices account compute delete'] = """
     examples:
     - name: Delete a compute resource.
       text: az cognitiveservices account compute delete -g MyResourceGroup -n MyAccount --compute-name my-compute
+    - name: Delete a compute resource without waiting for completion.
+      text: az cognitiveservices account compute delete -g MyResourceGroup -n MyAccount --compute-name my-compute --no-wait
 """
 
 helps['cognitiveservices account compute show'] = """
@@ -1136,4 +1140,14 @@ helps['cognitiveservices account compute list'] = """
     examples:
     - name: List compute resources.
       text: az cognitiveservices account compute list -g MyResourceGroup -n MyAccount
+"""
+
+helps['cognitiveservices account compute wait'] = """
+    type: command
+    short-summary: Wait for a compute resource to reach a specified condition.
+    examples:
+    - name: Wait for a compute resource to finish creating.
+      text: az cognitiveservices account compute wait -g MyResourceGroup -n MyAccount --compute-name my-compute --created
+    - name: Wait for a compute resource to be deleted.
+      text: az cognitiveservices account compute wait -g MyResourceGroup -n MyAccount --compute-name my-compute --deleted
 """

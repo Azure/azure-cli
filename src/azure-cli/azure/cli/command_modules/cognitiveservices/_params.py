@@ -17,7 +17,7 @@ from azure.cli.core.commands.parameters import (
 )
 from azure.cli.core.util import shell_safe_json_parse, CLIError
 
-from azure.cli.core.commands.validators import validate_tag
+from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tag
 from azure.cli.core.decorators import Completer
 
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_resource_skus
@@ -26,6 +26,7 @@ from azure.mgmt.cognitiveservices.models import (
     KeyName,
     DeploymentScaleType,
     HostingModel,
+    VmPriority,
 )
 
 logger = get_logger(__name__)
@@ -817,13 +818,16 @@ def load_arguments(self, _):
         c.argument('compute_name', help='Cognitive Services account compute name.')
 
     with self.argument_context('cognitiveservices account compute create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx),
-                   help='Location for the compute resource.')
+        c.argument(
+            'location', arg_type=get_location_type(self.cli_ctx), required=False,
+            validator=get_default_location_from_resource_group,
+            help='Location for the compute resource. If omitted, uses the configured default '
+                 'location or the resource group location.')
         c.argument('pool_name', arg_group='Pool', help='Name of the compute pool.')
         c.argument('instance_type', arg_group='Pool',
                    help='VM instance type for the pool (e.g. Standard_DS3_v2).')
         c.argument('node_count', arg_group='Pool', type=int,
                    help='Number of nodes in the pool.')
-        c.argument('vm_priority', arg_group='Pool',
-                   help='VM priority for the pool (e.g. Dedicated, LowPriority). '
-                        'If omitted, the service default is used.')
+        c.argument(
+            'vm_priority', arg_group='Pool', arg_type=get_enum_type(VmPriority),
+            help='VM priority for the pool. If omitted, the service default is used.')

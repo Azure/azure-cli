@@ -83,16 +83,18 @@ class CognitiveServicesComputeUnitTests(unittest.TestCase):
         self.assertEqual(pools[0]['nodeCount'], self.NODE_COUNT)
 
     def test_create_passes_vm_priority_when_provided(self):
-        client = mock.Mock()
+        for priority in ('Regular', 'Spot'):
+            with self.subTest(priority=priority):
+                client = mock.Mock()
 
-        compute_begin_create_or_update(
-            client, self.RG, self.ACCOUNT, self.COMPUTE_NAME,
-            self.LOCATION, self.POOL_NAME, self.INSTANCE_TYPE, self.NODE_COUNT,
-            vm_priority='LowPriority', no_wait=True,
-        )
+                compute_begin_create_or_update(
+                    client, self.RG, self.ACCOUNT, self.COMPUTE_NAME,
+                    self.LOCATION, self.POOL_NAME, self.INSTANCE_TYPE, self.NODE_COUNT,
+                    vm_priority=priority, no_wait=True,
+                )
 
-        resource_dict = client.begin_create_or_update.call_args.kwargs['resource'].as_dict()
-        self.assertEqual(resource_dict['properties']['pools'][0]['vmPriority'], 'LowPriority')
+                resource_dict = client.begin_create_or_update.call_args.kwargs['resource'].as_dict()
+                self.assertEqual(resource_dict['properties']['pools'][0]['vmPriority'], priority)
 
     def test_create_omits_vm_priority_by_default(self):
         """When --vm-priority is omitted, the field should not be sent so the service
