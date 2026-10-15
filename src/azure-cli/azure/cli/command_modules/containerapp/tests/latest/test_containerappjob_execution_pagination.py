@@ -9,7 +9,7 @@ from unittest.mock import Mock, call, patch
 
 from azure.cli.command_modules.containerapp._clients import ContainerAppsJobClient
 from azure.cli.command_modules.containerapp.custom import listexecution_containerappsjob
-from azure.cli.core.azclierror import AzureResponseError, CLIInternalError, HTTPError, InvalidArgumentValueError
+from azure.cli.core.azclierror import AzureResponseError, CLIInternalError, HTTPError
 
 
 def _response(payload):
@@ -34,14 +34,14 @@ class ContainerAppJobExecutionPaginationTests(unittest.TestCase):
         subscription.start()
         self.addCleanup(subscription.stop)
 
-    def _get_executions(self, page_size=None):
+    def _get_executions(self):
         return ContainerAppsJobClient.get_executions(
-            cmd=self.cmd, resource_group_name="test-rg", name="test-job", page_size=page_size
+            cmd=self.cmd, resource_group_name="test-rg", name="test-job"
         )
 
-    def _list_executions(self, page_size=None):
+    def _list_executions(self):
         return listexecution_containerappsjob(
-            cmd=self.cmd, resource_group_name="test-rg", name="test-job", page_size=page_size
+            cmd=self.cmd, resource_group_name="test-rg", name="test-job"
         )
 
     def test_containerapp_job_executions_single_page(self, request):
@@ -61,31 +61,6 @@ class ContainerAppJobExecutionPaginationTests(unittest.TestCase):
                 request.return_value = _response(payload)
                 self.assertEqual(self._list_executions(), executions)
                 request.assert_called_once_with(self.cmd.cli_ctx, "GET", self.url)
-
-    def test_containerapp_job_executions_page_size_only_on_initial_request(self, request):
-        next_url = self.url + "&$skipToken=a%2Fb%2Bc%3D%3D"
-        executions = [{"name": "execution-1"}, {"name": "execution-2"}]
-        for page_size in (0, 1, 20):
-            for client in (True, False):
-                with self.subTest(page_size=page_size, client=client):
-                    request.reset_mock()
-                    request.side_effect = [
-                        _response({"value": executions[:1], "nextLink": next_url}),
-                        _response({"value": executions[1:]}),
-                    ]
-
-                    result = self._get_executions(page_size) if client else self._list_executions(page_size)
-
-                    self.assertEqual(result["value"] if client else result, executions)
-                    self.assertEqual(request.call_args_list, [
-                        call(self.cmd.cli_ctx, "GET", self.url + f"&pageSize={page_size}"),
-                        call(self.cmd.cli_ctx, "GET", next_url),
-                    ])
-
-    def test_containerapp_job_executions_negative_page_size(self, request):
-        with self.assertRaisesRegex(InvalidArgumentValueError, "--page-size must be a non-negative integer"):
-            self._list_executions(page_size=-1)
-        request.assert_not_called()
 
     def test_containerapp_job_executions_three_pages_in_server_order(self, request):
         executions = [{"name": f"execution-{index}"} for index in range(45, 0, -1)]
@@ -140,7 +115,7 @@ class ContainerAppJobExecutionPaginationTests(unittest.TestCase):
         next_url = (
             self.endpoint.rstrip("/") + self.path +
             "?api-version=2025-07-01&$skipToken=a%2Fb%2Bc%3D%3D%26d%3Fe%252F"
-            "&filter=status%20eq%20%27Succeeded%27&pageSize=20"
+            "&filter=status%20eq%20%27Succeeded%27"
         )
         executions = [{"name": "execution-1"}, {"name": "execution-2"}]
         request.side_effect = [

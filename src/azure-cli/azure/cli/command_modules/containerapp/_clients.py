@@ -1043,7 +1043,7 @@ class ContainerAppsJobClient():
             return r
 
     @classmethod
-    def get_executions(cls, cmd, resource_group_name, name, page_size=None):
+    def get_executions(cls, cmd, resource_group_name, name):
         management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
         sub_id = get_subscription_id(cmd.cli_ctx)
         url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/jobs/{}/executions?api-version={}"
@@ -1053,9 +1053,6 @@ class ContainerAppsJobClient():
             resource_group_name,
             name,
             cls.api_version)
-
-        if page_size is not None:
-            request_url += f"&pageSize={page_size}"
 
         r = send_raw_request(cmd.cli_ctx, "GET", request_url)
         response = r.json()
