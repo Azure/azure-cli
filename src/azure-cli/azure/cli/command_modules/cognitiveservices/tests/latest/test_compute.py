@@ -97,8 +97,7 @@ class CognitiveServicesComputeUnitTests(unittest.TestCase):
                 self.assertEqual(resource_dict['properties']['pools'][0]['vmPriority'], priority)
 
     def test_create_omits_vm_priority_by_default(self):
-        """When --vm-priority is omitted, the field should not be sent so the service
-        applies its own default."""
+        """Omitting --vm-priority leaves vmPriority out of the request payload."""
         client = mock.Mock()
 
         compute_begin_create_or_update(

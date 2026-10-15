@@ -830,4 +830,4 @@ def load_arguments(self, _):
                    help='Number of nodes in the pool.')
         c.argument(
             'vm_priority', arg_group='Pool', arg_type=get_enum_type(VmPriority),
-            help='VM priority for the pool. If omitted, the service default is used.')
+            help='VM priority for the pool.')
