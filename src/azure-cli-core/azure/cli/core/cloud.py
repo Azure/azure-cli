@@ -356,6 +356,7 @@ class CloudNameEnum:  # pylint: disable=too-few-public-methods
     AzureUSGovernment = 'AzureUSGovernment'
     AzureGermanCloud = 'AzureGermanCloud'
     AzureBleuCloud = 'AzureBleuCloud'
+    AzureDelosCloud = 'AzureDelosCloud'
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
@@ -519,7 +520,37 @@ AZURE_BLEU_CLOUD = Cloud(
         mariadb_server_endpoint='.mariadb.database.sovcloud-api.fr',
         synapse_analytics_endpoint='.dev.azuresynapse.sovcloud-api.fr'))
 
-HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_BLEU_CLOUD]
+AZURE_DELOS_CLOUD = Cloud(
+    CloudNameEnum.AzureDelosCloud,
+    endpoints=CloudEndpoints(
+        management='https://management.sovcloud-api.de/',
+        resource_manager='https://management.sovcloud-api.de',
+        sql_management='https://management.database.sovcloud-api.de:8443/',
+        batch_resource_id='https://batch.sovcloud-api.de/',
+        gallery='https://gallery.sovcloud-api.de/',
+        active_directory='https://login.sovcloud-identity.de',
+        active_directory_resource_id='https://management.sovcloud-api.de/',
+        active_directory_graph_resource_id='https://graph.svc.sovcloud.de/',
+        microsoft_graph_resource_id='https://graph.svc.sovcloud.de',
+        vm_image_alias_doc='https://azcliprod.blob.core.windows.net/cli/vm/aliases_master.json',
+        media_resource_id='https://rest.media.sovcloud-api.de',
+        ossrdbms_resource_id='https://ossrdbms-aad.database.sovcloud-api.de',
+        synapse_analytics_resource_id='https://dev.azuresynapse.sovcloud-api.de',
+        portal='https://portal.sovcloud.de'),
+    suffixes=CloudSuffixes(
+        acr_login_server_endpoint='.azurecr.sovcloud-azure.de',
+        attestation_endpoint='attest.sovcloud-api.de',
+        storage_endpoint='core.sovcloud-api.de',
+        storage_sync_endpoint='afs.sovcloud-api.de',
+        keyvault_dns='.vault.sovcloud-api.de',
+        mhsm_dns='.managedhsm.sovcloud-api.de',
+        sql_server_hostname='.database.sovcloud-api.de',
+        mysql_server_endpoint='.mysql.database.sovcloud-api.de',
+        postgresql_server_endpoint='.postgres.database.sovcloud-api.de',
+        mariadb_server_endpoint='.mariadb.database.sovcloud-api.de',
+        synapse_analytics_endpoint='.dev.azuresynapse.sovcloud-api.de'))
+
+HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_BLEU_CLOUD, AZURE_DELOS_CLOUD]
 
 
 def retrieve_arm_cloud_metadata():
