@@ -308,6 +308,10 @@ def _add_record_names(text):
         elif not record_name.startswith('$'):
             previous_record_name = record_name
 
+        if _COMPILED_REGEX['txt'].match(line):
+            # Preserve empty TXT strings without using NAPTR's EMPTY marker.
+            tokens = ['""' if token == '' else token for token in tokens]
+
         ret.append(_serialize(tokens))
 
     return "\n".join(ret)
