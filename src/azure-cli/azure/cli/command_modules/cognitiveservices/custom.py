@@ -2687,6 +2687,7 @@ def compute_begin_create_or_update(
     Create a compute resource for Azure Cognitive Services account.
     """
     properties = ClusterComputeProperties(
+        location=location,
         pools=[
             Pool(
                 name=pool_name,
@@ -2696,11 +2697,7 @@ def compute_begin_create_or_update(
             )
         ],
     )
-    # The service also requires the location inside properties (not just on the outer
-    # Compute envelope). The SDK's ClusterComputeProperties class does not declare
-    # 'location' as a kwarg, so it is set via the underlying dict-backed model.
-    properties["location"] = location
-    resource = Compute(location=location, properties=properties)
+    resource = Compute(properties=properties)
     return sdk_no_wait(
         no_wait,
         client.begin_create_or_update,

@@ -6,8 +6,8 @@
 """Unit and scenario tests for `az cognitiveservices account compute` custom commands.
 
 `CognitiveServicesComputeUnitTests` uses mocks — no Azure resources required and
-runs in every CI job. Covers the wire-payload shape (including the location
-dual-placement) and the `--no-wait` behaviour of `create`/`delete`.
+runs in every CI job. Covers the wire-payload shape (including location in
+properties) and the `--no-wait` behaviour of `create`/`delete`.
 
 `CognitiveServicesComputeScenarioTests` are `@live_only()` scenario tests — they
 exercise the four commands end-to-end against a real Azure subscription. They
@@ -54,8 +54,8 @@ class CognitiveServicesComputeUnitTests(unittest.TestCase):
     # ---- create ----
 
     def test_create_builds_expected_payload_shape(self):
-        """The wire payload must carry `location` on the outer Compute envelope AND
-        inside the properties block (RP requires both). Pool goes inside properties.pools[]."""
+        """The wire payload carries location in properties, not the Compute envelope.
+        Pool goes inside properties.pools[]."""
         client = mock.Mock()
 
         compute_begin_create_or_update(
@@ -71,9 +71,7 @@ class CognitiveServicesComputeUnitTests(unittest.TestCase):
         self.assertEqual(kwargs['compute_name'], self.COMPUTE_NAME)
 
         resource_dict = kwargs['resource'].as_dict()
-        # location on outer Compute envelope
-        self.assertEqual(resource_dict['location'], self.LOCATION)
-        # location ALSO inside properties (RP requirement)
+        self.assertNotIn('location', resource_dict)
         self.assertEqual(resource_dict['properties']['location'], self.LOCATION)
         # cluster polymorphism discriminator auto-set by ClusterComputeProperties
         self.assertEqual(resource_dict['properties']['computeType'], 'Cluster')
@@ -228,7 +226,7 @@ class CognitiveServicesComputeScenarioTests(ScenarioTest):
         self.cmd(
             'az cognitiveservices account compute show -n {sname} -g {rg} '
             '--compute-name {cname}',
-            checks=[self.check('name', '{cname}'), self.check('location', '{location}')],
+            checks=[self.check('name', '{cname}'), self.check('properties.location', '{location}')],
         )
 
         self.cmd(
