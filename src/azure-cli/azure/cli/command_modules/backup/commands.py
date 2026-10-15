@@ -68,7 +68,7 @@ def load_command_table(self, _):
     with self.command_group('backup container', custom_command_type=backup_custom_base, client_factory=protection_containers_cf, exception_handler=backup_exception_handler) as g:
         g.custom_command('unregister', 'unregister_container', confirmation=True)
         g.custom_command('re-register', 're_register_wl_container', confirmation=True)
-        g.custom_command('register', 'register_wl_container')
+        g.custom_command('register', 'register_container')
 
     with self.command_group('backup policy', backup_custom_base, client_factory=protection_policies_cf, exception_handler=backup_exception_handler) as g:
         g.command('get-default-for-vm', 'get_default_policy_for_vm')

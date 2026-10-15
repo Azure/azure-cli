@@ -353,6 +353,146 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             ]
         )
 
+    @AllowLargeResponse()
+    @record_only()
+    def test_afs_msi_reregistration_protection_restore(self):
+        source_subscription = (
+            '8f74352d-05ee-4ca1-8807-c04eaa2dee5a'
+            if self.is_live else self.get_subscription_id()
+        )
+        target_subscription = (
+            '53ad7692-5283-4f0a-baf6-49412f5ebefe'
+            if self.is_live else self.get_subscription_id()
+        )
+        self.kwargs.update({
+            'rg': 'bhar11-prt-restore-rg',
+            'vault': 'bhar11-prt-olr-rsv',
+            'policy': 'bhar11-prt-snapshot-policy',
+            'storage_account': 'afsuami09191425',
+            'uami_id': (
+                '/subscriptions/{}/'
+                'resourceGroups/bhar11-prt-restore-rg/providers/Microsoft.ManagedIdentity/'
+                'userAssignedIdentities/afs-test-uami-09191425'
+            ).format(source_subscription),
+            'target_subscription': target_subscription,
+            'target_resource_group': 'afs-softdelete-rg',
+            'target_storage_account': 'bhar11csrtgtsa',
+            'target_share': 'restoredfs',
+            'share': self.create_random_name('climsirec', 20),
+            'type': 'AzureStorage'
+        })
+
+        self.cmd(
+            'backup container register -g {rg} -v {vault} '
+            '--backup-management-type {type} --workload-type AzureFileShare '
+            '--storage-account {storage_account} --access-type IdentityBased '
+            '--mi-system-assigned --yes'
+        )
+        self.cmd(
+            'backup container show -g {rg} -v {vault} -n {storage_account} '
+            '--backup-management-type {type}',
+            checks=[
+                self.check('properties.accessType', 'IdentityBased'),
+                self.check('properties.identityInfo.isSystemAssignedIdentity', True)
+            ]
+        )
+
+        self.cmd(
+            'backup container register -g {rg} -v {vault} '
+            '--backup-management-type {type} --workload-type AzureFileShare '
+            '--storage-account {storage_account} --access-type IdentityBased '
+            '--mi-user-assigned {uami_id} --yes'
+        )
+        self.cmd(
+            'backup container show -g {rg} -v {vault} -n {storage_account} '
+            '--backup-management-type {type}',
+            checks=[
+                self.check('properties.accessType', 'IdentityBased'),
+                self.check('properties.identityInfo.isSystemAssignedIdentity', False),
+                self.check('properties.identityInfo.managedIdentityResourceId', '{uami_id}')
+            ]
+        )
+
+        self.cmd(
+            'storage share-rm create -g {rg} --storage-account {storage_account} '
+            '--name {share} --quota 100 --enabled-protocols SMB'
+        )
+        self.kwargs['storage_key'] = self.cmd(
+            'storage account keys list -g {rg} -n {storage_account} '
+            '--query "[0].value" -o tsv'
+        ).output.strip()
+        self.cmd(
+            'storage directory create --account-name {storage_account} '
+            '--account-key "{storage_key}" --share-name {share} --name seed'
+        )
+
+        self.cmd(
+            'backup protection enable-for-azurefileshare -g {rg} -v {vault} '
+            '--storage-account {storage_account} --azure-file-share {share} '
+            '--policy-name {policy}',
+            checks=[
+                self.check('properties.operation', 'ConfigureBackup'),
+                self.check('properties.status', 'Completed')
+            ]
+        )
+
+        item = self.cmd(
+            'backup item list -g {rg} -v {vault} -c {storage_account} '
+            '--backup-management-type {type} --workload-type AzureFileShare '
+            '--query "[?properties.friendlyName == \'{share}\'] | [0]"'
+        ).get_output_in_json()
+        self.kwargs['item'] = item['name']
+        self.kwargs['container'] = item['properties']['containerName']
+        self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+
+        self.kwargs['job'] = self.cmd(
+            'backup protection backup-now -g {rg} -v {vault} -c {container} -i {item} '
+            '--backup-management-type {type} --retain-until {retain_date} --query name'
+        ).get_output_in_json()
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        self.kwargs['rp'] = self.cmd(
+            'backup recoverypoint list -g {rg} -v {vault} -c {container} -i {item} '
+            '--backup-management-type {type} --query "sort_by(@, &properties.recoveryPointTime)[-1].name"'
+        ).get_output_in_json()
+
+        self.kwargs['job'] = self.cmd(
+            'backup restore restore-azurefileshare -g {rg} -v {vault} '
+            '-c {container} -i {item} -r {rp} --restore-mode AlternateLocation '
+            '--resolve-conflict Overwrite --target-storage-account {storage_account} '
+            '--target-file-share {share} '
+            '--mi-user-assigned {uami_id} --query name'
+        ).get_output_in_json()
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+        self.cmd(
+            'backup job show -g {rg} -v {vault} -n {job}',
+            checks=[self.check('properties.status', 'Completed')]
+        )
+
+        self.kwargs['job'] = self.cmd(
+            'backup restore restore-azurefileshare -g {rg} -v {vault} '
+            '-c {container} -i {item} -r {rp} --restore-mode AlternateLocation '
+            '--resolve-conflict Overwrite --target-subscription-id {target_subscription} '
+            '--target-resource-group-name {target_resource_group} '
+            '--target-storage-account {target_storage_account} --target-file-share {target_share} '
+            '--mi-user-assigned {uami_id} --query name'
+        ).get_output_in_json()
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+        self.cmd(
+            'backup job show -g {rg} -v {vault} -n {job}',
+            checks=[self.check('properties.status', 'Completed')]
+        )
+
+        self.cmd(
+            'backup protection disable -g {rg} -v {vault} -c {container} -i {item} '
+            '--backup-management-type {type} --delete-backup-data true --yes'
+        )
+        self.cmd(
+            'storage share delete --account-name {storage_account} '
+            '--account-key "{storage_key}" --name {share} '
+            '--delete-snapshots include-leased'
+        )
+
     #@record_only()
     @live_only()
     @AllowLargeResponse()
