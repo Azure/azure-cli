@@ -1768,7 +1768,7 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(deployment_config['storage']['authentication']['storageAccountConnectionStringName'] is None)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_flex_registry_deployment(self, resource_group, storage_account):
         # Requires Registry deployment storage to be enabled in the region. The service only stores the
         # configuration; it doesn't pull the images during these commands.
