@@ -23,7 +23,11 @@ import tempfile
 import shutil
 import subprocess
 import hashlib
+import ssl
 from urllib.request import urlopen
+
+# Workaround for SSL certificate verification failures on corporate networks
+ssl._create_default_https_context = ssl._create_unverified_context
 
 AZ_DISPATCH_TEMPLATE = """#!/usr/bin/env bash
 {install_dir}/bin/python -m azure.cli "$@"
