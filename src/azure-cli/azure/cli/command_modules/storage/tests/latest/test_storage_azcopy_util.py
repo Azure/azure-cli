@@ -13,6 +13,11 @@ from azure.cli.command_modules.storage.azcopy import util
 
 class TestAzCopyExecutableResolution(unittest.TestCase):
 
+    def setUp(self):
+        platform_patcher = mock.patch.object(util.platform, "system", return_value="Windows")
+        platform_patcher.start()
+        self.addCleanup(platform_patcher.stop)
+
     def test_cwd_executable_is_not_probed_or_reused(self):
         with tempfile.TemporaryDirectory() as cwd:
             managed_executable = os.path.join(cwd, "managed", "azcopy.exe")
@@ -26,6 +31,63 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
                 azcopy = util.AzCopy()
 
         check_output.assert_not_called()
+        install_azcopy.assert_called_once_with(managed_executable)
+        self.assertEqual(managed_executable, azcopy.executable)
+
+    def test_relative_path_executable_is_not_probed_or_reused(self):
+        managed_executable = os.path.abspath(os.path.join("managed", "azcopy.exe"))
+        relative_executable = os.path.join("bin", "azcopy.exe")
+
+        with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
+                mock.patch.object(util.shutil, "which", return_value=relative_executable), \
+                mock.patch.object(util.os, "getcwd") as getcwd, \
+                mock.patch.object(util.subprocess, "check_output") as check_output, \
+                mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
+            azcopy = util.AzCopy()
+
+        getcwd.assert_not_called()
+        check_output.assert_not_called()
+        install_azcopy.assert_called_once_with(managed_executable)
+        self.assertEqual(managed_executable, azcopy.executable)
+
+    def test_windows_lookup_uses_exe_name(self):
+        managed_executable = os.path.abspath(os.path.join("managed", "azcopy.exe"))
+
+        with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
+                mock.patch.object(util.shutil, "which", return_value=None) as which, \
+                mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
+            azcopy = util.AzCopy()
+
+        which.assert_called_once_with("azcopy.exe")
+        install_azcopy.assert_called_once_with(managed_executable)
+        self.assertEqual(managed_executable, azcopy.executable)
+
+    def test_windows_lookup_rejects_script_result(self):
+        managed_executable = os.path.abspath(os.path.join("managed", "azcopy.exe"))
+        script_executable = os.path.abspath(os.path.join("system", "azcopy.exe.cmd"))
+
+        with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
+                mock.patch.object(util.shutil, "which", return_value=script_executable), \
+                mock.patch.object(util.os, "getcwd") as getcwd, \
+                mock.patch.object(util.subprocess, "check_output") as check_output, \
+                mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
+            azcopy = util.AzCopy()
+
+        getcwd.assert_not_called()
+        check_output.assert_not_called()
+        install_azcopy.assert_called_once_with(managed_executable)
+        self.assertEqual(managed_executable, azcopy.executable)
+
+    def test_non_windows_lookup_uses_bare_name(self):
+        managed_executable = os.path.abspath(os.path.join("managed", "azcopy"))
+
+        with mock.patch.object(util.platform, "system", return_value="Linux"), \
+                mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
+                mock.patch.object(util.shutil, "which", return_value=None) as which, \
+                mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
+            azcopy = util.AzCopy()
+
+        which.assert_called_once_with("azcopy")
         install_azcopy.assert_called_once_with(managed_executable)
         self.assertEqual(managed_executable, azcopy.executable)
 
@@ -110,14 +172,16 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
 
     def test_path_validation_failure_falls_back_without_probing(self):
         managed_executable = os.path.abspath(os.path.join("managed", "azcopy.exe"))
+        system_executable = os.path.abspath(os.path.join("system", "azcopy.exe"))
 
         with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
-                mock.patch.object(util.shutil, "which", return_value="azcopy.exe"), \
-                mock.patch.object(util.os, "getcwd", side_effect=OSError), \
+                mock.patch.object(util.shutil, "which", return_value=system_executable), \
+                mock.patch.object(util.os, "getcwd", side_effect=OSError) as getcwd, \
                 mock.patch.object(util.subprocess, "check_output") as check_output, \
                 mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
             azcopy = util.AzCopy()
 
+        getcwd.assert_called_once_with()
         check_output.assert_not_called()
         install_azcopy.assert_called_once_with(managed_executable)
         self.assertEqual(managed_executable, azcopy.executable)

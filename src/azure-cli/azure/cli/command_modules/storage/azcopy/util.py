@@ -37,7 +37,9 @@ class AzCopy:
             if not _is_supported_version(version):
                 self.executable = None
         else:
-            system_executable = _resolve_system_executable("azcopy")
+            executable_name = "azcopy.exe" if self.system == "Windows" else "azcopy"
+            system_executable = _resolve_system_executable(
+                executable_name, require_exact_name=self.system == "Windows")
             if system_executable:
                 self.executable = system_executable
                 version = self.check_version()
@@ -127,9 +129,16 @@ class AzCopy:
         self.run_command(['sync', source, destination] + flags)
 
 
-def _resolve_system_executable(executable):
+def _resolve_system_executable(executable, require_exact_name=False):
     resolved_path = shutil.which(executable)
     if not resolved_path:
+        return None
+    if (require_exact_name and
+            os.path.normcase(os.path.basename(resolved_path)) != os.path.normcase(executable)):
+        logger.warning("Ignoring %s because PATH resolved it to an unexpected file type.", executable)
+        return None
+    if not os.path.isabs(resolved_path):
+        logger.warning("Ignoring %s because PATH resolved it to a relative path.", executable)
         return None
 
     try:
