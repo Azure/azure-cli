@@ -16,7 +16,7 @@ from azure.cli.command_modules.vm.custom import (enable_boot_diagnostics, disabl
                                                  _get_extension_instance_name,
                                                  get_boot_log)
 from azure.cli.command_modules.vm.custom import \
-    (attach_unmanaged_data_disk, detach_unmanaged_data_disk, get_vmss_instance_view)
+    (attach_unmanaged_data_disk, detach_unmanaged_data_disk, get_vmss_instance_view, update_vmss)
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
@@ -165,6 +165,37 @@ class TestVmCustom(unittest.TestCase):
 
         # assert
         self.assertEqual(result, 'extension-name')
+
+    @mock.patch('azure.cli.command_modules.vm.operations.vmss.VMSSCreate')
+    def test_update_vmss_switches_zone_placement_filter(self, vmss_create_mock):
+        transitions = (
+            ('includeZones', ['1'], 'exclude_zones', ['2'], 'include_zones'),
+            ('excludeZones', ['2'], 'include_zones', ['1'], 'exclude_zones'),
+        )
+
+        for existing_key, existing_value, new_key, new_value, stale_key in transitions:
+            with self.subTest(existing_key=existing_key, new_key=new_key):
+                vmss_create_mock.reset_mock()
+                parameters = {
+                    'location': 'eastus2',
+                    'placement': {
+                        'zonePlacementPolicy': 'Auto',
+                        existing_key: existing_value,
+                    },
+                }
+
+                update_vmss(
+                    _get_test_cmd(),
+                    'resource-group',
+                    'vmss-name',
+                    parameters=parameters,
+                    **{new_key: new_value}
+                )
+
+                command_args = vmss_create_mock.return_value.call_args.kwargs['command_args']
+                placement = command_args['placement']
+                self.assertEqual(new_value, placement[new_key])
+                self.assertNotIn(stale_key, placement)
 
 
 class TestVMBootLog(unittest.TestCase):
