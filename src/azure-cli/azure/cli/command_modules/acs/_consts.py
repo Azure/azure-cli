@@ -67,6 +67,11 @@ CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
 CONST_GPU_DRIVER_INSTALL = "Install"
 CONST_GPU_DRIVER_NONE = "None"
 
+# SSH Access Consts
+CONST_SSH_ACCESS_LOCALUSER = "localuser"
+CONST_SSH_ACCESS_DISABLED = "disabled"
+CONST_SSH_ACCESS_ENTRAID = "entraid"
+
 # consts for ManagedCluster
 # load balancer sku
 CONST_LOAD_BALANCER_SKU_BASIC = "basic"
@@ -216,6 +221,9 @@ CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 # azure keyvault kms
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
+
+# kms infrastructure encryption (platform-managed keys)
+CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED = "Enabled"
 
 # app routing nginx config options
 CONST_WEB_APPLICATION_ROUTING_KEY_NAME = "ingress/webApplicationRouting"

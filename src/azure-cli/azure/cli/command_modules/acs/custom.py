@@ -71,6 +71,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SECRET_ROTATION_ENABLED,
     CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_SSH_ACCESS_LOCALUSER,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
     DecoratorEarlyExitException,
@@ -937,6 +938,7 @@ def aks_create(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    kms_infrastructure_encryption=None,
     enable_image_cleaner=False,
     image_cleaner_interval_hours=None,
     enable_keda=False,
@@ -1075,6 +1077,8 @@ def aks_create(
     enable_gateway_api=False,
     # user-defined scheduler configuration
     enable_upstream_kubescheduler_user_configuration=False,
+    # ssh access
+    ssh_access=CONST_SSH_ACCESS_LOCALUSER,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1188,6 +1192,7 @@ def aks_update(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    kms_infrastructure_encryption=None,
     enable_image_cleaner=False,
     disable_image_cleaner=False,
     image_cleaner_interval_hours=None,
@@ -3595,6 +3600,8 @@ def aks_agentpool_add(
     # local DNS
     localdns_config=None,
     enable_artifact_streaming=False,
+    # ssh access
+    ssh_access=CONST_SSH_ACCESS_LOCALUSER,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3661,6 +3668,9 @@ def aks_agentpool_update(
     gpu_driver=None,
     enable_artifact_streaming=False,
     disable_artifact_streaming=False,
+    # ssh access
+    ssh_access=None,
+    yes=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
