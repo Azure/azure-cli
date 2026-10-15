@@ -44,7 +44,7 @@ def create_args_for_complex_type(arg_ctx, dest, model_type, arguments):
     for name in arguments:
         # Get the validation map from the model type in order to determine
         # whether the argument should be required
-        validation = model_type._validation.get(name, None)  # pylint: disable=protected-access
+        validation = getattr(model_type, '_validation', {}).get(name, None)  # pylint: disable=protected-access
         required = validation.get('required', False) if validation else False
 
         # Generate the command line argument name from the property name

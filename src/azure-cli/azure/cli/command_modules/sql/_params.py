@@ -1203,6 +1203,12 @@ def load_arguments(self, _):
                    'Example: --actions FAILED_DATABASE_AUTHENTICATION_GROUP BATCH_COMPLETED_GROUP',
                    nargs='+')
 
+        c.argument('required_fields',
+                   arg_group=policy_arg_group,
+                   help='List of fields to include in audit events. Can only be specified when the Azure Monitor '
+                        'target is enabled.',
+                   nargs='+')
+
         c.argument('retention_days',
                    arg_group=policy_arg_group,
                    help='The number of days to retain audit logs.')
@@ -2054,6 +2060,12 @@ def load_arguments(self, _):
                    help='List of actions and action groups to audit.'
                    'These are space seperated values.'
                    'Example: --actions FAILED_DATABASE_AUTHENTICATION_GROUP BATCH_COMPLETED_GROUP',
+                   nargs='+')
+
+        c.argument('required_fields',
+                   arg_group=policy_arg_group,
+                   help='List of fields to include in audit events. Can only be specified when the Azure Monitor '
+                        'target is enabled.',
                    nargs='+')
 
         c.argument('retention_days',
