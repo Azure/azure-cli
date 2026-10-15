@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -17,6 +19,12 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
         platform_patcher = mock.patch.object(util.platform, "system", return_value="Windows")
         platform_patcher.start()
         self.addCleanup(platform_patcher.stop)
+
+    def _make_directory_link(self, target, link):
+        if sys.platform == "win32":
+            subprocess.run(["cmd", "/c", "mklink", "/J", link, target], check=True, capture_output=True)
+        else:
+            os.symlink(target, link)
 
     def test_cwd_executable_is_not_probed_or_reused(self):
         with tempfile.TemporaryDirectory() as cwd:
@@ -40,12 +48,10 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
 
         with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
                 mock.patch.object(util.shutil, "which", return_value=relative_executable), \
-                mock.patch.object(util.os, "getcwd") as getcwd, \
                 mock.patch.object(util.subprocess, "check_output") as check_output, \
                 mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
             azcopy = util.AzCopy()
 
-        getcwd.assert_not_called()
         check_output.assert_not_called()
         install_azcopy.assert_called_once_with(managed_executable)
         self.assertEqual(managed_executable, azcopy.executable)
@@ -68,12 +74,10 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
 
         with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
                 mock.patch.object(util.shutil, "which", return_value=script_executable), \
-                mock.patch.object(util.os, "getcwd") as getcwd, \
                 mock.patch.object(util.subprocess, "check_output") as check_output, \
                 mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
             azcopy = util.AzCopy()
 
-        getcwd.assert_not_called()
         check_output.assert_not_called()
         install_azcopy.assert_called_once_with(managed_executable)
         self.assertEqual(managed_executable, azcopy.executable)
@@ -131,6 +135,74 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
             env=mock.ANY)
         self.assertEqual(absolute_executable, azcopy.executable)
 
+    @unittest.skipIf(sys.platform == "win32", "POSIX symlink resolution semantics")
+    def test_managed_path_resolves_symlink_before_parent_component(self):
+        with tempfile.TemporaryDirectory() as root:
+            config_dir = os.path.join(root, "config")
+            profile_dir = os.path.join(root, "data", "profile")
+            os.makedirs(config_dir)
+            os.makedirs(profile_dir)
+            self._make_directory_link(profile_dir, os.path.join(config_dir, "link"))
+
+            configured_executable = os.path.join(config_dir, "link", "..", "bin", "azcopy.exe")
+            expected_executable = os.path.join(os.path.realpath(root), "data", "bin", "azcopy.exe")
+
+            with mock.patch.object(util, "_get_default_install_location", return_value=configured_executable), \
+                    mock.patch.object(util.shutil, "which", return_value=None), \
+                    mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
+                azcopy = util.AzCopy()
+
+        install_azcopy.assert_called_once_with(expected_executable)
+        self.assertEqual(expected_executable, azcopy.executable)
+
+    def test_system_path_preserves_symlink_and_parent_component(self):
+        with tempfile.TemporaryDirectory() as root:
+            config_dir = os.path.join(root, "config")
+            profile_dir = os.path.join(root, "data", "profile")
+            system_dir = os.path.join(root, "data", "bin")
+            cwd = os.path.join(root, "work")
+            os.makedirs(config_dir)
+            os.makedirs(profile_dir)
+            os.makedirs(system_dir)
+            os.makedirs(cwd)
+            self._make_directory_link(profile_dir, os.path.join(config_dir, "link"))
+
+            managed_executable = os.path.join(root, "managed", "azcopy.exe")
+            discovered_executable = os.path.join(config_dir, "link", "..", "bin", "azcopy.exe")
+
+            with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
+                    mock.patch.object(util.os, "getcwd", return_value=cwd), \
+                    mock.patch.object(util.shutil, "which", return_value=discovered_executable), \
+                    mock.patch.object(util.subprocess, "check_output",
+                                      return_value=b"azcopy version 10.13.0\n") as check_output, \
+                    mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
+                azcopy = util.AzCopy()
+
+        check_output.assert_called_once_with([discovered_executable, "--version"])
+        install_azcopy.assert_not_called()
+        self.assertEqual(discovered_executable, azcopy.executable)
+
+    def test_system_path_resolving_to_cwd_is_not_probed_or_reused(self):
+        with tempfile.TemporaryDirectory() as root:
+            cwd = os.path.join(root, "work")
+            os.makedirs(cwd)
+            cwd_link = os.path.join(root, "work-link")
+            self._make_directory_link(cwd, cwd_link)
+
+            managed_executable = os.path.join(root, "managed", "azcopy.exe")
+            discovered_executable = os.path.join(cwd_link, "azcopy.exe")
+
+            with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
+                    mock.patch.object(util.os, "getcwd", return_value=cwd), \
+                    mock.patch.object(util.shutil, "which", return_value=discovered_executable), \
+                    mock.patch.object(util.subprocess, "check_output") as check_output, \
+                    mock.patch.object(util.AzCopy, "install_azcopy") as install_azcopy:
+                azcopy = util.AzCopy()
+
+        check_output.assert_not_called()
+        install_azcopy.assert_called_once_with(managed_executable)
+        self.assertEqual(managed_executable, azcopy.executable)
+
     def test_system_probe_failure_falls_back_to_managed_executable(self):
         with tempfile.TemporaryDirectory() as cwd, tempfile.TemporaryDirectory() as system_dir:
             managed_executable = os.path.join(cwd, "managed", "azcopy.exe")
@@ -175,6 +247,7 @@ class TestAzCopyExecutableResolution(unittest.TestCase):
         system_executable = os.path.abspath(os.path.join("system", "azcopy.exe"))
 
         with mock.patch.object(util, "_get_default_install_location", return_value=managed_executable), \
+                mock.patch.object(util.os.path, "realpath", return_value=managed_executable), \
                 mock.patch.object(util.shutil, "which", return_value=system_executable), \
                 mock.patch.object(util.os, "getcwd", side_effect=OSError) as getcwd, \
                 mock.patch.object(util.subprocess, "check_output") as check_output, \

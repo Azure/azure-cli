@@ -29,7 +29,7 @@ AZCOPY_VERSION = '10.13.0'
 class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
-        install_location = os.path.abspath(_get_default_install_location())
+        install_location = os.path.realpath(_get_default_install_location())
         self.executable = None
         if os.path.isfile(install_location):
             self.executable = install_location
@@ -143,10 +143,10 @@ def _resolve_system_executable(executable, require_exact_name=False):
 
     try:
         cwd = os.path.abspath(os.getcwd())
-        resolved_path = os.path.abspath(resolved_path)
+        resolved_real_path = os.path.realpath(resolved_path)
         resolved_dirs = (
             os.path.dirname(resolved_path),
-            os.path.dirname(os.path.realpath(resolved_path)),
+            os.path.dirname(resolved_real_path),
         )
     except (OSError, ValueError):
         logger.warning("Ignoring %s because its path could not be validated.", executable)
