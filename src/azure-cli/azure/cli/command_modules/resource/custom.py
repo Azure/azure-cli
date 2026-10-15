@@ -62,6 +62,8 @@ from ._utils import _build_preflight_error_message, _build_http_response_error_m
 
 logger = get_logger(__name__)
 
+_CLI_GENERATED_DEPLOYMENT_NAME_PATTERN = re.compile(r'azurecli\d+\.\d+')
+
 RPAAS_APIS = {'microsoft.datadog': '/subscriptions/{subscriptionId}/providers/Microsoft.Datadog/agreements/default?api-version=2020-02-01-preview',
               'microsoft.confluent': '/subscriptions/{subscriptionId}/providers/Microsoft.Confluent/agreements/default?api-version=2020-03-01-preview'}
 
@@ -4651,7 +4653,7 @@ def snapshot_bicep_file(cmd, file, mode=None, tenant_id=None, subscription_id=No
             args += ["--location", location]
         if resource_group:
             args += ["--resource-group", resource_group]
-        if deployment_name:
+        if deployment_name and not _CLI_GENERATED_DEPLOYMENT_NAME_PATTERN.fullmatch(deployment_name):
             args += ["--deployment-name", deployment_name]
 
         output = run_bicep_command(cmd.cli_ctx, args)
