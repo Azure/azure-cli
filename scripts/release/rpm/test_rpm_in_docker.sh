@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script should be run in a ubi8, ubi9 docker.
+# This script should be run in a UBI or Fedora container.
 set -exv
 
 export USERNAME=azureuser
