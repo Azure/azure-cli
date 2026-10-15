@@ -447,6 +447,20 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
     source_sas = ns.pop('source_sas', None)
     token_credential = ns.get('token_credential')
     is_oauth = token_credential is not None
+    source_login = ns.get('source_auth_mode') == 'login'
+    if source_login:
+        if not is_oauth or not ns.get('requires_sync'):
+            raise InvalidArgumentValueError(
+                '--source-auth-mode login requires --auth-mode login and --requires-sync true.')
+        if (not container or not blob or share or path or file_snapshot or ns.get('source_url') or
+                source_account_key or source_sas or
+                ns.get('destination_blob_type') not in (None, 'Detect')):
+            raise InvalidArgumentValueError(
+                '--source-auth-mode login requires a named source blob without source key/SAS '
+                'or blob type conversion.')
+        if not _is_valid_storage_account_name(source_account_name or ns.get('account_name')):
+            raise InvalidArgumentValueError('--source-auth-mode login requires a valid source storage account name.')
+        ns['source_token_credential'] = token_credential
 
     # source in the form of an uri
     uri = ns.get('source_url', None)
@@ -500,7 +514,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
 
     # if oauth, use user delegation key to generate sas
     source_user_delegation_key = None
-    if is_oauth:
+    if is_oauth and not source_login:
         client_kwargs = {'account_name': source_account_name,
                          'token_credential': token_credential}
         if valid_blob_source:
@@ -520,7 +534,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
                 dir_name = None
             source_sas = create_short_lived_file_sas_v2(cmd, source_account_name, source_account_key, share,
                                                         dir_name, file_name)
-        elif valid_blob_source and (ns.get('share_name', None) or not same_account):
+        elif valid_blob_source and not source_login and (ns.get('share_name', None) or not same_account):
             source_sas = create_short_lived_blob_sas_v2(cmd, source_account_name, container, blob,
                                                         account_key=source_account_key,
                                                         user_delegation_key=source_user_delegation_key)
