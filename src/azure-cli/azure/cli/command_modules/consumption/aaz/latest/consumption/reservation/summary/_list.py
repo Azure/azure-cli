@@ -15,14 +15,22 @@ from azure.cli.core.aaz import *
     "consumption reservation summary list",
 )
 class List(AAZCommand):
-    """List reservation summaries for daily or monthly by order Id or reservation id.
+    """List the reservations summaries for the defined scope daily or monthly grain. Note: ARM has a payload size limit of 12MB, so currently callers get 400 when the response size exceeds the ARM limit. In such cases, API call should be made with smaller date ranges.
+
+    :example: List daily reservation summaries for a billing account
+        az consumption reservation summary list --resource-scope providers/Microsoft.Billing/billingAccounts/12345 --grain daily --filter "properties/usageDate ge 2024-01-01 AND properties/usageDate le 2024-01-31"
+
+    :example: List monthly reservation summaries for a billing account
+        az consumption reservation summary list --resource-scope providers/Microsoft.Billing/billingAccounts/12345 --grain monthly
+
+    :example: List daily reservation summaries for a billing profile with date range
+        az consumption reservation summary list --resource-scope providers/Microsoft.Billing/billingAccounts/12345:2468/billingProfiles/13579 --grain daily --start-date 2024-09-01 --end-date 2024-10-31
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-08-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.capacity/reservationorders/{}/providers/microsoft.consumption/reservationsummaries", "2023-05-01"],
-            ["mgmt-plane", "/providers/microsoft.capacity/reservationorders/{}/reservations/{}/providers/microsoft.consumption/reservationsummaries", "2023-05-01"],
+            ["mgmt-plane", "/{resourcescope}/providers/microsoft.consumption/reservationsummaries", "2024-08-01"],
         ]
     }
 
@@ -43,35 +51,42 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.reservation_id = AAZStrArg(
-            options=["--reservation-id"],
-            help="Id of the reservation",
-        )
-        _args_schema.reservation_order_id = AAZStrArg(
-            options=["--reservation-order-id"],
-            help="Reservation order id.",
+        _args_schema.resource_scope = AAZStrArg(
+            options=["--resource-scope"],
+            help="The fully qualified Azure Resource manager identifier of the resource.",
             required=True,
+        )
+        _args_schema.end_date = AAZStrArg(
+            options=["--end-date"],
+            help="End date. Only applicable when querying with billing profile",
         )
         _args_schema.filter = AAZStrArg(
             options=["--filter"],
-            help="Required only for daily grain. The properties/UsageDate for start date and end date. The filter supports 'le' and  'ge'",
+            help="Required only for daily grain. The properties/UsageDate for start date and end date. The filter supports 'le' and  'ge'. Not applicable when querying with billing profile",
         )
         _args_schema.grain = AAZStrArg(
             options=["--grain"],
-            help="Reservation summary grain. Possible values are daily or monthly.",
+            help="Can be daily or monthly",
             required=True,
             enum={"daily": "daily", "monthly": "monthly"},
+        )
+        _args_schema.reservation_id = AAZStrArg(
+            options=["--reservation-id"],
+            help="Reservation Id GUID. Only valid if reservationOrderId is also provided. Filter to a specific reservation",
+        )
+        _args_schema.reservation_order_id = AAZStrArg(
+            options=["--reservation-order-id"],
+            help="Reservation Order Id GUID. Required if reservationId is provided. Filter to a specific reservation order",
+        )
+        _args_schema.start_date = AAZStrArg(
+            options=["--start-date"],
+            help="Start date. Only applicable when querying with billing profile",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.reservation_id) and has_value(self.ctx.args.reservation_order_id) and has_value(self.ctx.args.grain)
-        condition_1 = has_value(self.ctx.args.reservation_order_id) and has_value(self.ctx.args.grain) and has_value(self.ctx.args.reservation_id) is not True
-        if condition_0:
-            self.ReservationsSummariesListByReservationOrderAndReservation(ctx=self.ctx)()
-        if condition_1:
-            self.ReservationsSummariesListByReservationOrder(ctx=self.ctx)()
+        self.ReservationsSummariesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -87,7 +102,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class ReservationsSummariesListByReservationOrderAndReservation(AAZHttpOperation):
+    class ReservationsSummariesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -101,7 +116,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/reservations/{reservationId}/providers/Microsoft.Consumption/reservationSummaries",
+                "/{resourceScope}/providers/Microsoft.Consumption/reservationSummaries",
                 **self.url_parameters
             )
 
@@ -111,34 +126,43 @@ class List(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceScope", self.ctx.args.resource_scope,
+                    skip_quote=True,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "$filter", self.ctx.args.filter,
+                ),
+                **self.serialize_query_param(
+                    "endDate", self.ctx.args.end_date,
+                ),
+                **self.serialize_query_param(
+                    "grain", self.ctx.args.grain,
+                    required=True,
+                ),
+                **self.serialize_query_param(
                     "reservationId", self.ctx.args.reservation_id,
-                    required=True,
                 ),
-                **self.serialize_url_param(
+                **self.serialize_query_param(
                     "reservationOrderId", self.ctx.args.reservation_order_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "grain", self.ctx.args.grain,
-                    required=True,
+                    "startDate", self.ctx.args.start_date,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-08-01",
                     required=True,
                 ),
             }
@@ -183,6 +207,9 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
@@ -191,6 +218,10 @@ class List(AAZCommand):
             )
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
+            )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
             )
             _element.tags = AAZDictType(
                 flags={"read_only": True},
@@ -204,12 +235,23 @@ class List(AAZCommand):
                 serialized_name="avgUtilizationPercentage",
                 flags={"read_only": True},
             )
+            properties.kind = AAZStrType(
+                flags={"read_only": True},
+            )
             properties.max_utilization_percentage = AAZFloatType(
                 serialized_name="maxUtilizationPercentage",
                 flags={"read_only": True},
             )
             properties.min_utilization_percentage = AAZFloatType(
                 serialized_name="minUtilizationPercentage",
+                flags={"read_only": True},
+            )
+            properties.purchased_quantity = AAZFloatType(
+                serialized_name="purchasedQuantity",
+                flags={"read_only": True},
+            )
+            properties.remaining_quantity = AAZFloatType(
+                serialized_name="remainingQuantity",
                 flags={"read_only": True},
             )
             properties.reservation_id = AAZStrType(
@@ -228,155 +270,8 @@ class List(AAZCommand):
                 serialized_name="skuName",
                 flags={"read_only": True},
             )
-            properties.usage_date = AAZStrType(
-                serialized_name="usageDate",
-                flags={"read_only": True},
-            )
-            properties.used_hours = AAZFloatType(
-                serialized_name="usedHours",
-                flags={"read_only": True},
-            )
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
-
-            return cls._schema_on_200
-
-    class ReservationsSummariesListByReservationOrder(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/providers/Microsoft.Consumption/reservationSummaries",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "reservationOrderId", self.ctx.args.reservation_order_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "$filter", self.ctx.args.filter,
-                ),
-                **self.serialize_query_param(
-                    "grain", self.ctx.args.grain,
-                    required=True,
-                ),
-                **self.serialize_query_param(
-                    "api-version", "2023-05-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-                flags={"read_only": True},
-            )
-            _schema_on_200.value = AAZListType(
-                flags={"read_only": True},
-            )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType(
-                flags={"read_only": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.avg_utilization_percentage = AAZFloatType(
-                serialized_name="avgUtilizationPercentage",
-                flags={"read_only": True},
-            )
-            properties.max_utilization_percentage = AAZFloatType(
-                serialized_name="maxUtilizationPercentage",
-                flags={"read_only": True},
-            )
-            properties.min_utilization_percentage = AAZFloatType(
-                serialized_name="minUtilizationPercentage",
-                flags={"read_only": True},
-            )
-            properties.reservation_id = AAZStrType(
-                serialized_name="reservationId",
-                flags={"read_only": True},
-            )
-            properties.reservation_order_id = AAZStrType(
-                serialized_name="reservationOrderId",
-                flags={"read_only": True},
-            )
-            properties.reserved_hours = AAZFloatType(
-                serialized_name="reservedHours",
-                flags={"read_only": True},
-            )
-            properties.sku_name = AAZStrType(
-                serialized_name="skuName",
+            properties.total_reserved_quantity = AAZFloatType(
+                serialized_name="totalReservedQuantity",
                 flags={"read_only": True},
             )
             properties.usage_date = AAZStrType(
@@ -386,6 +281,34 @@ class List(AAZCommand):
             properties.used_hours = AAZFloatType(
                 serialized_name="usedHours",
                 flags={"read_only": True},
+            )
+            properties.used_quantity = AAZFloatType(
+                serialized_name="usedQuantity",
+                flags={"read_only": True},
+            )
+            properties.utilized_percentage = AAZFloatType(
+                serialized_name="utilizedPercentage",
+                flags={"read_only": True},
+            )
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             tags = cls._schema_on_200.value.Element.tags

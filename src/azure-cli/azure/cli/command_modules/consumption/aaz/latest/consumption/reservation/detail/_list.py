@@ -15,14 +15,22 @@ from azure.cli.core.aaz import *
     "consumption reservation detail list",
 )
 class List(AAZCommand):
-    """List the details of a reservation by order id or reservation id.
+    """List the reservations details for provided date range. Note: ARM has a payload size limit of 12MB, so currently callers get 400 when the response size exceeds the ARM limit. If the data size is too large, customers may also get 504 as the API timed out preparing the data. In such cases, API call should be made with smaller date ranges or a call to Generate Reservation Details Report API should be made as it is asynchronous and will not run into response size time outs.
+
+    :example: List reservation details by billing account
+        az consumption reservation detail list --resource-scope providers/Microsoft.Billing/billingAccounts/12345 --filter "properties/usageDate ge 2024-01-01 AND properties/usageDate le 2024-01-31"
+
+    :example: List reservation details by billing profile and date range
+        az consumption reservation detail list --resource-scope providers/Microsoft.Billing/billingAccounts/12345:2468/billingProfiles/13579 --start-date 2024-09-01 --end-date 2024-10-31
+
+    :example: List details for a specific reservation
+        az consumption reservation detail list --resource-scope providers/Microsoft.Billing/billingAccounts/12345:2468/billingProfiles/13579 --start-date 2024-09-01 --end-date 2024-10-31 --reservation-order-id 9f39ba10-794f-4dcb-8f4b-8d0cb47c27dc --reservation-id 1c6b6358-709f-484c-85f1-72e862a0cf3b
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-08-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.capacity/reservationorders/{}/providers/microsoft.consumption/reservationdetails", "2023-05-01"],
-            ["mgmt-plane", "/providers/microsoft.capacity/reservationorders/{}/reservations/{}/providers/microsoft.consumption/reservationdetails", "2023-05-01"],
+            ["mgmt-plane", "/{resourcescope}/providers/microsoft.consumption/reservationdetails", "2024-08-01"],
         ]
     }
 
@@ -43,30 +51,36 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.reservation_id = AAZStrArg(
-            options=["--reservation-id"],
-            help="Reservation id.",
-        )
-        _args_schema.reservation_order_id = AAZStrArg(
-            options=["--reservation-order-id"],
-            help="Reservation order id.",
+        _args_schema.resource_scope = AAZStrArg(
+            options=["--resource-scope"],
+            help="The fully qualified Azure Resource manager identifier of the resource.",
             required=True,
+        )
+        _args_schema.end_date = AAZStrArg(
+            options=["--end-date"],
+            help="End date. Only applicable when querying with billing profile",
         )
         _args_schema.filter = AAZStrArg(
             options=["--filter"],
-            help="Filter reservation details by date range. The properties/UsageDate for start date and end date. The filter supports 'le' and  'ge' ",
-            required=True,
+            help="Filter reservation details by date range. The properties/UsageDate for start date and end date. The filter supports 'le' and  'ge'. Not applicable when querying with billing profile",
+        )
+        _args_schema.reservation_id = AAZStrArg(
+            options=["--reservation-id"],
+            help="Reservation Id GUID. Only valid if reservationOrderId is also provided. Filter to a specific reservation",
+        )
+        _args_schema.reservation_order_id = AAZStrArg(
+            options=["--reservation-order-id"],
+            help="Reservation Order Id GUID. Required if reservationId is provided. Filter to a specific reservation order",
+        )
+        _args_schema.start_date = AAZStrArg(
+            options=["--start-date"],
+            help="Start date. Only applicable when querying with billing profile",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.reservation_id) and has_value(self.ctx.args.reservation_order_id) and has_value(self.ctx.args.filter)
-        condition_1 = has_value(self.ctx.args.reservation_order_id) and has_value(self.ctx.args.filter) and has_value(self.ctx.args.reservation_id) is not True
-        if condition_0:
-            self.ReservationsDetailsListByReservationOrderAndReservation(ctx=self.ctx)()
-        if condition_1:
-            self.ReservationsDetailsListByReservationOrder(ctx=self.ctx)()
+        self.ReservationsDetailsList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -82,7 +96,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class ReservationsDetailsListByReservationOrderAndReservation(AAZHttpOperation):
+    class ReservationsDetailsList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -96,7 +110,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/reservations/{reservationId}/providers/Microsoft.Consumption/reservationDetails",
+                "/{resourceScope}/providers/Microsoft.Consumption/reservationDetails",
                 **self.url_parameters
             )
 
@@ -106,31 +120,39 @@ class List(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceScope", self.ctx.args.resource_scope,
+                    skip_quote=True,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "$filter", self.ctx.args.filter,
+                ),
+                **self.serialize_query_param(
+                    "endDate", self.ctx.args.end_date,
+                ),
+                **self.serialize_query_param(
                     "reservationId", self.ctx.args.reservation_id,
-                    required=True,
                 ),
-                **self.serialize_url_param(
+                **self.serialize_query_param(
                     "reservationOrderId", self.ctx.args.reservation_order_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "$filter", self.ctx.args.filter,
-                    required=True,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "startDate", self.ctx.args.start_date,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2024-08-01",
                     required=True,
                 ),
             }
@@ -175,6 +197,9 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
@@ -184,6 +209,10 @@ class List(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _element.tags = AAZDictType(
                 flags={"read_only": True},
             )
@@ -192,8 +221,19 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.instance_flexibility_group = AAZStrType(
+                serialized_name="instanceFlexibilityGroup",
+                flags={"read_only": True},
+            )
+            properties.instance_flexibility_ratio = AAZStrType(
+                serialized_name="instanceFlexibilityRatio",
+                flags={"read_only": True},
+            )
             properties.instance_id = AAZStrType(
                 serialized_name="instanceId",
+                flags={"read_only": True},
+            )
+            properties.kind = AAZStrType(
                 flags={"read_only": True},
             )
             properties.reservation_id = AAZStrType(
@@ -225,148 +265,24 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
-
-            return cls._schema_on_200
-
-    class ReservationsDetailsListByReservationOrder(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/providers/Microsoft.Capacity/reservationorders/{reservationOrderId}/providers/Microsoft.Consumption/reservationDetails",
-                **self.url_parameters
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
             )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "reservationOrderId", self.ctx.args.reservation_order_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "$filter", self.ctx.args.filter,
-                    required=True,
-                ),
-                **self.serialize_query_param(
-                    "api-version", "2023-05-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
             )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-                flags={"read_only": True},
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
             )
-            _schema_on_200.value = AAZListType(
-                flags={"read_only": True},
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
             )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
             )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType(
-                flags={"read_only": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.instance_id = AAZStrType(
-                serialized_name="instanceId",
-                flags={"read_only": True},
-            )
-            properties.reservation_id = AAZStrType(
-                serialized_name="reservationId",
-                flags={"read_only": True},
-            )
-            properties.reservation_order_id = AAZStrType(
-                serialized_name="reservationOrderId",
-                flags={"read_only": True},
-            )
-            properties.reserved_hours = AAZFloatType(
-                serialized_name="reservedHours",
-                flags={"read_only": True},
-            )
-            properties.sku_name = AAZStrType(
-                serialized_name="skuName",
-                flags={"read_only": True},
-            )
-            properties.total_reserved_quantity = AAZFloatType(
-                serialized_name="totalReservedQuantity",
-                flags={"read_only": True},
-            )
-            properties.usage_date = AAZStrType(
-                serialized_name="usageDate",
-                flags={"read_only": True},
-            )
-            properties.used_hours = AAZFloatType(
-                serialized_name="usedHours",
-                flags={"read_only": True},
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             tags = cls._schema_on_200.value.Element.tags
