@@ -889,7 +889,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
 # region VirtualMachines
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches, broad-except
-def create_vm(cmd, vm_name, resource_group_name, image=None, size=None, location=None, tags=None,
+def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_v5', location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None, computer_name=None,
               admin_username=None, ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
               availability_set=None, nics=None, nsg=None, nsg_rule=None, accelerated_networking=None,
