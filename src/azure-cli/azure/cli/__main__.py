@@ -12,8 +12,10 @@ import sys
 
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
+from azure.cli.core._output import apply_output_newline
 from azure.cli.core.intercept_survey import prompt_survey_message
 from knack.completion import ARGCOMPLETE_ENV_NAME
+from knack.events import EVENT_CLI_PRE_EXECUTE
 from knack.log import get_logger
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
@@ -28,6 +30,8 @@ def cli_main(cli, args):
 
 
 az_cli = get_default_cli()
+
+az_cli.register_event(EVENT_CLI_PRE_EXECUTE, apply_output_newline)
 
 telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
