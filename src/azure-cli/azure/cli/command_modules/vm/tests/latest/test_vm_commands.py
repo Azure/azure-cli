@@ -2821,7 +2821,8 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
 
 class VMFlexProfileScenarioTests(ScenarioTest):
 
-    @AllowLargeResponse()
+    # add live_only: Currently only enabled in canary region where BAMI sub is not accessible
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_main_', location='westus2')
     def test_vm_flex_profile_create_and_update(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -2864,7 +2865,8 @@ class VMFlexProfileScenarioTests(ScenarioTest):
             self.check("[?name=='{vm}'].hardwareProfile.vmSize | [0]", '{deployed_size}'),
         ])
 
-    @AllowLargeResponse()
+    # add live_only: Currently only enabled in canary region where BAMI sub is not accessible
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_edge_', location='westus2')
     def test_vm_flex_profile_opt_in_opt_out(self, resource_group, resource_group_location):
         self.kwargs.update({
