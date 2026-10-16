@@ -518,6 +518,23 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
         url = 'https://victim.blob.storage.example.test/c'
         self.assertEqual(self._add_sas(url), url + '?sig=test-signature')
 
+    def test_accept_normalized_account_origins(self):
+        for url in (
+                'https://VICTIM.blob.core.windows.net:443/c',
+                'https://victim.blob.core.windows.net./c',
+                'https://victim.blob.core.windows.net\u3002/c'):
+            with self.subTest(url=url):
+                self.assertEqual(self._add_sas(url), url + '?sig=test-signature')
+
+    def test_accept_normalized_connection_origins(self):
+        for endpoint, url in (
+                ('https://xn--bcher-kva.example', 'https://b\u00fccher.example:443/c'),
+                ('http://[::1]:10000/account', 'http://[0:0:0:0:0:0:0:1]:10000/account/c'),
+                ('https://configured.example.test.', 'https://configured.example.test/c')):
+            with self.subTest(endpoint=endpoint, url=url):
+                connection = 'AccountName=victim;AccountKey=a2V5;BlobEndpoint=' + endpoint
+                self.assertEqual(self._add_sas(url, connection_string=connection), url + '?sig=test-signature')
+
     def test_custom_connection_endpoint(self):
         from azure.cli.core.azclierror import InvalidArgumentValueError
         connection = ('DefaultEndpointsProtocol=https;AccountName=victim;AccountKey=a2V5;'
@@ -590,6 +607,18 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
                     self.assertEqual(getattr(ns, side), url)
                     validate.assert_not_called()
         self.generate.assert_not_called()
+
+    def test_copy_normalized_account_origins(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        for side in ('source', 'destination'):
+            for url in ('https://VICTIM.blob.core.windows.net:443/c',
+                        'https://victim.blob.core.windows.net./c',
+                        'https://victim.blob.core.windows.net\u3002/c'):
+                with self.subTest(side=side, url=url):
+                    ns = self._copy_namespace(
+                        **{side: url}, account_key='a2V5', source_account_key='a2V5')
+                    validate_azcopy_credential(self.cmd, ns)
+                    self.assertEqual(getattr(ns, side), url + '?sig=test-signature')
 
     def test_copy_keeps_explicit_credential_account(self):
         from azure.cli.command_modules.storage._validators import validate_azcopy_credential

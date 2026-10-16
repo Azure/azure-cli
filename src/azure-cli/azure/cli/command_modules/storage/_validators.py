@@ -1807,6 +1807,7 @@ def validate_or_policy(cmd, namespace):
 def _storage_url_origin(url):
     from urllib.parse import urlsplit
     from azure.cli.core.azclierror import InvalidArgumentValueError
+    from .storage_url_helpers import normalize_url_origin
 
     try:
         parsed = urlsplit(url)
@@ -1817,8 +1818,10 @@ def _storage_url_origin(url):
             raise ValueError()
         if url.startswith(' ') or ' ' in parsed.netloc:
             raise ValueError()
-        port = parsed.port
-        return parsed.scheme, parsed.hostname, port if port is not None else (443 if parsed.scheme == 'https' else 80)
+        origin = normalize_url_origin(url)
+        if origin is None:
+            raise ValueError()
+        return origin
     except ValueError:
         raise InvalidArgumentValueError(
             'Invalid storage endpoint URL. Use an account endpoint without user information or a fragment.') from None
