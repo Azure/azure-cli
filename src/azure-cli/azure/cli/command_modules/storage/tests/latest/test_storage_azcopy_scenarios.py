@@ -5,9 +5,39 @@
 import os
 import shutil
 from datetime import datetime, timedelta
-from azure.cli.testsdk import (StorageAccountPreparer, LiveScenarioTest, JMESPathCheck, ResourceGroupPreparer)
+from unittest import mock
+from azure.cli.testsdk import (
+    StorageAccountPreparer, LiveScenarioTest, ScenarioTest, JMESPathCheck, ResourceGroupPreparer)
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from knack.util import CLIError
+
+
+class StorageAzcopyEndpointTests(ScenarioTest):
+    def test_storage_copy_credential_endpoint_validation(self):
+        with mock.patch('azure.cli.command_modules.storage.operations.azcopy.AzCopy') as azcopy, \
+                mock.patch('azure.cli.command_modules.storage.azcopy.util._generate_sas_token',
+                           return_value='sig=test-signature') as generate:
+            with self.assertRaisesRegex(InvalidArgumentValueError, 'Cannot attach storage credentials'):
+                self.cmd(
+                    'storage copy --source ./source --destination https://another.blob.core.windows.net/c '
+                    '--account-name victim --account-key a2V5')
+            azcopy.assert_not_called()
+            generate.assert_not_called()
+
+            self.cmd('storage copy --source ./source --destination https://victim.blob.core.windows.net/c '
+                     '--account-name victim --account-key a2V5')
+            self.assertEqual(azcopy.return_value.copy.call_args[0],
+                             ('./source', 'https://victim.blob.core.windows.net/c?sig=test-signature'))
+
+            generate.reset_mock()
+            self.cmd(
+                'storage copy --source ./source '
+                '--destination https://victim.blob.core.windows.net.attacker.example/c '
+                '--account-name victim --account-key a2V5')
+            self.assertEqual(azcopy.return_value.copy.call_args[0],
+                             ('./source', 'https://victim.blob.core.windows.net.attacker.example/c'))
+            generate.assert_not_called()
 
 
 class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
