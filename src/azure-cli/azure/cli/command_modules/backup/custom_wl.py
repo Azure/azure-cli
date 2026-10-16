@@ -26,7 +26,7 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState, SnapshotRestoreParameters, \
     UserAssignedManagedIdentityDetails, UserAssignedIdentityProperties, \
     AzureVmWorkloadSAPAseDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
-    AzureVmWorkloadSQLInstanceProtectedItem
+    AzureVmWorkloadSQLInstanceProtectedItem, AzureWorkloadSQLRecoveryPointExtendedInfo, PointInTimeRange
 
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
@@ -1146,6 +1146,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'no_recovery_mode': no_recovery_mode}
 
 
+def _get_sql_recovery_point_extended_info(point):
+    info = cust_help.get_model_property(point.properties, 'extended_info', 'extendedInfo')
+    return AzureWorkloadSQLRecoveryPointExtendedInfo(info) if info is not None else None
+
+
 def _get_sql_snapshot_recovery_config(client, resource_group_name, vault_name, item, restore_mode,
                                       rp_name, log_point_in_time, target_item, target_item_name, target_container,
                                       recovery_mode, no_recovery_mode, identity_arm_id, snapshot_resource_group):
@@ -1171,7 +1176,7 @@ def _get_sql_snapshot_recovery_config(client, resource_group_name, vault_name, i
     else:
         snapshot_name = rp_name
     point = client.get(vault_name, resource_group_name, fabric_name, container_uri, item.name, snapshot_name)
-    info = point.properties.extended_info
+    info = _get_sql_recovery_point_extended_info(point)
     snapshot_info = info.snapshot_recovery_point_info if info is not None else None
     if snapshot_info is None:
         raise InvalidArgumentValueError("The selected recovery point does not contain SQL snapshot metadata.")
@@ -1304,11 +1309,12 @@ def _apply_sql_snapshot_restore(cmd, request, config, item, resource_group_name,
             point = recovery_points_cf(cmd.cli_ctx).get(
                 vault_name, resource_group_name, fabric_name, config['container_uri'],
                 config['item_uri'], config['recovery_point_id'])
-            info = point.properties.extended_info
+            info = _get_sql_recovery_point_extended_info(point)
             databases = info.included_databases if info is not None else None
             if not databases:
                 raise InvalidArgumentValueError("The snapshot recovery point has no included databases for log replay.")
-            datasource_id = item.properties.protected_item_data_source_id
+            datasource_id = cust_help.get_model_property(
+                item.properties, 'protected_item_data_source_id', 'protectedItemDataSourceId')
             if not datasource_id:
                 raise InvalidArgumentValueError("The SQL instance has no ProtectedItemDataSourceId for log queries.")
             items = common.list_items(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name,
@@ -1317,11 +1323,14 @@ def _apply_sql_snapshot_restore(cmd, request, config, item, resource_group_name,
             for database in databases:
                 matching_items = [
                     candidate for candidate in items
-                    if candidate.properties.protected_item_data_source_id == database.datasource_id]
+                    if cust_help.get_model_property(
+                        candidate.properties, 'protected_item_data_source_id', 'protectedItemDataSourceId') ==
+                    database.datasource_id]
                 if not matching_items:
                     matching_items = [
                         candidate for candidate in items
-                        if candidate.properties.friendly_name == database.datasource_name]
+                        if cust_help.get_model_property(
+                            candidate.properties, 'friendly_name', 'friendlyName') == database.datasource_name]
                 database_item = cust_help.get_none_one_or_many(matching_items)
                 _check_none_and_many(database_item, "Included database " + database.datasource_name)
                 ranges = _get_log_time_range(
@@ -1402,7 +1411,10 @@ def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondar
         vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter=filter_string)
     paged_recovery_points = cust_help.get_none_one_or_many(cust_help.get_list_from_paged_response(recovery_points))
     _check_none_and_many(paged_recovery_points, "Log time range")
-    return paged_recovery_points.properties.time_ranges
+    ranges = cust_help.get_model_property(paged_recovery_points.properties, 'time_ranges', 'timeRanges')
+    if not ranges:
+        raise InvalidArgumentValueError("The selected log recovery point does not contain time ranges.")
+    return [PointInTimeRange(time_range) if isinstance(time_range, dict) else time_range for time_range in ranges]
 
 
 def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
