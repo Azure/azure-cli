@@ -597,14 +597,10 @@ helps['functionapp deployment config set'] = """
 type: command
 short-summary: Update an existing function app's deployment configuration.
 long-summary: >
-    Use the --deployment-storage-* arguments for blob container deployment storage, or the --deployment-image
-    arguments for a Flex Consumption app that runs a container image (Registry deployment storage). Registry settings
-    are stored in the app's functionAppConfig and are separate from the legacy Linux container settings managed by
-    `az functionapp config container`. Switching to Registry removes the
-    functionAppConfig runtime. An existing Registry app may update just the image or authentication, but both must be
-    present in the resulting configuration. The service accepting the configuration doesn't prove that the
-    registry is reachable, that access is authorized, or that deployment succeeds. The CLI doesn't track tags; setting
-    the same tag again doesn't pull a newer image.
+    Use --deployment-storage-* for a blob container, or --deployment-image and its authentication arguments for a
+    container image on Flex Consumption. Image deployment is separate from `az functionapp config container`. For an
+    existing image deployment, you can update the image or authentication separately. Use a new tag or digest when
+    deploying a newer image.
 examples:
   - name: Set the function app's deployment storage.
     text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-name MyStorageAccount --deployment-storage-container-name MyStorageContainer
@@ -806,7 +802,7 @@ examples:
   - name: Create a flex consumption function app. See https://aka.ms/flex-http-concurrency for more information on default http concurrency values.
     text: >
         az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --runtime java --instance-memory 2048
-  - name: Create a flex consumption function app that runs a container image from Azure Container Registry, pulled with the app's system-assigned identity. The service accepting the configuration doesn't prove that the registry is reachable, that access is authorized, or that deployment succeeds.
+  - name: Create a flex consumption function app from an Azure Container Registry image using a system-assigned identity.
     text: >
         az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type SystemAssignedIdentity --assign-identity [system] --role AcrPull --scope /subscriptions/<subscription-id>/resourceGroups/MyResourceGroup/providers/Microsoft.ContainerRegistry/registries/myregistry
 """

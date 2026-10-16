@@ -1726,6 +1726,7 @@ def _build_flex_always_ready_config(always_ready_instances):
 
 
 def _is_flex_registry_storage(deployment_storage):
+    """Registry is the service-side deployment storage type created by --deployment-image."""
     return (deployment_storage.get("type") or "").lower() == "registry"
 
 
@@ -3814,6 +3815,7 @@ def _convert_webapp_to_docker(cmd, name, resource_group, slot, yes=False):
 
 
 def _persist_identity_update(cmd, resource_group_name, name, slot, webapp):
+    """Preserve Registry deployment settings while identity commands update the full site."""
     registry_config = _flex_registry_config_from_site(webapp)
     if registry_config:
         _prepare_flex_registry_config_for_update(registry_config)
@@ -10639,6 +10641,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         # set up dashboard if no app insights
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     elif not disable_app_insights and (is_flex_registry or matched_runtime.app_insights):
+        # Registry-backed Flex apps don't resolve a runtime, but App Insights remains enabled by default.
         create_app_insights = True
 
     if flexconsumption_location is not None:

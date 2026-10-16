@@ -1234,8 +1234,8 @@ subscription than the app service environment, please use the resource ID for --
     for scope in ['functionapp create', 'functionapp deployment config set']:
         with self.argument_context(scope, arg_group='Flex Registry Deployment') as c:
             c.argument('deployment_image', options_list=['--deployment-image'],
-                       help="Container image for a Flex Consumption app, e.g. `myregistry.azurecr.io/myimage:v1` or `myregistry.azurecr.io/myimage@sha256:<digest>`. "
-                       "Saved unchanged as the app's Registry deployment storage; the CLI doesn't validate, resolve, or pull it. Unrelated to legacy Linux container settings.")
+                       help="Container image for a Flex Consumption app, specified by tag or digest, e.g. "
+                       "`myregistry.azurecr.io/myimage:v1` or `myregistry.azurecr.io/myimage@sha256:<digest>`.")
             c.argument('deployment_image_auth_type', options_list=['--deployment-image-auth-type', '--diat'], arg_type=get_enum_type(FLEX_REGISTRY_AUTH_TYPES),
                        help="How the platform authenticates to the registry: Anonymous (public image), SystemAssignedIdentity, UserAssignedIdentity (requires --deployment-image-identity), "
                        "or Basic (requires --deployment-image-username-setting and --deployment-image-password-setting). The CLI doesn't assign identities or grant registry access.")
