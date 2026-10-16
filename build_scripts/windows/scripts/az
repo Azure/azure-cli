@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
+# AZ_LAUNCHER=bash makes stdout default to LF line endings (core.output_newline), so $(az ...) in WSL or
+# Git Bash has no trailing CR. WSL only passes variables listed in WSLENV to Windows programs.
+export AZ_LAUNCHER=bash WSLENV="${WSLENV:+$WSLENV:}AZ_LAUNCHER/w"
+
 AZ_INSTALLER=MSI "$(dirname "${BASH_SOURCE[0]}")/../python.exe" -IBm azure.cli "$@"
