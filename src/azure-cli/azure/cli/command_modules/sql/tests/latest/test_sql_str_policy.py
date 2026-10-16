@@ -22,7 +22,9 @@ from knack.prompting import NoTTYException
 from knack.util import CLIError
 from requests import Response
 
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError,
+)
 from azure.cli.core.mock import DummyCli
 from azure.cli.command_modules.sql.custom import (
     get_short_term_retention, get_short_term_retention_mi,
@@ -177,6 +179,56 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
     def test_sql_str_db_requires_setting(self):
         with self.assertRaises(RequiredArgumentMissingError):
             self._set()
+        self.prompt.assert_not_called()
+        self.send.assert_not_called()
+
+    def test_sql_str_db_diff_interval_integer_wire_type(self):
+        for hours in (12, 24):
+            for no_wait in (False, True):
+                for args, expected in (
+                    ({}, {}),
+                    ({'retention_days': 7}, {'retentionDays': 7}),
+                    ({'retention_days': 7, 'lock_immutability': True, 'yes': True},
+                     {'retentionDays': 7, 'lockImmutability': True}),
+                ):
+                    with self.subTest(hours=hours, no_wait=no_wait, args=args):
+                        self._respond()
+                        result = self._set(diffbackup_hours=hours, no_wait=no_wait, **args)
+                        if no_wait:
+                            self.assertIsNone(result)
+                        else:
+                            result.result()
+                        properties = self._properties()
+                        self.assertIs(type(properties['diffBackupIntervalInHours']), int)
+                        self.assertEqual(properties, {'diffBackupIntervalInHours': hours, **expected})
+        self.prompt.assert_not_called()
+
+    def test_sql_str_cli_diff_interval_integer_wire_type(self):
+        for hours in (12, 24):
+            for no_wait in (False, True):
+                with self.subTest(hours=hours, no_wait=no_wait):
+                    self._respond()
+                    command = 'sql db str-policy set -g rg -s server -n db --retention-days 7'.split()
+                    command += ['--diffbackup-hours', str(hours)]
+                    if no_wait:
+                        command.append('--no-wait')
+                    code, stdout, stderr = self._invoke(command)
+                    self.assertEqual(code, 0, stderr)
+                    properties = self._properties()
+                    self.assertIs(type(properties['diffBackupIntervalInHours']), int)
+                    self.assertEqual(properties, {'diffBackupIntervalInHours': hours, 'retentionDays': 7})
+                    if no_wait:
+                        self.assertEqual(stdout, '')
+        self.prompt.assert_not_called()
+
+    def test_sql_str_db_diff_interval_rejects_fractional_hours(self):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'whole number'):
+            self._set(diffbackup_hours=12.5).result()
+        code, stdout, stderr = self._invoke(
+            'sql db str-policy set -g rg -s server -n db --diffbackup-hours 12.5'.split())
+        self.assertEqual(code, 2, stderr)
+        self.assertIn('--diffbackup-hours', stderr)
+        self.assertEqual(stdout, '')
         self.prompt.assert_not_called()
         self.send.assert_not_called()
 

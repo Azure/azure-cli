@@ -6,6 +6,7 @@
 """Compatibility adapters for the generated STR commands."""
 
 from azure.cli.core.aaz import AAZCommand, AAZHttpOperation
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from .aaz.latest.sql.db.str_policy import Set as _DatabasePolicySet, Show as _DatabasePolicyShow
 from .aaz.latest.sql.midb.short_term_retention_policy import (
@@ -44,7 +45,18 @@ class DatabasePolicyShow(_ShortTermRetentionPolicy, _DatabasePolicyShow):
 class DatabasePolicySet(_ShortTermRetentionPolicy, _DatabasePolicySet):
     class BackupShortTermRetentionPoliciesCreateOrUpdate(
             _PolicySetOperation, _DatabasePolicySet.BackupShortTermRetentionPoliciesCreateOrUpdate):
-        pass
+        @property
+        def content(self):
+            content = super().content
+            properties = content["properties"]
+            if "diffBackupIntervalInHours" in properties:
+                # The Swagger number enum generates floats, but SQL requires integer JSON tokens.
+                interval = properties["diffBackupIntervalInHours"]
+                integer_interval = int(interval)
+                if integer_interval != interval:
+                    raise InvalidArgumentValueError("--diffbackup-hours must be a whole number of hours.")
+                properties["diffBackupIntervalInHours"] = integer_interval
+            return content
 
 
 class ManagedDatabasePolicyShow(_ShortTermRetentionPolicy, _ManagedDatabasePolicyShow):
