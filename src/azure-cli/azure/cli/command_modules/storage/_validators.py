@@ -1824,6 +1824,7 @@ def _storage_url_origin(url):
 
 def _storage_account_urls(cmd, account_name, service, connection_string=None):
     from azure.cli.core.azclierror import InvalidArgumentValueError
+    from ._client_factory import get_account_url
 
     services = ('blob', 'dfs') if service == 'blob' else ('file',)
     if connection_string:
@@ -1853,8 +1854,7 @@ def _storage_account_urls(cmd, account_name, service, connection_string=None):
 
     if not _is_valid_storage_account_name(account_name):
         raise InvalidArgumentValueError('Provide a valid storage account name for the storage credentials.')
-    suffix = cmd.cli_ctx.cloud.suffixes.storage_endpoint
-    return ['https://{}.{}.{}'.format(account, endpoint_service, suffix)
+    return [get_account_url(cmd.cli_ctx, account, endpoint_service)
             for endpoint_service in services
             for account in (account_name, account_name + '-secondary')]
 
