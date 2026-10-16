@@ -242,6 +242,82 @@ class EmailAddressReplacer(RecordingProcessor):
         return response
 
 
+class MSGraphUserProfileReplacer(RecordingProcessor):
+    """Remove personal profile data of Microsoft Graph user objects from responses.
+
+    Contact fields (phones, job title, office location) are cleared on every Graph user object. The names of the
+    signed-in user, learned from the `/me` response, are replaced with mock values in all subsequent responses.
+    """
+
+    MOCKED_DISPLAY_NAME = 'Test User'
+    MOCKED_GIVEN_NAME = 'Test'
+    MOCKED_SURNAME = 'User'
+    _CLEARED_FIELDS = {'businessPhones': [], 'mobilePhone': None, 'faxNumber': None, 'jobTitle': None,
+                       'officeLocation': None, 'department': None, 'companyName': None, 'streetAddress': None,
+                       'city': None, 'state': None, 'postalCode': None, 'country': None}
+
+    def __init__(self):
+        self._is_me_request = False
+        self._names = {}
+
+    def reset(self):
+        self._is_me_request = False
+        self._names = {}
+
+    def process_request(self, request):
+        self._is_me_request = (request.uri.startswith('https://graph.microsoft.com/') and
+                               request.path.rstrip('/').endswith('/me') and request.method.upper() == 'GET')
+        return request
+
+    def _scrub(self, obj):
+        if isinstance(obj, list):
+            return [self._scrub(item) for item in obj]
+        if isinstance(obj, dict):
+            if 'userPrincipalName' in obj:
+                for key, value in self._CLEARED_FIELDS.items():
+                    if key in obj:
+                        obj[key] = value
+            return {key: self._scrub(value) for key, value in obj.items()}
+        return obj
+
+    def process_response(self, response):
+        import json
+
+        body = response['body']['string']
+        if not body:
+            return response
+        try:
+            body = _byte_to_str(body)
+        except UnicodeDecodeError:
+            return response
+
+        if self._is_me_request:
+            self._is_me_request = False
+            try:
+                me = json.loads(body)
+            except ValueError:
+                me = None
+            if isinstance(me, dict):
+                for key, mock in (('displayName', self.MOCKED_DISPLAY_NAME),
+                                  ('givenName', self.MOCKED_GIVEN_NAME),
+                                  ('surname', self.MOCKED_SURNAME)):
+                    if isinstance(me.get(key), str) and me[key]:
+                        self._names[me[key]] = mock
+
+        # replace longer names first so that e.g. the display name wins over the given name
+        for name in sorted(self._names, key=len, reverse=True):
+            body = body.replace(name, self._names[name])
+
+        if '"userPrincipalName"' in body:
+            try:
+                body = json.dumps(self._scrub(json.loads(body)))
+            except ValueError:
+                pass
+
+        response['body']['string'] = body
+        return response
+
+
 class AADAuthRequestFilter(RecordingProcessor):
     """Remove oauth authentication requests and responses from recording.
     This is derived from OAuthRequestResponsesFilter.
