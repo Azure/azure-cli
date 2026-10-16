@@ -96,6 +96,7 @@ Release History
 
 **Storage**
 
+* `az storage copy`, `az storage fs directory upload/download`: Validate configured account endpoints before attaching SAS credentials
 * `az storage blob download-batch`: Ensure downloaded blobs stay within the destination directory (#34126)
 
 2.90.0
