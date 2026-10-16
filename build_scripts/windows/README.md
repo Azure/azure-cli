@@ -8,7 +8,8 @@ Prerequisites
 
 1. Turn on the '.NET Framework 3.5' Windows Feature (required for WIX Toolset).
 
-2. Install 'WIX Toolset build tools' if not already installed. (e.g. WiX v3.10.3)
+2. Install 'WIX Toolset build tools' if not already installed. WiX v3.14.1
+   or later is required for ARM64 MSI packages.
     http://wixtoolset.org/releases/
 
 3. Get Git for Windows (it has several tools used for the build).
@@ -28,6 +29,9 @@ Building
 
 1. Set the `CLI_VERSION` environment variable.
 
-2. Run `build_scripts\windows\scripts\build.cmd`.
+2. Set `ARCH` to `x86`, `x64`, or `arm64`. ARM64 builds must run on a native
+   Windows ARM64 host because the build executes the embedded Python runtime.
 
-3. The unsigned MSI will be in the `.\out` folder.
+3. Run `build_scripts\windows\scripts\build.cmd`.
+
+4. The unsigned MSI will be in the `.\out` folder.
