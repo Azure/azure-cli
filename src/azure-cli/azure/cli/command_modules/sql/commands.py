@@ -277,12 +277,18 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#DatabaseBlobAuditingPoliciesOperations.{}',
         client_factory=get_sql_database_blob_auditing_policies_operations)
 
+    audit_policy_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.sql.custom#{}')
+
     with self.command_group('sql db audit-policy',
                             database_blob_auditing_policies_operations,
                             client_factory=get_sql_database_blob_auditing_policies_operations) as g:
 
         g.custom_show_command('show', 'db_audit_policy_show')
-        g.generic_update_command('update', custom_func_name='db_audit_policy_update')
+        g.generic_update_command('update',
+                                 setter_name='db_audit_policy_set',
+                                 setter_type=audit_policy_custom,
+                                 custom_func_name='db_audit_policy_update')
         g.wait_command('wait')
 
     server_blob_auditing_policies_operations = CliCommandType(
@@ -295,7 +301,8 @@ def load_command_table(self, _):
 
         g.custom_show_command('show', 'server_audit_policy_show')
         g.generic_update_command('update',
-                                 setter_name='begin_create_or_update',
+                                 setter_name='server_audit_policy_set',
+                                 setter_type=audit_policy_custom,
                                  custom_func_name='server_audit_policy_update',
                                  supports_no_wait=True)
         g.wait_command('wait')

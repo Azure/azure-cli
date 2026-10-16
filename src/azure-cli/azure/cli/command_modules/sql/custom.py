@@ -2112,6 +2112,8 @@ def _get_database_keys_for_update(akvKeys, akvKeysToRemove):
 #           sql db audit-policy & threat-policy
 #####
 
+_AUDITING_API_VERSION = '2026-08-01-preview'
+
 
 def _find_storage_account_resource_group(cli_ctx, name):
     '''
@@ -2300,6 +2302,100 @@ def _get_diagnostic_settings(
     return list(azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url))
 
 
+def _attach_required_fields(pipeline_response, deserialized, _headers):
+    '''
+    The installed azure-mgmt-sql SDK's generated models do not define 'required_fields' (a
+    2026-08-01-preview-only property), so the SDK's own deserializer silently drops it from the
+    response. Read it from the raw response body via the SDK's public 'cls' extensibility hook
+    (supported by every generated operation method) and attach it to the model instance the SDK
+    already built, instead of hand-parsing the response ourselves.
+    '''
+    raw_body = pipeline_response.http_response.json()
+    deserialized.required_fields = raw_body.get('properties', {}).get('requiredFields')
+    return deserialized
+
+
+def _get_audit_policy_preview(cmd, client, resource_group_name, server_name, database_name=None):  # pylint: disable=unused-argument
+    '''
+    Calls the real SDK client, overriding only the api_version (a publicly documented kwarg on
+    every generated operation method) so the 2026-08-01-preview surface -- the first to define
+    'requiredFields' -- is used instead of the SDK's own pinned default.
+    '''
+    kwargs = {
+        'resource_group_name': resource_group_name,
+        'server_name': server_name,
+        'api_version': _AUDITING_API_VERSION,
+        'cls': _attach_required_fields,
+    }
+    if database_name is not None:
+        kwargs['database_name'] = database_name
+    return client.get(**kwargs)
+
+
+def _set_audit_policy_preview(
+        cmd,  # pylint: disable=unused-argument
+        client,
+        parameters,
+        resource_group_name,
+        server_name,
+        database_name=None,
+        no_wait=False):
+    '''
+    The installed SDK's models don't define 'required_fields', so parameters.serialize() won't
+    include it. Serialize what the SDK knows about, inject the extra field, then hand the SDK
+    client raw JSON bytes instead of the typed model: both 'create_or_update' and
+    'begin_create_or_update' publicly accept 'parameters: Union[<Model>, IO[bytes]]'. This keeps
+    the request on the SDK's own client (auth, retries, and -- for the server-level LRO -- its
+    own ARMPolling-based poller), rather than issuing a raw HTTP call ourselves.
+    '''
+    import json
+
+    body = parameters.serialize()
+    body.setdefault('properties', {})['requiredFields'] = parameters.required_fields
+    raw_parameters = json.dumps(body).encode('utf-8')
+
+    if database_name is not None:
+        return client.create_or_update(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            database_name=database_name,
+            parameters=raw_parameters,
+            api_version=_AUDITING_API_VERSION,
+            cls=_attach_required_fields)
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        parameters=raw_parameters,
+        api_version=_AUDITING_API_VERSION,
+        cls=_attach_required_fields)
+
+
+def db_audit_policy_set(cmd, client, resource_group_name, server_name, database_name, parameters):
+    if hasattr(parameters, 'required_fields'):
+        return _set_audit_policy_preview(
+            cmd, client, parameters, resource_group_name, server_name, database_name)
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        database_name=database_name,
+        parameters=parameters)
+
+
+def server_audit_policy_set(cmd, client, resource_group_name, server_name, parameters, no_wait=False):
+    if hasattr(parameters, 'required_fields'):
+        return _set_audit_policy_preview(
+            cmd, client, parameters, resource_group_name, server_name, no_wait=no_wait)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        parameters=parameters)
+
+
 def _fetch_first_audit_diagnostic_setting(diagnostic_settings, category_name):
     return next((ds for ds in diagnostic_settings if hasattr(ds, 'logs') and
                  next((log for log in ds.logs if log.enabled and
@@ -2361,11 +2457,15 @@ def _audit_policy_show(
                 resource_group_name=resource_group_name,
                 server_name=server_name)
         else:
-            audit_policy = client.get(
+            audit_policy = _get_audit_policy_preview(
+                cmd=cmd,
+                client=client,
                 resource_group_name=resource_group_name,
                 server_name=server_name)
     else:
-        audit_policy = client.get(
+        audit_policy = _get_audit_policy_preview(
+            cmd=cmd,
+            client=client,
             resource_group_name=resource_group_name,
             server_name=server_name,
             database_name=database_name)
@@ -2470,6 +2570,7 @@ def _audit_policy_validate_arguments(
         storage_endpoint=None,
         storage_account_access_key=None,
         retention_days=None,
+        required_fields=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
         event_hub_target_state=None,
@@ -2492,7 +2593,7 @@ def _audit_policy_validate_arguments(
         event_hub_name is not None
 
     if not state and not blob_storage_arguments_provided and\
-            not log_analytics_arguments_provided and not event_hub_arguments_provided:
+            not log_analytics_arguments_provided and not event_hub_arguments_provided and required_fields is None:
         raise CLIError('Either state or blob storage or log analytics or event hub arguments are missing')
 
     if _is_audit_policy_state_enabled(state) and\
@@ -2503,7 +2604,8 @@ def _audit_policy_validate_arguments(
     if _is_audit_policy_state_disabled(state) and\
             (blob_storage_arguments_provided or
              log_analytics_arguments_provided or
-             event_hub_name):
+             event_hub_name or
+             required_fields is not None):
         raise CLIError('No additional arguments should be provided once state is disabled')
 
     if (_is_audit_policy_state_none_or_disabled(blob_storage_target_state)) and\
@@ -2883,6 +2985,7 @@ def _audit_policy_update_global_settings(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         log_analytics_target_state=None,
         event_hub_target_state=None):
@@ -2924,6 +3027,12 @@ def _audit_policy_update_global_settings(
             category_name=category_name,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
+
+    if required_fields is not None:
+        if not _is_audit_policy_state_enabled(instance.state) or not instance.is_azure_monitor_target_enabled:
+            raise ValidationError(
+                'required-fields can only be specified when auditing and the Azure Monitor target are enabled')
+        instance.required_fields = required_fields
 
 
 def _audit_policy_update_rollback(
@@ -2974,6 +3083,7 @@ def _audit_policy_update(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         category_name=None,
         log_analytics_target_state=None,
@@ -2990,6 +3100,7 @@ def _audit_policy_update(
         storage_endpoint=storage_endpoint,
         storage_account_access_key=storage_account_access_key,
         retention_days=retention_days,
+        required_fields=required_fields,
         log_analytics_target_state=log_analytics_target_state,
         log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
         event_hub_target_state=event_hub_target_state,
@@ -3034,6 +3145,7 @@ def _audit_policy_update(
             storage_endpoint=storage_endpoint,
             storage_account_access_key=storage_account_access_key,
             audit_actions_and_groups=audit_actions_and_groups,
+            required_fields=required_fields,
             retention_days=retention_days,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
@@ -3065,6 +3177,7 @@ def server_audit_policy_update(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
@@ -3087,6 +3200,7 @@ def server_audit_policy_update(
         storage_endpoint=storage_endpoint,
         storage_account_access_key=storage_account_access_key,
         audit_actions_and_groups=audit_actions_and_groups,
+        required_fields=required_fields,
         retention_days=retention_days,
         category_name='SQLSecurityAuditEvents',
         log_analytics_target_state=log_analytics_target_state,
@@ -3108,6 +3222,7 @@ def db_audit_policy_update(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
@@ -3130,6 +3245,7 @@ def db_audit_policy_update(
         storage_endpoint=storage_endpoint,
         storage_account_access_key=storage_account_access_key,
         audit_actions_and_groups=audit_actions_and_groups,
+        required_fields=required_fields,
         retention_days=retention_days,
         category_name='SQLSecurityAuditEvents',
         log_analytics_target_state=log_analytics_target_state,
