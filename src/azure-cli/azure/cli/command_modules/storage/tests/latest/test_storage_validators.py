@@ -489,6 +489,11 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
             'https://victim.blob.core.windows.net\n.attacker.example/c',
             'https://victim.blob.core.windows.net/c#fragment',
             'https://victim.blob.core.windows.net:invalid/c',
+            ' https://victim.blob.core.windows.net/c',
+            'https://victim.blob.core.windows.net /c',
+            'https://victim.blob.core.windows.net/my\tfolder/*',
+            'https://victim.blob.core.windows.net/my\nfolder/*',
+            'https://victim.blob.core.windows.net/my\rfolder/*',
         ]
         for url in urls:
             for sas in (None, 'sig=existing-secret'):
@@ -543,6 +548,31 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
                     sas_token=None, auth_mode=None, _cmd=self.cmd)
         args.update(kwargs)
         return Namespace(**args)
+
+    def test_copy_wildcard_paths_with_spaces(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        for side in ('source', 'destination'):
+            for service, resource, path in (
+                    ('blob', 'container', 'blob'), ('file', 'share', 'file_path')):
+                for sas in (None, 'sig=provided'):
+                    with self.subTest(side=side, service=service, supplied_sas=bool(sas)):
+                        ns = self._copy_namespace(
+                            **{side: None, side + '_' + resource: 'container',
+                               side + '_' + path: 'my folder/*'},
+                            account_name='victim', account_key='a2V5', sas_token=sas,
+                            source_account_name='victim', source_account_key='a2V5', source_sas=sas)
+                        self.generate.reset_mock()
+                        validate_azcopy_credential(self.cmd, ns)
+                        expected = 'https://victim.{}.core.windows.net/container/my folder/*?{}'.format(
+                            service, sas or 'sig=test-signature')
+                        self.assertEqual(getattr(ns, side), expected)
+                        if sas:
+                            self.generate.assert_not_called()
+                        else:
+                            self.generate.assert_called_once_with(
+                                self.cmd, 'victim', 'a2V5', service,
+                                resource_types='sco' if side == 'source' else 'co',
+                                permissions='rl' if side == 'source' else 'wac')
 
     def test_copy_untrusted_urls_never_receive_sas(self):
         from azure.cli.command_modules.storage._validators import validate_azcopy_credential

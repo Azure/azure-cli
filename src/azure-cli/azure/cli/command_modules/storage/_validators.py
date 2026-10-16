@@ -1813,7 +1813,9 @@ def _storage_url_origin(url):
         if parsed.scheme not in ('https', 'http') or not parsed.hostname or parsed.fragment:
             raise ValueError()
         if (parsed.username is not None or parsed.password is not None or
-                '\\' in url or any(ord(char) <= 32 for char in url)):
+                '\\' in url or any(ord(char) < 32 for char in url)):
+            raise ValueError()
+        if url.startswith(' ') or ' ' in parsed.netloc:
             raise ValueError()
         port = parsed.port
         return parsed.scheme, parsed.hostname, port if port is not None else (443 if parsed.scheme == 'https' else 80)
