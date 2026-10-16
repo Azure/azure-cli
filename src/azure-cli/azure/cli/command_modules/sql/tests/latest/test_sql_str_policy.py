@@ -337,13 +337,16 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
                 self.assertEqual(len(self.requests) - start, 3)
 
     def test_sql_str_system_data_remains_nested(self):
-        self._respond({
-            'properties': {'retentionDays': 7, 'immutabilityStatus': 'Enabled'},
-            'systemData': {'createdBy': 'user', 'createdAt': '2026-08-01T00:00:00Z'},
-        })
-        result = self._get()
-        self.assertEqual(result['systemData']['createdBy'], 'user')
-        self.assertNotIn('createdBy', result)
+        for managed, deleted_time in ((False, None), (True, None), (True, '2026-08-01T00:00:00Z')):
+            with self.subTest(managed=managed, deleted_time=deleted_time):
+                self._respond({
+                    'properties': {'retentionDays': 7, 'immutabilityStatus': 'Enabled'},
+                    'systemData': {'createdBy': 'user', 'createdAt': '2026-08-01T00:00:00Z'},
+                })
+                result = self._get(managed, deleted_time=deleted_time)
+                self.assertEqual(result['systemData']['createdBy'], 'user')
+                self.assertEqual(result['systemData']['createdAt'], '2026-08-01T00:00:00Z')
+                self.assertNotIn('createdBy', result)
 
     def test_sql_str_service_rejection_is_propagated(self):
         for managed in (False, True):
@@ -443,6 +446,37 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
         self.assertEqual(stdout, '')
         self.send.assert_not_called()
         self.prompt.assert_not_called()
+
+    def test_sql_str_cli_managed_ids_and_required_retention(self):
+        resource_id = ('/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/'
+                       'providers/Microsoft.Sql/managedInstances/server/databases/db')
+        self._respond()
+        code, stdout, stderr = self._invoke([
+            'sql', 'midb', 'short-term-retention-policy', 'show', '--ids', resource_id,
+        ])
+        self.assertEqual(code, 0, stderr)
+        self.assertEqual(json.loads(stdout)['immutabilityStatus'], 'Locked')
+        self.assertIn('/managedInstances/server/databases/db/', self.requests[-1].url)
+        self.send.reset_mock()
+        code, stdout, stderr = self._invoke([
+            'sql', 'midb', 'short-term-retention-policy', 'set', '--ids', resource_id,
+            '--lock-immutability', 'true', '--yes',
+        ])
+        self.assertEqual(code, 2, stderr)
+        self.assertIn('--retention-days', stderr)
+        self.assertEqual(stdout, '')
+        self.send.assert_not_called()
+        self.prompt.assert_not_called()
+
+    def test_sql_str_generated_internal_commands_are_not_registered(self):
+        for operation in ('show', 'set'):
+            with self.subTest(operation=operation):
+                code, _, stderr = self._invoke([
+                    'sql', 'midb', 'short-term-retention-policy', 'restorable-dropped',
+                    operation, '--help',
+                ])
+                self.assertEqual(code, 2, stderr)
+        self.send.assert_not_called()
 
     def test_sql_str_cli_show_missing_returns_exit_three(self):
         self._respond({'error': {'code': 'ResourceNotFound', 'message': 'Database not found.'}}, 404)

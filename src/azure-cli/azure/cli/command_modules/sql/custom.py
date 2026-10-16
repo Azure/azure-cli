@@ -3272,7 +3272,7 @@ def update_short_term_retention(
     '''
     Updates short term retention for live database
     '''
-    from ._str_policy import ShortTermRetentionPolicySet
+    from ._str_policy import DatabasePolicySet
 
     if retention_days is None and diffbackup_hours is None and lock_immutability is None:
         raise RequiredArgumentMissingError(
@@ -3280,9 +3280,9 @@ def update_short_term_retention(
     if lock_immutability is True:
         user_confirmation('Locking backup immutability cannot be reverted. '
                           'Are you sure you want to lock backup immutability?', yes=yes)
-    return ShortTermRetentionPolicySet(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group_name': resource_group_name,
-        'parent_name': server_name,
+    return DatabasePolicySet(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'server_name': server_name,
         'database_name': database_name,
         'retention_days': retention_days,
         'diffbackup_hours': diffbackup_hours,
@@ -3304,10 +3304,10 @@ def get_short_term_retention_for_wait(cmd, database_name, server_name, resource_
 
     :param policy_name: The policy name. Should always be "default".
     '''
-    from ._str_policy import ShortTermRetentionPolicyGet
-    return ShortTermRetentionPolicyGet(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group_name': resource_group_name,
-        'parent_name': server_name,
+    from ._str_policy import DatabasePolicyShow
+    return DatabasePolicyShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'server_name': server_name,
         'database_name': database_name,
         'policy_name': policy_name,
     })
@@ -6134,7 +6134,7 @@ def update_short_term_retention_mi(
     Updates short term retention for database
     '''
 
-    from ._str_policy import ShortTermRetentionPolicySet
+    from ._str_policy import DroppedDatabasePolicySet, ManagedDatabasePolicySet
 
     if deleted_time is not None and lock_immutability is not None:
         raise MutuallyExclusiveArgumentError(
@@ -6145,12 +6145,12 @@ def update_short_term_retention_mi(
                           'Are you sure you want to lock backup immutability?', yes=yes)
     if deleted_time:
         database_name = '{},{}'.format(database_name, _to_filetimeutc(deleted_time))
-    return ShortTermRetentionPolicySet(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group_name': resource_group_name,
-        'parent_name': managed_instance_name,
-        'database_name': database_name,
-        'managed': True,
-        'deleted': bool(deleted_time),
+    policy_command = DroppedDatabasePolicySet if deleted_time else ManagedDatabasePolicySet
+    database_argument = 'restorable_dropped_database_id' if deleted_time else 'database_name'
+    return policy_command(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'managed_instance_name': managed_instance_name,
+        database_argument: database_name,
         'retention_days': retention_days,
         'lock_immutability': lock_immutability,
         'no_wait': no_wait,
@@ -6166,16 +6166,16 @@ def get_short_term_retention_mi(
     '''
     Gets short term retention for database
     '''
-    from ._str_policy import ShortTermRetentionPolicyGet
+    from ._str_policy import DroppedDatabasePolicyShow, ManagedDatabasePolicyShow
 
     if deleted_time:
         database_name = '{},{}'.format(database_name, _to_filetimeutc(deleted_time))
-    return ShortTermRetentionPolicyGet(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group_name': resource_group_name,
-        'parent_name': managed_instance_name,
-        'database_name': database_name,
-        'managed': True,
-        'deleted': bool(deleted_time),
+    policy_command = DroppedDatabasePolicyShow if deleted_time else ManagedDatabasePolicyShow
+    database_argument = 'restorable_dropped_database_id' if deleted_time else 'database_name'
+    return policy_command(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'managed_instance_name': managed_instance_name,
+        database_argument: database_name,
     })
 
 
