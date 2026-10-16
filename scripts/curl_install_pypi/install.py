@@ -115,7 +115,14 @@ def is_valid_sha256sum(a_file, expected_sum):
 def create_virtualenv(tmp_dir, install_dir):
     download_location = os.path.join(tmp_dir, VIRTUALENV_ARCHIVE)
     print_status('Downloading virtualenv package from {}.'.format(VIRTUALENV_DOWNLOAD_URL))
+    try:
     response = urlopen(VIRTUALENV_DOWNLOAD_URL)
+except Exception:
+    import ssl
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    response = urlopen(VIRTUALENV_DOWNLOAD_URL, context=ctx)
     with open(download_location, 'wb') as f: f.write(response.read())
     print_status("Downloaded virtualenv package to {}.".format(download_location))
     if is_valid_sha256sum(download_location, VIRTUALENV_ARCHIVE_SHA256):
