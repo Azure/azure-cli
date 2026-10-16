@@ -43,6 +43,9 @@ managed_instance_name_prefix = 'clitestmi'
 instance_pool_name_prefix = 'clitestip'
 managed_instance_name_max_length = 20
 
+# Region, subscription and existing-resource substitutions below select the recording environment;
+# they are retained independently of the SDK upgrade and must match the subscription used for live runs.
+
 
 class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='eastasia',
@@ -78,10 +81,11 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
+    # Recording-environment prerequisites, not SDK requirements; update together for another subscription.
     subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
-    existing_mi_name = 'autobot-managed-instance'
+    existing_mi_name = 'autobot-managed-instance2'
     group = 'CustomerExperienceTeam_RG'
-    location = 'westcentralus'
+    location = 'indiasouthcentral'
     vnet_name = 'vnet-mi-tooling'
     subnet_name = 'ManagedInstance'
     subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
@@ -107,16 +111,18 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     proxy = 'Proxy'
 
     fog_name = "fgtest2022a"
-    primary_name = 'mi-primary-wcus'
-    secondary_name = 'mi-mdcs-cx-secondary'
+    # Failover needs existing instances in different regions with matching DNS zones and connectivity.
+    primary_name = 'mi-fog-primary-857355f0'
+    secondary_name = 'mi-fog-secondary-857355f0'
     sec_group = 'mdcs-cx-secondary-vnet'
-    sec_location = 'centralus'
-    sec_subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/vnet-sql-mi-secondary/subnets/default'.format(subscription_id, sec_group)
+    sec_location = 'australiaeast'
+    sec_subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/vnet-sql-mi-secondary-australiaeast/subnets/default'.format(subscription_id, sec_group)
 
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4, enable_ad_only_auth = True):
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4, enable_ad_only_auth = False,
+                 family='Gen5', storage=32):
         super().__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -132,7 +138,11 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.is_geo_secondary = is_geo_secondary
         self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
         self.v_core = v_core
+        # The SDK upgrade does not require Entra-only auth; keep it opt-in for dedicated auth coverage.
         self.enable_ad_only_auth = enable_ad_only_auth
+        # Per-test hardware/storage avoids changing shared defaults for the GPv2 memory scenarios.
+        self.family = family
+        self.storage = storage
 
 
     def create_resource(self, name, **kwargs):
@@ -184,8 +194,8 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
 
 class SqlServerExternalGovernanceTests(ScenarioTest):
     
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_refresh_external_governance_status(self, resource_group, resource_group_location, server):
         
         self.cmd('sql server refresh-external-governance-status -g {} --server {}'
@@ -195,8 +205,8 @@ class SqlServerExternalGovernanceTests(ScenarioTest):
                      JMESPathCheck('status', 'Succeeded')])
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westus')
-    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westus')
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='indiasouthcentral')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='indiasouthcentral')
     def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
@@ -371,7 +381,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='westus')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
     def test_sql_server_public_network_access_update_mgmt(self, resource_group, resource_group_location):
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
@@ -432,7 +442,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='eastus')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_firewall_mgmt(self, resource_group, resource_group_location, server):
         firewall_rule_1 = 'rule1'
         start_ip_address_1 = '0.0.0.0'
@@ -544,7 +554,7 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
 
 class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='eastus')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_ipv6_firewall_mgmt(self, resource_group, resource_group_location, server):
         ipv6_firewall_rule_1 = 'rule1'
         start_ipv6_address_1 = '0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30'
@@ -626,8 +636,8 @@ class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus2')
-    @SqlServerPreparer(location='westus2')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @live_only()
     def test_sql_outbound_firewall_mgmt(self, resource_group, resource_group_location, server):
         outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
@@ -666,8 +676,8 @@ class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2')
-    @SqlServerPreparer(location='eastus2')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_db_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
         database_name_2 = "cliautomationdb02"
@@ -770,8 +780,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                  .format(db3['id']),
                  checks=[NoneCheck()])
 
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_vcore_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
@@ -815,17 +825,21 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         # Update only family
         vcore_family_updated = 'Gen5'
 
-        # Update only capacity
+        # Work around a retained sku.name conflicting with capacity in the newer API.
+        # This keeps the scenario runnable but does not fix or cover capacity-only updates.
         vcore_capacity_updated = 8
-        self.cmd('sql db update -g {} -s {} -n {} --capacity {}'
-                 .format(resource_group, server, database_name, vcore_capacity_updated),
+        vcore_service_objective_updated = 'GP_Gen5_8'
+        self.cmd('sql db update -g {} -s {} -n {} --capacity {} --service-objective {}'
+                 .format(resource_group, server, database_name, vcore_capacity_updated,
+                         vcore_service_objective_updated),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('edition', vcore_edition),
                      JMESPathCheck('sku.tier', vcore_edition),
                      JMESPathCheck('sku.capacity', vcore_capacity_updated),
-                     JMESPathCheck('sku.family', vcore_family_updated)])
+                     JMESPathCheck('sku.family', vcore_family_updated),
+                     JMESPathCheck('requestedServiceObjectiveName', vcore_service_objective_updated)])
 
         # Update only edition
         vcore_edition_updated = 'BusinessCritical'
@@ -854,8 +868,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.capacity', vcore_capacity_updated),
                      JMESPathCheck('sku.family', vcore_family_updated)])
 
-    @ResourceGroupPreparer(name_prefix='clitest-sql', location='eastus2')
-    @SqlServerPreparer(name_prefix='clitest-sql', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='clitest-sql', location='indiasouthcentral')
+    @SqlServerPreparer(name_prefix='clitest-sql', location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_read_replica_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
@@ -895,8 +909,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readScale', 'Enabled'),
                      JMESPathCheck('highAvailabilityReplicaCount', '2')])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_db_ledger(self, resource_group, resource_group_location, server):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
@@ -935,7 +949,27 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
-    @ResourceGroupPreparer(name_prefix='perdbcmktest', location='eastus2euap')
+    def _assert_database_keys(self, resource_group, server, database_name, encryption_protector, expected_keys):
+        # Key expansion can lag database creation; poll for the exact keys, not just their count.
+        # This is service eventual consistency exposed during SDK re-recording, not model conversion.
+        for attempt in range(90):
+            db_response = self.cmd('sql db show -g {} -s {} --name {} --expand-keys'
+                                   .format(resource_group, server, database_name),
+                                   checks=[
+                                       JMESPathCheck('resourceGroup', resource_group),
+                                       JMESPathCheck('name', database_name),
+                                       JMESPathCheck('encryptionProtector', encryption_protector),
+                                       JMESPathCheck('encryptionProtectorAutoRotation', True)]).get_output_in_json()
+            keys = db_response.get('keys')
+            if keys is not None and set(keys) == set(expected_keys):
+                return
+            if self.is_live and attempt < 89:
+                time.sleep(10)
+
+        self.assertIsNotNone(keys, 'Database keys were not returned before polling attempts were exhausted.')
+        self.assertCountEqual(keys, expected_keys, 'Database keys did not match before polling attempts were exhausted.')
+
+    @ResourceGroupPreparer(name_prefix='perdbcmktest', location='indiasouthcentral')
     def test_sql_per_db_cmk(self, resource_group, resource_group_location):
         # Creating a dynamic UMI, Key vault, and server for test setup
         # Create a umi
@@ -1044,14 +1078,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name3)])
         
-        db_response = self.cmd('sql db show -g {} -s {} --name {} --expand-keys'
-                 .format(resource_group, server_name, database_name3),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name3),
-                     JMESPathCheck('encryptionProtector', kid1),
-                     JMESPathCheck('encryptionProtectorAutoRotation', True)]).get_output_in_json()
-        self.assertEqual(len(db_response['keys']), 2)
+        self._assert_database_keys(resource_group, server_name, database_name3, kid1, [kid1, kid2])
 
         # Test create DB with versioned encryption protector and additional key as versionless key
         database_name4 = "DBWithVersionedEPAndVersionlessKey"
@@ -1062,18 +1089,11 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name4)])
         
-        db_response = self.cmd('sql db show -g {} -s {} --name {} --expand-keys'
-                 .format(resource_group, server_name, database_name4),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name4),
-                     JMESPathCheck('encryptionProtector', kid2),
-                     JMESPathCheck('encryptionProtectorAutoRotation', True)]).get_output_in_json()
-        self.assertEqual(len(db_response['keys']), 2)
+        self._assert_database_keys(resource_group, server_name, database_name4, kid2, [kid1, kid2])
 
 
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_db_preferred_enclave_type(self, resource_group, resource_group_location, server):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
@@ -1151,8 +1171,9 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    # The newer API selected by SDK 5.0 returns capacity-qualified SKU names (for example GP_S_Gen5_2).
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_serverless_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
@@ -1177,7 +1198,7 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('edition', vcore_edition),
                      JMESPathCheck('sku.tier', vcore_edition),
-                     JMESPathCheck('sku.name', 'GP_S_Gen5')])
+                     JMESPathCheck('sku.name', 'GP_S_Gen5_2')])
 
         # Update auto pause delay and min capacity
         auto_pause_delay = 120
@@ -1192,16 +1213,18 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('autoPauseDelay', auto_pause_delay),
                      JMESPathCheck('minCapacity', min_capacity)])
 
-        # Update only vCores
+        # Work around a retained capacity-qualified sku.name; this does not cover capacity-only updates.
         vCores = 8
-        self.cmd('sql db update -g {} -s {} -n {} -c {}'
-                 .format(resource_group, server, database_name, vCores),
+        serverless_service_objective = 'GP_S_Gen5_{}'.format(vCores)
+        self.cmd('sql db update -g {} -s {} -n {} -c {} --service-objective {}'
+                 .format(resource_group, server, database_name, vCores, serverless_service_objective),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('edition', vcore_edition),
                      JMESPathCheck('sku.tier', vcore_edition),
-                     JMESPathCheck('sku.capacity', vCores)])
+                     JMESPathCheck('sku.capacity', vCores),
+                     JMESPathCheck('sku.name', serverless_service_objective)])
 
         # Update back to provisioned database offering
         self.cmd('sql db update -g {} --server {} --name {} --compute-model {}'
@@ -1211,7 +1234,7 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('edition', vcore_edition),
                      JMESPathCheck('sku.tier', vcore_edition),
-                     JMESPathCheck('sku.name', 'GP_Gen5')])
+                     JMESPathCheck('sku.name', 'GP_Gen5_{}'.format(vCores))])
 
         # Create database with vcore edition with everything specified for Serverless
         database_name_2 = 'cliautomationdb02'
@@ -1233,7 +1256,7 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('sku.tier', vcore_edition),
                 JMESPathCheck('sku.capacity', vcore_capacity),
                 JMESPathCheck('sku.family', vcore_family),
-                JMESPathCheck('sku.name', 'GP_S_Gen5'),
+                JMESPathCheck('sku.name', 'GP_S_{}_{}'.format(vcore_family, vcore_capacity)),
                 JMESPathCheck('autoPauseDelay', auto_pause_delay),
                 JMESPathCheck('minCapacity', min_capacity)])
 
@@ -1264,7 +1287,7 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('edition', vcore_edition),
                      JMESPathCheck('sku.tier', vcore_edition),
-                     JMESPathCheck('sku.name', 'GP_S_Gen5')])
+                     JMESPathCheck('sku.name', 'GP_S_{}_{}'.format(vcore_family, vcore_capacity))])
         
         # Update from serverless to provisioned Standard S1 using --service-objective
         # This should result in S1, not S0 (the default for Standard tier)
@@ -1307,8 +1330,9 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerFreeDbMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    # The newer API returns a capacity-qualified serverless SKU; region selection is only test setup.
+    @ResourceGroupPreparer(location='centralindia')
+    @SqlServerPreparer(location='centralindia')
     @AllowLargeResponse()
     def test_sql_db_free_params(self, resource_group, resource_group_location, server):
         database_name = "freeDb1"
@@ -1338,14 +1362,14 @@ class SqlServerFreeDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('edition', vcore_edition),
                      JMESPathCheck('sku.tier', vcore_edition),
-                     JMESPathCheck('sku.name', 'GP_S_Gen5'),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5_2'),
                      JMESPathCheck('freeLimitExhaustionBehavior', new_free_limit_exhaustion_behavior),
                      JMESPathCheck('useFreeLimit', True)])
 
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_db_operation_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
         update_service_objective = 'GP_Gen5_8'
@@ -1362,9 +1386,10 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --no-wait'
                  .format(resource_group, server, database_name, update_service_objective))
 
-        # List operations
+        # The newer API also returns completed operations; select only the update we can cancel.
         ops = list(
             self.cmd('sql db op list -g {} -s {} -d {}'
+                     ' --query "[?operation==\'UpdateLogicalDatabase\' && state==\'InProgress\']"'
                      .format(resource_group, server, database_name),
                      checks=[
                          JMESPathCheck('length(@)', 1),
@@ -1404,9 +1429,10 @@ class SqlServerDbForwardMigrationScenarioTest(ScenarioTest):
         # When run live, this may take like 10 minutes. Unforunately there's no way to speed this up
         while operationPhaseDetailsObject is None or operationPhaseDetailsPhase != 'WaitingForCutover':
             time.sleep(60)
-            # List operations
+            # Ignore completed operations returned alongside the active migration by the newer API.
             ops = list(
-                self.cmd('sql db op list -g {} -s {} -d {}'
+                self.cmd('sql db op list -g {} -s {} -d {} '
+                         '--query "[?operation==\'UpdateLogicalDatabase\' && state==\'InProgress\']"'
                         .format(resource_group, server, database_name),
                         checks=[
                             JMESPathCheck('length(@)', 1),
@@ -1772,7 +1798,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
 class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='eastus')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_server_connection_policy(self, resource_group, resource_group_location, server):
         # Show
         self.cmd('sql server conn-policy show -g {} -s {}'
@@ -1787,8 +1813,8 @@ class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
 
 
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_aad_admin(self, resource_group, server):
         self.kwargs.update({
             'rg': resource_group,
@@ -1834,8 +1860,8 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
 
 class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_aadonly(self, resource_group, server):
         print('\n********************')
         print("Server: {}".format(server))
@@ -1853,27 +1879,32 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
 
 
 class SqlServerDbCopyScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
-    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
+    # A vCore source supports the requested GP copy SKU; this is fixture consistency, not SDK serialization.
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='indiasouthcentral')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='indiasouthcentral')
     @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1',
-                       location='westeurope')
+                       location='indiasouthcentral')
     @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2',
-                       location='westeurope')
+                       location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_copy(self, resource_group_1, resource_group_2,
                          resource_group_location,
                          server1, server2):
         database_name = "cliautomationdb01"
         database_copy_name = "cliautomationdb02"
+        edition = 'GeneralPurpose'
+        source_service_objective = 'GP_Gen5_2'
         service_objective = 'GP_Gen5_8'
 
         # create database
-        self.cmd('sql db create -g {} --server {} --name {} --yes'
-                 .format(resource_group_1, server1, database_name),
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --service-objective {} --yes'
+                 .format(resource_group_1, server1, database_name, edition, source_service_objective),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('requestedServiceObjectiveName', source_service_objective),
                      JMESPathCheck('elasticPoolId', None),
                      JMESPathCheck('status', 'Online')])
 
@@ -1893,6 +1924,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('name', database_copy_name),
+                     JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('requestedServiceObjectiveName', service_objective),
                  ])
 
@@ -1929,12 +1961,12 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 
         
 
-    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
-    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='indiasouthcentral')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='indiasouthcentral')
     @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1',
-                       location='eastus2euap')
+                       location='indiasouthcentral')
     @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2',
-                       location='eastus2euap')
+                       location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_copy_with_perdb_cmk(self, resource_group_1, resource_group_2,
                          resource_group_location,
@@ -1944,7 +1976,8 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         service_objective = 'GP_Gen5_8'
 
         # copy db with per db cmk Enabled
-        encryption_protector = "https://pstestkv3.vault.azure.net/keys/testkey3/90bfc038075241518bf00ba4bb00ce1d"
+        # Recording prerequisite: this key and identity must exist and grant the server access.
+        encryption_protector = "https://pstestkv4.vault.azure.net/keys/testkey3/ca3d115086c345feb6ce09474d9320cb"
         umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
 
         # create db with db level encryption protector and umi
@@ -2020,8 +2053,8 @@ def _wait_until_first_backup_midb(self):
 
 
 class SqlServerDbRestoreScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_restore(self, resource_group, resource_group_location, server):
         database_name = 'cliautomationdb01'
@@ -2087,8 +2120,8 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
 
 
 class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_restore_deleted(self, resource_group, resource_group_location, server):
         database_name = 'cliautomationdb01'
@@ -2151,6 +2184,7 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
 
 
 class SqlServerDbSecurityScenarioTest(ScenarioTest):
+    # Auditing rejects legacy Storage accounts; StorageV2 is a service prerequisite, not an SDK requirement.
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('storage account show -g {} -n {}'
                         ' --query primaryEndpoints.blob'
@@ -2160,12 +2194,12 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @ResourceGroupPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
-    @SqlServerPreparer(location='westeurope')
-    @StorageAccountPreparer(location='westus')
+    @SqlServerPreparer(location='indiasouthcentral')
+    @StorageAccountPreparer(location='indiasouthcentral', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='storage_account_2',
-                            resource_group_parameter_name='resource_group_2')
+                            resource_group_parameter_name='resource_group_2', kind='StorageV2')
     def test_sql_db_security_mgmt(self, resource_group, resource_group_2,
                                   resource_group_location, server,
                                   storage_account, storage_account_2):
@@ -2193,6 +2227,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('blobStorageTargetState', state_disabled),
                      JMESPathCheck('logAnalyticsTargetState', state_disabled),
                      JMESPathCheck('eventHubTargetState', state_disabled),
+                     JMESPathCheck('state', state_disabled),
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
         # update audit policy - enable
@@ -2409,6 +2444,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
 
 class SqlServerSecurityScenarioTest(ScenarioTest):
+    # Auditing requires StorageV2; preserve state checks as well as the SDK-compatible calculated fields.
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('storage account show -g {} -n {}'
                         ' --query primaryEndpoints.blob'
@@ -2418,12 +2454,12 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @ResourceGroupPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
-    @SqlServerPreparer(location='westeurope')
-    @StorageAccountPreparer(location='westus')
+    @SqlServerPreparer(location='indiasouthcentral')
+    @StorageAccountPreparer(location='indiasouthcentral', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='storage_account_2',
-                            resource_group_parameter_name='resource_group_2')
+                            resource_group_parameter_name='resource_group_2', kind='StorageV2')
     def test_sql_server_security_mgmt(self, resource_group, resource_group_2,
                                       resource_group_location, server,
                                       storage_account, storage_account_2):
@@ -2439,6 +2475,7 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                  .format(resource_group, server),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_disabled),
                      JMESPathCheck('blobStorageTargetState', state_disabled),
                      JMESPathCheck('logAnalyticsTargetState', state_disabled),
                      JMESPathCheck('eventHubTargetState', state_disabled),
@@ -2618,8 +2655,8 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
 
 
 class SqlServerAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_server_advanced_threat_protection(self, resource_group,
                                                    resource_group_location, server):
         state_enabled = 'Enabled'
@@ -2664,8 +2701,8 @@ class SqlServerAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
 
 
 class SqlDbAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_db_advanced_threat_protection(self, resource_group,
                                                resource_group_location, server):
         database_name = "cliautomationdb01"
@@ -2832,6 +2869,7 @@ class SqlManagedDatabaseAdvancedThreatProtectionSettingsScenarioTest(ScenarioTes
 
 
 class SqlServerMSSupportScenarioTest(ScenarioTest):
+    # DevOps auditing has the same StorageV2 service prerequisite as server/database auditing.
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('storage account show -g {} -n {}'
                         ' --query primaryEndpoints.blob'
@@ -2841,12 +2879,12 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @ResourceGroupPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
-    @SqlServerPreparer(location='westeurope')
-    @StorageAccountPreparer(location='westus')
+    @SqlServerPreparer(location='indiasouthcentral')
+    @StorageAccountPreparer(location='indiasouthcentral', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='storage_account_2',
-                            resource_group_parameter_name='resource_group_2')
+                            resource_group_parameter_name='resource_group_2', kind='StorageV2')
     def test_sql_server_ms_support_mgmt(self, resource_group, resource_group_2,
                                         resource_group_location, server,
                                         storage_account, storage_account_2):
@@ -3016,8 +3054,8 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
 
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
     # pylint: disable=too-many-instance-attributes
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_dw_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
@@ -3250,19 +3288,19 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='westus3')
+                           location='indiasouthcentral')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2",
-                           location='westus3')
+                           location='indiasouthcentral')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westus3')
+                       location='indiasouthcentral')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1",
-                       location='westus3')
+                       location='indiasouthcentral')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2",
-                       location='westus3')
+                       location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,
@@ -3317,6 +3355,10 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s2.group)])
+
+        # The newer API rejects changing replica backup redundancy through create; use a fresh target.
+        self.cmd('sql db delete -g {} -s {} -n {} --yes'
+                 .format(s2.group, s2.name, database_name))
 
         # create replica in second server with backup storage redundancy
         backup_storage_redundancy = "zone"
@@ -3449,10 +3491,10 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='westus2')
+                           location='indiasouthcentral')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westus2')
+                       location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_replica_mgmt_cross_subscription(self,
                                  resource_group_1, resource_group_location_1,
@@ -3463,13 +3505,13 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         service_objective = 'GP_Gen5_8'
 
         self.kwargs.update({
-            "server_name_2" : "cli-automated-tests1",
-            "server_name_3" : "cli-automated-tests2",
+            "server_name_2" : "cli-automated-tests3",
+            "server_name_3" : "cli-automated-tests4",
             "resource_group_2" : "CLI-Automated-Tests",
-            "resource_group_location_2" : "southcentralus",
-            "resource_group_location_3" : "westus3",
+            "resource_group_location_2" : "indiacentral",
+            "resource_group_location_3" : "southindia",
             "partner_subscription" : "00000000-0000-0000-0000-000000000000"  # replace with actual subscription id for record mode
-            })
+        })
 
         # helper class so that it's clear which servers are in which groups
         class ServerInfo:  # pylint: disable=too-few-public-methods
@@ -3484,11 +3526,13 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         s3 = ServerInfo(self.kwargs["server_name_3"], self.kwargs["resource_group_2"], self.kwargs["resource_group_location_3"], self.kwargs["partner_subscription"])
 
         # create db in first server
-        self.cmd('sql db create -g {} -s {} -n {} --yes'
-                 .format(s1.group, s1.name, database_name),
+        self.cmd('sql db create -g {} -s {} -n {} --service-objective {} --yes'
+                 .format(s1.group, s1.name, database_name, service_objective),
                  checks=[
                      JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', s1.group)])
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('sku.tier', 'GeneralPurpose'),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective)])
 
         # create replica in second server with min params
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {}'
@@ -3498,15 +3542,19 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', s2.group)])
 
-        # create replica in second server with backup storage redundancy
+        # The newer API applies replica redundancy at creation; avoid modifying a shared existing replica.
+        zone_replica_name = self.create_random_name('clizonereplica', 24)
         backup_storage_redundancy = "zone"
-        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {} --backup-storage-redundancy {}'
+        zone_replica = self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {} --backup-storage-redundancy {} --partner-database {}'
                  .format(s1.group, s1.name, database_name,
-                         s2.name, s2.group, s2.subscription, backup_storage_redundancy),
-                 checks=[
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', s2.group),
-                     JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
+                         s2.name, s2.group, s2.subscription, backup_storage_redundancy, zone_replica_name))
+        self.addCleanup(
+            self.cmd, 'sql db delete -g {} -s {} -n {} --subscription {} --yes'
+            .format(s2.group, s2.name, zone_replica_name, s2.subscription))
+        zone_replica.assert_with_checks([
+            JMESPathCheck('name', zone_replica_name),
+            JMESPathCheck('resourceGroup', s2.group),
+            JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
 
         secondary_type = "Geo"
         self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}  --partner-resource-group {} --partner-sub-id {}'
@@ -3557,8 +3605,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                                      .format(activity['currentElasticPoolName'], self.pool_name))
         return True
 
-    @ResourceGroupPreparer(location='eastus2')
-    @SqlServerPreparer(location='eastus2')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     @live_only() # skipping due to this error: (ProvisioningDisabled) The service level objective 'S3M1200' does not support the min capacity '10.0'. End user is also able to repro the issue.
     def test_sql_elastic_pools_mgmt(self, resource_group, resource_group_location, server):
@@ -3801,8 +3849,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                  .format(elastic_pool_1['id']),
                  checks=[NoneCheck()])
 
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_elastic_pools_vcore_mgmt(self, resource_group, resource_group_location, server):
         pool_name = "cliautomationpool1"
@@ -4003,8 +4051,8 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('status', 'Online'),
                      JMESPathCheck('highAvailabilityReplicaCount', replica_count)]) #Verify its the same as pool
 
-    @ResourceGroupPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
-    @SqlServerPreparer(name_prefix='clitest-EPVBS', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='clitest-EPVBS', location='indiasouthcentral')
+    @SqlServerPreparer(name_prefix='clitest-EPVBS', location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_elastic_pools_preferred_enclave_type_mgmt(self, resource_group, resource_group_location, server):
         pool_name_one = "cliautomationpool1"
@@ -4111,8 +4159,8 @@ class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
         super().__init__(method_name)
         self.pool_name = "operationtestep1"
 
-    @ResourceGroupPreparer(location='westeurope')
-    @SqlServerPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_elastic_pool_operation_mgmt(self, resource_group, resource_group_location, server):
         edition = 'Premium'
@@ -4167,7 +4215,7 @@ class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
 class SqlServerCapabilityScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_capabilities(self):
-        location = 'westeurope'
+        location = 'indiasouthcentral'
         # New capabilities are added quite frequently and the state of each capability depends
         # on your subscription. So it's not a good idea to make strict checks against exactly
         # which capabilities are returned. The idea is to just check the overall structure.
@@ -4323,12 +4371,13 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
 
 
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
-    @StorageAccountPreparer(location='eastus')
+    # StorageV2 is a storage-service prerequisite, independent of SQL SDK serialization.
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
+    @StorageAccountPreparer(location='indiasouthcentral', kind='StorageV2')
     @AllowLargeResponse()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'eastus'
+        location_long_name = 'indiasouthcentral'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -4353,28 +4402,37 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('startIpAddress', start_ip_address_1),
                          JMESPathCheck('endIpAddress', end_ip_address_1)])
 
-        # create dbs
-        self.cmd('sql db create -g {} --server {} --name {}'
+        # Use matching explicit GP fixtures to isolate import/export; this does not fix service HTTP 500s.
+        self.cmd('sql db create -g {} --server {} --name {} --edition GeneralPurpose --family Gen5 --capacity 2'
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name),
                          JMESPathCheck('location', location_long_name),
+                         JMESPathCheck('sku.tier', 'GeneralPurpose'),
+                         JMESPathCheck('sku.family', 'Gen5'),
+                         JMESPathCheck('sku.capacity', 2),
                          JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
-        self.cmd('sql db create -g {} --server {} --name {}'
+        self.cmd('sql db create -g {} --server {} --name {} --edition GeneralPurpose --family Gen5 --capacity 2'
                  .format(resource_group, server, db_name2),
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name2),
                          JMESPathCheck('location', location_long_name),
+                         JMESPathCheck('sku.tier', 'GeneralPurpose'),
+                         JMESPathCheck('sku.family', 'Gen5'),
+                         JMESPathCheck('sku.capacity', 2),
                          JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
-        self.cmd('sql db create -g {} --server {} --name {}'
+        self.cmd('sql db create -g {} --server {} --name {} --edition GeneralPurpose --family Gen5 --capacity 2'
                  .format(resource_group, server, db_name3),
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name3),
                          JMESPathCheck('location', location_long_name),
+                         JMESPathCheck('sku.tier', 'GeneralPurpose'),
+                         JMESPathCheck('sku.family', 'Gen5'),
+                         JMESPathCheck('sku.capacity', 2),
                          JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
@@ -4543,7 +4601,7 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
 
 class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='eastus')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_tde(self, resource_group, server):
         sn = server
         db_name = self.create_random_name("sqltdedb", 20)
@@ -4578,7 +4636,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, sn, db_name),
                  checks=[JMESPathCheck('state', 'Enabled')])
 
-    @ResourceGroupPreparer(name_prefix='sqlserverbyoktest', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='sqlserverbyoktest', location='indiasouthcentral')
     def test_sql_tdebyok(self, resource_group, resource_group_location):
         # Create a umi
         umi_name = "testcliumi"
@@ -4747,7 +4805,7 @@ class SqlServerIdentityTest(ScenarioTest):
         subnet = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance'
 
         license_type = 'LicenseIncluded'
-        loc = 'eastus2euap'
+        loc = 'indiasouthcentral'
         v_cores = 4
         storage_size_in_gb = '32'
         edition = 'GeneralPurpose'
@@ -4789,8 +4847,8 @@ class SqlServerIdentityTest(ScenarioTest):
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         vnet_rule_1 = 'rule1'
         vnet_rule_2 = 'rule2'
@@ -4875,18 +4933,18 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
 class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
     def test_sql_subscription_usages(self):
-        self.cmd('sql list-usages -l westus',
+        self.cmd('sql list-usages -l indiasouthcentral',
                  checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
-        self.cmd('sql show-usage -l westus -u ServerQuota',
+        self.cmd('sql show-usage -l indiasouthcentral -u ServerQuota',
                  checks=[
                      JMESPathCheck('name', 'ServerQuota'),
                      JMESPathCheckGreaterThan('limit', 0)])
 
 
 class SqlZoneResilienceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_zone_resilient_database(self, resource_group, resource_group_location, server):
         database_name = "createUnzonedUpdateToZonedDb"
@@ -4986,8 +5044,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', 'P2'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_zone_resilient_pool(self, resource_group, resource_group_location, server):
         pool_name = "createUnzonedUpdateToZonedPool"
@@ -5093,8 +5151,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_zone_resilient_copy_hyperscale_database(self, resource_group, server):
         # Set db names
@@ -5173,10 +5231,10 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus2euap')
-    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus2euap')
-    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus2euap')
-    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus2euap')
+    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='indiasouthcentral')
+    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='indiasouthcentral')
+    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='indiasouthcentral')
+    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_zone_resilient_replica_hyperscale_database(self, resource_group_pri, server_name_pri, resource_group_sec, server_name_sec):
         # Set db names
@@ -5566,7 +5624,8 @@ class SqlServerTrustGroupsScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
-    MMI1 = "SQL_WestCentralUS_MI_1"
+    # The maintenance policy, instance location and subnet must agree; this is test setup, not SDK behavior.
+    MMI1 = "SQL_EastUS_MI_1"
 
     def _get_full_maintenance_id(self, name):
         return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
@@ -5578,9 +5637,12 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
 
     def test_sql_managed_instance_cmw(self):
         # Values of existing resources in order to test this feature
-        loc = 'westcentralus'
+        loc = 'eastus'
         resource_group = ManagedInstancePreparer.group
-        subnet = ManagedInstancePreparer.subnet
+        subnet = (
+            '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/'
+            'virtualNetworks/vnet-mi-cmw-eastus/subnets/{}'
+        ).format(self.get_subscription_id(), resource_group, ManagedInstancePreparer.subnet_name)
         ####
 
         self.kwargs.update({
@@ -5940,46 +6002,27 @@ class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
         self.cmd('az sql mi start-stop-schedule delete -g {rg} --mi {mi} --yes')
 
 class SqlManagedInstanceBackupStorageRedundancyTest(ScenarioTest):
-    bsr_geo = "Geo"
-
     @AllowLargeResponse()
-    @ManagedInstancePreparer(
-        otherParams=f"--bsr {bsr_geo}")
-    def test_sql_managed_instance_bsr(self, mi, rg):
-        managed_instance_name_1 = mi
-        resource_group_1 = rg
+    @ManagedInstancePreparer(parameter_name='mi_geo', otherParams='--bsr Geo')
+    @ManagedInstancePreparer(parameter_name='mi_local', otherParams='--bsr Local')
+    def test_sql_managed_instance_bsr(self, mi_geo, mi_local, rg):
+        # Service behavior, not an SDK requirement: applying redundancy can take 24 hours.
+        # Independent instances avoid reversing an unapplied request; assert requested, not current, values.
+        for mi, initial_redundancy, requested_redundancy in (
+                (mi_geo, 'Geo', 'Local'), (mi_local, 'Local', 'Geo')):
+            self.cmd('sql mi show -g {} -n {}'.format(rg, mi),
+                     checks=[
+                         JMESPathCheck('name', mi),
+                         JMESPathCheck('resourceGroup', rg),
+                         JMESPathCheck('currentBackupStorageRedundancy', initial_redundancy),
+                         JMESPathCheck('requestedBackupStorageRedundancy', initial_redundancy)])
 
-        # test show sql managed instance 1
-        self.cmd('sql mi show -g {} -n {}'
-            .format(resource_group_1, managed_instance_name_1),
-            checks=[
-                JMESPathCheck('name', managed_instance_name_1),
-                JMESPathCheck('resourceGroup', resource_group_1),
-                JMESPathCheck('currentBackupStorageRedundancy', self.bsr_geo),
-                JMESPathCheck('requestedBackupStorageRedundancy', self.bsr_geo)])
-
-        time.sleep(120)
-
-        bsr_local = "Local"
-        # Test update bsr to Local
-        self.cmd('sql mi update -g {} -n {} --bsr {} --yes'
-            .format(resource_group_1, managed_instance_name_1, bsr_local),
-            checks=[
-                JMESPathCheck('name', managed_instance_name_1),
-                JMESPathCheck('resourceGroup', resource_group_1),
-                JMESPathCheck('currentBackupStorageRedundancy', bsr_local),
-                JMESPathCheck('requestedBackupStorageRedundancy', bsr_local)])
-
-        time.sleep(120)
-
-        # Test update bsr to Geo
-        self.cmd('sql mi update -g {} -n {} --bsr {} --yes'
-            .format(resource_group_1, managed_instance_name_1, self.bsr_geo),
-            checks=[
-                JMESPathCheck('name', managed_instance_name_1),
-                JMESPathCheck('resourceGroup', resource_group_1),
-                JMESPathCheck('currentBackupStorageRedundancy', self.bsr_geo),
-                JMESPathCheck('requestedBackupStorageRedundancy', self.bsr_geo)])
+            self.cmd('sql mi update -g {} -n {} --bsr {} --yes'
+                     .format(rg, mi, requested_redundancy),
+                     checks=[
+                         JMESPathCheck('name', mi),
+                         JMESPathCheck('resourceGroup', rg),
+                         JMESPathCheck('requestedBackupStorageRedundancy', requested_redundancy)])
 
 class SqlManagedInstanceMgmtScenarioIdentityTest(ScenarioTest):
     test_umi = '/subscriptions/{}/resourcegroups/{}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-tooling-managed-identity'.format(ManagedInstancePreparer.subscription_id, ManagedInstancePreparer.group)
@@ -8851,12 +8894,15 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
     def test_sql_midb_recover(self):
         self.kwargs.update({
             'rg': ManagedInstancePreparer.group,
-            'mi': ManagedInstancePreparer.existing_mi_name
+            'mi': ManagedInstancePreparer.primary_name
         })
 
-        # Due to long creation of geo backups, use existing MI
+        # Recording prerequisite, not an SDK requirement: geo-backups need an existing source database.
         backups_list = self.cmd('sql recoverable-midb list -g {rg} --mi {mi}').get_output_in_json()
-        database_name = backups_list[0]['name']
+        source_database = 'clitest-georecovery-source'
+        backup = next((db for db in backups_list if db['name'] == source_database), None)
+        self.assertIsNotNone(backup, 'The dedicated recovery source database has no geo-replicated backup yet.')
+        database_name = backup['name']
         self.kwargs.update({
             'geodb': database_name
         })
@@ -8866,11 +8912,18 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
                         JMESPathCheck('name', database_name),
                         JMESPathCheck('resourceGroup',  ManagedInstancePreparer.group)]).get_output_in_json()
         self.kwargs.update({
-            'recoverable_db': recoverable_db['id']
+            'recoverable_db': recoverable_db['id'],
+            # A unique target and finally cleanup make re-recording safe without deleting the source.
+            'recovered_db': self.create_random_name('clitestrecovered', 30)
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db5 -r {recoverable_db}',
-                checks=[
-                    JMESPathCheck('name', "recovered_db5")])
+        try:
+            self.cmd('sql midb recover -g {rg} --mi {mi} -n {recovered_db} -r {recoverable_db}',
+                     checks=[self.check('name', '{recovered_db}')])
+        finally:
+            try:
+                self.cmd('sql midb delete -g {rg} --mi {mi} -n {recovered_db} --yes')
+            except ResourceNotFoundError:
+                pass
 
 
 class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
@@ -9069,97 +9122,52 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
                  .format(managed_instance['id']), checks=NoneCheck())
 
 class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
+    # Own the MI lifecycle rather than depending on a shared instance; this is test isolation, not an SDK fix.
     @AllowLargeResponse()
-    def test_sql_mi_memorysizeingb_create(self):
-
-        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
-        group = 'uroskrstic'
-        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
-        subnet_name = 'ManagedInstance'
-        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
-
+    @ManagedInstancePreparer(v_core=8, family='Gen8IM', storage=256,
+                             otherParams='--gpv2 true --memory 64 --iops 1000')
+    def test_sql_mi_memorysizeingb_create(self, mi, rg):
         self.kwargs.update({
-            'rg': group,
-            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
-                                                             managed_instance_name_max_length),
-            'loc': 'westeurope',
-            'username': 'admin123',
-            'admin_password': 'SecretPassword123SecretPassword',
-            'subnet': subnet,
-            'license_type': 'LicenseIncluded',
-            'v_cores': 8,
-            'memory_size_in_gb': '64',
-            'storage_size_in_gb': '256',
-            'storage_iops': '1000',
-            'edition': 'GeneralPurpose',
-            'is_general_purpose_v2': 'True',
-            'family': 'Gen8IM'
+            'rg': rg,
+            'managed_instance_name': mi
         })
 
-        # Create MI
-        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
-                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} '
-                                    '--memory {memory_size_in_gb}',
-                                    checks=[
-                                        self.check('name', '{managed_instance_name}'),
-                                        self.check('resourceGroup', '{rg}'),
-                                        self.check('administratorLogin', '{username}'),
-                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
-                                        self.check('vCores', '{v_cores}'),
-                                        self.check('memorySizeInGb', '{memory_size_in_gb}'),
-                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                                        self.check('storageIops', '{storage_iops}'),
-                                        self.check('licenseType', '{license_type}'),
-                                        self.check('sku.tier', '{edition}'),
-                                        self.check('sku.family', '{family}'),
-                                        self.check('sku.capacity', '{v_cores}')])
-
-        # Get the managed instance and check memory size in gb
-        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
-        self.assertEqual(managed_instance['memorySizeInGb'], 64)
-
-        # Delete the managed instance
-        self.cmd('sql mi delete --ids {} --yes'
-                 .format(managed_instance['id']), checks=NoneCheck())
+        self.cmd('sql mi show -g {rg} -n {managed_instance_name}',
+                 checks=[
+                     self.check('name', mi),
+                     self.check('resourceGroup', rg),
+                     self.check('administratorLogin', 'admin123'),
+                     self.check('isGeneralPurposeV2', True),
+                     self.check('vCores', 8),
+                     self.check('memorySizeInGb', 64),
+                     self.check('storageSizeInGb', 256),
+                     self.check('storageIops', 1000),
+                     self.check('licenseType', 'LicenseIncluded'),
+                     self.check('sku.tier', 'GeneralPurpose'),
+                     self.check('sku.family', 'Gen8IM'),
+                     self.check('sku.capacity', 8)])
 
 class SqlManagedInstanceMemorySizeInGBUpdateScenarioTest(ScenarioTest):
+    # Gen8IM needs 8 vCores for 64 GB; create a valid 56 GB source instead of updating a shared 4-core MI.
     @AllowLargeResponse()
-    def test_sql_mi_memorysizeingb_update(self):
-
-        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
-        group = 'uroskrstic'
-        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
-        subnet_name = 'ManagedInstance'
-        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
-
+    @ManagedInstancePreparer(v_core=8, family='Gen8IM', storage=128,
+                             otherParams='--gpv2 true --memory 56 --iops 1000')
+    def test_sql_mi_memorysizeingb_update(self, mi, rg):
         self.kwargs.update({
-            'rg': group,
-            'managed_instance_name': 'uroskrstic-flexi-test-azpowershell',
-            'loc': 'westeurope',
-            'username': 'admin123',
-            'admin_password': 'SecretPassword123SecretPassword',
-            'subnet': subnet,
-            'license_type': 'LicenseIncluded',
-            'v_cores': 4,
-            'memory_size_in_gb': '64',
-            'storage_size_in_gb': '128',
-            'storage_iops': '1000',
-            'edition': 'GeneralPurpose',
-            'is_general_purpose_v2': 'True',
-            'family': 'Gen8IM'
+            'rg': rg,
+            'managed_instance_name': mi,
+            'memory_size_in_gb': 64
         })
 
-        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --memory {memory_size_in_gb}',
-                 checks=[self.check('memorySizeInGb', '{memory_size_in_gb}')])
+        self.cmd('sql mi show -g {rg} -n {managed_instance_name}',
+                 checks=[self.check('memorySizeInGb', 56)])
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 true --memory {memory_size_in_gb}',
+                 checks=[self.check('memorySizeInGb', 64)])
 
         # Get the managed instance and check memory size in GB
         managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
         self.assertEqual(managed_instance['memorySizeInGb'], int(self.kwargs['memory_size_in_gb']))
-
-        # Delete the managed instance
-        self.cmd('sql mi delete --ids {} --yes'
-                 .format(managed_instance['id']), checks=NoneCheck())
 
 class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
     @AllowLargeResponse()
@@ -9270,7 +9278,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                  '--soft-delete-retention-days 100',
                  expect_failure=True)
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='indiasouthcentral')
     def test_sql_server_soft_delete_boundary_values(self, resource_group, resource_group_location):
         """
         Test boundary values for soft-delete-retention-days: 0, 1, and 7.
@@ -9281,7 +9289,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         server_name_7 = self.create_random_name('softdelete', server_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
-        location = 'westus'
+        location = resource_group_location
 
         # Test with retention_days = 0 (disabled)
         self.cmd('sql server create -g {} --name {} -l {} '
@@ -9319,7 +9327,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
                  .format(resource_group, server_name_7))
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='indiasouthcentral')
     def test_sql_server_create_without_soft_delete(self, resource_group, resource_group_location):
         """
         Test creating a server without specifying soft-delete-retention-days.
@@ -9331,7 +9339,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         server_name = self.create_random_name('softdelete', server_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
-        location = 'westus'
+        location = resource_group_location
 
         # Create server without soft delete parameter
         self.cmd('sql server create -g {} --name {} -l {} '
@@ -9350,14 +9358,14 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('retentionDays', -1)])
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='indiasouthcentral')
     def test_sql_server_soft_delete_enable_on_create(self, resource_group, resource_group_location):
         """Test enabling soft delete with retention days on server creation"""
         server_name = self.create_random_name('softdelete', server_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         retention_days = 5
-        location = 'westus'
+        location = resource_group_location
 
         # Create server with soft delete enabled with retention days
         server = self.cmd('sql server create -g {} --name {} -l {} '
@@ -9386,8 +9394,8 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
 
         # Note: ResourceGroupPreparer automatically handles cleanup
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
-    @SqlServerPreparer(name_prefix='softdelete', location='westus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='indiasouthcentral')
+    @SqlServerPreparer(name_prefix='softdelete', location='indiasouthcentral')
     def test_sql_server_soft_delete_disable_on_existing(self, resource_group, resource_group_location, server):
         """Test disabling soft delete on an existing server"""
         # First enable soft delete on the server with 7 days retention
@@ -9414,8 +9422,8 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('retentionDays', 0)])
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
-    @SqlServerPreparer(name_prefix='softdelete', location='westus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='indiasouthcentral')
+    @SqlServerPreparer(name_prefix='softdelete', location='indiasouthcentral')
     def test_sql_server_soft_delete_update_retention_existing(self, resource_group, resource_group_location, server):
         """Test updating retention days on existing server"""
         retention_days_1 = 3
@@ -9449,8 +9457,8 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
                  .format(resource_group, server))
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
-    @SqlServerPreparer(name_prefix='softdelete', location='westus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='indiasouthcentral')
+    @SqlServerPreparer(name_prefix='softdelete', location='indiasouthcentral')
     def test_sql_server_soft_delete_toggle_multiple_times(self, resource_group, resource_group_location, server):
         """
         Test toggling soft delete on and off multiple times to ensure state changes work correctly.
@@ -9479,8 +9487,8 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('retentionDays', 0)])
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
-    @SqlServerPreparer(name_prefix='softdelete', location='westus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='indiasouthcentral')
+    @SqlServerPreparer(name_prefix='softdelete', location='indiasouthcentral')
     def test_sql_server_soft_delete_update_same_value(self, resource_group, resource_group_location, server):
         """
         Test updating soft delete retention to the same value (idempotent operation).
@@ -9509,7 +9517,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
                  .format(resource_group, server))
 
-    @ResourceGroupPreparer(name_prefix='softdelete', location='westus')
+    @ResourceGroupPreparer(name_prefix='softdelete', location='indiasouthcentral')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_server_soft_delete_complete_recovery_workflow(self, resource_group, resource_group_location):
         """Test complete soft delete workflow: create server with 2-day retention, delete, restore, and cleanup"""
@@ -9518,7 +9526,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         retention_days = 2
-        location = 'westus'
+        location = 'indiasouthcentral'
 
         # Create server with soft delete enabled and 2-day retention
         server = self.cmd('sql server create -g {} --name {} -l {} '
@@ -9601,7 +9609,7 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
                 .format(non_existent_server, location),
                 expect_failure=True)
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_deleted_server_list_and_show(self, resource_group, resource_group_location):
         '''
@@ -9806,7 +9814,7 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         # Verify command succeeds and returns a list (even if empty)
         self.assertIsInstance(deleted_servers, list)
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_deleted_server_list_without_location(self, resource_group, resource_group_location):
         '''
@@ -9851,7 +9859,7 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         self.assertIn(f"/resourcegroups/{resource_group.lower()}/", original_id)
         self.assertIn(f"/servers/{server_name.lower()}", original_id)
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_deleted_server_show_wrong_location(self, resource_group, resource_group_location):
         '''
@@ -9895,7 +9903,7 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
                 .format(non_existent_server, location),
                 expect_failure=True)
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_server_restore_to_existing_live_server_name(self, resource_group, resource_group_location):
         '''
@@ -9937,8 +9945,8 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
                  .format(resource_group, server_name))
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
-    @ResourceGroupPreparer(parameter_name='resource_group_2', location='centralus')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='indiasouthcentral')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_server_restore_deleted_with_invalid_resource_group(self, resource_group, resource_group_2, resource_group_location):
         '''
@@ -9983,7 +9991,7 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
                  .format(resource_group, server_name))
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_server_restore_after_resource_group_removal(self, resource_group, resource_group_location):
         '''
@@ -10051,7 +10059,7 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
-        location = 'centralus'
+        location = 'indiasouthcentral'
         soft_delete_retention_days = 7
 
         try:

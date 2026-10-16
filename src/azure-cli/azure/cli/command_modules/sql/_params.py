@@ -422,6 +422,8 @@ authentication_metadata_param_type = CLIArgumentType(
 
 memory_size_type = CLIArgumentType(
     options_list=['--memory'],
+    # SQL SDK 5.0 no longer applies msrest's str-to-int coercion before JSON serialization.
+    type=int,
     help='The memory size in gigabytes (GB).')
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
@@ -811,6 +813,20 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('allow_data_loss',
                    help='If specified, the failover operation will allow data loss.')
+
+        # SDK 5.0 uses :keyword: docs for optional query arguments, which legacy CLI introspection misses.
+        c.argument('filter', help='An OData filter expression to apply to the response.')
+        c.argument('expand', help='The child resources to include in the response.')
+
+    with self.argument_context('sql db list-deleted') as c:
+        c.argument('skiptoken', help='The continuation token for the next page of deleted databases.')
+        c.argument('top', help='The maximum number of deleted databases to return.')
+
+    with self.argument_context('sql elastic-pool list') as c:
+        c.argument('skip', help='The number of elastic pools to skip.')
+
+    with self.argument_context('sql mi failover') as c:
+        c.argument('replica_type', help='The type of managed-instance replica to fail over.')
 
     with self.argument_context('sql db') as c:
         _configure_db_dw_params(c)
@@ -3208,6 +3224,8 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db classification recommendation list') as c:
         c.ignore('skip_token')
+        c.argument('include_disabled_recommendations',
+                   help='Whether to include disabled sensitivity-classification recommendations.')
 
 ###################################################
 #           sql server ipv6-firewall-rule
