@@ -14,6 +14,7 @@ from azure.cli.core.util import (
     CLIError,
     sdk_no_wait,
     user_confirmation,
+    todict,
 )
 from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
@@ -55,6 +56,7 @@ from azure.mgmt.sql.models import (
     ManagedInstanceLongTermRetentionPolicyName,
     ManagedInstancePairInfo,
     OutboundFirewallRule,
+    ManagedShortTermRetentionPolicyName,
     PartnerInfo,
     PartnerRegionInfo,
     PerformanceLevelUnit,
@@ -64,6 +66,7 @@ from azure.mgmt.sql.models import (
     SecurityAlertPolicyState,
     SensitivityLabel,
     SensitivityLabelSource,
+    Server,
     ServerAzureADOnlyAuthentication,
     ServerConnectionPolicy,
     ServerCreateMode,
@@ -153,7 +156,7 @@ def _get_location_capability(cli_ctx, location, group):
     '''
 
     capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
-    location_capability = capabilities_client.list_by_location(location, group)
+    location_capability = capabilities_client.list_by_location(location, include=group)
     _assert_capability_available(location_capability)
     return location_capability
 
@@ -1143,6 +1146,11 @@ def _validate_elastic_pool_id(
     return elastic_pool_id
 
 
+def restorable_databases_list(client, resource_group_name, server_name, skiptoken=None, top=None):
+    """Get a list of restorable dropped databases."""
+    return client.list_by_server(resource_group_name, server_name, skiptoken=skiptoken, top=top)
+
+
 def restorable_databases_get(
     client,
     server_name,
@@ -1161,7 +1169,7 @@ def restorable_databases_get(
     elif expand_keys:
         expand = 'keys'
 
-    return client.get(resource_group_name, server_name, restorable_dropped_database_id, expand)
+    return client.get(resource_group_name, server_name, restorable_dropped_database_id, expand=expand)
 
 
 def recoverable_databases_get(
@@ -1188,6 +1196,7 @@ def recoverable_databases_get(
 
 
 def db_get(
+        cmd,
         client,
         database_name,
         server_name,
@@ -1204,7 +1213,12 @@ def db_get(
     elif expand_keys:
         expand = 'keys'
 
-    return client.get(resource_group_name, server_name, database_name, expand)
+    if expand_keys:
+        # The 2026-08-01-preview API omits expanded database keys.
+        from ._util import get_sql_management_client
+        client = get_sql_management_client(cmd.cli_ctx, api_version='2025-01-01').databases
+
+    return client.get(resource_group_name, server_name, database_name, expand=expand)
 
 
 def _db_dw_create(
@@ -1720,7 +1734,7 @@ def db_list_capabilities(
         show_details = []
 
     # Get capabilities tree from server
-    capabilities = client.list_by_location(location, CapabilityGroup.SUPPORTED_EDITIONS)
+    capabilities = client.list_by_location(location, include=CapabilityGroup.SUPPORTED_EDITIONS)
 
     # Get subtree related to databases
     editions = _get_default_server_version(capabilities).supported_editions
@@ -2370,22 +2384,23 @@ def _audit_policy_show(
             server_name=server_name,
             database_name=database_name)
 
-    audit_policy.blob_storage_target_state = BlobAuditingPolicyState.DISABLED
-    audit_policy.event_hub_target_state = BlobAuditingPolicyState.DISABLED
-    audit_policy.log_analytics_target_state = BlobAuditingPolicyState.DISABLED
+    result = todict(audit_policy)
+    result['blobStorageTargetState'] = BlobAuditingPolicyState.DISABLED
+    result['eventHubTargetState'] = BlobAuditingPolicyState.DISABLED
+    result['logAnalyticsTargetState'] = BlobAuditingPolicyState.DISABLED
 
     # If audit policy's state is disabled there is nothing to do
     if _is_audit_policy_state_disabled(audit_policy.state):
-        return audit_policy
+        return result
 
     if not audit_policy.storage_endpoint:
-        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.DISABLED
+        result['blobStorageTargetState'] = BlobAuditingPolicyState.DISABLED
     else:
-        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.ENABLED
+        result['blobStorageTargetState'] = BlobAuditingPolicyState.ENABLED
 
     # If 'is_azure_monitor_target_enabled' is false there is no reason to request diagnostic settings
     if not audit_policy.is_azure_monitor_target_enabled:
-        return audit_policy
+        return result
 
     # Request diagnostic settings
     diagnostic_settings = _get_diagnostic_settings(
@@ -2399,15 +2414,15 @@ def _audit_policy_show(
     # Initialize azure monitor properties
     if audit_diagnostic_setting is not None:
         if audit_diagnostic_setting.workspace_id is not None:
-            audit_policy.log_analytics_target_state = BlobAuditingPolicyState.ENABLED
-            audit_policy.log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
+            result['logAnalyticsTargetState'] = BlobAuditingPolicyState.ENABLED
+            result['logAnalyticsWorkspaceResourceId'] = audit_diagnostic_setting.workspace_id
 
         if audit_diagnostic_setting.event_hub_authorization_rule_id is not None:
-            audit_policy.event_hub_target_state = BlobAuditingPolicyState.enabled
-            audit_policy.event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
-            audit_policy.event_hub_name = audit_diagnostic_setting.event_hub_name
+            result['eventHubTargetState'] = BlobAuditingPolicyState.ENABLED
+            result['eventHubAuthorizationRuleId'] = audit_diagnostic_setting.event_hub_authorization_rule_id
+            result['eventHubName'] = audit_diagnostic_setting.event_hub_name
 
-    return audit_policy
+    return result
 
 
 def server_audit_policy_show(
@@ -4273,7 +4288,7 @@ def elastic_pool_list_capabilities(
         dtu = int(dtu)
 
     # Get capabilities tree from server
-    capabilities = client.list_by_location(location, CapabilityGroup.SUPPORTED_ELASTIC_POOL_EDITIONS)
+    capabilities = client.list_by_location(location, include=CapabilityGroup.SUPPORTED_ELASTIC_POOL_EDITIONS)
 
     # Get subtree related to elastic pools
     editions = _get_default_server_version(capabilities).supported_elastic_pool_editions
@@ -4514,7 +4529,7 @@ def server_create(
     if minimal_tls_version is not None:
         kwargs['minimal_tls_version'] = minimal_tls_version
     else:
-        kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
+        kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2.value
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id
@@ -4548,7 +4563,7 @@ def server_create(
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=server_name,
                        resource_group_name=resource_group_name,
-                       parameters=kwargs)
+                       parameters=Server(**kwargs))
 
 
 def server_restore(
@@ -4614,7 +4629,7 @@ def server_list(
         return client.list_by_resource_group(resource_group_name=resource_group_name, expand=expand)
 
     # List all servers in the subscription
-    return client.list(expand)
+    return client.list(expand=expand)
 
 
 def server_get(
@@ -4631,7 +4646,7 @@ def server_get(
         expand = 'administrators/activedirectory'
 
     # List all servers in the subscription
-    return client.get(resource_group_name, server_name, expand)
+    return client.get(resource_group_name, server_name, expand=expand)
 
 
 def server_update(
@@ -4915,8 +4930,7 @@ def outbound_firewall_rule_create(
     return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
-        outbound_rule_fqdn=outbound_rule_fqdn,
-        parameters=OutboundFirewallRule())
+        outbound_rule_fqdn=outbound_rule_fqdn)
 
 
 #########################################################
@@ -5534,7 +5548,7 @@ def managed_instance_list(
         return client.list_by_resource_group(resource_group_name=resource_group_name, expand=expand)
 
     # List all managed instances in the subscription
-    return client.list(expand)
+    return client.list(expand=expand)
 
 
 def managed_instance_get(
@@ -5551,7 +5565,7 @@ def managed_instance_get(
         expand = 'administrators/activedirectory'
 
     # List all servers in the subscription
-    return client.get(resource_group_name, managed_instance_name, expand)
+    return client.get(resource_group_name, managed_instance_name, expand=expand)
 
 
 def managed_instance_update(  # pylint: disable=too-many-locals

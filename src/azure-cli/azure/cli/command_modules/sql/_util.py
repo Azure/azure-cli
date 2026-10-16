@@ -4,28 +4,119 @@
 # --------------------------------------------------------------------------------------------
 
 
-def get_sql_management_client(cli_ctx, subscription_id=None):
+def _normalize_model_key(key):
+    return key.replace('_', '').lower()
+
+
+def build_sdk_model(model_type, values):
+    # Emulates how msrest built models from loose key/value pairs: a key matches a model attribute
+    # by attribute name or by REST name (ignoring case and underscores), and keys that match nothing
+    # (e.g. CLI-only arguments) or have a None value are skipped. The new SDK models are strict and
+    # would otherwise raise on unknown keywords or serialize flattened properties at the wrong level.
+    template = model_type()
+    lookup = {}
+
+    def _add(attr_name, rest_name):
+        lookup.setdefault(_normalize_model_key(attr_name), attr_name)
+        lookup.setdefault(_normalize_model_key(rest_name), attr_name)
+
+    for attr_name, rest_field in template._attr_to_rest_field.items():  # pylint: disable=protected-access
+        _add(attr_name, rest_field._rest_name)  # pylint: disable=protected-access
+
+    properties_field = template._attr_to_rest_field.get('properties')  # pylint: disable=protected-access
+    flattened = getattr(model_type, '_{}__flattened_items'.format(model_type.__name__), [])
+    if properties_field is not None and flattened:
+        properties = properties_field._class_type()  # pylint: disable=protected-access
+        for attr_name, rest_field in properties._attr_to_rest_field.items():  # pylint: disable=protected-access
+            if attr_name in flattened:
+                _add(attr_name, rest_field._rest_name)  # pylint: disable=protected-access
+
+    kwargs = {}
+    for key, value in values.items():
+        if value is None:
+            continue
+        attr_name = key if key in lookup.values() else lookup.get(_normalize_model_key(key))
+        if attr_name:
+            kwargs[attr_name] = value
+    return model_type(**kwargs)
+
+
+def _dict_to_sdk_model(method, parameters):
+    # The SDK serializes plain dicts as raw JSON, so build the model the SDK method expects instead.
+    import inspect
+    import typing
+
+    param = inspect.signature(method).parameters.get('parameters')
+    if param is not None:
+        for candidate in typing.get_args(param.annotation):
+            if inspect.isclass(candidate) and candidate.__module__ == 'azure.mgmt.sql.models._models':
+                return build_sdk_model(candidate, parameters)
+    return parameters
+
+
+class _SqlOperationsProxy:
+    def __init__(self, operations):
+        self._operations = operations
+
+    def __getattr__(self, name):
+        attr = getattr(self._operations, name)
+        if not callable(attr):
+            return attr
+
+        import functools
+
+        @functools.wraps(attr)
+        def _call(*args, **kwargs):
+            if isinstance(kwargs.get('parameters'), dict):
+                kwargs['parameters'] = _dict_to_sdk_model(attr, kwargs['parameters'])
+            return attr(*args, **kwargs)
+
+        return _call
+
+
+class _SqlClientProxy:
+    def __init__(self, client):
+        self._client = client
+
+    def __getattr__(self, name):
+        attr = getattr(self._client, name)
+        if name.startswith('_') or not hasattr(attr, '_client'):
+            return attr
+        return _SqlOperationsProxy(attr)
+
+    def __enter__(self):
+        self._client.__enter__()
+        return self
+
+    def __exit__(self, *exc_details):
+        return self._client.__exit__(*exc_details)
+
+
+def get_sql_management_client(cli_ctx, subscription_id=None, api_version=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.sql import SqlManagementClient
     from msrest.authentication import Authentication
     from os import getenv
+    client_kwargs = {'api_version': api_version} if api_version is not None else {}
 
     # Allow overriding SQL resource manager URI using environment variable
     # for testing purposes. Subscription id is also determined by environment
     # variable.
     sql_rm_override = getenv('_AZURE_CLI_SQL_RM_URI')
     if sql_rm_override:
-        return SqlManagementClient(
+        return _SqlClientProxy(SqlManagementClient(
             subscription_id=getenv('_AZURE_CLI_SQL_SUB_ID'),
             base_url=sql_rm_override,
-            credentials=Authentication())  # No authentication
+            credentials=Authentication(),
+            **client_kwargs))  # No authentication
 
     # Cross-subscription scenario.
     if subscription_id is not None:
-        return get_mgmt_service_client(cli_ctx, SqlManagementClient, subscription_id=subscription_id)
+        return _SqlClientProxy(
+            get_mgmt_service_client(cli_ctx, SqlManagementClient, subscription_id=subscription_id, **client_kwargs))
 
     # Normal production scenario.
-    return get_mgmt_service_client(cli_ctx, SqlManagementClient)
+    return _SqlClientProxy(get_mgmt_service_client(cli_ctx, SqlManagementClient, **client_kwargs))
 
 
 def get_sql_capabilities_operations(cli_ctx, _):
