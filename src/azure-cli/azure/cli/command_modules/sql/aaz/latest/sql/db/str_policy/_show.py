@@ -15,7 +15,7 @@ class Show(AAZCommand):
     """Show the short-term retention policy for a SQL database.
 
     :example: Show the database backup retention policy.
-        az sql db str-policy show --resource-group MyResourceGroup --server MyServer --name MyDatabase --policy-name default
+        az sql db str-policy show --resource-group MyResourceGroup --server MyServer --name MyDatabase
     """
 
     _aaz_info = {

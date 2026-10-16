@@ -15,7 +15,7 @@ class Set(AAZCommand):
     """Set the short-term retention policy for a SQL database.
 
     :example: Set the backup retention period to seven days.
-        az sql db str-policy set --resource-group MyResourceGroup --server MyServer --name MyDatabase --policy-name default --retention-days 7
+        az sql db str-policy set --resource-group MyResourceGroup --server MyServer --name MyDatabase --retention-days 7
     """
 
     _aaz_info = {

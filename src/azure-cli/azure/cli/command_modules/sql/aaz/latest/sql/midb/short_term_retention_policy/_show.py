@@ -15,7 +15,7 @@ class Show(AAZCommand):
     """Show the short-term retention policy for a managed database.
 
     :example: Show the database backup retention policy.
-        az sql midb short-term-retention-policy show --resource-group MyResourceGroup --mi MyInstance --name MyDatabase --policy-name default
+        az sql midb short-term-retention-policy show --resource-group MyResourceGroup --mi MyInstance --name MyDatabase
     """
 
     _aaz_info = {

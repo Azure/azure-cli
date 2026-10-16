@@ -484,6 +484,25 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
         self.assertEqual(code, 3, stderr)
         self.assertEqual(stdout, '')
 
+    def test_sql_str_generated_examples_use_public_arguments(self):
+        from azure.cli.command_modules.sql.aaz.latest.sql.db.str_policy import (
+            Set as DatabaseSet, Show as DatabaseShow,
+        )
+        from azure.cli.command_modules.sql.aaz.latest.sql.midb.short_term_retention_policy import (
+            Set as ManagedDatabaseSet, Show as ManagedDatabaseShow,
+        )
+        for command in (DatabaseSet, DatabaseShow, ManagedDatabaseSet, ManagedDatabaseShow):
+            examples = [line.strip() for line in command.__doc__.splitlines()
+                        if line.strip().startswith('az sql ')]
+            self.assertTrue(examples)
+            for example in examples:
+                with self.subTest(example=example):
+                    self._respond()
+                    code, stdout, stderr = self._invoke(example.split()[1:])
+                    self.assertEqual(code, 0, stderr)
+                    self.assertEqual(json.loads(stdout)['immutabilityStatus'], 'Locked')
+        self.prompt.assert_not_called()
+
     def test_sql_str_cli_help(self):
         for command in (
             'sql db str-policy set', 'sql db str-policy show', 'sql db str-policy wait',
