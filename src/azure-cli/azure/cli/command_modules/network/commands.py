@@ -127,6 +127,18 @@ def load_command_table(self, _):
         self.command_table["network application-gateway rule create"] = RuleCreate(loader=self)
         self.command_table["network application-gateway rule update"] = RuleUpdate(loader=self)
 
+    with self.command_group("network application-gateway advanced-routing-map"):
+        from .custom import AdvancedRoutingMapCreate, AdvancedRoutingMapUpdate, AdvancedRoutingMapRuleCreate, \
+            AdvancedRoutingMapRuleUpdate
+        self.command_table["network application-gateway advanced-routing-map create"] = \
+            AdvancedRoutingMapCreate(loader=self)
+        self.command_table["network application-gateway advanced-routing-map update"] = \
+            AdvancedRoutingMapUpdate(loader=self)
+        self.command_table["network application-gateway advanced-routing-map rule create"] = \
+            AdvancedRoutingMapRuleCreate(loader=self)
+        self.command_table["network application-gateway advanced-routing-map rule update"] = \
+            AdvancedRoutingMapRuleUpdate(loader=self)
+
     with self.command_group("network application-gateway ssl-cert"):
         from .custom import SSLCertCreate, SSLCertUpdate
         self.command_table["network application-gateway ssl-cert create"] = SSLCertCreate(loader=self)
