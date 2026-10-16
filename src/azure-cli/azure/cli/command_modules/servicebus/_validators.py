@@ -13,7 +13,7 @@ from isodate import parse_duration
 from knack.util import CLIError
 
 # PARAMETER VALIDATORS
-# Type ISO 8061 duration
+# Type ISO 8601 duration
 
 iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\d+H)?(\\d+M)?(\\d+.)?(\\d+S)?)?$")
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
