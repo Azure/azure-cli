@@ -1,0 +1,2941 @@
+interactions:
+- request:
+    body: '{"sku": {"name": "S0"}, "kind": "AIServices", "location": "eastus", "properties":
+      {"allowProjectManagement": true}, "identity": {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '155'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2026-01-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"9a0379b2-0000-0100-0000-69d52b110000\"","location":"eastus","sku":{"name":"S0"},"kind":"AIServices","properties":{"endpoint":"https://eastus.api.cognitive.microsoft.com/","internalId":"ea00ec7703d34a6ca7cf266e1da410cc","dateCreated":"2026-04-07T16:04:32.880341Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"documentTranslation.post","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"POST"}]},{"key":"documentTranslation.get","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"GET"}]},{"key":"documentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"*"}]},{"key":"textTranslation","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"translator/text/*","method":"*"}]},{"key":"singledocumentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document:translate","method":"*"}]},{"key":"batchDocumentTranslation.post","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"POST"}]},{"key":"batchDocumentTranslation.get","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"GET"}]},{"key":"batchDocumentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"*"}]},{"key":"workflow.endpoint.postcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/:analyze-conversations","method":"*"}]},{"key":"textAnalytics.conversations.jobs.getcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/analyze-conversations/jobs/*","method":"GET"}]},{"key":"textAnalytics.conversations.jobs.postcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/analyze-conversations/jobs","method":"POST"}]},{"key":"textAnalytics.analyzetext.postcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/:analyze-text","method":"POST"}]},{"key":"textAnalytics.analyzetext.jobs.getcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/analyze-text/jobs/*","method":"GET"}]},{"key":"textAnalytics.analyzetext.jobs.postcalls","renewalPeriod":60,"count":300,"matchPatterns":[{"path":"language/analyze-text/jobs","method":"POST"}]},{"key":"textAnalytics.analyzedocuments.jobs.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-documents/jobs/*","method":"GET"}]},{"key":"textAnalytics.analyzedocuments.jobs.postcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-documents/jobs","method":"POST"}]},{"key":"textAnalytics.generate.postcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/:generate","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.march.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.march.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.customText","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"text/analytics/v3.1-preview.ct.1/analyze/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health","method":"*"},{"path":"text/analytics/v3.2-preview.1/health","method":"*"},{"path":"text/analytics/v3.2-preview.2/health","method":"*"}]},{"key":"textAnalytics.languagedetection","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"text/analytics/v3.1/languages","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"questionanswering","renewalPeriod":60,"count":600,"matchPatterns":[{"path":"qnamaker/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering","renewalPeriod":1,"count":3,"matchPatterns":[{"path":"language/query-knowledgebases/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering.inference","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"language/:query-*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"textAnalytics.analyze.internal.evaluation","renewalPeriod":60,"count":150,"matchPatterns":[{"path":"TextAnalytics/ct-evaluation","method":"*"}]},{"key":"token","renewalPeriod":1,"count":50,"matchPatterns":[{"path":"sts/v1.0/*","method":"*"}]},{"key":"speech.synthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/synthesize","method":"*"}]},{"key":"speech.customvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/customvoicesynthesize","method":"*"}]},{"key":"speech.neuralvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/neuralvoicesynthesize","method":"*"}]},{"key":"speech.aoaivoicesynthesize","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"speech/aoaivoicesynthesize","method":"*"}]},{"key":"speech.aoaihdvoicesynthesize","renewalPeriod":60,"count":3,"matchPatterns":[{"path":"speech/aoaihdvoicesynthesize","method":"*"}]},{"key":"speech.customneuralvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/customneuralvoicesynthesize","method":"*"}]},{"key":"speech.personalvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/personalvoicesynthesize","method":"*"}]},{"key":"speech.liveavatarconnect","renewalPeriod":60,"count":2,"matchPatterns":[{"path":"speech/liveavatarconnect","method":"*"}]},{"key":"speech.livecustomavatarconnect","renewalPeriod":60,"count":200,"matchPatterns":[{"path":"speech/livecustomavatarconnect","method":"*"}]},{"key":"speech.batchavatarcreate","renewalPeriod":60,"count":2,"matchPatterns":[{"path":"avatar/batchsyntheses/*","method":"PUT"}]},{"key":"speech.conversationtranscription","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"speech/singlechannelaudioconversationtranscription","method":"*"},{"path":"speech/multichannelaudioconversationtranscribe","method":"*"},{"path":"speech/videoconversationtranscribe","method":"*"}]},{"key":"speech.speechtotext","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"speechtotext/*","method":"*"}]},{"key":"speech.batchtexttospeechcreate","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"texttospeech/batchsyntheses/*","method":"PUT"}]},{"key":"speech.texttospeech","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"texttospeech/*","method":"*"}]},{"key":"speech.customvoice","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"customvoice/*","method":"*"}]},{"key":"speech.speakerrecognitionv2","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"speaker/*","method":"*"},{"path":"speaker-recognition/*","method":"*"}]},{"key":"speech.speakerrecognitionv1","renewalPeriod":1,"count":5,"matchPatterns":[{"path":"spid/*","method":"*"}]},{"key":"voicelive.realtime","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"voice-live/realtime","method":"*"},{"path":"voice-agent/realtime","method":"*"}]},{"key":"speech.speechtotext.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"stt/*","method":"*"}]},{"key":"speech.speechtotext.s2s.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"s2s/*","method":"*"}]},{"key":"speech.speechtotext.sttbase.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"sttbase/*","method":"*"}]},{"key":"speech.texttospeech.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"tts/*","method":"*"}]},{"key":"speech.texttospeech.customvoice.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"voice/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:analyze","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:analyze?_overload=analyzeDocument","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}:analyze","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}:analyze?_overload=classifyDocument","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:analyzeBatch","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/operations/{operationId}","method":"GET"},{"path":"documentintelligence/operations/{operationId}?_overload={_overload}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}","method":"GET"},{"path":"documentintelligence/documentClassifiers/{classifierId}","method":"GET"},{"path":"documentintelligence/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeBatchResults/{resultId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeResults/{resultId}/figures/{figureId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeResults/{resultId}/pdf","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"},{"path":"documentintelligence/documentModels","method":"GET"},{"path":"documentintelligence/operations","method":"GET"},{"path":"documentintelligence/info","method":"GET"},{"path":"documentintelligence/documentClassifiers","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeBatchResults","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"},{"path":"documentintelligence/documentModels:authorizeCopy","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:copyTo","method":"POST"},{"path":"documentintelligence/documentModels:build","method":"POST"},{"path":"documentintelligence/documentModels:compose","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}","method":"DELETE"},{"path":"documentintelligence/documentClassifiers:build","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}","method":"DELETE"},{"path":"documentintelligence/documentClassifiers/{classifierId}:copyTo","method":"POST"},{"path":"documentintelligence/documentClassifiers:authorizeCopy","method":"POST"}]},{"key":"formrecognizer.chat.build","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"documentintelligence/chat:build","method":"POST"}]},{"key":"formrecognizer.chat.complete","renewalPeriod":60,"count":5,"matchPatterns":[{"path":"documentintelligence/chat/{chatId}:complete","method":"POST"}]},{"key":"formrecognizer.labeling","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"documentintelligence/labelingProjects/*","method":"*"},{"path":"documentintelligence/classificationProjects/*","method":"*"},{"path":"documentintelligence/labelingProjects","method":"GET"},{"path":"documentintelligence/classificationProjects","method":"GET"}]},{"key":"vision.recognizeText","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"vision/recognizeText","method":"POST"},{"path":"vision/textOperations/*","method":"GET"},{"path":"vision/read/*","method":"*"}]},{"key":"vision","renewalPeriod":1,"count":20,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"vision/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"ContentSafety.AgentTaskAdherence","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/agent:analyzeTaskAdherence*","method":"*"}]},{"key":"ContentSafety.List","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/blocklists*","method":"*"}]},{"key":"ContentSafety.TextGroundedDetection","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectGroundedness*","method":"*"}]},{"key":"ContentSafety.TextShieldPrompt","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:shieldPrompt*","method":"*"}]},{"key":"ContentSafety.TextDetectIncidents","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectIncidents*","method":"*"}]},{"key":"ContentSafety.TextAnalyzeCustomCategory","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:analyzeCustomCategory*","method":"*"}]},{"key":"ContentSafety.TextAutoReview","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:autoReview*","method":"*"}]},{"key":"ContentSafety.GPTFeature","renewalPeriod":10,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectungroundedness*","method":"*"}]},{"key":"ContentSafety.TextJailbreak","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectJailbreak*","method":"*"}]},{"key":"ContentSafety.TextProtectedMaterial","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectProtectedMaterial*","method":"*"}]},{"key":"ContentSafety.Unified1PAPI","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/analyze1p*","method":"*"}]},{"key":"ContentSafety.AnalyzeWithRaiPolicyAPI","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/analyzeWithRaiPolicy*","method":"*"}]},{"key":"ContentSafety.UnifiedAPI","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/analyze*","method":"*"}]},{"key":"ContentSafety.RaiPoliciesAPI","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/raiPolicies*","method":"*"}]},{"key":"ContentSafety.TextIncidentResponse","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/incidents*","method":"*"}]},{"key":"ContentSafety.TextAutoReviewers","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/autoReviewers*","method":"*"}]},{"key":"ContentSafety.TextCustomCategories","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/categories*","method":"*"}]},{"key":"ContentSafety.Text","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text*","method":"*"}]},{"key":"ContentSafety.ImageWithText","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/imageWithText*","method":"*"}]},{"key":"ContentSafety.ImageDetectIncidents","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image:detectIncidents*","method":"*"}]},{"key":"ContentSafety.ImageIncidentResponse","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image/incidents*","method":"*"}]},{"key":"ContentSafety.Image","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image*","method":"*"}]},{"key":"ContentSafety.Project","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/projects*","method":"*"}]},{"key":"ContentSafety.Metrics","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/metrics*","method":"*"}]},{"key":"ContentSafety.Feature","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/whitelist*","method":"*"}]},{"key":"ContentSafetyInternal.Metrics","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/internal/metrics*","method":"*"}]},{"key":"ContentSafetyInternal.Feature","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/internal/whitelist*","method":"*"}]},{"key":"ContentSafety.Provenance.ManifestBind","renewalPeriod":10,"count":200,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance/manifest:bind*","method":"*"}]},{"key":"ContentSafety.Provenance.DigestSign","renewalPeriod":10,"count":400,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance/digest:sign*","method":"*"}]},{"key":"ContentSafety.Provenance.Detect","renewalPeriod":10,"count":1,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance:detect*","method":"*"}]},{"key":"ContentSafety.Provenance.Detect1P","renewalPeriod":10,"count":200,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance:detect_1p*","method":"*"}]},{"key":"contentunderstanding.analyze","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}:analyze","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:analyzebinary","method":"POST"},{"path":"contentunderstanding/classifiers/{classifierId}:classify","method":"POST"}]},{"key":"contentunderstanding.get.object","renewalPeriod":1,"count":50,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/operations/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{operationId}/files/{path}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{resultId}/*","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/results/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/results/{operationId}/images/{imageId}","method":"GET"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"GET"},{"path":"contentunderstanding/classifierResults/{operationId}","method":"GET"},{"path":"contentunderstanding/defaults","method":"GET"}]},{"key":"contentunderstanding.list.object","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"contentunderstanding/analyzers","method":"GET"},{"path":"contentunderstanding/classifiers","method":"GET"}]},{"key":"contentunderstanding.analyzer.management","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}","method":"PUT"},{"path":"contentunderstanding/analyzers/{analyzerId}","method":"DELETE"},{"path":"contentunderstanding/analyzers/{analyzerId}","method":"PATCH"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"PUT"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"DELETE"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"PATCH"},{"path":"contentunderstanding/analyzers/{analyzerId}:grantCopyAuthorization","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:copy","method":"POST"},{"path":"contentunderstanding/defaults","method":"PATCH"},{"path":"contentunderstanding/analyzerResults/{operationId}","method":"DELETE"}]},{"key":"contentunderstanding.labeling","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"contentunderstanding/labelingProjects","method":"GET"},{"path":"contentunderstanding/labelingProjects/*","method":"*"},{"path":"contentunderstanding/classificationProjects","method":"GET"},{"path":"contentunderstanding/classificationProjects/*","method":"*"}]},{"key":"contentunderstanding.face","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"contentunderstanding/personDirectories","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons/{personId}","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces/{faceId}","method":"*"},{"path":"contentunderstanding/faces:detect","method":"*"},{"path":"contentunderstanding/faces:compare","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons:identify","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces:find","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons/{personId}:verify","method":"*"}]},{"key":"mai","renewalPeriod":1,"count":30000,"matchPatterns":[{"path":"/mai","method":"*"}]},{"key":"models","renewalPeriod":1,"count":30000,"matchPatterns":[{"path":"/models","method":"*"}]},{"key":"openai.dalle.post","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"dalle/*","method":"POST"},{"path":"openai/images/*","method":"POST"}]},{"key":"openai.dalle.other","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"dalle/*","method":"*"},{"path":"openai/operations/images/*","method":"*"}]},{"key":"openai.assistants.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/assistants","method":"GET"}]},{"key":"openai.threads.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/threads","method":"GET"}]},{"key":"openai.vectorstores.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/vector_stores","method":"GET"}]},{"key":"openai.vectorstores.post","renewalPeriod":1,"count":60,"matchPatterns":[{"path":"openai/vector_stores","method":"POST"},{"path":"openai/vector_stores/*","method":"POST"}]},{"key":"openai.assistants.default","renewalPeriod":1,"count":100000,"matchPatterns":[{"path":"openai/assistants","method":"*"},{"path":"openai/assistants/*","method":"*"},{"path":"openai/threads","method":"*"},{"path":"openai/threads/*","method":"*"},{"path":"openai/vector_stores","method":"*"},{"path":"openai/vector_stores/*","method":"*"}]},{"key":"openai.responses.default","renewalPeriod":1,"count":100000,"matchPatterns":[{"path":"openai/responses","method":"*"},{"path":"openai/responses/*","method":"*"}]},{"key":"openai.batches.post","renewalPeriod":60,"count":30,"matchPatterns":[{"path":"openai/v1/batches","method":"POST"},{"path":"openai/batches","method":"POST"}]},{"key":"openai.batches.get","renewalPeriod":60,"count":500,"matchPatterns":[{"path":"openai/v1/batches/*","method":"GET"},{"path":"openai/batches/*","method":"GET"}]},{"key":"openai.batches.list","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"openai/v1/batches","method":"GET"},{"path":"openai/batches","method":"GET"}]},{"key":"openai.moderations.post","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/v1/moderations","method":"POST"},{"path":"openai/v1/moderations/exp/safeberry","method":"POST"},{"path":"openai/v1/safeberry/moderations","method":"POST"}]},{"key":"openai","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"openai/*","method":"*"}]},{"key":"api.projects.default","renewalPeriod":1,"count":1000000,"matchPatterns":[{"path":"api/projects/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"allowProjectManagement":true,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"EnabledApimVnet","value":"true"},{"name":"TrustedServices","value":"Microsoft.CognitiveServices,Microsoft.MachineLearningServices,Microsoft.Search,Microsoft.CognitiveServices,Microsoft.MachineLearningServices,Microsoft.Search,Microsoft.VideoIndexer,Microsoft.CognitiveServices"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"MaxFineTuneCount","value":"500"},{"name":"MaxRunningFineTuneCount","value":"3"},{"name":"MaxUserFileCount","value":"100"},{"name":"MaxTrainingFileSize","value":"512000000"},{"name":"MaxUserFileImportDurationInHours","value":"1"},{"name":"MaxFineTuneJobDurationInHours","value":"720"},{"name":"MaxEvaluationRunDurationInHours","value":"5"},{"name":"MaxRunningEvaluationCount","value":"5"},{"name":"NetworkSecurityPerimeter"},{"name":"useEndpointRateLimiter","value":"Enabled"},{"name":"MaxRunningGlobalStandardFineTuneCount","value":"3"},{"name":"RaiMonitor"},{"name":"FinetunedModelRouterEndpoint"},{"name":"FinetunedModelRouterScoreThreshold","value":"0.171"},{"name":"quotaRefundsEnabled","value":"false"},{"name":"audio","value":"true"},{"name":"imageGenerations","value":"true"},{"name":"chatCompletion","value":"true"},{"name":"fineTune","value":"true"},{"name":"imageEdits","value":"true"},{"name":"Container","value":"ContentSafety.*,ContentSafety.TextAnalyze,ContentSafety.ImageAnalyze,ContentSafety.Jailbreak,ContentSafety.jailbreakanalyze,ComputerVision.*,ComputerVision.ComputerVisionRead,ComputerVision.ocr,ComputerVision.readfile,ComputerVision.readfiledsd,ComputerVision.recognizetext,ComputerVision.ComputerVision,ComputerVision.ocrlayoutworker,ComputerVision.ocrcontroller,ComputerVision.ocrdispatcher,ComputerVision.ocrbillingprocessor,ComputerVision.ocranalyzer,ComputerVision.ocrpagesplitter,ComputerVision.ocrapi,ComputerVision.ocrengineworker,ComputerVision.API.Private,ComputerVision.API.1P,FormRecognizer.*,FormRecognizer.Forms,FormRecognizer.FormRecognizerCustomSupervised,FormRecognizer.FormRecognizerLayout,FormRecognizer.formrecognizerreadlayout,FormRecognizer.FormRecognizerId,FormRecognizer.FormRecognizerInvoice,FormRecognizer.FormRecognizerReceipt,FormRecognizer.FormRecognizerBusinessCard,FormRecognizer.FormRecognizerRead,FormRecognizer.FormRecognizerKvp,SpeechServices.*,SpeechServices.CustomSpeechToText,SpeechServices.NeuralTextToSpeechOnPrem,SpeechServices.DPP,SpeechServices.SpeechToText,SpeechServices.ctsdiarizer,SpeechServices.diarization,TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.EntityV3,TextAnalytics.EntityONNX,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview,TextAnalytics.SentimentONNX,TextAnalytics.CustomNER,TextAnalytics.textanalyticsdispatcher,TextAnalytics.SummarizationFrontend,TextAnalytics.SummarizationWorker,TextAnalytics.PII,TextAnalytics.CluRuntime,TextAnalytics.CluContainer,TextAnalytics.NER,TextTranslation.*"},{"name":"DynamicThrottling"},{"name":"Scenario","value":"ComputerVision.Legacy"},{"name":"CommitmentPlan"},{"name":"Cloud","value":"SpeechServices.SpeakerVerification,SpeechServices.SpeakerIdentification,SpeechServices.CustomNeuralVoice,TextAnalytics.Healthcare,TextAnalytics.Analyze,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"AI
+        Foundry API":"https://cog000002.services.ai.azure.com/","ProjectA APIs":"https://eastus.api.cognitive.microsoft.com/","OpenAI
+        Language Model Instance API":"https://eastus.api.cognitive.microsoft.com/","OpenAI
+        Dall-E API":"https://eastus.api.cognitive.microsoft.com/","OpenAI Sora API":"https://eastus.api.cognitive.microsoft.com/","OpenAI
+        Moderations API":"https://eastus.api.cognitive.microsoft.com/","OpenAI Whisper
+        API":"https://eastus.api.cognitive.microsoft.com/","OpenAI Model Scaleset
+        API":"https://eastus.api.cognitive.microsoft.com/","OpenAI Realtime API":"https://eastus.api.cognitive.microsoft.com/","Token
+        Service API":"https://eastus.api.cognitive.microsoft.com/","Azure OpenAI Legacy
+        API - Latest moniker":"https://eastus.api.cognitive.microsoft.com/","Azure
+        AI Model Inference API":"https://eastus.api.cognitive.microsoft.com/","Cohere
+        AI API":"https://eastus.api.cognitive.microsoft.com/","Mistral AI API":"https://eastus.api.cognitive.microsoft.com/","Azure
+        MAI Model Inference API":"https://eastus.api.cognitive.microsoft.com/","Azure
+        MAI Model Inference API v1.0":"https://eastus.api.cognitive.microsoft.com/","Content
+        Understanding":"https://eastus.api.cognitive.microsoft.com/","Content Safety":"https://eastus.api.cognitive.microsoft.com/","Container":"https://eastus.api.cognitive.microsoft.com/","Computer
+        Vision":"https://eastus.api.cognitive.microsoft.com/","FormRecognizer":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text v3.2":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text 2024-05-15-preview":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text 2024-11-15":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text 2025-10-15":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text v3.2_internal.1":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Custom Voice":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Custom Voice Trial":"https://eastus.api.cognitive.microsoft.com/","Video
+        Translation":"https://eastus.api.cognitive.microsoft.com/","Speech Services
+        Audio Content Creation":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services TTS Player":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Podcast":"https://eastus.api.cognitive.microsoft.com/","Speech Services
+        Custom Avatar":"https://eastus.api.cognitive.microsoft.com/","Speech Services
+        Batch Avatar":"https://eastus.api.cognitive.microsoft.com/","Speech Services
+        Batch Text to Speech":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text (Standard)":"https://eastus.stt.speech.microsoft.com","Speech
+        Services Text to Speech (Neural)":"https://eastus.tts.speech.microsoft.com","Speech
+        Services Speaker Verification":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speaker Identification":"https://eastus.api.cognitive.microsoft.com/","Voice
+        Agent Realtime API":"https://eastus.api.cognitive.microsoft.com/","Voice Live
+        Realtime API":"https://eastus.api.cognitive.microsoft.com/","Token":"https://eastus.api.cognitive.microsoft.com/","Text
+        Analytics":"https://eastus.api.cognitive.microsoft.com/","Custom Text Authoring":"https://eastus.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring":"https://eastus.api.cognitive.microsoft.com/","Custom
+        Question Answering Authoring":"https://eastus.api.cognitive.microsoft.com/","Custom
+        Question Answering":"https://eastus.api.cognitive.microsoft.com/","ConversationalLURuntime":"https://eastus.api.cognitive.microsoft.com/","Language":"https://eastus.api.cognitive.microsoft.com/","Language
+        Remote MCP Server":"https://eastus.api.cognitive.microsoft.com/","QnAMaker":"https://eastus.api.cognitive.microsoft.com/","Turing":"https://eastus.api.cognitive.microsoft.com/","QuestionAnswering":"https://eastus.api.cognitive.microsoft.com/","LUIS":"https://eastus.api.cognitive.microsoft.com/","TextTranslation-Global":"https://api.cognitive.microsofttranslator.com/","TextTranslation":"https://eastus.api.cognitive.microsoft.com/","DocumentTranslation":"https://eastus.api.cognitive.microsoft.com/","CustomTranslator":"https://eastus.api.cognitive.microsoft.com/"},"provisioningState":"Creating"},"identity":{"principalId":"d32434bc-09c2-4a62-bc74-cd4618d41d95","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-04-07T16:04:30.6185367Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-04-07T16:04:30.6185367Z"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/eastus/operationResults/4f3fc4ab-3a32-4fc7-ba0f-748068a4d645?api-version=2017-04-18&t=639111746736030269&c=MIIIJjCCBw6gAwIBAgIQXAg_KQfqNmXWsnKmcWm-CjANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDMwMzE4NDAwNFoXDTI2MDgzMDAwNDAwNFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCq2QsnpddKa8kR8gt-vA9VEusmZorO2S-vbINESl_vgl_PJICxJntGEX47Fd1DDc76k_3GujB58pb9CVQcLZ3-ca4xBv6hEqbf7VGNJdlUmL6V31uaLBLUMfEySd5hdTIpu4K8C1BsXVfomETR-eBTaEKo7U6rad09i8wEBquSFVf5S7J71JehWC4rsigucyf3uMHNqTzZudQy7Dr4g3o1z8GDPMMNrN8NB6XUfnHR60daMf2EzZU2v746EHu58MN3kAveFfbqRrcWd5-tDS7K-u-_1JBNmgg_vgVE_HIXLJ-H3nSUSgujW4YOVJzkyLbU8xAJiSJ_NeLBYjJyJhCNAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRvNYqFx4fDp-iV_6CV_JvtWzks-DAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvMjUvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI1L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvMjUvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvMjUvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAHyESoM-hJA8co5aYFKQj6Yb2naSt-_hW50RjbHBbcf7c32Ujn8L-srkiIyVxkEpzXn0sgWpC8m9Wmwi-IXcD8wG3oPqMrn5ZYvIwrFdrlRwKg23jUltqn23uy8oAzIxCBsBblPSNyWSbEL5Vi52YbLITPHu4uEC7Exy9jJvn6cttL4bste7Sfve85Dd-RbogDrr8HBad8-CN8sHHSyii8mKaK7rq75VE6arRrM28SQgrKJDPrv40C9I6Z5pK40CEUfpYyWTzS6FkLMf7SIjhz0Ilua9xqzb0IO32oVtuv4c-GmmjyJy8FRZzgEYbW_CUh19Gx-9L_Sd5ZzebW5exxE&s=eTAwkVDGoQxgH_QXN5W6gkCAaCj4JxoGhzv5HnEjg0mykvEuEYY60q7r9rk_mDQDfRRYs8fQhbyjP-wLcvyb0J4hQumoENo3rNA-zSu2Mi-tQfswdlLKtH2i9XjkCzTX3b_DytTLqNU5y00RjwRftgXaR0MRxtS12emqxznAUUCK51mzYRZT6-DrgC3OojSqFs3ZvGlHrk_3nWeMzIxR-F_ES5M12NxFesFrfMeWSZt3OhaIsom2zxA5mbu6QPQKR7D6y73wby7_lBQ-Gb6CEyGbeFf_mJvCfM_SYdou8qkfx5z1kyjrOi83HZoSJsw1nrebZRvDR8PJCMckXz0wEQ&h=pZ6mt7HFWaz2ARXApdEgnZNEsicQrlInnndsA6zY1_w
+      cache-control:
+      - no-cache
+      content-length:
+      - '37622'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:04:33 GMT
+      etag:
+      - '"9a0379b2-0000-0100-0000-69d52b110000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '870'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/westus/316ace2f-97c0-49ac-a14c-e60913d3564e
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 08A32B79FCE64E11A7A7856987A27290 Ref B: BN1AA2051012033 Ref C: 2026-04-07T16:04:29Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/eastus/operationResults/4f3fc4ab-3a32-4fc7-ba0f-748068a4d645?api-version=2017-04-18&t=639111746736030269&c=MIIIJjCCBw6gAwIBAgIQXAg_KQfqNmXWsnKmcWm-CjANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDMwMzE4NDAwNFoXDTI2MDgzMDAwNDAwNFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCq2QsnpddKa8kR8gt-vA9VEusmZorO2S-vbINESl_vgl_PJICxJntGEX47Fd1DDc76k_3GujB58pb9CVQcLZ3-ca4xBv6hEqbf7VGNJdlUmL6V31uaLBLUMfEySd5hdTIpu4K8C1BsXVfomETR-eBTaEKo7U6rad09i8wEBquSFVf5S7J71JehWC4rsigucyf3uMHNqTzZudQy7Dr4g3o1z8GDPMMNrN8NB6XUfnHR60daMf2EzZU2v746EHu58MN3kAveFfbqRrcWd5-tDS7K-u-_1JBNmgg_vgVE_HIXLJ-H3nSUSgujW4YOVJzkyLbU8xAJiSJ_NeLBYjJyJhCNAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRvNYqFx4fDp-iV_6CV_JvtWzks-DAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvMjUvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI1L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvMjUvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvMjUvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAHyESoM-hJA8co5aYFKQj6Yb2naSt-_hW50RjbHBbcf7c32Ujn8L-srkiIyVxkEpzXn0sgWpC8m9Wmwi-IXcD8wG3oPqMrn5ZYvIwrFdrlRwKg23jUltqn23uy8oAzIxCBsBblPSNyWSbEL5Vi52YbLITPHu4uEC7Exy9jJvn6cttL4bste7Sfve85Dd-RbogDrr8HBad8-CN8sHHSyii8mKaK7rq75VE6arRrM28SQgrKJDPrv40C9I6Z5pK40CEUfpYyWTzS6FkLMf7SIjhz0Ilua9xqzb0IO32oVtuv4c-GmmjyJy8FRZzgEYbW_CUh19Gx-9L_Sd5ZzebW5exxE&s=eTAwkVDGoQxgH_QXN5W6gkCAaCj4JxoGhzv5HnEjg0mykvEuEYY60q7r9rk_mDQDfRRYs8fQhbyjP-wLcvyb0J4hQumoENo3rNA-zSu2Mi-tQfswdlLKtH2i9XjkCzTX3b_DytTLqNU5y00RjwRftgXaR0MRxtS12emqxznAUUCK51mzYRZT6-DrgC3OojSqFs3ZvGlHrk_3nWeMzIxR-F_ES5M12NxFesFrfMeWSZt3OhaIsom2zxA5mbu6QPQKR7D6y73wby7_lBQ-Gb6CEyGbeFf_mJvCfM_SYdou8qkfx5z1kyjrOi83HZoSJsw1nrebZRvDR8PJCMckXz0wEQ&h=pZ6mt7HFWaz2ARXApdEgnZNEsicQrlInnndsA6zY1_w
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/eastus/operationResults/4f3fc4ab-3a32-4fc7-ba0f-748068a4d645","name":"4f3fc4ab-3a32-4fc7-ba0f-748068a4d645","status":"Creating","startTime":"2026-04-07T16:04:33Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '270'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:04:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '10'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/e1d9c782-feb9-4acf-b6eb-5d6368ad5687
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 60AE77F604244C6498E818F7E18D90ED Ref B: BN1AA2051015051 Ref C: 2026-04-07T16:04:33Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/eastus/operationResults/4f3fc4ab-3a32-4fc7-ba0f-748068a4d645?api-version=2017-04-18&t=639111746736030269&c=MIIIJjCCBw6gAwIBAgIQXAg_KQfqNmXWsnKmcWm-CjANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDMwMzE4NDAwNFoXDTI2MDgzMDAwNDAwNFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCq2QsnpddKa8kR8gt-vA9VEusmZorO2S-vbINESl_vgl_PJICxJntGEX47Fd1DDc76k_3GujB58pb9CVQcLZ3-ca4xBv6hEqbf7VGNJdlUmL6V31uaLBLUMfEySd5hdTIpu4K8C1BsXVfomETR-eBTaEKo7U6rad09i8wEBquSFVf5S7J71JehWC4rsigucyf3uMHNqTzZudQy7Dr4g3o1z8GDPMMNrN8NB6XUfnHR60daMf2EzZU2v746EHu58MN3kAveFfbqRrcWd5-tDS7K-u-_1JBNmgg_vgVE_HIXLJ-H3nSUSgujW4YOVJzkyLbU8xAJiSJ_NeLBYjJyJhCNAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBRvNYqFx4fDp-iV_6CV_JvtWzks-DAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvMjUvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzI1L2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvMjUvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvMjUvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAHyESoM-hJA8co5aYFKQj6Yb2naSt-_hW50RjbHBbcf7c32Ujn8L-srkiIyVxkEpzXn0sgWpC8m9Wmwi-IXcD8wG3oPqMrn5ZYvIwrFdrlRwKg23jUltqn23uy8oAzIxCBsBblPSNyWSbEL5Vi52YbLITPHu4uEC7Exy9jJvn6cttL4bste7Sfve85Dd-RbogDrr8HBad8-CN8sHHSyii8mKaK7rq75VE6arRrM28SQgrKJDPrv40C9I6Z5pK40CEUfpYyWTzS6FkLMf7SIjhz0Ilua9xqzb0IO32oVtuv4c-GmmjyJy8FRZzgEYbW_CUh19Gx-9L_Sd5ZzebW5exxE&s=eTAwkVDGoQxgH_QXN5W6gkCAaCj4JxoGhzv5HnEjg0mykvEuEYY60q7r9rk_mDQDfRRYs8fQhbyjP-wLcvyb0J4hQumoENo3rNA-zSu2Mi-tQfswdlLKtH2i9XjkCzTX3b_DytTLqNU5y00RjwRftgXaR0MRxtS12emqxznAUUCK51mzYRZT6-DrgC3OojSqFs3ZvGlHrk_3nWeMzIxR-F_ES5M12NxFesFrfMeWSZt3OhaIsom2zxA5mbu6QPQKR7D6y73wby7_lBQ-Gb6CEyGbeFf_mJvCfM_SYdou8qkfx5z1kyjrOi83HZoSJsw1nrebZRvDR8PJCMckXz0wEQ&h=pZ6mt7HFWaz2ARXApdEgnZNEsicQrlInnndsA6zY1_w
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/eastus/operationResults/4f3fc4ab-3a32-4fc7-ba0f-748068a4d645","name":"4f3fc4ab-3a32-4fc7-ba0f-748068a4d645","status":"Succeeded","startTime":"2026-04-07T16:04:33Z","endTime":"2026-04-07T16:04:40Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:05:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '10'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/8473f40d-afed-4a70-8ca6-f2ac084ef593
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: C7CEDAE31AB0435EB336C7C60B5B605B Ref B: BN1AA2051012035 Ref C: 2026-04-07T16:05:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --kind --sku -l --yes
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2026-01-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002","name":"cog000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"9a0397b4-0000-0100-0000-69d52b170000\"","location":"eastus","sku":{"name":"S0"},"kind":"AIServices","properties":{"endpoint":"https://eastus.api.cognitive.microsoft.com/","internalId":"ea00ec7703d34a6ca7cf266e1da410cc","dateCreated":"2026-04-07T16:04:32.880341Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"documentTranslation.post","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"POST"}]},{"key":"documentTranslation.get","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"GET"}]},{"key":"documentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"*"}]},{"key":"textTranslation","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"translator/text/*","method":"*"}]},{"key":"singledocumentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document:translate","method":"*"}]},{"key":"batchDocumentTranslation.post","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"POST"}]},{"key":"batchDocumentTranslation.get","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"GET"}]},{"key":"batchDocumentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"*"}]},{"key":"workflow.endpoint.postcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/:analyze-conversations","method":"*"}]},{"key":"textAnalytics.conversations.jobs.getcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/analyze-conversations/jobs/*","method":"GET"}]},{"key":"textAnalytics.conversations.jobs.postcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/analyze-conversations/jobs","method":"POST"}]},{"key":"textAnalytics.analyzetext.postcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/:analyze-text","method":"POST"}]},{"key":"textAnalytics.analyzetext.jobs.getcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/analyze-text/jobs/*","method":"GET"}]},{"key":"textAnalytics.analyzetext.jobs.postcalls","renewalPeriod":60,"count":300,"matchPatterns":[{"path":"language/analyze-text/jobs","method":"POST"}]},{"key":"textAnalytics.analyzedocuments.jobs.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-documents/jobs/*","method":"GET"}]},{"key":"textAnalytics.analyzedocuments.jobs.postcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-documents/jobs","method":"POST"}]},{"key":"textAnalytics.generate.postcalls","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"language/:generate","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.march.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.march.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.customText","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"text/analytics/v3.1-preview.ct.1/analyze/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health","method":"*"},{"path":"text/analytics/v3.2-preview.1/health","method":"*"},{"path":"text/analytics/v3.2-preview.2/health","method":"*"}]},{"key":"textAnalytics.languagedetection","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"text/analytics/v3.1/languages","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"questionanswering","renewalPeriod":60,"count":600,"matchPatterns":[{"path":"qnamaker/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering","renewalPeriod":1,"count":3,"matchPatterns":[{"path":"language/query-knowledgebases/*","method":"*"}]},{"key":"unifiedlanguage.questionanswering.inference","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"language/:query-*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"textAnalytics.analyze.internal.evaluation","renewalPeriod":60,"count":150,"matchPatterns":[{"path":"TextAnalytics/ct-evaluation","method":"*"}]},{"key":"token","renewalPeriod":1,"count":50,"matchPatterns":[{"path":"sts/v1.0/*","method":"*"}]},{"key":"speech.synthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/synthesize","method":"*"}]},{"key":"speech.customvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/customvoicesynthesize","method":"*"}]},{"key":"speech.neuralvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/neuralvoicesynthesize","method":"*"}]},{"key":"speech.aoaivoicesynthesize","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"speech/aoaivoicesynthesize","method":"*"}]},{"key":"speech.aoaihdvoicesynthesize","renewalPeriod":60,"count":3,"matchPatterns":[{"path":"speech/aoaihdvoicesynthesize","method":"*"}]},{"key":"speech.customneuralvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/customneuralvoicesynthesize","method":"*"}]},{"key":"speech.personalvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/personalvoicesynthesize","method":"*"}]},{"key":"speech.liveavatarconnect","renewalPeriod":60,"count":2,"matchPatterns":[{"path":"speech/liveavatarconnect","method":"*"}]},{"key":"speech.livecustomavatarconnect","renewalPeriod":60,"count":200,"matchPatterns":[{"path":"speech/livecustomavatarconnect","method":"*"}]},{"key":"speech.batchavatarcreate","renewalPeriod":60,"count":2,"matchPatterns":[{"path":"avatar/batchsyntheses/*","method":"PUT"}]},{"key":"speech.conversationtranscription","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"speech/singlechannelaudioconversationtranscription","method":"*"},{"path":"speech/multichannelaudioconversationtranscribe","method":"*"},{"path":"speech/videoconversationtranscribe","method":"*"}]},{"key":"speech.speechtotext","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"speechtotext/*","method":"*"}]},{"key":"speech.batchtexttospeechcreate","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"texttospeech/batchsyntheses/*","method":"PUT"}]},{"key":"speech.texttospeech","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"texttospeech/*","method":"*"}]},{"key":"speech.customvoice","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"customvoice/*","method":"*"}]},{"key":"speech.speakerrecognitionv2","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"speaker/*","method":"*"},{"path":"speaker-recognition/*","method":"*"}]},{"key":"speech.speakerrecognitionv1","renewalPeriod":1,"count":5,"matchPatterns":[{"path":"spid/*","method":"*"}]},{"key":"voicelive.realtime","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"voice-live/realtime","method":"*"},{"path":"voice-agent/realtime","method":"*"}]},{"key":"speech.speechtotext.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"stt/*","method":"*"}]},{"key":"speech.speechtotext.s2s.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"s2s/*","method":"*"}]},{"key":"speech.speechtotext.sttbase.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"sttbase/*","method":"*"}]},{"key":"speech.texttospeech.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"tts/*","method":"*"}]},{"key":"speech.texttospeech.customvoice.frontend","renewalPeriod":10,"count":10000,"matchPatterns":[{"path":"voice/*","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:analyze","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:analyze?_overload=analyzeDocument","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}:analyze","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}:analyze?_overload=classifyDocument","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:analyzeBatch","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/operations/{operationId}","method":"GET"},{"path":"documentintelligence/operations/{operationId}?_overload={_overload}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}","method":"GET"},{"path":"documentintelligence/documentClassifiers/{classifierId}","method":"GET"},{"path":"documentintelligence/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeBatchResults/{resultId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeResults/{resultId}/figures/{figureId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeResults/{resultId}/pdf","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"},{"path":"documentintelligence/documentModels","method":"GET"},{"path":"documentintelligence/operations","method":"GET"},{"path":"documentintelligence/info","method":"GET"},{"path":"documentintelligence/documentClassifiers","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeBatchResults","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"},{"path":"documentintelligence/documentModels:authorizeCopy","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:copyTo","method":"POST"},{"path":"documentintelligence/documentModels:build","method":"POST"},{"path":"documentintelligence/documentModels:compose","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}","method":"DELETE"},{"path":"documentintelligence/documentClassifiers:build","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}","method":"DELETE"},{"path":"documentintelligence/documentClassifiers/{classifierId}:copyTo","method":"POST"},{"path":"documentintelligence/documentClassifiers:authorizeCopy","method":"POST"}]},{"key":"formrecognizer.chat.build","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"documentintelligence/chat:build","method":"POST"}]},{"key":"formrecognizer.chat.complete","renewalPeriod":60,"count":5,"matchPatterns":[{"path":"documentintelligence/chat/{chatId}:complete","method":"POST"}]},{"key":"formrecognizer.labeling","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"documentintelligence/labelingProjects/*","method":"*"},{"path":"documentintelligence/classificationProjects/*","method":"*"},{"path":"documentintelligence/labelingProjects","method":"GET"},{"path":"documentintelligence/classificationProjects","method":"GET"}]},{"key":"vision.recognizeText","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"vision/recognizeText","method":"POST"},{"path":"vision/textOperations/*","method":"GET"},{"path":"vision/read/*","method":"*"}]},{"key":"vision","renewalPeriod":1,"count":20,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"vision/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"ContentSafety.AgentTaskAdherence","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/agent:analyzeTaskAdherence*","method":"*"}]},{"key":"ContentSafety.List","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/blocklists*","method":"*"}]},{"key":"ContentSafety.TextGroundedDetection","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectGroundedness*","method":"*"}]},{"key":"ContentSafety.TextShieldPrompt","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:shieldPrompt*","method":"*"}]},{"key":"ContentSafety.TextDetectIncidents","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectIncidents*","method":"*"}]},{"key":"ContentSafety.TextAnalyzeCustomCategory","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:analyzeCustomCategory*","method":"*"}]},{"key":"ContentSafety.TextAutoReview","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:autoReview*","method":"*"}]},{"key":"ContentSafety.GPTFeature","renewalPeriod":10,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectungroundedness*","method":"*"}]},{"key":"ContentSafety.TextJailbreak","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectJailbreak*","method":"*"}]},{"key":"ContentSafety.TextProtectedMaterial","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectProtectedMaterial*","method":"*"}]},{"key":"ContentSafety.Unified1PAPI","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/analyze1p*","method":"*"}]},{"key":"ContentSafety.AnalyzeWithRaiPolicyAPI","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/analyzeWithRaiPolicy*","method":"*"}]},{"key":"ContentSafety.UnifiedAPI","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/analyze*","method":"*"}]},{"key":"ContentSafety.RaiPoliciesAPI","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/raiPolicies*","method":"*"}]},{"key":"ContentSafety.TextIncidentResponse","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/incidents*","method":"*"}]},{"key":"ContentSafety.TextAutoReviewers","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/autoReviewers*","method":"*"}]},{"key":"ContentSafety.TextCustomCategories","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/categories*","method":"*"}]},{"key":"ContentSafety.Text","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text*","method":"*"}]},{"key":"ContentSafety.ImageWithText","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/imageWithText*","method":"*"}]},{"key":"ContentSafety.ImageDetectIncidents","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image:detectIncidents*","method":"*"}]},{"key":"ContentSafety.ImageIncidentResponse","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image/incidents*","method":"*"}]},{"key":"ContentSafety.Image","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image*","method":"*"}]},{"key":"ContentSafety.Project","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/projects*","method":"*"}]},{"key":"ContentSafety.Metrics","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/metrics*","method":"*"}]},{"key":"ContentSafety.Feature","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/whitelist*","method":"*"}]},{"key":"ContentSafetyInternal.Metrics","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/internal/metrics*","method":"*"}]},{"key":"ContentSafetyInternal.Feature","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/internal/whitelist*","method":"*"}]},{"key":"ContentSafety.Provenance.ManifestBind","renewalPeriod":10,"count":200,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance/manifest:bind*","method":"*"}]},{"key":"ContentSafety.Provenance.DigestSign","renewalPeriod":10,"count":400,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance/digest:sign*","method":"*"}]},{"key":"ContentSafety.Provenance.Detect","renewalPeriod":10,"count":1,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance:detect*","method":"*"}]},{"key":"ContentSafety.Provenance.Detect1P","renewalPeriod":10,"count":200,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance:detect_1p*","method":"*"}]},{"key":"contentunderstanding.analyze","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}:analyze","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:analyzebinary","method":"POST"},{"path":"contentunderstanding/classifiers/{classifierId}:classify","method":"POST"}]},{"key":"contentunderstanding.get.object","renewalPeriod":1,"count":50,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/operations/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{operationId}/files/{path}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{resultId}/*","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/results/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/results/{operationId}/images/{imageId}","method":"GET"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"GET"},{"path":"contentunderstanding/classifierResults/{operationId}","method":"GET"},{"path":"contentunderstanding/defaults","method":"GET"}]},{"key":"contentunderstanding.list.object","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"contentunderstanding/analyzers","method":"GET"},{"path":"contentunderstanding/classifiers","method":"GET"}]},{"key":"contentunderstanding.analyzer.management","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}","method":"PUT"},{"path":"contentunderstanding/analyzers/{analyzerId}","method":"DELETE"},{"path":"contentunderstanding/analyzers/{analyzerId}","method":"PATCH"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"PUT"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"DELETE"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"PATCH"},{"path":"contentunderstanding/analyzers/{analyzerId}:grantCopyAuthorization","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:copy","method":"POST"},{"path":"contentunderstanding/defaults","method":"PATCH"},{"path":"contentunderstanding/analyzerResults/{operationId}","method":"DELETE"}]},{"key":"contentunderstanding.labeling","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"contentunderstanding/labelingProjects","method":"GET"},{"path":"contentunderstanding/labelingProjects/*","method":"*"},{"path":"contentunderstanding/classificationProjects","method":"GET"},{"path":"contentunderstanding/classificationProjects/*","method":"*"}]},{"key":"contentunderstanding.face","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"contentunderstanding/personDirectories","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons/{personId}","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces/{faceId}","method":"*"},{"path":"contentunderstanding/faces:detect","method":"*"},{"path":"contentunderstanding/faces:compare","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons:identify","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces:find","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons/{personId}:verify","method":"*"}]},{"key":"mai","renewalPeriod":1,"count":30000,"matchPatterns":[{"path":"/mai","method":"*"}]},{"key":"models","renewalPeriod":1,"count":30000,"matchPatterns":[{"path":"/models","method":"*"}]},{"key":"openai.dalle.post","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"dalle/*","method":"POST"},{"path":"openai/images/*","method":"POST"}]},{"key":"openai.dalle.other","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"dalle/*","method":"*"},{"path":"openai/operations/images/*","method":"*"}]},{"key":"openai.assistants.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/assistants","method":"GET"}]},{"key":"openai.threads.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/threads","method":"GET"}]},{"key":"openai.vectorstores.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/vector_stores","method":"GET"}]},{"key":"openai.vectorstores.post","renewalPeriod":1,"count":60,"matchPatterns":[{"path":"openai/vector_stores","method":"POST"},{"path":"openai/vector_stores/*","method":"POST"}]},{"key":"openai.assistants.default","renewalPeriod":1,"count":100000,"matchPatterns":[{"path":"openai/assistants","method":"*"},{"path":"openai/assistants/*","method":"*"},{"path":"openai/threads","method":"*"},{"path":"openai/threads/*","method":"*"},{"path":"openai/vector_stores","method":"*"},{"path":"openai/vector_stores/*","method":"*"}]},{"key":"openai.responses.default","renewalPeriod":1,"count":100000,"matchPatterns":[{"path":"openai/responses","method":"*"},{"path":"openai/responses/*","method":"*"}]},{"key":"openai.batches.post","renewalPeriod":60,"count":30,"matchPatterns":[{"path":"openai/v1/batches","method":"POST"},{"path":"openai/batches","method":"POST"}]},{"key":"openai.batches.get","renewalPeriod":60,"count":500,"matchPatterns":[{"path":"openai/v1/batches/*","method":"GET"},{"path":"openai/batches/*","method":"GET"}]},{"key":"openai.batches.list","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"openai/v1/batches","method":"GET"},{"path":"openai/batches","method":"GET"}]},{"key":"openai.moderations.post","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/v1/moderations","method":"POST"},{"path":"openai/v1/moderations/exp/safeberry","method":"POST"},{"path":"openai/v1/safeberry/moderations","method":"POST"}]},{"key":"openai","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"openai/*","method":"*"}]},{"key":"api.projects.default","renewalPeriod":1,"count":1000000,"matchPatterns":[{"path":"api/projects/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"allowProjectManagement":true,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"EnabledApimVnet","value":"true"},{"name":"TrustedServices","value":"Microsoft.CognitiveServices,Microsoft.MachineLearningServices,Microsoft.Search,Microsoft.CognitiveServices,Microsoft.MachineLearningServices,Microsoft.Search,Microsoft.VideoIndexer,Microsoft.CognitiveServices"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"MaxFineTuneCount","value":"500"},{"name":"MaxRunningFineTuneCount","value":"3"},{"name":"MaxUserFileCount","value":"100"},{"name":"MaxTrainingFileSize","value":"512000000"},{"name":"MaxUserFileImportDurationInHours","value":"1"},{"name":"MaxFineTuneJobDurationInHours","value":"720"},{"name":"MaxEvaluationRunDurationInHours","value":"5"},{"name":"MaxRunningEvaluationCount","value":"5"},{"name":"NetworkSecurityPerimeter"},{"name":"useEndpointRateLimiter","value":"Enabled"},{"name":"MaxRunningGlobalStandardFineTuneCount","value":"3"},{"name":"RaiMonitor"},{"name":"FinetunedModelRouterEndpoint"},{"name":"FinetunedModelRouterScoreThreshold","value":"0.171"},{"name":"quotaRefundsEnabled","value":"false"},{"name":"audio","value":"true"},{"name":"imageGenerations","value":"true"},{"name":"chatCompletion","value":"true"},{"name":"fineTune","value":"true"},{"name":"imageEdits","value":"true"},{"name":"Container","value":"ContentSafety.*,ContentSafety.TextAnalyze,ContentSafety.ImageAnalyze,ContentSafety.Jailbreak,ContentSafety.jailbreakanalyze,ComputerVision.*,ComputerVision.ComputerVisionRead,ComputerVision.ocr,ComputerVision.readfile,ComputerVision.readfiledsd,ComputerVision.recognizetext,ComputerVision.ComputerVision,ComputerVision.ocrlayoutworker,ComputerVision.ocrcontroller,ComputerVision.ocrdispatcher,ComputerVision.ocrbillingprocessor,ComputerVision.ocranalyzer,ComputerVision.ocrpagesplitter,ComputerVision.ocrapi,ComputerVision.ocrengineworker,ComputerVision.API.Private,ComputerVision.API.1P,FormRecognizer.*,FormRecognizer.Forms,FormRecognizer.FormRecognizerCustomSupervised,FormRecognizer.FormRecognizerLayout,FormRecognizer.formrecognizerreadlayout,FormRecognizer.FormRecognizerId,FormRecognizer.FormRecognizerInvoice,FormRecognizer.FormRecognizerReceipt,FormRecognizer.FormRecognizerBusinessCard,FormRecognizer.FormRecognizerRead,FormRecognizer.FormRecognizerKvp,SpeechServices.*,SpeechServices.CustomSpeechToText,SpeechServices.NeuralTextToSpeechOnPrem,SpeechServices.DPP,SpeechServices.SpeechToText,SpeechServices.ctsdiarizer,SpeechServices.diarization,TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.EntityV3,TextAnalytics.EntityONNX,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview,TextAnalytics.SentimentONNX,TextAnalytics.CustomNER,TextAnalytics.textanalyticsdispatcher,TextAnalytics.SummarizationFrontend,TextAnalytics.SummarizationWorker,TextAnalytics.PII,TextAnalytics.CluRuntime,TextAnalytics.CluContainer,TextAnalytics.NER,TextTranslation.*"},{"name":"DynamicThrottling"},{"name":"Scenario","value":"ComputerVision.Legacy"},{"name":"CommitmentPlan"},{"name":"Cloud","value":"SpeechServices.SpeakerVerification,SpeechServices.SpeakerIdentification,SpeechServices.CustomNeuralVoice,TextAnalytics.Healthcare,TextAnalytics.Analyze,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"AI
+        Foundry API":"https://cog000002.services.ai.azure.com/","ProjectA APIs":"https://eastus.api.cognitive.microsoft.com/","OpenAI
+        Language Model Instance API":"https://eastus.api.cognitive.microsoft.com/","OpenAI
+        Dall-E API":"https://eastus.api.cognitive.microsoft.com/","OpenAI Sora API":"https://eastus.api.cognitive.microsoft.com/","OpenAI
+        Moderations API":"https://eastus.api.cognitive.microsoft.com/","OpenAI Whisper
+        API":"https://eastus.api.cognitive.microsoft.com/","OpenAI Model Scaleset
+        API":"https://eastus.api.cognitive.microsoft.com/","OpenAI Realtime API":"https://eastus.api.cognitive.microsoft.com/","Token
+        Service API":"https://eastus.api.cognitive.microsoft.com/","Azure OpenAI Legacy
+        API - Latest moniker":"https://eastus.api.cognitive.microsoft.com/","Azure
+        AI Model Inference API":"https://eastus.api.cognitive.microsoft.com/","Cohere
+        AI API":"https://eastus.api.cognitive.microsoft.com/","Mistral AI API":"https://eastus.api.cognitive.microsoft.com/","Azure
+        MAI Model Inference API":"https://eastus.api.cognitive.microsoft.com/","Azure
+        MAI Model Inference API v1.0":"https://eastus.api.cognitive.microsoft.com/","Content
+        Understanding":"https://eastus.api.cognitive.microsoft.com/","Content Safety":"https://eastus.api.cognitive.microsoft.com/","Container":"https://eastus.api.cognitive.microsoft.com/","Computer
+        Vision":"https://eastus.api.cognitive.microsoft.com/","FormRecognizer":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text v3.2":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text 2024-05-15-preview":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text 2024-11-15":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text 2025-10-15":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text v3.2_internal.1":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Custom Voice":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Custom Voice Trial":"https://eastus.api.cognitive.microsoft.com/","Video
+        Translation":"https://eastus.api.cognitive.microsoft.com/","Speech Services
+        Audio Content Creation":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services TTS Player":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Podcast":"https://eastus.api.cognitive.microsoft.com/","Speech Services
+        Custom Avatar":"https://eastus.api.cognitive.microsoft.com/","Speech Services
+        Batch Avatar":"https://eastus.api.cognitive.microsoft.com/","Speech Services
+        Batch Text to Speech":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speech to Text (Standard)":"https://eastus.stt.speech.microsoft.com","Speech
+        Services Text to Speech (Neural)":"https://eastus.tts.speech.microsoft.com","Speech
+        Services Speaker Verification":"https://eastus.api.cognitive.microsoft.com/","Speech
+        Services Speaker Identification":"https://eastus.api.cognitive.microsoft.com/","Voice
+        Agent Realtime API":"https://eastus.api.cognitive.microsoft.com/","Voice Live
+        Realtime API":"https://eastus.api.cognitive.microsoft.com/","Token":"https://eastus.api.cognitive.microsoft.com/","Text
+        Analytics":"https://eastus.api.cognitive.microsoft.com/","Custom Text Authoring":"https://eastus.api.cognitive.microsoft.com/","Conversational
+        Language Understanding Authoring":"https://eastus.api.cognitive.microsoft.com/","Custom
+        Question Answering Authoring":"https://eastus.api.cognitive.microsoft.com/","Custom
+        Question Answering":"https://eastus.api.cognitive.microsoft.com/","ConversationalLURuntime":"https://eastus.api.cognitive.microsoft.com/","Language":"https://eastus.api.cognitive.microsoft.com/","Language
+        Remote MCP Server":"https://eastus.api.cognitive.microsoft.com/","QnAMaker":"https://eastus.api.cognitive.microsoft.com/","Turing":"https://eastus.api.cognitive.microsoft.com/","QuestionAnswering":"https://eastus.api.cognitive.microsoft.com/","LUIS":"https://eastus.api.cognitive.microsoft.com/","TextTranslation-Global":"https://api.cognitive.microsofttranslator.com/","TextTranslation":"https://eastus.api.cognitive.microsoft.com/","DocumentTranslation":"https://eastus.api.cognitive.microsoft.com/","CustomTranslator":"https://eastus.api.cognitive.microsoft.com/"},"provisioningState":"Succeeded"},"identity":{"principalId":"d32434bc-09c2-4a62-bc74-cd4618d41d95","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-04-07T16:04:30.6185367Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-04-07T16:04:30.6185367Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '37623'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:05:03 GMT
+      etag:
+      - '"9a0397b4-0000-0100-0000-69d52b170000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '19'
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 65273AAEB70A4210A5C3D6932FB2403A Ref B: BN1AA2051014049 Ref C: 2026-04-07T16:05:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"managedNetwork": {"isolationMode": "AllowOnlyApprovedOutbound"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '82'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default?api-version=2026-01-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 07 Apr 2026 16:05:05 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default?api-version=2026-01-15-preview
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-async-operation-timeout:
+      - PT50M
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/westus/7e305c7e-330b-4589-acb2-b091cd24946e
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: DD434F54DFB4487A879C5A39532878DD Ref B: BN1AA2051012053 Ref C: 2026-04-07T16:05:05Z'
+      x-request-time:
+      - '0.625'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:05:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/8e710a4e-a37f-4c82-8c35-8eec91361c0b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 286159B30BEF47CC96938BCAA39A6417 Ref B: BN1AA2051014047 Ref C: 2026-04-07T16:05:06Z'
+      x-request-time:
+      - '0.056'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:05:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/35ac9a53-f6e7-4960-810a-d2918b801eae
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 1FEECE860948474C9D209AFB455582F1 Ref B: BN1AA2051014033 Ref C: 2026-04-07T16:05:36Z'
+      x-request-time:
+      - '0.049'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:06:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/e727c45b-de52-4844-a81f-24a971872f0e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 08D87EF2C3DD4238B78E4BDA60E560D0 Ref B: BN1AA2051015051 Ref C: 2026-04-07T16:06:07Z'
+      x-request-time:
+      - '0.049'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:06:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/53b064a0-4aa7-40ff-b5cf-788d8af61792
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: C386286D989F4530AD020FB571A86B3F Ref B: BN1AA2051013023 Ref C: 2026-04-07T16:06:37Z'
+      x-request-time:
+      - '0.097'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:07:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/b614716d-91f8-454f-a128-ffaa0da56df6
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: AFD223C713FF4BA996FC9F2488835AF0 Ref B: BN1AA2051014019 Ref C: 2026-04-07T16:07:07Z'
+      x-request-time:
+      - '0.053'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:07:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/50bc940e-5080-489c-9776-34660cbe8d3a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 88BFE2D3696F4AD9BE39BC525FC92CFE Ref B: BN1AA2051015039 Ref C: 2026-04-07T16:07:38Z'
+      x-request-time:
+      - '0.039'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:08:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/7c323f5c-51e9-4a1b-8e4a-e97da4db9ff0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 6FE4366CAD224ABEA5906596D302437D Ref B: BN1AA2051014017 Ref C: 2026-04-07T16:08:08Z'
+      x-request-time:
+      - '0.030'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:08:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/e3fe8788-7076-4272-a7a9-5faf98d292e6
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 630952A423E04EC6A258FAF9A842F13E Ref B: BN1AA2051014045 Ref C: 2026-04-07T16:08:40Z'
+      x-request-time:
+      - '0.026'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:09:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/d1aadb45-e893-4c8e-84af-647daac428f8
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 2BF0B45F5635455CAB5548DD92F31D1A Ref B: BN1AA2051015021 Ref C: 2026-04-07T16:09:10Z'
+      x-request-time:
+      - '0.043'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc-a7ea4fee_80402442-e6f8-42dc-8600-9510513ae9e9\",\n
+        \ \"status\": \"Succeeded\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '121'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:09:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/30373b8c-7b63-4f6e-9cc1-e1ca30ac6891
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: F9052BCC490D4CE0B0FFFB60B86F6FC3 Ref B: BN1AA2051012011 Ref C: 2026-04-07T16:09:40Z'
+      x-request-time:
+      - '0.059'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --managed-network
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default?api-version=2026-01-15-preview
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","managedNetwork":{"isolationMode":"AllowOnlyApprovedOutbound","networkId":"ea00ec77-03d3-4a6c-a7cf-266e1da410cc","outboundRules":{"__SYS_ST_AzureActiveDirectory_TCP":{"status":"Active","category":"Required","type":"ServiceTag","destination":{"serviceTag":"AzureActiveDirectory","protocol":"TCP","portRanges":"80,
+        443","action":"Allow","addressPrefixes":[]}}},"status":{"status":"Active"},"firewallSku":"Standard","enableNetworkMonitor":false,"enableFirewallLog":false,"provisionNetworkNow":true,"managedNetworkKind":"V2","provisioningState":"Succeeded","changeableIsolationModes":[]}}}'
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '632'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:09:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/westus/d007f827-a5f1-40f8-a96c-63f5d52c2904
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 2E1945F4237F44EC972FD4F5FE8D3C4A Ref B: BN1AA2051013037 Ref C: 2026-04-07T16:09:41Z'
+      x-request-time:
+      - '0.123'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"category": "UserDefined", "destination": "*.openai.azure.com",
+      "type": "FQDN"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '96'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default/outboundRules/fqdn-rule-1?api-version=2026-01-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 07 Apr 2026 16:09:42 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default/outboundRules/fqdn-rule-1?api-version=2026-01-15-preview
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-async-operation-timeout:
+      - PT50M
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/westus/b666f2d3-2a88-4fdd-93f4-157c618d96e8
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: FE76C410CD434737BD11691DB27C6B78 Ref B: BN1AA2051015023 Ref C: 2026-04-07T16:09:42Z'
+      x-request-time:
+      - '0.625'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:09:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/ddc4d218-298b-48a2-a6d0-55c7881b726f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: E96EEFB225394B9AA6635BC185CDBE5C Ref B: BN1AA2051014023 Ref C: 2026-04-07T16:09:43Z'
+      x-request-time:
+      - '0.046'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:10:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/bdaaf87c-6eee-4dff-b67c-e7fc5f610f95
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 1FB1DAB95C044A0189E1EDC882DF55AF Ref B: BN1AA2051015033 Ref C: 2026-04-07T16:10:14Z'
+      x-request-time:
+      - '0.057'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:10:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/c0a232e3-46fe-4552-8d09-5e2eafdad390
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 4D1BF1B812774F72A784F4473742B3B7 Ref B: BN1AA2051012011 Ref C: 2026-04-07T16:10:44Z'
+      x-request-time:
+      - '0.044'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:11:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/7144be1d-c902-43c2-a108-4b26b34246dd
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: A1195FD9076F49D0B33169ACE11A583B Ref B: BN1AA2051015053 Ref C: 2026-04-07T16:11:14Z'
+      x-request-time:
+      - '0.032'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:11:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/ff28993a-938a-4f3c-a0ee-8f049cd01b05
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: CC1CE5161871430F9BFD15AB5D8C0281 Ref B: BN1AA2051015025 Ref C: 2026-04-07T16:11:45Z'
+      x-request-time:
+      - '0.052'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:12:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/265f603a-3eb0-4af3-b411-66a9c33a25f1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: D8303040AD5849E490AC37DFEFA3D8C8 Ref B: BN1AA2051014033 Ref C: 2026-04-07T16:12:15Z'
+      x-request-time:
+      - '0.038'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:12:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/921ddfc2-e609-4dc4-ba2b-74deaa27d6a0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 2F5B5C95716943A3BD6AF83430EDF192 Ref B: BN1AA2051012017 Ref C: 2026-04-07T16:12:45Z'
+      x-request-time:
+      - '3.188'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:13:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/3b4a084b-076b-4e61-bdf9-375ebaea4162
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: F74CC87D983247D9B8C23D2811D92E1D Ref B: BN1AA2051013039 Ref C: 2026-04-07T16:13:19Z'
+      x-request-time:
+      - '0.062'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:13:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/ab778d21-291f-4203-b143-2313774afb82
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 9E02E6C87D644EFAB107F33D60561A45 Ref B: BN1AA2051015031 Ref C: 2026-04-07T16:13:49Z'
+      x-request-time:
+      - '0.029'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:14:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/2c627bdf-df6d-407c-b3b0-83ff310cbe94
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 93A0D90392BD429F8D56D4A039976F78 Ref B: BN1AA2051014051 Ref C: 2026-04-07T16:14:20Z'
+      x-request-time:
+      - '0.063'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:14:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/752dbd38-0770-4c8d-af07-5c9ca70ca819
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 6157673DAD704BFABCB0B2E853F29BE1 Ref B: BN1AA2051013045 Ref C: 2026-04-07T16:14:50Z'
+      x-request-time:
+      - '0.054'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:15:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/0e110377-0198-4f6c-afdb-1e3ab9a7e01e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: DD69019A4E3447D2B2D66D2B2449D55D Ref B: BN1AA2051014025 Ref C: 2026-04-07T16:15:20Z'
+      x-request-time:
+      - '0.065'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:15:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/ab2005d6-97d1-4b33-8e4e-44c0af978b69
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 640ED841B5844F77B7EC7F6EC50DCE75 Ref B: BN1AA2051015047 Ref C: 2026-04-07T16:15:51Z'
+      x-request-time:
+      - '0.050'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:16:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/229d248f-d380-4e52-b4f8-5db5eda34664
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 4EF65C02279640AD8A60D52256E4155E Ref B: BN1AA2051014047 Ref C: 2026-04-07T16:16:21Z'
+      x-request-time:
+      - '0.040'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:16:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/0ffedc9f-819e-4c24-85f9-88489c54d8db
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: B02974526544453B87A883A234B9AC40 Ref B: BN1AA2051012019 Ref C: 2026-04-07T16:16:51Z'
+      x-request-time:
+      - '0.043'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:17:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/7646b70a-5047-45ad-8dd6-8e81c9211f55
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 5B454BE4069D49E28AA4E69AF1D4AF67 Ref B: BN1AA2051013047 Ref C: 2026-04-07T16:17:22Z'
+      x-request-time:
+      - '0.029'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:17:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/1d72f9bd-657d-4b5b-bc97-7d0ed59126e1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: B757505D867D4A52876D6C0526DE4FF8 Ref B: BN1AA2051012039 Ref C: 2026-04-07T16:17:52Z'
+      x-request-time:
+      - '0.045'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:18:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/88c9b11c-74a0-448e-a1af-013191b200f1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 13782B8B9F99475FBE39944414C10125 Ref B: BN1AA2051013035 Ref C: 2026-04-07T16:18:23Z'
+      x-request-time:
+      - '0.075'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:18:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/8edae2b7-55e4-495b-b094-265cf17e5668
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: FF16B69E875A4BDA8D1158B9BB8269CC Ref B: BN1AA2051014029 Ref C: 2026-04-07T16:18:53Z'
+      x-request-time:
+      - '0.067'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_cc19701d-9646-4103-a91e-f6cd19ef0447\",\n
+        \ \"status\": \"Succeeded\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:19:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/3e69c204-df7e-44c8-b1a1-f4e02232bad3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 2B8C1CFBCB994503ABE6241D66E0CFF3 Ref B: BN1AA2051015017 Ref C: 2026-04-07T16:19:23Z'
+      x-request-time:
+      - '0.030'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default/outboundRules/fqdn-rule-1?api-version=2026-01-15-preview
+  response:
+    body:
+      string: '{"properties":{"status":"Active","category":"UserDefined","type":"FQDN","destination":"*.openai.azure.com"}}'
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:19:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/westus/2782b5a5-6da8-48e4-b6ff-445cca50d9f3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: B8BCE08DD3AE4C4B95C1F53E91717215 Ref B: BN1AA2051013037 Ref C: 2026-04-07T16:19:24Z'
+      x-request-time:
+      - '0.120'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"category": "UserDefined", "destination": "*.cognitiveservices.azure.com",
+      "type": "FQDN"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '107'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default/outboundRules/fqdn-rule-2?api-version=2026-01-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f?api-version=2026-01-15-preview
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 07 Apr 2026 16:19:25 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default/outboundRules/fqdn-rule-2?api-version=2026-01-15-preview
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-async-operation-timeout:
+      - PT50M
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/westus/62d6787b-c84b-4e63-b922-f55e707ebcd6
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: CE9ED4523AE44B18915A50CB96D3507A Ref B: BN1AA2051014049 Ref C: 2026-04-07T16:19:24Z'
+      x-request-time:
+      - '0.308'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:19:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/a587fbf8-7aa7-450a-b696-4c95dbc371c8
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 42AB90FB3F8E46E3B92B73784BA9333A Ref B: BN1AA2051012037 Ref C: 2026-04-07T16:19:25Z'
+      x-request-time:
+      - '0.028'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:19:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/0c27f483-8a7c-4074-9945-66adc90d0d42
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 5213530153CD41B1BA745E7875D73581 Ref B: BN1AA2051012025 Ref C: 2026-04-07T16:19:56Z'
+      x-request-time:
+      - '0.028'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:20:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/d6076c51-fb95-43d1-8607-52925bab85bd
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 6D7BE809C71A41A49B4ED781F619D8BB Ref B: BN1AA2051015031 Ref C: 2026-04-07T16:20:26Z'
+      x-request-time:
+      - '0.046'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:20:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/635324ad-544b-4c2c-8bca-cb6ea8a630de
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 1BF9757EEA3B4E7B937292353D652997 Ref B: BN1AA2051015023 Ref C: 2026-04-07T16:20:56Z'
+      x-request-time:
+      - '0.038'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:21:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/72e74be1-9211-4e43-9123-7f927751efd1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 34795757271E4D0EBC1F7A7F9A2D119D Ref B: BN1AA2051014047 Ref C: 2026-04-07T16:21:26Z'
+      x-request-time:
+      - '0.028'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:21:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/cac9e13d-2206-4554-adac-3dc03828b663
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 0C5390098C3B43C9B9A9ACA6981EE4C5 Ref B: BN1AA2051015053 Ref C: 2026-04-07T16:21:57Z'
+      x-request-time:
+      - '0.049'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f\",\n
+        \ \"status\": \"InProgress\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:22:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus2/2705b00e-0489-4456-be15-82b21ab47453
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: A2C0DDEE00824A25856F08EDED299597 Ref B: BN1AA2051013049 Ref C: 2026-04-07T16:22:27Z'
+      x-request-time:
+      - '0.065'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.MachineLearningServices/locations/eastus/mfeOperationsStatus/mnet:ea00ec77-03d3-4a6c-a7cf-266e1da410cc:ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f?api-version=2026-01-15-preview
+  response:
+    body:
+      string: "{\n  \"id\": \"ea00ec77-03d3-4a6c-a7cf-266e1da410cc_f2715b1e-a7f0-4ef6-b2f8-f5add15eac0f\",\n
+        \ \"status\": \"Succeeded\"\n}"
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:22:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/eastus/4b372639-48ac-4869-9e63-040a4bf48766
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 62E66C54B5F842368CD5E99A88C3A65C Ref B: BN1AA2051012051 Ref C: 2026-04-07T16:22:58Z'
+      x-request-time:
+      - '0.045'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule bulk-set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default/outboundRules/fqdn-rule-2?api-version=2026-01-15-preview
+  response:
+    body:
+      string: '{"properties":{"status":"Active","category":"UserDefined","type":"FQDN","destination":"*.cognitiveservices.azure.com"}}'
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-02
+      cache-control:
+      - no-cache
+      content-length:
+      - '119'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:22:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/westus/f29867d1-0b06-48cf-a94e-9e7cdb9620fb
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: 9579895A1A9E435DB86C31B9A501F37C Ref B: BN1AA2051014053 Ref C: 2026-04-07T16:22:58Z'
+      x-request-time:
+      - '0.082'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account managed-network outbound-rule list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002/managedNetworks/default/outboundRules?api-version=2026-01-15-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"status":"Active","category":"UserDefined","type":"FQDN","destination":"*.openai.azure.com"}},{"properties":{"status":"Active","category":"UserDefined","type":"FQDN","destination":"*.cognitiveservices.azure.com"}},{"properties":{"status":"Active","category":"Required","type":"ServiceTag","destination":{"serviceTag":"AzureActiveDirectory","protocol":"TCP","portRanges":"80,
+        443","action":"Allow","addressPrefixes":[]}}}]}'
+    headers:
+      azureml-served-by-cluster:
+      - vienna-eastus-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '447'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 07 Apr 2026 16:22:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-context:
+      - appId=cid-v1:2d2e8e63-272e-4b3c-8598-4ee570a0e70d
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/westus/d6f7bb9a-c054-4a8a-a10e-d81613621ac2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-ms-response-type:
+      - standard
+      x-msedge-ref:
+      - 'Ref A: E771981AE0984B38A348EE21AC69156B Ref B: BN1AA2051015025 Ref C: 2026-04-07T16:22:59Z'
+      x-request-time:
+      - '0.102'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.10.11 (Windows-10-10.0.26200-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.CognitiveServices/accounts/cog000002?api-version=2026-01-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 07 Apr 2026 16:23:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '132'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=728ecbac-8e5e-4fca-af71-75f4e28db5f8/westus/0f860da3-46c0-44a4-b360-cc7ae772b36a
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 7CFF61D9EFF944F8A6CBE3380D9C824C Ref B: BN1AA2051014011 Ref C: 2026-04-07T16:22:59Z'
+    status:
+      code: 200
+      message: OK
+version: 1
