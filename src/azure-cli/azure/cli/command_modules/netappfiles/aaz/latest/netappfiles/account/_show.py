@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-05-01",
+        "version": "2026-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2026-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2026-07-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-05-01",
+                    "api-version", "2026-07-01",
                     required=True,
                 ),
             }
@@ -222,6 +222,9 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
             properties.encryption = AAZObjectType()
+            properties.ldap_configuration = AAZObjectType(
+                serialized_name="ldapConfiguration",
+            )
             properties.multi_ad_status = AAZStrType(
                 serialized_name="multiAdStatus",
                 flags={"read_only": True},
@@ -362,6 +365,66 @@ class Show(AAZCommand):
             key_vault_properties.status = AAZStrType(
                 flags={"read_only": True},
             )
+
+            ldap_configuration = cls._schema_on_200.properties.ldap_configuration
+            ldap_configuration.bind_authentication_level = AAZStrType(
+                serialized_name="bindAuthenticationLevel",
+            )
+            ldap_configuration.bind_dn = AAZStrType(
+                serialized_name="bindDN",
+            )
+            ldap_configuration.bind_password_akv_config = AAZObjectType(
+                serialized_name="bindPasswordAkvConfig",
+            )
+            ldap_configuration.certificate_cn_host = AAZStrType(
+                serialized_name="certificateCNHost",
+                nullable=True,
+            )
+            ldap_configuration.dns_servers = AAZListType(
+                serialized_name="dnsServers",
+            )
+            ldap_configuration.domain = AAZStrType()
+            ldap_configuration.group_dn = AAZStrType(
+                serialized_name="groupDN",
+            )
+            ldap_configuration.ldap_port = AAZIntType(
+                serialized_name="ldapPort",
+            )
+            ldap_configuration.ldap_servers = AAZListType(
+                serialized_name="ldapServers",
+            )
+            ldap_configuration.net_group_dn = AAZStrType(
+                serialized_name="netGroupDN",
+            )
+            ldap_configuration.secure_ldap_type = AAZStrType(
+                serialized_name="secureLdapType",
+            )
+            ldap_configuration.server_ca_certificate = AAZStrType(
+                serialized_name="serverCACertificate",
+                flags={"secret": True},
+            )
+            ldap_configuration.user_dn = AAZStrType(
+                serialized_name="userDN",
+            )
+
+            bind_password_akv_config = cls._schema_on_200.properties.ldap_configuration.bind_password_akv_config
+            bind_password_akv_config.azure_key_vault_uri = AAZStrType(
+                serialized_name="azureKeyVaultUri",
+                flags={"required": True},
+            )
+            bind_password_akv_config.secret_name = AAZStrType(
+                serialized_name="secretName",
+                flags={"required": True},
+            )
+            bind_password_akv_config.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
+            )
+
+            dns_servers = cls._schema_on_200.properties.ldap_configuration.dns_servers
+            dns_servers.Element = AAZStrType()
+
+            ldap_servers = cls._schema_on_200.properties.ldap_configuration.ldap_servers
+            ldap_servers.Element = AAZStrType()
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(

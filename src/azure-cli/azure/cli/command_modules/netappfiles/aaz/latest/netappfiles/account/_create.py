@@ -28,9 +28,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-05-01",
+        "version": "2026-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2026-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2026-07-01"],
         ]
     }
 
@@ -166,6 +166,11 @@ class Create(AAZCommand):
             options=["--active-directories"],
             arg_group="Properties",
             help="Active Directories",
+        )
+        _args_schema.ldap_configuration = AAZObjectArg(
+            options=["--ldap-configuration"],
+            arg_group="Properties",
+            help="LDAP Configuration for the account.",
         )
         _args_schema.nfs_v4_id_domain = AAZStrArg(
             options=["--nfs-v4-id-domain"],
@@ -342,6 +347,123 @@ class Create(AAZCommand):
                 min_length=1,
             ),
         )
+
+        ldap_configuration = cls._args_schema.ldap_configuration
+        ldap_configuration.bind_authentication_level = AAZStrArg(
+            options=["bind-authentication-level"],
+            help="The authentication level to use when binding to the LDAP server, defaults to Anonymous.",
+            default="Anonymous",
+            enum={"Anonymous": "Anonymous", "Simple": "Simple"},
+        )
+        ldap_configuration.bind_dn = AAZStrArg(
+            options=["bind-dn"],
+            help="The distinguished name (DN) to bind as when performing LDAP operations.",
+            fmt=AAZStrArgFormat(
+                max_length=255,
+                min_length=1,
+            ),
+        )
+        ldap_configuration.bind_password_akv_config = AAZObjectArg(
+            options=["bind-password-akv-config"],
+            help="The Azure Key Vault configuration where the Bind DN (Distinguished Name) user password is stored.",
+        )
+        ldap_configuration.certificate_cn_host = AAZStrArg(
+            options=["certificate-cn-host"],
+            help="The CN host name used while generating the certificate, LDAP Over TLS requires the CN host name to create DNS host entry.",
+            nullable=True,
+            fmt=AAZStrArgFormat(
+                max_length=255,
+            ),
+        )
+        ldap_configuration.dns_servers = AAZListArg(
+            options=["dns-servers"],
+            help="List of DNS server IPv4 addresses for resolving the CN host certificate. This parameter is used when LDAP over TLS is enabled.",
+        )
+        ldap_configuration.domain = AAZStrArg(
+            options=["domain"],
+            help="Name of the LDAP configuration domain",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9.-]{0,253}[a-zA-Z0-9]$",
+                max_length=255,
+            ),
+        )
+        ldap_configuration.group_dn = AAZStrArg(
+            options=["group-dn"],
+            help="This specifies the group DN (Distinguished Name), which overrides the base DN for group lookups.",
+            fmt=AAZStrArgFormat(
+                max_length=1024,
+            ),
+        )
+        ldap_configuration.ldap_port = AAZIntArg(
+            options=["ldap-port"],
+            help="Port number for LDAP communication. Default is 389 for LDAP.",
+            fmt=AAZIntArgFormat(
+                maximum=65535,
+                minimum=1,
+            ),
+        )
+        ldap_configuration.ldap_servers = AAZListArg(
+            options=["ldap-servers"],
+            help="List of LDAP server IP addresses (IPv4 only) for the LDAP domain.",
+        )
+        ldap_configuration.net_group_dn = AAZStrArg(
+            options=["net-group-dn"],
+            help="This specifies the netgroup DN (Distinguished Name), which overrides the base DN for netgroup lookups.",
+            fmt=AAZStrArgFormat(
+                max_length=1024,
+            ),
+        )
+        ldap_configuration.secure_ldap_type = AAZStrArg(
+            options=["secure-ldap-type"],
+            help="Indicates the secure LDAP mode for encrypting communication between ANF storage and customer LDAP servers.",
+            default="None",
+            enum={"LdapOverTLS": "LdapOverTLS", "None": "None"},
+        )
+        ldap_configuration.server_ca_certificate = AAZPasswordArg(
+            options=["server-ca-certificate"],
+            help="When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded ldap servers CA certificate.",
+            fmt=AAZStrArgFormat(
+                max_length=10240,
+                min_length=1,
+            ),
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
+            ),
+        )
+        ldap_configuration.user_dn = AAZStrArg(
+            options=["user-dn"],
+            help="This specifies the user DN (Distinguished Name), which overrides the base DN for user lookups.",
+            fmt=AAZStrArgFormat(
+                max_length=1024,
+            ),
+        )
+
+        bind_password_akv_config = cls._args_schema.ldap_configuration.bind_password_akv_config
+        bind_password_akv_config.azure_key_vault_uri = AAZStrArg(
+            options=["azure-key-vault-uri"],
+            help="The Azure Key Vault URI where the Bind DN user password is stored.",
+            required=True,
+        )
+        bind_password_akv_config.secret_name = AAZStrArg(
+            options=["secret-name"],
+            help="The name of the secret in Azure Key Vault that contains the Bind DN user password.",
+            required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9-]+$",
+                max_length=127,
+                min_length=1,
+            ),
+        )
+        bind_password_akv_config.user_assigned_identity = AAZResourceIdArg(
+            options=["user-assigned-identity"],
+            help="The ARM resource identifier of the user assigned identity used to authenticate with key vault.",
+        )
+
+        dns_servers = cls._args_schema.ldap_configuration.dns_servers
+        dns_servers.Element = AAZStrArg()
+
+        ldap_servers = cls._args_schema.ldap_configuration.ldap_servers
+        ldap_servers.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
@@ -425,7 +547,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-05-01",
+                    "api-version", "2026-07-01",
                     required=True,
                 ),
             }
@@ -474,6 +596,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("activeDirectories", AAZListType, ".active_directories")
                 properties.set_prop("encryption", AAZObjectType)
+                properties.set_prop("ldapConfiguration", AAZObjectType, ".ldap_configuration")
                 properties.set_prop("nfsV4IDDomain", AAZStrType, ".nfs_v4_id_domain", typ_kwargs={"nullable": True})
 
             active_directories = _builder.get(".properties.activeDirectories")
@@ -538,6 +661,36 @@ class Create(AAZCommand):
                 key_vault_properties.set_prop("keyName", AAZStrType, ".key_name", typ_kwargs={"flags": {"required": True}})
                 key_vault_properties.set_prop("keyVaultResourceId", AAZStrType, ".key_vault_resource_id")
                 key_vault_properties.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri", typ_kwargs={"flags": {"required": True}})
+
+            ldap_configuration = _builder.get(".properties.ldapConfiguration")
+            if ldap_configuration is not None:
+                ldap_configuration.set_prop("bindAuthenticationLevel", AAZStrType, ".bind_authentication_level")
+                ldap_configuration.set_prop("bindDN", AAZStrType, ".bind_dn")
+                ldap_configuration.set_prop("bindPasswordAkvConfig", AAZObjectType, ".bind_password_akv_config")
+                ldap_configuration.set_prop("certificateCNHost", AAZStrType, ".certificate_cn_host", typ_kwargs={"nullable": True})
+                ldap_configuration.set_prop("dnsServers", AAZListType, ".dns_servers")
+                ldap_configuration.set_prop("domain", AAZStrType, ".domain")
+                ldap_configuration.set_prop("groupDN", AAZStrType, ".group_dn")
+                ldap_configuration.set_prop("ldapPort", AAZIntType, ".ldap_port")
+                ldap_configuration.set_prop("ldapServers", AAZListType, ".ldap_servers")
+                ldap_configuration.set_prop("netGroupDN", AAZStrType, ".net_group_dn")
+                ldap_configuration.set_prop("secureLdapType", AAZStrType, ".secure_ldap_type")
+                ldap_configuration.set_prop("serverCACertificate", AAZStrType, ".server_ca_certificate", typ_kwargs={"flags": {"secret": True}})
+                ldap_configuration.set_prop("userDN", AAZStrType, ".user_dn")
+
+            bind_password_akv_config = _builder.get(".properties.ldapConfiguration.bindPasswordAkvConfig")
+            if bind_password_akv_config is not None:
+                bind_password_akv_config.set_prop("azureKeyVaultUri", AAZStrType, ".azure_key_vault_uri", typ_kwargs={"flags": {"required": True}})
+                bind_password_akv_config.set_prop("secretName", AAZStrType, ".secret_name", typ_kwargs={"flags": {"required": True}})
+                bind_password_akv_config.set_prop("userAssignedIdentity", AAZStrType, ".user_assigned_identity")
+
+            dns_servers = _builder.get(".properties.ldapConfiguration.dnsServers")
+            if dns_servers is not None:
+                dns_servers.set_elements(AAZStrType, ".")
+
+            ldap_servers = _builder.get(".properties.ldapConfiguration.ldapServers")
+            if ldap_servers is not None:
+                ldap_servers.set_elements(AAZStrType, ".")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -629,6 +782,9 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             properties.encryption = AAZObjectType()
+            properties.ldap_configuration = AAZObjectType(
+                serialized_name="ldapConfiguration",
+            )
             properties.multi_ad_status = AAZStrType(
                 serialized_name="multiAdStatus",
                 flags={"read_only": True},
@@ -769,6 +925,66 @@ class Create(AAZCommand):
             key_vault_properties.status = AAZStrType(
                 flags={"read_only": True},
             )
+
+            ldap_configuration = cls._schema_on_200_201.properties.ldap_configuration
+            ldap_configuration.bind_authentication_level = AAZStrType(
+                serialized_name="bindAuthenticationLevel",
+            )
+            ldap_configuration.bind_dn = AAZStrType(
+                serialized_name="bindDN",
+            )
+            ldap_configuration.bind_password_akv_config = AAZObjectType(
+                serialized_name="bindPasswordAkvConfig",
+            )
+            ldap_configuration.certificate_cn_host = AAZStrType(
+                serialized_name="certificateCNHost",
+                nullable=True,
+            )
+            ldap_configuration.dns_servers = AAZListType(
+                serialized_name="dnsServers",
+            )
+            ldap_configuration.domain = AAZStrType()
+            ldap_configuration.group_dn = AAZStrType(
+                serialized_name="groupDN",
+            )
+            ldap_configuration.ldap_port = AAZIntType(
+                serialized_name="ldapPort",
+            )
+            ldap_configuration.ldap_servers = AAZListType(
+                serialized_name="ldapServers",
+            )
+            ldap_configuration.net_group_dn = AAZStrType(
+                serialized_name="netGroupDN",
+            )
+            ldap_configuration.secure_ldap_type = AAZStrType(
+                serialized_name="secureLdapType",
+            )
+            ldap_configuration.server_ca_certificate = AAZStrType(
+                serialized_name="serverCACertificate",
+                flags={"secret": True},
+            )
+            ldap_configuration.user_dn = AAZStrType(
+                serialized_name="userDN",
+            )
+
+            bind_password_akv_config = cls._schema_on_200_201.properties.ldap_configuration.bind_password_akv_config
+            bind_password_akv_config.azure_key_vault_uri = AAZStrType(
+                serialized_name="azureKeyVaultUri",
+                flags={"required": True},
+            )
+            bind_password_akv_config.secret_name = AAZStrType(
+                serialized_name="secretName",
+                flags={"required": True},
+            )
+            bind_password_akv_config.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
+            )
+
+            dns_servers = cls._schema_on_200_201.properties.ldap_configuration.dns_servers
+            dns_servers.Element = AAZStrType()
+
+            ldap_servers = cls._schema_on_200_201.properties.ldap_configuration.ldap_servers
+            ldap_servers.Element = AAZStrType()
 
             system_data = cls._schema_on_200_201.system_data
             system_data.created_at = AAZStrType(
