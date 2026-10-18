@@ -356,14 +356,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @AllowLargeResponse()
     @record_only()
     def test_afs_msi_reregistration_protection_restore(self):
-        source_subscription = (
-            '8f74352d-05ee-4ca1-8807-c04eaa2dee5a'
-            if self.is_live else self.get_subscription_id()
-        )
-        target_subscription = (
-            '53ad7692-5283-4f0a-baf6-49412f5ebefe'
-            if self.is_live else self.get_subscription_id()
-        )
+        source_subscription = self.get_subscription_id()
+        target_subscription = self.get_subscription_id()
         self.kwargs.update({
             'rg': 'bhar11-prt-restore-rg',
             'vault': 'bhar11-prt-olr-rsv',
@@ -491,6 +485,125 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'storage share delete --account-name {storage_account} '
             '--account-key "{storage_key}" --name {share} '
             '--delete-snapshots include-leased'
+        )
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_afs_sami_protection_restore(self):
+        self.kwargs.update({
+            'rg': 'bhar11-prt-restore-rg',
+            'vault': 'bhar11-prt-olr-rsv',
+            'policy': 'bhar11-prt-snapshot-policy',
+            'storage_account': 'afssami09191425',
+            'share': self.create_random_name('bhar11clisami', 20),
+            'subscription': self.get_subscription_id(),
+            'type': 'AzureStorage'
+        })
+
+        self.cmd(
+            'storage share-rm create -g {rg} --storage-account {storage_account} '
+            '--name {share} --quota 100 --enabled-protocols SMB '
+            '--subscription {subscription}'
+        )
+        self.kwargs['storage_key'] = self.cmd(
+            'storage account keys list -g {rg} -n {storage_account} '
+            '--subscription {subscription} --query "[0].value" -o tsv'
+        ).output.strip()
+        self.cmd(
+            'storage directory create --account-name {storage_account} '
+            '--account-key "{storage_key}" --share-name {share} --name seed '
+            '--subscription {subscription}'
+        )
+
+        self.cmd(
+            'backup protection enable-for-azurefileshare -g {rg} -v {vault} '
+            '--storage-account {storage_account} --azure-file-share {share} '
+            '--policy-name {policy} --access-type IdentityBased '
+            '--mi-system-assigned --yes --subscription {subscription}',
+            checks=[
+                self.check('properties.operation', 'ConfigureBackup'),
+                self.check('properties.status', 'Completed')
+            ]
+        )
+        self.cmd(
+            'backup container show -g {rg} -v {vault} -n {storage_account} '
+            '--backup-management-type {type} --subscription {subscription}',
+            checks=[
+                self.check('properties.accessType', 'IdentityBased'),
+                self.check('properties.identityInfo.isSystemAssignedIdentity', True)
+            ]
+        )
+
+        item = self.cmd(
+            'backup item list -g {rg} -v {vault} -c {storage_account} '
+            '--backup-management-type {type} --workload-type AzureFileShare '
+            '--subscription {subscription} '
+            '--query "[?properties.friendlyName == \'{share}\'] | [0]"'
+        ).get_output_in_json()
+        self.kwargs['item'] = item['name']
+        self.kwargs['container'] = item['properties']['containerName']
+        self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+
+        self.kwargs['job'] = self.cmd(
+            'backup protection backup-now -g {rg} -v {vault} -c {container} -i {item} '
+            '--backup-management-type {type} --retain-until {retain_date} '
+            '--subscription {subscription} --query name'
+        ).get_output_in_json()
+        self.cmd(
+            'backup job wait -g {rg} -v {vault} -n {job} '
+            '--subscription {subscription}'
+        )
+
+        self.kwargs['rp'] = self.cmd(
+            'backup recoverypoint list -g {rg} -v {vault} -c {container} -i {item} '
+            '--backup-management-type {type} --subscription {subscription} '
+            '--query "sort_by(@, &properties.recoveryPointTime)[-1].name"'
+        ).get_output_in_json()
+
+        self.kwargs['job'] = self.cmd(
+            'backup restore restore-azurefileshare -g {rg} -v {vault} '
+            '-c {container} -i {item} -r {rp} --restore-mode AlternateLocation '
+            '--resolve-conflict Overwrite --target-storage-account {storage_account} '
+            '--target-file-share {share} --mi-system-assigned '
+            '--subscription {subscription} --query name'
+        ).get_output_in_json()
+        self.cmd(
+            'backup job wait -g {rg} -v {vault} -n {job} '
+            '--subscription {subscription}'
+        )
+        self.cmd(
+            'backup job show -g {rg} -v {vault} -n {job} '
+            '--subscription {subscription}',
+            checks=[self.check('properties.status', 'Completed')]
+        )
+
+        self.kwargs['job'] = self.cmd(
+            'backup restore restore-azurefiles -g {rg} -v {vault} '
+            '-c {container} -i {item} -r {rp} --restore-mode AlternateLocation '
+            '--resolve-conflict Overwrite --source-file-type Directory '
+            '--source-file-path seed --target-storage-account {storage_account} '
+            '--target-file-share {share} --target-folder sami-item-restore '
+            '--mi-system-assigned --subscription {subscription} --query name'
+        ).get_output_in_json()
+        self.cmd(
+            'backup job wait -g {rg} -v {vault} -n {job} '
+            '--subscription {subscription}'
+        )
+        self.cmd(
+            'backup job show -g {rg} -v {vault} -n {job} '
+            '--subscription {subscription}',
+            checks=[self.check('properties.status', 'Completed')]
+        )
+
+        self.cmd(
+            'backup protection disable -g {rg} -v {vault} -c {container} -i {item} '
+            '--backup-management-type {type} --delete-backup-data true --yes '
+            '--subscription {subscription}'
+        )
+        self.cmd(
+            'storage share delete --account-name {storage_account} '
+            '--account-key "{storage_key}" --name {share} '
+            '--delete-snapshots include-leased --subscription {subscription}'
         )
 
     #@record_only()
