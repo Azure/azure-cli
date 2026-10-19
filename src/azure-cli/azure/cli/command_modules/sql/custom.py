@@ -3272,7 +3272,7 @@ def update_short_term_retention(
     '''
     Updates short term retention for live database
     '''
-    from ._str_policy import DatabasePolicySet
+    from .operations.str_policy import DatabasePolicySet
 
     if retention_days is None and diffbackup_hours is None and lock_immutability is None:
         raise RequiredArgumentMissingError(
@@ -3304,7 +3304,7 @@ def get_short_term_retention_for_wait(cmd, database_name, server_name, resource_
 
     :param policy_name: The policy name. Should always be "default".
     '''
-    from ._str_policy import DatabasePolicyShow
+    from .operations.str_policy import DatabasePolicyShow
     return DatabasePolicyShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'server_name': server_name,
@@ -6134,7 +6134,7 @@ def update_short_term_retention_mi(
     Updates short term retention for database
     '''
 
-    from ._str_policy import DroppedDatabasePolicySet, ManagedDatabasePolicySet
+    from .operations.str_policy import DroppedDatabasePolicySet, ManagedDatabasePolicySet
 
     if deleted_time is not None and lock_immutability is not None:
         raise MutuallyExclusiveArgumentError(
@@ -6166,7 +6166,7 @@ def get_short_term_retention_mi(
     '''
     Gets short term retention for database
     '''
-    from ._str_policy import DroppedDatabasePolicyShow, ManagedDatabasePolicyShow
+    from .operations.str_policy import DroppedDatabasePolicyShow, ManagedDatabasePolicyShow
 
     if deleted_time:
         database_name = '{},{}'.format(database_name, _to_filetimeutc(deleted_time))

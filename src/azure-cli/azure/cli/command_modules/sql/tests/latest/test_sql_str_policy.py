@@ -520,6 +520,32 @@ class SqlShortTermRetentionPolicyTests(unittest.TestCase):
         self.send.assert_not_called()
         self.prompt.assert_not_called()
 
+    def test_sql_str_customizations_inherit_generated_classes(self):
+        from azure.cli.command_modules.sql.operations import str_policy
+        from azure.cli.command_modules.sql.aaz.latest.sql.db.str_policy import Set as DatabaseSet, Show as DatabaseShow
+        from azure.cli.command_modules.sql.aaz.latest.sql.midb.short_term_retention_policy import (
+            Set as ManagedSet, Show as ManagedShow,
+        )
+        from azure.cli.command_modules.sql.aaz.latest.sql.midb.short_term_retention_policy.restorable_dropped import (
+            Set as DroppedSet, Show as DroppedShow,
+        )
+        for customized, generated, operation_name in (
+            (str_policy.DatabasePolicyShow, DatabaseShow, None),
+            (str_policy.ManagedDatabasePolicyShow, ManagedShow, None),
+            (str_policy.DroppedDatabasePolicyShow, DroppedShow, None),
+            (str_policy.DatabasePolicySet, DatabaseSet, 'BackupShortTermRetentionPoliciesCreateOrUpdate'),
+            (str_policy.ManagedDatabasePolicySet, ManagedSet, 'ManagedBackupShortTermRetentionPoliciesCreateOrUpdate'),
+            (str_policy.DroppedDatabasePolicySet, DroppedSet,
+             'ManagedRestorableDroppedDatabaseBackupShortTermRetentionPoliciesCreateOrUpdate'),
+        ):
+            with self.subTest(customized=customized.__name__):
+                self.assertEqual(customized.__bases__, (generated,))
+                self.assertEqual(customized.__module__, 'azure.cli.command_modules.sql.operations.str_policy')
+                if operation_name:
+                    operation = getattr(customized, operation_name)
+                    self.assertEqual(operation.__bases__, (getattr(generated, operation_name),))
+        self.send.assert_not_called()
+
     def test_sql_str_generated_internal_commands_are_not_registered(self):
         for operation in ('show', 'set'):
             with self.subTest(operation=operation):
