@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import ntpath
 import unittest
 from unittest import mock
 
@@ -12,7 +13,10 @@ from azure.cli.command_modules.storage.operations.file import _make_directory_in
 class TestMakeDirectoryInFilesShare(unittest.TestCase):
     def test_absolute_windows_path_terminates_and_skips_root(self):
         file_service = mock.Mock()
-        _make_directory_in_files_share(file_service, 'C:/Program Files/Git/some/path')
+        # Force ntpath semantics so this test is deterministic on any CI host OS
+        # (os.path is posixpath on Linux, where 'C:' isn't recognized as a drive root).
+        with mock.patch('azure.cli.command_modules.storage.operations.file.os.path', ntpath):
+            _make_directory_in_files_share(file_service, 'C:/Program Files/Git/some/path')
 
         created = [c.kwargs['directory_name'] for c in file_service.create_directory.call_args_list]
         self.assertEqual(created, [
