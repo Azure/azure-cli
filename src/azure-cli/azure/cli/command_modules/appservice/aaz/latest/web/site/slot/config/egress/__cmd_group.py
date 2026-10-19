@@ -11,10 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command_group(
-    "web site slot config egress",
-    is_preview=True,
-)
 class __CMDGroup(AAZCommandGroup):
     """Manage Egress
     """

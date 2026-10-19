@@ -11,10 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "web site slot config egress show",
-    is_preview=True,
-)
 class Show(AAZCommand):
     """Get the egress configuration stored for a deployment slot, including its
 connections. Returns an empty configuration when none is stored.

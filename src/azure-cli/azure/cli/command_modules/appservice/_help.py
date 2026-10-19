@@ -1448,6 +1448,102 @@ type: group
 short-summary: Configure a web app.
 """
 
+helps['webapp config egress'] = """
+type: group
+short-summary: Manage virtualized backend connections for a web app.
+"""
+
+helps['webapp config egress set'] = """
+type: command
+short-summary: Replace the egress configuration for a web app.
+long-summary: |
+  All existing connections are replaced. Connections omitted from the request are removed.
+  Omit --connection entirely to clear the configuration. To change just one connection, use
+  "az webapp config egress connection add" instead. Reference existing app setting or connection
+  string names, never their secret values. The platform validates protocol and authentication
+  combinations and requires referenced settings and managed identities to exist.
+examples:
+  - name: Enable a Redis connection and a managed identity SQL connection.
+    text: >-
+      az webapp config egress set --resource-group MyRG --name MyApp --enabled Enabled
+      --connection name=cache protocol=Redis auth=Credential host-setting=REDIS_HOST credential-setting=REDIS_PASSWORD
+      --connection name=orders-db protocol=Tds auth=ManagedIdentity source=ConnectionStrings value-setting=OrdersDb
+  - name: Configure HTTP credential injection for a deployment slot.
+    text: >-
+      az webapp config egress set --resource-group MyRG --name MyApp --slot staging --enabled Enabled
+      --connection name=api protocol=Http auth=Credential host-setting=API_HOST credential-setting=API_KEY credential-header=X-API-Key
+  - name: Clear all egress connections.
+    text: az webapp config egress set --resource-group MyRG --name MyApp
+"""
+
+helps['webapp config egress show'] = """
+type: command
+short-summary: Show the egress configuration for a web app.
+examples:
+  - name: Show the enabled state and all connections.
+    text: az webapp config egress show --resource-group MyRG --name MyApp
+  - name: Show only the connections for a deployment slot.
+    text: az webapp config egress show --resource-group MyRG --name MyApp --slot staging --query properties.connections
+"""
+
+helps['webapp config egress connection'] = """
+type: group
+short-summary: Manage named connections in a web app's egress configuration.
+"""
+
+helps['webapp config egress connection add'] = """
+type: command
+short-summary: Add or replace a named egress connection.
+long-summary: |
+  Preserve other connections and the enabled state. An existing connection with the same name
+  is replaced, regardless of casing. Only the supplied connection is returned.
+  Setting arguments accept existing setting names, not their values. The platform validates
+  protocol and authentication combinations. Managed identities must already be assigned to the app.
+examples:
+  - name: Add a SQL connection that uses managed identity and an existing connection string.
+    text: >-
+      az webapp config egress connection add --resource-group MyRG --name MyApp
+      --connection-name orders-db --source ConnectionStrings --protocol Tds --auth ManagedIdentity
+      --value-setting OrdersDb
+  - name: Add a PostgreSQL connection composed of separate app settings.
+    text: >-
+      az webapp config egress connection add --resource-group MyRG --name MyApp
+      --connection-name postgres --source AppSettings --protocol Postgres --auth Credential
+      --host-setting PG_HOST --username-setting PG_USER --credential-setting PG_PASSWORD
+  - name: Use a user-assigned identity with a custom token scope for a deployment slot.
+    text: >-
+      az webapp config egress connection add --resource-group MyRG --name MyApp --slot staging
+      --connection-name api --protocol Http --auth ManagedIdentity --host-setting API_HOST
+      --identity-resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+      --identity-scope https://storage.azure.com/.default
+  - name: Inject an HTTP credential using a header format.
+    text: >-
+      az webapp config egress connection add --resource-group MyRG --name MyApp
+      --connection-name api --protocol Http --auth Credential --host-setting API_HOST
+      --credential-setting API_TOKEN --credential-header Authorization --credential-format "Bearer {value}"
+"""
+
+helps['webapp config egress connection remove'] = """
+type: command
+short-summary: Remove a named egress connection.
+long-summary: Preserve other connections and the enabled state. Removing the last connection clears the egress configuration.
+examples:
+  - name: Remove the orders database connection.
+    text: az webapp config egress connection remove --resource-group MyRG --name MyApp --connection-name orders-db
+  - name: Remove a connection from a deployment slot.
+    text: az webapp config egress connection remove --resource-group MyRG --name MyApp --slot staging --connection-name cache
+"""
+
+helps['webapp config egress connection show'] = """
+type: command
+short-summary: Show a named egress connection.
+examples:
+  - name: Show the orders database connection.
+    text: az webapp config egress connection show --resource-group MyRG --name MyApp --connection-name orders-db
+  - name: Show the setting roles for a connection in a deployment slot.
+    text: az webapp config egress connection show --resource-group MyRG --name MyApp --slot staging --connection-name cache --query settings
+"""
+
 helps['webapp config access-restriction'] = """
 type: group
 short-summary: Methods that show, set, add, and remove access restrictions on a webapp

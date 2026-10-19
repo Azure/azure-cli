@@ -11,10 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "web site config egress show",
-    is_preview=True,
-)
 class Show(AAZCommand):
     """Get the egress configuration stored for an app, including its connections.
 Returns an empty configuration when none is stored.

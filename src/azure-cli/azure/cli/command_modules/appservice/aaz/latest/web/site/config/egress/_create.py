@@ -11,10 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "web site config egress create",
-    is_preview=True,
-)
 class Create(AAZCommand):
     """Create the egress configuration for an app. The supplied
 connections replace the stored ones in full, so connections omitted from
