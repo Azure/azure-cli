@@ -131,14 +131,28 @@ def process_hsm_name(ns):
         ns.hsm_name = ns.identifier
 
 
+def _get_vault_name_options(ns):
+    """Get the option string of the vault name argument registered for the current command,
+    as it can be either --vault-name or --name/-n."""
+    default_options = '--vault-name'
+    cmd = getattr(ns, 'cmd', None)
+    arguments = getattr(cmd, 'arguments', None) or {}
+    argument = arguments.get('vault_name', None)
+    options_list = argument.options_list if argument else None
+    if not options_list:
+        return default_options
+    return '/'.join([str(option) for option in options_list])
+
+
 def validate_vault_name_and_hsm_name(ns):
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
+    vault_name_options = _get_vault_name_options(ns)
     if vault_name and hsm_name:
-        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
+        raise CLIError('{} and --hsm-name are mutually exclusive.'.format(vault_name_options))
 
     if not vault_name and not hsm_name:
-        raise CLIError('Please specify --vault-name or --hsm-name.')
+        raise CLIError('Please specify {} or --hsm-name.'.format(vault_name_options))
 
 # PARAMETER NAMESPACE VALIDATORS
 
@@ -426,7 +440,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     hsm_name = getattr(ns, 'hsm_name', None)
 
     if not vault_name and not hsm_name:
-        raise CLIError('Please specify --vault-name or --hsm-name.')
+        raise CLIError('Please specify {} or --hsm-name.'.format(_get_vault_name_options(ns)))
 
     if vault_name:
         resource_name = vault_name
