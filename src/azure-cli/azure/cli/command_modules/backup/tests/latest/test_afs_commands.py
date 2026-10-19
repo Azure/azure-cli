@@ -353,7 +353,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             ]
         )
 
-    # Uses subscription-specific vault, storage, identity, and RBAC setup that generic preparers do not create.
     @AllowLargeResponse()
     @record_only()
     def test_afs_msi_reregistration_protection_restore(self):
@@ -488,7 +487,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             '--delete-snapshots include-leased'
         )
 
-    # Uses subscription-specific vault, storage, identity, and RBAC setup that generic preparers do not create.
     @AllowLargeResponse()
     @record_only()
     def test_afs_sami_protection_restore(self):
