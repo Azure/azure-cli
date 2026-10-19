@@ -284,6 +284,8 @@ def _polish_bad_errors(ex, creating_plan):
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
+    from ._active_backup_commands import load_command_table as load_active_backup_commands
+    load_active_backup_commands(self)
     webclient_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.web.operations#WebSiteManagementClientOperationsMixin.{}',
         client_factory=cf_web_client
