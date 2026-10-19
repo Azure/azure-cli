@@ -4,9 +4,45 @@
 # --------------------------------------------------------------------------------------------
 
 """
+Help functions to normalize and compare storage URL origins.
 Help functions to extract storage account, container name, blob name and other information from
 container and/or blob URL.
 """
+
+
+def normalize_url_origin(url):
+    from ipaddress import ip_address
+    from urllib.parse import urlsplit
+    import idna
+
+    try:
+        parsed = urlsplit(url)
+        scheme = parsed.scheme.lower()
+        hostname = parsed.hostname
+        if scheme not in ('http', 'https') or not hostname:
+            return None
+
+        hostname = hostname.rstrip('.')
+        if not hostname:
+            return None
+        try:
+            hostname = ip_address(hostname).compressed
+        except ValueError:
+            hostname = idna.encode(hostname, uts46=True).decode('ascii').lower().rstrip('.')
+            if not hostname:
+                return None
+
+        port = parsed.port
+        if port is None:
+            port = 443 if scheme == 'https' else 80
+        return scheme, hostname, port
+    except (UnicodeError, ValueError):
+        return None
+
+
+def same_url_origin(first_url, second_url):
+    first_origin = normalize_url_origin(first_url)
+    return first_origin is not None and first_origin == normalize_url_origin(second_url)
 
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
