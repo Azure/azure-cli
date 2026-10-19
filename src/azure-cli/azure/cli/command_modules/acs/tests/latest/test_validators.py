@@ -634,8 +634,26 @@ class TestValidateAzureKeyVaultKmsKeyId(unittest.TestCase):
             validators.validate_azure_keyvault_kms_key_id(namespace)
         self.assertEqual(str(cm.exception), err)
 
-    def test_invalid_azure_keyvault_kms_key_id_without_key_version(self):
-        invalid_azure_keyvault_kms_key_id = "https://fakekeyvault.vault.azure.net/keys/fakekeyname"
+    def test_valid_azure_keyvault_kms_key_id_without_key_version(self):
+        # versionless key IDs are valid, they are required when KMS infrastructure encryption (PMK) is enabled
+        valid_azure_keyvault_kms_key_id = "https://fakekeyvault.vault.azure.net/keys/fakekeyname"
+        namespace = AzureKeyVaultKmsKeyIdNamespace(azure_keyvault_kms_key_id=valid_azure_keyvault_kms_key_id)
+
+        validators.validate_azure_keyvault_kms_key_id(namespace)
+
+    def test_invalid_azure_keyvault_kms_key_id_with_insufficient_segments(self):
+        invalid_azure_keyvault_kms_key_id = "https://fakekeyvault.vault.azure.net/keys"
+        namespace = AzureKeyVaultKmsKeyIdNamespace(azure_keyvault_kms_key_id=invalid_azure_keyvault_kms_key_id)
+        err = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. ' \
+              'See https://learn.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_azure_keyvault_kms_key_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_azure_keyvault_kms_key_id_with_extra_segments(self):
+        invalid_azure_keyvault_kms_key_id = \
+            "https://fakekeyvault.vault.azure.net/keys/fakekeyname/fakekeyversion/extra"
         namespace = AzureKeyVaultKmsKeyIdNamespace(azure_keyvault_kms_key_id=invalid_azure_keyvault_kms_key_id)
         err = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. ' \
               'See https://learn.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
@@ -720,15 +738,40 @@ class TestValidateAzureKeyVaultKmsKeyVaultResourceId(unittest.TestCase):
 
         validators.validate_azure_keyvault_kms_key_vault_resource_id(namespace)
 
+    def test_valid_azure_keyvault_kms_managed_hsm_resource_id(self):
+        valid_azure_keyvault_kms_key_vault_resource_id = "/subscriptions/8ecadfc9-d1a3-4ea4-b844-0d9f87e4d7c8/resourceGroups/foo/providers/Microsoft.KeyVault/managedHSMs/foo"
+        namespace = AzureKeyVaultKmsKeyVaultResourceIdNamespace(azure_keyvault_kms_key_vault_resource_id=valid_azure_keyvault_kms_key_vault_resource_id)
+
+        validators.validate_azure_keyvault_kms_key_vault_resource_id(namespace)
+
+    def test_invalid_azure_keyvault_kms_key_vault_resource_id_wrong_provider(self):
+        invalid_azure_keyvault_kms_key_vault_resource_id = "/subscriptions/8ecadfc9-d1a3-4ea4-b844-0d9f87e4d7c8/resourceGroups/foo/providers/Microsoft.Storage/storageAccounts/foo"
+        namespace = AzureKeyVaultKmsKeyVaultResourceIdNamespace(azure_keyvault_kms_key_vault_resource_id=invalid_azure_keyvault_kms_key_vault_resource_id)
+        err = '--azure-keyvault-kms-key-vault-resource-id must reference a Microsoft.KeyVault resource.'
+
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            validators.validate_azure_keyvault_kms_key_vault_resource_id(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_empty_azure_keyvault_kms_key_vault_resource_id(self):
+        namespace = AzureKeyVaultKmsKeyVaultResourceIdNamespace(azure_keyvault_kms_key_vault_resource_id="")
+
+        validators.validate_azure_keyvault_kms_key_vault_resource_id(namespace)
+
+    def test_none_azure_keyvault_kms_key_vault_resource_id(self):
+        namespace = AzureKeyVaultKmsKeyVaultResourceIdNamespace(azure_keyvault_kms_key_vault_resource_id=None)
+
+        validators.validate_azure_keyvault_kms_key_vault_resource_id(namespace)
+
 
 class TestValidateNodepoolName(unittest.TestCase):
     def test_invalid_nodepool_name_too_long(self):
         namespace = SimpleNamespace(
             **{
-                "nodepool_name": "tooLongNodepoolName",
+                "nodepool_name": "a" * 40,
             }
         )
-        with self.assertRaises(InvalidArgumentValueError):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "at most 39 characters"):
             validators.validate_nodepool_name(
                 namespace
             )
@@ -736,10 +779,10 @@ class TestValidateNodepoolName(unittest.TestCase):
     def test_invalid_agent_pool_name_too_long(self):
         namespace = SimpleNamespace(
             **{
-                "agent_pool_name": "tooLongNodepoolName",
+                "agent_pool_name": "a" * 40,
             }
         )
-        with self.assertRaises(InvalidArgumentValueError):
+        with self.assertRaisesRegex(InvalidArgumentValueError, "at most 39 characters"):
             validators.validate_agent_pool_name(
                 namespace
             )
@@ -785,6 +828,24 @@ class TestValidateNodepoolName(unittest.TestCase):
         validators.validate_agent_pool_name(
             namespace
         )
+
+    def test_valid_nodepool_name_length_boundaries(self):
+        for length in (12, 13, 39):
+            with self.subTest(length=length):
+                namespace = SimpleNamespace(nodepool_name="a" * length)
+                validators.validate_nodepool_name(namespace)
+
+    def test_valid_agent_pool_name_length_boundaries(self):
+        for length in (12, 13, 39):
+            with self.subTest(length=length):
+                namespace = SimpleNamespace(agent_pool_name="a" * length)
+                validators.validate_agent_pool_name(namespace)
+
+    def test_valid_empty_nodepool_name(self):
+        validators.validate_nodepool_name(SimpleNamespace(nodepool_name=""))
+
+    def test_valid_empty_agent_pool_name(self):
+        validators.validate_agent_pool_name(SimpleNamespace(agent_pool_name=""))
 
 
 class GatewayPrefixSizeSpace:
@@ -2440,6 +2501,15 @@ class TestNatGatewayV2Validators(unittest.TestCase):
         # Managed-only and BYO-only (IPs and prefixes together) remain valid.
         validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_managed_outbound_ipv6_count=1, outbound_type="managedNATGateway", nat_gateway_sku="StandardV2"))
         validators.validate_nat_gateway_v2_params(self._ns(nat_gateway_outbound_ip_ids="/sub/ip", nat_gateway_outbound_ip_prefix_ids="/sub/pfx", outbound_type="managedNATGateway", nat_gateway_sku="StandardV2"))
+
+
+class TestValidateOsSku(unittest.TestCase):
+    def test_nodepool_update_allows_windows2022_and_windows2025(self):
+        from azure.cli.command_modules.acs._params import node_os_skus_update
+
+        self.assertIn("Windows2022", node_os_skus_update)
+        self.assertIn("Windows2025", node_os_skus_update)
+        self.assertNotIn("Windows2019", node_os_skus_update)
 
 
 if __name__ == "__main__":

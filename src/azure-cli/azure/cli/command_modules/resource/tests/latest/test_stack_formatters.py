@@ -164,6 +164,10 @@ Azure
   {Color.GREEN}+{Color.RESET} {Color.GREEN}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testD/resourceD [2021-05-01]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"NotManaged"{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}"None"{Color.RESET} => {Color.PURPLE}"DenyDelete"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} location: {Color.GREEN}"westus"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} properties: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "property1": "resourceD"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
 
   >> {Color.PURPLE}Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
   {Color.CYAN}?{Color.RESET}{Color.PURPLE}~{Color.RESET} {Color.CYAN}[Potential] {Color.RESET}{Color.PURPLE}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC [2021-05-01]{Color.RESET}
@@ -197,6 +201,9 @@ Contoso@2.0.0
   {Color.RED}-{Color.RESET} {Color.RED}Contoso/example name="defResource"{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"Managed"{Color.RESET} => {Color.PURPLE}"Unmanaged"{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}"NotSupported"{Color.RESET} => {Color.PURPLE}"None"{Color.RESET}
+    {Color.RED}-{Color.RESET} properties: {Color.RED}{{{Color.RESET}
+      {Color.RED}  "property1": "resourceDef-before"{Color.RESET}
+      {Color.RED}}}{Color.RESET}
 
   >> {Color.PURPLE}Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
   {Color.CYAN}?{Color.RESET}! {Color.CYAN}[Potential] {Color.RESET}Contoso/noPreview 
@@ -207,7 +214,9 @@ Kubernetes@2.0.0 namespace="myNs", kubeconfig=<Secret 'mySecret' in key vault '/
   {Color.GREEN}+{Color.RESET} {Color.GREEN}app/Deployment name="kubeAppDeployment" [v1]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}null{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Deny Status: {Color.PURPLE}null{Color.RESET} => {Color.PURPLE}"NotApplicable"{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} properties.property1: {Color.PURPLE}"kubeAppDeployment-before"{Color.RESET} => {Color.PURPLE}"kubeAppDeployment-after"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} properties: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "property1": "kubeAppDeployment-after"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
 
 {Color.RED}Deleting - {Color.RESET}Resources Marked for Deletion 2 total:
 
@@ -293,6 +302,23 @@ Azure
   {Color.GREEN}+{Color.RESET} {Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvcreatemjwo5pow6lmvm [2023-05-01]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
     = Deny Status: "none"
+    {Color.GREEN}+{Color.RESET} kind: {Color.GREEN}"StorageV2"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} location: {Color.GREEN}"westus2"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} sku: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "name": "Standard_LRS"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
+    {Color.GREEN}+{Color.RESET} tags: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "owner": "what-if-visual-validation",{Color.RESET}
+      {Color.GREEN}  "scenario": "definite-create"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
+    {Color.GREEN}+{Color.RESET} properties: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "allowBlobPublicAccess": false,{Color.RESET}
+      {Color.GREEN}  "allowSharedKeyAccess": false,{Color.RESET}
+      {Color.GREEN}  "defaultToOAuthAuthentication": true,{Color.RESET}
+      {Color.GREEN}  "minimumTlsVersion": "TLS1_2",{Color.RESET}
+      {Color.GREEN}  "publicNetworkAccess": "Disabled",{Color.RESET}
+      {Color.GREEN}  "supportsHttpsTrafficOnly": true{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
   {Color.PURPLE}~{Color.RESET} {Color.PURPLE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvmodmjwo5pow6lmvm [2023-05-01]{Color.RESET}
     = Management Status: "managed"
     = Deny Status: "none"
@@ -309,14 +335,38 @@ Azure
   {Color.GREEN}+{Color.RESET} {Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/bar [1999-12-31]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
     = Deny Status: "none"
+    {Color.GREEN}+{Color.RESET} properties: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "source": "duplicate-diagnostic.bicep"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
   {Color.GREEN}+{Color.RESET} {Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/RP.Namespace/widgets/foo [1999-12-31]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
     = Deny Status: "none"
+    {Color.GREEN}+{Color.RESET} properties: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "source": "duplicate-diagnostic.bicep"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
 
   >> {Color.PURPLE}Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
   {Color.CYAN}?{Color.RESET}{Color.GREEN}+{Color.RESET} {Color.CYAN}[Potential] {Color.RESET}{Color.GREEN}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotcreatemjwo5pow6lmvm [2023-05-01]{Color.RESET}
     {Color.PURPLE}~{Color.RESET} Management Status: {Color.PURPLE}"notManaged"{Color.RESET} => {Color.PURPLE}"managed"{Color.RESET}
     = Deny Status: "none"
+    {Color.GREEN}+{Color.RESET} condition: {Color.GREEN}"[greater(int(utcNow('%f')), 4)]"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} kind: {Color.GREEN}"StorageV2"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} location: {Color.GREEN}"westus2"{Color.RESET}
+    {Color.GREEN}+{Color.RESET} sku: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "name": "Standard_LRS"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
+    {Color.GREEN}+{Color.RESET} tags: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "owner": "what-if-visual-validation",{Color.RESET}
+      {Color.GREEN}  "scenario": "potential-create"{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
+    {Color.GREEN}+{Color.RESET} properties: {Color.GREEN}{{{Color.RESET}
+      {Color.GREEN}  "allowBlobPublicAccess": false,{Color.RESET}
+      {Color.GREEN}  "allowSharedKeyAccess": false,{Color.RESET}
+      {Color.GREEN}  "defaultToOAuthAuthentication": true,{Color.RESET}
+      {Color.GREEN}  "minimumTlsVersion": "TLS1_2",{Color.RESET}
+      {Color.GREEN}  "publicNetworkAccess": "Disabled",{Color.RESET}
+      {Color.GREEN}  "supportsHttpsTrafficOnly": true{Color.RESET}
+      {Color.GREEN}}}{Color.RESET}
   {Color.CYAN}?{Color.RESET}{Color.PURPLE}~{Color.RESET} {Color.CYAN}[Potential] {Color.RESET}{Color.PURPLE}/subscriptions/390ba170-3e2a-41c4-b372-15d9c5ae6e81/resourceGroups/whatif-change-40011/providers/Microsoft.Storage/storageAccounts/wvpotremovemjwo5pow6lmvm [2023-05-01]{Color.RESET}
     = Management Status: "managed"
     = Deny Status: "none"
