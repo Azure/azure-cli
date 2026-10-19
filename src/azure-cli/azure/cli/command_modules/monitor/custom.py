@@ -33,12 +33,12 @@ def list_activity_log(cmd, correlation_id=None, resource_group=None, resource_id
 
 def _build_activity_log_odata_filter(correlation_id=None, resource_group=None, resource_id=None, resource_provider=None,
                                      start_time=None, end_time=None, caller=None, status=None, offset=None):
-    from datetime import datetime
+    import datetime as dt
     import dateutil.parser
 
     if not start_time and not end_time:
         # if neither value provided, end_time is now
-        end_time = datetime.utcnow().isoformat()
+        end_time = dt.datetime.now(dt.UTC).isoformat()
     if not start_time:
         # if no start_time, apply offset backwards from end_time
         start_time = (dateutil.parser.parse(end_time) - offset).isoformat()
@@ -108,13 +108,13 @@ def list_metrics(cmd, resource,
                  metadata=None, dimension=None, aggregation=None, metrics=None,
                  filters=None, metric_namespace=None, orderby=None, top=10):
 
-    from datetime import datetime
+    import datetime as dt
     import dateutil.parser
     from urllib.parse import quote_plus
 
     if not start_time and not end_time:
         # if neither value provided, end_time is now
-        end_time = datetime.utcnow().isoformat()
+        end_time = dt.datetime.now(dt.UTC).isoformat()
     if not start_time:
         # if no start_time, apply offset backwards from end_time
         start_time = (dateutil.parser.parse(end_time) - offset).isoformat()

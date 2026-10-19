@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import datetime
+import datetime as dt
 import logging
 import os
 import time
@@ -102,7 +102,7 @@ class TestCommandLogFile(ScenarioTest):
         self.assertEqual(_RAW_EXTENSIONS_ISSUES_URL, repo_url)
 
     def _helper_test_log_metadata_correct(self):
-        time_now = datetime.datetime.now()
+        time_now = dt.datetime.now()
         command_log_files = _get_command_log_files(self.cli_ctx, time_now)
         p_id = os.getpid()
         self.assertEqual(len(command_log_files), 4)
@@ -123,7 +123,7 @@ class TestCommandLogFile(ScenarioTest):
         self.assertEqual("az alias list", command_log_files[3].metadata_tup.cmd)
 
     def _helper_test_log_contents_correct(self):
-        time_now = datetime.datetime.now()
+        time_now = dt.datetime.now()
         command_log_files = _get_command_log_files(self.cli_ctx, time_now)
         self.assertEqual(len(command_log_files), 4)
 
@@ -205,6 +205,22 @@ class TestCommandLogFile(ScenarioTest):
         with mock.patch('azure.cli.core.util.handle_exception', _handle_exception_with_log):
             result = execute(cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
         return result
+
+
+class TestSurvey(unittest.TestCase):
+    def test_handle_survey_accepts_saved_timestamp_without_offset(self):
+        from azure.cli.command_modules.feedback import custom
+
+        note = '{"last_prompt_time": "2000-01-01T00:00:00"}'
+        with mock.patch.object(custom.os.path, 'isfile', return_value=True), \
+                mock.patch('azure.cli.command_modules.feedback.custom.open', mock.mock_open(read_data=note)), \
+                mock.patch('azure.cli.core._profile.Profile') as profile, \
+                mock.patch.object(custom, 'can_launch_browser', return_value=False), \
+                mock.patch('builtins.print') as output:
+            profile.return_value.get_installation_id.return_value = 'test-installation'
+            custom.handle_survey(mock.Mock())
+            self.assertIn('test-installation', output.call_args.args[0])
+            self.assertNotIn('d=-1', output.call_args.args[0])
 
 
 if __name__ == '__main__':

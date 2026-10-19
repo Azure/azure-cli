@@ -33,7 +33,7 @@ from azure.cli.command_modules.sql.custom import (
     ClientType,
     ComputeModelType,
     ResourceIdType)
-from datetime import datetime, timedelta
+import datetime as dt
 
 
 # Constants
@@ -2018,15 +2018,15 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 
 
 def _get_earliest_restore_date(db):
-    return datetime.strptime(db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S+00:00")
+    return dt.datetime.strptime(db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S+00:00")
 
 
 def _get_earliest_restore_date_for_deleted_db(deleted_db):
-    return datetime.strptime(deleted_db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S+00:00")
+    return dt.datetime.strptime(deleted_db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S+00:00")
 
 
 def _get_deleted_date(deleted_db):
-    return datetime.strptime(deleted_db['deletionDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
+    return dt.datetime.strptime(deleted_db['deletionDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
 
 
 def _create_db_wait_for_first_backup(test, resource_group, server, database_name):
@@ -2045,12 +2045,12 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
         db = test.cmd('sql db show -g {} -s {} -n {}'
                       .format(resource_group, server, database_name)).get_output_in_json()
 
-    earliest_restore_date = _get_earliest_restore_date(db)
+    earliest_restore_date = _get_earliest_restore_date(db).replace(tzinfo=dt.UTC)
 
-    if datetime.utcnow() <= earliest_restore_date:
+    if dt.datetime.now(dt.UTC) <= earliest_restore_date:
         print('Waiting until earliest restore date', earliest_restore_date)
 
-    while datetime.utcnow() <= earliest_restore_date:
+    while dt.datetime.now(dt.UTC) <= earliest_restore_date:
         time.sleep(10)
 
     return db
@@ -2155,8 +2155,8 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
         # Wait for deleted database to become visible. When run live, this will take around
         # 5-10 minutes. Unforunately there's no way to speed this up. Use timeout to ensure
         # test doesn't loop forever if there's a bug.
-        start_time = datetime.now()
-        timeout = timedelta(0, 15 * 60)  # 15 minutes timeout
+        start_time = dt.datetime.now()
+        timeout = dt.timedelta(0, 15 * 60)  # 15 minutes timeout
 
         while True:
             deleted_dbs = list(
@@ -2168,7 +2168,7 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
 
             # Deleted db not found, sleep (if running live) and then poll again.
             if self.is_live:
-                self.assertTrue(datetime.now() < start_time + timeout, 'Deleted db not found before timeout expired.')
+                self.assertTrue(dt.datetime.now() < start_time + timeout, 'Deleted db not found before timeout expired.')
                 time.sleep(10)  # seconds
 
         deleted_db = deleted_dbs[0]
@@ -5378,7 +5378,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Verify restored vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {} '
                  '--edition {} --family {} --capacity {} --backup-storage-redundancy {} --z'
-                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_true_param_db_name, datetime.utcnow().isoformat(),
+                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_true_param_db_name, dt.datetime.now(dt.UTC).isoformat(),
                          "Hyperscale", 'Gen5', 2, 'zone'),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -5389,7 +5389,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Restore zone redundant source vldb with zone redundancy == false
         # Verify restored vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Zone)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {} --z {}'
-                 .format(resource_group, server, source_zr_db_name, restore_source_zr_false_param_db_name, datetime.utcnow().isoformat(), False),
+                 .format(resource_group, server, source_zr_db_name, restore_source_zr_false_param_db_name, dt.datetime.now(dt.UTC).isoformat(), False),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
 					 JMESPathCheck('name', restore_source_zr_false_param_db_name),
@@ -5400,7 +5400,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Restore non zone redundant source vldb with no parameters passed in
         # Verify restored vldb has correct values (specifically zone redundancy == false and backup storage redundancy == Geo)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {}'
-                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_no_param_db_name, datetime.utcnow().isoformat()),
+                 .format(resource_group, server, source_non_zr_db_name, restore_source_non_zr_no_param_db_name, dt.datetime.now(dt.UTC).isoformat()),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
 					 JMESPathCheck('name', restore_source_non_zr_no_param_db_name),
@@ -5410,7 +5410,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         # Restore zone redundant source vldb with no parameters passed in
         # Verify restored vldb has correct values (specifically zone redundancy == true and backup storage redundancy == Zone)
         self.cmd('sql db restore -g {} --server {} --name {} --dest-name {} --time {}'
-                 .format(resource_group, server, source_zr_db_name, restore_source_zr_no_param_db_name, datetime.utcnow().isoformat()),
+                 .format(resource_group, server, source_zr_db_name, restore_source_zr_no_param_db_name, dt.datetime.now(dt.UTC).isoformat()),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
 					 JMESPathCheck('name', restore_source_zr_no_param_db_name),
@@ -6582,7 +6582,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         # test sql db restore command
         # db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
         #                .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored,
-        #                        datetime.utcnow().isoformat()),
+        #                        dt.datetime.now(dt.UTC).isoformat()),
         #                checks=[
         #                    JMESPathCheck('resourceGroup', resource_group_1),
         #                    JMESPathCheck('name', database_name_restored),
@@ -7870,8 +7870,7 @@ class SqlManagedDatabaseLogReplayScenarionTest(ScenarioTest):
             'last_backup_name': 'full.bak'
         })
 
-        from datetime import datetime, timedelta
-        self.kwargs['expiry'] = (datetime.utcnow() + timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
+        self.kwargs['expiry'] = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=12)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.kwargs['storage_key'] = str(self.cmd(
             'az storage account keys list -n {storage_account} -g {resource_group} --query "[0].value"').output)
@@ -8904,7 +8903,6 @@ class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
     @live_only()
     @ManagedInstancePreparer()
     def test_sql_managed_deleted_cross_subscription_restore(self, mi, rg):
-        from datetime import datetime, timezone, timedelta
         resource_prefix = 'MIRestoreCrossSubDB'
 
         self.kwargs.update({
@@ -8915,7 +8913,7 @@ class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
             'source_rg': "gen4-testing-RG",
             'source_mi': "filiptanic-gen4-on-gen7-different-subnet",
             'source_db': "cross-sub-restored",
-            'pit': (datetime.now(timezone.utc) + timedelta(minutes=-15)).isoformat()
+            'pit': (dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=-15)).isoformat()
         })
 
         # test restore deleted database

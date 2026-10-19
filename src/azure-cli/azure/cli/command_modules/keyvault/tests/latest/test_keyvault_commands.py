@@ -11,7 +11,7 @@ import tempfile
 import time
 from unittest import mock
 import unittest
-from datetime import datetime, timedelta
+import datetime as dt
 from dateutil import tz
 from ipaddress import ip_network
 
@@ -97,13 +97,13 @@ def _clear_hsm(test, hsm_url):
 
 class DateTimeParseTest(unittest.TestCase):
     def test_parse_asn1_date(self):
-        expected = datetime(year=2017,
-                            month=4,
-                            day=24,
-                            hour=16,
-                            minute=37,
-                            second=20,
-                            tzinfo=tz.tzutc())
+        expected = dt.datetime(year=2017,
+                               month=4,
+                               day=24,
+                               hour=16,
+                               minute=37,
+                               second=20,
+                               tzinfo=tz.tzutc())
         self.assertEqual(_asn1_to_iso8601("20170424163720Z"), expected)
 
 
@@ -975,8 +975,8 @@ class KeyVaultHSMSelectiveKeyRestoreScenarioTest(ScenarioTest):
             'key_name': self.create_random_name('selective-restore-', 24),
             'storage_account': self.create_random_name('clitesthsmsa', 24),
             'blob': self.create_random_name('clitesthsmblob', 24),
-            'sas_start': (datetime.utcnow() - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'sas_expiry': (datetime.utcnow() + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
+            'sas_start': (dt.datetime.now(dt.UTC) - dt.timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'sas_expiry': (dt.datetime.now(dt.UTC) + dt.timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
         })
 
         _clear_hsm(self, hsm_url=self.kwargs['hsm_url'])
@@ -1031,8 +1031,8 @@ class KeyVaultHSMFullBackupRestoreScenarioTest(ScenarioTest):
             'hsm_name': managed_hsm,
             'storage_account': storage_account,
             'blob': self.create_random_name('clitesthsmblob', 24),
-            'sas_start': (datetime.utcnow() - timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'sas_expiry': (datetime.utcnow() + timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
+            'sas_start': (dt.datetime.now(dt.UTC) - dt.timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'sas_expiry': (dt.datetime.now(dt.UTC) + dt.timedelta(minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
         })
         self.cmd('az storage container create -n {blob} --account-name {storage_account} -g {rg}')
 
@@ -2662,8 +2662,8 @@ def _generate_certificate(path, keyfile=None, password=None):
                                     .issuer_name(issuer) \
                                     .public_key(key.public_key()) \
                                     .serial_number(x509.random_serial_number()) \
-                                    .not_valid_before(datetime.utcnow()) \
-                                    .not_valid_after(datetime.utcnow() + timedelta(days=10)) \
+                                    .not_valid_before(dt.datetime.now(dt.UTC)) \
+                                    .not_valid_after(dt.datetime.now(dt.UTC) + dt.timedelta(days=10)) \
                                     .sign(key, hashes.SHA256(), default_backend())
 
     # Write the cert out to disk

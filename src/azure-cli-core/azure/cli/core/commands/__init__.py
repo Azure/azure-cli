@@ -6,7 +6,7 @@
 # pylint: disable=too-many-lines
 
 import argparse
-import datetime
+import datetime as dt
 import json
 import logging as logs
 import os
@@ -218,7 +218,7 @@ class CacheObject:
                 "Caching %s '%s' as: %s", self._model_name, self._resource_name,
                 os.path.join(directory, filename)
             )
-            self.last_saved = str(datetime.datetime.now())
+            self.last_saved = str(dt.datetime.now())
             self._dump_to_file(f)
 
     def result(self):
@@ -396,9 +396,9 @@ def _is_stale(cli_ctx, cache_obj):
             cache_ttl = DEFAULT_CACHE_TTL
         else:
             raise ex
-    time_now = datetime.datetime.now()
-    time_cache = datetime.datetime.strptime(cache_obj.last_saved, '%Y-%m-%d %H:%M:%S.%f')
-    return time_now - time_cache > datetime.timedelta(minutes=int(cache_ttl))
+    time_now = dt.datetime.now()
+    time_cache = dt.datetime.strptime(cache_obj.last_saved, '%Y-%m-%d %H:%M:%S.%f')
+    return time_now - time_cache > dt.timedelta(minutes=int(cache_ttl))
 
 
 def cached_get(cmd_obj, operation, *args, **kwargs):
@@ -1032,7 +1032,7 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.finish_msg = finish_msg
         self.poller_done_interval_ms = poller_done_interval_ms
         self.deploy_dict = {}
-        self.last_progress_report = datetime.datetime.now()
+        self.last_progress_report = dt.datetime.now()
 
         self._progress_bar = None
         disable_progress_bar = self.cli_ctx.config.getboolean('core', 'disable_progress_bar', False)
@@ -1060,8 +1060,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         if correlation_id is not None:  # pylint: disable=too-many-nested-blocks
             formatter = "eventTimestamp ge {}"
 
-            end_time = datetime.datetime.utcnow()
-            start_time = end_time - datetime.timedelta(seconds=DEFAULT_QUERY_TIME_RANGE)
+            end_time = dt.datetime.now(dt.UTC)
+            start_time = end_time - dt.timedelta(seconds=DEFAULT_QUERY_TIME_RANGE)
             odata_filters = formatter.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
             odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
@@ -1141,8 +1141,8 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
             except:  # pylint: disable=bare-except
                 pass
 
-            current_time = datetime.datetime.now()
-            if is_verbose and current_time - self.last_progress_report >= datetime.timedelta(seconds=10):
+            current_time = dt.datetime.now()
+            if is_verbose and current_time - self.last_progress_report >= dt.timedelta(seconds=10):
                 self.last_progress_report = current_time
                 try:
                     self._generate_template_progress(correlation_id)

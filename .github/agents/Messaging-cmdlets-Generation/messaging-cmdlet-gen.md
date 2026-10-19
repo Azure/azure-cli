@@ -83,7 +83,7 @@ $VENV = "$SPEC_ROOT\.venv-aaz"
 
 ## 2. Environment
 
-**Python 3.10-3.14 required.** Verify with the explicit path, not `PATH`; do not install it yourself.
+**Python 3.11-3.15 required.** Verify with the explicit path, not `PATH`; do not install it yourself.
 * Windows: `& "$env:LOCALAPPDATA\Programs\Python\Python312\python.exe" --version`
   (installer from <https://www.python.org/downloads/>; path form
   `C:\Users\{xxxx}\AppData\Local\Programs\Python\Python3{xxxx}`)
@@ -734,7 +734,7 @@ Further reading: azure-cli `doc/` (extensions, command guidelines, authoring tes
 - [ ] Plan echoed back and confirmed (service, `<OLD>` -> `<NEW>`, swagger path, branch, scope).
 - [ ] **Section 4.1 pre-flight**: `az provider show` confirms whether ARM serves `<NEW>` yet.
 - [ ] **Section 4.2**: pre-existing aaz<->azure-cli drift isolated and listed before generating.
-- [ ] Python 3.10-3.14 venv active; `aaz-dev` + `azdev` installed.
+- [ ] Python 3.11-3.15 venv active; `aaz-dev` + `azdev` installed.
 - [ ] Repos synced from upstream; `aaz` and `azure-cli` on identically named `feature-*` branches.
 - [ ] `azdev setup --cli $CLI --repo $EXT` clean.
 - [ ] `aaz-dev run` generation complete for the agreed scope.

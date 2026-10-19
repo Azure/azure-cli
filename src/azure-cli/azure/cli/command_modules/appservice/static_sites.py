@@ -14,7 +14,7 @@ from azure.mgmt.core.tools import parse_resource_id
 from knack.log import get_logger
 from urllib.parse import urlparse
 import uuid
-from datetime import datetime, timedelta
+import datetime as dt
 
 from .utils import normalize_sku_for_staticapp, raise_missing_token_suggestion, raise_missing_ado_token_suggestion
 from .custom import show_app, _build_identities_info
@@ -406,7 +406,7 @@ def _get_ado_token(cmd, source):
     body = {
         "displayName": f"SWA Deployment Token (created via the Azure CLI) - {uuid.uuid4().hex}",
         "scope": "vso.build_execute vso.code_full vso.variablegroups_manage",
-        "validTo": (datetime.utcnow() + timedelta(days=6 * 30)).isoformat(),
+        "validTo": (dt.datetime.now(dt.UTC) + dt.timedelta(days=6 * 30)).isoformat(),
         "allOrgs": False,
         "targetAccounts": [org_id],
     }

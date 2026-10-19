@@ -10,7 +10,7 @@ import unittest
 from azure.cli.testsdk import JMESPathCheck, ScenarioTest, ResourceGroupPreparer, KeyVaultPreparer, record_only
 from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from datetime import datetime, timedelta, timezone
+import datetime as dt
 from dateutil import parser
 
 class CosmosDBTests(ScenarioTest):
@@ -2083,9 +2083,8 @@ class CosmosDBTests(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         import dateutil.parser
-        from datetime import timedelta
         creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=4)
         restore_ts_string = restore_ts.isoformat()
         import time
         time.sleep(300)
@@ -2125,17 +2124,16 @@ class CosmosDBTests(ScenarioTest):
 
         import dateutil.parser
         import time
-        from datetime import timedelta, datetime
 
         # This should fail as restore time is before account creation time
-        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) - timedelta(days=30)
+        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) - dt.timedelta(days=30)
         self.kwargs.update({
             'invalid_restore_time': invalid_restore_time.isoformat()
         })
         self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as restore time is in future
-        invalid_restore_time = datetime.now() + timedelta(days=30)
+        invalid_restore_time = dt.datetime.now() + dt.timedelta(days=30)
         self.kwargs.update({
             'invalid_restore_time': invalid_restore_time.isoformat()
         })
@@ -2144,7 +2142,7 @@ class CosmosDBTests(ScenarioTest):
         # Get correct restore ts
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=4)
 
         restore_ts_string = restore_ts.isoformat()
         self.kwargs.update({
@@ -2204,12 +2202,11 @@ class CosmosDBTests(ScenarioTest):
 
         import dateutil.parser
         import time
-        from datetime import timedelta
 
         # Get correct restore ts
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=4)
 
         restore_ts_string = restore_ts.isoformat()
         self.kwargs.update({
@@ -2267,9 +2264,8 @@ class CosmosDBTests(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         import dateutil.parser
-        from datetime import timedelta
         creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=2)
         import time
         time.sleep(200)
         restore_ts_string = restore_ts.isoformat()
@@ -2324,9 +2320,8 @@ class CosmosDBTests(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         import dateutil.parser
-        from datetime import timedelta
         creation_timestamp_datetime = dateutil.parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=2)
         import time
         time.sleep(200)
         restore_ts_string = restore_ts.isoformat()
@@ -2505,7 +2500,7 @@ class CosmosDBTests(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=4)
         restore_ts_string = restore_ts.isoformat()
         import time
         time.sleep(240)
@@ -2547,7 +2542,7 @@ class CosmosDBTests(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=4)
         import time
         time.sleep(240)
         restore_ts_string = restore_ts.isoformat()
@@ -2601,7 +2596,7 @@ class CosmosDBTests(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=2)
         import time
         time.sleep(120)
         restore_ts_string = restore_ts.isoformat()
@@ -2636,7 +2631,7 @@ class CosmosDBTests(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=4)
         restore_ts_string = restore_ts.isoformat()
         import time
         time.sleep(240)
@@ -2676,7 +2671,7 @@ class CosmosDBTests(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=4)
         import time
         time.sleep(240)
         restore_ts_string = restore_ts.isoformat()
@@ -2723,7 +2718,7 @@ class CosmosDBTests(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=2)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=2)
         import time
         time.sleep(120)
         restore_ts_string = restore_ts.isoformat()
@@ -2934,7 +2929,7 @@ class CosmosDBTests(ScenarioTest):
         database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = dt.datetime.now(dt.UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3019,7 +3014,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = dt.datetime.now(dt.UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string,
@@ -3125,7 +3120,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = dt.datetime.now(dt.UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3209,7 +3204,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = dt.datetime.now(dt.UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3301,7 +3296,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = dt.datetime.now(dt.UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3381,7 +3376,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert self.cmd('az cosmosdb mongodb collection exists -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = dt.datetime.now(dt.UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3508,7 +3503,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert self.cmd('az cosmosdb mongodb collection exists -g {rg} -a {acc} -d {db_name} -n {col_name}').get_output_in_json()
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = dt.datetime.now(dt.UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string
@@ -3595,7 +3590,7 @@ class CosmosDBTests(ScenarioTest):
         ]).get_output_in_json()
 
         #restore time
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = dt.datetime.now(dt.UTC).isoformat()
         self.kwargs.update({
             'rts': restore_ts_string
         })
@@ -3729,7 +3724,7 @@ class CosmosDBTests(ScenarioTest):
 
         assert self.cmd('az cosmosdb table exists -g {rg} -a {acc} -n {table_name}').get_output_in_json()
 
-        restore_ts_string = datetime.utcnow().isoformat()
+        restore_ts_string = dt.datetime.now(dt.UTC).isoformat()
 
         self.kwargs.update({
             'rts': restore_ts_string

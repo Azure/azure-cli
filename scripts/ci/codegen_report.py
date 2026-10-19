@@ -5,7 +5,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import datetime
+import datetime as dt
 import json
 import logging
 import os
@@ -111,7 +111,7 @@ def generate_csv():
     total = ref['total']
     manual = total - codegenv1 - codegenv2
     is_release = True if BUILD_BRANCH == 'release' else False
-    date = (datetime.datetime.utcnow() + datetime.timedelta(hours=8)).strftime("%Y-%m-%d")
+    date = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=8)).strftime("%Y-%m-%d")
     data.append([BUILD_ID, manual, codegenv1, codegenv2, total, is_release, date])
     logger.info('Finish generate data for codegen report:')
     logger.info("BUILD_ID, manual, codegenv1, codegenv2, total, is_release, date")

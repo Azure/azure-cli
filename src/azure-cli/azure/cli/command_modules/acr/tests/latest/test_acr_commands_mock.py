@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from urllib.parse import urlencode
+import datetime as dt
 import json
 import unittest
 from unittest import mock
@@ -63,6 +64,13 @@ TEST_REPOSITORY = 'testrepository'
 
 
 class AcrMockCommandsTests(unittest.TestCase):
+
+    def test_add_days_to_now_returns_utc_max_on_overflow(self):
+        from azure.cli.command_modules.acr._utils import add_days_to_now
+
+        result = add_days_to_now(999999999)
+        self.assertEqual(result, dt.datetime.max.replace(tzinfo=dt.UTC))
+        self.assertIs(result.tzinfo, dt.UTC)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)

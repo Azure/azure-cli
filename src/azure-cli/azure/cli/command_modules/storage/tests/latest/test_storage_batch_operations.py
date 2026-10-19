@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from datetime import datetime
+import datetime as dt
 from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, JMESPathCheck, live_only
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
@@ -154,9 +154,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob upload-batch -d {} -s "{}"',
                                   storage_account_info, container, test_dir)
         import time
-        from datetime import datetime
         time.sleep(1)
-        current = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        current = dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         time.sleep(1)
         result = self.storage_cmd('storage blob upload-batch -d {} -s "{}" --if-modified-since {}',
                                   storage_account_info, container, test_dir, current).get_output_in_json()
@@ -353,8 +352,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='dst_account')
     @StorageTestFilesPreparer()
     def test_storage_blob_batch_copy(self, src_account_info, dst_account_info, test_dir):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         src_container = 'container1'
         self.storage_cmd('storage container create -n {}', src_account_info, src_container)
@@ -443,8 +441,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='dst_account')
     @StorageTestFilesPreparer()
     def test_storage_file_batch_copy(self, src_account_info, dst_account_info, test_dir):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         src_container = 'container1'
         self.storage_cmd('storage container create -n {}', src_account_info, src_container)
@@ -580,9 +577,9 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         src_container = 'container7'
         create_and_populate_container(src_container)
         self.storage_cmd('storage blob delete-batch -s {} --if-unmodified-since {} --dryrun',
-                         storage_account_info, src_container, datetime.max.strftime('%Y-%m-%dT%H:%MZ'))
+                         storage_account_info, src_container, dt.datetime.max.strftime('%Y-%m-%dT%H:%MZ'))
         self.storage_cmd('storage blob delete-batch -s {} --if-unmodified-since {}',
-                         storage_account_info, src_container, datetime.max.strftime('%Y-%m-%dT%H:%MZ'))
+                         storage_account_info, src_container, dt.datetime.max.strftime('%Y-%m-%dT%H:%MZ'))
         self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
             JMESPathCheck('length(@)', 0))
 
@@ -648,12 +645,11 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageTestFilesPreparer()
     @live_only()
     def test_storage_blob_batch_sas_scenarios(self, test_dir, resource_group, storage_account_info):
-        from datetime import datetime, timedelta
 
         container_name = 'container1'
         self.storage_cmd('storage container create -n {}', storage_account_info, container_name)
         temp_dir = self.create_temp_dir()
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions dwrl --expiry {}',
                                      storage_account_info, container_name, expiry).get_output_in_json()
