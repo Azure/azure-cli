@@ -101,9 +101,10 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
         with self.assertRaises(SystemExit) as missing:
             self.cmd('sql db show --subscription {subscription} -g {rg} -s {server} -n {db}')
         self.assertEqual(missing.exception.code, 3)
-        database = self.cmd('sql db create --subscription {subscription} -g {rg} -s {server} -n {db}'
-                            ' --service-objective S0 --backup-storage-redundancy Local --yes').get_output_in_json()
+        result = self.cmd('sql db create --subscription {subscription} -g {rg} -s {server} -n {db}'
+                          ' --service-objective S0 --backup-storage-redundancy Local --yes')
         self.database_created = True
+        database = result.get_output_in_json()
         self.assertEqual(database['name'], self.kwargs['db'])
         self.assertEqual(database['status'], 'Online')
         return self._show_policy()
@@ -299,6 +300,96 @@ class SqlServerDbExistingPolicyLockScenarioTest(ScenarioTest):
 
 
 class SqlDbStrScenarioSafetyTests(unittest.TestCase):
+    def _cleanup_scenario(self, managed):
+        from unittest.mock import Mock
+        from .test_sql_mi_str_policy import SqlManagedInstanceDbShortTermRetentionScenarioTest
+        scenario_type = (SqlManagedInstanceDbShortTermRetentionScenarioTest if managed
+                         else SqlServerDbShortTermRetentionScenarioTest)
+        method = 'test_sql_managed_db_short_retention' if managed else 'test_sql_db_short_term_retention'
+        scenario = scenario_type.__new__(scenario_type)
+        unittest.TestCase.__init__(scenario, method)
+        scenario.cli_ctx = object()
+        scenario.kwargs = {}
+        scenario.recording_processors = []
+        scenario.in_recording = False
+        scenario.is_live = False
+        scenario.disable_recording = False
+        scenario.create_random_name = Mock(return_value='owneddb')
+        self.addCleanup(scenario.doCleanups)
+        with patch.object(ScenarioTest, 'setUp'):
+            scenario.setUp()
+        scenario.in_recording = True
+        return scenario
+
+    def test_sql_str_create_output_failure_cleans_owned_database(self):
+        from azure.cli.testsdk.base import ExecutionResult
+        for managed in (False, True):
+            for output in ('{"name":"wrongdb","status":"Online"}',
+                           '{"name":"owneddb","status":"Creating"}', '{', 'null'):
+                with self.subTest(managed=managed, output=output):
+                    commands = []
+
+                    def execute(cli_ctx, command, expect_failure=False):
+                        commands.append(command)
+                        action = command.split()[2]
+                        if action == 'show':
+                            raise SystemExit(3)
+                        self.assertIn(action, ('create', 'delete'))
+                        result = ExecutionResult.__new__(ExecutionResult)
+                        result.output = output if action == 'create' else ''
+                        result.json_value = None
+                        result.skip_assert = False
+                        return result
+
+                    with patch.dict(os.environ, {'AZURE_CLI_TEST_SQL_DB_KEEP_DATABASES': 'false'}), \
+                            patch('azure.cli.testsdk.base.execute', side_effect=execute):
+                        scenario = self._cleanup_scenario(managed)
+                        try:
+                            with self.assertRaises((AssertionError, ValueError)):
+                                scenario._create_database()
+                            self.assertTrue(scenario.database_created)
+                        finally:
+                            self.assertTrue(scenario.doCleanups())
+                        self.assertTrue(scenario.doCleanups())
+                    scope = '--mi strtestmi' if managed else '-s strtestserver'
+                    kind = 'midb' if managed else 'db'
+                    self.assertEqual(commands[-1],
+                                     'sql ' + kind + ' delete --subscription '
+                                     '00000000-0000-0000-0000-000000000000 -g strtestrg ' + scope +
+                                     ' -n owneddb --yes')
+                    self.assertEqual([command.split()[2] for command in commands], ['show', 'create', 'delete'])
+                    self.assertFalse(scenario.database_created)
+
+    def test_sql_str_failed_create_or_absence_check_does_not_delete(self):
+        from azure.cli.testsdk.base import ExecutionResult
+        from unittest.mock import Mock
+        for managed in (False, True):
+            for failure in ('create', 'existing', 'probe'):
+                with self.subTest(managed=managed, failure=failure):
+                    commands = []
+
+                    def execute(cli_ctx, command, expect_failure=False):
+                        commands.append(command)
+                        action = command.split()[2]
+                        if action == 'show':
+                            if failure == 'existing':
+                                return Mock(spec=ExecutionResult)
+                            raise SystemExit(1 if failure == 'probe' else 3)
+                        self.assertEqual(action, 'create')
+                        raise CLIError('Create failed')
+
+                    with patch('azure.cli.testsdk.base.execute', side_effect=execute):
+                        scenario = self._cleanup_scenario(managed)
+                        try:
+                            with self.assertRaises((AssertionError, CLIError)):
+                                scenario._create_database()
+                            self.assertFalse(scenario.database_created)
+                        finally:
+                            self.assertTrue(scenario.doCleanups())
+                    expected = ['show', 'create'] if failure == 'create' else ['show']
+                    self.assertEqual([command.split()[2] for command in commands], expected)
+                    self.assertFalse(scenario.database_created)
+
     def test_sql_db_str_existing_target_is_explicit(self):
         for target in ('', '/invalid', '/subscriptions/sub/databases/db',
                        '/subscriptions/sub/databases/db/backupShortTermRetentionPolicies/default'):

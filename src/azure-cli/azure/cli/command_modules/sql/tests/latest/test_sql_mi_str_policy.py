@@ -132,9 +132,9 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
         with self.assertRaises(SystemExit) as missing:
             self.cmd('sql midb show --subscription {subscription} -g {rg} --mi {mi} -n {db}')
         self.assertEqual(missing.exception.code, 3)
-        self.cmd('sql midb create --subscription {subscription} -g {rg} --mi {mi} -n {db}', checks=[
-            self.check('name', '{db}'), self.check('status', 'Online')])
+        result = self.cmd('sql midb create --subscription {subscription} -g {rg} --mi {mi} -n {db}')
         self.database_created = True
+        result.assert_with_checks([self.check('name', '{db}'), self.check('status', 'Online')])
         return self._show_policy()
 
     def _delete_database(self):
