@@ -1417,7 +1417,9 @@ def _get_certificate_name(certificate_subject_name, resource_group_name):
 
 # pylint: disable=inconsistent-return-statements
 def _get_vault_from_secret_identifier(cli_ctx, secret_identifier):
-    key_vault_client = keyvault_client_factory(cli_ctx).vaults
+    # vaults.list() calls ARM's /resources API, which only accepts 2015-11-01. azure-mgmt-keyvault 14.1.0
+    # sends the client's api-version on next-link pages, so pin the client to 2015-11-01 for this call.
+    key_vault_client = keyvault_client_factory(cli_ctx, api_version='2015-11-01').vaults
     vault_name = urlparse(secret_identifier).hostname.split('.')[0]
     vaults = key_vault_client.list()
     if vaults is not None:

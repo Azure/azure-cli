@@ -37,6 +37,12 @@ def _extract_version(item_id):
     return item_id.split('/')[-1]
 
 
+def _get_vaults_list_client(cli_ctx):
+    # vaults.list() calls ARM's /resources API, which only accepts 2015-11-01. azure-mgmt-keyvault 14.1.0
+    # sends the client's api-version on next-link pages, so pin the client to 2015-11-01 for this call.
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT, api_version='2015-11-01').vaults
+
+
 def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     """
     Fetch resource group from vault name
@@ -48,7 +54,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     from azure.mgmt.core.tools import parse_resource_id
 
     if vault_name:
-        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+        client = _get_vaults_list_client(cli_ctx)
         for vault in client.list(filter=f"resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{vault_name}'"):
             id_comps = parse_resource_id(vault.id)
             if id_comps.get('name', None) and id_comps['name'].lower() == vault_name.lower():
@@ -217,7 +223,7 @@ def _fetch_default_release_policy(cli_ctx, vault_url, policy_type='cvm'):
         parsed_vault_url = vault_url.removeprefix('https://').split('.')
         if parsed_vault_url[1] == 'vault':
             vault_name_filter = f"resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{parsed_vault_url[0]}'"
-            for vault in mgmt_client.vaults.list(filter=vault_name_filter):
+            for vault in _get_vaults_list_client(cli_ctx).list(filter=vault_name_filter):
                 location = vault.location
                 break
         elif parsed_vault_url[1] == 'managedhsm':
