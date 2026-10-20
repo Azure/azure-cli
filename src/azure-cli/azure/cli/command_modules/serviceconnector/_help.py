@@ -799,10 +799,10 @@ for target in supported_target_resources:
         filter_auth_label=filter_auth_label,
         client_type=client_type,
         filter_auth_params=filter_auth_params)
-    for auth_type in auth_types:
-        if auth_type == filter_auth_type:
+    for example_auth_type in auth_types:
+        if example_auth_type == filter_auth_type:
             continue
-        if auth_type == AUTH_TYPE.UserAccount:
+        if example_auth_type == AUTH_TYPE.UserAccount:
             if target == RESOURCE.MysqlFlexible:
                 auth_example = '--user-account mysql-identity-id=xx object-id=XX'
             else:
@@ -810,18 +810,18 @@ for target in supported_target_resources:
             example_name = (
                 'Pass user account auth info when previewing a local connection to {target}'
             ).format(target=target.value)
-        elif auth_type == AUTH_TYPE.ServicePrincipalSecret:
-            auth_example = get_auth_info_params(auth_type)
+        elif example_auth_type == AUTH_TYPE.ServicePrincipalSecret:
+            auth_example = get_auth_info_params(example_auth_type)
             example_name = (
                 'Preview configurations for a local connection to {target} '
                 'filtered by service principal authentication'
             ).format(target=target.value)
         else:
-            auth_example = get_auth_info_params(auth_type)
+            auth_example = get_auth_info_params(example_auth_type)
             example_name = (
                 'Preview configurations for a local connection to {target} '
                 'filtered by {label} authentication'
-            ).format(target=target.value, label=auth_type.value)
+            ).format(target=target.value, label=example_auth_type.value)
         preview_examples += (
             "\n"
             "        - name: {example_name}\n"
@@ -902,5 +902,5 @@ helps['connection preview-configuration {target}'.format(target=target.value)] =
       examples:
 {preview_examples}
     """.format(
-        target=target.value,
-        preview_examples=confluent_preview_examples)
+    target=target.value,
+    preview_examples=confluent_preview_examples)
