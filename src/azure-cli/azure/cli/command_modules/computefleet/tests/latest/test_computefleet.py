@@ -183,9 +183,18 @@ class TestComputefleetScenario(ScenarioTest):
             }
         )
 
+        create_command = (
+            "az compute-fleet create --name {fleet_name_test} --resource-group {resource_group} --mode {mode} "
+            "--regular-priority-profile '{regular_priority_profile}' --spot-priority-profile '{spot_profile}' "
+            "--compute-profile '{compute_profile}' --vm-sizes-profile '{vm_sizes_profile}' "
+            "--location {location} --tags '{tags}'"
+        )
+        if mode == "Launch":
+            create_command += " --vm-name-prefix {vm_name_prefix}"
+
         try:
             response = self.cmd(
-                "az compute-fleet create  --name {fleet_name_test} --resource-group {resource_group} --mode {mode} --vm-name-prefix {vm_name_prefix} --regular-priority-profile '{regular_priority_profile}' --spot-priority-profile '{spot_profile}' --compute-profile '{compute_profile}' --vm-sizes-profile '{vm_sizes_profile}' --location {location} --tags '{tags}' ",
+                create_command,
                 checks=[
                     self.check("name", "{fleet_name_test}"),
                     self.check("resourceGroup", "{resource_group}"),
@@ -355,6 +364,79 @@ class TestComputefleetScenario(ScenarioTest):
     def test_all_fleet_operations(self, resource_group, resource_group_location):
         fleet_name = generate_random_fleet_name("testFleet")
         self._fleet_create(fleet_name, resource_group, resource_group_location)
+
+        self.kwargs.update({
+            "identity_fleet": fleet_name,
+            "identity_rg": resource_group,
+            "identity_location": resource_group_location,
+            "identity_name": self.create_random_name("fleetidentity", 24),
+            "identity_name_2": self.create_random_name("fleetidentity", 24),
+        })
+        identity = self.cmd(
+            "identity create -g {identity_rg} -n {identity_name} "
+            "-l {identity_location}"
+        ).get_output_in_json()
+        self.kwargs["identity_id"] = identity["id"]
+        identity_2 = self.cmd(
+            "identity create -g {identity_rg} -n {identity_name_2} "
+            "-l {identity_location}"
+        ).get_output_in_json()
+        self.kwargs["identity_id_2"] = identity_2["id"]
+
+        self.cmd(
+            "compute-fleet identity assign -g {identity_rg} "
+            "-n {identity_fleet} --user-assigned {identity_id}",
+            checks=[self.check("type", "UserAssigned")],
+        )
+        result = self.cmd(
+            "compute-fleet identity show -g {identity_rg} -n {identity_fleet}",
+            checks=[self.check("type", "UserAssigned")],
+        ).get_output_in_json()
+        self.assertEqual(
+            [key.lower() for key in result["userAssignedIdentities"]],
+            [identity["id"].lower()],
+        )
+
+        self.cmd(
+            "compute-fleet identity assign -g {identity_rg} "
+            "-n {identity_fleet} --user-assigned {identity_id_2}",
+            checks=[self.check("type", "UserAssigned")],
+        )
+        result = self.cmd(
+            "compute-fleet identity show -g {identity_rg} -n {identity_fleet}",
+            checks=[self.check("type", "UserAssigned")],
+        ).get_output_in_json()
+        self.assertEqual(
+            {key.lower() for key in result["userAssignedIdentities"]},
+            {identity["id"].lower(), identity_2["id"].lower()},
+        )
+
+        self.cmd(
+            "compute-fleet identity remove -g {identity_rg} "
+            "-n {identity_fleet} --user-assigned {identity_id}",
+            checks=[self.check("type", "UserAssigned")],
+        )
+        result = self.cmd(
+            "compute-fleet identity show -g {identity_rg} -n {identity_fleet}",
+            checks=[self.check("type", "UserAssigned")],
+        ).get_output_in_json()
+        self.assertEqual(
+            [key.lower() for key in result["userAssignedIdentities"]],
+            [identity_2["id"].lower()],
+        )
+
+        self.cmd(
+            "compute-fleet identity remove -g {identity_rg} "
+            "-n {identity_fleet} --user-assigned {identity_id_2}"
+        )
+        self.cmd(
+            "compute-fleet show -g {identity_rg} -n {identity_fleet}",
+            checks=[
+                self.check("identity.type == 'None' || identity == null", True),
+                self.check("length(identity.userAssignedIdentities || `{{}}`)", 0),
+            ],
+        )
+
         self._fleet_update(fleet_name, resource_group)
         self._fleet_show(fleet_name, resource_group)
         self._fleet_list(resource_group)
