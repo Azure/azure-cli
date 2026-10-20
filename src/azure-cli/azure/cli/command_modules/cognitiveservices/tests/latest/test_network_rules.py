@@ -19,7 +19,7 @@ class CognitiveServicesNetworkRulesTests(ScenarioTest):
             'vnetname': sname,
             'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS',
+            'location': 'southcentralus',
             'customdomain': customdomain,
         })
 
