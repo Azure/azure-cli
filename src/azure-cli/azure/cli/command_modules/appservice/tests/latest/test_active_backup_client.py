@@ -10,7 +10,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 
 import requests
 
@@ -70,6 +70,23 @@ class ActiveBackupClientTests(unittest.TestCase):
                     'https://management.example.test/path#fragment', 'https://management.example.test:0/path'):
             with self.subTest(address=bad), self.assertRaises(AzureResponseError):
                 self.client.url(bad)
+
+    def test_crud_operation_url_uses_async_status_mode_in_the_selected_cloud(self):
+        self.ctx.cloud.endpoints.resource_manager = 'https://management.sovereign.example.test/'
+        for resource_type in ('sites', 'serverfarms'):
+            with self.subTest(resource_type=resource_type):
+                client = ActiveBackupClient(
+                    self.ctx, 'group', 'primary', resource_type, subscription='subscription')
+                parsed = urlsplit(client.operation_url('back up', 'op?#%'))
+                self.assertEqual(parsed.scheme, 'https')
+                self.assertEqual(parsed.netloc, 'management.sovereign.example.test')
+                self.assertEqual(parsed.path, client.resource('back up') + '/operationresults/op%3F%23%25')
+                self.assertEqual(parse_qs(parsed.query),
+                                 {'api-version': [API_VERSION], 'azureAsyncOperation': ['1']})
+                self.assertEqual(parsed.fragment, '')
+        for operation_id in ('', '..', 'a/b', 'a\\b', None):
+            with self.subTest(operation_id=operation_id), self.assertRaises(InvalidArgumentValueError):
+                self.client.operation_url('backup', operation_id)
 
     def test_request_uses_cli_auth_cloud_and_no_redirects(self):
         result = response(payload={'properties': {'secret': 'not-logged'}})
@@ -171,6 +188,76 @@ class ActiveBackupClientTests(unittest.TestCase):
         with patch.object(self.client, 'request', return_value=response(204)):
             self.assertIsNone(self.client.mutate('DELETE', self.resource))
 
+    def test_origin_resource_read_prefers_a_working_point_endpoint(self):
+        origin = self.client.resource('origin')
+        payload = {'id': origin, 'properties': {'outboundIpAddresses': 'fixture-ip', 'unknown': 1}}
+        with patch.object(self.client, 'request', return_value=response(payload=payload)) as request, \
+                patch.object(self.client, 'list') as listing, patch(MODULE + '.logger.warning') as warning:
+            self.assertEqual(self.client.get_resource(origin), payload)
+        request.assert_called_once_with('GET', origin)
+        listing.assert_not_called()
+        warning.assert_not_called()
+
+    def test_origin_404_uses_the_exact_paginated_resource_and_warns_once(self):
+        client = ActiveBackupClient(self.ctx, 'grüp', 'primary', subscription='subscription')
+        origin = client.resource('origin')
+        payload = {'id': unquote(origin).upper(), 'name': 'origin', 'type': 'Microsoft.Web/sites/silos',
+                   'properties': {'endpointStatus': 'Enabled', 'unknown': {'preserved': True}}}
+        foreign = dict(payload, id=origin.replace('/primary/', '/different/'))
+        missing = ResourceNotFoundError('Original origin error; request-id.')
+        with patch.object(client, 'request', side_effect=[
+                missing, response(payload={'value': [foreign], 'nextLink': client.resource() + '?page=2'}),
+                response(payload={'value': [payload]}), missing, response(payload={'value': [payload]})]) as request, \
+                patch(MODULE + '.logger.warning') as warning:
+            self.assertEqual(client.get_resource(origin), payload)
+            self.assertEqual(client.get_resource(origin), payload)
+        warning.assert_called_once()
+        self.assertIn('Origin point GET returned HTTP 404', warning.call_args.args[0])
+        self.assertEqual(request.call_count, 5)
+
+    def test_origin_fallback_never_applies_to_other_reads_or_errors(self):
+        plan = ActiveBackupClient(self.ctx, 'group', 'primary', 'serverfarms', subscription='subscription')
+        cases = (
+            (self.client, self.resource, ResourceNotFoundError('Missing replica')),
+            (self.client, self.client.resource('origin') + '/config/web', ResourceNotFoundError('Missing config')),
+            (plan, plan.resource('origin'), ResourceNotFoundError('Missing plan origin')),
+            (self.client, self.client.resource('origin'), AzureResponseError('Forbidden')),
+            (self.client, self.client.resource('origin'), AzureResponseError('Service failed')),
+        )
+        for client, path, error in cases:
+            with self.subTest(path=path, error=str(error)), \
+                    patch.object(client, 'request', side_effect=error), patch.object(client, 'list') as listing:
+                with self.assertRaises(type(error)) as caught:
+                    client.get_resource(path)
+                self.assertIs(caught.exception, error)
+                listing.assert_not_called()
+
+    def test_origin_collection_missing_duplicate_or_invalid_results_remain_errors(self):
+        origin = self.client.resource('origin')
+        payload = {'id': origin, 'type': 'Microsoft.Web/sites/silos', 'properties': {'endpointStatus': 'Enabled'}}
+        for entries, error_type in (
+                ([], ResourceNotFoundError),
+                ([dict(payload, id=self.resource)], ResourceNotFoundError),
+                ([payload, dict(payload)], AzureResponseError),
+                ([dict(payload, type='Microsoft.Web/sites')], AzureResponseError),
+                ([dict(payload, properties=None)], AzureResponseError)):
+            with self.subTest(entries=entries), \
+                    patch.object(self.client, 'request', side_effect=ResourceNotFoundError('Original error')), \
+                    patch.object(self.client, 'list', return_value=entries), \
+                    patch(MODULE + '.logger.warning') as warning, self.assertRaises(error_type):
+                self.client.get_resource(origin)
+            warning.assert_not_called()
+
+    def test_origin_collection_failures_are_not_hidden(self):
+        origin = self.client.resource('origin')
+        for error in (AzureResponseError('List forbidden'), ResourceNotFoundError('List missing')):
+            with self.subTest(error=str(error)), \
+                    patch.object(self.client, 'request', side_effect=ResourceNotFoundError('Point missing')), \
+                    patch.object(self.client, 'list', side_effect=error):
+                with self.assertRaises(type(error)) as caught:
+                    self.client.get_resource(origin)
+                self.assertIs(caught.exception, error)
+
     def test_no_wait_returns_receipt_without_polling(self):
         poll = self.resource + '/operationresults/operation'
         for header in ('Location', 'Azure-AsyncOperation'):
@@ -181,6 +268,21 @@ class ActiveBackupClientTests(unittest.TestCase):
                 self.assertEqual(result['operationId'], 'operation')
                 self.assertEqual(result['resourceId'], self.resource)
                 request.assert_called_once()
+
+    def test_async_status_header_takes_precedence_and_preserves_its_query(self):
+        location = self.resource + '/operationresults/operation'
+        poll = self.client.url(location, {'azureAsyncOperation': 1})
+        initial = response(202, headers={
+            'Location': location, 'Azure-AsyncOperation': poll, 'Retry-After': '0'})
+        with patch.object(self.client, 'request', return_value=initial) as request:
+            receipt = self.client.mutate('DELETE', self.resource, no_wait=True)
+        self.assertEqual(receipt['operationUrl'], poll)
+        request.assert_called_once()
+        with patch.object(self.client, 'request', side_effect=[
+                initial, response(payload={'status': 'Succeeded'})]) as request, patch(MODULE + '.time.sleep'):
+            self.assertIsNone(self.client.mutate('DELETE', self.resource))
+        self.assertEqual(request.call_args.args[:2], ('GET', poll))
+        self.assertEqual(request.call_count, 2)
 
     def test_poll_status_body_and_final_resource(self):
         poll = self.resource + '/operationresults/operation'
@@ -195,12 +297,50 @@ class ActiveBackupClientTests(unittest.TestCase):
             self.assertEqual(request.call_args.args, ('GET', self.resource))
             self.assertEqual(request.call_count, 4)
 
+    def test_operation_status_envelopes_are_not_resources(self):
+        for identifier in (None, '', '/operations/op', 123):
+            with self.subTest(identifier=identifier):
+                result = self.client.operation(self.resource, response(payload={
+                    'id': identifier, 'status': 'Succeeded', 'properties': None}))
+                self.assertEqual(result['status'], 'Succeeded')
+                self.assertNotIn('resource', result)
+        resource = {'id': self.resource, 'properties': {'provisioningState': 'Succeeded'}}
+        self.assertEqual(self.client.operation(self.resource, response(payload=resource))['resource'], resource)
+
+    def test_async_writes_return_the_canonical_target_resource(self):
+        poll = self.resource + '/operationresults/op?azureAsyncOperation=1'
+        resource = {'id': self.resource, 'properties': {'revisionNumber': 8}}
+        for method in ('PUT', 'PATCH'):
+            for terminal in (
+                    {'status': 'Succeeded'},
+                    {'id': None, 'status': 'Succeeded', 'properties': None},
+                    {'id': '/operations/op', 'status': 'Succeeded'},
+                    {'id': self.resource, 'properties': {'revisionNumber': 7}}):
+                with self.subTest(method=method, terminal=terminal), \
+                        patch.object(self.client, 'request', side_effect=[
+                            response(202, headers={'Azure-AsyncOperation': poll, 'Retry-After': '0'}),
+                            response(payload=terminal), response(payload=resource)]) as request, \
+                        patch(MODULE + '.time.sleep'):
+                    self.assertEqual(self.client.mutate(method, self.resource), resource)
+                    self.assertEqual(request.call_args.args, ('GET', self.resource))
+                    self.assertEqual(request.call_count, 3)
+
+    def test_final_resource_read_errors_remain_errors(self):
+        poll = self.resource + '/operationresults/op'
+        with patch.object(self.client, 'request', side_effect=[
+                response(202, headers={'Location': poll, 'Retry-After': '0'}),
+                response(payload={'id': None, 'status': 'Succeeded'}),
+                ResourceNotFoundError('The target was not found.')]) as request, \
+                patch(MODULE + '.time.sleep'), self.assertRaises(ResourceNotFoundError):
+            self.client.mutate('PUT', self.resource)
+        self.assertEqual(request.call_args.args, ('GET', self.resource))
+
     def test_delete_and_post_do_not_get_deleted_resource_or_action(self):
         poll = self.resource + '/operationresults/operation'
         for method in ('DELETE', 'POST'):
             with self.subTest(method=method), patch.object(self.client, 'request', side_effect=[
                     response(202, headers={'Location': poll, 'Retry-After': '0'}),
-                    response(payload={'status': 'Succeeded'})]) as request, patch(MODULE + '.time.sleep'):
+                    response(payload={'id': None, 'status': 'Succeeded'})]) as request, patch(MODULE + '.time.sleep'):
                 self.assertIsNone(self.client.mutate(method, self.resource))
                 self.assertEqual(request.call_count, 2)
 

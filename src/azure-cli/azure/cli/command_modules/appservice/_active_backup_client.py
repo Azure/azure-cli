@@ -13,10 +13,11 @@ import os
 import sys
 import tempfile
 import time
-from urllib.parse import parse_qsl, quote, urlencode, urljoin, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, quote, unquote, urlencode, urljoin, urlsplit, urlunsplit
 import uuid
 
 import requests
+from knack.log import get_logger
 
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (AzureConnectionError, AzureResponseError, FileOperationError,
@@ -30,6 +31,7 @@ API_VERSION = '2026-08-01'
 DEFAULT_TIMEOUT = 7200
 _RUNNING = {'accepted', 'created', 'inprogress', 'running', 'waiting'}
 _FAILED = {'failed', 'cancelled', 'canceled', 'timedout'}
+logger = get_logger(__name__)
 
 
 def segment(value):
@@ -107,6 +109,8 @@ class ActiveBackupClient:
 
     def __init__(self, cli_ctx, resource_group_name, name, resource_type='sites', subscription=None):
         self.cli_ctx = cli_ctx
+        self._resource_type = resource_type
+        self._origin_fallback_warned = False
         self.subscription = subscription or get_subscription_id(cli_ctx)
         self.endpoint = cli_ctx.cloud.endpoints.resource_manager.rstrip('/') + '/'
         self.parent = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/{}/{}'.format(
@@ -114,6 +118,11 @@ class ActiveBackupClient:
 
     def resource(self, silo=None):
         return self.parent + '/silos' + ('/' + segment(silo) if silo is not None else '')
+
+    def operation_url(self, silo, operation_id):
+        """Select the CRUD status response rather than the final-resource response."""
+        return self.url(self.resource(silo) + '/operationresults/' + segment(operation_id),
+                        {'azureAsyncOperation': 1})
 
     def url(self, path, query=None):
         try:
@@ -195,6 +204,34 @@ class ActiveBackupClient:
         except ValueError as ex:
             raise AzureResponseError('ARM returned an unsupported response content type. Use --file.') from ex
 
+    def get_resource(self, path):
+        try:
+            return self.decode(self.request('GET', path))
+        except ResourceNotFoundError:
+            if (self._resource_type != 'sites' or
+                    unquote(path).casefold() != unquote(self.resource('origin')).casefold()):
+                raise
+            matches = [
+                resource for resource in self.list(self.resource())
+                if isinstance(resource, dict) and isinstance(resource.get('id'), str) and
+                unquote(resource['id']).casefold() == unquote(path).casefold()
+            ]
+            if not matches:
+                raise
+            if len(matches) != 1:
+                raise AzureResponseError('ARM returned duplicate origin resources in the silo collection.')
+            resource = matches[0]
+            resource_type = resource.get('type')
+            if (not isinstance(resource_type, str) or resource_type.casefold() != 'microsoft.web/sites/silos' or
+                    not isinstance(resource.get('properties'), dict)):
+                raise AzureResponseError('ARM returned an invalid origin resource in the silo collection.')
+            if not self._origin_fallback_warned:
+                logger.warning(
+                    'Origin point GET returned HTTP 404; using the matching origin from the silo collection. '
+                    'Stamp-derived IP fields may be absent.')
+                self._origin_fallback_warned = True
+            return resource
+
     def list(self, path, query=None):
         result = []
         visited = set()
@@ -239,7 +276,8 @@ class ActiveBackupClient:
             'operationUrl': self.url(path),
             'status': state,
         }
-        if isinstance(payload, dict) and 'id' in payload:
+        if (isinstance(payload, dict) and isinstance(payload.get('id'), str) and payload['id'].strip() and
+                not payload.get('status')):
             result['resource'] = payload
         return result
 
@@ -294,11 +332,11 @@ class ActiveBackupClient:
                 'status': 'Accepted',
             }
         operation = self.wait(location, timeout, initial=response)
+        if method in ('PUT', 'PATCH'):
+            return self.get_resource(path)
         if method == 'DELETE':
             return None
-        if 'resource' in operation:
-            return operation['resource']
-        return self.decode(self.request('GET', path)) if method in ('PUT', 'PATCH') else None
+        return operation.get('resource')
 
     def consume(self, method, path, filename=None, overwrite=False, query=None, body=None,
                 content_type=None, tail=False):

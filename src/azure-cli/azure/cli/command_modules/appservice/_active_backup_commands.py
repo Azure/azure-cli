@@ -122,10 +122,7 @@ def load_command_table(loader):
         with loader.command_group(group, custom_command_type=command_type, is_preview=True,
                                   validator=validate_identity) as context:
             for verb, handler_name in commands:
-                handler = getattr(active_backup, handler_name)
                 options = {}
-                if 'no_wait' in inspect.signature(handler).parameters:
-                    options['supports_no_wait'] = True
                 if verb == 'delete':
                     options['confirmation'] = True
                 if group in ('appservice plan silo', 'webapp silo') and verb in ('create', 'update', 'show', 'list'):
@@ -148,6 +145,11 @@ def load_arguments(loader, command):
                          configured_default=None, local_context_attribute=None, completer=None,
                          help='Name of the primary App Service plan or app, not an internal silo resource.')
         context.argument('silo', id_part='child_name_1', help='Customer-facing silo name, including origin when supported.')
+        if 'no_wait' in parameters:
+            # Register the reserved flag locally; supports_no_wait would discard the receipt.
+            context.extra(
+                'no_wait', options_list=['--no-wait'], action='store_true', default=False,
+                help='Return without waiting for the API operation, preserving its resource or accepted-operation receipt.')
         for argument in parameters:
             if argument in ('cmd', 'name', 'resource_group_name', 'silo', 'no_wait'):
                 continue
@@ -230,14 +232,18 @@ def load_help():
             if handler_name in ('add_silo_vnet_integration', 'update_silo_vnet_integration'):
                 example += ' --body @request.json'
             description = handler_name.replace('_', ' ').capitalize() + '.'
+            origin_help = (
+                ' Origin point GET 404s can use the matching silo-list entry for metadata, with a warning. '
+                'Origin writes and operation polling are unchanged.'
+                if handler_name in ('show_site_silo', 'update_site_silo') else '')
             helps[command] = (
                 'type: command\nshort-summary: {}\n'
                 'long-summary: Calls the supported silo ARM API without client-side OS or SKU eligibility checks. '
                 'Read operations can return sensitive configuration. File responses require --file. '
                 'See https://github.com/Azure/azure-cli/blob/dev/doc/active_backup_preview.md '
-                'for API bodies and service limitations.\n'
+                'for API bodies and service limitations.{}\n'
                 'examples:\n  - name: {}\n    text: {}\n'
-            ).format(description, description, example)
+            ).format(description, origin_help, description, example)
     for group in ('appservice plan silo', 'webapp silo'):
         helps[group] = (
             'type: group\nshort-summary: Manage App Service Active Backup silos.\n'

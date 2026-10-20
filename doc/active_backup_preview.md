@@ -61,7 +61,13 @@ name is required.
 
 Create/update/delete wait for their API operation, not future content/configuration
 revision, probe-health, or DNS convergence. `--no-wait` returns an accepted-operation
-receipt when the service starts an asynchronous operation:
+receipt when the service starts an asynchronous operation.
+After an asynchronous create/update succeeds, the CLI reads and returns the
+original target resource, rather than returning the operation-status envelope.
+
+The receipt contains `resourceId`, `operationId`, `operationUrl`, and
+`status: Accepted`. It is returned in the selected output format; `--output none`
+explicitly suppresses it.
 
 ```powershell
 $operation = az appservice plan silo create -g MyGroup -n MyPlan --silo WestPlan --location westus2 --primary-location eastus --no-wait | ConvertFrom-Json
@@ -73,11 +79,27 @@ wait. A CLI timeout does not cancel the service operation. `silo operation show`
 inspects a CRUD operation; `webapp silo runtime-operation show` inspects a runtime
 operation instead.
 
+Both plan and site `silo operation show`/`silo wait` request the API's asynchronous
+status representation (`azureAsyncOperation=1`). They report operation status
+without reading the target resource after success, including after deletion.
+Polling errors remain errors; a missing resource alone is not proof of successful
+operation completion.
+
 Worker overrides are 1-30. Omitted fields preserve service defaults/current values;
 explicit `false` is not omission. Location cannot be changed by update. The current
 API does not establish resetting existing plan overrides back to inheritance.
 
 ## Traffic, origin, Last Known Good, and refresh
+
+For the site `origin` entry only, a point-read HTTP 404 can be worked around using
+the exact matching origin resource returned by the paginated silo collection.
+The CLI emits a warning when it does this for show, update pre-read, or update
+readback. The returned object is the service's collection entry, without invented
+fields; stamp-derived IP fields from point reads may be absent. Missing,
+duplicate, or malformed origin entries and list/permission failures remain
+errors. Ordinary replica, plan-origin and pass-through reads are unchanged.
+Origin writes and operation polling still target their original API routes;
+the workaround does not prove that the raw ARM point endpoint is working.
 
 ```azurecli
 az webapp managed-traffic show -g MyGroup -n MyApp

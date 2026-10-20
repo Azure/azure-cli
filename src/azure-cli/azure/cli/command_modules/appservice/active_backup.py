@@ -37,7 +37,7 @@ def _primary_location(cmd, resource_group_name, name, plan):
 def _silo_body(cmd, resource_group_name, name, silo, location, primary_location, properties, plan, update):
     client = _client(cmd, resource_group_name, name, plan)
     if update:
-        existing = client.decode(client.request('GET', client.resource(silo)))
+        existing = client.get_resource(client.resource(silo))
         if not isinstance(existing, dict) or not isinstance(existing.get('properties'), dict):
             raise AzureResponseError('The silo API did not return the resource properties required for update.')
         existing_properties = existing['properties']
@@ -89,12 +89,12 @@ def delete_plan_silo(cmd, resource_group_name, name, silo, no_wait=False, timeou
 
 def show_plan_silo_operation(cmd, resource_group_name, name, silo, operation_id):
     client = _client(cmd, resource_group_name, name, True)
-    return client.operation(client.resource(silo) + '/operationresults/' + segment(operation_id))
+    return client.operation(client.operation_url(silo, operation_id))
 
 
 def wait_plan_silo(cmd, resource_group_name, name, silo, operation_id, timeout=DEFAULT_TIMEOUT):
     client = _client(cmd, resource_group_name, name, True)
-    return client.wait(client.resource(silo) + '/operationresults/' + segment(operation_id), timeout)
+    return client.wait(client.operation_url(silo, operation_id), timeout)
 
 
 def list_plan_silo_vnet_integrations(cmd, resource_group_name, name, silo):
@@ -128,7 +128,8 @@ def update_site_silo(cmd, resource_group_name, name, silo, location=None, primar
 
 
 def show_site_silo(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo)
+    client = _client(cmd, resource_group_name, name)
+    return client.get_resource(client.resource(silo))
 
 
 def list_site_silos(cmd, resource_group_name, name):
@@ -143,12 +144,12 @@ def delete_site_silo(cmd, resource_group_name, name, silo, no_wait=False, timeou
 
 def show_site_silo_operation(cmd, resource_group_name, name, silo, operation_id):
     client = _client(cmd, resource_group_name, name)
-    return client.operation(client.resource(silo) + '/operationresults/' + segment(operation_id))
+    return client.operation(client.operation_url(silo, operation_id))
 
 
 def wait_site_silo(cmd, resource_group_name, name, silo, operation_id, timeout=DEFAULT_TIMEOUT):
     client = _client(cmd, resource_group_name, name)
-    return client.wait(client.resource(silo) + '/operationresults/' + segment(operation_id), timeout)
+    return client.wait(client.operation_url(silo, operation_id), timeout)
 
 
 def refresh_site_silos(cmd, resource_group_name, name):

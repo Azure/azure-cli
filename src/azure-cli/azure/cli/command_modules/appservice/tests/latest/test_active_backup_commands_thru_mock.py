@@ -6,13 +6,14 @@
 from contextlib import redirect_stderr, redirect_stdout
 import inspect
 import io
+import json
 import unittest
 from unittest.mock import patch
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from azure.cli.core.azclierror import AzureResponseError, InvalidArgumentValueError, ResourceNotFoundError
 from azure.cli.command_modules.appservice import active_backup as commands
-from azure.cli.command_modules.appservice._active_backup_client import ActiveBackupClient
+from azure.cli.command_modules.appservice._active_backup_client import ActiveBackupClient, API_VERSION
 from azure.cli.command_modules.appservice._active_backup_commands import COMMAND_GROUPS
 from .test_active_backup_client import cli_context, response
 
@@ -374,6 +375,20 @@ class ActiveBackupCommandTests(unittest.TestCase):
 class ActiveBackupHelpTests(unittest.TestCase):
 
     @staticmethod
+    def invoke_json(arguments):
+        from azure.cli.core import get_default_cli
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            try:
+                exit_code = get_default_cli().invoke(arguments + ['--output', 'json'], out_file=stdout)
+            except SystemExit as ex:
+                exit_code = ex.code
+        if exit_code:
+            raise AssertionError(stderr.getvalue())
+        return exit_code, stdout.getvalue()
+
+    @staticmethod
     def invoke(arguments):
         from azure.cli.core import get_default_cli
         if '--help' not in arguments:
@@ -426,6 +441,207 @@ class ActiveBackupHelpTests(unittest.TestCase):
                 '--primary-location eastus --zone-redundant false --no-wait'.split()), 0)
             self.assertIs(request.call_args.args[2]['properties']['zoneRedundantOverride'], False)
             request.assert_called_once()
+
+    def test_cli_no_wait_receipts_are_not_discarded(self):
+        for group, entries in COMMAND_GROUPS.items():
+            for verb, handler_name in entries:
+                parameters = inspect.signature(getattr(commands, handler_name)).parameters
+                if 'no_wait' not in parameters:
+                    continue
+                with self.subTest(command=group + ' ' + verb):
+                    client = ActiveBackupClient(
+                        cli_context(), 'group', 'primary',
+                        'serverfarms' if group.startswith('appservice plan') else 'sites',
+                        subscription='sub')
+                    resource_id = client.resource('backup')
+                    poll = resource_id + '/operationresults/op'
+                    initial = response(202, headers={'Location': poll})
+                    existing = response(payload={
+                        'id': resource_id, 'location': 'westus2',
+                        'properties': {'primaryLocation': 'eastus'}})
+                    arguments = (group + ' ' + verb).split() + [
+                        '-g', 'group', '-n', 'primary', '--silo', 'backup', '--no-wait']
+                    if 'location' in parameters:
+                        arguments += ['--location', 'westus2', '--primary-location', 'eastus']
+                    if verb == 'delete':
+                        arguments += ['--yes']
+                    with patch(MODULE + '._client', return_value=client), \
+                            patch.object(client, 'request', side_effect=lambda method, *args, **kwargs:
+                                         existing if method == 'GET' else initial) as request:
+                        exit_code, output = self.invoke_json(arguments)
+                    self.assertEqual(exit_code, 0)
+                    self.assertTrue(output.strip(), 'The CLI discarded the no-wait operation receipt.')
+                    receipt = json.loads(output)
+                    self.assertEqual(receipt['status'], 'Accepted')
+                    self.assertEqual(receipt['operationId'], 'op')
+                    self.assertEqual(receipt['resourceId'], request.call_args.args[1])
+                    self.assertEqual(receipt['operationUrl'], client.url(poll))
+                    self.assertEqual(request.call_count, 2 if verb == 'update' else 1)
+
+    def test_cli_no_wait_preserves_synchronous_resource_results(self):
+        for group in ('appservice plan silo', 'webapp silo'):
+            with self.subTest(command=group + ' create'):
+                client = ActiveBackupClient(cli_context(), 'group', 'primary', subscription='sub')
+                resource = {'id': client.resource('backup'), 'properties': {'provisioningState': 'Succeeded'}}
+                with patch(MODULE + '._client', return_value=client), \
+                        patch.object(client, 'request', return_value=response(payload=resource)) as request:
+                    exit_code, output = self.invoke_json(
+                        (group + ' create -g group -n primary --silo backup --location westus2 '
+                         '--primary-location eastus --no-wait').split())
+                self.assertEqual(exit_code, 0)
+                self.assertTrue(output.strip(), 'The CLI discarded the synchronous resource result.')
+                self.assertEqual(json.loads(output), dict(resource, resourceGroup='group'))
+                request.assert_called_once()
+
+    def test_cli_waited_writes_return_resource_json_not_operation_status(self):
+        for group in ('appservice plan silo', 'webapp silo'):
+            for verb in ('create', 'update'):
+                with self.subTest(command=group + ' ' + verb):
+                    client = ActiveBackupClient(
+                        cli_context(), 'group', 'primary',
+                        'serverfarms' if group.startswith('appservice plan') else 'sites',
+                        subscription='sub')
+                    resource_id = client.resource('backup')
+                    existing = {'id': resource_id, 'location': 'westus2',
+                                'properties': {'primaryLocation': 'eastus'}}
+                    resource = dict(existing, properties={
+                        'primaryLocation': 'eastus', 'provisioningState': 'Succeeded',
+                        'instanceNumberOverride': 2, 'zoneRedundantOverride': False})
+                    poll = resource_id + '/operationresults/op?azureAsyncOperation=1'
+                    replies = [response(payload=existing)] if verb == 'update' else []
+                    replies += [
+                        response(202, headers={'Azure-AsyncOperation': poll, 'Retry-After': '0'}),
+                        response(payload={'id': None, 'status': 'Succeeded', 'properties': None}),
+                        response(payload=resource)]
+                    with patch(MODULE + '._client', return_value=client), \
+                            patch.object(client, 'request', side_effect=replies) as request, \
+                            patch('azure.cli.command_modules.appservice._active_backup_client.time.sleep'):
+                        exit_code, output = self.invoke_json(
+                            (group + ' ' + verb + ' -g group -n primary --silo backup '
+                             '--location westus2 --primary-location eastus').split())
+                    self.assertEqual(exit_code, 0)
+                    self.assertEqual(json.loads(output), dict(resource, resourceGroup='group'))
+                    self.assertEqual(request.call_args.args, ('GET', resource_id))
+                    self.assertEqual(request.call_count, 4 if verb == 'update' else 3)
+
+    def test_cli_operation_show_uses_async_status_mode(self):
+        for group, resource_type in (('appservice plan silo', 'serverfarms'), ('webapp silo', 'sites')):
+            for state in ('InProgress', 'Succeeded'):
+                with self.subTest(group=group, state=state):
+                    client = ActiveBackupClient(
+                        cli_context(), 'group', 'primary', resource_type, subscription='sub')
+                    with patch(MODULE + '._client', return_value=client), \
+                            patch.object(client, 'request', return_value=response(
+                                payload={'id': None, 'status': state, 'properties': None})) as request:
+                        exit_code, output = self.invoke_json(
+                            (group + ' operation show -g group -n primary --silo backup --operation-id op').split())
+                    self.assertEqual(exit_code, 0)
+                    request.assert_called_once()
+                    method, address = request.call_args.args
+                    self.assertEqual(method, 'GET')
+                    self.assertEqual(urlsplit(address).path, client.resource('backup') + '/operationresults/op')
+                    self.assertEqual(parse_qs(urlsplit(address).query),
+                                     {'api-version': [API_VERSION], 'azureAsyncOperation': ['1']})
+                    self.assertEqual(json.loads(output),
+                                     {'operationId': 'op', 'operationUrl': address, 'status': state})
+
+    def test_cli_wait_uses_async_status_mode_without_resource_readback(self):
+        for group, resource_type in (('appservice plan silo', 'serverfarms'), ('webapp silo', 'sites')):
+            with self.subTest(group=group):
+                client = ActiveBackupClient(cli_context(), 'group', 'primary', resource_type, subscription='sub')
+                with patch(MODULE + '._client', return_value=client), \
+                        patch.object(client, 'request', side_effect=[
+                            response(202, headers={'Retry-After': '0'}),
+                            response(payload={'id': None, 'status': 'Succeeded', 'properties': None})]) as request, \
+                        patch('azure.cli.command_modules.appservice._active_backup_client.time.sleep'):
+                    exit_code, output = self.invoke_json(
+                        (group + ' wait -g group -n primary --silo backup --operation-id op').split())
+                self.assertEqual(exit_code, 0)
+                self.assertEqual(request.call_count, 2)
+                for call in request.call_args_list:
+                    self.assertEqual(call.args[0], 'GET')
+                    self.assertEqual(urlsplit(call.args[1]).path, client.resource('backup') + '/operationresults/op')
+                    self.assertEqual(parse_qs(urlsplit(call.args[1]).query),
+                                     {'api-version': [API_VERSION], 'azureAsyncOperation': ['1']})
+                self.assertEqual(json.loads(output),
+                                 {'operationId': 'op', 'operationUrl': request.call_args.args[1], 'status': 'Succeeded'})
+
+    def test_cli_operation_failures_are_not_masked(self):
+        forbidden = AzureResponseError('Operation access denied.')
+        forbidden.response = response(403)
+        failures = [ResourceNotFoundError('Operation missing.'), forbidden] + [
+            response(payload={'status': status, 'error': {'code': 'SiloFailed', 'message': 'Operation failed.'}})
+            for status in ('Failed', 'Cancelled', 'TimedOut')]
+        for group, resource_type in (('appservice plan silo', 'serverfarms'), ('webapp silo', 'sites')):
+            for action in ('operation show', 'wait'):
+                for failure in failures:
+                    with self.subTest(group=group, action=action, failure=failure):
+                        client = ActiveBackupClient(
+                            cli_context(), 'group', 'primary', resource_type, subscription='sub')
+                        with patch(MODULE + '._client', return_value=client), \
+                                patch.object(client, 'request', side_effect=[failure]) as request:
+                            exit_code = self.invoke(
+                                (group + ' ' + action + ' -g group -n primary --silo origin --operation-id op').split())
+                        self.assertNotEqual(exit_code, 0)
+                        request.assert_called_once()
+                        self.assertEqual(request.call_args.args[0], 'GET')
+                        self.assertEqual(urlsplit(request.call_args.args[1]).path,
+                                         client.resource('origin') + '/operationresults/op')
+                        self.assertEqual(parse_qs(urlsplit(request.call_args.args[1]).query),
+                                         {'api-version': [API_VERSION], 'azureAsyncOperation': ['1']})
+
+    def test_cli_origin_show_reads_the_collection_after_point_404(self):
+        client = ActiveBackupClient(cli_context(), 'group', 'primary',
+                                    subscription='00000000-0000-0000-0000-000000000001')
+        origin = client.resource('origin')
+        resource = {'id': origin, 'name': 'origin', 'type': 'Microsoft.Web/sites/silos',
+                    'location': 'eastus', 'properties': {'primaryLocation': 'eastus', 'endpointStatus': 'Enabled'}}
+        with patch(MODULE + '._client', return_value=client), \
+                patch.object(client, 'request', side_effect=[
+                    ResourceNotFoundError('Origin point missing'), response(payload={'value': [resource]})]) as request, \
+                patch('azure.cli.command_modules.appservice._active_backup_client.logger.warning') as warning:
+            exit_code, output = self.invoke_json(['webapp', 'silo', 'show', '--ids', origin])
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(json.loads(output), dict(resource, resourceGroup='group'))
+        self.assertEqual([call.args[:2] for call in request.call_args_list],
+                         [('GET', origin), ('GET', client.url(client.resource()))])
+        warning.assert_called_once()
+
+    def test_cli_origin_update_uses_the_collection_before_and_after_async_write(self):
+        client = ActiveBackupClient(cli_context(), 'group', 'primary', subscription='sub')
+        origin = client.resource('origin')
+        before = {'id': origin, 'name': 'origin', 'type': 'Microsoft.Web/sites/silos', 'location': 'eastus',
+                  'properties': {'primaryLocation': 'eastus', 'endpointStatus': 'Enabled'}}
+        after = dict(before, properties={'primaryLocation': 'eastus', 'endpointStatus': 'Disabled'})
+        poll = origin + '/operationresults/op'
+        with patch(MODULE + '._client', return_value=client), \
+                patch.object(client, 'request', side_effect=[
+                    ResourceNotFoundError('Point missing'), response(payload={'value': [before]}),
+                    response(202, headers={'Azure-AsyncOperation': poll, 'Retry-After': '0'}),
+                    response(payload={'id': None, 'status': 'Succeeded'}),
+                    ResourceNotFoundError('Point still missing'), response(payload={'value': [after]})]) as request, \
+                patch('azure.cli.command_modules.appservice._active_backup_client.time.sleep'), \
+                patch('azure.cli.command_modules.appservice._active_backup_client.logger.warning') as warning:
+            exit_code, output = self.invoke_json(
+                'webapp silo update -g group -n primary --silo origin --endpoint-status Disabled'.split())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(json.loads(output), dict(after, resourceGroup='group'))
+        self.assertEqual(request.call_count, 6)
+        self.assertEqual(request.call_args_list[2].args[:2], ('PUT', origin))
+        expected_body = {
+            'location': 'eastus',
+            'properties': {'name': 'origin', 'primaryLocation': 'eastus', 'endpointStatus': 'Disabled'}}
+        self.assertEqual(request.call_args_list[2].args[2], expected_body)
+        warning.assert_called_once()
+
+    def test_cli_origin_pass_through_does_not_use_collection_fallback(self):
+        client = ActiveBackupClient(cli_context(), 'group', 'primary', subscription='sub')
+        with patch(MODULE + '._client', return_value=client), \
+                patch.object(client, 'request', side_effect=ResourceNotFoundError('Config missing')) as request:
+            self.assertEqual(self.invoke(
+                'webapp silo config show -g group -n primary --silo origin'.split()), 3)
+        request.assert_called_once()
+        self.assertEqual(request.call_args.args[:2], ('GET', client.resource('origin') + '/config/web'))
 
     def test_cli_not_found_has_show_exit_code(self):
         client = ActiveBackupClient(cli_context(), 'group', 'primary', subscription='sub')
