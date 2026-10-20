@@ -73,6 +73,10 @@ The receipt contains `resourceId`, `operationId`, `operationUrl`, and
 `status: Accepted`. It is returned in the selected output format; `--output none`
 explicitly suppresses it.
 
+No-wait skips subsequent operation polling; the initial request must still
+complete. For restart, use `--synchronous false --no-wait` when you also want
+the service to avoid synchronous restart work in that initial request.
+
 ```powershell
 $operation = az appservice plan silo create -g MyGroup -n MyPlan --silo WestPlan --location westus2 --primary-location eastus --no-wait | ConvertFrom-Json
 az appservice plan silo wait -g MyGroup -n MyPlan --silo WestPlan --operation-id $operation.operationId --timeout 7200
@@ -187,7 +191,20 @@ downloads require `--file`; an existing destination requires `--overwrite`.
 string/auth/private-snapshot reads intentionally return sensitive values: protect
 their output and do not put it in source control.
 
-Request-body operations accept JSON or `@file` containing the API envelope:
+Use named options for DNS checks, TCP checks and antivirus configuration:
+
+```azurecli
+az webapp silo network-check dns -g MyGroup -n MyApp --silo WestApp --dns-name example.com
+az webapp silo network-check tcp-ping -g MyGroup -n MyApp --silo WestApp --host example.com --port 443
+az webapp silo antivirus config update -g MyGroup -n MyApp --silo WestApp --delete-infected-files false
+```
+
+For those commands, `--body` remains an advanced alternative and cannot be
+combined with the named request fields. TCP ports are integers from 1 to 65535;
+the CLI serializes the port using the service's string-valued field.
+
+Other request-body operations accept JSON or `@file` containing the API envelope.
+The advanced-body forms of the commands above use the same envelopes:
 
 | Operation | Example body |
 |---|---|

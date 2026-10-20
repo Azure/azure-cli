@@ -32,6 +32,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'ActiveBackupTestHarness.psm1') -Force -DisableNameChecking
 $context = $null
+$initialized = $false
 $exitCode = 0
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 try {
@@ -95,6 +96,7 @@ try {
     else {
         if ($Mode -eq 'Cleanup' -and -not $PSCmdlet.ShouldProcess($context.Subscription, 'Delete only manifest-owned Active Backup test resources')) { return }
         Initialize-AbLocalState $context -Existing:($Mode -in @('Resume', 'Cleanup'))
+        $initialized = $true
         Test-AbSource $context
         $context.Manifest.Remove('failure')
         Save-AbManifest $context
@@ -122,7 +124,7 @@ catch {
     $kind = $(if ($_.Exception.Data.Contains('AbKind')) { $_.Exception.Data['AbKind'] } else { 'Invalid' })
     $exitCode = switch ($kind) { 'Cleanup' { 3 } 'BlockedEnvironment' { 2 } 'BlockedFixture' { 2 } 'Fail' { 1 } default { 4 } }
     Write-Warning $(if ($_.Exception.Data.Contains('AbSafeMessage')) { $_.Exception.Data['AbSafeMessage'] } else { 'Unexpected local failure. Raw output was withheld to avoid persisting credentials.' })
-    if ($context -and (Test-Path -LiteralPath $context.ManifestPath)) {
+    if ($initialized -and $context.Lock -and (Test-Path -LiteralPath $context.ManifestPath)) {
         $context.Manifest.failure = @{
             kind = $kind
             reason = $(if ($_.Exception.Data.Contains('AbSafeMessage')) { $_.Exception.Data['AbSafeMessage'] } else { 'Unexpected local failure; raw details withheld.' })
@@ -137,7 +139,7 @@ catch {
 finally {
     if ($context) {
         if ($context.Lock) { $context.Lock.Dispose() }
-        if ($context.Mode -ne 'Plan' -and (Test-Path -LiteralPath $context.ManifestPath)) {
+        if ($initialized -and $context.Mode -ne 'Plan' -and (Test-Path -LiteralPath $context.ManifestPath)) {
             $relative = [IO.Path]::GetRelativePath($repo, $context.ManifestPath)
             Write-Host "Recovery manifest: $relative"
             $scriptPath = (Join-Path $PSScriptRoot 'test_active_backup.ps1').Replace("'", "''")

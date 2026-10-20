@@ -14,10 +14,11 @@ from urllib.parse import parse_qs, unquote, urlsplit
 
 import requests
 
-from azure.cli.core.azclierror import (AzureConnectionError, AzureResponseError, FileOperationError,
-                                       InvalidArgumentValueError, ResourceNotFoundError)
+from azure.cli.core.azclierror import (AzureConnectionError, AzureInternalError, AzureResponseError, BadRequestError,
+                                       FileOperationError, ForbiddenError, InvalidArgumentValueError,
+                                       ResourceNotFoundError, UnauthorizedError, UnclassifiedUserFault)
 from azure.cli.command_modules.appservice._active_backup_client import (
-    ActiveBackupClient, API_VERSION, load_json, segment)
+    ActiveBackupClient, API_VERSION, _service_error, load_json, segment)
 
 
 MODULE = 'azure.cli.command_modules.appservice._active_backup_client'
@@ -109,7 +110,10 @@ class ActiveBackupClientTests(unittest.TestCase):
                 resource='https://audience.example.test/', subscription='subscription')
 
     def test_service_errors_preserve_code_and_request_id(self):
-        for status, error_type in ((404, ResourceNotFoundError), (409, AzureResponseError), (500, AzureResponseError)):
+        for status, error_type in (
+                (400, BadRequestError), (401, UnauthorizedError), (403, ForbiddenError),
+                (404, ResourceNotFoundError), (409, UnclassifiedUserFault), (429, UnclassifiedUserFault),
+                (500, AzureInternalError), (503, AzureInternalError)):
             failed = response(status, {'error': {'code': 'SiloBusy', 'message': 'Try again.'}},
                               {'x-ms-request-id': 'request-one'})
             with self.subTest(status=status), patch(MODULE + '.Profile') as profile, \
@@ -125,7 +129,7 @@ class ActiveBackupClientTests(unittest.TestCase):
         with patch(MODULE + '.Profile') as profile, patch(MODULE + '.requests.Session') as factory:
             profile.return_value.get_raw_token.return_value = (('Bearer', 'token', {}), None, None)
             factory.return_value.__enter__.return_value.request.return_value = legacy
-            with self.assertRaises(AzureResponseError) as caught:
+            with self.assertRaises(BadRequestError) as caught:
                 self.client.request('GET', self.resource)
             self.assertIn('LegacyFailure', str(caught.exception))
             self.assertIn('Legacy detail.', str(caught.exception))
@@ -386,17 +390,17 @@ class ActiveBackupClientTests(unittest.TestCase):
 
     def test_only_transient_polling_reads_are_retried(self):
         for status in (429, 500, 502, 503, 504):
-            error = AzureResponseError('Transient failure')
-            error.response = response(status, headers={'Retry-After': '0'})
+            error = _service_error(response(status, headers={'Retry-After': '0'}))
             with self.subTest(status=status), patch.object(self.client, 'request', side_effect=[
                     error, response(payload={'status': 'Succeeded'})]) as request, patch(MODULE + '.time.sleep'):
                 self.assertEqual(self.client.wait(self.resource)['status'], 'Succeeded')
                 self.assertEqual(request.call_count, 2)
-        error = AzureResponseError('Bad input')
-        error.response = response(400)
-        with patch.object(self.client, 'request', side_effect=error) as request, self.assertRaises(AzureResponseError):
-            self.client.wait(self.resource)
-        request.assert_called_once()
+        for status in (400, 401, 403, 409):
+            error = _service_error(response(status))
+            with self.subTest(status=status), patch.object(self.client, 'request', side_effect=error) as request, \
+                    self.assertRaises(type(error)):
+                self.client.wait(self.resource)
+            request.assert_called_once()
 
     def test_operation_inspection_preserves_pending_and_success(self):
         running = self.client.operation(self.resource, response(202))

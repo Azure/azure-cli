@@ -201,7 +201,7 @@ function New-AbContext {
         AuthConfigDir = $auth; Catalog = $catalog; Manifest = $manifest; CurrentCase = $null
         RunDeadline = [DateTime]::UtcNow.AddMinutes($RunTimeoutMinutes); CleanupDeadline = $null
         Executor = $null; HttpExecutor = $null; Lock = $null; ArmEndpoint = 'https://management.azure.com/'
-        ApiVersion = $version; Environment = @{}; InCleanup = $false
+        ApiVersion = $version; Environment = @{}; InCleanup = $false; ManifestReadHash = $null
     }
 }
 
@@ -234,6 +234,13 @@ function Initialize-AbLocalState {
         Protect-AbDirectory (Join-Path $Context.RunDirectory $name)
     }
     $Context.Lock = [IO.File]::Open((Join-Path $Context.RunDirectory 'run.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
+    if ($Existing) {
+        $currentBytes = [IO.File]::ReadAllBytes($Context.ManifestPath)
+        $currentHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($currentBytes))
+        if (-not $Context.ManifestReadHash -or $currentHash -cne $Context.ManifestReadHash) {
+            Stop-Ab 'The recovery manifest changed before its lock was acquired. Reread the manifest and retry recovery.' Invalid
+        }
+    }
     $Context.PythonExe = Resolve-AbPython $Context.RepoRoot $Context.PythonExe
     $Context.Manifest.pythonExe = $Context.PythonExe
     $Context.Environment = @{
@@ -692,7 +699,21 @@ function Read-AbManifest {
     param([string]$RepoRoot, [string]$ManifestPath, [string]$Subscription, [string]$Mode = 'Cleanup')
     $path = Assert-AbLocalPath $RepoRoot $ManifestPath -RequireIgnored
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { Stop-Ab 'The manifest file does not exist.' Invalid }
-    try { $manifest = ConvertFrom-Json -InputObject ([IO.File]::ReadAllText($path)) -AsHashtable } catch { Stop-Ab 'The manifest is not valid JSON.' Invalid }
+    try {
+        $stream = [IO.File]::Open($path, 'Open', 'Read', ([IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete))
+        $buffer = [IO.MemoryStream]::new()
+        try {
+            $stream.CopyTo($buffer)
+            $manifestBytes = $buffer.ToArray()
+        }
+        finally {
+            $stream.Dispose()
+            $buffer.Dispose()
+        }
+        $manifestText = [Text.Encoding]::UTF8.GetString($manifestBytes).TrimStart([char]0xfeff)
+        $manifest = ConvertFrom-Json -InputObject $manifestText -AsHashtable
+    }
+    catch { Stop-Ab 'The manifest could not be read as valid JSON.' Invalid }
     if ($manifest.schemaVersion -ne 1 -or $manifest.purpose -ne 'active-backup-cli-validation' -or
         $manifest.subscription -ne $Subscription -or
         $manifest.repoRoot -ine [IO.Path]::GetFullPath($RepoRoot) -or
@@ -742,6 +763,7 @@ function Read-AbManifest {
         }
     }
     $context.Manifest = $manifest
+    $context.ManifestReadHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($manifestBytes))
     $context.ArmEndpoint = [string](Get-AbValue $manifest 'armEndpoint' 'https://management.azure.com/')
     if ($context.ArmEndpoint -ne 'https://management.azure.com/') { Stop-Ab 'The saved ARM origin is not the reviewed public cloud.' Invalid }
     return $context
@@ -1699,10 +1721,14 @@ function Invoke-AbRun {
             $_.status -ne 'Pass' -and @($_.calls | Where-Object { (Get-AbValue $_ 'mutationReplay') -eq 'NoReplay' }).Count
         })
         if ($unsafeCases.Count) { Stop-Ab 'A non-idempotent action in an incomplete case was already attempted. It was not replayed; inspect or clean up this run.' BlockedFixture }
-        if ($null -ne $Context.Manifest.pendingMutation) {
-            foreach ($suite in $Context.Manifest.suites) {
-                if ($suite.groupCreateAttempted -and -not $suite.cleanupComplete) { Assert-AbOwnedGroup $Context $suite | Out-Null }
+        foreach ($suite in $Context.Manifest.suites) {
+            if ($suite.groupCreateAttempted -and -not $suite.cleanupComplete) {
+                if (-not (Assert-AbOwnedGroup $Context $suite)) {
+                    Stop-Ab 'Resume cannot reconcile a missing owned resource group. Use Cleanup or start a new run.' BlockedFixture
+                }
             }
+        }
+        if ($null -ne $Context.Manifest.pendingMutation) {
             if ($Context.Manifest.pendingMutation.replay -eq 'NoReplay') {
                 Stop-Ab 'A previous non-idempotent action has an uncertain outcome. It was not replayed. Use ownership-checked Cleanup or investigate the recorded case.' BlockedFixture
             }

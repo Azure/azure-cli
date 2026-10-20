@@ -347,6 +347,64 @@ try {
         Assert-Throws { Initialize-AbLocalState $other -Existing }
         Assert-Test ([IO.File]::ReadAllText($c.ManifestPath) -ceq $before)
     }
+    Test-Case 'recovery rejects a stale snapshot after the writer releases its lock' {
+        $c = New-TestContext
+        $stale = Read-AbManifest $repo $c.ManifestPath $subscription Cleanup
+        $contexts.Add($stale)
+        $suite = New-AbSuite $c Windows
+        $suite.groupCreateAttempted = $true
+        $suite.intents = @($suite.groupId, $suite.appId)
+        $c.Manifest.suites = @($suite)
+        $c.Manifest.pendingMutation = @{ replay = 'NoReplay'; command = 'webapp silo refresh'; resourceId = $suite.appId }
+        $c.Manifest.cases = @(@{ id = 'retained-history'; status = 'Pass'; calls = @() })
+        Save-AbManifest $c
+        $newer = [IO.File]::ReadAllText($c.ManifestPath)
+        $c.Lock.Dispose()
+        $c.Lock = $null
+        Assert-Throws { Initialize-AbLocalState $stale -Existing } 'changed before its lock'
+        Assert-Test ([IO.File]::ReadAllText($c.ManifestPath) -ceq $newer)
+        $stale.Lock.Dispose()
+        $stale.Lock = $null
+        $fresh = Read-AbManifest $repo $c.ManifestPath $subscription Cleanup
+        $contexts.Add($fresh)
+        Initialize-AbLocalState $fresh -Existing
+        Assert-Test ($fresh.Manifest.suites.Count -eq 1)
+        Assert-Test ($fresh.Manifest.pendingMutation.command -eq 'webapp silo refresh')
+        Assert-Test ($fresh.Manifest.cases[0].id -eq 'retained-history')
+    }
+    Test-Case 'entrypoint collisions and rejected locks preserve existing recovery artifacts' {
+        foreach ($mode in @('Preflight', 'Resume')) {
+            $c = New-TestContext
+            $suite = New-AbSuite $c Windows
+            $suite.groupCreateAttempted = $true
+            $suite.intents = @($suite.groupId, $suite.appId)
+            $c.Manifest.suites = @($suite)
+            $c.Manifest.pendingMutation = @{ replay = 'NoReplay'; case = 'refresh'; resourceId = $suite.appId }
+            Save-AbManifest $c
+            $reportPath = Join-Path $c.RunDirectory 'results.json'
+            $eventsPath = Join-Path $c.RunDirectory 'events.jsonl'
+            [IO.File]::WriteAllText($reportPath, '{"preserve":"report"}')
+            [IO.File]::WriteAllText($eventsPath, '{"preserve":"events"}')
+            $before = @{}
+            foreach ($path in @($c.ManifestPath, $reportPath, $eventsPath)) {
+                $before[$path] = [IO.File]::ReadAllText($path)
+            }
+            $arguments = @('-NoProfile', '-File', (Join-Path $repo 'scripts\appservice\test_active_backup.ps1'),
+                '-Mode', $mode, '-Subscription', $subscription, '-PythonExe', $python)
+            if ($mode -eq 'Preflight') {
+                $arguments += @('-RunId', $c.Manifest.runId, '-OutputRoot', (Split-Path $c.RunDirectory),
+                    '-AuthConfigDir', $c.AuthConfigDir, '-OperatingSystem', 'Windows', '-Profile', 'Smoke')
+            }
+            else {
+                $arguments += @('-Manifest', $c.ManifestPath, '-AllowResourceCreation', '-AllowCleanup')
+            }
+            $process = Invoke-AbProcess (Get-Command pwsh -CommandType Application).Source $arguments $repo @{} 60
+            Assert-Test ($process.exitCode -eq 4)
+            foreach ($path in $before.Keys) {
+                Assert-Test ([IO.File]::ReadAllText($path) -ceq $before[$path]) "$mode changed a locked recovery artifact."
+            }
+        }
+    }
     Test-Case 'native arguments preserve quotes and whitespace, warnings stay distinct' {
         $code = 'import json,sys; print(json.dumps(sys.argv[1:])); print("preview warning",file=sys.stderr)'
         $result = Invoke-AbProcess $python @('-c', $code, 'a path\with spaces', '{"x":"quoted value"}') $repo @{ PYTHONDONTWRITEBYTECODE = '1' } 30
@@ -969,6 +1027,32 @@ try {
         $c = New-TestContext -Mode Resume
         $c.Manifest.pendingMutation = @{ replay = 'NoReplay'; case = 'refresh'; resourceId = ''; command = 'webapp silo refresh' }
         Assert-Throws { Invoke-AbRun $c } 'not replayed'
+    }
+    Test-Case 'resume validates all existing groups before mutation with an empty pending journal' {
+        foreach ($missing in @($false, $true)) {
+            $c = New-TestContext -Mode Resume
+            $suite = New-AbSuite $c Windows
+            $suite.groupCreateAttempted = $true
+            $suite.intents = @($suite.groupId, $suite.planId, $suite.appId)
+            $c.Manifest.suites = @($suite)
+            $c.Manifest.cases = @(@{
+                id = $suite.key + '.primary'; status = 'Pass'; required = $true
+                evidenceKind = 'Behavioral'; calls = @(); reason = ''
+            })
+            $calls = [Collections.Generic.List[string]]::new()
+            $c.Executor = {
+                param($arguments)
+                $calls.Add(($arguments -join ' '))
+                if (($arguments -join ' ').StartsWith('group show ')) {
+                    if ($missing) { return New-FakeResponse -ExitCode 3 }
+                    return New-FakeResponse @{ id = $suite.groupId; tags = @{ abcliRunId = 'foreign-run' } }
+                }
+                throw 'Resume sent a command before validating group ownership.'
+            }.GetNewClosure()
+            Assert-Test ($null -eq $c.Manifest.pendingMutation)
+            Assert-Throws { Invoke-AbRun $c }
+            Assert-Test ($calls.Count -eq 1 -and $calls[0].StartsWith('group show '))
+        }
     }
     Test-Case 'resume accepts a completed empty refresh without replaying it' {
         $c = New-TestContext

@@ -20,11 +20,11 @@ import requests
 from knack.log import get_logger
 
 from azure.cli.core._profile import Profile
-from azure.cli.core.azclierror import (AzureConnectionError, AzureResponseError, FileOperationError,
-                                       InvalidArgumentValueError, ResourceNotFoundError)
+from azure.cli.core.azclierror import (AzureConnectionError, AzureInternalError, AzureResponseError, FileOperationError,
+                                       InvalidArgumentValueError, ResourceNotFoundError, UnclassifiedUserFault)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.sdk.policies import get_custom_hook_policy
-from azure.cli.core.util import get_az_user_agent, should_disable_connection_verify
+from azure.cli.core.util import get_az_user_agent, get_error_type_by_status_code, should_disable_connection_verify
 
 
 API_VERSION = '2026-08-01'
@@ -86,7 +86,7 @@ def _service_error(response):
     request_id = response.headers.get('x-ms-request-id')
     if request_id:
         message += ' Request ID: {}.'.format(request_id)
-    error_type = ResourceNotFoundError if response.status_code == 404 else AzureResponseError
+    error_type = get_error_type_by_status_code(str(response.status_code))
     error = error_type(message)
     error.response = response
     return error
@@ -297,7 +297,7 @@ class ActiveBackupClient:
                 try:
                     response = self.request('GET', path, timeout=min(60, remaining))
                     read_retries = 0
-                except (ResourceNotFoundError, AzureResponseError) as ex:
+                except (ResourceNotFoundError, AzureResponseError, AzureInternalError, UnclassifiedUserFault) as ex:
                     failed_response = getattr(ex, 'response', None)
                     status = getattr(failed_response, 'status_code', None)
                     known_pending = isinstance(ex, ResourceNotFoundError) and initial is not None

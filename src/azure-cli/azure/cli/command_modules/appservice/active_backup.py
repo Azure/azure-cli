@@ -7,7 +7,8 @@ from urllib.parse import quote, unquote
 
 from knack.log import get_logger
 
-from azure.cli.core.azclierror import AzureResponseError, FileOperationError, InvalidArgumentValueError
+from azure.cli.core.azclierror import (AzureResponseError, FileOperationError, InvalidArgumentValueError,
+                                       MutuallyExclusiveArgumentError, RequiredArgumentMissingError)
 
 from ._active_backup_client import ActiveBackupClient, DEFAULT_TIMEOUT, load_json, segment
 
@@ -264,16 +265,21 @@ def remove_silo_vnet_integration(cmd, resource_group_name, name, silo):
 
 
 def _site(cmd, resource_group_name, name, silo, suffix='', method='GET', query=None, body=None,
-          filename=None, overwrite=False, tail=False, content_type=None, no_wait=False, timeout=None, collection=False):
+          filename=None, overwrite=False, tail=False, content_type=None, collection=False):
     client = _client(cmd, resource_group_name, name)
     path = client.resource(silo) + suffix
     if collection:
         return client.list(path, query)
     if filename is not None or tail:
         return client.consume(method, path, filename, overwrite, query, body, content_type, tail)
-    if timeout is not None:
-        return client.mutate(method, path, body, no_wait, timeout, query)
     return client.decode(client.request(method, path, body, query, content_type=content_type))
+
+
+def _site_operation(cmd, resource_group_name, name, silo, suffix, query=None,
+                    no_wait=False, timeout=DEFAULT_TIMEOUT):
+    client = _client(cmd, resource_group_name, name)
+    return client.mutate('POST', client.resource(silo) + suffix,
+                         no_wait=no_wait, timeout=timeout, query=query)
 
 
 def _instance(instance):
@@ -433,12 +439,34 @@ def check_silo_connectivity(cmd, resource_group_name, name, silo, body):
     return _site(cmd, resource_group_name, name, silo, '/connectivityCheck', method='POST', body=load_json(body))
 
 
-def check_silo_dns(cmd, resource_group_name, name, silo, body):
-    return _site(cmd, resource_group_name, name, silo, '/dnsCheck', method='POST', body=load_json(body))
+def check_silo_dns(cmd, resource_group_name, name, silo, body=None, dns_name=None):
+    if body is not None:
+        if dns_name is not None:
+            raise MutuallyExclusiveArgumentError('Use --dns-name or --body, not both.')
+        payload = load_json(body)
+    else:
+        if dns_name is None:
+            raise RequiredArgumentMissingError('Provide --dns-name or --body.')
+        if not isinstance(dns_name, str) or not dns_name.strip():
+            raise InvalidArgumentValueError('--dns-name must be a non-empty DNS name.')
+        payload = {'properties': {'dnsName': dns_name}}
+    return _site(cmd, resource_group_name, name, silo, '/dnsCheck', method='POST', body=payload)
 
 
-def check_silo_tcp(cmd, resource_group_name, name, silo, body):
-    return _site(cmd, resource_group_name, name, silo, '/tcpPingCheck', method='POST', body=load_json(body))
+def check_silo_tcp(cmd, resource_group_name, name, silo, body=None, host=None, port=None):
+    if body is not None:
+        if host is not None or port is not None:
+            raise MutuallyExclusiveArgumentError('Use --host and --port or --body, not both.')
+        payload = load_json(body)
+    else:
+        if host is None or port is None:
+            raise RequiredArgumentMissingError('Provide both --host and --port, or use --body.')
+        if not isinstance(host, str) or not host.strip():
+            raise InvalidArgumentValueError('--host must be a non-empty hostname or IP address.')
+        if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
+            raise InvalidArgumentValueError('--port must be an integer from 1 to 65535.')
+        payload = {'properties': {'host': host, 'port': str(port)}}
+    return _site(cmd, resource_group_name, name, silo, '/tcpPingCheck', method='POST', body=payload)
 
 
 def invoke_silo_extension(cmd, resource_group_name, name, silo, instance, path, method='GET',
@@ -590,26 +618,27 @@ def list_silo_perf_counters(
 def restart_site_silo(
         cmd, resource_group_name, name, silo, soft_restart=None, synchronous=None,
         no_wait=False, timeout=DEFAULT_TIMEOUT):
-    return _site(cmd, resource_group_name, name, silo, '/restart', method='POST',
-                 query={'softRestart': _boolean(soft_restart), 'synchronous': _boolean(synchronous)},
-                 no_wait=no_wait, timeout=timeout)
+    return _site_operation(
+        cmd, resource_group_name, name, silo, '/restart',
+        query={'softRestart': _boolean(soft_restart), 'synchronous': _boolean(synchronous)},
+        no_wait=no_wait, timeout=timeout)
 
 
 def start_site_silo(cmd, resource_group_name, name, silo, no_wait=False, timeout=DEFAULT_TIMEOUT):
-    return _site(cmd, resource_group_name, name, silo, '/start', method='POST', no_wait=no_wait, timeout=timeout)
+    return _site_operation(cmd, resource_group_name, name, silo, '/start', no_wait=no_wait, timeout=timeout)
 
 
 def stop_site_silo(cmd, resource_group_name, name, silo, no_wait=False, timeout=DEFAULT_TIMEOUT):
-    return _site(cmd, resource_group_name, name, silo, '/stop', method='POST', no_wait=no_wait, timeout=timeout)
+    return _site_operation(cmd, resource_group_name, name, silo, '/stop', no_wait=no_wait, timeout=timeout)
 
 
 def start_silo_network_trace(
         cmd, resource_group_name, name, silo, duration=None, max_frame_length=None,
         sas_url=None, legacy=False, no_wait=False, timeout=DEFAULT_TIMEOUT):
-    return _site(cmd, resource_group_name, name, silo, '/networkTrace/start' + ('' if legacy else 'Operation'),
-                 method='POST', query={
-                     'durationInSeconds': duration, 'maxFrameLength': max_frame_length, 'sasUrl': sas_url},
-                 no_wait=no_wait, timeout=timeout)
+    return _site_operation(
+        cmd, resource_group_name, name, silo, '/networkTrace/start' + ('' if legacy else 'Operation'),
+        query={'durationInSeconds': duration, 'maxFrameLength': max_frame_length, 'sasUrl': sas_url},
+        no_wait=no_wait, timeout=timeout)
 
 
 def stop_silo_network_trace(cmd, resource_group_name, name, silo):
@@ -636,8 +665,16 @@ def show_silo_antivirus_config(cmd, resource_group_name, name, silo):
     return _site(cmd, resource_group_name, name, silo, '/antivirus/config')
 
 
-def update_silo_antivirus_config(cmd, resource_group_name, name, silo, body):
-    return _site(cmd, resource_group_name, name, silo, '/antivirus/config', method='PUT', body=load_json(body))
+def update_silo_antivirus_config(cmd, resource_group_name, name, silo, body=None, delete_infected_files=None):
+    if body is not None:
+        if delete_infected_files is not None:
+            raise MutuallyExclusiveArgumentError('Use --delete-infected-files or --body, not both.')
+        payload = load_json(body)
+    else:
+        if delete_infected_files is None:
+            raise RequiredArgumentMissingError('Provide --delete-infected-files or --body.')
+        payload = {'properties': {'deleteInfectedFiles': _boolean(delete_infected_files)}}
+    return _site(cmd, resource_group_name, name, silo, '/antivirus/config', method='PUT', body=payload)
 
 
 def list_silo_antivirus_logs(cmd, resource_group_name, name, silo):

@@ -278,6 +278,12 @@ Replace `<actual-run-id>` with the printed run; never delete groups by a name
 prefix. Cleanup revalidates the actual group tags, subscription and resource IDs
 and waits for absence. A source change prevents Resume but does not require
 using a stale/broken interpreter for ownership-checked Cleanup.
+Rejected RunId collisions and lock-acquisition failures leave the existing
+manifest and reports untouched. Reports are finalized only after local
+initialization succeeds while holding the run lock.
+Recovery also compares the exact snapshot read before confirmation with the
+manifest after acquiring the lock. If another invocation updated it in between,
+recovery stops without saving stale state; reread the manifest and retry.
 Some enterprise subscriptions add policy-generated NRMS NSGs during VNet creation.
 If these lack the run's tags/journal entries, automatic cleanup intentionally
 refuses group deletion. Review exact IDs and attachments and obtain explicit
@@ -300,6 +306,9 @@ pwsh -NoProfile -File .\scripts\appservice\test_active_backup.ps1 `
 Resume does not recreate cleaned fixtures or blindly replay uncertain deployment,
 refresh, mark-LKG, or other non-idempotent actions. In those cases, investigate or
 clean up and start a fresh run.
+Before continuing, Resume revalidates every attempted, uncleared resource group,
+even when no mutation is pending. Missing groups and mismatched ownership tags
+stop resumption before further resource mutations.
 
 Successful commands clear their pending-mutation journal entry after output
 validation, including empty refresh results and text output. Failed, timed-out,

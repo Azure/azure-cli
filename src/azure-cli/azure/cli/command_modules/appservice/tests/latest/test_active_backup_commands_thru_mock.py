@@ -7,14 +7,17 @@ from contextlib import redirect_stderr, redirect_stdout
 import inspect
 import io
 import json
+import shlex
 import unittest
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlsplit
 
-from azure.cli.core.azclierror import AzureResponseError, InvalidArgumentValueError, ResourceNotFoundError
+from azure.cli.core.azclierror import (AzureResponseError, InvalidArgumentValueError, MutuallyExclusiveArgumentError,
+                                       RequiredArgumentMissingError, ResourceNotFoundError)
 from azure.cli.command_modules.appservice import active_backup as commands
 from azure.cli.command_modules.appservice._active_backup_client import ActiveBackupClient, API_VERSION
-from azure.cli.command_modules.appservice._active_backup_commands import COMMAND_GROUPS
+from azure.cli.command_modules.appservice._active_backup_commands import (
+    ADDITIONAL_EXAMPLES, ARGUMENT_HELP, COMMAND_GROUPS, COMMAND_SUMMARIES)
 from .test_active_backup_client import cli_context, response
 
 
@@ -294,6 +297,50 @@ class ActiveBackupCommandTests(unittest.TestCase):
             commands.show_silo_config(self.cmd, 'group', 'primary', 'backup')
         self.request.assert_called_once()
 
+    def test_named_diagnostic_fields_build_the_service_envelopes(self):
+        commands.check_silo_dns(self.cmd, 'group', 'primary', 'backup', dns_name='example.com')
+        self.assertEqual(self.request.call_args.args[:3], (
+            'POST', self.client.resource('backup') + '/dnsCheck', {'properties': {'dnsName': 'example.com'}}))
+        commands.check_silo_tcp(self.cmd, 'group', 'primary', 'backup', host='example.com', port=443)
+        self.assertEqual(self.request.call_args.args[:3], (
+            'POST', self.client.resource('backup') + '/tcpPingCheck',
+            {'properties': {'host': 'example.com', 'port': '443'}}))
+        commands.update_silo_antivirus_config(
+            self.cmd, 'group', 'primary', 'backup', delete_infected_files=False)
+        self.assertEqual(self.request.call_args.args[:3], (
+            'PUT', self.client.resource('backup') + '/antivirus/config',
+            {'properties': {'deleteInfectedFiles': False}}))
+
+    def test_named_request_fields_reject_ambiguous_or_incomplete_input(self):
+        cases = (
+            (commands.check_silo_dns, {}, RequiredArgumentMissingError),
+            (commands.check_silo_dns, {'dns_name': ''}, InvalidArgumentValueError),
+            (commands.check_silo_dns, {'dns_name': 'example.com', 'body': '{}'}, MutuallyExclusiveArgumentError),
+            (commands.check_silo_tcp, {'host': 'example.com'}, RequiredArgumentMissingError),
+            (commands.check_silo_tcp, {'host': '', 'port': 443}, InvalidArgumentValueError),
+            (commands.check_silo_tcp, {'host': 'example.com', 'port': 65536}, InvalidArgumentValueError),
+            (commands.check_silo_tcp, {'host': 'example.com', 'port': True}, InvalidArgumentValueError),
+            (commands.check_silo_tcp, {'host': 'example.com', 'body': '{}'}, MutuallyExclusiveArgumentError),
+            (commands.update_silo_antivirus_config, {}, RequiredArgumentMissingError),
+            (commands.update_silo_antivirus_config,
+             {'delete_infected_files': False, 'body': '{}'}, MutuallyExclusiveArgumentError),
+        )
+        for handler, kwargs, error in cases:
+            with self.subTest(handler=handler.__name__, kwargs=kwargs), self.assertRaises(error):
+                handler(self.cmd, 'group', 'primary', 'backup', **kwargs)
+        self.request.assert_not_called()
+
+    def test_operation_protocol_selection_is_explicit(self):
+        with patch.object(self.client, 'mutate') as mutate:
+            commands.start_site_silo(self.cmd, 'group', 'primary', 'backup', no_wait=True, timeout=7)
+            mutate.assert_called_once_with(
+                'POST', self.client.resource('backup') + '/start', no_wait=True, timeout=7, query=None)
+            self.request.assert_not_called()
+            mutate.reset_mock()
+            commands.show_silo_config(self.cmd, 'group', 'primary', 'backup')
+            mutate.assert_not_called()
+        self.request.assert_called_once()
+
     def test_plan_creation_and_explicit_false(self):
         commands.create_plan_silo(self.cmd, 'group', 'primary', 'backup', 'westus2',
                                   primary_location='eastus', number_of_workers=2, zone_redundant='false')
@@ -430,6 +477,45 @@ class ActiveBackupCommandTests(unittest.TestCase):
                     self.assertIn('examples:', helps[command])
                     self.assertIn('cmd', inspect.signature(getattr(commands, handler)).parameters)
         self.assertEqual(len(seen), 104)
+        self.assertEqual({handler for entries in COMMAND_GROUPS.values() for _, handler in entries},
+                         set(COMMAND_SUMMARIES))
+        self.assertEqual(set(COMMAND_SUMMARIES), set(ADDITIONAL_EXAMPLES))
+        arguments = {
+            argument for entries in COMMAND_GROUPS.values() for _, handler in entries
+            for argument in inspect.signature(getattr(commands, handler)).parameters
+            if argument not in ('cmd', 'name', 'resource_group_name', 'silo', 'no_wait')
+        }
+        self.assertFalse(arguments.difference(ARGUMENT_HELP))
+
+    def test_authored_examples_cover_every_handler_parameter(self):
+        import yaml
+        from knack.help_files import helps
+        aliases = {
+            'resource_group_name': {'-g', '--resource-group'}, 'name': {'-n', '--name'},
+            'filter_string': {'--filter'},
+        }
+        for group, entries in COMMAND_GROUPS.items():
+            for verb, handler in entries:
+                command = group + ' ' + verb
+                with self.subTest(command=command):
+                    examples = yaml.safe_load(helps[command])['examples']
+                    self.assertGreaterEqual(len(examples), 2)
+                    flags = {token for example in examples for token in shlex.split(example['text'])}
+                    for parameter in inspect.signature(getattr(commands, handler)).parameters:
+                        if parameter == 'cmd':
+                            continue
+                        options = aliases.get(parameter, {'--' + parameter.replace('_', '-')})
+                        self.assertTrue(options.intersection(flags), '{} lacks an example.'.format(parameter))
+
+    def test_no_wait_restart_examples_do_not_request_a_synchronous_service_restart(self):
+        import yaml
+        from knack.help_files import helps
+        examples = yaml.safe_load(helps['webapp silo restart'])['examples']
+        no_wait = [shlex.split(example['text']) for example in examples if '--no-wait' in example['text']]
+        self.assertTrue(no_wait)
+        for arguments in no_wait:
+            self.assertIn('--synchronous', arguments)
+            self.assertEqual(arguments[arguments.index('--synchronous') + 1], 'false')
 
 
 class ActiveBackupHelpTests(unittest.TestCase):
@@ -477,6 +563,35 @@ class ActiveBackupHelpTests(unittest.TestCase):
             self.assertEqual(self.invoke(
                 'webapp silo config show -g group -n primary --silo backup'.split()), 0)
             self.assertEqual(request.call_args.args[:2], ('GET', client.resource('backup') + '/config/web'))
+
+    def test_cli_named_request_options_preserve_false_and_port_types(self):
+        cases = (
+            ('webapp silo network-check dns --dns-name example.com', {'dnsName': 'example.com'}),
+            ('webapp silo network-check tcp-ping --host example.com --port 443',
+             {'host': 'example.com', 'port': '443'}),
+            ('webapp silo antivirus config update --delete-infected-files false', {'deleteInfectedFiles': False}),
+        )
+        for command, properties in cases:
+            with self.subTest(command=command):
+                client = ActiveBackupClient(cli_context(), 'group', 'primary', subscription='sub')
+                with patch(MODULE + '._client', return_value=client), \
+                        patch.object(client, 'request', return_value=response(payload={})) as request:
+                    self.assertEqual(self.invoke(
+                        command.split() + ['-g', 'group', '-n', 'primary', '--silo', 'backup']), 0)
+                self.assertEqual(request.call_args.args[2], {'properties': properties})
+
+    def test_cli_help_explains_units_and_endpoint_variants(self):
+        for command, terms in (
+                ('webapp silo log startup show-summary', ('hours', '24')),
+                ('webapp silo network-trace start', ('seconds', 'bytes', 'legacy', 'asynchronous')),
+                ('webapp silo auth v2 show', ('legacy', '/list')),
+                ('webapp silo network-check dns', ('--dns-name', 'example.com')),
+                ('webapp silo network-check tcp-ping', ('--host', '--port', '65535')),
+                ('webapp silo antivirus config update', ('--delete-infected-files', 'false'))):
+            with self.subTest(command=command):
+                _, output = self.invoke_output(command.split() + ['--help'])
+                for term in terms:
+                    self.assertIn(term, output)
 
     def test_cli_updates_ignore_configured_location_defaults(self):
         for group, resource_type in (('appservice plan silo', 'serverfarms'), ('webapp silo', 'sites')):
@@ -563,6 +678,42 @@ class ActiveBackupHelpTests(unittest.TestCase):
                 request.reset_mock()
                 self.assertNotEqual(self.invoke(arguments), 0)
                 request.assert_not_called()
+
+    def test_cli_ids_reject_abbreviated_explicit_identity_options(self):
+        subscription = '00000000-0000-0000-0000-000000000001'
+        for group, resource_type in (('webapp silo', 'sites'), ('appservice plan silo', 'serverfarms')):
+            resource_id = '/subscriptions/{}/resourceGroups/group/providers/Microsoft.Web/{}/primary/silos/backup'.format(
+                subscription, resource_type)
+            for verb in ('show', 'delete'):
+                for option, value in (
+                        ('--na', 'other'), ('--resource-g', 'other'), ('--sil', 'other'),
+                        ('--sub', subscription), ('--subscription', subscription)):
+                    with self.subTest(group=group, verb=verb, option=option), \
+                            patch(MODULE + '._client') as factory, \
+                            patch('azure.cli.core._profile.Profile.load_cached_subscriptions',
+                                  return_value=[{'id': subscription, 'name': 'test'}]):
+                        arguments = (group + ' ' + verb).split() + ['--ids', resource_id, option, value]
+                        if verb == 'delete':
+                            arguments += ['--yes']
+                        self.assertNotEqual(self.invoke(arguments), 0)
+                        factory.assert_not_called()
+
+    def test_cli_id_only_show_and_delete_remain_valid_for_both_resource_families(self):
+        subscription = '00000000-0000-0000-0000-000000000001'
+        for group, resource_type in (('webapp silo', 'sites'), ('appservice plan silo', 'serverfarms')):
+            client = ActiveBackupClient(cli_context(), 'group', 'primary', resource_type, subscription=subscription)
+            resource_id = client.resource('backup')
+            for verb in ('show', 'delete'):
+                with self.subTest(group=group, verb=verb), \
+                        patch(MODULE + '._client', return_value=client), \
+                        patch.object(client, 'request', return_value=response(payload={'id': resource_id})) as request:
+                    arguments = (group + ' ' + verb).split() + ['--ids', resource_id]
+                    if verb == 'delete':
+                        arguments += ['--yes']
+                    self.assertEqual(self.invoke(arguments), 0)
+                    request.assert_called_once()
+                    self.assertEqual(request.call_args.args[:2],
+                                     ('DELETE' if verb == 'delete' else 'GET', resource_id))
 
     def test_cli_explicit_false_and_no_wait(self):
         client = ActiveBackupClient(cli_context(), 'group', 'primary', subscription='sub')
