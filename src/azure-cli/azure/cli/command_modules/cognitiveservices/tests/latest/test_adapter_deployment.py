@@ -162,10 +162,6 @@ class CognitiveServicesAdapterDeploymentScenarioTests(ScenarioTest):
     ``self.create_random_name`` so playback replaces them with stable monikers.
     """
 
-    # Adapter deployments currently require the 2026-09-15-preview API version, which the
-    # CognitiveServices RP only recognises in TIP regions until Fareed's TSP PR #45556
-    # merges. Recording must be done from a subscription with TIP access; playback works
-    # anywhere. westus2 was validated live via `az cognitiveservices account adapter-deployment list`.
     LOCATION = 'westus2'
 
     @ResourceGroupPreparer(name_prefix='clitest_cs_adapter', location=LOCATION)
