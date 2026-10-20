@@ -219,7 +219,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                                 JMESPathCheck("properties.contentSettings.contentType", "application/javascript"))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_blob_azcopy_sync_sas(self, resource_group, storage_account, test_dir):
         from datetime import datetime, timedelta
@@ -650,7 +650,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(local_file, sasURL))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='first_account', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_blob_account(self, resource_group, first_account, second_account, test_dir):
@@ -752,7 +752,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(third_container, second_account), checks=JMESPathCheck('length(@)', 10))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='first_account', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_blob_source_with_credential(self, resource_group, first_account, second_account, test_dir):
