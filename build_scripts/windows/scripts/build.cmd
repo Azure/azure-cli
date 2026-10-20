@@ -88,11 +88,12 @@ if "%TARGET%" == "msi" (
         mkdir %WIX_DIR%
         pushd %WIX_DIR%
         echo Downloading Wix.
-        curl --output wix-archive.zip %WIX_DOWNLOAD_URL%
+        curl --fail --location --output wix-archive.zip %WIX_DOWNLOAD_URL%
+        if errorlevel 1 goto ERROR
         powershell.exe -NoProfile -Command "if ((Get-FileHash -Algorithm SHA256 wix-archive.zip).Hash -ne '%WIX_DOWNLOAD_SHA256%') { throw 'WiX archive SHA-256 mismatch' }"
-        if %errorlevel% neq 0 goto ERROR
+        if errorlevel 1 goto ERROR
         unzip wix-archive.zip
-        if %errorlevel% neq 0 goto ERROR
+        if errorlevel 1 goto ERROR
         del wix-archive.zip
         echo Wix downloaded and extracted successfully.
         popd

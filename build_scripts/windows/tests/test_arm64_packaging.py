@@ -23,6 +23,11 @@ class WindowsArm64PackagingTest(unittest.TestCase):
             build,
         )
         self.assertIn('Get-FileHash -Algorithm SHA256 wix-archive.zip', build)
+        self.assertIn(
+            'curl --fail --location --output wix-archive.zip %WIX_DOWNLOAD_URL%',
+            build,
+        )
+        self.assertNotIn('if %errorlevel% neq 0 goto ERROR\n        unzip wix-archive.zip', build)
         self.assertIn('set WIX_DIR=%ARTIFACTS_DIR%\\wix-3.14.1', build)
         self.assertIn('<LocalWixRoot>artifacts\\wix-3.14.1</LocalWixRoot>', project)
 
