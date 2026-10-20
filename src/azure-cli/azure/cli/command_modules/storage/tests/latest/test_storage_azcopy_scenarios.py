@@ -242,7 +242,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account, sas), checks=JMESPathCheck('length(@)', 41))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_blob_azcopy_remove(self, resource_group, storage_account_info, test_dir):
         storage_account, account_key = storage_account_info
@@ -433,7 +433,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account), checks=JMESPathCheck('length(@)', 40))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_storage_file_azcopy_remove(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         s1 = self.create_share(account_info)
@@ -512,7 +512,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 0))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_remove_sas(self, resource_group, storage_account, test_dir):
         from datetime import datetime, timedelta
