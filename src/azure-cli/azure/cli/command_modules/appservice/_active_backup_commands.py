@@ -167,7 +167,9 @@ def load_arguments(loader, command):
             if argument == 'number_of_workers':
                 settings.update(default=None, help='Silo worker-count override, from 1 to 30. Omit to preserve inheritance.')
             if argument == 'location':
-                settings['help'] = 'Target silo region. Required on create; never inferred from the resource group.'
+                settings.update(
+                    configured_default=None, local_context_attribute=None,
+                    help='Target silo region. Required on create; preserved from the existing silo on update.')
             if argument == 'primary_location':
                 settings['help'] = 'Primary region. On create, resolved from the primary resource when omitted.'
             if argument == 'timeout':

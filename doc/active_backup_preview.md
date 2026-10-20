@@ -59,6 +59,10 @@ non-create commands also accept a complete nested silo ARM ID through `--ids`;
 do not combine it with named resource arguments. No internal replica app or plan
 name is required.
 
+Create requires an explicit target `--location`; a configured default location
+does not choose the silo region. Update preserves the existing silo location when
+`--location` is omitted, even if a different CLI default location is configured.
+
 Create/update/delete wait for their API operation, not future content/configuration
 revision, probe-health, or DNS convergence. `--no-wait` returns an accepted-operation
 receipt when the service starts an asynchronous operation.
@@ -161,6 +165,12 @@ deployment history/status, instances/processes, logs, WebJobs, installed extensi
 extension invocation, network checks/traces, metrics, antivirus, and site-container
 reads. There is **no CLI-side OS/SKU/flavor/provisioning filter**: the requested silo
 route is called directly, and service errors such as 404 are surfaced normally.
+
+ARM collection list commands follow `nextLink` and return the item array, so
+`--query "[].name"` and table output include all pages. Property-bag responses,
+such as app settings, connection strings, storage accounts and metadata, retain
+their service shape. The startup-log response also retains its file/latest-log
+wrapper rather than being flattened into an ARM collection.
 
 ```azurecli
 az webapp silo config show -g MyGroup -n MyApp --silo WestApp

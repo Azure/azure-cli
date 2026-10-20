@@ -264,9 +264,11 @@ def remove_silo_vnet_integration(cmd, resource_group_name, name, silo):
 
 
 def _site(cmd, resource_group_name, name, silo, suffix='', method='GET', query=None, body=None,
-          filename=None, overwrite=False, tail=False, content_type=None, no_wait=False, timeout=None):
+          filename=None, overwrite=False, tail=False, content_type=None, no_wait=False, timeout=None, collection=False):
     client = _client(cmd, resource_group_name, name)
     path = client.resource(silo) + suffix
+    if collection:
+        return client.list(path, query)
     if filename is not None or tail:
         return client.consume(method, path, filename, overwrite, query, body, content_type, tail)
     if timeout is not None:
@@ -287,7 +289,7 @@ def show_silo_php_logging(cmd, resource_group_name, name, silo):
 
 
 def list_silo_deployments(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/deployments')
+    return _site(cmd, resource_group_name, name, silo, '/deployments', collection=True)
 
 
 def show_silo_deployment(cmd, resource_group_name, name, silo, deployment_id):
@@ -316,7 +318,7 @@ def show_silo_process(cmd, resource_group_name, name, silo, process_id, instance
 
 
 def list_silo_process_threads(cmd, resource_group_name, name, silo, process_id, instance=None):
-    return _site(cmd, resource_group_name, name, silo, _process(process_id, instance) + '/threads')
+    return _site(cmd, resource_group_name, name, silo, _process(process_id, instance) + '/threads', collection=True)
 
 
 def show_silo_process_thread(cmd, resource_group_name, name, silo, process_id, thread_id, instance=None):
@@ -325,7 +327,7 @@ def show_silo_process_thread(cmd, resource_group_name, name, silo, process_id, t
 
 
 def list_silo_process_modules(cmd, resource_group_name, name, silo, process_id, instance=None):
-    return _site(cmd, resource_group_name, name, silo, _process(process_id, instance) + '/modules')
+    return _site(cmd, resource_group_name, name, silo, _process(process_id, instance) + '/modules', collection=True)
 
 
 def show_silo_process_module(cmd, resource_group_name, name, silo, process_id, base_address, instance=None):
@@ -371,7 +373,7 @@ def _webjob(webjob_name, kind='webjobs'):
 
 
 def list_silo_webjobs(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/webjobs')
+    return _site(cmd, resource_group_name, name, silo, '/webjobs', collection=True)
 
 
 def show_silo_webjob(cmd, resource_group_name, name, silo, webjob_name):
@@ -379,7 +381,7 @@ def show_silo_webjob(cmd, resource_group_name, name, silo, webjob_name):
 
 
 def list_silo_continuous_webjobs(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/continuouswebjobs')
+    return _site(cmd, resource_group_name, name, silo, '/continuouswebjobs', collection=True)
 
 
 def show_silo_continuous_webjob(cmd, resource_group_name, name, silo, webjob_name):
@@ -397,7 +399,7 @@ def stop_silo_continuous_webjob(cmd, resource_group_name, name, silo, webjob_nam
 
 
 def list_silo_triggered_webjobs(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/triggeredwebjobs')
+    return _site(cmd, resource_group_name, name, silo, '/triggeredwebjobs', collection=True)
 
 
 def show_silo_triggered_webjob(cmd, resource_group_name, name, silo, webjob_name):
@@ -405,7 +407,8 @@ def show_silo_triggered_webjob(cmd, resource_group_name, name, silo, webjob_name
 
 
 def list_silo_webjob_history(cmd, resource_group_name, name, silo, webjob_name):
-    return _site(cmd, resource_group_name, name, silo, _webjob(webjob_name, 'triggeredwebjobs') + '/history')
+    return _site(cmd, resource_group_name, name, silo, _webjob(webjob_name, 'triggeredwebjobs') + '/history',
+                 collection=True)
 
 
 def show_silo_webjob_history(cmd, resource_group_name, name, silo, webjob_name, run_id):
@@ -419,7 +422,7 @@ def run_silo_triggered_webjob(cmd, resource_group_name, name, silo, webjob_name)
 
 
 def list_silo_site_extensions(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/siteextensions')
+    return _site(cmd, resource_group_name, name, silo, '/siteextensions', collection=True)
 
 
 def show_silo_site_extension(cmd, resource_group_name, name, silo, extension_name):
@@ -480,7 +483,7 @@ def show_silo_msdeploy_log(cmd, resource_group_name, name, silo, instance=None):
 
 
 def list_silo_instances(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/instances')
+    return _site(cmd, resource_group_name, name, silo, '/instances', collection=True)
 
 
 def show_silo_instance(cmd, resource_group_name, name, silo, instance):
@@ -492,11 +495,11 @@ def show_silo_config(cmd, resource_group_name, name, silo):
 
 
 def list_silo_config(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/config')
+    return _site(cmd, resource_group_name, name, silo, '/config', collection=True)
 
 
 def list_silo_config_snapshots(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/config/web/snapshots')
+    return _site(cmd, resource_group_name, name, silo, '/config/web/snapshots', collection=True)
 
 
 def show_silo_config_snapshot(cmd, resource_group_name, name, silo, snapshot_id, include_secrets=False):
@@ -506,7 +509,7 @@ def show_silo_config_snapshot(cmd, resource_group_name, name, silo, snapshot_id,
 
 
 def list_silo_keyvault_references(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/config/configreferences/connectionstrings')
+    return _site(cmd, resource_group_name, name, silo, '/config/configreferences/connectionstrings', collection=True)
 
 
 def refresh_silo_keyvault_references(cmd, resource_group_name, name, silo, force_restart=None):
@@ -558,7 +561,7 @@ def show_silo_log_config(cmd, resource_group_name, name, silo):
 
 
 def list_silo_premier_addons(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/premieraddons')
+    return _site(cmd, resource_group_name, name, silo, '/premieraddons', collection=True)
 
 
 def show_silo_premier_addon(cmd, resource_group_name, name, silo, addon_name):
@@ -570,18 +573,18 @@ def list_silo_metrics(cmd, resource_group_name, name, silo, start_time=None, end
     query = _metric_query(start_time, end_time, time_grain, names, filter_string)
     query['details'] = _boolean(details)
     query['slotView'] = _boolean(slot_view)
-    return _site(cmd, resource_group_name, name, silo, '/metrics', query=query)
+    return _site(cmd, resource_group_name, name, silo, '/metrics', query=query, collection=True)
 
 
 def list_silo_metric_definitions(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/metricdefinitions')
+    return _site(cmd, resource_group_name, name, silo, '/metricdefinitions', collection=True)
 
 
 def list_silo_perf_counters(
         cmd, resource_group_name, name, silo, start_time=None, end_time=None,
         time_grain=None, names=None, filter_string=None):
     return _site(cmd, resource_group_name, name, silo, '/perfcounters',
-                 query=_metric_query(start_time, end_time, time_grain, names, filter_string))
+                 query=_metric_query(start_time, end_time, time_grain, names, filter_string), collection=True)
 
 
 def restart_site_silo(
@@ -648,11 +651,11 @@ def show_silo_antivirus_log(cmd, resource_group_name, name, silo, scan_id, inclu
 
 
 def list_silo_deployment_statuses(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/deploymentStatus')
+    return _site(cmd, resource_group_name, name, silo, '/deploymentStatus', collection=True)
 
 
 def list_silo_sitecontainers(cmd, resource_group_name, name, silo):
-    return _site(cmd, resource_group_name, name, silo, '/sitecontainers')
+    return _site(cmd, resource_group_name, name, silo, '/sitecontainers', collection=True)
 
 
 def show_silo_sitecontainer(cmd, resource_group_name, name, silo, container_name):

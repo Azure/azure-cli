@@ -301,6 +301,12 @@ Resume does not recreate cleaned fixtures or blindly replay uncertain deployment
 refresh, mark-LKG, or other non-idempotent actions. In those cases, investigate or
 clean up and start a fresh run.
 
+Successful commands clear their pending-mutation journal entry after output
+validation, including empty refresh results and text output. Failed, timed-out,
+or invalid-output mutations remain uncertain. A completed refresh case can be
+resumed without issuing refresh again; an incomplete case containing a
+non-idempotent action still requires investigation or cleanup.
+
 The operation, observation, run and cleanup timeout parameters bound orchestration,
 not billing. A host/power failure can leave resources until the recovery command
 is run; expiry tags are not an automatic reaper.

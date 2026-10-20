@@ -519,10 +519,10 @@ function Invoke-AbAz {
                 response = Get-AbSiloResponseMetadata $Context $result.json
             }
         }
-        if ($Mutation -and -not $result.timedOut -and $result.exitCode -eq 0) {
-            $Context.Manifest.pendingMutation = $null
-            Save-AbManifest $Context
-        }
+    }
+    if ($Mutation -and -not $result.timedOut -and $result.exitCode -eq 0) {
+        $Context.Manifest.pendingMutation = $null
+        Save-AbManifest $Context
     }
     return $result
 }

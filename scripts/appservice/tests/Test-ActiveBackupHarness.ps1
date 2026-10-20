@@ -488,6 +488,48 @@ try {
         Assert-Throws { Invoke-AbAz $c @('webapp', 'silo', 'show') } 'ResourceNotFound'
         Assert-Test (-not ([IO.File]::ReadAllText((Join-Path $c.RunDirectory 'events.jsonl'))).Contains('synthetic-secret'))
     }
+    Test-Case 'successful validated mutations clear pending state for every output shape' {
+        foreach ($shape in @('Empty', 'Text', 'Json')) {
+            $c = New-TestContext
+            $suite = New-AbSuite $c Windows
+            $suite.intents = @($suite.appId)
+            $c.Manifest.suites = @($suite)
+            $stdout = $(if ($shape -eq 'Text') { 'accepted' } elseif ($shape -eq 'Json') { '{"accepted":true}' } else { '' })
+            $c.Executor = {
+                param($arguments)
+                return @{ exitCode = 0; stdout = $stdout; stderr = ''; elapsedMs = 1; timedOut = $false }
+            }.GetNewClosure()
+            Invoke-AbAz $c @('webapp', 'silo', 'refresh', '--ids', $suite.appId) -OutputShape $shape `
+                -Mutation -Replay NoReplay -IntentId $suite.appId | Out-Null
+            Assert-Test ($null -eq $c.Manifest.pendingMutation) "$shape success left an uncertain mutation."
+            $saved = ConvertFrom-Json -InputObject ([IO.File]::ReadAllText($c.ManifestPath)) -AsHashtable
+            Assert-Test ($null -eq $saved.pendingMutation) "$shape success did not persist its completed state."
+        }
+    }
+    Test-Case 'failed timed-out and invalid-output mutations retain uncertain state' {
+        foreach ($sample in @(
+                @{ shape = 'Empty'; exitCode = 1; stdout = ''; timedOut = $false },
+                @{ shape = 'Empty'; exitCode = 124; stdout = ''; timedOut = $true },
+                @{ shape = 'Empty'; exitCode = 0; stdout = 'unexpected output'; timedOut = $false },
+                @{ shape = 'Json'; exitCode = 0; stdout = 'invalid JSON'; timedOut = $false })) {
+            $c = New-TestContext
+            $suite = New-AbSuite $c Windows
+            $suite.intents = @($suite.appId)
+            $c.Manifest.suites = @($suite)
+            $c.Executor = {
+                param($arguments)
+                return @{ exitCode = $sample.exitCode; stdout = $sample.stdout; stderr = ''
+                    elapsedMs = 1; timedOut = $sample.timedOut }
+            }.GetNewClosure()
+            Assert-Throws {
+                Invoke-AbAz $c @('webapp', 'silo', 'refresh', '--ids', $suite.appId) -OutputShape $sample.shape `
+                    -Mutation -Replay NoReplay -IntentId $suite.appId
+            }
+            Assert-Test ($c.Manifest.pendingMutation.command -eq 'webapp silo refresh')
+            $saved = ConvertFrom-Json -InputObject ([IO.File]::ReadAllText($c.ManifestPath)) -AsHashtable
+            Assert-Test ($saved.pendingMutation.replay -eq 'NoReplay')
+        }
+    }
     Test-Case 'recovery accepts only the exact generated VNet intent, not sibling resources' {
         $c = New-TestContext -Profile Core
         $suite = New-AbSuite $c Windows
@@ -927,6 +969,18 @@ try {
         $c = New-TestContext -Mode Resume
         $c.Manifest.pendingMutation = @{ replay = 'NoReplay'; case = 'refresh'; resourceId = ''; command = 'webapp silo refresh' }
         Assert-Throws { Invoke-AbRun $c } 'not replayed'
+    }
+    Test-Case 'resume accepts a completed empty refresh without replaying it' {
+        $c = New-TestContext
+        $suite = New-AbSuite $c Windows
+        $c.Manifest.suites = @($suite)
+        $state = Set-FakeAzure $c $suite
+        Invoke-AbSmoke $c $suite
+        Assert-Test ($null -eq $c.Manifest.pendingMutation)
+        $c.Mode = 'Resume'
+        $report = Invoke-AbRun $c
+        Assert-Test ($report.exitCode -eq 0)
+        Assert-Test (@($state.calls | Where-Object { $_.StartsWith('webapp silo refresh ') }).Count -eq 1)
     }
     Test-Case 'resume never repeats a successful action in a later-failed case' {
         $c = New-TestContext -Mode Resume

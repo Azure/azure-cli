@@ -152,6 +152,11 @@ RESOURCE_CASES = (
      {'silo': 'backup'}),
 )
 
+PAGED_COLLECTION_APIS = {
+    'P02', 'P09', 'P11', 'P21', 'P23', 'P27', 'P29', 'P32', 'P40',
+    'P43', 'P44', 'P47', 'P62', 'P64', 'P65', 'P66', 'P82', 'P83',
+}
+
 
 class ActiveBackupCommandTests(unittest.TestCase):
 
@@ -192,7 +197,8 @@ class ActiveBackupCommandTests(unittest.TestCase):
                 getattr(commands, handler)(self.cmd, 'group', 'primary', 'backup', **kwargs)
                 call = consume.call_args if consume.called else self.request.call_args
                 self.assertIsNotNone(call)
-                self.assertEqual(call.args[:2], (method, self.client.resource('backup') + suffix))
+                self.assertEqual(call.args[0], method)
+                self.assertEqual(urlsplit(call.args[1]).path, self.client.resource('backup') + suffix)
                 self.assertEqual(self.request.call_count + consume.call_count, 1)
                 primary.assert_not_called()
                 self.assertIn(handler, registered)
@@ -206,7 +212,61 @@ class ActiveBackupCommandTests(unittest.TestCase):
                 getattr(commands, handler)(self.cmd, 'group', 'primary', 'backup',
                                            **dict(kwargs, instance='worker'))
                 call = consume.call_args if consume.called else self.request.call_args
-                self.assertEqual(call.args[:2], (method, self.client.resource('backup') + '/instances/worker' + suffix))
+                self.assertEqual(call.args[0], method)
+                self.assertEqual(urlsplit(call.args[1]).path,
+                                 self.client.resource('backup') + '/instances/worker' + suffix)
+
+    def test_every_paged_pass_through_returns_all_collection_items(self):
+        for key, handler, _, suffix, kwargs in PASS_THROUGH_CASES:
+            if key not in PAGED_COLLECTION_APIS:
+                continue
+            with self.subTest(api=key):
+                self.request.reset_mock()
+                path = self.client.resource('backup') + suffix
+                next_link = path + '?api-version=' + API_VERSION + '&page=2'
+                items = [{'name': 'first', 'properties': {'unknownField': 1}},
+                         {'name': 'second', 'properties': {'unknownField': 2}}]
+                self.request.side_effect = [
+                    response(payload={'value': items[:1], 'nextLink': next_link}),
+                    response(payload={'value': items[1:]})]
+                self.assertEqual(getattr(commands, handler)(self.cmd, 'group', 'primary', 'backup', **kwargs), items)
+                self.assertEqual(self.request.call_count, 2)
+                self.assertEqual(self.request.call_args.args, ('GET', self.client.url(next_link)))
+
+    def test_collection_pagination_failure_does_not_return_partial_success(self):
+        self.request.side_effect = [
+            response(payload={'value': [{'name': 'first'}], 'nextLink': self.client.resource('backup') + '?page=2'}),
+            ResourceNotFoundError('Second page missing')]
+        with self.assertRaises(ResourceNotFoundError):
+            commands.list_silo_instances(self.cmd, 'group', 'primary', 'backup')
+        self.assertEqual(self.request.call_count, 2)
+
+    def test_collection_query_parameters_are_not_reapplied_to_next_link(self):
+        next_link = self.client.resource('backup') + '/metrics?api-version=' + API_VERSION + '&page=2'
+        self.request.side_effect = [
+            response(payload={'value': [], 'nextLink': next_link}), response(payload={'value': []})]
+        self.assertEqual(commands.list_silo_metrics(
+            self.cmd, 'group', 'primary', 'backup', names=['Requests'], time_grain='PT1H',
+            details=False, slot_view=True), [])
+        first_query = parse_qs(urlsplit(self.request.call_args_list[0].args[1]).query)
+        self.assertIn("name.value eq 'Requests'", first_query['$filter'][0])
+        self.assertEqual(first_query['details'], ['false'])
+        self.assertEqual(first_query['slotView'], ['true'])
+        self.assertEqual(parse_qs(urlsplit(self.request.call_args.args[1]).query),
+                         {'api-version': [API_VERSION], 'page': ['2']})
+
+    def test_property_bags_and_startup_log_wrappers_are_not_flattened(self):
+        bag = {'properties': {'value': 'setting value', 'other': False}, 'unknownField': 'preserved'}
+        startup = {'files': [{'name': 'startup.log'}], 'nextToken': 'preserved'}
+        for handler, payload in (
+                (commands.list_silo_appsettings, bag), (commands.list_silo_storage_accounts, bag),
+                (commands.list_silo_connection_strings, bag), (commands.list_silo_metadata, bag),
+                (commands.list_silo_startup_logs, startup)):
+            with self.subTest(handler=handler.__name__):
+                self.request.reset_mock()
+                self.request.return_value = response(payload=payload)
+                self.assertEqual(handler(self.cmd, 'group', 'primary', 'backup'), payload)
+                self.request.assert_called_once()
 
     def test_extension_verbs_bodies_and_path_validation(self):
         for method in ('GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'):
@@ -376,12 +436,16 @@ class ActiveBackupHelpTests(unittest.TestCase):
 
     @staticmethod
     def invoke_json(arguments):
+        return ActiveBackupHelpTests.invoke_output(arguments)
+
+    @staticmethod
+    def invoke_output(arguments, output_format='json'):
         from azure.cli.core import get_default_cli
         stdout = io.StringIO()
         stderr = io.StringIO()
         with redirect_stdout(stdout), redirect_stderr(stderr):
             try:
-                exit_code = get_default_cli().invoke(arguments + ['--output', 'json'], out_file=stdout)
+                exit_code = get_default_cli().invoke(arguments + ['--output', output_format], out_file=stdout)
             except SystemExit as ex:
                 exit_code = ex.code
         if exit_code:
@@ -413,6 +477,75 @@ class ActiveBackupHelpTests(unittest.TestCase):
             self.assertEqual(self.invoke(
                 'webapp silo config show -g group -n primary --silo backup'.split()), 0)
             self.assertEqual(request.call_args.args[:2], ('GET', client.resource('backup') + '/config/web'))
+
+    def test_cli_updates_ignore_configured_location_defaults(self):
+        for group, resource_type in (('appservice plan silo', 'serverfarms'), ('webapp silo', 'sites')):
+            for explicit_location in (False, True):
+                with self.subTest(group=group, explicit_location=explicit_location):
+                    client = ActiveBackupClient(
+                        cli_context(), 'group', 'primary', resource_type, subscription='sub')
+                    resource = {'location': 'westus2', 'properties': {'primaryLocation': 'eastus'}}
+                    arguments = (group + ' update -g group -n primary --silo backup').split()
+                    arguments += (['--number-of-workers', '2'] if resource_type == 'serverfarms'
+                                  else ['--endpoint-status', 'Disabled'])
+                    if explicit_location:
+                        arguments += ['--location', 'westus2']
+                    with patch.dict('os.environ', {'AZURE_DEFAULTS_LOCATION': 'eastus'}), \
+                            patch(MODULE + '._client', return_value=client), \
+                            patch.object(client, 'request', return_value=response(payload=resource)) as request:
+                        self.assertEqual(self.invoke(arguments), 0)
+                    self.assertEqual(request.call_count, 2)
+                    self.assertEqual(request.call_args.args[0], 'PUT')
+                    self.assertEqual(request.call_args.args[2]['location'], 'westus2')
+
+    def test_cli_creates_require_an_explicit_silo_location_despite_defaults(self):
+        for group in ('appservice plan silo', 'webapp silo'):
+            with self.subTest(group=group), \
+                    patch.dict('os.environ', {'AZURE_DEFAULTS_LOCATION': 'eastus'}), \
+                    patch(MODULE + '._client') as factory:
+                self.assertNotEqual(self.invoke(
+                    (group + ' create -g group -n primary --silo backup --primary-location eastus').split()), 0)
+                factory.assert_not_called()
+
+    def test_cli_collection_commands_return_arrays_from_all_pages(self):
+        registered = {handler: group + ' ' + verb
+                      for group, entries in COMMAND_GROUPS.items() for verb, handler in entries}
+        for key, handler, _, suffix, kwargs in PASS_THROUGH_CASES:
+            if key not in PAGED_COLLECTION_APIS:
+                continue
+            with self.subTest(api=key):
+                client = ActiveBackupClient(cli_context(), 'group', 'primary', subscription='sub')
+                arguments = registered[handler].split() + ['-g', 'group', '-n', 'primary', '--silo', 'backup']
+                for key_name, value in kwargs.items():
+                    arguments += ['--' + key_name.replace('_', '-'), value]
+                with patch(MODULE + '._client', return_value=client), \
+                        patch.object(client, 'request', side_effect=[
+                            response(payload={'value': [{'name': 'first'}],
+                                              'nextLink': client.resource('backup') + suffix + '?page=2'}),
+                            response(payload={'value': [{'name': 'second'}]})]) as request:
+                    _, output = self.invoke_json(arguments)
+                self.assertEqual(json.loads(output), [{'name': 'first'}, {'name': 'second'}])
+                self.assertEqual(request.call_count, 2)
+
+    def test_cli_collection_table_and_list_queries_include_all_pages(self):
+        for output_format, query in (('table', None), ('json', '[].name')):
+            with self.subTest(output_format=output_format, query=query):
+                client = ActiveBackupClient(cli_context(), 'group', 'primary', subscription='sub')
+                arguments = 'webapp silo instance list -g group -n primary --silo backup'.split()
+                if query:
+                    arguments += ['--query', query]
+                with patch(MODULE + '._client', return_value=client), \
+                        patch.object(client, 'request', side_effect=[
+                            response(payload={'value': [{'name': 'first'}],
+                                              'nextLink': client.resource('backup') + '/instances?page=2'}),
+                            response(payload={'value': [{'name': 'second'}]})]) as request:
+                    _, output = self.invoke_output(arguments, output_format)
+                self.assertEqual(request.call_count, 2)
+                if query:
+                    self.assertEqual(json.loads(output), ['first', 'second'])
+                else:
+                    self.assertIn('first', output)
+                    self.assertIn('second', output)
 
     def test_nested_ids_are_typed_and_do_not_silently_override_names(self):
         resource_id = (
