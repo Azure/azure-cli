@@ -496,8 +496,9 @@ def track_backup_crr_operation(cli_ctx, result, azure_region):
 
 
 def track_refresh_operation(cli_ctx, result, vault_name, resource_group):
+    location_url = result.http_response.headers.get('Location')
     status_url = result.http_response.headers.get('Azure-AsyncOperation')
-    if status_url:
+    if not location_url and status_url:
         client = protection_container_refresh_operation_statuses_cf(cli_ctx)
         operation_id = get_operation_id_from_header(status_url)
         status = client.get(resource_group, vault_name, fabric_name, operation_id)
@@ -508,9 +509,12 @@ def track_refresh_operation(cli_ctx, result, vault_name, resource_group):
             message = status.error.message if status.error is not None else status.status
             raise AzureResponseError("Container discovery failed: {}.".format(message))
         return
+    if not location_url:
+        raise AzureResponseError(
+            "Container discovery response contains neither Location nor Azure-AsyncOperation polling headers.")
     protection_container_refresh_operation_results_client = protection_container_refresh_operation_results_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
+    operation_id = get_operation_id_from_header(location_url)
     result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                        fabric_name, operation_id,
                                                                        cls=get_pipeline_response)

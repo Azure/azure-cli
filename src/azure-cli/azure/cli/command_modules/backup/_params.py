@@ -206,7 +206,7 @@ def load_arguments(self, _):
         c.argument('backup_management_type', backup_management_type)
         c.argument('resource_id', resource_id_type)
         c.argument('workload_type', azure_workload_type)
-        c.argument('container_subscription_id', help='Subscription containing the VM to discover. The vault remains in the subscription selected by --subscription.')
+        c.argument('container_subscription_id', options_list=['--container-subscription-id', '--container-sub-id'], help='Subscription containing the VM to discover. The vault remains in the subscription selected by --subscription.')
 
     # Item
     with self.argument_context('backup item') as c:
@@ -297,8 +297,8 @@ def load_arguments(self, _):
         c.argument('target_tier', target_tier_type)
         c.argument('tier', tier_type)
         c.argument('recommended_for_archive', action="store_true", help='Use this flag to retrieve recommended archivable recoverypoints.')
-        c.argument('restore_point_query_type', arg_type=get_enum_type(['Full', 'Log', 'Differential', 'FullAndDifferential', 'All', 'Incremental', 'SnapshotFull', 'SnapshotCopyOnlyFull', 'Snapshot', 'FullDifferentialAndSnapshot']), help='Filter AzureWorkload recovery points by backup type.')
-        c.argument('get_latest_recovery_point_only', arg_type=get_three_state_flag(), help='Return only the latest matching AzureWorkload recovery point.')
+        c.argument('restore_point_query_type', options_list=['--restore-point-query-type', '--rp-query-type'], arg_type=get_enum_type(['Full', 'Log', 'Differential', 'FullAndDifferential', 'All', 'Incremental', 'SnapshotFull', 'SnapshotCopyOnlyFull', 'Snapshot', 'FullDifferentialAndSnapshot']), help='Filter AzureWorkload recovery points by backup type.')
+        c.argument('get_latest_recovery_point_only', options_list=['--get-latest-recovery-point-only', '--latest-rp-only'], arg_type=get_three_state_flag(), help='Return only the latest matching AzureWorkload recovery point.')
 
     with self.argument_context('backup recoverypoint move') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
@@ -318,8 +318,8 @@ def load_arguments(self, _):
         c.argument('workload_type', workload_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list recoverypoints in secondary region.')
         c.argument('recovery_mode', arg_type=get_enum_type(['SnapshotAttachAndRecover']), help='Query database log ranges on top of an instance snapshot.')
-        c.argument('base_snapshot_recovery_point_id', help='Name of the base instance snapshot recovery point.')
-        c.argument('base_recovery_point_datasource_id', help='ProtectedItemDataSourceId of the base SQL instance, not the child database.')
+        c.argument('base_snapshot_recovery_point_id', options_list=['--base-snapshot-recovery-point-id', '--base-snapshot-rp-id'], help='Name of the base instance snapshot recovery point.')
+        c.argument('base_recovery_point_datasource_id', options_list=['--base-recovery-point-datasource-id', '--base-datasource-id'], help='ProtectedItemDataSourceId of the base SQL instance, not the child database.')
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.', id_part='child_name_4')

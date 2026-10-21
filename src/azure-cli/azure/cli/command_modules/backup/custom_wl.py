@@ -595,7 +595,7 @@ def move_wl_recovery_points(cmd, resource_group_name, vault_name, item_name, rp_
 
 
 def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_object, protectable_item,
-                                  child_database_names=None):
+                                   child_database_names=None):
     # Get protectable item.
     protectable_item_object = protectable_item
     protectable_item_type = protectable_item_object.properties.protectable_item_type
