@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 
@@ -46,10 +46,11 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
     CONFIGURATION = {
         'name': 'default',
         'hostingType': 'ManagedCluster',
-        'hostingManagementIdentityResourceId': MANAGEMENT_IDENTITY,
-        'workloadIdentityResourceId': WORKLOAD_IDENTITY,
         'clusterResourceId': CLUSTER_ID,
+        'agentSubnetResourceId': SUBNET_ID,
+        'hostingManagementIdentityResourceId': MANAGEMENT_IDENTITY,
         'storageAccountResourceId': STORAGE_ID,
+        'workloadIdentityResourceId': WORKLOAD_IDENTITY,
     }
 
     def _call_create(self, **overrides):
@@ -61,8 +62,7 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
             'sku_name': 'S0',
             'kind': 'AIServices',
             'location': 'westus',
-            'agent_hosting_configurations': [copy.deepcopy(self.CONFIGURATION)],
-            'agent_hosting_subnet': self.SUBNET_ID,
+            'agent_hosting': copy.deepcopy(self.CONFIGURATION),
         }
         arguments.update(overrides)
         result = account_create(**arguments)
@@ -71,7 +71,7 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
     def _assert_invalid_configuration(self, configuration, error_type=InvalidArgumentValueError):
         client = mock.Mock()
         with self.assertRaises(error_type):
-            self._call_create(client=client, agent_hosting_configurations=configuration)
+            self._call_create(client=client, agent_hosting=configuration)
         client.begin_create.assert_not_called()
 
     def test_agent_hosting_builds_expected_payload(self):
@@ -116,26 +116,11 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
             {self.MANAGEMENT_IDENTITY: {}},
         )
 
-    def test_agent_hosting_requires_configuration_and_subnet_together(self):
-        for configurations, subnet in (
-            ([self.CONFIGURATION], None),
-            (None, self.SUBNET_ID),
-        ):
-            with self.subTest(configurations=configurations, subnet=subnet):
-                client = mock.Mock()
-                with self.assertRaises(RequiredArgumentMissingError):
-                    self._call_create(
-                        client=client,
-                        agent_hosting_configurations=configurations,
-                        agent_hosting_subnet=subnet,
-                    )
-                client.begin_create.assert_not_called()
-
-    def test_agent_hosting_rejects_invalid_collection_shapes(self):
+    def test_agent_hosting_rejects_non_object_configuration(self):
         invalid_values = (
-            {},
             [],
-            [self.CONFIGURATION, self.CONFIGURATION],
+            [self.CONFIGURATION],
+            'invalid',
             [1],
         )
         for value in invalid_values:
@@ -150,7 +135,7 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
 
         for configuration in (missing, unknown):
             with self.subTest(configuration=configuration):
-                self._assert_invalid_configuration([configuration])
+                self._assert_invalid_configuration(configuration)
 
     def test_agent_hosting_rejects_empty_and_non_string_fields(self):
         for field_name in self.CONFIGURATION:
@@ -158,36 +143,29 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
                 with self.subTest(field_name=field_name, value=value):
                     configuration = copy.deepcopy(self.CONFIGURATION)
                     configuration[field_name] = value
-                    self._assert_invalid_configuration([configuration])
+                    self._assert_invalid_configuration(configuration)
 
     def test_agent_hosting_rejects_unsupported_hosting_type(self):
         configuration = copy.deepcopy(self.CONFIGURATION)
         configuration['hostingType'] = 'Unsupported'
-        self._assert_invalid_configuration([configuration])
+        self._assert_invalid_configuration(configuration)
 
     def test_agent_hosting_rejects_invalid_resource_ids(self):
         for field_name in (
-            'hostingManagementIdentityResourceId',
-            'workloadIdentityResourceId',
             'clusterResourceId',
+            'agentSubnetResourceId',
+            'hostingManagementIdentityResourceId',
             'storageAccountResourceId',
+            'workloadIdentityResourceId',
         ):
             with self.subTest(field_name=field_name):
                 configuration = copy.deepcopy(self.CONFIGURATION)
                 configuration[field_name] = 'not-a-resource-id'
-                self._assert_invalid_configuration([configuration])
-
-        for subnet in ('', '   ', 1, 'not-a-resource-id'):
-            with self.subTest(subnet=subnet):
-                client = mock.Mock()
-                with self.assertRaises(InvalidArgumentValueError):
-                    self._call_create(client=client, agent_hosting_subnet=subnet)
-                client.begin_create.assert_not_called()
+                self._assert_invalid_configuration(configuration)
 
     def test_agent_hosting_non_byo_create_preserves_existing_payload(self):
         client, _ = self._call_create(
-            agent_hosting_configurations=None,
-            agent_hosting_subnet=None,
+            agent_hosting=None,
         )
 
         request = client.begin_create.call_args.args[2].as_dict()
@@ -227,7 +205,7 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
                 '--kind AIServices '
                 '--sku S0 '
                 '--location westus '
-                '--agent-hosting-configurations null'
+                '--agent-hosting null'
             )
 
             request = accounts_client.begin_create.call_args.args[2].as_dict()
@@ -236,7 +214,7 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
 
     def test_cognitiveservices_agent_hosting_from_file(self):
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as configuration_file:
-            json.dump([CognitiveServicesAgentHostingUnitTests.CONFIGURATION], configuration_file)
+            json.dump(CognitiveServicesAgentHostingUnitTests.CONFIGURATION, configuration_file)
             configuration_file_path = configuration_file.name
 
         try:
@@ -255,8 +233,7 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
                     '--kind AIServices '
                     '--sku S0 '
                     '--location westus '
-                    f'--agent-hosting-configurations "@{configuration_file_path}" '
-                    f'--agent-hosting-subnet "{CognitiveServicesAgentHostingUnitTests.SUBNET_ID}"'
+                    f'--agent-hosting "@{configuration_file_path}"'
                 )
 
                 request = accounts_client.begin_create.call_args.args[2].as_dict()
@@ -277,7 +254,7 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
             'get_cognitiveservices_management_client'
         ) as get_management_client:
             get_management_client.return_value.accounts = mock.Mock()
-            with self.assertRaisesRegex(InvalidArgumentValueError, 'exactly one'):
+            with self.assertRaisesRegex(InvalidArgumentValueError, 'JSON object'):
                 self.cmd(
                     'az cognitiveservices account create '
                     '--name myAccount '
@@ -285,6 +262,5 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
                     '--kind AIServices '
                     '--sku S0 '
                     '--location westus '
-                    '--agent-hosting-configurations "[]" '
-                    f'--agent-hosting-subnet "{CognitiveServicesAgentHostingUnitTests.SUBNET_ID}"'
+                    '--agent-hosting "[]"'
                 )

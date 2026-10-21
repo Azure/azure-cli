@@ -150,50 +150,40 @@ def _kind_uses_project_management(kind):
     return kind in ["AIServices"]
 
 
-_AGENT_HOSTING_CONFIGURATION_KEYS = {
+_AGENT_HOSTING_KEYS = {
     "name",
     "hostingType",
-    "hostingManagementIdentityResourceId",
-    "workloadIdentityResourceId",
     "clusterResourceId",
+    "agentSubnetResourceId",
+    "hostingManagementIdentityResourceId",
     "storageAccountResourceId",
+    "workloadIdentityResourceId",
 }
 
 _AGENT_HOSTING_RESOURCE_ID_FIELDS = (
-    "hostingManagementIdentityResourceId",
-    "workloadIdentityResourceId",
     "clusterResourceId",
+    "agentSubnetResourceId",
+    "hostingManagementIdentityResourceId",
     "storageAccountResourceId",
+    "workloadIdentityResourceId",
 )
 
 
-def _build_agent_hosting_models(agent_hosting_configurations, agent_hosting_subnet):
-    if agent_hosting_configurations is None and agent_hosting_subnet is None:
+def _build_agent_hosting_models(agent_hosting):
+    if agent_hosting is None:
         return None, None, None
 
-    if agent_hosting_configurations is None or agent_hosting_subnet is None:
-        raise RequiredArgumentMissingError(
-            "Both --agent-hosting-configurations and --agent-hosting-subnet are required "
-            "when configuring agent hosting."
-        )
-
-    configurations = agent_hosting_configurations
-    if not isinstance(configurations, list) or len(configurations) != 1:
-        raise InvalidArgumentValueError(
-            "--agent-hosting-configurations must be a JSON array containing exactly one configuration."
-        )
-
-    configuration = configurations[0]
+    configuration = agent_hosting
     if not isinstance(configuration, dict):
         raise InvalidArgumentValueError(
-            "Each item in --agent-hosting-configurations must be a JSON object."
+            "--agent-hosting must be a JSON object."
         )
 
     configuration_keys = set(configuration)
-    if configuration_keys != _AGENT_HOSTING_CONFIGURATION_KEYS:
-        missing_keys = sorted(_AGENT_HOSTING_CONFIGURATION_KEYS - configuration_keys)
+    if configuration_keys != _AGENT_HOSTING_KEYS:
+        missing_keys = sorted(_AGENT_HOSTING_KEYS - configuration_keys)
         unknown_keys = sorted(
-            str(key) for key in configuration_keys - _AGENT_HOSTING_CONFIGURATION_KEYS
+            str(key) for key in configuration_keys - _AGENT_HOSTING_KEYS
         )
         details = []
         if missing_keys:
@@ -201,23 +191,23 @@ def _build_agent_hosting_models(agent_hosting_configurations, agent_hosting_subn
         if unknown_keys:
             details.append("unknown keys: {}".format(", ".join(unknown_keys)))
         raise InvalidArgumentValueError(
-            "Each agent hosting configuration must contain exactly the supported fields ({}).".format(
+            "The agent hosting object must contain exactly the supported fields ({}).".format(
                 "; ".join(details)
             )
         )
 
-    for field_name in _AGENT_HOSTING_CONFIGURATION_KEYS:
+    for field_name in _AGENT_HOSTING_KEYS:
         value = configuration[field_name]
         if not isinstance(value, str) or not value.strip():
             raise InvalidArgumentValueError(
-                "Field '{}' in --agent-hosting-configurations must be a non-empty string.".format(
+                "Field '{}' in --agent-hosting must be a non-empty string.".format(
                     field_name
                 )
             )
 
     if configuration["hostingType"] != AgentHostingType.MANAGED_CLUSTER.value:
         raise InvalidArgumentValueError(
-            "Field 'hostingType' in --agent-hosting-configurations must be 'ManagedCluster'."
+            "Field 'hostingType' in --agent-hosting must be 'ManagedCluster'."
         )
 
     from azure.mgmt.core.tools import is_valid_resource_id
@@ -225,18 +215,9 @@ def _build_agent_hosting_models(agent_hosting_configurations, agent_hosting_subn
     for field_name in _AGENT_HOSTING_RESOURCE_ID_FIELDS:
         if not is_valid_resource_id(configuration[field_name]):
             raise InvalidArgumentValueError(
-                "Field '{}' in --agent-hosting-configurations must be a fully qualified "
+                "Field '{}' in --agent-hosting must be a fully qualified "
                 "Azure resource ID.".format(field_name)
             )
-
-    if not isinstance(agent_hosting_subnet, str) or not agent_hosting_subnet.strip():
-        raise InvalidArgumentValueError(
-            "--agent-hosting-subnet must be a non-empty fully qualified Azure resource ID."
-        )
-    if not is_valid_resource_id(agent_hosting_subnet):
-        raise InvalidArgumentValueError(
-            "--agent-hosting-subnet must be a fully qualified Azure resource ID."
-        )
 
     hosting_configuration = ManagedClusterAgentHostingConfiguration(
         name=configuration["name"],
@@ -247,7 +228,7 @@ def _build_agent_hosting_models(agent_hosting_configurations, agent_hosting_subn
     )
     network_injection = NetworkInjection(
         scenario=ScenarioType.AGENT,
-        subnet_arm_id=agent_hosting_subnet,
+        subnet_arm_id=configuration["agentSubnetResourceId"],
         use_microsoft_managed_network=False,
     )
     user_assigned_identities = {
@@ -271,8 +252,7 @@ def create(
     encryption=None,
     allow_project_management=None,
     yes=None,
-    agent_hosting_configurations=None,
-    agent_hosting_subnet=None,
+    agent_hosting=None,
 ):  # pylint: disable=unused-argument
     """
     Create an Azure Cognitive Services account.
@@ -299,8 +279,7 @@ def create(
         properties.encryption = json.loads(encryption)
 
     hosting_configurations, network_injections, user_assigned_identities = _build_agent_hosting_models(
-        agent_hosting_configurations,
-        agent_hosting_subnet,
+        agent_hosting
     )
     if hosting_configurations is not None:
         properties.agent_hosting_configurations = hosting_configurations

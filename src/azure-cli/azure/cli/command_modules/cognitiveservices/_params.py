@@ -279,27 +279,15 @@ def load_arguments(self, _):
         "cognitiveservices account create", arg_group="Agent Hosting"
     ) as c:
         c.argument(
-            "agent_hosting_configurations",
-            options_list=[
-                "--agent-hosting-configurations",
-                "--agent-hosting-config",
-            ],
+            "agent_hosting",
             type=shell_safe_json_parse,
             is_preview=True,
             help=(
-                "JSON array or `@<file>` containing exactly one ManagedCluster agent hosting configuration. "
-                "Required properties: name, hostingType, "
-                "hostingManagementIdentityResourceId, workloadIdentityResourceId, clusterResourceId, "
-                "and storageAccountResourceId. The hosting management identity is assigned to the account; "
-                "the workload identity is not assigned to the account."
-            ),
-        )
-        c.argument(
-            "agent_hosting_subnet",
-            is_preview=True,
-            help=(
-                "Fully qualified resource ID of the subnet used for agent network injection. "
-                "This is the agent subnet, not the AKS node subnet."
+                "JSON object or `@<file>` describing complete agent hosting provisioning. "
+                "Required properties: name, hostingType, clusterResourceId, agentSubnetResourceId, "
+                "hostingManagementIdentityResourceId, storageAccountResourceId, and workloadIdentityResourceId. "
+                "The object is expanded into the account's agent hosting configuration, network injection, "
+                "and managed identity."
             ),
         )
 
