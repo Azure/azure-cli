@@ -44,11 +44,11 @@ Target command: `az cognitiveservices account create` (new arguments marked `is_
 
 ### 3.1 Option A: JSON Input (Selected)
 
-Selected for future extensibility: `agentHostingConfigurations` is a polymorphic array (`AgentHostingConfiguration[]`) designed to support multiple items and new `hostingType` values in future API versions. Accepts an inline JSON array or `@<file>` (expanded by the CLI framework and parsed once via `shell_safe_json_parse`), paired with `--agent-hosting-subnet`:
+Selected for future extensibility: `agentHostingConfigurations` is a polymorphic array (`AgentHostingConfiguration[]`) designed to support multiple items and new `hostingType` values in future API versions. Accepts an inline JSON array or `@<file>` parsed via `shell_safe_json_parse`, paired with `--agent-hosting-subnet`:
 
 | CLI Option | Python Argument | Mapped SDK Target | Requirement | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `--agent-hosting-configurations` | `agent_hosting_configurations` | `properties.agent_hosting_configurations` & `identity.user_assigned_identities` | Required when BYO AKS is used | JSON array string (or `@<file>`) of `ManagedClusterAgentHostingConfiguration` objects (schema in Section 2.1). `hostingManagementIdentityResourceId` is automatically attached to `account.identity.userAssignedIdentities`. |
+| `--agent-hosting-configurations` (`--agent-hosting-config`) | `agent_hosting_configurations` | `properties.agent_hosting_configurations` & `identity.user_assigned_identities` | Required when BYO AKS is used | JSON array string (or `@<file>`) of `ManagedClusterAgentHostingConfiguration` objects (schema in Section 2.1). `hostingManagementIdentityResourceId` is automatically attached to `account.identity.userAssignedIdentities`. The shorter alias satisfies the CLI option-length requirement. |
 | `--agent-hosting-subnet` | `agent_hosting_subnet` | `properties.network_injections[0].subnet_arm_id` | Required when BYO AKS is used | ARM resource ID of the agent injection subnet (`scenario="agent"`, `use_microsoft_managed_network=False`). |
 
 #### Example (Option A)
@@ -114,10 +114,10 @@ az cognitiveservices account create \
 ## 4. Implementation Notes
 
 1. **Trigger & Argument Validation**:
-   * Keep `--agent-hosting-configurations` as a raw string in `argparse` (do not set `type=shell_safe_json_parse` directly, which would turn explicit JSON `null` into `None` and silently bypass validation) and parse/validate it once in `custom.py:create()` via `shell_safe_json_parse` (so both CLI invocations and direct unit test calls share the same validation path).
+   * Parse `--agent-hosting-configurations` in `_params.py` with `type=shell_safe_json_parse`, following the current repository pattern for JSON arguments. `custom.py:create()` receives the parsed value and validates its schema.
    * If both `--agent-hosting-configurations` and `--agent-hosting-subnet` are `None` (not provided): preserve existing behavior (do not send empty `agentHostingConfigurations` or `networkInjections` arrays).
    * If only one is provided: raise `RequiredArgumentMissingError` requiring both `--agent-hosting-configurations` and `--agent-hosting-subnet`.
-   * Require the parsed value to be a `list` of length `1` (`minItems=1, maxItems=1`; reject `null`, non-list, `[]`, and `len > 1`), require the item to be a `dict` with only the 6 expected `camelCase` keys (`name`, `hostingType == "ManagedCluster"`, and 4 valid ARM IDs checked via `is_valid_resource_id()`) with non-empty `str` values, validate `is_valid_resource_id(agent_hosting_subnet)`, and map the `camelCase` fields to `ManagedClusterAgentHostingConfiguration`.
+   * Require the parsed value to be a `list` of length `1` (`minItems=1, maxItems=1`; reject non-list, `[]`, and `len > 1`), require the item to be a `dict` with only the 6 expected `camelCase` keys (`name`, `hostingType == "ManagedCluster"`, and 4 valid ARM IDs checked via `is_valid_resource_id()`) with non-empty `str` values, validate `is_valid_resource_id(agent_hosting_subnet)`, and map the `camelCase` fields to `ManagedClusterAgentHostingConfiguration`.
 2. **Account Identity Construction (`custom.py`)**:
    * Keep existing `has_system_identity = bool(assign_identity or allow_project_management)` logic in `create()`.
    * Collect `hosting_management_identity_resource_id` from the validated configuration into `user_assigned_identities = {uai_id: UserAssignedIdentity() for uai_id in mgmt_identity_ids}` (do not attach `workload_identity_resource_id` to the account identity).
@@ -136,15 +136,15 @@ az cognitiveservices account create \
 
 | File Path | Planned Change |
 | :--- | :--- |
-| `src/azure-cli/azure/cli/command_modules/cognitiveservices/_params.py` | Register preview `--agent-hosting-configurations` and `--agent-hosting-subnet` arguments under `cognitiveservices account create`. |
+| `src/azure-cli/azure/cli/command_modules/cognitiveservices/_params.py` | Register preview `--agent-hosting-configurations` and `--agent-hosting-subnet` arguments and their parameter help under `cognitiveservices account create`. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/custom.py` | Validate `--agent-hosting-configurations` / `--agent-hosting-subnet` and set `properties.agent_hosting_configurations`, `properties.network_injections`, and `params.identity` in `create()`. |
-| `src/azure-cli/azure/cli/command_modules/cognitiveservices/_help.py` | Add parameter help (clarifying JSON schema, management vs. workload UAI, agent injection subnet vs. AKS node subnet, and pre-provisioned resource/RBAC prerequisites) and BYO AKS example. |
-| `src/azure-cli/azure/cli/command_modules/cognitiveservices/tests/latest/test_byox.py` | Add `ScenarioTest` (`self.cmd(...)` for CI `missing_parameter_test_coverage`) and unit tests for argument validation, serialized wire payload (`agentHostingConfigurations`, `networkInjections`, `identity`), and non-BYO regression. |
+| `src/azure-cli/azure/cli/command_modules/cognitiveservices/_help.py` | Add a BYO AKS account creation example. |
+| `src/azure-cli/azure/cli/command_modules/cognitiveservices/tests/latest/test_agent_hosting.py` | Add `ScenarioTest` (`self.cmd(...)` for CI `missing_parameter_test_coverage`) and unit tests for argument validation, serialized wire payload (`agentHostingConfigurations`, `networkInjections`, `identity`), and non-BYO regression. |
 
 ### Verification Checklist
 
-* **Pre-request Validation**: Missing paired flag, explicit JSON `null`, non-list, empty list `[]`, multi-item list (`len > 1`), non-object item, unknown/missing keys, empty/non-string values, and invalid ARM resource IDs fail before any SDK call.
+* **Pre-request Validation**: Missing paired flag, non-list, empty list `[]`, multi-item list (`len > 1`), non-object item, unknown/missing keys, empty/non-string values, and invalid ARM resource IDs fail before any SDK call.
 * **Wire Serialization**: Verify the serialized body passed to `client.begin_create` contains 1 `agentHostingConfigurations` item (`hostingType="ManagedCluster"`), 1 `networkInjections` item (`scenario="agent"`, `subnetArmId`, `useMicrosoftManagedNetwork=False`), and expected `identity` (`SystemAssigned, UserAssigned` default for `AIServices`, or `UserAssigned` when system identity is disabled, with only `hostingManagementIdentityResourceId` in `userAssignedIdentities`).
 * **Non-BYO & Update Regression**: Non-BYO `account create` sends no `agentHostingConfigurations` / `networkInjections`; `account update` omits `agentHostingConfigurations`.
 * **Live ARM Verification**: Creating a new BYO AKS account via `az cognitiveservices account create` reaches `Succeeded` and `account show` returns the expected bindings.
-* **Checks**: `azdev style cognitiveservices`, `azdev linter cognitiveservices`, and `azdev test test_byox`.
+* **Checks**: `azdev style cognitiveservices`, `azdev linter cognitiveservices`, and `azdev test test_agent_hosting`.

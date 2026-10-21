@@ -62,6 +62,25 @@ examples:
                 "keyVaultUri": "https://issue23056kv.vault.azure.net/"
               }
             }'
+  - name: Create an AI Services account hosted on a customer-owned AKS cluster.
+    text: |
+        az cognitiveservices account create \\
+            --name foundryByocAccount \\
+            --resource-group myResourceGroup \\
+            --kind AIServices \\
+            --sku S0 \\
+            --location westus \\
+            --agent-hosting-subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/agent-subnet" \\
+            --agent-hosting-configurations '[
+              {
+                "name": "default",
+                "hostingType": "ManagedCluster",
+                "hostingManagementIdentityResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/account-control-plane",
+                "workloadIdentityResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aks-workload",
+                "clusterResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1",
+                "storageAccountResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/storage1"
+              }
+            ]'
 """
 
 helps[
