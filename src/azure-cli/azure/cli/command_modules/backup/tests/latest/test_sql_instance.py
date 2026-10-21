@@ -639,6 +639,25 @@ class SqlInstanceCommandTests(unittest.TestCase):
         self.assertEqual("SQLInstance", request["properties"]["workloadType"])
         self.assertEqual("AzureWorkload", request["properties"]["backupManagementType"])
 
+    @patch.object(custom_base.custom_afs, "register_afs_container", return_value={"status": "Succeeded"})
+    def test_backup_container_registration_preserves_azure_files_identity(self, register_afs):
+        self.assertEqual({"status": "Succeeded"}, self.cmd(
+            'backup container register -g rg -v vault --backup-management-type AzureStorage '
+            '--workload-type AzureFileShare --storage-account account --access-type IdentityBased '
+            '--mi-system-assigned --yes'))
+        args = register_afs.call_args.args
+        self.assertEqual(("rg", "vault", "account", "IdentityBased", True, None, True), args[2:])
+        self.client.protection_containers.refresh.assert_not_called()
+        self.client.protection_containers.begin_register.assert_not_called()
+
+    @patch.object(custom_base.custom_afs, "register_afs_container")
+    def test_backup_container_registration_rejects_source_subscription_for_azure_files(self, register_afs):
+        self.cmd('backup container register -g rg -v vault --backup-management-type AzureStorage '
+                 '--workload-type AzureFileShare --storage-account account --container-sub-id source-sub',
+                 expect_failure=True)
+        register_afs.assert_not_called()
+        self.client.protection_containers.refresh.assert_not_called()
+
     @patch.object(custom_base, "show_item")
     def test_backup_recovery_point_query_options(self, show_item):
         show_item.return_value = protected_item()
