@@ -12,6 +12,7 @@ from unittest import mock
 
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 
 from azure.cli.command_modules.cognitiveservices.custom import (
     create as account_create,
@@ -20,27 +21,26 @@ from azure.cli.command_modules.cognitiveservices.custom import (
 
 
 class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
-    SUBSCRIPTION_ID = '00000000-1111-2222-3333-444444444444'
     RESOURCE_GROUP = 'myResourceGroup'
     ACCOUNT_NAME = 'myAccount'
     MANAGEMENT_IDENTITY = (
-        f'/subscriptions/{SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
+        f'/subscriptions/{MOCKED_SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
         'Microsoft.ManagedIdentity/userAssignedIdentities/account-control-plane'
     )
     WORKLOAD_IDENTITY = (
-        f'/subscriptions/{SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
+        f'/subscriptions/{MOCKED_SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
         'Microsoft.ManagedIdentity/userAssignedIdentities/aks-workload'
     )
     CLUSTER_ID = (
-        f'/subscriptions/{SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
+        f'/subscriptions/{MOCKED_SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
         'Microsoft.ContainerService/managedClusters/cluster1'
     )
     STORAGE_ID = (
-        f'/subscriptions/{SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
+        f'/subscriptions/{MOCKED_SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
         'Microsoft.Storage/storageAccounts/storage1'
     )
     SUBNET_ID = (
-        f'/subscriptions/{SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
+        f'/subscriptions/{MOCKED_SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
         'Microsoft.Network/virtualNetworks/vnet1/subnets/agent-subnet'
     )
     CONFIGURATION = {

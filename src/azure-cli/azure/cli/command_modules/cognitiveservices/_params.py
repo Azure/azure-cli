@@ -291,7 +291,7 @@ def load_arguments(self, _):
                 "Required properties: name, hostingType, "
                 "hostingManagementIdentityResourceId, workloadIdentityResourceId, clusterResourceId, "
                 "and storageAccountResourceId. The hosting management identity is assigned to the account; "
-                "the workload identity is not."
+                "the workload identity is not assigned to the account."
             ),
         )
         c.argument(
