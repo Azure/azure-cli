@@ -175,10 +175,16 @@ def _build_agent_hosting_models(agent_hosting):
     if agent_hosting is None:
         return None, None, None
 
-    configuration = agent_hosting
+    configurations = agent_hosting
+    if not isinstance(configurations, list) or len(configurations) != 1:
+        raise InvalidArgumentValueError(
+            "--agent-hosting must be a JSON array containing exactly one configuration."
+        )
+
+    configuration = configurations[0]
     if not isinstance(configuration, dict):
         raise InvalidArgumentValueError(
-            "--agent-hosting must be a JSON object."
+            "Each item in --agent-hosting must be a JSON object."
         )
 
     configuration_keys = set(configuration)

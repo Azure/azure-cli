@@ -283,11 +283,12 @@ def load_arguments(self, _):
             type=shell_safe_json_parse,
             is_preview=True,
             help=(
-                "JSON object or `@<file>` describing complete agent hosting provisioning. "
-                "Required properties: name, hostingType, clusterResourceId, "
+                "JSON array or `@<file>` containing exactly one agent hosting configuration. "
+                "Required object properties: name, hostingType, clusterResourceId, "
                 "hostingManagementIdentityResourceId, storageAccountResourceId, and workloadIdentityResourceId. "
-                "Optional property: agentSubnetResourceId. The object is expanded into the account's agent hosting "
-                "configuration and managed identity; agentSubnetResourceId adds network injection when provided."
+                "Optional object property: agentSubnetResourceId. "
+                "The object is expanded into the account's agent hosting configuration and managed identity. "
+                "agentSubnetResourceId adds network injection when provided."
             ),
         )
 

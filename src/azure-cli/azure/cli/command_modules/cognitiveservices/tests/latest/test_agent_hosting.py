@@ -62,7 +62,7 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
             'sku_name': 'S0',
             'kind': 'AIServices',
             'location': 'westus',
-            'agent_hosting': copy.deepcopy(self.CONFIGURATION),
+            'agent_hosting': [copy.deepcopy(self.CONFIGURATION)],
         }
         arguments.update(overrides)
         result = account_create(**arguments)
@@ -120,17 +120,17 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
         configuration = copy.deepcopy(self.CONFIGURATION)
         del configuration['agentSubnetResourceId']
 
-        client, _ = self._call_create(agent_hosting=configuration)
+        client, _ = self._call_create(agent_hosting=[configuration])
 
         request = client.begin_create.call_args.args[2].as_dict()
         self.assertIn('agentHostingConfigurations', request['properties'])
         self.assertNotIn('networkInjections', request['properties'])
 
-    def test_agent_hosting_rejects_non_object_configuration(self):
+    def test_agent_hosting_rejects_invalid_collection_shapes(self):
         invalid_values = (
+            {},
             [],
-            [self.CONFIGURATION],
-            'invalid',
+            [self.CONFIGURATION, self.CONFIGURATION],
             [1],
         )
         for value in invalid_values:
@@ -145,7 +145,7 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
 
         for configuration in (missing, unknown):
             with self.subTest(configuration=configuration):
-                self._assert_invalid_configuration(configuration)
+                self._assert_invalid_configuration([configuration])
 
     def test_agent_hosting_rejects_empty_and_non_string_fields(self):
         for field_name in self.CONFIGURATION:
@@ -153,12 +153,12 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
                 with self.subTest(field_name=field_name, value=value):
                     configuration = copy.deepcopy(self.CONFIGURATION)
                     configuration[field_name] = value
-                    self._assert_invalid_configuration(configuration)
+                    self._assert_invalid_configuration([configuration])
 
     def test_agent_hosting_rejects_unsupported_hosting_type(self):
         configuration = copy.deepcopy(self.CONFIGURATION)
         configuration['hostingType'] = 'Unsupported'
-        self._assert_invalid_configuration(configuration)
+        self._assert_invalid_configuration([configuration])
 
     def test_agent_hosting_rejects_invalid_resource_ids(self):
         for field_name in (
@@ -171,7 +171,7 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
             with self.subTest(field_name=field_name):
                 configuration = copy.deepcopy(self.CONFIGURATION)
                 configuration[field_name] = 'not-a-resource-id'
-                self._assert_invalid_configuration(configuration)
+                self._assert_invalid_configuration([configuration])
 
     def test_agent_hosting_non_byo_create_preserves_existing_payload(self):
         client, _ = self._call_create(
@@ -224,7 +224,7 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
 
     def test_cognitiveservices_agent_hosting_from_file(self):
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as configuration_file:
-            json.dump(CognitiveServicesAgentHostingUnitTests.CONFIGURATION, configuration_file)
+            json.dump([CognitiveServicesAgentHostingUnitTests.CONFIGURATION], configuration_file)
             configuration_file_path = configuration_file.name
 
         try:
@@ -264,7 +264,7 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
             'get_cognitiveservices_management_client'
         ) as get_management_client:
             get_management_client.return_value.accounts = mock.Mock()
-            with self.assertRaisesRegex(InvalidArgumentValueError, 'JSON object'):
+            with self.assertRaisesRegex(InvalidArgumentValueError, 'exactly one'):
                 self.cmd(
                     'az cognitiveservices account create '
                     '--name myAccount '

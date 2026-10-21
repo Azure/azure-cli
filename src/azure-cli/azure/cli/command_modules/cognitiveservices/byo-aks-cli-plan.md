@@ -8,14 +8,14 @@ Based on [Azure/azure-rest-api-specs#45245](https://github.com/Azure/azure-rest-
   1. `properties.agent_hosting_configurations` (`ManagedClusterAgentHostingConfiguration`)
   2. Optional `properties.network_injections` (`NetworkInjection` when an agent subnet is provided)
   3. Account-level managed identity (`identity.user_assigned_identities` including the hosting-management UAI)
-  4. The `--agent-hosting` aggregate argument, validation, help, and tests.
+  4. The `--agent-hosting` array argument, validation, help, and tests.
 * **Prerequisite**: `azure-mgmt-cognitiveservices>=15.0.0b5` (which introduced `AgentHostingConfiguration`, `ManagedClusterAgentHostingConfiguration`, and `AgentHostingType`). In `azure-cli`, [Azure/azure-cli#34112](https://github.com/Azure/azure-cli/pull/34112) upgrades the dependency directly from `15.0.0b4` to `15.0.0b6`.
 
 ---
 
 ## 2. API Specification
 
-The service API represents agent hosting configuration, network injection, and account identity as separate properties. The selected CLI design combines the required provisioning inputs into one `--agent-hosting` object and fans them out to these service properties.
+The service API represents agent hosting configuration, network injection, and account identity as separate properties. The selected CLI design accepts `--agent-hosting` as an array containing one configuration object, with the optional agent subnet included in that object, and fans the values out to these service properties.
 
 ### 2.1 Agent Hosting Configuration
 
@@ -38,7 +38,7 @@ BYO AKS can optionally use an agent subnet configured on `AccountProperties.netw
 * `subnet_arm_id`: Agent subnet ARM resource ID (`Microsoft.Network/virtualNetworks/subnets`)
 * `use_microsoft_managed_network`: `False`
 
-At the CLI layer, the optional subnet is supplied as `agentSubnetResourceId` inside the `--agent-hosting` aggregate object and mapped to `network_injections[0].subnet_arm_id`; it is not a separate argument in the selected Option A. When omitted, the CLI does not send `networkInjections`.
+At the CLI layer, the optional subnet is supplied as `agentSubnetResourceId` inside the configuration object in the `--agent-hosting` array and mapped to `network_injections[0].subnet_arm_id`; it is not a separate argument in the selected Option A. When omitted, the CLI does not send `networkInjections`.
 
 ---
 
@@ -46,13 +46,13 @@ At the CLI layer, the optional subnet is supplied as `agentSubnetResourceId` ins
 
 Target command: `az cognitiveservices account create` (the new argument is marked `is_preview=True`).
 
-### 3.1 Option A: Aggregated JSON Object (Selected)
+### 3.1 Option A: JSON Array (Selected)
 
-Selected to follow the aggregate provisioning model in [Azure/azure-dev#9942](https://github.com/Azure/azure-dev/pull/9942): the CLI accepts one complete Agent Hosting object and expands it into `agentHostingConfigurations[0]`, `networkInjections[0]`, and the account identity. Accepts an inline JSON object or `@<file>` parsed via `shell_safe_json_parse`:
+Selected to preserve the `AgentHostingConfiguration[]` shape while incorporating the network input from [Azure/azure-dev#9942](https://github.com/Azure/azure-dev/pull/9942): the CLI accepts an array containing exactly one Agent Hosting object. The object is expanded into `agentHostingConfigurations[0]`, optional `networkInjections[0]`, and the account identity. Accepts an inline JSON array or `@<file>` parsed via `shell_safe_json_parse`:
 
 | CLI Option | Python Argument | Mapped SDK Target | Requirement | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `--agent-hosting` | `agent_hosting` | `properties.agent_hosting_configurations`, optional `properties.network_injections` & `identity.user_assigned_identities` | Required when BYO AKS is used | JSON object (or `@<file>`) containing `name`, `hostingType`, `clusterResourceId`, `hostingManagementIdentityResourceId`, `storageAccountResourceId`, and `workloadIdentityResourceId`, with optional `agentSubnetResourceId`. |
+| `--agent-hosting` | `agent_hosting` | `properties.agent_hosting_configurations`, optional `properties.network_injections` & `identity.user_assigned_identities` | Required when BYO AKS is used | JSON array (or `@<file>`) containing exactly one object with `name`, `hostingType`, `clusterResourceId`, `hostingManagementIdentityResourceId`, `storageAccountResourceId`, and `workloadIdentityResourceId`, plus optional `agentSubnetResourceId`. |
 
 #### Example (Option A)
 
@@ -65,15 +65,17 @@ az cognitiveservices account create \
     -l westus \
     --custom-domain foundrybyocaccount \
     --yes \
-    --agent-hosting '{
-      "name": "default",
-      "hostingType": "ManagedCluster",
-      "clusterResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1",
-      "agentSubnetResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/agent-subnet",
-      "hostingManagementIdentityResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/account-control-plane",
-      "storageAccountResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/storage1",
-      "workloadIdentityResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aks-workload"
-    }'
+    --agent-hosting '[
+      {
+        "name": "default",
+        "hostingType": "ManagedCluster",
+        "clusterResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1",
+        "agentSubnetResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/agent-subnet",
+        "hostingManagementIdentityResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/account-control-plane",
+        "storageAccountResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/storage1",
+        "workloadIdentityResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aks-workload"
+      }
+    ]'
 ```
 
 ---
@@ -117,8 +119,8 @@ az cognitiveservices account create \
 1. **Trigger & Argument Validation**:
    * Parse `--agent-hosting` in `_params.py` with `type=shell_safe_json_parse`, following the current repository pattern for JSON arguments. `custom.py:create()` receives the parsed value and validates its schema.
    * If `--agent-hosting` is `None` (not provided): preserve existing behavior (do not send empty `agentHostingConfigurations` or `networkInjections` arrays).
-   * Require the parsed value to be a `dict` with the 6 required `camelCase` keys (`name`, `hostingType == "ManagedCluster"`, `clusterResourceId`, `hostingManagementIdentityResourceId`, `storageAccountResourceId`, and `workloadIdentityResourceId`) and optional `agentSubnetResourceId`. Reject unknown keys and empty/non-string values. Validate the 4 required ARM IDs and the optional subnet ID, when present, with `is_valid_resource_id()`.
-   * Map the hosting fields to `ManagedClusterAgentHostingConfiguration`, optional `agentSubnetResourceId` to `NetworkInjection.subnet_arm_id`, and `hostingManagementIdentityResourceId` to the account identity. Do not set `networkInjections` when the subnet is omitted.
+   * Require the parsed value to be a `list` of length `1` (`minItems=1`, `maxItems=1`; reject non-list, `[]`, and `len > 1`). Require the item to be a `dict` with the 6 required `camelCase` keys (`name`, `hostingType == "ManagedCluster"`, `clusterResourceId`, `hostingManagementIdentityResourceId`, `storageAccountResourceId`, and `workloadIdentityResourceId`) and optional `agentSubnetResourceId`. Reject unknown keys and empty/non-string values. Validate the 4 required ARM IDs and the optional subnet ID, when present, with `is_valid_resource_id()`.
+   * Map the object to `ManagedClusterAgentHostingConfiguration`, optional `agentSubnetResourceId` to `NetworkInjection.subnet_arm_id`, and `hostingManagementIdentityResourceId` to the account identity. Do not set `networkInjections` when the subnet is omitted.
 2. **Account Identity Construction (`custom.py`)**:
    * Keep existing `has_system_identity = bool(assign_identity or allow_project_management)` logic in `create()`.
    * Collect `hostingManagementIdentityResourceId` from the validated aggregate into `user_assigned_identities` (do not attach `workloadIdentityResourceId` to the account identity).
@@ -138,13 +140,13 @@ az cognitiveservices account create \
 | File Path | Planned Change |
 | :--- | :--- |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/_params.py` | Register the preview `--agent-hosting` aggregate argument and its parameter help under `cognitiveservices account create`. |
-| `src/azure-cli/azure/cli/command_modules/cognitiveservices/custom.py` | Validate `--agent-hosting` and fan the aggregate out to `properties.agent_hosting_configurations`, `properties.network_injections`, and `params.identity` in `create()`. |
+| `src/azure-cli/azure/cli/command_modules/cognitiveservices/custom.py` | Validate `--agent-hosting` and map the single array item to `properties.agent_hosting_configurations`, optional `properties.network_injections`, and `params.identity` in `create()`. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/_help.py` | Add a BYO AKS account creation example. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/tests/latest/test_agent_hosting.py` | Add `ScenarioTest` (`self.cmd(...)` for CI `missing_parameter_test_coverage`) and unit tests for argument validation, serialized wire payload (`agentHostingConfigurations`, `networkInjections`, `identity`), and non-BYO regression. |
 
 ### Verification Checklist
 
-* **Pre-request Validation**: Non-object input, unknown/missing keys, empty/non-string values, unsupported `hostingType`, and invalid ARM resource IDs fail before any SDK call.
+* **Pre-request Validation**: Non-list input, empty list `[]`, multi-item list (`len > 1`), non-object item, unknown/missing keys, empty/non-string values, unsupported `hostingType`, and invalid ARM resource IDs fail before any SDK call.
 * **Wire Serialization**: Verify the serialized body passed to `client.begin_create` contains 1 `agentHostingConfigurations` item (`hostingType="ManagedCluster"`), expected `identity` (`SystemAssigned, UserAssigned` default for `AIServices`, or `UserAssigned` when system identity is disabled, with only `hostingManagementIdentityResourceId` in `userAssignedIdentities`), and either 1 `networkInjections` item (`scenario="agent"`, `subnetArmId`, `useMicrosoftManagedNetwork=False`) when `agentSubnetResourceId` is provided or no `networkInjections` field when it is omitted.
 * **Non-BYO & Update Regression**: Non-BYO `account create` sends no `agentHostingConfigurations` / `networkInjections`; `account update` omits `agentHostingConfigurations`.
 * **Live ARM Verification**: Creating a new BYO AKS account via `az cognitiveservices account create` reaches `Succeeded` and `account show` returns the expected bindings.
