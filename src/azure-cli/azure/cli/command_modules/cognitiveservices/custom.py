@@ -150,19 +150,21 @@ def _kind_uses_project_management(kind):
     return kind in ["AIServices"]
 
 
-_AGENT_HOSTING_KEYS = {
+_AGENT_HOSTING_REQUIRED_KEYS = {
     "name",
     "hostingType",
     "clusterResourceId",
-    "agentSubnetResourceId",
     "hostingManagementIdentityResourceId",
     "storageAccountResourceId",
     "workloadIdentityResourceId",
 }
 
-_AGENT_HOSTING_RESOURCE_ID_FIELDS = (
-    "clusterResourceId",
+_AGENT_HOSTING_OPTIONAL_KEYS = {
     "agentSubnetResourceId",
+}
+
+_AGENT_HOSTING_REQUIRED_RESOURCE_ID_FIELDS = (
+    "clusterResourceId",
     "hostingManagementIdentityResourceId",
     "storageAccountResourceId",
     "workloadIdentityResourceId",
@@ -180,23 +182,24 @@ def _build_agent_hosting_models(agent_hosting):
         )
 
     configuration_keys = set(configuration)
-    if configuration_keys != _AGENT_HOSTING_KEYS:
-        missing_keys = sorted(_AGENT_HOSTING_KEYS - configuration_keys)
-        unknown_keys = sorted(
-            str(key) for key in configuration_keys - _AGENT_HOSTING_KEYS
-        )
+    allowed_keys = _AGENT_HOSTING_REQUIRED_KEYS | _AGENT_HOSTING_OPTIONAL_KEYS
+    missing_keys = sorted(_AGENT_HOSTING_REQUIRED_KEYS - configuration_keys)
+    unknown_keys = sorted(
+        str(key) for key in configuration_keys - allowed_keys
+    )
+    if missing_keys or unknown_keys:
         details = []
         if missing_keys:
             details.append("missing keys: {}".format(", ".join(missing_keys)))
         if unknown_keys:
             details.append("unknown keys: {}".format(", ".join(unknown_keys)))
         raise InvalidArgumentValueError(
-            "The agent hosting object must contain exactly the supported fields ({}).".format(
+            "The agent hosting object must include all required fields and no unknown fields ({}).".format(
                 "; ".join(details)
             )
         )
 
-    for field_name in _AGENT_HOSTING_KEYS:
+    for field_name in configuration_keys:
         value = configuration[field_name]
         if not isinstance(value, str) or not value.strip():
             raise InvalidArgumentValueError(
@@ -212,7 +215,10 @@ def _build_agent_hosting_models(agent_hosting):
 
     from azure.mgmt.core.tools import is_valid_resource_id
 
-    for field_name in _AGENT_HOSTING_RESOURCE_ID_FIELDS:
+    resource_id_fields = list(_AGENT_HOSTING_REQUIRED_RESOURCE_ID_FIELDS)
+    if "agentSubnetResourceId" in configuration:
+        resource_id_fields.append("agentSubnetResourceId")
+    for field_name in resource_id_fields:
         if not is_valid_resource_id(configuration[field_name]):
             raise InvalidArgumentValueError(
                 "Field '{}' in --agent-hosting must be a fully qualified "
@@ -226,15 +232,19 @@ def _build_agent_hosting_models(agent_hosting):
         cluster_resource_id=configuration["clusterResourceId"],
         storage_account_resource_id=configuration["storageAccountResourceId"],
     )
-    network_injection = NetworkInjection(
-        scenario=ScenarioType.AGENT,
-        subnet_arm_id=configuration["agentSubnetResourceId"],
-        use_microsoft_managed_network=False,
-    )
+    network_injections = None
+    if "agentSubnetResourceId" in configuration:
+        network_injections = [
+            NetworkInjection(
+                scenario=ScenarioType.AGENT,
+                subnet_arm_id=configuration["agentSubnetResourceId"],
+                use_microsoft_managed_network=False,
+            )
+        ]
     user_assigned_identities = {
         configuration["hostingManagementIdentityResourceId"]: UserAssignedIdentity()
     }
-    return [hosting_configuration], [network_injection], user_assigned_identities
+    return [hosting_configuration], network_injections, user_assigned_identities
 
 
 def create(
@@ -283,6 +293,7 @@ def create(
     )
     if hosting_configurations is not None:
         properties.agent_hosting_configurations = hosting_configurations
+    if network_injections is not None:
         properties.network_injections = network_injections
 
     properties.allow_project_management = allow_project_management

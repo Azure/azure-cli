@@ -116,6 +116,16 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
             {self.MANAGEMENT_IDENTITY: {}},
         )
 
+    def test_agent_hosting_omits_network_injection_without_subnet(self):
+        configuration = copy.deepcopy(self.CONFIGURATION)
+        del configuration['agentSubnetResourceId']
+
+        client, _ = self._call_create(agent_hosting=configuration)
+
+        request = client.begin_create.call_args.args[2].as_dict()
+        self.assertIn('agentHostingConfigurations', request['properties'])
+        self.assertNotIn('networkInjections', request['properties'])
+
     def test_agent_hosting_rejects_non_object_configuration(self):
         invalid_values = (
             [],

@@ -284,10 +284,10 @@ def load_arguments(self, _):
             is_preview=True,
             help=(
                 "JSON object or `@<file>` describing complete agent hosting provisioning. "
-                "Required properties: name, hostingType, clusterResourceId, agentSubnetResourceId, "
+                "Required properties: name, hostingType, clusterResourceId, "
                 "hostingManagementIdentityResourceId, storageAccountResourceId, and workloadIdentityResourceId. "
-                "The object is expanded into the account's agent hosting configuration, network injection, "
-                "and managed identity."
+                "Optional property: agentSubnetResourceId. The object is expanded into the account's agent hosting "
+                "configuration and managed identity; agentSubnetResourceId adds network injection when provided."
             ),
         )
 
