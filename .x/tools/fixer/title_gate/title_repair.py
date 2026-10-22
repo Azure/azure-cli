@@ -198,3 +198,47 @@ def _repaired_cli_history_notes(body, component=None):
             lines[index] = replacement
             updated_count += 1
     return "".join(lines), updated_count
+
+
+def _component_metadata_plan(pr, pr_files):
+    """Plan an unambiguous title and History Notes component correction."""
+    expected = expected_cli_title_component(pr_files)
+    if expected is None:
+        return {"updated": False, "reason": "no_unique_production_module"}
+    title = pr.get("title") or ""
+    prefix = _TITLE_PREFIX_PATTERN.match(title)
+    if prefix and prefix.group(1).strip() == expected:
+        return {"updated": False, "reason": "component_matches"}
+    if not prefix:
+        return {"updated": False, "reason": "title_has_no_component_prefix"}
+    corrected = title[:prefix.start(1)] + expected + title[prefix.end(1):]
+    body = pr.get("body") or ""
+    corrected_body = _replace_history_note_component(body, prefix.group(1).strip(), expected)
+    metadata = {"title": corrected}
+    if corrected_body != body:
+        metadata["body"] = corrected_body
+    return {
+        "updated": True, "reason": "component_repaired",
+        "title": corrected, "metadata": metadata,
+    }
+
+
+def _failed_metadata_plan(pr, pr_files, component=None, issue_number=None, issue_title=None):
+    """Plan metadata changes without writing a PR or rerunning CI."""
+    component = expected_cli_title_component(pr_files) or component
+    title = repaired_pr_title(
+        "Azure/azure-cli", pr.get("title") or "", component=component,
+        issue_number=issue_number, issue_title=issue_title,
+    )
+    body = pr.get("body") or ""
+    body, history_notes_updated = _repaired_cli_history_notes(body, component=component)
+    metadata = {}
+    if title != (pr.get("title") or ""):
+        metadata["title"] = title
+    if body != (pr.get("body") or ""):
+        metadata["body"] = body
+    return {
+        "title": title, "body": body, "metadata": metadata,
+        "title_updated": "title" in metadata,
+        "history_notes_updated": history_notes_updated,
+    }
