@@ -5,8 +5,6 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.help_files import helps  # pylint: disable=unused-import
-from ._active_backup_commands import load_help as load_active_backup_help
-load_active_backup_help()
 # pylint: disable=line-too-long, too-many-lines
 
 helps['appservice'] = """

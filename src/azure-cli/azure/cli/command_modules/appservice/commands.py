@@ -17,7 +17,7 @@ from ._validators import (validate_onedeploy_params, validate_staticsite_link_fu
                           validate_functionapp_on_containerapp_site_config_show,
                           validate_functionapp_on_containerapp_container_settings_delete,
                           validate_functionapp_on_containerapp_update, validate_functionapp_on_flex_plan,
-                          validate_functionapp, validate_is_flex_functionapp)
+                          validate_functionapp, validate_is_flex_functionapp, validate_active_backup_ids)
 
 
 def output_slots_in_table(slots):
@@ -284,8 +284,34 @@ def _polish_bad_errors(ex, creating_plan):
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
-    from ._active_backup_commands import load_command_table as load_active_backup_commands
-    load_active_backup_commands(self)
+    from .operations.active_backup import (
+        PlanSiloCreate, PlanSiloUpdate, PlanSiloDelete, PlanSiloShow, PlanSiloList, PlanSiloWait, PlanSiloVnetList,
+        SiteSiloCreate, SiteSiloUpdate, SiteSiloDelete, SiteSiloShow, SiteSiloList, SiteSiloWait,
+    )
+    for name, command in (
+        ('appservice plan silo create', PlanSiloCreate), ('appservice plan silo update', PlanSiloUpdate),
+        ('appservice plan silo delete', PlanSiloDelete),
+        ('appservice plan silo show', PlanSiloShow), ('appservice plan silo list', PlanSiloList),
+        ('appservice plan silo wait', PlanSiloWait),
+        ('appservice plan silo vnet-integration list', PlanSiloVnetList),
+        ('webapp silo create', SiteSiloCreate), ('webapp silo update', SiteSiloUpdate),
+        ('webapp silo delete', SiteSiloDelete),
+        ('webapp silo show', SiteSiloShow), ('webapp silo list', SiteSiloList), ('webapp silo wait', SiteSiloWait),
+    ):
+        if name in self.command_table:
+            self.command_table[name] = command(loader=self)
+    for name in (
+        'appservice plan silo show', 'appservice plan silo update', 'appservice plan silo delete',
+        'appservice plan silo wait', 'appservice plan silo vnet-integration list',
+        'webapp silo show', 'webapp silo update', 'webapp silo delete', 'webapp silo wait',
+        'webapp silo vnet-integration show', 'webapp silo vnet-integration add',
+        'webapp silo vnet-integration update', 'webapp silo vnet-integration remove',
+        'webapp silo refresh', 'webapp managed-traffic list', 'webapp managed-traffic show',
+        'webapp managed-traffic update', 'webapp last-known-good list', 'webapp last-known-good show',
+        'webapp last-known-good mark',
+    ):
+        if name in self.command_table:
+            self.command_table[name].validator = validate_active_backup_ids
     webclient_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.web.operations#WebSiteManagementClientOperationsMixin.{}',
         client_factory=cf_web_client

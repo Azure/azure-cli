@@ -52,8 +52,6 @@ REGISTRY_ADAPTER_TYPES = ['Binary', 'String', 'Expand_String', 'Multi_String', '
 
 
 def load_arguments(self, _):
-    from ._active_backup_commands import load_arguments as load_active_backup_arguments
-    load_active_backup_arguments(self, _)
     # pylint: disable=line-too-long
     # PARAMETER REGISTRATION
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')

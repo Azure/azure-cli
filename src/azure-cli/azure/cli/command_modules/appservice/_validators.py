@@ -10,7 +10,7 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageE
                                        ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import validate_tags
-from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from knack.log import get_logger
 
@@ -25,6 +25,34 @@ from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
 from ._constants import ACR_IMAGE_SUFFIX, ISOLATED_V4_SKUS
 
 logger = get_logger(__name__)
+
+
+def validate_active_backup_ids(cmd, namespace):
+    """Keep core ID expansion from retargeting another resource type."""
+    parent_type = 'serverfarms' if cmd.name.startswith('appservice plan silo ') else 'sites'
+    singleton = ('managedTrafficConfig' if cmd.name.startswith('webapp managed-traffic ') else
+                 'lastKnownGood' if cmd.name.startswith('webapp last-known-good ') else None)
+    parent_only = bool(singleton) or cmd.name == 'webapp silo refresh'
+    resource_type = parent_type if parent_only else parent_type + '/silos'
+    ids = getattr(namespace, '_ids', None) or getattr(namespace, 'ids', None) or []
+    for value in ids:
+        parts = parse_resource_id(value)
+        required = ('subscription', 'resource_group', 'name') + (() if parent_only else ('child_name_1',))
+        if not is_valid_resource_id(value) or not all(parts.get(key) for key in required):
+            raise InvalidArgumentValueError(
+                "Provide a Microsoft.Web/{} resource ID with --ids.".format(resource_type))
+        parameters = dict(
+            subscription=parts['subscription'], resource_group=parts['resource_group'],
+            namespace='Microsoft.Web', type=parent_type, name=parts['name'],
+        )
+        if not parent_only:
+            parameters.update(child_type_1='silos', child_name_1=parts['child_name_1'])
+        expected = [resource_id(**parameters).lower()]
+        if singleton:
+            expected.append(resource_id(**parameters, child_type_1=singleton, child_name_1='default').lower())
+        if value.rstrip('/').lower() not in expected:
+            raise InvalidArgumentValueError(
+                "Provide a Microsoft.Web/{} resource ID with --ids.".format(resource_type))
 
 
 def validate_and_convert_to_int(flag, val):
