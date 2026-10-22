@@ -12,12 +12,16 @@ from azure.cli.core.azclierror import ValidationError
 
 class ContainerAppRegistryDetailsTest(unittest.TestCase):
     def test_containerapp_registry_acr_lookup(self):
-        for server, suffix in (
-            ("myacr.azurecr.io", ".azurecr.io"),
-            ("MyAcr.AzureCR.io", ".azurecr.io"),
-            ("myacr.azurecr.cn", ".azurecr.cn"),
+        for server, suffix, sources in (
+            ("myacr.azurecr.io", ".azurecr.io", (None, ".")),
+            ("MyAcr.AzureCR.io", ".azurecr.io", (None, ".")),
+            ("myacr.azurecr.cn", ".azurecr.cn", (None, ".")),
+            ("https://myacr.azurecr.io", ".azurecr.io", (None, ".")),
+            ("https://myacr.azurecr.io/", ".azurecr.io", (None,)),
+            ("https://MyAcr.AzureCR.io", ".azurecr.io", (None, ".")),
+            ("https://myacr.azurecr.cn/", ".azurecr.cn", (None,)),
         ):
-            for source in (None, "."):
+            for source in sources:
                 for username, password in ((None, None), ("user", None), (None, "password")):
                     with self.subTest(server=server, source=source, username=username, password=password):
                         cmd = Mock()
@@ -37,6 +41,9 @@ class ContainerAppRegistryDetailsTest(unittest.TestCase):
             "myacr.azurecr.io.example.com",
             "a.b.azurecr.io",
             "docker.io",
+            "https://myacr.example.com",
+            "https://myacr.azurecr.io.example.com/",
+            "https://a.b.azurecr.io/",
         ):
             for source in (None, "."):
                 for username, password in ((None, None), ("user", None), (None, "password")):
