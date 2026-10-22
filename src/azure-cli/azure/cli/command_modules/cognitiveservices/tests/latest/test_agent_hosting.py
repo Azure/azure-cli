@@ -6,6 +6,7 @@
 import copy
 import json
 import os
+import shlex
 import tempfile
 import unittest
 from unittest import mock
@@ -126,6 +127,22 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
         self.assertIn('agentHostingConfigurations', request['properties'])
         self.assertNotIn('networkInjections', request['properties'])
 
+    def test_agent_hosting_null_subnet_matches_omitted_subnet(self):
+        configuration = copy.deepcopy(self.CONFIGURATION)
+        configuration['agentSubnetResourceId'] = None
+
+        null_client, _ = self._call_create(agent_hosting=[configuration])
+
+        self.assertIn('agentSubnetResourceId', configuration)
+        self.assertIsNone(configuration['agentSubnetResourceId'])
+        del configuration['agentSubnetResourceId']
+        omitted_client, _ = self._call_create(agent_hosting=[configuration])
+
+        self.assertEqual(
+            null_client.begin_create.call_args.args[2].as_dict(),
+            omitted_client.begin_create.call_args.args[2].as_dict(),
+        )
+
     def test_agent_hosting_rejects_invalid_collection_shapes(self):
         invalid_values = (
             {},
@@ -149,7 +166,10 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
 
     def test_agent_hosting_rejects_empty_and_non_string_fields(self):
         for field_name in self.CONFIGURATION:
-            for value in (None, '', '   ', 1):
+            invalid_values = ('', '   ', False, 0, 1, [], {})
+            if field_name != 'agentSubnetResourceId':
+                invalid_values += (None,)
+            for value in invalid_values:
                 with self.subTest(field_name=field_name, value=value):
                     configuration = copy.deepcopy(self.CONFIGURATION)
                     configuration[field_name] = value
@@ -223,7 +243,9 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
             self.assertNotIn('networkInjections', request['properties'])
 
     def test_cognitiveservices_agent_hosting_from_file(self):
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as configuration_file:
+        with tempfile.NamedTemporaryFile(
+            mode='w', prefix="agent hosting ' ", suffix='.json', delete=False
+        ) as configuration_file:
             json.dump([CognitiveServicesAgentHostingUnitTests.CONFIGURATION], configuration_file)
             configuration_file_path = configuration_file.name
 
@@ -243,7 +265,7 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
                     '--kind AIServices '
                     '--sku S0 '
                     '--location westus '
-                    f'--agent-hosting "@{configuration_file_path}"'
+                    f'--agent-hosting {shlex.quote("@" + configuration_file_path)}'
                 )
 
                 request = accounts_client.begin_create.call_args.args[2].as_dict()

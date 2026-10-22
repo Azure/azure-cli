@@ -187,6 +187,10 @@ def _build_agent_hosting_models(agent_hosting):
             "Each item in --agent-hosting must be a JSON object."
         )
 
+    configuration = dict(configuration)
+    if configuration.get("agentSubnetResourceId") is None:
+        configuration.pop("agentSubnetResourceId", None)
+
     configuration_keys = set(configuration)
     allowed_keys = _AGENT_HOSTING_REQUIRED_KEYS | _AGENT_HOSTING_OPTIONAL_KEYS
     missing_keys = sorted(_AGENT_HOSTING_REQUIRED_KEYS - configuration_keys)
