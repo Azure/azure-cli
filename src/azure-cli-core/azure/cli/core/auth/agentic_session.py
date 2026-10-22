@@ -26,6 +26,11 @@ logger = get_logger(__name__)
 COPILOT_AGENT_SESSION_ID = "COPILOT_AGENT_SESSION_ID"
 
 
+def is_agentic_session():
+    """Determine if we're in an agentic session based on the presence of COPILOT_AGENT_SESSION_ID."""
+    return os.environ.get(COPILOT_AGENT_SESSION_ID) is not None
+
+
 def build_agentic_session_params():
     """Read COPILOT_AGENT_SESSION_ID and build the agentic claims challenge.
 
