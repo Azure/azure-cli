@@ -13,6 +13,7 @@ from ._format import (configstore_credential_format,
                       configstore_output_format,
                       keyvalue_entry_format,
                       featureflag_entry_format,
+                      enhanced_featureflag_entry_format,
                       featurefilter_entry_format,
                       deleted_configstore_output_format,
                       configstore_replica_output_format,
@@ -61,6 +62,11 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.appconfig.network_security_perimeter#{}',
         table_transformer=configstore_nsp_output_format,
         client_factory=cf_nsp_configurations
+    )
+
+    configstore_enhanced_featureflag_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.enhanced_feature#{}',
+        table_transformer=enhanced_featureflag_entry_format
     )
 
     def get_custom_sdk(custom_module, client_factory, table_transformer):
@@ -140,6 +146,16 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_filter')
         g.custom_show_command('show', 'show_filter')
         g.custom_command('list', 'list_filter')
+
+    # Enhanced FeatureManagement Commands
+    with self.command_group('appconfig enhanced-feature-flag',
+                            custom_command_type=configstore_enhanced_featureflag_util) as g:
+        g.custom_command('set', 'set_feature')
+        g.custom_command('delete', 'delete_feature')
+        g.custom_show_command('show', 'show_feature')
+        g.custom_command('list', 'list_feature')
+        g.custom_command('enable', 'enable_feature')
+        g.custom_command('disable', 'disable_feature')
 
     # Snapshot Commands
     with self.command_group('appconfig snapshot', configstore_snapshot_util) as g:
