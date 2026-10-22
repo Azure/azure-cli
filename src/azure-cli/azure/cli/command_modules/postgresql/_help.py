@@ -943,7 +943,7 @@ examples:
 helps['postgres flexible-server upgrade'] = """
 type: command
 short-summary: Upgrade the major version of a flexible server.
-long-summary: Supports flexible servers, including elastic clusters.
+long-summary: Supports flexible servers, including elastic clusters. The --validate-only parameter is not supported for elastic clusters.
 examples:
   - name: Upgrade server 'testserver' to PostgreSQL major version 19.
     text: az postgres flexible-server upgrade -g testgroup -n testserver -v 19

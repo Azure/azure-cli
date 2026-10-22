@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 from knack.util import CLIError
 
 from azure.cli.command_modules.postgresql.commands import upgrade_commands
+from azure.cli.core.azclierror import ValidationError
 
 
 class UpgradeCommandsTest(unittest.TestCase):
@@ -51,7 +52,7 @@ class UpgradeCommandsTest(unittest.TestCase):
             with self.subTest(cluster=cluster):
                 self.server.cluster = cluster
                 self.client.begin_update.reset_mock()
-                result = self._upgrade(yes=True)
+                result = self._upgrade(yes=True, validate=False)
 
                 self.client.begin_update.assert_called_once_with(
                     resource_group_name='test-rg',
@@ -60,23 +61,40 @@ class UpgradeCommandsTest(unittest.TestCase):
                 )
                 self.assertIs(result, self.resolve_poller.return_value)
         self.confirmation.assert_not_called()
+        self.server_factory.assert_not_called()
 
-    def test_postgres_upgrade_elastic_cluster_validate_only(self):
+    def test_postgres_upgrade_elastic_cluster_rejects_validate_only(self):
+        with self.assertRaises(ValidationError) as error:
+            self._upgrade(validate=True)
+
+        self.assertEqual(str(error.exception), 'Elastic cluster does not currently support this operation.')
+        self.client.begin_start_major_version_upgrade_precheck.assert_not_called()
+        self.precheck.assert_not_called()
+        self.client.begin_update.assert_not_called()
+        self.confirmation.assert_not_called()
+
+    def test_postgres_upgrade_regular_server_validate_only(self):
         self.resolve_poller.return_value = {'name': 'precheck-id'}
 
-        result = self._upgrade(validate=True)
+        for cluster in (SimpleNamespace(cluster_size=0), None):
+            with self.subTest(cluster=cluster):
+                self.server.cluster = cluster
+                self.client.begin_start_major_version_upgrade_precheck.reset_mock()
+                self.precheck.return_value.get.reset_mock()
 
-        self.client.begin_start_major_version_upgrade_precheck.assert_called_once_with(
-            resource_group_name='test-rg',
-            server_name='test-server',
-            body={'targetVersion': '17'},
-        )
-        self.precheck.return_value.get.assert_called_once_with(
-            resource_group_name='test-rg',
-            server_name='test-server',
-            precheck_validation_id='precheck-id',
-        )
-        self.assertIs(result, self.precheck.return_value.get.return_value)
+                result = self._upgrade(validate=True)
+
+                self.client.begin_start_major_version_upgrade_precheck.assert_called_once_with(
+                    resource_group_name='test-rg',
+                    server_name='test-server',
+                    body={'targetVersion': '17'},
+                )
+                self.precheck.return_value.get.assert_called_once_with(
+                    resource_group_name='test-rg',
+                    server_name='test-server',
+                    precheck_validation_id='precheck-id',
+                )
+                self.assertIs(result, self.precheck.return_value.get.return_value)
         self.client.begin_update.assert_not_called()
         self.confirmation.assert_not_called()
 
