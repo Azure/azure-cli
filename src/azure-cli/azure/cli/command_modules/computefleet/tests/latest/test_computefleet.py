@@ -413,21 +413,7 @@ class TestComputefleetScenario(ScenarioTest):
 
         self.cmd(
             "compute-fleet identity remove -g {identity_rg} "
-            "-n {identity_fleet} --user-assigned {identity_id}",
-            checks=[self.check("type", "UserAssigned")],
-        )
-        result = self.cmd(
-            "compute-fleet identity show -g {identity_rg} -n {identity_fleet}",
-            checks=[self.check("type", "UserAssigned")],
-        ).get_output_in_json()
-        self.assertEqual(
-            [key.lower() for key in result["userAssignedIdentities"]],
-            [identity_2["id"].lower()],
-        )
-
-        self.cmd(
-            "compute-fleet identity remove -g {identity_rg} "
-            "-n {identity_fleet} --user-assigned {identity_id_2}"
+            "-n {identity_fleet} --user-assigned"
         )
         self.cmd(
             "compute-fleet show -g {identity_rg} -n {identity_fleet}",

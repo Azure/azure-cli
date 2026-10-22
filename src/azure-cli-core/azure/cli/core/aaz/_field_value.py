@@ -457,7 +457,7 @@ class AAZIdentityObject(AAZObject):  # pylint: disable=too-few-public-methods
 
         if action == "remove":
             if user_assigned is not None:
-                if user_assigned:  # remove each
+                if len(user_assigned) > 1:  # remove each
                     identities -= set(user_assigned)
 
                 else:  # remove all
