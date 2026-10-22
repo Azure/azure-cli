@@ -11867,6 +11867,43 @@ spec:
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus3')
+    def test_aks_nodepool_add_with_managed_gpu(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': self.create_random_name('cliakstest', 16),
+            'node_pool_name': self.create_random_name('gpu', 6),
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+        self.cmd(
+            'aks create --resource-group {resource_group} --name {name} '
+            '--node-count 1 --ssh-key-value {ssh_key_value}',
+            checks=[self.check('provisioningState', 'Succeeded')],
+        )
+        self.cmd(
+            'aks nodepool add --resource-group {resource_group} --cluster-name {name} '
+            '--name {node_pool_name} --node-vm-size Standard_NC4as_T4_v3 '
+            '--node-count 1 --enable-managed-gpu',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('gpuProfile.driver', 'Install'),
+                self.check('gpuProfile.nvidia.managementMode', 'Managed'),
+            ],
+        )
+        self.cmd(
+            'aks nodepool update --resource-group {resource_group} --cluster-name {name} '
+            '--name {node_pool_name} --tags purpose=managed-gpu-test',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('gpuProfile.driver', 'Install'),
+                self.check('gpuProfile.nvidia.managementMode', 'Managed'),
+                self.check('tags.purpose', 'managed-gpu-test'),
+            ],
+        )
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_with_overlay_network_plugin_mode(self, resource_group, resource_group_location):

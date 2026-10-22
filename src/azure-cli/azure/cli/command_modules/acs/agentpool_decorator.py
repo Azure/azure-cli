@@ -17,6 +17,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
     CONST_DEFAULT_VMS_VM_SIZE,
     CONST_DEFAULT_WINDOWS_VMS_VM_SIZE,
+    CONST_GPU_DRIVER_INSTALL,
+    CONST_GPU_DRIVER_NONE,
+    CONST_GPU_MANAGEMENT_MODE_MANAGED,
     CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
@@ -1880,6 +1883,25 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_gpu_driver()
 
+    def get_enable_managed_gpu(self) -> Union[bool, None]:
+        """Return Managed GPU enablement, preserving an attached profile during creation.
+
+        An omitted argument returns None unless the command supplies a default or the
+        attached creation profile already specifies a management mode.
+        """
+        enable_managed_gpu = self.raw_param.get("enable_managed_gpu")
+        if (
+            self.decorator_mode == DecoratorMode.CREATE and
+            self.agentpool and
+            self.agentpool.gpu_profile and
+            self.agentpool.gpu_profile.nvidia and
+            self.agentpool.gpu_profile.nvidia.management_mode is not None
+        ):
+            enable_managed_gpu = (
+                self.agentpool.gpu_profile.nvidia.management_mode == CONST_GPU_MANAGEMENT_MODE_MANAGED
+            )
+        return enable_managed_gpu
+
     def get_gateway_prefix_size(self) -> Union[int, None]:
         """Obtain the value of gateway_prefix_size.
 
@@ -2403,18 +2425,35 @@ class AKSAgentPoolAddDecorator:
         return agentpool
 
     def set_up_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
-        """Set up gpu profile for the AgentPool object.
+        """Configure GPU drivers and Managed GPU without replacing existing GPU settings.
+
+        Managed GPU requires AKS driver installation. Reject a conflicting driver option
+        before changing the profile.
 
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 
         gpu_driver = self.context.get_gpu_driver()
+        enable_managed_gpu = self.context.get_enable_managed_gpu()
 
-        # Construct AgentPoolGPUProfile if one of the fields has been set
-        if gpu_driver:
-            agentpool.gpu_profile = self.models.GPUProfile()
+        if enable_managed_gpu:
+            if gpu_driver is not None and gpu_driver.lower() == CONST_GPU_DRIVER_NONE.lower():
+                raise MutuallyExclusiveArgumentError(
+                    "Managed GPU requires GPU driver installation. "
+                    "Remove --gpu-driver None or set --enable-managed-gpu false."
+                )
+            gpu_driver = CONST_GPU_DRIVER_INSTALL
+
+        if gpu_driver is not None:
+            if agentpool.gpu_profile is None:
+                agentpool.gpu_profile = self.models.GPUProfile()
             agentpool.gpu_profile.driver = gpu_driver
+
+        if enable_managed_gpu:
+            if agentpool.gpu_profile.nvidia is None:
+                agentpool.gpu_profile.nvidia = self.models.NvidiaGPUProfile()
+            agentpool.gpu_profile.nvidia.management_mode = CONST_GPU_MANAGEMENT_MODE_MANAGED
 
         return agentpool
 
@@ -3014,13 +3053,15 @@ class AKSAgentPoolUpdateDecorator:
         return agentpool
 
     def update_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Update the requested GPU driver setting and preserve the rest of the GPU profile."""
         self._ensure_agentpool(agentpool)
 
         gpu_driver = self.context.get_gpu_driver()
 
-        # Construct AgentPoolGPUProfile if one of the fields has been set
-        if gpu_driver:
-            agentpool.gpu_profile = self.models.GPUProfile()
+        if gpu_driver is not None:
+            # Replacing the profile would discard the immutable NVIDIA management mode.
+            if agentpool.gpu_profile is None:
+                agentpool.gpu_profile = self.models.GPUProfile()
             agentpool.gpu_profile.driver = gpu_driver
 
         return agentpool

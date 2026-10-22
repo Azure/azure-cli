@@ -3595,6 +3595,7 @@ def aks_agentpool_add(
     if_none_match=None,
     # gpu driver
     gpu_driver=None,
+    enable_managed_gpu=False,
     # static egress gateway - gateway-mode pool
     gateway_prefix_size=None,
     # local DNS
