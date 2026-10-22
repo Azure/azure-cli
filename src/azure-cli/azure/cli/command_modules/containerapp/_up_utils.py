@@ -976,6 +976,14 @@ def _get_registry_details(cmd, app: "ContainerApp", source):
         parsed = urlparse(app.registry_server)
         registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
         if app.registry_user is None or app.registry_pass is None:
+            acr_suffix = cmd.cli_ctx.cloud.suffixes.acr_login_server_endpoint
+            server = app.registry_server.lower()
+            if not server.endswith(acr_suffix) or "." in server[:-len(acr_suffix)]:
+                raise ValidationError(
+                    f"Registry server '{app.registry_server}' is not an Azure Container Registry. Use "
+                    "--registry-server, or pass --registry-username and --registry-password."
+                )
+            registry_name = server[:-len(acr_suffix)]
             registry_rg = _set_acr_creds(cmd, app, registry_name)
         else:
             registry_rg = _get_acr_rg(app)
