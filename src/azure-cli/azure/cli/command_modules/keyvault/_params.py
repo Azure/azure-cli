@@ -159,7 +159,9 @@ def load_arguments(self, _):
                    help='[HSM Only] Administrator role for data plane operations for Managed HSM. '
                         'It accepts a space separated list of OIDs that will be assigned.')
         c.argument('sku', help='Required. SKU details. Allowed values for Vault: premium, standard. Default: standard.'
-                               ' Allowed values for HSM: Standard_B1, Custom_B32, Custom_B6, Custom_C42, Custom_C10. Default: Standard_B1')
+                               ' Allowed values for HSM: Standard_B1, Standard_B1v2, Standard_B5v2, Standard_B10v2, '
+                               'Standard_B15v2, Standard_B20v2, Custom_B32, Custom_B6, Custom_C42, Custom_C10. '
+                               'Default: Standard_B1')
         c.argument('no_self_perms', arg_type=get_three_state_flag(),
                    help='[Vault Only] Don\'t add permissions for the current user/service principal in the new vault.')
         c.argument('location', validator=get_default_location_from_resource_group)
