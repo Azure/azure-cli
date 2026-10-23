@@ -2215,6 +2215,38 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_gpu_driver(self):
         self.common_get_gpu_driver()
 
+    def test_get_enable_managed_gpu(self):
+        for value in (None, False, True):
+            with self.subTest(value=value):
+                ctx = AKSAgentPoolContext(
+                    self.cmd,
+                    AKSAgentPoolParamDict({"enable_managed_gpu": value}),
+                    self.models,
+                    DecoratorMode.CREATE,
+                    self.agentpool_decorator_mode,
+                )
+                self.assertEqual(ctx.get_enable_managed_gpu(), value)
+                agentpool = self.create_initialized_agentpool_instance()
+                ctx.attach_agentpool(agentpool)
+                self.assertEqual(ctx.get_enable_managed_gpu(), value)
+
+        for mode, expected in (("Managed", True), ("Unmanaged", False)):
+            with self.subTest(mode=mode):
+                ctx = AKSAgentPoolContext(
+                    self.cmd,
+                    AKSAgentPoolParamDict({"enable_managed_gpu": None}),
+                    self.models,
+                    DecoratorMode.CREATE,
+                    self.agentpool_decorator_mode,
+                )
+                agentpool = self.create_initialized_agentpool_instance(
+                    gpu_profile=self.models.GPUProfile(
+                        nvidia=self.models.NvidiaGPUProfile(management_mode=mode)
+                    )
+                )
+                ctx.attach_agentpool(agentpool)
+                self.assertEqual(ctx.get_enable_managed_gpu(), expected)
+
     def test_get_gateway_prefix_size(self):
         self.common_get_gateway_prefix_size()
 
@@ -3224,6 +3256,69 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
     def test_set_up_gpu_profile(self):
         self.common_set_up_gpu_profile()
+
+    def test_set_up_gpu_profile_with_managed_gpu(self):
+        for driver in (None, "Install", "None"):
+            with self.subTest(driver=driver):
+                dec = AKSAgentPoolAddDecorator(
+                    self.cmd,
+                    self.client,
+                    {"enable_managed_gpu": True, "gpu_driver": driver},
+                    self.resource_type,
+                    self.agentpool_decorator_mode,
+                )
+                with self.assertRaises(CLIInternalError):
+                    dec.set_up_gpu_profile(None)
+                agentpool = self.create_initialized_agentpool_instance()
+                dec.context.attach_agentpool(agentpool)
+
+                self.assertIs(dec.set_up_gpu_profile(agentpool), agentpool)
+                self.assertEqual(
+                    agentpool.gpu_profile.as_dict(),
+                    {"driver": "Install", "nvidia": {"managementMode": "Managed"}},
+                )
+
+    def test_set_up_gpu_profile_without_managed_gpu(self):
+        for enabled in (None, False):
+            for driver in (None, "Install", "None"):
+                with self.subTest(enabled=enabled, driver=driver):
+                    dec = AKSAgentPoolAddDecorator(
+                        self.cmd,
+                        self.client,
+                        {"enable_managed_gpu": enabled, "gpu_driver": driver},
+                        self.resource_type,
+                        self.agentpool_decorator_mode,
+                    )
+                    agentpool = self.create_initialized_agentpool_instance()
+                    dec.context.attach_agentpool(agentpool)
+                    dec.set_up_gpu_profile(agentpool)
+
+                    if driver is None:
+                        self.assertIsNone(agentpool.gpu_profile)
+                    else:
+                        self.assertEqual(agentpool.gpu_profile.as_dict(), {"driver": driver})
+
+    def test_set_up_gpu_profile_preserves_nvidia_profile(self):
+        dec = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"gpu_driver": "Install"},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        nvidia = self.models.NvidiaGPUProfile(management_mode="Managed")
+        gpu_profile = self.models.GPUProfile(nvidia=nvidia)
+        agentpool = self.create_initialized_agentpool_instance(gpu_profile=gpu_profile)
+        dec.context.attach_agentpool(agentpool)
+
+        dec.set_up_gpu_profile(agentpool)
+
+        self.assertIs(agentpool.gpu_profile, gpu_profile)
+        self.assertIs(agentpool.gpu_profile.nvidia, nvidia)
+        self.assertEqual(
+            agentpool.gpu_profile.as_dict(),
+            {"driver": "Install", "nvidia": {"managementMode": "Managed"}},
+        )
 
     def test_set_up_artifact_streaming(self):
         self.common_set_up_artifact_streaming()
