@@ -196,7 +196,9 @@ class CacheListPeeringPassphrase(_ListPeeringPassphrase):
 
 # endregion
 
-#region Volume Replication
+# region Volume Replication
+
+
 class VolumeReplicationPeerExternalCluster(_PeerExternalCluster):
     def _output(self, *args, **kwargs):
         # External-cluster peering requires the returned passphrase.
@@ -206,7 +208,7 @@ class VolumeReplicationPeerExternalCluster(_PeerExternalCluster):
             secret_hidden=False,
         )
 
-#endregion
+# endregion
 
 
 # region Pool
