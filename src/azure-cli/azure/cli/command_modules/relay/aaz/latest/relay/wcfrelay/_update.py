@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2017-04-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.relay/namespaces/{}/wcfrelays/{}", "2017-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.relay/namespaces/{}/wcfrelays/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -137,7 +137,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -165,7 +165,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -227,7 +227,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -255,7 +255,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -340,8 +340,10 @@ class _UpdateHelper:
     def _build_schema_wcf_relay_read(cls, _schema):
         if cls._schema_wcf_relay_read is not None:
             _schema.id = cls._schema_wcf_relay_read.id
+            _schema.location = cls._schema_wcf_relay_read.location
             _schema.name = cls._schema_wcf_relay_read.name
             _schema.properties = cls._schema_wcf_relay_read.properties
+            _schema.system_data = cls._schema_wcf_relay_read.system_data
             _schema.type = cls._schema_wcf_relay_read.type
             return
 
@@ -351,11 +353,18 @@ class _UpdateHelper:
         wcf_relay_read.id = AAZStrType(
             flags={"read_only": True},
         )
+        wcf_relay_read.location = AAZStrType(
+            flags={"read_only": True},
+        )
         wcf_relay_read.name = AAZStrType(
             flags={"read_only": True},
         )
         wcf_relay_read.properties = AAZObjectType(
             flags={"client_flatten": True},
+        )
+        wcf_relay_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
         )
         wcf_relay_read.type = AAZStrType(
             flags={"read_only": True},
@@ -391,9 +400,31 @@ class _UpdateHelper:
             serialized_name="userMetadata",
         )
 
+        system_data = _schema_wcf_relay_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
         _schema.id = cls._schema_wcf_relay_read.id
+        _schema.location = cls._schema_wcf_relay_read.location
         _schema.name = cls._schema_wcf_relay_read.name
         _schema.properties = cls._schema_wcf_relay_read.properties
+        _schema.system_data = cls._schema_wcf_relay_read.system_data
         _schema.type = cls._schema_wcf_relay_read.type
 
 
