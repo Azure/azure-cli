@@ -3,7 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import base64
+from datetime import datetime, timedelta, timezone
+import json
 import unittest
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
 from knack.util import CLIError
 from azure.cli.core.azclierror import ValidationError
 from azure.core.exceptions import HttpResponseError
@@ -18,6 +25,7 @@ ADLOCATION = "northeurope"
 
 
 class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_account(self):
         self.kwargs.update({
@@ -396,3 +404,97 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
             self.cmd("az netappfiles account change-key-vault -g {rg} -a {acc2_name} --key-vault-uri {keyVaultUri} --key-name {keyName} --keyvault-resource-id {keyVaultResourceId} --key-vault-private-endpoints [0].private-endpoint-id={privateEndpointId} [0].virtual-network-id={privateEndpointId}  --yes")
         self.assertIn('AzureKeyVaultEncryptionNotConfigured', str(
             cm.exception))
+
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
+    def test_create_account_ldap_configuration(self):
+        identity_name = self.create_random_name(prefix='cli-identity-', length=24)
+        self.kwargs.update({
+            'identity_name': identity_name,
+            'loc': LOCATION,
+            'acc_name': self.create_random_name(prefix='cli-acc-', length=24),
+            'dns_servers': '10.10.10.10',
+            'ldap_servers': '10.10.10.10',
+            'domain': 'test.com',
+            'secure_ldap_type': 'LdapOverTLS',
+            'group_dn': 'cn=groups,cn=accounts,dc=test,dc=com',
+            'ldap_port': 1234,
+            'user_dn': 'cn=users,cn=accounts,dc=test,dc=com',
+            'bind_authentication_level': 'Simple',
+            'bind_dn': 'cn=users,cn=accounts,dc=test,dc=com',
+            'bind_password_akv_secret_name': 'abcd',
+            'bind_password_akv_uri': 'https://my-key-vault.managedhsm.azure.net',
+            'net_group_dn': 'cn=users,cn=accounts,dc=test,dc=com',
+            'identity_type': 'UserAssigned',
+            'account_subscription_id': self.get_subscription_id(),
+            'server_ca_certificate': self._generate_ldap_ca_certificate(),
+        })
+        self.kwargs['bind_password_akv_user_identity'] = (
+            '/subscriptions/{account_subscription_id}/resourceGroups/{rg}/'
+            'providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identity_name}'
+        ).format(**self.kwargs)
+        self.kwargs['user_assigned_identities'] = "'{}'={{}}".format(
+            self.kwargs['bind_password_akv_user_identity'])
+        account_id = (
+            '/subscriptions/{account_subscription_id}/resourceGroups/{rg}/'
+            'providers/Microsoft.NetApp/netAppAccounts/{acc_name}'
+        ).format(**self.kwargs)
+        identity_error_response = json.dumps({
+            'error': {
+                'code': 'BadRequest',
+                'message': "Resource '{}' was not found.".format(self.kwargs['bind_password_akv_user_identity']),
+            },
+        }, separators=(',', ':'))
+        expected_message = (
+            "Identity operation for resource '{}' failed with error 'Failed to perform resource identity "
+            "operation. Status: 'BadRequest'. Response: '{}'.'."
+        ).format(account_id, identity_error_response)
+
+        with self.assertRaises(HttpResponseError) as cm:
+            self.cmd(
+                'az netappfiles account create -g {rg} --name {acc_name} -l {loc} '
+                '--dns-servers {dns_servers} --ldap-servers {ldap_servers} --domain {domain} '
+                '--secure-ldap-type {secure_ldap_type} --server-ca-certificate "{server_ca_certificate}" '
+                '--group-dn "{group_dn}" --ldap-port {ldap_port} --user-dn "{user_dn}" '
+                '--bind-authentication-level {bind_authentication_level} --bind-dn "{bind_dn}" '
+                '--bind-password-akv-secret-name {bind_password_akv_secret_name} '
+                '--bind-password-akv-uri {bind_password_akv_uri} '
+                '--bind-password-akv-user-identity "{bind_password_akv_user_identity}" '
+                '--net-group-dn "{net_group_dn}" --identity-type {identity_type} '
+                '--user-assigned-identities "{user_assigned_identities}"'
+            )
+
+        error = str(cm.exception)
+        self.assertIn('(FailedIdentityOperation)', error)
+        self.assertIn('Code: FailedIdentityOperation', error)
+        # Azure may normalize resource ID casing in the nested identity error.
+        self.assertIn(expected_message.casefold(), error.casefold())
+
+    @staticmethod
+    def _generate_ldap_ca_certificate():
+        """Return a base64-encoded PEM CA certificate without its private key."""
+        key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        subject = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'CLI LDAP Test CA')])
+        now = datetime.now(timezone.utc)
+        certificate = (
+            x509.CertificateBuilder()
+            .subject_name(subject)
+            .issuer_name(subject)
+            .public_key(key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(now - timedelta(minutes=5))
+            .not_valid_after(now + timedelta(days=365))
+            .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+            .add_extension(x509.KeyUsage(
+                digital_signature=False,
+                content_commitment=False,
+                key_encipherment=False,
+                data_encipherment=False,
+                key_agreement=False,
+                key_cert_sign=True,
+                crl_sign=True,
+                encipher_only=False,
+                decipher_only=False,
+            ), critical=True)
+            .sign(key, hashes.SHA256())
+        )
+        return base64.b64encode(certificate.public_bytes(serialization.Encoding.PEM)).decode('ascii')
