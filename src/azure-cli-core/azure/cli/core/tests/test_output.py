@@ -143,6 +143,18 @@ class TestOutputNewline(unittest.TestCase):
         warning.assert_called_once()
         self.assertEqual(b'a\r\r\nb\r\nc\r\n', self._written(self.cli.out_file))
 
+    def test_apply_output_newline_does_not_raise_for_closed_stream(self):
+        from azure.cli.core._output import apply_output_newline
+        os.environ['AZURE_CORE_OUTPUT_NEWLINE'] = 'lf'
+        closed = self._windows_like_stream()
+        closed.close()
+        self.cli.out_file = closed
+        stdout = self._windows_like_stream()
+        with mock.patch('sys.stdout', stdout):
+            apply_output_newline(self.cli)
+        # The other stream is still reconfigured.
+        self.assertEqual(b'a\r\nb\nc\n', self._written(stdout))
+
     def test_apply_output_newline_skips_streams_without_reconfigure(self):
         from io import StringIO
         from azure.cli.core._output import apply_output_newline

@@ -75,4 +75,8 @@ def apply_output_newline(cli_ctx, **_):
         if stream is not None and hasattr(stream, 'reconfigure') and all(stream is not s for s in streams):
             streams.append(stream)
     for stream in streams:
-        stream.reconfigure(newline=newline)
+        try:
+            stream.reconfigure(newline=newline)
+        except (OSError, ValueError) as ex:
+            # Line endings are cosmetic, so never fail the command (e.g. stdout closed or detached).
+            logger.debug("Unable to set stdout newline to %r: %s", newline, ex)
