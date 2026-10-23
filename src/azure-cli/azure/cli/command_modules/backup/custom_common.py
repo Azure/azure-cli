@@ -20,6 +20,7 @@ fabric_name = "Azure"
 
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
+                     'SQLInstance': 'SQLInstance',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SQLDataBase': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
@@ -29,6 +30,7 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'AzureFileShare': 'AzureFileShare'}
 
 workload_bmt_map = {'SQLDataBase': 'AzureWorkload',
+                    'SQLInstance': 'AzureWorkload',
                     'SAPHanaDatabase': 'AzureWorkload',
                     'SAPHanaDBInstance': 'AzureWorkload',
                     'SAPAseDatabase': 'AzureWorkload',

@@ -43,7 +43,7 @@ class AfsManagedIdentityTest(unittest.TestCase):
             cmd, client, "vault", "rg", "MSSQL", resource_id="resource-id")
 
         register_wl_container.assert_called_once_with(
-            cmd, client, "vault", "rg", "MSSQL", "resource-id", "AzureWorkload")
+            cmd, client, "vault", "rg", "MSSQL", "resource-id", "AzureWorkload", None)
 
     def test_validate_identity_parameters(self):
         custom_afs._validate_afs_identity_parameters(None, None, None)

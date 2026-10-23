@@ -190,7 +190,8 @@ def show_recovery_point_with_hybrid_properties(cmd, client, resource_group_name,
 def list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
                          backup_management_type=None, workload_type=None, start_date=None, end_date=None,
                          use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
-                         recommended_for_archive=None):
+                         recommended_for_archive=None, restore_point_query_type=None,
+                         get_latest_recovery_point_only=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
@@ -199,6 +200,10 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
 
     if isinstance(item, list):
         raise ValidationError("Multiple items found. Please give native names instead.")
+
+    if (item.properties.backup_management_type.lower() != "azureworkload" and
+            (restore_point_query_type is not None or get_latest_recovery_point_only is not None)):
+        raise ArgumentUsageError("Recovery-point query type and latest-only filters require AzureWorkload.")
 
     if (use_secondary_region and (is_ready_for_move is not None or target_tier is not None or
                                   recommended_for_archive is not None)):
@@ -218,7 +223,9 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
         return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item,
                                                  start_date, end_date, is_ready_for_move=is_ready_for_move,
                                                  target_tier=target_tier, use_secondary_region=use_secondary_region,
-                                                 tier=tier, recommended_for_archive=recommended_for_archive)
+                                                 tier=tier, recommended_for_archive=recommended_for_archive,
+                                                 restore_point_query_type=restore_point_query_type,
+                                                 get_latest_recovery_point_only=get_latest_recovery_point_only)
 
     return None
 
@@ -227,17 +234,19 @@ def list_recovery_points_with_hybrid_properties(
         cmd, client, resource_group_name, vault_name, container_name, item_name,
         backup_management_type=None, workload_type=None, start_date=None, end_date=None,
         use_secondary_region=None, is_ready_for_move=None, target_tier=None, tier=None,
-        recommended_for_archive=None):
+        recommended_for_archive=None, restore_point_query_type=None, get_latest_recovery_point_only=None):
     recovery_points = list_recovery_points(
         cmd, client, resource_group_name, vault_name, container_name, item_name,
         backup_management_type, workload_type, start_date, end_date, use_secondary_region,
-        is_ready_for_move, target_tier, tier, recommended_for_archive)
+        is_ready_for_move, target_tier, tier, recommended_for_archive,
+        restore_point_query_type, get_latest_recovery_point_only)
     return custom_help.serialize_hybrid_model(recovery_points)
 
 
 def show_log_chain_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
                                    backup_management_type=None, workload_type=None, start_date=None, end_date=None,
-                                   use_secondary_region=None):
+                                   use_secondary_region=None, recovery_mode=None, base_snapshot_recovery_point_id=None,
+                                   base_recovery_point_datasource_id=None):
 
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
@@ -246,6 +255,18 @@ def show_log_chain_recovery_points(cmd, client, resource_group_name, vault_name,
 
     if isinstance(item, list):
         raise ValidationError("Multiple items found. Please give native names instead.")
+
+    snapshot_filters = (recovery_mode, base_snapshot_recovery_point_id, base_recovery_point_datasource_id)
+    if any(value is not None for value in snapshot_filters):
+        if not all(snapshot_filters):
+            raise RequiredArgumentMissingError(
+                "Provide --recovery-mode, --base-snapshot-recovery-point-id and "
+                "--base-recovery-point-datasource-id together.")
+        if (item.properties.backup_management_type.lower() != "azureworkload" or
+                item.properties.workload_type.lower() != "sqldatabase"):
+            raise ArgumentUsageError("Snapshot log ranges must be queried on a SQL database protected item.")
+        if use_secondary_region:
+            raise ArgumentUsageError("Snapshot log ranges are not supported in the secondary region.")
 
     if item.properties.backup_management_type.lower() == "azureiaasvm":
         return custom.list_recovery_points(cmd, client, resource_group_name, vault_name, item, start_date, end_date,
@@ -256,8 +277,12 @@ def show_log_chain_recovery_points(cmd, client, resource_group_name, vault_name,
                                                end_date, use_secondary_region)
 
     if item.properties.backup_management_type.lower() == "azureworkload":
-        return custom_wl.list_wl_recovery_points(cmd, client, resource_group_name, vault_name, item,
-                                                 start_date, end_date, use_secondary_region=use_secondary_region)
+        recovery_points = custom_wl.list_wl_recovery_points(
+            cmd, client, resource_group_name, vault_name, item, start_date, end_date,
+            use_secondary_region=use_secondary_region, recovery_mode=recovery_mode,
+            base_snapshot_recovery_point_id=base_snapshot_recovery_point_id,
+            base_recovery_point_datasource_id=base_recovery_point_datasource_id)
+        return custom_help.serialize_hybrid_model(recovery_points)
     return None
 
 
@@ -486,16 +511,20 @@ def unregister_container(cmd, client, vault_name, resource_group_name, container
 
 
 def register_wl_container(cmd, client, vault_name, resource_group_name, workload_type, resource_id,
-                          backup_management_type="AzureWorkload"):
+                          backup_management_type="AzureWorkload", container_subscription_id=None):
     return custom_wl.register_wl_container(cmd, client, vault_name, resource_group_name, workload_type,
-                                           resource_id, backup_management_type)
+                                           resource_id, backup_management_type, container_subscription_id)
 
 
 def register_container(cmd, client, vault_name, resource_group_name, workload_type,
                        resource_id=None, backup_management_type="AzureWorkload",
                        storage_account=None, access_type=None,
-                       mi_system_assigned=None, mi_user_assigned=None, yes=False):
+                       mi_system_assigned=None, mi_user_assigned=None, yes=False,
+                       container_subscription_id=None):
     if backup_management_type.lower() == "azurestorage":
+        if container_subscription_id is not None:
+            raise ArgumentUsageError(
+                "--container-subscription-id is only supported with --backup-management-type AzureWorkload.")
         if workload_type is None or workload_type.lower() not in ["azurefiles", "azurefileshare"]:
             raise InvalidArgumentValueError(
                 "--workload-type AzureFileShare is required with --backup-management-type AzureStorage.")
@@ -526,7 +555,8 @@ def register_container(cmd, client, vault_name, resource_group_name, workload_ty
             "Azure Files managed identity arguments are only supported with "
             "--backup-management-type AzureStorage.")
     return register_wl_container(
-        cmd, client, vault_name, resource_group_name, workload_type, resource_id, backup_management_type)
+        cmd, client, vault_name, resource_group_name, workload_type, resource_id, backup_management_type,
+        container_subscription_id)
 
 
 def re_register_wl_container(cmd, client, vault_name, resource_group_name, workload_type, container_name,
@@ -559,7 +589,7 @@ def update_protection_for_vm(cmd, client, resource_group_name, vault_name, conta
 
 
 def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_name, protectable_item_type,
-                                   protectable_item_name, server_name, workload_type):
+                                   protectable_item_name, server_name, workload_type, child_database_names=None):
     protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
     protectable_item = show_protectable_item(cmd, protectable_items_client, resource_group_name, vault_name,
                                              protectable_item_name, server_name, protectable_item_type, workload_type)
@@ -569,7 +599,7 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     custom_help.validate_policy(policy_object)
 
     return custom_wl.enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_object,
-                                                    protectable_item)
+                                                    protectable_item, child_database_names)
 
 
 def auto_enable_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_name, protectable_item_name,
@@ -731,7 +761,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                          target_server_name=None, workload_type=None, backup_management_type="AzureWorkload",
                          from_full_rp_name=None, filepath=None, target_container_name=None, target_resource_group=None,
                          target_vault_name=None, target_subscription_id=None, target_instance_name=None,
-                         attach_and_mount=None, identity_arm_id=None, snapshot_instance_resource_group=None):
+                         attach_and_mount=None, identity_arm_id=None, snapshot_instance_resource_group=None,
+                         recovery_mode=None, no_recovery_mode=False):
     target_subscription = get_subscription_id(cmd.cli_ctx)
     if target_subscription_id is not None:
         vault_csr_state = custom.get_vault_csr_state(vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name))
@@ -747,7 +778,9 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     target_vault_name = vault_name if target_vault_name is None else target_vault_name
     target_container_name = container_name if target_container_name is None else target_container_name
     target_item = None
-    if target_item_name is not None:
+    if (target_item_name is not None or
+            (restore_mode == 'AlternateWorkloadRestore' and
+             (recovery_mode is not None or workload_type == 'SQLInstance'))):
         protectable_items_client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
                                                            subscription_id=target_subscription).backup_protectable_items
         target_item = show_protectable_instance(
@@ -772,7 +805,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                                           from_full_rp_name, filepath, target_container, target_resource_group,
                                           target_vault_name, target_subscription, workload_type=workload_type,
                                           attach_and_mount=attach_and_mount, identity_arm_id=identity_arm_id,
-                                          snapshot_instance_resource_group=snapshot_instance_resource_group)
+                                          snapshot_instance_resource_group=snapshot_instance_resource_group,
+                                          recovery_mode=recovery_mode, no_recovery_mode=no_recovery_mode)
 
 
 def undelete_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,
