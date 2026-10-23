@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete a gallery image version.
+
+    :example: Permanently delete a gallery image version by bypassing soft delete.
+        az sig image-version delete --resource-group myResourceGroup --gallery-name myGalleryName --gallery-image-definition myGalleryImageName --gallery-image-version-name 1.0.0 --bypass-soft-delete true
     """
 
     _aaz_info = {
-        "version": "2024-03-03",
+        "version": "2026-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions/{}", "2024-03-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}/versions/{}", "2026-03-03"],
         ]
     }
 
@@ -47,21 +50,34 @@ class Delete(AAZCommand):
             help="The name of the gallery image definition in which the Image Version resides.",
             required=True,
             id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.gallery_image_version_name = AAZStrArg(
             options=["-e", "--gallery-image-version", "--gallery-image-version-name"],
             help="The name of the gallery image version to be deleted.",
             required=True,
             id_part="child_name_2",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         _args_schema.gallery_name = AAZStrArg(
             options=["-r", "--gallery-name"],
             help="The name of the Shared Image Gallery in which the Image Definition resides.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[^_\\W][\\w.-]{0,79}(?<![-.])$",
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
+        )
+        _args_schema.bypass_soft_delete = AAZBoolArg(
+            options=["--bypass-soft-delete"],
+            help="Specifies whether to bypass the gallery's soft-delete policy and permanently delete the gallery image version. If true, the version is not retained in the recycle bin and cannot be restored. If false or omitted, the version is soft-deleted when the gallery's soft-delete policy is enabled and permanently deleted when the policy is disabled.",
         )
         return cls._args_schema
 
@@ -90,7 +106,7 @@ class Delete(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -99,7 +115,7 @@ class Delete(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [204]:
@@ -108,7 +124,7 @@ class Delete(AAZCommand):
                     session,
                     self.on_204,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -159,7 +175,10 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-03",
+                    "bypassSoftDelete", self.ctx.args.bypass_soft_delete,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2026-03-03",
                     required=True,
                 ),
             }

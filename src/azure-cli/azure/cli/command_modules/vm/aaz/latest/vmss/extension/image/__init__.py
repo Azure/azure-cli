@@ -10,5 +10,3 @@
 
 from .__cmd_group import *
 from ._list_names import *
-from ._list_versions import *
-from ._show import *

@@ -25,12 +25,15 @@ class Update(AAZCommand):
 
     :example: Update a traffic manager profile.
         az network traffic-manager profile update -n MyTmProfile -g MyResourceGroup --status-code-ranges [{min:200,max:204}] --custom-headers  [{name:foo,value:doo},{name:test,value:best}]
+
+    :example: Set the record type on a traffic manager profile where it is not already set.
+        az network traffic-manager profile update -g MyResourceGroup -n MyTmProfile --record-type A
     """
 
     _aaz_info = {
-        "version": "2024-04-01-preview",
+        "version": "2026-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2024-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2026-09-01"],
         ]
     }
 
@@ -195,7 +198,7 @@ class Update(AAZCommand):
         _args_schema.record_type = AAZStrArg(
             options=["--record-type"],
             arg_group="Properties",
-            help="When record type is set, a traffic manager profile will allow only endpoints that match this type.",
+            help="When record type is set, a traffic manager profile will allow only endpoints that match this type. If it is not set, traffic manager profile will allow adding all types of endpoints. It is returned as null when this is not set.",
             nullable=True,
             enum={"A": "A", "AAAA": "AAAA", "CNAME": "CNAME"},
         )
@@ -286,7 +289,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-04-01-preview",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -369,7 +372,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-04-01-preview",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }

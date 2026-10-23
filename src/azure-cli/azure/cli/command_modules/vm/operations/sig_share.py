@@ -5,7 +5,7 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
 
-from azure.cli.core.aaz import register_command, AAZListArg, AAZStrArg
+from azure.cli.core.aaz import register_command, AAZListArg, AAZStrArg, has_value
 from azure.cli.core.azclierror import ArgumentUsageError
 from ..aaz.latest.sig.share import Update as _SigShareUpdate
 from ..aaz.latest.sig import Wait as _SigWait
@@ -203,11 +203,47 @@ class SigShareWait(_SigWait):
         az sig share wait --updated --resource-group MyResourceGroup --gallery-name Gallery
     """
 
+    _args_schema = None
+    _arguments_schema = None
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.gallery_name._help['short-summary'] = 'Gallery name.'
+
+        args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="The expand query option to apply on the operation.",
+            enum={"SharingProfile/Groups": "SharingProfile/Groups"},
+        )
+        args_schema.select = AAZStrArg(
+            options=["--select"],
+            help="The select expression to apply on the operation.",
+            enum={"Permissions": "Permissions"},
+        )
+
         args_schema.expand._registered = False
         args_schema.select._registered = False
 
         return args_schema
+
+    def pre_operations(self):
+        if not has_value(self.ctx.args.select):
+            self.ctx.args.select = 'Permissions'
+
+    class GalleriesGet(_SigWait.GalleriesGet):
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
+                **self.serialize_query_param(
+                    "$select", self.ctx.args.select,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2026-03-03",
+                    required=True,
+                ),
+            }
+            return parameters

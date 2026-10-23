@@ -67,6 +67,11 @@ CONST_GPU_INSTANCE_PROFILE_MIG7_G = "MIG7g"
 CONST_GPU_DRIVER_INSTALL = "Install"
 CONST_GPU_DRIVER_NONE = "None"
 
+# SSH Access Consts
+CONST_SSH_ACCESS_LOCALUSER = "localuser"
+CONST_SSH_ACCESS_DISABLED = "disabled"
+CONST_SSH_ACCESS_ENTRAID = "entraid"
+
 # consts for ManagedCluster
 # load balancer sku
 CONST_LOAD_BALANCER_SKU_BASIC = "basic"
@@ -87,6 +92,10 @@ CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING = "userDefinedRouting"
 CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY = "managedNATGateway"
 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY = "userAssignedNATGateway"
 CONST_OUTBOUND_TYPE_NONE = "none"
+
+# managed NAT gateway SKU
+CONST_NAT_GATEWAY_SKU_STANDARD = "Standard"
+CONST_NAT_GATEWAY_SKU_STANDARD_V2 = "StandardV2"
 
 # load balancer backend pool type
 CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP = "nodeIP"
@@ -160,6 +169,15 @@ CONST_MONITORING_ADDON_NAME = "omsagent"
 CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID = "logAnalyticsWorkspaceResourceID"
 CONST_MONITORING_USING_AAD_MSI_AUTH = "useAADAuth"
 
+# container network logs (azureMonitorProfile.containerInsights.containerNetworkLogs)
+CONST_CONTAINER_NETWORK_LOGS_ENABLED = "Enabled"
+CONST_CONTAINER_NETWORK_LOGS_DISABLED = "Disabled"
+# legacy omsagent addon config key, superseded by containerNetworkLogs on the Azure Monitor
+# profile path. Only read, to keep recognizing clusters onboarded before the switch.
+CONST_MONITORING_ENABLE_RETINA_NETWORK_FLAGS = "enableRetinaNetworkFlags"
+# server-side default for azureMonitorProfile.containerInsights.syslogPort
+CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT = 28330
+
 # virtual node
 CONST_VIRTUAL_NODE_ADDON_NAME = "aciConnector"
 CONST_VIRTUAL_NODE_SUBNET_NAME = "SubnetName"
@@ -203,6 +221,9 @@ CONST_ROTATION_POLL_INTERVAL = "rotationPollInterval"
 # azure keyvault kms
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC = "Public"
 CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE = "Private"
+
+# kms infrastructure encryption (platform-managed keys)
+CONST_KMS_INFRASTRUCTURE_ENCRYPTION_ENABLED = "Enabled"
 
 # app routing nginx config options
 CONST_WEB_APPLICATION_ROUTING_KEY_NAME = "ingress/webApplicationRouting"
