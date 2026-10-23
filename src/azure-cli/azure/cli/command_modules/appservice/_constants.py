@@ -20,6 +20,10 @@ ISOLATED_V4_SKUS = [
     'I1MV4', 'I2MV4', 'I3MV4', 'I4MV4', 'I5MV4'
 ]
 FUNCTIONS_VERSIONS = ['4']
+EGRESS_PROTOCOLS = ['Http', 'Postgres', 'Redis', 'Tds']
+EGRESS_AUTH_TYPES = ['Credential', 'ManagedIdentity']
+EGRESS_SOURCES = ['AppSettings', 'ConnectionStrings']
+EGRESS_ENABLED_STATES = ['Disabled', 'Enabled']
 LOGICAPPS_NODE_RUNTIME_VERSIONS = ['~14', '~16', '~18']
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
