@@ -187,7 +187,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.bind_authentication_level = AAZStrArg(
-            options=["--bind-authentication-level"],
+            options=["--bind-auth-level", "--bind-authentication-level"],
             arg_group="LdapConfiguration",
             help="The authentication level to use when binding to the LDAP server, defaults to Anonymous.",
             default="Anonymous",
