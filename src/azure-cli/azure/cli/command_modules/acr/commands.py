@@ -33,6 +33,7 @@ from ._format import (
 )
 from ._client_factory import (
     cf_acr_registries,
+    cf_acr_import,
     cf_acr_replications,
     cf_acr_webhooks,
     cf_acr_tasks,
@@ -69,7 +70,7 @@ def load_command_table(self, _):
 
     acr_import_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.import#{}',
-        client_factory=cf_acr_registries
+        client_factory=cf_acr_import
     )
 
     acr_policy_util = CliCommandType(
