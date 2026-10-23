@@ -372,12 +372,43 @@ def deployment_begin_create_or_update(
         model_format, model_name, model_version, model_source=None,
         sku_name=None, sku_capacity=None,
         scale_settings_scale_type=None, scale_settings_capacity=None,
-        spillover_deployment_name=None):
+        spillover_deployment_name=None,
+        organization_name=None, industry=None, country=None):
     """
     Create a deployment for Azure Cognitive Services account.
     """
+    provider_data = None
+    provider_arguments = {
+        '--organization-name': organization_name,
+        '--industry': industry,
+        '--country': country,
+    }
+    if any(value is not None for value in provider_arguments.values()):
+        for option, value in provider_arguments.items():
+            if value is None:
+                raise RequiredArgumentMissingError(
+                    f"Specify {option} together with --organization-name, --industry, and --country.")
+            if not value.strip():
+                raise InvalidArgumentValueError(f"{option} must not be empty or whitespace.")
+
+        import pycountry
+
+        try:
+            country_code = pycountry.countries.lookup(country.strip()).alpha_2
+        except LookupError as ex:
+            raise InvalidArgumentValueError(
+                "--country must be an ISO country name or code, such as 'United States' or 'US'.") from ex
+        provider_data = {
+            'organizationName': organization_name,
+            'industry': industry,
+            'countryCode': country_code,
+        }
+
     dpy = Deployment()
     dpy.properties = DeploymentProperties()
+    if provider_data is not None:
+        # The SDK has no typed property for this field yet; its mapping interface preserves it on the wire.
+        dpy.properties['modelProviderData'] = provider_data
     dpy.properties.model = DeploymentModel()
     dpy.properties.model.format = model_format
     dpy.properties.model.name = model_name

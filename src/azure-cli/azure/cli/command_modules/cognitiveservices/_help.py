@@ -332,10 +332,17 @@ helps[
 ] = """
 type: command
 short-summary: Create a deployment for Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: |
+  To deploy an Anthropic model, use an eligible Foundry account and supply --organization-name, --industry,
+  and --country together when provider onboarding is required. Use values for the real organization using
+  the model. Country names are converted to two-letter country codes before being sent to the service.
+  Existing provider onboarding can be reused by omitting all three arguments. Model availability,
+  Marketplace eligibility, terms, and quota requirements still apply.
 examples:
   - name: Create a deployment for Azure Cognitive Services account.
     text: az cognitiveservices account deployment create -g yuanyang-test-sdk -n yytest-oai --deployment-name dpy --model-name ada --model-version "1" --model-format OpenAI --sku-capacity 1 --sku-name "Standard"
+  - name: Create an Anthropic Claude deployment with organization information.
+    text: az cognitiveservices account deployment create -g myResourceGroup -n myFoundryAccount --deployment-name my-haiku --model-name claude-haiku-4-5 --model-version "2" --model-format Anthropic --sku-capacity 1 --sku-name GlobalStandard --organization-name Contoso --industry Law --country "United States"
 """
 
 helps[
