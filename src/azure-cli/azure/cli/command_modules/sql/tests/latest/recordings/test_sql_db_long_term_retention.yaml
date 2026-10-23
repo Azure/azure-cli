@@ -1,27 +1,27 @@
 interactions:
 - request:
-    body: '{"properties": {"timeBasedImmutability": "Disabled", "weeklyRetention":
-      "P1W", "monthlyRetention": "P1M", "yearlyRetention": "P2M", "weekOfYear": 12}}'
+    body: '{"properties": {"weekOfYear": "12", "weeklyRetention": "P1W", "timeBasedImmutability":
+      "Disabled", "yearlyRetention": "P2M", "monthlyRetention": "P1M"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql db ltr-policy set
       Connection:
       - keep-alive
       Content-Length:
-      - '150'
+      - '152'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -s -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
-        --time-based-immutability
+        --make-backups-immutable
       User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.13.7 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strehan-donotdelete-canaryeuap/providers/Microsoft.Sql/servers/testsvr-strehan-donotdelete1/databases/basicdb2/backupLongTermRetentionPolicies/default?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strehan-donotdelete-canaryeuap/providers/Microsoft.Sql/servers/testsvr-strehan-donotdelete1/databases/basicdb2/backupLongTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
       string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
@@ -34,7 +34,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 28 Aug 2025 00:05:32 GMT
+      - Mon, 19 Oct 2026 12:39:43 GMT
       expires:
       - '-1'
       pragma:
@@ -48,7 +48,7 @@ interactions:
       x-ms-failure-cause:
       - gateway
       x-msedge-ref:
-      - 'Ref A: DE6788A9DE704FEB86BC328EE8999456 Ref B: BY1AA1072319023 Ref C: 2025-08-28T00:05:32Z'
+      - 'Ref A: 7649A5100EB04B89A0F145385DC5EF57 Ref B: PNQ231110906042 Ref C: 2026-10-19T12:39:42Z'
     status:
       code: 404
       message: Not Found

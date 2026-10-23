@@ -6,8 +6,33 @@
 from azure.cli.core.util import CLIError
 from azure.cli.core.azclierror import InvalidArgumentValueError
 
+from ._util import build_sdk_model
+
 # Important note: if cmd validator exists, then individual param validators will not be
 # executed. See C:\git\azure-cli\env\lib\site-packages\knack\invocation.py `def _validation`
+
+
+def _is_model_field_required(model_type, name):
+    '''
+    Determine whether a model property is required. Msrest models expose a `_validation` map;
+    TypeSpec models declare required properties as non-Optional class annotations.
+    '''
+    import types
+    import typing
+
+    validation = getattr(model_type, '_validation', None)  # pylint: disable=protected-access
+    if validation is not None:
+        return bool(validation.get(name, {}).get('required', False))
+
+    for cls in model_type.__mro__:
+        # Accessing __annotations__ evaluates lazy annotations on Python 3.14+
+        annotations = getattr(cls, '__annotations__', {}) if name in getattr(cls, '__dict__', {}) else {}
+        if name in annotations:
+            annotation = annotations[name]
+            if typing.get_origin(annotation) in (typing.Union, types.UnionType):
+                return type(None) not in typing.get_args(annotation)
+            return True
+    return False
 
 
 def create_args_for_complex_type(arg_ctx, dest, model_type, arguments):
@@ -32,7 +57,7 @@ def create_args_for_complex_type(arg_ctx, dest, model_type, arguments):
             '''
             ns = vars(namespace)
             kwargs = {k: ns[k] for k in ns if k in set(expanded_arguments)}
-            setattr(namespace, assigned_arg, model_type(**kwargs))
+            setattr(namespace, assigned_arg, build_sdk_model(model_type, kwargs))
 
         return _expansion_validator_impl
 
@@ -42,10 +67,7 @@ def create_args_for_complex_type(arg_ctx, dest, model_type, arguments):
     parameter_docs = option_descriptions(model_type)
 
     for name in arguments:
-        # Get the validation map from the model type in order to determine
-        # whether the argument should be required
-        validation = model_type._validation.get(name, None)  # pylint: disable=protected-access
-        required = validation.get('required', False) if validation else False
+        required = _is_model_field_required(model_type, name)
 
         # Generate the command line argument name from the property name
         options_list = ['--' + name.replace('_', '-')]
