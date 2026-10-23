@@ -38,6 +38,19 @@ SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
 logger = get_logger(__name__)
 
 
+def get_warning_response_hook():
+    """Create an SDK response hook that emits each LRO warning once."""
+    displayed_warnings = set()
+
+    def _show_warning(response):
+        warning = response.http_response.headers.get('x-ms-warning')
+        if warning and warning not in displayed_warnings:
+            logger.warning('%s', warning)
+            displayed_warnings.add(warning)
+
+    return _show_warning
+
+
 def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     """Returns the ARM resource in the current subscription with resource_name.
     :param str resource_name: The name of resource
