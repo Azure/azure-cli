@@ -16,6 +16,8 @@ from azure.core.credentials import AccessToken
 from azure.core.pipeline.transport import HttpResponse, HttpTransport
 from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
 from azure.mgmt.recoveryservicesbackup import models
+from azure.mgmt.recoveryservicesbackup.passivestamp import RecoveryServicesBackupPassiveClient
+from azure.mgmt.recoveryservicesbackup.passivestamp import models as passive_models
 
 from azure.cli.command_modules.backup import _client_factory, custom_base, custom_common, custom_help, custom_wl
 from azure.cli.core.mock import DummyCli
@@ -374,6 +376,138 @@ class SqlInstanceTests(unittest.TestCase):
                 client, "rg", "vault", protected_item(), "OriginalWorkloadRestore",
                 "snapshot", None, None, None, None, "SnapshotAttachAndRecover", False, IDENTITY, "restore-rg")
 
+    def test_backup_snapshot_config_from_passive_sdk_metadata(self):
+        point = passive_models.RecoveryPointResource.deserialize(snapshot_point().as_dict())
+        self.assertIn("snapshotRecoveryPointInfo", point.properties.extended_info.additional_properties)
+        for workload in ["SQLInstance", "SQLDataBase"]:
+            for mode in ["SnapshotAttach", "SnapshotAttachAndRecover"]:
+                with self.subTest(workload=workload, mode=mode):
+                    client = Mock()
+                    client.get.return_value = point
+                    source = passive_models.ProtectedItemResource.deserialize(protected_item(workload).as_dict())
+                    config = custom_wl._get_sql_snapshot_recovery_config(
+                        client, "rg", "vault", source, "OriginalWorkloadRestore", "snapshot-rp",
+                        None, None, None, None, mode, False, IDENTITY, "restore-rg")
+                    self.assertEqual(["E:\\", "F:\\"],
+                                     [mapping["source_path"] for mapping in config["target_physical_path"]])
+
+    @patch.object(custom_wl, "_get_snapshot_identity")
+    @patch.object(custom_wl, "recovery_points_cf")
+    @patch.object(custom_wl, "recovery_points_crr_cf")
+    def test_backup_secondary_snapshot_restore_failures_do_not_use_primary(self, secondary, primary, identity):
+        config = self._snapshot_config("SQLInstance", "SnapshotAttachAndRecover")
+        args = (self.cmd, models.AzureWorkloadSQLRestoreRequest(), config, protected_item(), "rg", "vault")
+        secondary.return_value.get.return_value = passive_models.RecoveryPointResource.deserialize({
+            "name": "snapshot-rp", "properties": {"objectType": "AzureWorkloadSQLRecoveryPoint"}})
+        with self.assertRaisesRegex(InvalidArgumentValueError, "secondary-region recovery point"):
+            custom_wl._apply_sql_snapshot_restore(*args, use_secondary_region=True)
+        secondary.return_value.get.side_effect = AzureResponseError("secondary service failed")
+        with self.assertRaisesRegex(AzureResponseError, "secondary service failed"):
+            custom_wl._apply_sql_snapshot_restore(*args, use_secondary_region=True)
+        primary.assert_not_called()
+        identity.assert_not_called()
+
+    @patch.object(custom_wl, "recovery_points_crr_cf")
+    def test_backup_secondary_snapshot_pit_requires_base_snapshot(self, secondary):
+        config = self._snapshot_config("SQLDataBase", "SnapshotAttachAndRecover", "15-10-2026-12:00:00")
+        self.assertEqual("snapshot-rp", config.pop("base_snapshot_recovery_point_id"))
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "Regenerate the configuration"):
+            custom_wl._apply_sql_snapshot_restore(
+                self.cmd, models.AzureWorkloadSQLPointInTimeRestoreRequest(), config,
+                protected_item("SQLDataBase"), "rg", "vault", True)
+        secondary.assert_not_called()
+
+    def test_backup_secondary_sql_snapshot_restore_requests(self):
+        for workload in ["SQLInstance", "SQLDataBase"]:
+            for mode in ["SnapshotAttach", "SnapshotAttachAndRecover"]:
+                for pit in [None, "15-10-2026-12:00:00"]:
+                    with self.subTest(workload=workload, mode=mode, pit=pit), ExitStack() as patches:
+                        def mocked(owner, name, **kwargs):
+                            return patches.enter_context(patch.object(owner, name, **kwargs))
+
+                        source = passive_models.ProtectedItemResource.deserialize(protected_item(workload).as_dict())
+                        show_item = mocked(custom_wl.common, "show_item", return_value=source)
+                        point = passive_models.RecoveryPointResource.deserialize(snapshot_point().as_dict())
+                        show_point = mocked(custom_wl.common, "show_recovery_point", return_value=point)
+                        target_container = SimpleNamespace(properties=SimpleNamespace(
+                            source_resource_id="/subscriptions/sub/resourceGroups/target-rg/providers/"
+                                               "Microsoft.Compute/virtualMachines/target"))
+                        mocked(custom_wl.common, "show_container", return_value=target_container)
+                        mocked(custom_wl, "get_mgmt_service_client")
+                        mocked(custom_wl, "backup_protected_items_cf")
+                        mocked(custom_wl, "_get_snapshot_identity", return_value=models.UserAssignedManagedIdentityDetails(
+                            identity_arm_id=IDENTITY))
+                        primary_points = mocked(custom_wl, "recovery_points_cf")
+                        secondary_points = mocked(custom_wl, "recovery_points_crr_cf")
+                        secondary_points.return_value.get.return_value = point
+                        secondary_points.return_value.list.return_value = [
+                            passive_models.RecoveryPointResource.deserialize({
+                                "properties": {
+                                    "objectType": "AzureWorkloadSQLPointInTimeRecoveryPoint",
+                                    "timeRanges": [{"startTime": "2026-10-01T00:00:00Z",
+                                                    "endTime": "2026-10-31T00:00:00Z"}]}})]
+                        database = passive_models.ProtectedItemResource.deserialize(
+                            protected_item("SQLDataBase").as_dict())
+                        database.properties.protected_item_data_source_id = "db-source"
+                        list_items = mocked(custom_wl.common, "list_items", return_value=[database])
+                        log_ranges = mocked(custom_wl, "_get_log_time_range", wraps=custom_wl._get_log_time_range)
+                        vaults = mocked(custom_wl, "vaults_cf")
+                        vaults.return_value.get.return_value = SimpleNamespace(location="eastus", id="vault-id")
+                        aad = mocked(custom_wl, "aad_properties_cf")
+                        access = mocked(custom_wl, "recovery_points_passive_cf")
+                        access.return_value.get_access_token.return_value.properties = passive_models.CrrAccessToken(
+                            access_token_string="test-token")
+                        crr = mocked(custom_wl, "cross_region_restore_cf")
+                        track = mocked(custom_wl.cust_help, "track_backup_crr_job")
+                        config = self._snapshot_config(workload, mode, pit)
+                        config["target_physical_path"][0]["target_path"] = "X:\\"
+                        config["disks_to_detach_on_clash"] = [DISK]
+                        if mode == "SnapshotAttach":
+                            config["target_directory_mapping"] = {"all": "C:\\temp"}
+                        client = Mock()
+
+                        result = custom_wl.restore_azure_wl(
+                            self.cmd, client, "rg", "vault", json.dumps(config), use_secondary_region=True)
+
+                        client.begin_trigger.assert_not_called()
+                        primary_points.return_value.get.assert_not_called()
+                        primary_points.return_value.list.assert_not_called()
+                        self.assertTrue(show_item.call_args.kwargs["use_secondary_region"])
+                        secondary_points.return_value.get.assert_called_once_with(
+                            "vault", "rg", "Azure", CONTAINER, config["item_uri"], "snapshot-rp")
+                        region, request = crr.return_value.begin_trigger.call_args.args
+                        self.assertEqual(custom_wl.custom.secondary_region_map["eastus"], region)
+                        envelope = json.loads(request.getvalue())
+                        self.assertEqual("test-token",
+                                         envelope["crossRegionRestoreAccessDetails"]["accessTokenString"])
+                        payload = envelope["restoreRequest"]
+                        self.assertEqual(mode, payload["recoveryMode"])
+                        self.assertEqual("AlternateLocation", payload["recoveryType"])
+                        self.assertEqual("restore-rg", payload["targetResourceGroupName"])
+                        self.assertEqual(IDENTITY, payload["userAssignedManagedIdentityDetails"]["identityArmId"])
+                        self.assertEqual("X:\\", payload["alternateDirectoryPaths"][0]["targetPath"])
+                        self.assertEqual([DISK], payload["snapshotRestoreParameters"]["disksToDetachOnClash"])
+                        if mode == "SnapshotAttach":
+                            self.assertEqual({"all": "C:\\temp"}, payload["targetInfo"]["targetDirectoryMapping"])
+                        access.return_value.get_access_token.assert_called_once_with(
+                            "vault", "rg", "Azure", CONTAINER, config["item_uri"],
+                            config["recovery_point_id"], aad.return_value.get.return_value)
+                        if pit:
+                            self.assertIn("2026-10-15T12:00:00", payload["pointInTime"])
+                            self.assertTrue(log_ranges.call_args.args[4])
+                            filters = secondary_points.return_value.list.call_args.kwargs["filter"]
+                            self.assertIn("restorePointQueryType eq 'Log'", filters)
+                            if workload == "SQLInstance":
+                                self.assertTrue(list_items.call_args.kwargs["use_secondary_region"])
+                                self.assertEqual(("snapshot-rp", "instance-datasource", "SnapshotAttachAndRecover"),
+                                                 log_ranges.call_args.args[-3:])
+                                secondary_points.return_value.get.assert_called_once()
+                                self.assertIn("baseSnapshotRPId eq 'snapshot-rp'", filters)
+                                self.assertIn("baseRPDatasourceId eq 'instance-datasource'", filters)
+                        else:
+                            self.assertTrue(show_point.call_args.args[-1])
+                        self.assertIs(track.return_value, result)
+
     @patch.object(custom_wl, "get_mgmt_service_client")
     @patch.object(custom_wl, "recovery_points_cf")
     @patch.object(custom_wl, "backup_protected_items_cf")
@@ -560,6 +694,9 @@ class SqlInstanceTests(unittest.TestCase):
             def read(self):
                 return self.body()
 
+            def stream_download(self, pipeline, **kwargs):
+                return self.iter_bytes()
+
         transport = Mock(spec=HttpTransport)
         transport.send.side_effect = lambda request, **kwargs: AcceptedResponse(request)
         credential = SimpleNamespace(get_token=lambda *args, **kwargs: AccessToken("unit-test", 2000000000))
@@ -578,6 +715,20 @@ class SqlInstanceTests(unittest.TestCase):
         payload = json.loads(wire_request.body)["properties"]
         self.assertEqual({"all": "C:\\temp"}, payload["targetInfo"]["targetDirectoryMapping"])
         self.assertEqual("AzureWorkloadSQLPointInTimeRestoreRequest", payload["objectType"])
+        self.assertEqual([DISK], payload["snapshotRestoreParameters"]["disksToDetachOnClash"])
+
+        passive_client = RecoveryServicesBackupPassiveClient(credential, "sub", transport=transport)
+        envelope = {
+            "crossRegionRestoreAccessDetails": {"accessTokenString": "test-token"},
+            "restoreRequest": request.as_dict()}
+        passive_client.cross_region_restore.begin_trigger(
+            "westus", custom_wl.BytesIO(json.dumps(envelope).encode("utf-8")), polling=False)
+        wire_request = transport.send.call_args.args[0]
+        self.assertIn("/locations/westus/backupCrossRegionRestore", wire_request.url)
+        self.assertIn("api-version=2021-11-15", wire_request.url)
+        payload = json.loads(wire_request.body.getvalue())["restoreRequest"]
+        self.assertEqual({"all": "C:\\temp"}, payload["targetInfo"]["targetDirectoryMapping"])
+        self.assertEqual("SnapshotAttach", payload["recoveryMode"])
         self.assertEqual([DISK], payload["snapshotRestoreParameters"]["disksToDetachOnClash"])
 
 
@@ -612,6 +763,119 @@ class SqlInstanceCommandTests(unittest.TestCase):
             return None
         self.assertEqual(0, exit_code, output.getvalue())
         return json.loads(output.getvalue()) if output.getvalue().strip() else None
+
+    def test_backup_legacy_database_crr_workflow(self):
+        with ExitStack() as patches:
+            def mocked(owner, name, **kwargs):
+                return patches.enter_context(patch.object(owner, name, **kwargs))
+
+            source = protected_item("SQLDataBase")
+            show_item = mocked(custom_wl.common, "show_item", return_value=source)
+            mocked(custom_base, "get_mgmt_service_client")
+            mocked(custom_wl, "get_mgmt_service_client")
+            target_id = ITEM_ID.replace(CONTAINER, CONTAINER.replace(";vm", ";target-vm")) + INSTANCE
+            target = SimpleNamespace(
+                id=target_id, properties=SimpleNamespace(
+                    protectable_item_type="SQLInstance", friendly_name="mssqlserver", server_name="target-vm",
+                    data_directory_paths=[models.SQLDataDirectory(type="Data", path="X:\\Data")]))
+            mocked(custom_base, "show_protectable_instance", return_value=target)
+            mocked(custom_wl, "list_workload_items", return_value=[target])
+            mocked(custom_wl.common, "show_container", return_value=SimpleNamespace(
+                id="/".join(target_id.split("/")[:-2]), name="target-container",
+                properties=SimpleNamespace(source_resource_id="/subscriptions/sub/resourceGroups/rg/providers/"
+                                                             "Microsoft.Compute/virtualMachines/target-vm")))
+            point = models.RecoveryPointResource(
+                name="full-rp", properties=models.AzureWorkloadSQLRecoveryPoint(
+                    type="Full", extended_info=models.AzureWorkloadSQLRecoveryPointExtendedInfo(
+                        data_directory_paths=[models.SQLDataDirectory(
+                            type="Data", path="E:\\Data\\db.mdf", logical_name="db")])))
+            show_point = mocked(custom_wl.common, "show_recovery_point", return_value=point)
+            self.client.recovery_points.list.return_value = [
+                models.RecoveryPointResource(
+                    name="DefaultRangeRecoveryPoint", properties=models.AzureWorkloadSQLPointInTimeRecoveryPoint(
+                        extended_info=point.properties.extended_info))]
+            passive = mocked(_client_factory, "_backup_passive_client_factory")
+            passive.return_value.recovery_points_crr.list.return_value = [
+                passive_models.RecoveryPointResource.deserialize({
+                    "properties": {"objectType": "AzureWorkloadSQLPointInTimeRecoveryPoint",
+                                   "timeRanges": [{"startTime": "2026-10-01T00:00:00Z",
+                                                   "endTime": "2026-10-31T00:00:00Z"}]}})]
+            vaults = mocked(custom_wl, "vaults_cf")
+            vaults.return_value.get.return_value = SimpleNamespace(location="eastus", id="vault-id")
+            mocked(custom_wl, "aad_properties_cf")
+            access = mocked(custom_wl, "recovery_points_passive_cf")
+            access.return_value.get_access_token.return_value.properties = passive_models.CrrAccessToken(
+                access_token_string="test-token")
+            crr = mocked(custom_wl, "cross_region_restore_cf")
+            mocked(custom_wl.cust_help, "track_backup_crr_job", return_value={"status": "InProgress"})
+
+            for mode, point_option in [
+                    ("AlternateWorkloadRestore", "--rp-name full-rp"),
+                    ("AlternateWorkloadRestore", "--log-point-in-time 15-10-2026-12:00:00"),
+                    ("RestoreAsFiles", "--rp-name full-rp")]:
+                with self.subTest(mode=mode, point_option=point_option):
+                    passive.reset_mock()
+                    show_item.reset_mock()
+                    show_point.reset_mock()
+                    target_options = ('--target-item-name db-restored --target-server-type SQLInstance '
+                                      '--target-server-name target-vm'
+                                      if mode == "AlternateWorkloadRestore" else '--filepath "X:\\\\Restore"')
+                    config = self.cmd('backup recoveryconfig show -g rg -v vault '
+                                      '-c "VMAppContainer;Compute;rg;vm" -i "SQLDataBase;mssqlserver;db" '
+                                      '--workload-type MSSQL --target-vault-name target-vault '
+                                      '--target-resource-group target-rg '
+                                      '--target-container-name "VMAppContainer;Compute;rg;target-vm" '
+                                      '--restore-mode ' + mode + ' ' + point_option + ' ' + target_options)
+                    passive.assert_not_called()
+                    self.assertNotIn("use_secondary_region", show_item.call_args.kwargs)
+                    if show_point.called:
+                        self.assertNotIn("use_secondary_region", show_point.call_args.kwargs)
+                    self.assertEqual("SQLDataBase", config["workload_type"])
+                    self.assertEqual("FileRecovery" if mode == "RestoreAsFiles" else None, config["recovery_mode"])
+                    self.assertEqual(
+                        {"status": "InProgress"},
+                        self.cmd('backup restore restore-azurewl -g rg -v vault --use-secondary-region '
+                                 '--recovery-config ' + shlex.quote(json.dumps(config))))
+                    region, request = crr.return_value.begin_trigger.call_args.args
+                    self.assertEqual(custom_wl.custom.secondary_region_map["eastus"], region)
+                    payload = json.loads(request.getvalue())["restoreRequest"]
+                    self.assertEqual("AlternateLocation", payload["recoveryType"])
+                    self.assertEqual(config["container_id"], payload["targetInfo"]["containerId"])
+                    if mode == "RestoreAsFiles":
+                        self.assertEqual("FileRecovery", payload["recoveryMode"])
+                    else:
+                        self.assertEqual("mssqlserver/db-restored", payload["targetInfo"]["databaseName"])
+                    if config["log_point_in_time"]:
+                        self.assertIn("2026-10-15T12:00:00", payload["pointInTime"])
+                        passive.return_value.recovery_points_crr.list.assert_called_once()
+
+    @patch.object(custom_base, "get_mgmt_service_client")
+    @patch.object(_client_factory, "_backup_passive_client_factory")
+    @patch.object(custom_wl.common, "show_item")
+    @patch.object(custom_base.common, "show_container")
+    @patch.object(custom_base, "show_protectable_instance")
+    def test_backup_snapshot_recovery_config_needs_no_region_flag(self, target, container, source, passive, _service):
+        source.return_value = protected_item()
+        target_id = ITEM_ID.replace(CONTAINER, CONTAINER.replace(";vm", ";target-vm")) + INSTANCE
+        target.return_value = SimpleNamespace(
+            id=target_id, properties=SimpleNamespace(protectable_item_type="SQLInstance", friendly_name="target"))
+        container.return_value = SimpleNamespace(id="/".join(target_id.split("/")[:-2]))
+        self.client.recovery_points.get.return_value = snapshot_point()
+        for mode in ["SnapshotAttach", "SnapshotAttachAndRecover"]:
+            config = self.cmd('backup recoveryconfig show -g rg -v vault -c "VMAppContainer;Compute;rg;vm" '
+                              '-i "SQLInstance;mssqlserver" --workload-type SQLInstance --rp-name snapshot-rp '
+                              '--restore-mode AlternateWorkloadRestore --target-instance-name mssqlserver '
+                              '--target-server-name target-vm --target-server-type SQLInstance '
+                              '--target-container-name "VMAppContainer;Compute;rg;target-vm" '
+                              '--snapshot-rg restore-rg --identity-arm-id ' + IDENTITY +
+                              ' --recovery-mode ' + mode)
+            self.assertEqual(mode, config["recovery_mode"])
+            self.assertNotIn("use_secondary_region", source.call_args.kwargs)
+            self.assertEqual("snapshot-rp", config["recovery_point_id"])
+            self.assertEqual("snapshot-rp", config["base_snapshot_recovery_point_id"])
+        self.assertEqual(2, self.client.recovery_points.get.call_count)
+        self.client.recovery_points.list.assert_not_called()
+        passive.assert_not_called()
 
     @patch.object(custom_wl.cust_help, "track_register_operation", return_value={"status": "Succeeded"})
     @patch.object(custom_wl.cust_help, "track_refresh_operation")

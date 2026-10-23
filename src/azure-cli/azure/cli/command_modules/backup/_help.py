@@ -379,7 +379,11 @@ long-summary: >
     target_physical_path entries and edit target_path only for volumes that need remapping.
     Use --recovery-mode SnapshotAttach to attach snapshot disks without recovering databases,
     or SnapshotAttachAndRecover to recover databases. Use --no-recovery-mode to leave databases
-    in the restoring state. The configuration can be submitted with az backup restore restore-azurewl.
+    in the restoring state. For cross-region restore, generate the configuration normally and specify
+    --use-secondary-region only when submitting it with az backup restore restore-azurewl.
+    Configuration generation reads primary-region metadata. Select a recovery point available in the
+    secondary region and the intended target instance, disk resource group and managed identity for
+    that region. Restore validates the snapshot and log availability in the secondary region.
 examples:
   - name: Construct the recovery configuration of an Azure workload backed up item. The configuration object stores all details such as the recovery mode, target destinations for the restore and application specific parameters like target physical paths for SQL.
     text: az backup recoveryconfig show --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --restore-mode OriginalWorkloadRestore
@@ -508,9 +512,16 @@ examples:
 helps['backup restore restore-azurewl'] = """
 type: command
 short-summary: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
+long-summary: >
+    SQL snapshot cross-region restores support SnapshotAttach and SnapshotAttachAndRecover, including
+    point-in-time recovery. Generate the recovery configuration normally and specify
+    --use-secondary-region only when submitting the restore. The vault must support cross-region restore and the
+    selected recovery point must be available in the secondary region.
 examples:
   - name: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
     text: az backup restore restore-azurewl --resource-group MyResourceGroup --vault-name MyVault --recovery-config MyRecoveryConfig
+  - name: Submit a SQL snapshot restore using a secondary-region recovery configuration.
+    text: az backup restore restore-azurewl --resource-group MyResourceGroup --vault-name MyVault --recovery-config secondary-recovery-config.json --use-secondary-region
 """
 
 helps['backup vault'] = """

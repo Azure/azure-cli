@@ -411,6 +411,8 @@ def get_model_property(model, attribute_name, wire_name):
     value = getattr(model, attribute_name, None)
     if value is None and hasattr(model, 'get'):
         value = model.get(wire_name)
+    if value is None:
+        value = getattr(model, 'additional_properties', {}).get(wire_name)
     return value
 
 

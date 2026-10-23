@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
+from io import BytesIO
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 
@@ -845,12 +847,10 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     snapshot_instance_resource_group = recovery_config_object['snapshot_instance_resource_group']
 
     item = common.show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                            container_uri, item_uri, "AzureWorkload")
+                            container_uri, item_uri, "AzureWorkload",
+                            use_secondary_region=use_secondary_region if sql_snapshot else None)
     cust_help.validate_item(item)
     validate_wl_restore(item, item_type, restore_mode, recovery_mode)
-    if sql_snapshot and use_secondary_region:
-        raise ArgumentUsageError("SQL snapshot restores are not supported in the secondary region.")
-
     trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time, None)
     if log_point_in_time is None:
         recovery_point = common.show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name,
@@ -919,7 +919,7 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
     if sql_snapshot:
         _apply_sql_snapshot_restore(cmd, trigger_restore_properties, recovery_config_object,
-                                    item, resource_group_name, vault_name)
+                                    item, resource_group_name, vault_name, use_secondary_region)
     elif 'sql' in item_type.lower():
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
         setattr(trigger_restore_properties, 'is_non_recoverable',
@@ -977,8 +977,10 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
                                                       item_uri, recovery_point_id, aad_result).properties
         crr_client = cross_region_restore_cf(cmd.cli_ctx)
         trigger_restore_properties.region = azure_region
-        trigger_crr_request = CrossRegionRestoreRequest(cross_region_restore_access_details=crr_access_token,
-                                                        restore_request=trigger_restore_properties)
+        # Primary and passive SDK models use different serializers; pass the primary wire payload intact.
+        payload = CrossRegionRestoreRequest(cross_region_restore_access_details=crr_access_token).serialize()
+        payload['restoreRequest'] = trigger_restore_properties.as_dict()
+        trigger_crr_request = BytesIO(json.dumps(payload).encode('utf-8'))
         result = crr_client.begin_trigger(azure_region, trigger_crr_request, cls=cust_help.get_pipeline_response,
                                           polling=False).result()
         return cust_help.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
@@ -1148,7 +1150,12 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
 
 def _get_sql_recovery_point_extended_info(point):
     info = cust_help.get_model_property(point.properties, 'extended_info', 'extendedInfo')
-    return AzureWorkloadSQLRecoveryPointExtendedInfo(info) if info is not None else None
+    if info is None:
+        return None
+    return AzureWorkloadSQLRecoveryPointExtendedInfo(
+        included_databases=cust_help.get_model_property(info, 'included_databases', 'includedDatabases'),
+        snapshot_recovery_point_info=cust_help.get_model_property(
+            info, 'snapshot_recovery_point_info', 'snapshotRecoveryPointInfo'))
 
 
 def _get_sql_snapshot_recovery_config(client, resource_group_name, vault_name, item, restore_mode,
@@ -1212,6 +1219,7 @@ def _get_sql_snapshot_recovery_config(client, resource_group_name, vault_name, i
         'container_uri': container_uri,
         'item_uri': item.name,
         'recovery_point_id': rp_name or 'DefaultRangeRecoveryPoint',
+        'base_snapshot_recovery_point_id': snapshot_name,
         'log_point_in_time': log_point_in_time,
         'item_type': 'SQL',
         'workload_type': item.properties.workload_type,
@@ -1249,7 +1257,23 @@ def _get_snapshot_identity(cmd, identity_arm_id):
             client_id=details.client_id, principal_id=details.principal_id))
 
 
-def _apply_sql_snapshot_restore(cmd, request, config, item, resource_group_name, vault_name):
+def _apply_sql_snapshot_restore(cmd, request, config, item, resource_group_name, vault_name,
+                                use_secondary_region=False):
+    info = None
+    if use_secondary_region:
+        snapshot_name = config['recovery_point_id']
+        if snapshot_name == 'DefaultRangeRecoveryPoint':
+            snapshot_name = config.get('base_snapshot_recovery_point_id')
+        if not isinstance(snapshot_name, str) or not snapshot_name.strip():
+            raise RequiredArgumentMissingError(
+                "SQL snapshot cross-region restore requires a base snapshot recovery point. "
+                "Regenerate the configuration using backup recoveryconfig show.")
+        point = recovery_points_crr_cf(cmd.cli_ctx).get(
+            vault_name, resource_group_name, fabric_name, config['container_uri'], config['item_uri'], snapshot_name)
+        info = _get_sql_recovery_point_extended_info(point)
+        if info is None or info.snapshot_recovery_point_info is None:
+            raise InvalidArgumentValueError(
+                "The selected secondary-region recovery point does not contain SQL snapshot metadata.")
     snapshot_resource_group = config.get('snapshot_instance_resource_group')
     if not isinstance(snapshot_resource_group, str) or not snapshot_resource_group.strip():
         raise RequiredArgumentMissingError(
@@ -1306,10 +1330,11 @@ def _apply_sql_snapshot_restore(cmd, request, config, item, resource_group_name,
     if config['log_point_in_time'] is not None:
         point_in_time = datetime_type(config['log_point_in_time'])
         if item.properties.workload_type == 'SQLInstance':
-            point = recovery_points_cf(cmd.cli_ctx).get(
-                vault_name, resource_group_name, fabric_name, config['container_uri'],
-                config['item_uri'], config['recovery_point_id'])
-            info = _get_sql_recovery_point_extended_info(point)
+            if not use_secondary_region:
+                point = recovery_points_cf(cmd.cli_ctx).get(
+                    vault_name, resource_group_name, fabric_name, config['container_uri'],
+                    config['item_uri'], config['recovery_point_id'])
+                info = _get_sql_recovery_point_extended_info(point)
             databases = info.included_databases if info is not None else None
             if not databases:
                 raise InvalidArgumentValueError("The snapshot recovery point has no included databases for log replay.")
@@ -1319,7 +1344,7 @@ def _apply_sql_snapshot_restore(cmd, request, config, item, resource_group_name,
                 raise InvalidArgumentValueError("The SQL instance has no ProtectedItemDataSourceId for log queries.")
             items = common.list_items(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name,
                                       vault_name, workload_type='MSSQL', container_name=config['container_uri'],
-                                      container_type='AzureWorkload')
+                                      container_type='AzureWorkload', use_secondary_region=use_secondary_region)
             for database in databases:
                 matching_items = [
                     candidate for candidate in items
@@ -1334,11 +1359,11 @@ def _apply_sql_snapshot_restore(cmd, request, config, item, resource_group_name,
                 database_item = cust_help.get_none_one_or_many(matching_items)
                 _check_none_and_many(database_item, "Included database " + database.datasource_name)
                 ranges = _get_log_time_range(
-                    cmd, resource_group_name, vault_name, database_item, False,
+                    cmd, resource_group_name, vault_name, database_item, use_secondary_region,
                     config['recovery_point_id'], datasource_id, 'SnapshotAttachAndRecover')
                 validate_log_point_in_time(point_in_time, ranges)
         else:
-            ranges = _get_log_time_range(cmd, resource_group_name, vault_name, item, False)
+            ranges = _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondary_region)
             validate_log_point_in_time(point_in_time, ranges)
         request.point_in_time = point_in_time
 
