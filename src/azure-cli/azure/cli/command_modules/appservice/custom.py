@@ -8299,7 +8299,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     def resolve(self, display_name, linux=False):
         display_name = self.standardize_runtime_name(display_name).lower()
-        stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
+        stack = next((s for s in self.stacks if s.linux == linux and
+                      self.standardize_runtime_name(s.display_name).lower() == display_name), None)
         if stack is None:  # help convert previously acceptable stack names into correct ones if runtime not found
             old_to_new_windows = {
                 "node|12-lts": "node|12lts",
@@ -8614,7 +8615,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 eol_date = self._format_eol_date(getattr(settings, 'end_of_life_date', None))
                 if "Java" not in minor_version.display_text:
                     runtime_name = self._format_windows_display_text(minor_version.display_text)
-                    runtime_name = self.standardize_runtime_name(runtime_name)
+                    runtime_name = self.standardize_node_runtime_name(runtime_name)
 
                     runtime = self.Runtime(display_name=runtime_name, linux=False,
                                            os="Windows", runtime_family=runtime_family,
@@ -8726,7 +8727,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 major_version, linux=True, java=False, include_eol=self._include_eol)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.linux_runtime_settings
-                runtime_name = self.standardize_runtime_name(settings.runtime_version)
+                runtime_name = self.standardize_node_runtime_name(settings.runtime_version)
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"linux_fx_version": runtime_name},
                                        linux=True,

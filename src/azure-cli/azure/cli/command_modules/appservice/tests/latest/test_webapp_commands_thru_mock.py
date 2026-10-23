@@ -2371,7 +2371,15 @@ class TestStackRuntimeDotnetLinux(unittest.TestCase):
 
         node_standardizer.assert_not_called()
 
-    def test_parse_legacy_dotnet_11_catalog_as_canonical(self):
+    def test_resolve_canonical_dotnet_11_with_legacy_catalog(self):
+        helper = self._new_helper('DOTNETCORE|11.0')
+
+        runtime = helper.resolve('dotnet|11', linux=True)
+
+        self.assertEqual(runtime.display_name, 'DOTNETCORE|11.0')
+        self.assertEqual(runtime.configs['linux_fx_version'], 'DOTNETCORE|11.0')
+
+    def test_parse_legacy_dotnet_11_catalog_unchanged(self):
         helper = self._new_helper('placeholder')
         parsed_results = []
         github_settings = types.SimpleNamespace(is_supported=True, supported_version='11.x')
@@ -2390,8 +2398,43 @@ class TestStackRuntimeDotnetLinux(unittest.TestCase):
                 set(),
                 runtime_family='.NET')
 
-        self.assertEqual(parsed_results[0].display_name, 'dotnet|11')
-        self.assertEqual(parsed_results[0].configs['linux_fx_version'], 'dotnet|11')
+        self.assertEqual(parsed_results[0].display_name, 'DOTNETCORE|11.0')
+        self.assertEqual(parsed_results[0].configs['linux_fx_version'], 'DOTNETCORE|11.0')
+        helper._stacks = parsed_results
+        self.assertEqual(
+            [row['config'] for row in helper.get_stacks_as_table()],
+            ['DOTNETCORE|11.0'])
+
+    def test_parse_windows_dotnet_catalog_unchanged(self):
+        for display_text, expected in (
+                ('.NET 11 (STS)', 'dotnet|11'),
+                ('.NET 11.0 (STS)', 'dotnet|11.0')):
+            with self.subTest(display_text=display_text):
+                helper = self._new_helper('placeholder')
+                parsed_results = []
+                settings = types.SimpleNamespace(
+                    runtime_version='v11.0',
+                    end_of_life_date=None,
+                    git_hub_action_settings=types.SimpleNamespace(
+                        is_supported=True, supported_version='11.x'))
+                minor_version = types.SimpleNamespace(
+                    display_text=display_text,
+                    stack_settings=types.SimpleNamespace(windows_runtime_settings=settings))
+
+                with mock.patch.object(helper, '_get_valid_minor_versions', side_effect=[[], [minor_version]]):
+                    helper._parse_major_version_windows(
+                        types.SimpleNamespace(display_text='.NET 11'),
+                        parsed_results,
+                        {'dotnet': 'net_framework_version', 'netcore': 'net_framework_version'},
+                        runtime_family='.NET')
+
+                helper._stacks = parsed_results
+                self.assertEqual(
+                    [row['config'] for row in helper.get_stacks_as_table()],
+                    [expected])
+                runtime = helper.resolve('dotnet|11')
+                self.assertEqual(runtime.display_name, expected)
+                self.assertEqual(runtime.configs['net_framework_version'], 'v11.0')
 
 
 class TestStackRuntimeNodeStandardization(unittest.TestCase):
@@ -2461,6 +2504,15 @@ class TestStackRuntimeNodeStandardization(unittest.TestCase):
             'display_name': 'NODE|26',
             'github_actions_version': '26.x',
         })
+
+    def test_node_26_legacy_aliases_resolve_canonical_catalog(self):
+        helper = self._new_helper()
+        helper._parse_raw_stacks([self._node_stack('26', 'Node 26', 'NODE|26')])
+
+        for linux in (True, False):
+            for runtime_name in ('NODE|26', 'NODE|26-lts', 'NODE|26LTS'):
+                with self.subTest(linux=linux, runtime_name=runtime_name):
+                    self.assertEqual(helper.resolve(runtime_name, linux=linux).display_name, 'NODE|26')
 
     def test_older_node_identifiers_remain_unchanged(self):
         helper = self._new_helper()
