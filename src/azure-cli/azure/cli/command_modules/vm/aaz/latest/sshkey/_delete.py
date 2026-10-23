@@ -11,6 +11,10 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "sshkey delete",
+    confirmation="Are you sure you want to perform this operation?",
+)
 class Delete(AAZCommand):
     """Delete a SSH public key.
 
@@ -49,6 +53,9 @@ class Delete(AAZCommand):
             help="The name of the SSH public key.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         return cls._args_schema
 
