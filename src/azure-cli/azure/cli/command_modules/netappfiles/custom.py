@@ -19,6 +19,8 @@ from .aaz.latest.netappfiles.volume_group import Create as _VolumeGroupCreate
 from .aaz.latest.netappfiles.volume.export_policy import List as _ExportPolicyList, Add as _ExportPolicyAdd, Remove as _ExportPolicyRemove
 from .aaz.latest.netappfiles.volume.replication import Resume as _ReplicationResume
 from .aaz.latest.netappfiles.pool import Create as _PoolCreate, Update as _PoolUpdate
+from .aaz.latest.netappfiles.cache import ListPeeringPassphrase as _ListPeeringPassphrase
+from .aaz.latest.netappfiles.volume.replication import PeerExternalCluster as _PeerExternalCluster
 
 logger = get_logger(__name__)
 
@@ -178,6 +180,33 @@ class ActiveDirectoryList(_ActiveDirectoryList):
             result = self.ctx.vars.instance
             result.properties.activeDirectories = value
 
+
+# endregion
+
+# region Peering Passphrase
+
+class CacheListPeeringPassphrase(_ListPeeringPassphrase):
+    def _output(self, *args, **kwargs):
+        # This credential-retrieval command intentionally returns its secret.
+        return self.deserialize_output(
+            self.ctx.vars.instance,
+            client_flatten=True,
+            secret_hidden=False,
+        )
+
+# endregion
+
+# region Volume Replication
+
+
+class VolumeReplicationPeerExternalCluster(_PeerExternalCluster):
+    def _output(self, *args, **kwargs):
+        # External-cluster peering requires the returned passphrase.
+        return self.deserialize_output(
+            self.ctx.vars.instance,
+            client_flatten=True,
+            secret_hidden=False,
+        )
 
 # endregion
 
