@@ -259,3 +259,22 @@ class MonitorTraceTest(unittest.TestCase):
         settings = trace_container_settings({'properties': {'traceDurationWindowInSeconds': 300,
                                                             'traceMetricsState': 'Disabled'}})
         self.assertEqual(settings, {'retention_days': 30, 'trace_duration_window': 300, 'trace_metrics': 'Disabled'})
+
+    def test_monitor_trace_container_conflict(self):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        from azure.cli.command_modules.monitor.operations import trace_container
+
+        workspace_id = '/subscriptions/{}/resourceGroups/rg1/providers/Microsoft.Monitor/accounts/amw1'.format(
+            self.subscription)
+        existing = {'properties': {'provisioningState': 'Succeeded', 'traceRetentionInDays': 90,
+                                   'traceDurationWindowInSeconds': 600, 'traceMetricsState': 'Disabled'}}
+        with mock.patch.object(trace_container, 'get_trace_container', return_value=existing):
+            # Matching settings reuse the container.
+            self.assertIs(trace_container.ensure_trace_container(None, workspace_id, 90, 'Disabled'), existing)
+            with self.assertRaisesRegex(InvalidArgumentValueError,
+                                        'keeps traces for 90 days and has trace metrics Disabled') as error:
+                trace_container.ensure_trace_container(None, workspace_id, 7, 'Enabled')
+        self.assertEqual(error.exception.recommendations, [
+            'To change it, run: az monitor account trace-container update --subscription {} -g rg1 -w amw1 '
+            '--retention-days 7 --trace-metrics Enabled'.format(self.subscription),
+            'Or run this command without --trace-retention-days and --trace-metrics.'])

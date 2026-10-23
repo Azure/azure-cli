@@ -76,8 +76,10 @@ class TestMonitorTraceScenarios(ScenarioTest):
             self.check('properties.traceRetentionInDays', 60),
             self.check('properties.traceMetricsState', 'Disabled'),
         ])
-        with self.assertRaisesRegex(InvalidArgumentValueError, 'already exists'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'already keeps traces for 60 days') as error:
             self.cmd('monitor trace-association create --resource-uri {rg_id} -w {amw_id} --trace-retention-days 90')
+        self.assertIn('trace-container update', error.exception.recommendations[0])
+        self.assertIn('--retention-days 90', error.exception.recommendations[0])
         self.cmd('monitor trace-association show --resource-uri {rg_id}', checks=[
             self.check_pattern('id', '(?i).*/traceAssociations/default$'),
         ])

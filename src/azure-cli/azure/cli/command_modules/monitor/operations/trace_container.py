@@ -58,9 +58,9 @@ def trace_container_settings(container):
     return settings
 
 
-def _container_create_command(workspace):
-    return "az monitor account trace-container create --subscription {} -g {} -w {}".format(
-        workspace["subscription"], workspace["resource_group"], workspace["azure_monitor_workspace_name"])
+def _container_command(verb, workspace):
+    return "az monitor account trace-container {} --subscription {} -g {} -w {}".format(
+        verb, workspace["subscription"], workspace["resource_group"], workspace["azure_monitor_workspace_name"])
 
 
 def _wait_for_container(cli_ctx, workspace):
@@ -111,7 +111,7 @@ def ensure_trace_container(cli_ctx, workspace_id, retention_days=None, trace_met
                 raise ForbiddenError(
                     "Creating the trace container of {} was denied. Ask the owner of that Azure Monitor workspace "
                     "to run:\n  {}\nThen run this command again.".format(
-                        workspace_id, _container_create_command(workspace))) from ex
+                        workspace_id, _container_command("create", workspace))) from ex
             raise
         logger.warning("Created the trace container of %s: retention %s days, trace metrics %s.",
                        workspace_id, settings["retention_days"], settings["trace_metrics"])
@@ -120,22 +120,28 @@ def ensure_trace_container(cli_ctx, workspace_id, retention_days=None, trace_met
     state = (container.get("properties") or {}).get("provisioningState")
     if state in ("Failed", "Canceled"):
         raise AzureResponseError(
-            "The trace container of {} is in the {} state. Retry it with "
-            "'az monitor account trace-container update --subscription {} -g {} -w {}', then run this command "
-            "again.".format(workspace_id, state, workspace["subscription"], workspace["resource_group"],
-                            workspace["azure_monitor_workspace_name"]))
+            "The trace container of {} is in the {} state. Retry it with '{}', then run this command again.".format(
+                workspace_id, state, _container_command("update", workspace)))
     if state not in (None, "Succeeded"):
         container = _wait_for_container(cli_ctx, workspace)
 
     settings = trace_container_settings(container)
-    for name, option, value in (("retention_days", "--trace-retention-days", retention_days),
-                                ("trace_metrics", "--trace-metrics", trace_metrics)):
-        if value is not None and value != settings[name]:
-            raise InvalidArgumentValueError(
-                "The trace container of {workspace} already exists with {option} {value}. This command does not "
-                "change an existing container. Omit {option}, or change the container with "
-                "'az monitor account trace-container update'.".format(
-                    workspace=workspace_id, option=option, value=settings[name]))
+    current, update_args, options = [], [], []
+    if retention_days is not None and retention_days != settings["retention_days"]:
+        current.append("keeps traces for {} days".format(settings["retention_days"]))
+        update_args.append("--retention-days {}".format(retention_days))
+        options.append("--trace-retention-days")
+    if trace_metrics is not None and trace_metrics != settings["trace_metrics"]:
+        current.append("has trace metrics {}".format(settings["trace_metrics"]))
+        update_args.append("--trace-metrics {}".format(trace_metrics))
+        options.append("--trace-metrics")
+    if current:
+        raise InvalidArgumentValueError(
+            "The trace container of {} already {}. Every scope that sends traces to this workspace uses it, so this "
+            "command does not change it.".format(workspace["azure_monitor_workspace_name"], " and ".join(current)),
+            recommendation=[
+                "To change it, run: {} {}".format(_container_command("update", workspace), " ".join(update_args)),
+                "Or run this command without {}.".format(" and ".join(options))])
     logger.warning("Using the existing trace container of %s: retention %s days, trace metrics %s.",
                    workspace_id, settings["retention_days"], settings["trace_metrics"])
     return container
