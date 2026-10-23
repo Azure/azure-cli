@@ -333,3 +333,19 @@ def load_arguments(self, _):
         c.argument('monitor_types', options_list=['--types', '-t'], arg_type=get_enum_type(['metricsAlert']),
                    nargs='+', help='List of types of monitor settings which would be cloned.', default=['metricsAlert'])
     # endregion
+
+    # region Trace Association
+    with self.argument_context('monitor trace-association') as c:
+        c.argument('resource_uri', options_list=['--resource-uri'],
+                   help='Resource ID of an Application Insights component, a resource group or a subscription.')
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
+
+    with self.argument_context('monitor trace-association create') as c:
+        c.argument('azure_monitor_workspace', options_list=['--azure-monitor-workspace', '-w'],
+                   help='Resource ID of the Azure Monitor workspace that receives the traces.')
+        c.argument('trace_retention_days', type=int,
+                   help='Days to keep traces, from 4 to 730, if the workspace has no trace container yet. Default: 30.')
+        c.argument('trace_metrics', arg_type=get_enum_type(['Enabled', 'Disabled']),
+                   help='Trace-derived metrics, which are billed, if the workspace has no trace container yet. '
+                        'Default: Enabled.')
+    # endregion
