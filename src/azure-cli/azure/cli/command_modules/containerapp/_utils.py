@@ -965,16 +965,23 @@ def _remove_readonly_attributes(containerapp_def):
 
 
 # Remove null/None/empty properties in a model since the PATCH API will delete those. Not needed once we move to the SDK
+# userAssignedIdentities entries are kept even when empty: the resource ID key is the payload and its value is {}.
 def clean_null_values(d):
     if isinstance(d, dict):
         return {
             k: v
-            for k, v in ((k, clean_null_values(v)) for k, v in d.items())
+            for k, v in ((k, _clean_child_value(k, v)) for k, v in d.items())
             if (isinstance(v, dict) and len(v.items()) > 0) or (not isinstance(v, dict) and v is not None)
         }
     if isinstance(d, list):
         return [v for v in map(clean_null_values, d) if v]
     return d
+
+
+def _clean_child_value(key, value):
+    if key == "userAssignedIdentities" and isinstance(value, dict):
+        return {identity_id: clean_null_values(properties) or {} for identity_id, properties in value.items()}
+    return clean_null_values(value)
 
 
 def _populate_secret_values(containerapp_def, secret_values):

@@ -211,6 +211,47 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(expect_result_for_new, result_new)
         self.assertEqual(expect_result_for_old, result_old)
 
+    def test_clean_null_values_keeps_user_assigned_identities(self):
+        identity_id = ("/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg"
+                       "/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id")
+        other_identity_id = identity_id + "2"
+        test_dict = {
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    identity_id: {},
+                    other_identity_id: {"principalId": None, "clientId": None},
+                },
+            },
+            "properties": {
+                "configuration": {
+                    "registries": [{"server": "registry.azurecr.io", "identity": identity_id}],
+                },
+            },
+        }
+
+        result = clean_null_values(test_dict)
+
+        self.assertEqual({
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    identity_id: {},
+                    other_identity_id: {},
+                },
+            },
+            "properties": {
+                "configuration": {
+                    "registries": [{"server": "registry.azurecr.io", "identity": identity_id}],
+                },
+            },
+        }, result)
+
+        # An empty or null map is still removed, as before
+        for empty in ({}, None):
+            self.assertEqual({"identity": {"type": "None"}},
+                             clean_null_values({"identity": {"type": "None", "userAssignedIdentities": empty}}))
+
     def test_load_cert_file(self):
         pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')
         testpassword = 'test12'
