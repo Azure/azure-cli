@@ -10,7 +10,7 @@ from unittest import mock
 
 
 from knack.log import get_logger
-from azure.cli.command_modules.aro.tests.latest.custom_preparers import AROClusterServicePrincipalPreparer
+from azure.cli.command_modules.aro.tests.latest.standard.custom_preparers import AROClusterServicePrincipalPreparer
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.checkers import StringContainCheck
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
