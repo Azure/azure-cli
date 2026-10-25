@@ -777,6 +777,15 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     target_resource_group = resource_group_name if target_resource_group is None else target_resource_group
     target_vault_name = vault_name if target_vault_name is None else target_vault_name
     target_container_name = container_name if target_container_name is None else target_container_name
+    source_item = None
+    if restore_mode == 'AlternateWorkloadRestore' and workload_type is None:
+        source_item = common.show_item(
+            cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
+            container_name, item_name, "AzureWorkload")
+        custom_help.validate_item(source_item)
+        if isinstance(source_item, list):
+            raise ValidationError("Multiple items found. Please give native names instead.")
+        workload_type = source_item.properties.workload_type
     target_item = None
     if (target_item_name is not None or
             (restore_mode == 'AlternateWorkloadRestore' and
@@ -806,7 +815,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                                           target_vault_name, target_subscription, workload_type=workload_type,
                                           attach_and_mount=attach_and_mount, identity_arm_id=identity_arm_id,
                                           snapshot_instance_resource_group=snapshot_instance_resource_group,
-                                          recovery_mode=recovery_mode, no_recovery_mode=no_recovery_mode)
+                                          recovery_mode=recovery_mode, no_recovery_mode=no_recovery_mode,
+                                          source_item=source_item)
 
 
 def undelete_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,

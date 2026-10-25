@@ -259,6 +259,12 @@ az backup restore restore-azurewl @vaultArgs --recovery-config ".\instance-olr.j
 
 ### ALR: alternate-location restore
 
+For SQLInstance sources, `--workload-type` may be omitted; the CLI infers it from
+the protected source item. Omitting `--recovery-mode` defaults to
+`SnapshotAttachAndRecover`, and omitting `--target-item-name` generates a target
+database-name pattern. The target server, instance, and container selectors still
+identify the restore destination.
+
 ```powershell
 az backup protectable-item show @vaultArgs --workload-type MSSQL `
     --protectable-item-type SQLInstance --name $targetInstanceName --server-name $targetVm

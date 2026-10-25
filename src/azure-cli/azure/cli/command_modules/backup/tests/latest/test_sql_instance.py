@@ -297,6 +297,41 @@ class SqlInstanceTests(unittest.TestCase):
         track_refresh.assert_called_once()
         self.assertEqual("SQLInstance", client.begin_register.call_args.args[4].properties.workload_type)
 
+    @patch.object(custom_wl, "list_protectable_containers")
+    def test_backup_container_lookup_matches_full_resource_id(self, containers):
+        resource_id = (
+            "/subscriptions/source-sub/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm")
+        matching = SimpleNamespace(name="matching", properties=SimpleNamespace(container_id=resource_id.upper()))
+        other_subscription = SimpleNamespace(name="other", properties=SimpleNamespace(
+            container_id=resource_id.replace("source-sub", "other-sub")))
+        for candidates, expected in [
+                ([other_subscription], None), ([other_subscription, matching], matching.name),
+                ([matching], matching.name), ([], None)]:
+            with self.subTest(candidates=[item.name for item in candidates]):
+                containers.return_value = candidates
+                self.assertEqual(expected, custom_wl._get_protectable_container_name(
+                    self.cmd, "rg", "vault", resource_id))
+
+    @patch.object(custom_wl.cust_help, "track_register_operation")
+    @patch.object(custom_wl.cust_help, "track_refresh_operation")
+    @patch.object(custom_wl, "list_protectable_containers")
+    def test_backup_register_refreshes_after_subscription_collision(self, containers, refresh, _register):
+        resource_id = (
+            "/subscriptions/source-sub/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm")
+        containers.side_effect = [
+            [SimpleNamespace(name=CONTAINER, properties=SimpleNamespace(
+                container_id=resource_id.replace("source-sub", "other-sub")))],
+            [SimpleNamespace(name=CONTAINER, properties=SimpleNamespace(container_id=resource_id))]]
+        client = Mock()
+        custom_wl.register_wl_container(
+            self.cmd, client, "vault", "rg", "SQLInstance", resource_id, "AzureWorkload", "source-sub")
+        client.refresh.assert_called_once()
+        self.assertIn("containerSubscriptionId eq 'source-sub'", client.refresh.call_args.kwargs["filter"])
+        refresh.assert_called_once()
+        self.assertEqual(2, containers.call_count)
+        self.assertEqual(CONTAINER, client.begin_register.call_args.args[3])
+        self.assertEqual(resource_id, client.begin_register.call_args.args[4].properties.source_resource_id)
+
     def test_backup_target_instance_preserves_server_filter(self):
         items = [
             SimpleNamespace(name=INSTANCE, properties=SimpleNamespace(
@@ -305,6 +340,49 @@ class SqlInstanceTests(unittest.TestCase):
         ]
         selected = custom_wl.show_protectable_instance(items, "target-vm", "SQLInstance", "mssqlserver")
         self.assertIs(items[1], selected)
+
+    def test_backup_target_instance_skips_missing_friendly_names(self):
+        for item_type in ("SQLInstance", "SAPHanaSystem"):
+            for omitted in (False, True):
+                for requested_name in (item_type + ";target", "target-instance"):
+                    with self.subTest(item_type=item_type, omitted=omitted, requested_name=requested_name):
+                        properties = {
+                            "protectableItemType": item_type, "serverName": "target-vm", "friendlyName": None}
+                        if omitted:
+                            properties.pop("friendlyName")
+                        missing = models.WorkloadProtectableItemResource({
+                            "name": item_type + ";other", "properties": properties})
+                        target = models.WorkloadProtectableItemResource({
+                            "name": item_type + ";target", "properties": {
+                                "protectableItemType": item_type, "serverName": "target-vm",
+                                "friendlyName": "target-instance"}})
+                        wrong_server = models.WorkloadProtectableItemResource({
+                            "name": item_type + ";target", "properties": {
+                                "protectableItemType": item_type, "serverName": "source-vm",
+                                "friendlyName": "target-instance"}})
+                        other_type = "SAPHanaSystem" if item_type == "SQLInstance" else "SQLInstance"
+                        wrong_type = models.WorkloadProtectableItemResource({
+                            "name": other_type + ";target", "properties": {
+                                "protectableItemType": other_type, "serverName": "target-vm",
+                                "friendlyName": "target-instance"}})
+                        selected = custom_wl.show_protectable_instance(
+                            [missing, wrong_server, wrong_type, target],
+                            "TARGET-VM", item_type, requested_name.upper())
+                        self.assertIs(target, selected)
+
+    def test_backup_target_instance_native_name_without_friendly_name(self):
+        for item_type in ("SQLInstance", "SAPHanaSystem"):
+            for omitted in (False, True):
+                with self.subTest(item_type=item_type, omitted=omitted):
+                    properties = {
+                        "protectableItemType": item_type, "serverName": "target-vm", "friendlyName": None}
+                    if omitted:
+                        properties.pop("friendlyName")
+                    target = models.WorkloadProtectableItemResource({
+                        "name": item_type + ";target", "properties": properties})
+                    selected = custom_wl.show_protectable_instance(
+                        [target], "target-vm", item_type, target.name.upper())
+                    self.assertIs(target, selected)
 
     def test_backup_filter_literals_escape_quotes(self):
         self.assertEqual("baseSnapshotRPId eq 'snapshot''rp'",
@@ -708,7 +786,7 @@ class SqlInstanceTests(unittest.TestCase):
     @patch.object(custom_base, "show_protectable_instance")
     @patch.object(custom_base, "get_mgmt_service_client")
     @patch.object(custom_base, "get_subscription_id", return_value="sub")
-    @patch.object(custom_wl, "backup_protected_items_cf")
+    @patch.object(_client_factory, "_backup_client_factory")
     def test_backup_snapshot_config_public_handler(
             self, _items, _subscription, _client, target_item, target_container, source_item):
         target_id = ITEM_ID.replace(CONTAINER, CONTAINER.replace(";vm", ";target-vm")) + INSTANCE
@@ -718,14 +796,57 @@ class SqlInstanceTests(unittest.TestCase):
         source_item.return_value = protected_item()
         client = Mock()
         client.get.return_value = snapshot_point()
-        config = custom_base.show_recovery_config(
-            self.cmd, client, "rg", "vault", "AlternateWorkloadRestore", CONTAINER, INSTANCE,
-            rp_name="snapshot-rp", target_server_type="SQLInstance", target_server_name="target-vm",
-            workload_type="SQLInstance", target_instance_name="mssqlserver",
-            identity_arm_id=IDENTITY, snapshot_instance_resource_group="restore-rg")
-        self.assertTrue(config["database_name"].startswith("target/*_restored_"))
-        self.assertEqual("SnapshotAttachAndRecover", config["recovery_mode"])
-        target_item.assert_called_once()
+        for options in [{}, {"workload_type": "SQLInstance"}, {"recovery_mode": "SnapshotAttach"},
+                        {"target_item_name": "restored-db"}]:
+            with self.subTest(options=options):
+                target_item.reset_mock()
+                source_item.reset_mock()
+                config = custom_base.show_recovery_config(
+                    self.cmd, client, "rg", "vault", "AlternateWorkloadRestore", CONTAINER, INSTANCE,
+                    rp_name="snapshot-rp", target_server_type="SQLInstance", target_server_name="target-vm",
+                    target_instance_name="mssqlserver", identity_arm_id=IDENTITY,
+                    snapshot_instance_resource_group="restore-rg", **options)
+                if "target_item_name" in options:
+                    self.assertEqual("target/restored-db", config["database_name"])
+                else:
+                    self.assertTrue(config["database_name"].startswith("target/*_restored_"))
+                self.assertEqual(options.get("recovery_mode", "SnapshotAttachAndRecover"), config["recovery_mode"])
+                target_item.assert_called_once()
+                self.assertEqual("SQLInstance", target_item.call_args.args[6])
+                source_item.assert_called_once()
+
+    @patch.object(custom_wl.common, "show_recovery_point", return_value=SimpleNamespace(name="hana-rp"))
+    @patch.object(custom_wl.common, "show_item")
+    @patch.object(custom_base.common, "show_container")
+    @patch.object(custom_base, "show_protectable_instance")
+    @patch.object(custom_base, "get_mgmt_service_client")
+    @patch.object(custom_base, "get_subscription_id", return_value="sub")
+    @patch.object(_client_factory, "_backup_client_factory")
+    def test_backup_hana_config_infers_source_workload(
+            self, _items, _subscription, _client, target, container, source, _point):
+        source.return_value = models.ProtectedItemResource(
+            id=ITEM_ID + "SAPHanaDatabase;h01;db", name="SAPHanaDatabase;h01;db",
+            properties=models.AzureVmWorkloadSAPHanaDatabaseProtectedItem(
+                workload_type="SAPHanaDatabase", backup_management_type="AzureWorkload",
+                container_name=CONTAINER, source_resource_id="source-vm"))
+        target.return_value = SimpleNamespace(
+            id=ITEM_ID + "SAPHanaSystem;h02",
+            properties=SimpleNamespace(protectable_item_type="SAPHanaSystem", friendly_name="h02"))
+        container.return_value = SimpleNamespace(id=ITEM_ID)
+        configs = []
+        for workload in (None, "SAPHanaDatabase"):
+            with self.subTest(workload=workload):
+                source.reset_mock()
+                target.reset_mock()
+                configs.append(custom_base.show_recovery_config(
+                    self.cmd, Mock(), "rg", "vault", "AlternateWorkloadRestore", CONTAINER,
+                    source.return_value.name, rp_name="hana-rp", target_item_name="restored-db",
+                    target_server_type="HANAInstance", target_server_name="target-vm", workload_type=workload))
+                source.assert_called_once()
+                self.assertEqual("SAPHanaDatabase", target.call_args.args[6])
+        self.assertEqual(configs[0], configs[1])
+        self.assertEqual("h02/restored-db", configs[0]["database_name"])
+        self.assertEqual("SAPHana", configs[0]["item_type"])
 
     def test_backup_sdk_wire_preserves_snapshot_extensions(self):
         class AcceptedResponse(HttpResponse):
@@ -931,6 +1052,44 @@ class SqlInstanceCommandTests(unittest.TestCase):
         self.assertEqual(2, self.client.recovery_points.get.call_count)
         self.client.recovery_points.list.assert_not_called()
         passive.assert_not_called()
+
+    @patch.object(custom_base, "get_mgmt_service_client")
+    @patch.object(custom_wl.common, "show_item")
+    @patch.object(custom_base.common, "show_container")
+    @patch.object(custom_base, "show_protectable_instance")
+    def test_backup_snapshot_recovery_config_infers_defaults(self, target, container, source, _service):
+        source.return_value = protected_item()
+        target_id = ITEM_ID.replace(CONTAINER, CONTAINER.replace(";vm", ";target-vm")) + INSTANCE
+        target.return_value = SimpleNamespace(
+            id=target_id, properties=SimpleNamespace(protectable_item_type="SQLInstance", friendly_name="target"))
+        container.return_value = SimpleNamespace(id="/".join(target_id.split("/")[:-2]))
+        self.client.recovery_points.get.return_value = snapshot_point()
+        config = self.cmd(
+            'backup recoveryconfig show -g rg -v vault -c "VMAppContainer;Compute;rg;vm" '
+            '-i "SQLInstance;mssqlserver" --rp-name snapshot-rp --restore-mode AlternateWorkloadRestore '
+            '--target-instance-name mssqlserver --target-server-name target-vm --target-server-type SQLInstance '
+            '--target-container-name "VMAppContainer;Compute;rg;target-vm" '
+            '--snapshot-rg restore-rg --identity-arm-id ' + IDENTITY)
+        self.assertEqual("SnapshotAttachAndRecover", config["recovery_mode"])
+        self.assertTrue(config["database_name"].startswith("target/*_restored_"))
+        target.assert_called_once()
+        self.assertEqual("SQLInstance", target.call_args.args[6])
+        source.assert_called_once()
+        self.client.recovery_points.get.assert_called_once()
+
+    @patch.object(custom_wl.common, "show_item")
+    @patch.object(custom_base, "show_protectable_instance")
+    def test_backup_snapshot_recovery_config_rejects_missing_or_ambiguous_source(self, target, source):
+        for item in (None, [protected_item(), protected_item()]):
+            with self.subTest(ambiguous=isinstance(item, list)):
+                source.return_value = item
+                self.cmd(
+                    'backup recoveryconfig show -g rg -v vault -c "VMAppContainer;Compute;rg;vm" '
+                    '-i "SQLInstance;mssqlserver" --rp-name snapshot-rp --restore-mode AlternateWorkloadRestore '
+                    '--target-instance-name mssqlserver --target-server-name target-vm '
+                    '--target-server-type SQLInstance', expect_failure=True)
+                target.assert_not_called()
+                self.client.recovery_points.get.assert_not_called()
 
     @patch.object(custom_wl.cust_help, "track_register_operation", return_value={"status": "Succeeded"})
     @patch.object(custom_wl.cust_help, "track_refresh_operation")

@@ -471,8 +471,8 @@ def show_protectable_instance(items, server_name, protectable_item_type, instanc
         filtered_items = [
             item for item in filtered_items
             if item.name.lower() == instance_name.lower() or
-            cust_help.get_model_property(
-                item.properties, 'friendly_name', 'friendlyName').lower() == instance_name.lower()
+            (cust_help.get_model_property(
+                item.properties, 'friendly_name', 'friendlyName') or '').lower() == instance_name.lower()
         ]
 
     return cust_help.get_none_one_or_many(filtered_items)
@@ -1005,7 +1005,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                          rp_name, target_item, target_item_name, log_point_in_time, from_full_rp_name,
                          filepath, target_container, target_resource_group, target_vault_name, target_subscription,
                          workload_type, attach_and_mount, identity_arm_id, snapshot_instance_resource_group,
-                         recovery_mode=None, no_recovery_mode=False):
+                         recovery_mode=None, no_recovery_mode=False, source_item=None):
     if log_point_in_time is not None:
         datetime_type(log_point_in_time)
 
@@ -1028,8 +1028,10 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
             Log point in time or recovery point name must be provided.
             """)
 
-    item = common.show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
-                            container_name, item_name, "AzureWorkload")
+    item = source_item
+    if item is None:
+        item = common.show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                container_name, item_name, "AzureWorkload")
     cust_help.validate_item(item)
     item_type = item.properties.workload_type
     item_name = item.name
@@ -1511,8 +1513,7 @@ def _get_protectable_container_name(cmd, resource_group_name, vault_name, resour
     containers = list_protectable_containers(cmd, resource_group_name, vault_name)
     container_name = None
     for container in containers:
-        container_resource_id = cust_help.get_resource_id(container.properties.container_id)
-        if container_resource_id.lower() == cust_help.get_resource_id(resource_id).lower():
+        if container.properties.container_id.lower() == resource_id.lower():
             container_name = container.name
             break
     return container_name
