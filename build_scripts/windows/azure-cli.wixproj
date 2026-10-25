@@ -1,50 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="WixToolset.Sdk/7.0.0">
   <!-- Project -->
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>3.10</ProductVersion>
-    <ProjectGuid>9a0dc66d-3186-4ee4-b471-6c0f1dd6e159</ProjectGuid>
-    <SchemaVersion>2.0</SchemaVersion>
     <OutputName>Microsoft Azure CLI</OutputName>
     <OutputType>Package</OutputType>
-    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-  </PropertyGroup>
-  <!-- Local WiX -->
-  <PropertyGroup>
-    <LocalWixRoot>artifacts\wix</LocalWixRoot>
-    <WixToolPath>$(MSBuildThisFileDirectory)$(LocalWixRoot)</WixToolPath>
-    <WixTargetsPath Condition="Exists('$(WixToolPath)\Wix.targets')">$(WixToolPath)\Wix.targets</WixTargetsPath>
-    <WixTasksPath Condition="Exists('$(WixToolPath)\wixtasks.dll')">$(WixToolPath)\wixtasks.dll</WixTasksPath>
+    <!-- Don't glob for sources: artifacts\ holds the whole CLI layout with tens of thousands of files -->
+    <EnableDefaultItems>false</EnableDefaultItems>
     <AzureCliSource>artifacts\cli</AzureCliSource>
-    <LinkerAdditionalOptions>-fv</LinkerAdditionalOptions>
+    <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
+    <DefineConstants Condition=" '$(Configuration)' == 'Debug' ">Debug;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <OutputPath>out\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>Debug;AzureCliSource=$(AzureCliSource)</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <OutputPath>out\</OutputPath>
     <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <OutputPath>out\$(Configuration)\</OutputPath>
-    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>Debug;AzureCliSource=$(AzureCliSource)</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <OutputPath>out\</OutputPath>
-    <IntermediateOutputPath>out\obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>AzureCliSource=$(AzureCliSource)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="out\azure-cli.wxs">
-      <Link>azure-cli.wxs</Link>
-    </Compile>
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
@@ -52,17 +27,7 @@
   </ItemGroup>
   <!-- UI -->
   <ItemGroup>
-    <WixExtension Include="WixUIExtension">
-      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
-      <Name>WixUIExtension</Name>
-    </WixExtension>
-    <WixExtension Include="WixUtilExtension">
-      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
-      <Name>WixUtilExtension</Name>
-    </WixExtension>
+    <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="7.0.0" />
   </ItemGroup>
-  <Import Project="$(WixTargetsPath)" />
-  <Target Name="BeforeBuild">
-    <HeatDirectory Directory="$(AzureCliSource)" ToolPath="$(WixToolPath)" AutogenerateGuids="true" ComponentGroupName="AzureCliComponentGroup" SuppressRootDirectory="true" DirectoryRefId="DynamicCliDir" OutputFile="out\azure-cli.wxs" PreprocessorVariable="var.AzureCliSource" />
-  </Target>
 </Project>
