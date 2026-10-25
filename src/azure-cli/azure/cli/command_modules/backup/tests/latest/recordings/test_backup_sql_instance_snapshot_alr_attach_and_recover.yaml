@@ -1,0 +1,2593 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -c --item-name --backup-management-type --workload-type
+        --restore-point-query-type
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver","name":"SQLInstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"childDatabaseNameList":["db1","db2","db3"],"instanceProtectionReadiness":"Ready","friendlyName":"mssqlserver","serverName":"testvm2-iws","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2026-10-24T15:54:44.5260488Z","protectedItemDataSourceId":"2266330960059317423","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-21T08:03:59Z","recoveryPointCount":15,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSQLInstance","backupManagementType":"AzureWorkload","workloadType":"SQLInstance","containerName":"VMAppContainer;compute;chandrikarg;testvm2-iws","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testvm2-iws","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/DefaultBackupPolicy-msyn7xfa","lastRecoveryPoint":"2026-10-24T18:16:21Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastasia"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1774'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/cd9fe8cc-c407-4842-acff-dab198ef48f6
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 33F8815E4A2443A38D75E520DCEE2FBC Ref B: SG2AA1040517054 Ref C: 2026-10-24T18:22:36Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -c --item-name --backup-management-type --workload-type
+        --restore-point-query-type
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver/recoveryPoints?$filter=restorePointQueryType%20eq%20%27Snapshot%27&api-version=2026-10-01
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266349069015704081","name":"2266349069015704081","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-10-24T18:16:21Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"InstantRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266349111475432955","name":"2266349111475432955","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-10-24T15:53:25Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"InstantRP","status":"Valid"},{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266352464258260906","name":"2266352464258260906","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-10-04T08:04:00Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"InstantRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2026-10-09T08:04:00.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266354289824992720","name":"2266354289824992720","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-30T20:04:06Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"InstantRP","status":"Valid"},{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-29T20:04:06.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266354678258785068","name":"2266354678258785068","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-29T20:04:05Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-28T20:04:05.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266357795362235495","name":"2266357795362235495","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-28T20:04:06Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-27T20:04:06.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266358670787017250","name":"2266358670787017250","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-28T06:59:54Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2026-10-29T06:57:27.0000000Z","ruleName":"On-Demand","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266350207879208754","name":"2266350207879208754","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-27T20:03:59Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2028-09-24T20:03:59.0000000Z","ruleName":"Weekly","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266352143182930437","name":"2266352143182930437","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-26T20:03:59Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-25T20:03:59.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266363094191061753","name":"2266363094191061753","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-25T20:03:59Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-24T20:03:59.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266357625286152597","name":"2266357625286152597","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-24T20:04:00Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-23T20:04:00.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266362338801371873","name":"2266362338801371873","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-23T20:04:00Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-22T20:04:00.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266364745455989522","name":"2266364745455989522","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-22T20:03:59Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-21T20:03:59.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266353388997022845","name":"2266353388997022845","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-21T20:04:01Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-20T20:04:01.0000000Z","ruleName":"Daily","isSoftDeleted":false}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266351285379269029","name":"2266351285379269029","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","recoveryPointTimeInUTC":"2026-09-21T08:03:59Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"HardenedRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"expiryTime":"2027-03-20T08:03:59.0000000Z","ruleName":"Daily","isSoftDeleted":false}}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '14064'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/6d2fe414-2c44-4b66-8dfc-e8d0d0631c7f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 1B512E4518BF4A789B74E2F075DDD57B Ref B: SG2AA1040517052 Ref C: 2026-10-24T18:22:39Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -c --item-name --backup-management-type --workload-type
+        -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver","name":"SQLInstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"childDatabaseNameList":["db1","db2","db3"],"instanceProtectionReadiness":"Ready","friendlyName":"mssqlserver","serverName":"testvm2-iws","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2026-10-24T15:54:44.5260488Z","protectedItemDataSourceId":"2266330960059317423","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-21T08:03:59Z","recoveryPointCount":15,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSQLInstance","backupManagementType":"AzureWorkload","workloadType":"SQLInstance","containerName":"VMAppContainer;compute;chandrikarg;testvm2-iws","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testvm2-iws","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/DefaultBackupPolicy-msyn7xfa","lastRecoveryPoint":"2026-10-24T18:16:21Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastasia"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1774'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/c869b9b7-4a29-4083-b005-7218f798e855
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 721FF561C35C4477AB74C16552B39955 Ref B: SG2AA1070306040 Ref C: 2026-10-24T18:22:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -c --item-name --backup-management-type --workload-type
+        -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver/recoveryPoints/2266349069015704081?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266349069015704081","name":"2266349069015704081","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","extendedInfo":{"dataDirectoryTimeInUTC":"2026-10-24T18:16:21Z","dataDirectoryPaths":[{"type":"DiskDrives","path":"F:\\"},{"type":"DiskDrives","path":"G:\\"}],"includedDatabases":[{"datasourceId":"2266330960749398735","datasourceName":"MSSQLSERVER;db1"},{"datasourceId":"2266330960070266617","datasourceName":"MSSQLSERVER;db2"},{"datasourceId":"2266330960221001143","datasourceName":"MSSQLSERVER;db3"}],"snapshotRecoveryPointInfo":{"snapshotResourceGroup":"chandrikarg","sourceFilesystemInfo":[{"volumeGuid":"\\\\?\\Volume{d5d42fee-46ea-46b6-be21-69d4f04d83ea}\\","fileSystemType":"ntfs","accessPaths":["F:\\"],"isOnStorageSpace":true,"storageSpaceInfo":{"storagePoolUniqueId":"{5bc804ce-3e1c-47f4-837f-c9658eeb7a2a}","storagePoolFriendlyName":"SQLVMStoragePool1","virtualDiskUniqueId":"{5bc804ce-3e1c-47f4-837f-c9658eeb7a2a}{53752663-d76d-4db8-a92e-22343dcf787d}\"","virtualDiskFriendlyName":"SQLVMVirtualDisk1"},"diskInfoList":[{"diskNumber":0,"diskUniqueId":"{4228e948-9aa5-c6d0-8055-b77f9792db49}\"","sizeInBytes":0,"lun":0}]},{"volumeGuid":"\\\\?\\Volume{eb035701-f99e-4b27-a399-d09c8cee1158}\\","fileSystemType":"ntfs","accessPaths":["G:\\"],"isOnStorageSpace":true,"storageSpaceInfo":{"storagePoolUniqueId":"{422c52db-4c92-4132-90cf-a9f0ae4e3d88}","storagePoolFriendlyName":"SQLVMStoragePool2","virtualDiskUniqueId":"{422c52db-4c92-4132-90cf-a9f0ae4e3d88}{1fdd81d4-047d-4792-b572-2b1e6858e5c8}\"","virtualDiskFriendlyName":"SQLVMVirtualDisk2"},"diskInfoList":[{"diskNumber":0,"diskUniqueId":"{b77165c6-413f-fc15-6233-97ac0167f596}\"","sizeInBytes":0,"lun":1}]}]}},"recoveryPointTimeInUTC":"2026-10-24T18:16:21Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"InstantRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"isSoftDeleted":false},"sourceResourceLocation":"eastasia"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2482'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/bbfd5d88-8d35-44d5-8bac-7cb99102525c
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: A852BC9C1AA74312856D24124798A0CD Ref B: SG2AA1070303054 Ref C: 2026-10-24T18:22:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoveryconfig show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -c --item-name --backup-management-type --workload-type
+        --rp-name --restore-mode --recovery-mode --target-container-name --target-server-name
+        --target-server-type --target-instance-name --target-resource-group --target-vault-name
+        --snapshot-rg --identity-arm-id --target-item-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupProtectableItems?api-version=2026-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20workloadType%20eq%20%27SQLDataBase%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm2/protectableItems/sqldatabase;mssqlserver;master","name":"sqldatabase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm2","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"master","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm2/protectableItems/sqldatabase;mssqlserver;model","name":"sqldatabase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm2","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"model","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm2/protectableItems/sqldatabase;mssqlserver;msdb","name":"sqldatabase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm2","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm3/protectableItems/sqldatabase;mssqlserver;master","name":"sqldatabase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm3","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"master","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm3/protectableItems/sqldatabase;mssqlserver;model","name":"sqldatabase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm3","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"model","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm3/protectableItems/sqldatabase;mssqlserver;msdb","name":"sqldatabase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm3","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm4/protectableItems/sqldatabase;mssqlserver;master","name":"sqldatabase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm4","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"master","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm4/protectableItems/sqldatabase;mssqlserver;model","name":"sqldatabase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm4","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"model","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm4/protectableItems/sqldatabase;mssqlserver;msdb","name":"sqldatabase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm4","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm1-iws/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm1-iws","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":9,"subprotectableitemcount":9,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm1-iws/protectableItems/sqldatabase;mssqlserver;db1restored","name":"sqldatabase;mssqlserver;db1restored","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm1-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"db1restored","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm1-iws/protectableItems/sqldatabase;mssqlserver;db2restored","name":"sqldatabase;mssqlserver;db2restored","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm1-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"db2restored","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm1-iws/protectableItems/sqldatabase;mssqlserver;db3restored","name":"sqldatabase;mssqlserver;db3restored","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm1-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"db3restored","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm1-iws/protectableItems/sqldatabase;mssqlserver;master","name":"sqldatabase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm1-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"master","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm1-iws/protectableItems/sqldatabase;mssqlserver;model","name":"sqldatabase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm1-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"model","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm1-iws/protectableItems/sqldatabase;mssqlserver;msdb","name":"sqldatabase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm1-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm2-iws/protectableItems/sqldatabase;mssqlserver;master","name":"sqldatabase;mssqlserver;master","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm2-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"master","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm2-iws/protectableItems/sqldatabase;mssqlserver;model","name":"sqldatabase;mssqlserver;model","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm2-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"model","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm2-iws/protectableItems/sqldatabase;mssqlserver;msdb","name":"sqldatabase;mssqlserver;msdb","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm2-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"msdb","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm2-iws/protectableItems/sqldatabase;mssqlserver;testdb2restored_9_21_2026_1929","name":"sqldatabase;mssqlserver;testdb2restored_9_21_2026_1929","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm2-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"testdb2restored_9_21_2026_1929","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm2-iws/protectableItems/sqldatabase;mssqlserver;testdb3restored_9_21_2026_1929","name":"sqldatabase;mssqlserver;testdb3restored_9_21_2026_1929","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm2-iws","isAutoProtectable":false,"isAutoProtected":false,"subinquireditemcount":0,"subprotectableitemcount":0,"IsProtectable":true,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLDataBase","friendlyName":"testdb3restored_9_21_2026_1929","protectionState":"NotProtected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm2/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm2","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":4,"subprotectableitemcount":4,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"Protected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm3/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm3","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":4,"subprotectableitemcount":4,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"Protected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testovm4/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testovm4","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":4,"subprotectableitemcount":4,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"Protected"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm2-iws/protectableItems/sqlinstance;mssqlserver","name":"sqlinstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectableItems","properties":{"parentName":"MSSQLSERVER","serverName":"testvm2-iws","isAutoProtectable":true,"isAutoProtected":false,"subinquireditemcount":8,"subprotectableitemcount":8,"prebackupvalidation":{"status":"Success","code":"Success"},"IsProtectable":false,"backupManagementType":"AzureWorkload","workloadType":"SQL","protectableItemType":"SQLInstance","friendlyName":"MSSQLSERVER","protectionState":"Protected"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '19251'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/68643ca5-8fab-4d1d-880f-bf1b126944fd
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 2D7E4C17C18548579B1075D6B201B25A Ref B: SG2AA1070301036 Ref C: 2026-10-24T18:22:44Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoveryconfig show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -c --item-name --backup-management-type --workload-type
+        --rp-name --restore-mode --recovery-mode --target-container-name --target-server-name
+        --target-server-type --target-instance-name --target-resource-group --target-vault-name
+        --snapshot-rg --identity-arm-id --target-item-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupProtectionIntents?api-version=2026-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20itemName%20eq%20%27MSSQLSERVER%27%20and%20itemType%20eq%20%27SQLInstance%27%20and%20parentName%20eq%20%27vmappcontainer%3Bcompute%3Bchandrikarg%3Btestvm1-iws%27
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/3f7452fd-c464-48ee-b2be-f43fe44dc2d0
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 996DEDA3D2D3415FA6DF8507630135EA Ref B: SG2AA1040518011 Ref C: 2026-10-24T18:22:46Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoveryconfig show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -c --item-name --backup-management-type --workload-type
+        --rp-name --restore-mode --recovery-mode --target-container-name --target-server-name
+        --target-server-type --target-instance-name --target-resource-group --target-vault-name
+        --snapshot-rg --identity-arm-id --target-item-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupProtectionContainers?api-version=2026-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;testovm2","name":"VMAppContainer;Compute;chandrikarg;testovm2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testovm2","lastUpdatedTime":"2026-08-18T12:01:21.768788Z","extendedInfo":{"hostServerName":"testovm2","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":4}}}]}},"friendlyName":"testovm2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;testovm3","name":"VMAppContainer;Compute;chandrikarg;testovm3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testovm3","lastUpdatedTime":"2026-09-09T14:45:59.2913899Z","extendedInfo":{"hostServerName":"testovm3","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":4}}}]}},"friendlyName":"testovm3","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;testovm4","name":"VMAppContainer;Compute;chandrikarg;testovm4","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testovm4","lastUpdatedTime":"2026-09-10T10:45:55.5235245Z","extendedInfo":{"hostServerName":"testovm4","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":4}}}]}},"friendlyName":"testovm4","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;TestVM1-iws","name":"VMAppContainer;Compute;chandrikarg;TestVM1-iws","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/TestVM1-iws","lastUpdatedTime":"2026-09-17T06:57:08.7675247Z","extendedInfo":{"hostServerName":"testvm1-iws","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":9,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":9}}}]}},"friendlyName":"TestVM1-iws","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;TestVM2-iws","name":"VMAppContainer;Compute;chandrikarg;TestVM2-iws","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/TestVM2-iws","lastUpdatedTime":"2026-09-21T06:29:15.5802954Z","extendedInfo":{"hostServerName":"testvm2-iws","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":8,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":8}}}]}},"friendlyName":"TestVM2-iws","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5965'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/cbdfa798-6815-46cb-aa2e-a2d3c25481f8
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 26BDD76D64D34352A964A3CEBE703FF0 Ref B: SG2AA1070301040 Ref C: 2026-10-24T18:22:48Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoveryconfig show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -c --item-name --backup-management-type --workload-type
+        --rp-name --restore-mode --recovery-mode --target-container-name --target-server-name
+        --target-server-type --target-instance-name --target-resource-group --target-vault-name
+        --snapshot-rg --identity-arm-id --target-item-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver","name":"SQLInstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"childDatabaseNameList":["db1","db2","db3"],"instanceProtectionReadiness":"Ready","friendlyName":"mssqlserver","serverName":"testvm2-iws","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2026-10-24T15:54:44.5260488Z","protectedItemDataSourceId":"2266330960059317423","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-21T08:03:59Z","recoveryPointCount":15,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSQLInstance","backupManagementType":"AzureWorkload","workloadType":"SQLInstance","containerName":"VMAppContainer;compute;chandrikarg;testvm2-iws","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testvm2-iws","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/DefaultBackupPolicy-msyn7xfa","lastRecoveryPoint":"2026-10-24T18:16:21Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastasia"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1774'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/07e16eb1-3458-4d41-83bf-6498fba88558
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: BA74E6CB30894667B36DDE3D4D45FE43 Ref B: SG2AA1070304031 Ref C: 2026-10-24T18:22:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoveryconfig show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -c --item-name --backup-management-type --workload-type
+        --rp-name --restore-mode --recovery-mode --target-container-name --target-server-name
+        --target-server-type --target-instance-name --target-resource-group --target-vault-name
+        --snapshot-rg --identity-arm-id --target-item-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver/recoveryPoints/2266349069015704081?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266349069015704081","name":"2266349069015704081","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","extendedInfo":{"dataDirectoryTimeInUTC":"2026-10-24T18:16:21Z","dataDirectoryPaths":[{"type":"DiskDrives","path":"F:\\"},{"type":"DiskDrives","path":"G:\\"}],"includedDatabases":[{"datasourceId":"2266330960749398735","datasourceName":"MSSQLSERVER;db1"},{"datasourceId":"2266330960070266617","datasourceName":"MSSQLSERVER;db2"},{"datasourceId":"2266330960221001143","datasourceName":"MSSQLSERVER;db3"}],"snapshotRecoveryPointInfo":{"snapshotResourceGroup":"chandrikarg","sourceFilesystemInfo":[{"volumeGuid":"\\\\?\\Volume{d5d42fee-46ea-46b6-be21-69d4f04d83ea}\\","fileSystemType":"ntfs","accessPaths":["F:\\"],"isOnStorageSpace":true,"storageSpaceInfo":{"storagePoolUniqueId":"{5bc804ce-3e1c-47f4-837f-c9658eeb7a2a}","storagePoolFriendlyName":"SQLVMStoragePool1","virtualDiskUniqueId":"{5bc804ce-3e1c-47f4-837f-c9658eeb7a2a}{53752663-d76d-4db8-a92e-22343dcf787d}\"","virtualDiskFriendlyName":"SQLVMVirtualDisk1"},"diskInfoList":[{"diskNumber":0,"diskUniqueId":"{4228e948-9aa5-c6d0-8055-b77f9792db49}\"","sizeInBytes":0,"lun":0}]},{"volumeGuid":"\\\\?\\Volume{eb035701-f99e-4b27-a399-d09c8cee1158}\\","fileSystemType":"ntfs","accessPaths":["G:\\"],"isOnStorageSpace":true,"storageSpaceInfo":{"storagePoolUniqueId":"{422c52db-4c92-4132-90cf-a9f0ae4e3d88}","storagePoolFriendlyName":"SQLVMStoragePool2","virtualDiskUniqueId":"{422c52db-4c92-4132-90cf-a9f0ae4e3d88}{1fdd81d4-047d-4792-b572-2b1e6858e5c8}\"","virtualDiskFriendlyName":"SQLVMVirtualDisk2"},"diskInfoList":[{"diskNumber":0,"diskUniqueId":"{b77165c6-413f-fc15-6233-97ac0167f596}\"","sizeInBytes":0,"lun":1}]}]}},"recoveryPointTimeInUTC":"2026-10-24T18:16:21Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"InstantRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"isSoftDeleted":false},"sourceResourceLocation":"eastasia"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2482'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/1e6086d4-421d-45aa-bcb5-14b6d97de4f3
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: F8FB14FCC016466389386A293D4011CF Ref B: SG2AA1070305062 Ref C: 2026-10-24T18:22:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver","name":"SQLInstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"childDatabaseNameList":["db1","db2","db3"],"instanceProtectionReadiness":"Ready","friendlyName":"mssqlserver","serverName":"testvm2-iws","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2026-10-24T15:54:44.5260488Z","protectedItemDataSourceId":"2266330960059317423","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-21T08:03:59Z","recoveryPointCount":15,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSQLInstance","backupManagementType":"AzureWorkload","workloadType":"SQLInstance","containerName":"VMAppContainer;compute;chandrikarg;testvm2-iws","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testvm2-iws","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/DefaultBackupPolicy-msyn7xfa","lastRecoveryPoint":"2026-10-24T18:16:21Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastasia"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1774'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/bdd7cbf0-97f1-4e2d-a1e1-3c9be85b03b1
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: B25AA020436C41E1B68FF31A1EE85D9A Ref B: SG2AA1040516036 Ref C: 2026-10-24T18:22:53Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver","name":"SQLInstance;mssqlserver","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"childDatabaseNameList":["db1","db2","db3"],"instanceProtectionReadiness":"Ready","friendlyName":"mssqlserver","serverName":"testvm2-iws","parentName":"MSSQLSERVER","parentType":"AzureVmWorkloadSQLInstance","protectionStatus":"Healthy","protectionState":"Protected","lastBackupStatus":"Healthy","lastBackupTime":"2026-10-24T15:54:44.5260488Z","protectedItemDataSourceId":"2266330960059317423","protectedItemHealthStatus":"Healthy","extendedInfo":{"oldestRecoveryPoint":"2026-09-21T08:03:59Z","recoveryPointCount":15,"policyState":"Consistent"},"protectedItemType":"AzureVmWorkloadSQLInstance","backupManagementType":"AzureWorkload","workloadType":"SQLInstance","containerName":"VMAppContainer;compute;chandrikarg;testvm2-iws","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testvm2-iws","policyId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/DefaultBackupPolicy-msyn7xfa","lastRecoveryPoint":"2026-10-24T18:16:21Z","vaultId":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr","isArchiveEnabled":false,"softDeleteRetentionPeriod":0,"sourceLocation":"eastasia"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1774'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/3ad59752-6b42-453b-bd50-6975e9259017
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: EA7E3C5E9A884BD8A314AEAB1DA374F7 Ref B: SG2AA1040519031 Ref C: 2026-10-24T18:22:55Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver/recoveryPoints/2266349069015704081?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/recoveryPoints/2266349069015704081","name":"2266349069015704081","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems/recoveryPoints","properties":{"objectType":"AzureWorkloadSQLRecoveryPoint","extendedInfo":{"dataDirectoryTimeInUTC":"2026-10-24T18:16:21Z","dataDirectoryPaths":[{"type":"DiskDrives","path":"F:\\"},{"type":"DiskDrives","path":"G:\\"}],"includedDatabases":[{"datasourceId":"2266330960749398735","datasourceName":"MSSQLSERVER;db1"},{"datasourceId":"2266330960070266617","datasourceName":"MSSQLSERVER;db2"},{"datasourceId":"2266330960221001143","datasourceName":"MSSQLSERVER;db3"}],"snapshotRecoveryPointInfo":{"snapshotResourceGroup":"chandrikarg","sourceFilesystemInfo":[{"volumeGuid":"\\\\?\\Volume{d5d42fee-46ea-46b6-be21-69d4f04d83ea}\\","fileSystemType":"ntfs","accessPaths":["F:\\"],"isOnStorageSpace":true,"storageSpaceInfo":{"storagePoolUniqueId":"{5bc804ce-3e1c-47f4-837f-c9658eeb7a2a}","storagePoolFriendlyName":"SQLVMStoragePool1","virtualDiskUniqueId":"{5bc804ce-3e1c-47f4-837f-c9658eeb7a2a}{53752663-d76d-4db8-a92e-22343dcf787d}\"","virtualDiskFriendlyName":"SQLVMVirtualDisk1"},"diskInfoList":[{"diskNumber":0,"diskUniqueId":"{4228e948-9aa5-c6d0-8055-b77f9792db49}\"","sizeInBytes":0,"lun":0}]},{"volumeGuid":"\\\\?\\Volume{eb035701-f99e-4b27-a399-d09c8cee1158}\\","fileSystemType":"ntfs","accessPaths":["G:\\"],"isOnStorageSpace":true,"storageSpaceInfo":{"storagePoolUniqueId":"{422c52db-4c92-4132-90cf-a9f0ae4e3d88}","storagePoolFriendlyName":"SQLVMStoragePool2","virtualDiskUniqueId":"{422c52db-4c92-4132-90cf-a9f0ae4e3d88}{1fdd81d4-047d-4792-b572-2b1e6858e5c8}\"","virtualDiskFriendlyName":"SQLVMVirtualDisk2"},"diskInfoList":[{"diskNumber":0,"diskUniqueId":"{b77165c6-413f-fc15-6233-97ac0167f596}\"","sizeInBytes":0,"lun":1}]}]}},"recoveryPointTimeInUTC":"2026-10-24T18:16:21Z","type":"SnapshotFull","recoveryPointTierDetails":[{"type":"InstantRP","status":"Valid"}],"recoveryPointMoveReadinessInfo":{"ArchivedRP":{"isReadyForMove":false,"additionalInfo":"We''re
+        still determining if this Recovery Point can be moved.. Please check again
+        after some time."}},"recoveryPointProperties":{"isSoftDeleted":false},"sourceResourceLocation":"eastasia"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2482'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/b7f1f851-df3f-42a2-ab9d-9e6893361514
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: D1E7C5D4637D475EB585193AB8E879DE Ref B: SG2AA1070301060 Ref C: 2026-10-24T18:22:57Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupProtectionContainers?api-version=2026-10-01&$filter=backupManagementType%20eq%20%27AzureWorkload%27%20and%20status%20eq%20%27Registered%27
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;testovm2","name":"VMAppContainer;Compute;chandrikarg;testovm2","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testovm2","lastUpdatedTime":"2026-08-18T12:01:21.768788Z","extendedInfo":{"hostServerName":"testovm2","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":4}}}]}},"friendlyName":"testovm2","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;testovm3","name":"VMAppContainer;Compute;chandrikarg;testovm3","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testovm3","lastUpdatedTime":"2026-09-09T14:45:59.2913899Z","extendedInfo":{"hostServerName":"testovm3","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":4}}}]}},"friendlyName":"testovm3","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;testovm4","name":"VMAppContainer;Compute;chandrikarg;testovm4","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testovm4","lastUpdatedTime":"2026-09-10T10:45:55.5235245Z","extendedInfo":{"hostServerName":"testovm4","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":4,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":4}}}]}},"friendlyName":"testovm4","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Deleted","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;TestVM1-iws","name":"VMAppContainer;Compute;chandrikarg;TestVM1-iws","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/TestVM1-iws","lastUpdatedTime":"2026-09-17T06:57:08.7675247Z","extendedInfo":{"hostServerName":"testvm1-iws","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":9,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":9}}}]}},"friendlyName":"TestVM1-iws","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;Compute;chandrikarg;TestVM2-iws","name":"VMAppContainer;Compute;chandrikarg;TestVM2-iws","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers","properties":{"sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/TestVM2-iws","lastUpdatedTime":"2026-09-21T06:29:15.5802954Z","extendedInfo":{"hostServerName":"testvm2-iws","inquiryInfo":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"inquiryDetails":[{"type":"SQL","itemCount":8,"inquiryValidation":{"status":"Success","errorDetail":{"code":"Success","message":"","recommendations":[""]},"additionalDetail":"","protectableItemCount":{"SQLInstance":1,"SQLDataBase":8}}}]}},"friendlyName":"TestVM2-iws","backupManagementType":"AzureWorkload","registrationStatus":"Registered","healthStatus":"Healthy","containerType":"VMAppContainer","protectableObjectType":"VMAppContainer","sourceLocation":"eastasia"}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '5965'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:22:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/986b1d9e-8746-4875-9fa5-dc6639605c87
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 485382E9386B4E0785C98E86BF4D2511 Ref B: SG2AA1070302034 Ref C: 2026-10-24T18:22:58Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testsqlmi2?api-version=2024-11-30
+  response:
+    body:
+      string: '{"location":"eastus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/chandrikarg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testsqlmi2","name":"testsqlmi2","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"isolationScope":"None","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"a09fa23a-c239-49b0-b67e-416a3241d7fd","clientId":"2d93c503-0763-4000-854b-07cfe1cc4f80"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '457'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8B9FA373756E41D0A70F17F106D9E1B7 Ref B: SG2AA1070305054 Ref C: 2026-10-24T18:23:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupResourceGuardProxies?api-version=2026-10-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/7449170f-451c-46d3-9422-7387d49acc71
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 3F220B234BFB4CB6B303EBFB25CB9F4C Ref B: SG2AA1040517025 Ref C: 2026-10-24T18:23:02Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"objectType": "AzureWorkloadSQLRestoreRequest", "recoveryType":
+      "AlternateLocation", "targetVirtualMachineId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/TestVM1-iws",
+      "sourceResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.Compute/virtualMachines/testvm2-iws",
+      "targetInfo": {"overwriteOption": "Overwrite", "databaseName": "MSSQLSERVER/*_cli_snap_20261024",
+      "containerId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/vmappcontainer;compute;chandrikarg;testvm1-iws"},
+      "recoveryMode": "SnapshotAttachAndRecover", "shouldUseAlternateTargetLocation":
+      true, "isNonRecoverable": false, "targetResourceGroupName": "chandrikarg", "userAssignedManagedIdentityDetails":
+      {"identityArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testsqlmi2",
+      "identityName": "testsqlmi2", "userAssignedIdentityProperties": {"clientId":
+      "2d93c503-0763-4000-854b-07cfe1cc4f80", "principalId": "a09fa23a-c239-49b0-b67e-416a3241d7fd"}},
+      "alternateDirectoryPaths": [{"mappingType": "Data", "sourcePath": "F:\\", "sourceLogicalName":
+      "mssqlserver", "targetPath": "X:\\"}, {"mappingType": "Data", "sourcePath":
+      "G:\\", "sourceLogicalName": "mssqlserver", "targetPath": "Y:\\"}]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1535'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer%3Bcompute%3Bchandrikarg%3Btestvm2-iws/protectedItems/SQLInstance%3Bmssqlserver/recoveryPoints/2266349069015704081/restore?api-version=2026-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/operationsStatus/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01&t=639284629846534572&c=MIIHlDCCBnygAwIBAgIQAyyFFSM2pYNnRQr5Kek0fDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDkyMjAyNDYyM1oXDTI2MTIxNzA4NDYyM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC_DUgZQlXEEcSGgdh5CReShVGzde-hHDEUw29H-ZhkmaCLipBRly4IiaPgwh7gMU7_V74DXS0dRyfacpQo4J-NrnPTiz7tNShFXmiPD8nlOH7dJM7i6ZAufeLJJUB0myJ40JATLexf51BMfCf7DeleHOXp2W0DdN8vCNFU8HN57V7W2MCooScBsVeFmtA2pnZS9YR2x-CQrb0y7eAq3grCr-kw66-uyPcD2wUKFRbqXfDYplTgYFyOhrDyI7KqwNstY2ENZHfdWq0I4T2OZ_VcIh2nst_a3PkLxBTFx3nz-sWGXEy8L7kaFtZR8txYnLCeX8BgVqoRABcROauo4CRJAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTELuOMHHlu_iOAB1LoRzxj0xAySzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzAvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzcwL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzAvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS83MC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBAJgkuOxxIbj4IXpp2XZ_AlCRJb0pmOW7HKGmJkqZjNurtf3q-FnxsQrgIIOXF75JOR2KQsMb6XaeGlk1cvbBtCEJTeJrwSp0AXfFRRJ7AQEXIPqqa2YYSJoemgVeybChZWAZ8z4KF8n3rv0BhxR57lP_MrufaHPkq_E11c9mHnsfeS5bMNTq1I4d_26PjuxFSxupmj-fa_L9aq2Jl6j4Ib3hUbZyRXtXgUSKSFTHLy_xx-wpplBgyrCorI91GVFGAZmFq8d_MhL61-ox2qhqsh6x5b3GC3PxIv-pQgNB07TiWy7elV4n1EJbduICOoqR7Iw-cybQQc8uaDc_r5MER&s=C92-OqckxjwJGUa0cuRWwBcqV6J1GCVVUiLNe6PfMLBtcCqOlFqq0v78MJGFBR_F7hn01quyG-FJasNFhUke2VpJGBm10dDk7lgXXIClWU_XxgVDoSGbvKS5I7fAwGfN1pR1alfNQ_uts-I4_oVKFovpftajr7yci-3jOGpvjkfFdOQA8gseeg8WVRSiClayb2UyAZDdHBgCfyhzhE1qgnYALNkBSWUIkuuY5VNnuwYaAeiPNMeCY3knLW-CdBsZF96cXU2VfBMqF0dxX3_pD21TF2qVkJu1Cq5M2FRblbO5Yf2woXOijBDXiS8eO7RKqdhe9cC-4A4Jb7ITmzi8FA&h=ObPKkFiQFRVhaV9RLhnwXx1AhSPr7WeBr21U-MwoInA
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sat, 24 Oct 2026 18:23:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupFabrics/Azure/protectionContainers/VMAppContainer;compute;chandrikarg;testvm2-iws/protectedItems/SQLInstance;mssqlserver/operationResults/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01&t=639284629846690800&c=MIIHlDCCBnygAwIBAgIQAyyFFSM2pYNnRQr5Kek0fDANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDkyMjAyNDYyM1oXDTI2MTIxNzA4NDYyM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC_DUgZQlXEEcSGgdh5CReShVGzde-hHDEUw29H-ZhkmaCLipBRly4IiaPgwh7gMU7_V74DXS0dRyfacpQo4J-NrnPTiz7tNShFXmiPD8nlOH7dJM7i6ZAufeLJJUB0myJ40JATLexf51BMfCf7DeleHOXp2W0DdN8vCNFU8HN57V7W2MCooScBsVeFmtA2pnZS9YR2x-CQrb0y7eAq3grCr-kw66-uyPcD2wUKFRbqXfDYplTgYFyOhrDyI7KqwNstY2ENZHfdWq0I4T2OZ_VcIh2nst_a3PkLxBTFx3nz-sWGXEy8L7kaFtZR8txYnLCeX8BgVqoRABcROauo4CRJAgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBTELuOMHHlu_iOAB1LoRzxj0xAySzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzAvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzcwL2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvNzAvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS83MC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBAJgkuOxxIbj4IXpp2XZ_AlCRJb0pmOW7HKGmJkqZjNurtf3q-FnxsQrgIIOXF75JOR2KQsMb6XaeGlk1cvbBtCEJTeJrwSp0AXfFRRJ7AQEXIPqqa2YYSJoemgVeybChZWAZ8z4KF8n3rv0BhxR57lP_MrufaHPkq_E11c9mHnsfeS5bMNTq1I4d_26PjuxFSxupmj-fa_L9aq2Jl6j4Ib3hUbZyRXtXgUSKSFTHLy_xx-wpplBgyrCorI91GVFGAZmFq8d_MhL61-ox2qhqsh6x5b3GC3PxIv-pQgNB07TiWy7elV4n1EJbduICOoqR7Iw-cybQQc8uaDc_r5MER&s=Z5lU9t8B-ar2kpk_6MwzGonfJNRt5Yowqc-SMxLUNnsaN2jhrNNrVMfOYHOaLrsU6h3znu9BSVUgVvk49WqSLpnFMffXfoZ1atqPxRzhI9taqfQwSOPqPj0ooPZNkg5BEeYFx377Uy4pgnzggs6HFWQWOrKv8H_HO_SwkRY9LT_7R2CZ6ZfrHVag1dvKxH00nUzRTaDhhBq82kNwJeP46tDBhQudtY6niISkQhgJsye9s0XbFVBfaGiEnyO7eV_LgpCcXwys9geI4R-uVJOU2nYZC9JeEPbO1lcOvTHhzzZkT_uODUD-ulvoBnhtHNEeZM-ZoMeavUiUl-rx2glPNw&h=to1j1IwQXAC8_TY8cMBLF5Y5xG3R8E98wqfcZhLXiTI
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/6c22ce9c-0055-41c7-816f-9a42883e4c36
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 9C49703993BC4B57BEBB8BBAE882452F Ref B: SG2AA1070304025 Ref C: 2026-10-24T18:23:03Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/bed1e2b2-e718-4e9f-8f35-356cb6629c86
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 5048B36B9067416B917E5E90E27DC062 Ref B: SG2AA1070301042 Ref C: 2026-10-24T18:23:05Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/8ee80d2e-a548-47da-bdf8-f6f7f81aa791
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: C59CDC510B7C4F53BCEB11978E8A72BA Ref B: SG2AA1040516031 Ref C: 2026-10-24T18:23:12Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/feb89128-2c97-413b-b6c3-63653bb0fff4
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 4A9938A46CCB484A947B239F9BBFA287 Ref B: SG2AA1070306023 Ref C: 2026-10-24T18:23:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/001f62cb-3d28-42d5-b8f7-95f5644794e1
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: C508C07205C84546A5DD05084C96BBA7 Ref B: SG2AA1070302062 Ref C: 2026-10-24T18:23:25Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/a8bd3573-48cd-4ed9-9990-bb19ccdf77e2
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: B2EF520B46734D999783BE7DA4EC7555 Ref B: SG2AA1070301025 Ref C: 2026-10-24T18:23:31Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/7fb4e2b1-f508-4689-bafc-16865aeb7a59
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '248'
+      x-msedge-ref:
+      - 'Ref A: 489A57E2EB844DB29BC162BDCAFE25C0 Ref B: SG2AA1040515025 Ref C: 2026-10-24T18:23:38Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/495d3ab7-8693-468c-b5c7-9cae0a3acdd1
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 0876DA81CEFB41C6B9C00BF3D7070CE6 Ref B: SG2AA1040518034 Ref C: 2026-10-24T18:23:44Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/0d04b195-d300-48cd-ad99-0af0b1c5e9f3
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 8D64669BF31941F98DFBBFB0D3E4B8D0 Ref B: SG2AA1070301062 Ref C: 2026-10-24T18:23:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:23:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/f5db5560-3ac8-4e18-a148-fa23a34dab4f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 6C2D26445BA54FD2A74C630C2A36813C Ref B: SG2AA1070306023 Ref C: 2026-10-24T18:23:57Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:24:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/dd458091-6b49-4f5c-92e9-c6f93cb16612
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 2BF3E88FCB9E4C0F96EBA317F79B58BD Ref B: SG2AA1040519025 Ref C: 2026-10-24T18:24:03Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:24:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/5b2a818d-e76a-432d-8db4-c2f427e0c45f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 7FD578B416FA43CD8FF0E90173F902DC Ref B: SG2AA1040513052 Ref C: 2026-10-24T18:24:10Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:24:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/74a0eeae-3c50-4dae-86de-8771e149a5f1
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: D502BDA4751C4C16B402A4B1960D3EC6 Ref B: SG2AA1070303052 Ref C: 2026-10-24T18:24:16Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:24:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/33d67129-fa4a-4d6e-a6c2-9be104484b43
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 5BA61FA25995404D9009B8346757B5DD Ref B: SG2AA1070306031 Ref C: 2026-10-24T18:24:23Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:24:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/f68c9554-1aea-45fb-be82-31e7878f4d7d
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 707F33EFA0104FE39826015925FF5B19 Ref B: SG2AA1070303062 Ref C: 2026-10-24T18:24:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:24:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/4f547fab-5703-45d8-954d-70a7bd756add
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 80D8FBB029524C1BB9A57B54C3E4ED49 Ref B: SG2AA1070301023 Ref C: 2026-10-24T18:24:36Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:24:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/cd22c9ec-84ea-456c-9831-d13da9d6d270
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: D433FF02A5124BC880C0DF1F738A0AA4 Ref B: SG2AA1070303042 Ref C: 2026-10-24T18:24:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:24:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/ede9755e-5104-4620-a5aa-75204b0032a9
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: E8BAE78D975D4C85B428E35D7062DCA1 Ref B: SG2AA1040517011 Ref C: 2026-10-24T18:24:48Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"0001-01-01T00:00:00"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '188'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:24:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/589dba13-6eba-4a75-870b-80dfaf162e6a
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 225FC6FABEBB44F39725BDB8B9895B50 Ref B: SG2AA1040515054 Ref C: 2026-10-24T18:24:55Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupOperations/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","status":"Succeeded","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"2026-10-24T18:23:04.4318189Z","properties":{"objectType":"OperationStatusJobExtendedInfo","jobId":"5f87cace-1e64-4f83-a893-a0b4de17213b"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '304'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:25:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/2e51443b-513b-4a54-8785-63dd88ca71a6
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: EFA718EF5FCC43E79C84AFD29BCEFF43 Ref B: SG2AA1070301052 Ref C: 2026-10-24T18:25:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup restore restore-azurewl
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v --recovery-config
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT1M59.1816078S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:25:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/033ed2ef-f07a-4f38-b493-f99091bafdfe
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: BBEA1ECB12DB42C4BE0F0EC025F90F48 Ref B: SG2AA1040515036 Ref C: 2026-10-24T18:25:03Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT2M0.5474801S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1111'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:25:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/f9438934-27cf-4940-be63-17c64d77808f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 0A8AC0253B08456AA08BDCF79A160BDE Ref B: SG2AA1070304042 Ref C: 2026-10-24T18:25:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT2M2.1154848S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1111'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:25:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/69ec4d39-302a-44ea-bb66-90de72bd4200
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: BF952643E6F04EBB811EC235326A6AA0 Ref B: SG2AA1070306052 Ref C: 2026-10-24T18:25:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT2M33.4945107S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:25:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/e20adf33-b2ef-4658-b01b-3166fee1156f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: EDC76159BDE24909804ED62366A56E99 Ref B: SG2AA1070302029 Ref C: 2026-10-24T18:25:37Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT3M4.9562019S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1111'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:26:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/57b1e47a-116b-474a-94a9-dac56f153cd0
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 60357A8F50014315BB30DEB435E774FB Ref B: SG2AA1070305040 Ref C: 2026-10-24T18:26:08Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT3M36.4002359S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:26:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/484eea3e-b31a-4c1b-9839-a2bb3bf7f32f
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 5423800CE6E74811ADD1EA2AAFA455F7 Ref B: SG2AA1070303060 Ref C: 2026-10-24T18:26:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT4M7.9013452S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1111'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:27:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/82cd3e93-5277-4e35-b8f7-e556990155ed
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 3C39AC96449C465780EF3332BED1354D Ref B: SG2AA1070305042 Ref C: 2026-10-24T18:27:11Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT4M39.4292855S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:27:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/94efbc40-fa70-43cc-9070-14f77f028b3b
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 9D74B54D533344098524EB689EDF2901 Ref B: SG2AA1040515040 Ref C: 2026-10-24T18:27:43Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT5M11.1252351S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:28:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/1b50e098-f6fb-4caa-801c-0b2214b551fe
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: E56571BD95F14A7598F6E643AC449CD7 Ref B: SG2AA1040517042 Ref C: 2026-10-24T18:28:15Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT5M42.6674755S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:28:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/62103f12-9835-4a0e-87e9-40051d7ebc07
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: CCF2BA89C4EC491EA0245C81A65C6BE1 Ref B: SG2AA1040517052 Ref C: 2026-10-24T18:28:46Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT6M14.0656922S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:29:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/d8c663d8-5f2c-496f-97ac-79e39755a082
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: B7BD185F538244829949E7D693AAE104 Ref B: SG2AA1070304060 Ref C: 2026-10-24T18:29:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT6M45.7178719S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:29:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/b55d37c6-74e8-4505-b83e-82d6ed7f4bb5
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 7FDB3994039742C29ADE8C6D3053B398 Ref B: SG2AA1070306029 Ref C: 2026-10-24T18:29:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT7M17.2067906S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:30:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/f5110474-78c5-415e-9c22-bf13df515769
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 513B35E9EF0E4167A78618A735623210 Ref B: SG2AA1070302023 Ref C: 2026-10-24T18:30:21Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT7M48.6600544S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"InProgress"}],"propertyBag":{"ChildDatabaseList":"db1;db2;db3","Job
+        Type":"Snapshot restore to alternate instance","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore","status":"InProgress","startTime":"2026-10-24T18:23:04.4318189Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:30:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/52c2ec0f-8e5f-4171-906a-a6aef583957e
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 4BBAA7ADCD1446E8AF8C80B8FD453196 Ref B: SG2AA1070301060 Ref C: 2026-10-24T18:30:52Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n --timeout
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT6M3.8501437S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"Completed"}],"propertyBag":{"Data
+        Transferred (in MB)":"0.0337","ChildDatabaseList":"db1;db2;db3","POType":"SQLInstance","ContainerType":"VMAppContainer","Job
+        Type":"Snapshot restore to alternate instance","Recovery Point Time in UTC":"24/10/2026
+        18:16:21","RestoreDestination":"TestVM1-iws/MSSQLSERVER","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore
+        (SnapshotFull)","status":"Completed","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"2026-10-24T18:29:08.2819626Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1355'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:31:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/b2306510-86f5-4b67-a6c2-defdfd80ddbb
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: ED2D8F64B9374202A4091894A59269C2 Ref B: SG2AA1070305054 Ref C: 2026-10-24T18:31:24Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup job show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupJobs/5f87cace-1e64-4f83-a893-a0b4de17213b","name":"5f87cace-1e64-4f83-a893-a0b4de17213b","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureWorkloadJob","workloadType":"SQLInstance","duration":"PT6M3.8501437S","extendedInfo":{"tasksList":[{"taskId":"Transfer
+        data from vault","taskType":"Normal","status":"Completed"}],"propertyBag":{"Data
+        Transferred (in MB)":"0.0337","ChildDatabaseList":"db1;db2;db3","POType":"SQLInstance","ContainerType":"VMAppContainer","Job
+        Type":"Snapshot restore to alternate instance","Recovery Point Time in UTC":"24/10/2026
+        18:16:21","RestoreDestination":"TestVM1-iws/MSSQLSERVER","Target VM Name":"testvm1-iws","Target
+        VM resource group":"chandrikarg","Target disk resource group":"chandrikarg","RecoveryMode":"SnapshotAttachAndRecover","RestoreRecoveryPointId":"2266349069015704081","TargetContainerName":"Compute;chandrikarg;TestVM1-iws"}},"isUserTriggered":true,"entityFriendlyName":"MSSQLSERVER
+        [testvm2-iws]","backupManagementType":"AzureWorkload","operation":"Restore
+        (SnapshotFull)","status":"Completed","startTime":"2026-10-24T18:23:04.4318189Z","endTime":"2026-10-24T18:29:08.2819626Z","activityId":"ecee74e3-cfd7-11f1-8a7d-9cfce85cbbcd"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1355'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:31:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/b5e71fd9-23d4-45df-8ec2-467b3f3632a9
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: C95479E51B91494AA3CF1277E65ED8B2 Ref B: SG2AA1070302034 Ref C: 2026-10-24T18:31:55Z'
+    status:
+      code: 200
+      message: OK
+version: 1

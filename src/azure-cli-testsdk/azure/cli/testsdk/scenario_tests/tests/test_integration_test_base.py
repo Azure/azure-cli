@@ -5,11 +5,58 @@
 
 import os
 import unittest
+from io import BytesIO
+from types import SimpleNamespace
 
-from azure.cli.testsdk.scenario_tests.base import IntegrationTestBase, LiveTest
+from vcr.request import Request
+
+from azure.cli.testsdk.scenario_tests.base import IntegrationTestBase, LiveTest, ReplayableTest
+from azure.cli.testsdk.scenario_tests.recording_processors import (
+    LargeRequestBodyProcessor, SubscriptionRecordingProcessor
+)
 
 
 class TestIntegrationTestBase(unittest.TestCase):
+    def test_process_request_recording_with_file_body(self):
+        original_subscription = '11111111-1111-1111-1111-111111111111'
+        replacement_subscription = '00000000-0000-0000-0000-000000000000'
+        uri = 'https://management.azure.com/subscriptions/' + original_subscription
+        body = ('{"id":"/subscriptions/' + original_subscription + '"}').encode()
+        for recording in (True, False):
+            for stream in (True, False):
+                with self.subTest(recording=recording, stream=stream):
+                    request = Request('POST', uri, BytesIO(body) if stream else body,
+                                      {'Content-Type': 'application/json'})
+                    processor = SubscriptionRecordingProcessor(replacement_subscription)
+                    test = SimpleNamespace(
+                        disable_recording=False, in_recording=recording,
+                        recording_processors=[processor],
+                        recording_post_processors=[LargeRequestBodyProcessor()],
+                        replay_processors=[processor, LargeRequestBodyProcessor()])
+                    processed = ReplayableTest._process_request_recording(test, request)
+                    self.assertEqual(processed.method, 'POST')
+                    self.assertEqual(processed.uri, uri.replace(original_subscription, replacement_subscription))
+                    self.assertEqual(processed.headers, request.headers)
+                    self.assertEqual(processed.body,
+                                     body.replace(original_subscription.encode(), replacement_subscription.encode()))
+                    if stream:
+                        self.assertEqual(request.body.getvalue(), body)
+                        self.assertEqual(request.body.tell(), 0)
+                    else:
+                        self.assertIs(processed, request)
+
+    def test_process_request_recording_preserves_binary_file_body(self):
+        body = b'\x00\xff\x01'
+        request = Request('POST', 'https://management.azure.com/upload', BytesIO(body),
+                          {'Content-Type': 'application/octet-stream'})
+        test = SimpleNamespace(
+            disable_recording=False, in_recording=True,
+            recording_processors=[SubscriptionRecordingProcessor('unused')],
+            recording_post_processors=[LargeRequestBodyProcessor()])
+        processed = ReplayableTest._process_request_recording(test, request)
+        self.assertEqual(processed.body, body)
+        self.assertEqual(request.body.getvalue(), body)
+
     def test_integration_test_default_constructor(self):
         class MockTest(IntegrationTestBase):
             def __init__(self):

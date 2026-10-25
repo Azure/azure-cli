@@ -176,6 +176,61 @@ class SqlInstanceTests(unittest.TestCase):
         self.assertEqual(["SnapshotFull", "Log"],
                          [p["policyType"] for p in payload["properties"]["subProtectionPolicy"]])
 
+    @patch.object(custom_common, "backup_protected_items_cf")
+    @patch.object(custom_common, "show_item")
+    @patch.object(custom_common, "recovery_points_crr_cf")
+    def test_backup_secondary_sql_snapshot_show_details(self, secondary, show_item, _items):
+        summary = passive_models.RecoveryPointResource.deserialize({
+            "name": "snapshot-rp", "properties": {
+                "objectType": "AzureWorkloadSQLRecoveryPoint", "type": "SnapshotFull"}})
+        details = passive_models.RecoveryPointResource.deserialize(snapshot_point().as_dict())
+        client = secondary.return_value
+        client.list.return_value = [summary]
+        client.get.return_value = details
+        for workload in ("SQLInstance", "SQLDataBase"):
+            with self.subTest(workload=workload):
+                client.reset_mock()
+                source = passive_models.ProtectedItemResource.deserialize(protected_item(workload).as_dict())
+                show_item.return_value = source
+                result = custom_common.show_recovery_point(
+                    self.cmd, Mock(), "rg", "vault", CONTAINER, source.name, "snapshot-rp",
+                    workload_type=workload, backup_management_type="AzureWorkload", use_secondary_region=True)
+                self.assertIs(details, result)
+                client.get.assert_called_once_with(
+                    "vault", "rg", "Azure", CONTAINER, source.name, "snapshot-rp")
+                info = custom_wl._get_sql_recovery_point_extended_info(result)
+                self.assertEqual(["E:\\", "F:\\"], [
+                    path for filesystem in info.snapshot_recovery_point_info.source_filesystem_info
+                    for path in filesystem.access_paths])
+
+    @patch.object(custom_common, "backup_protected_items_cf")
+    @patch.object(custom_common, "show_item")
+    @patch.object(custom_common, "recovery_points_crr_cf")
+    def test_backup_secondary_legacy_recovery_point_show_unchanged(self, secondary, show_item, _items):
+        show_item.return_value = protected_item("SQLDataBase")
+        point = models.RecoveryPointResource(
+            name="full-rp", properties=models.AzureWorkloadSQLRecoveryPoint(type="Full"))
+        secondary.return_value.list.return_value = [point]
+        result = custom_common.show_recovery_point(
+            self.cmd, Mock(), "rg", "vault", CONTAINER, DATABASE, "full-rp",
+            workload_type="MSSQL", backup_management_type="AzureWorkload", use_secondary_region=True)
+        self.assertIs(point, result)
+        secondary.return_value.get.assert_not_called()
+
+    @patch.object(custom_common, "backup_protected_items_cf")
+    @patch.object(custom_common, "show_item")
+    @patch.object(custom_common, "recovery_points_crr_cf")
+    def test_backup_secondary_snapshot_show_error_does_not_use_primary(self, secondary, show_item, _items):
+        show_item.return_value = protected_item()
+        secondary.return_value.list.return_value = [snapshot_point()]
+        secondary.return_value.get.side_effect = AzureResponseError("Secondary detail lookup failed")
+        primary = Mock()
+        with self.assertRaisesRegex(AzureResponseError, "Secondary detail lookup failed"):
+            custom_common.show_recovery_point(
+                self.cmd, primary, "rg", "vault", CONTAINER, INSTANCE, "snapshot-rp",
+                workload_type="SQLInstance", backup_management_type="AzureWorkload", use_secondary_region=True)
+        primary.get.assert_not_called()
+
     def test_backup_recovery_point_query_filters(self):
         client = Mock()
         client.list.return_value = []

@@ -1,0 +1,214 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --ids
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testsqlmi2?api-version=2025-05-31-preview
+  response:
+    body:
+      string: '{"location":"eastus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/chandrikarg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testsqlmi2","name":"testsqlmi2","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"isolationScope":"None","assignmentRestrictions":{"providers":[]},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"a09fa23a-c239-49b0-b67e-416a3241d7fd","clientId":"2d93c503-0763-4000-854b-07cfe1cc4f80"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '499'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:12:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: F369B0BD5A574E298BE22755D0431059 Ref B: SG2AA1070304036 Ref C: 2026-10-24T18:12:37Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"backupManagementType": "AzureWorkload", "workLoadType":
+      "SQLInstance", "vmWorkloadPolicyType": "SnapshotV2", "settings": {"timeZone":
+      "UTC", "issqlcompression": false, "isCompression": false}, "subProtectionPolicy":
+      [{"policyType": "SnapshotFull", "schedulePolicy": {"schedulePolicyType": "SimpleSchedulePolicy",
+      "scheduleRunFrequency": "Daily", "scheduleRunTimes": ["2026-10-15T02:00:00Z"]},
+      "retentionPolicy": {"retentionPolicyType": "LongTermRetentionPolicy", "dailySchedule":
+      {"retentionTimes": ["2026-10-15T02:00:00Z"], "retentionDuration": {"count":
+      7, "durationType": "Days"}}}, "snapshotBackupAdditionalDetails": {"instantRpRetentionRangeInDays":
+      5, "instantRPDetails": "chandrikarg", "userAssignedManagedIdentityDetails":
+      {"identityArmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/chandrikarg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testsqlmi2",
+      "identityName": "testsqlmi2", "userAssignedIdentityProperties": {"clientId":
+      "2d93c503-0763-4000-854b-07cfe1cc4f80", "principalId": "a09fa23a-c239-49b0-b67e-416a3241d7fd"}}}},
+      {"policyType": "Log", "schedulePolicy": {"schedulePolicyType": "LogSchedulePolicy",
+      "scheduleFrequencyInMins": 60}, "retentionPolicy": {"retentionPolicyType": "SimpleRetentionPolicy",
+      "retentionDuration": {"count": 7, "durationType": "Days"}}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1340'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -v -n --backup-management-type --workload-type --policy
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/cli-sql-snapshot-log-000002?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/cli-sql-snapshot-log-000002","name":"cli-sql-snapshot-log-000002","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLInstance","vmWorkloadPolicyType":"SnapshotV2","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"SnapshotFull","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2026-10-15T02:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2026-10-15T02:00:00Z"],"retentionDuration":{"count":7,"durationType":"Days"}}},"snapshotBackupAdditionalDetails":{"instantRpRetentionRangeInDays":5,"instantRPDetails":"chandrikarg","userAssignedManagedIdentityDetails":{"identityArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/chandrikarg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testsqlmi2","identityName":"testsqlmi2","userAssignedIdentityProperties":{"clientId":"2d93c503-0763-4000-854b-07cfe1cc4f80","principalId":"a09fa23a-c239-49b0-b67e-416a3241d7fd"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":7,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1604'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:12:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/36fa59bc-5da8-4b3d-acda-4e50f5749562
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 83873CD46923463D96DD1E7A43C5C900 Ref B: SG2AA1040515029 Ref C: 2026-10-24T18:12:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -v -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/cli-sql-snapshot-log-000002?api-version=2026-10-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/cli-sql-snapshot-log-000002","name":"cli-sql-snapshot-log-000002","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureWorkload","workLoadType":"SQLInstance","vmWorkloadPolicyType":"SnapshotV2","settings":{"timeZone":"UTC","issqlcompression":false,"isCompression":false},"subProtectionPolicy":[{"policyType":"SnapshotFull","schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2026-10-15T02:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2026-10-15T02:00:00Z"],"retentionDuration":{"count":7,"durationType":"Days"}}},"snapshotBackupAdditionalDetails":{"instantRpRetentionRangeInDays":5,"instantRPDetails":"chandrikarg","userAssignedManagedIdentityDetails":{"identityArmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/chandrikarg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testsqlmi2","identityName":"testsqlmi2","userAssignedIdentityProperties":{"clientId":"2d93c503-0763-4000-854b-07cfe1cc4f80","principalId":"a09fa23a-c239-49b0-b67e-416a3241d7fd"}}}},{"policyType":"Log","schedulePolicy":{"schedulePolicyType":"LogSchedulePolicy","scheduleFrequencyInMins":60},"retentionPolicy":{"retentionPolicyType":"SimpleRetentionPolicy","retentionDuration":{"count":7,"durationType":"Days"}}}],"protectedItemsCount":0}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1604'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 24 Oct 2026 18:12:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/772b2198-796c-4775-8a15-1d3c39baeb01
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 7DD5301EB9A943048F61A0A1A1309A7E Ref B: SG2AA1040517023 Ref C: 2026-10-24T18:12:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup policy delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --subscription -g -v -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/chandrikarg/providers/Microsoft.RecoveryServices/vaults/testolr/backupPolicies/cli-sql-snapshot-log-000002?api-version=2026-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sat, 24 Oct 2026 18:12:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=75320258-6d4a-4f7e-aac0-f013fd030124/eastasia/3e8f9138-d11d-4f85-9444-8681dbbd1b4b
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 8E81631F1B85459182E84647DD24BE1F Ref B: SG2AA1070303034 Ref C: 2026-10-24T18:12:43Z'
+    status:
+      code: 200
+      message: OK
+version: 1

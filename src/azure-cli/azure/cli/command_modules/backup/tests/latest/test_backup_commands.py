@@ -12,7 +12,7 @@ import random
 from unittest import mock
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, \
-    KeyVaultPreparer, record_only, live_only
+    KeyVaultPreparer, MSGraphNameReplacer, record_only, live_only
 from azure.mgmt.recoveryservicesbackup.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
@@ -588,17 +588,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     # DATA-PLANE: asserts threat info on a source-scanned recovery point. Targets the pre-onboarded
-    # vault swbela-mdc-vault-1 / Sample-VM and RP 1134701036948821, which the Defender-for-Cloud scan
-    # pipeline marked UnHealthy with populated threatInfo (verified live 2026-09-25).
+    # vault mdchanatest31new1 / hanatest32 and RP 2265475452755865626, which the Defender-for-Cloud scan
+    # pipeline marked UnHealthy with populated threatInfo (verified live 2026-10-24).
     @record_only()
     def test_backup_source_scan_recovery_points(self):
         self.kwargs.update({
-            'sub': ('6d875e77-e412-4d7d-9af4-8895278b4443'
+            'sub': ('935cff54-7d3c-49cc-a1e0-a9aa8bf006f5'
                     if self.in_recording or self.is_live else self.get_subscription_id()),
-            'rg': 'swbela-ransom-rg',
-            'vault': 'swbela-mdc-vault-1',
-            'vm': 'Sample-VM',
-            'rp': '1134701036948821'
+            'rg': 'hanatest31-rg',
+            'vault': 'mdchanatest31new1',
+            'vm': 'hanatest32',
+            'rp': '2265475452755865626'
         })
 
         self.cmd('backup vault show --subscription {sub} -g {rg} -n {vault}', checks=[
@@ -1073,7 +1073,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                  '-g {rg} -v {vault} -c {vm_name} -i {vm_name} --delete-backup-data true --yes')
 
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=4096)
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="eastus2euap")
     @VaultPreparer()
@@ -1227,7 +1227,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=4096)
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="centraluseuap")
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="storage_account_resource_group", location="centraluseuap")
@@ -1727,11 +1727,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         subscription = self.cmd('account show --query "id"').get_output_in_json()
         user_principal_id = self.cmd('account show --query "user.name"').get_output_in_json()
+        self.recording_processors.insert(0, MSGraphNameReplacer(user_principal_id, 'example@example.com'))
         self.kwargs["user_principal_id"] = user_principal_id
-        self.kwargs['key_vault_id'] = "subscriptions/{}/resourceGroups/{}/providers/Microsoft.KeyVault/vaults/{}".format(
+        self.kwargs['key_vault_id'] = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.KeyVault/vaults/{}".format(
             subscription, resource_group, key_vault)
-        # Uncomment during live runs (key vault is RBAC-authorization enabled)
-        # self.cmd('role assignment create --role "{user_rbac_permissions}" --scope "{key_vault_id}" --assignee "{user_principal_id}"')
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --role "{user_rbac_permissions}" --scope "{key_vault_id}" --assignee "{user_principal_id}"')
+        if self.in_recording or self.is_live:
+            time.sleep(300)
 
         self.kwargs['identity1_id'] = self.cmd('identity create -n "{identity1}" -g "{rg}" --query id').get_output_in_json()
         self.kwargs['identity1_principalid'] = self.cmd('identity show -n "{identity1}" -g "{rg}" --query principalId').get_output_in_json()
@@ -1784,17 +1787,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['key1_id'] = key1_json['key']['kid']
         self.kwargs['key2_id'] = key2_json['key']['kid']
 
-        # Uncomment during live runs (key vault is RBAC-authorization enabled)
-        # role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/e147488a-f6f5-4113-8e2d-b22465e65bf6'.format(subscription)
-        # rbac1_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
-        # self.assertEqual(rbac1_json['roleDefinitionId'], role_id)
-        # rbac2_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
-        # self.assertEqual(rbac2_json['roleDefinitionId'], role_id)
-        # rbac3_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
-        # self.assertEqual(rbac3_json['roleDefinitionId'], role_id)
-        # rbac4_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
-        # self.assertEqual(rbac4_json['roleDefinitionId'], role_id)
-        # time.sleep(300)  # let RBAC role assignments propagate before Backup accesses the key
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --scope "{key_vault_id}" --assignee-object-id "{identity1_principalid}" --assignee-principal-type ServicePrincipal --role "{identity_rbac_permissions}"')
+            self.cmd('role assignment create --scope "{key_vault_id}" --assignee-object-id "{identity2_principalid}" --assignee-principal-type ServicePrincipal --role "{identity_rbac_permissions}"')
+            self.cmd('role assignment create --scope "{key_vault_id}" --assignee-object-id "{system1_principalid}" --assignee-principal-type ServicePrincipal --role "{identity_rbac_permissions}"')
+            self.cmd('role assignment create --scope "{key_vault_id}" --assignee-object-id "{system2_principalid}" --assignee-principal-type ServicePrincipal --role "{identity_rbac_permissions}"')
+        if self.in_recording or self.is_live:
+            time.sleep(300)
 
         self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity1_id}" -g "{rg}" -n "{vault1}"')
 
