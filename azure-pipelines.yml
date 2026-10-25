@@ -335,6 +335,11 @@ jobs:
       artifactName: msi-$(Platform)
 
   - task: PowerShell@2
+    displayName: Upgrade from Previous Release
+    inputs:
+      filePath: build_scripts\windows\scripts\test_msi_upgrade.ps1
+
+  - task: PowerShell@2
     displayName: Install and Load CLI
     inputs:
       filePath: build_scripts\windows\scripts\test_msi_installation.ps1
