@@ -484,6 +484,13 @@ class GetVersionsTest(unittest.TestCase):
 
 class RequestCredentialTest(unittest.TestCase):
 
+    def test_no_wait_is_disabled(self):
+        schema = RequestCredential._build_arguments_schema()
+
+        self.assertFalse(RequestCredential.AZ_SUPPORT_NO_WAIT)
+        self.assertFalse(schema.no_wait._registered)
+        self.assertIs(schema.no_wait._default, False)
+
     def test_handler_without_admin_raises_invalid_argument_value_error(self):
         command = object.__new__(RequestCredential)
         with self.assertRaisesRegex(
