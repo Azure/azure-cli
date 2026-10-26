@@ -13967,6 +13967,8 @@ def _get_template_file_path(runtime_string, is_linux):
 
     runtime_string = runtime_string.lower()
     runtime_stack = runtime_string.split('|')[0]
+    if runtime_stack == DOTNET_RUNTIME_NAME:
+        runtime_stack = NETCORE_RUNTIME_NAME
     template_file_path = None
 
     if is_linux:

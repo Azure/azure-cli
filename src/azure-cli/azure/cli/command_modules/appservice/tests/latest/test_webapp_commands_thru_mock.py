@@ -3755,6 +3755,24 @@ class _TypespecContainerSettings(Mapping):
 
 class TestStackRuntimeDotnetLinux(unittest.TestCase):
 
+    def test_dotnet_github_actions_template_selection(self):
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper, _get_workflow_template
+
+        for is_linux, platform in ((True, 'linux'), (False, 'windows')):
+            for runtime_name in ('dotnet|11', 'DOTNET|11.0', 'DOTNETCORE|11.0', 'DOTNETCORE|10.0'):
+                for normalize in (False, True):
+                    with self.subTest(is_linux=is_linux, runtime_name=runtime_name, normalize=normalize):
+                        runtime = (_StackRuntimeHelper.standardize_runtime_name(runtime_name)
+                                   if normalize else runtime_name)
+                        github = mock.Mock()
+
+                        result = _get_workflow_template(github, runtime, is_linux)
+
+                        github.get_repo.assert_called_once_with('Azure/actions-workflow-templates')
+                        github.get_repo.return_value.get_contents.assert_called_once_with(
+                            'AppService/{}/aspnet-core-webapp-on-azure.yml'.format(platform))
+                        self.assertIs(result, github.get_repo.return_value.get_contents.return_value)
+
     @staticmethod
     def _new_helper(runtime_name):
         from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
