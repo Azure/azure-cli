@@ -8,14 +8,14 @@ Based on [Azure/azure-rest-api-specs#45245](https://github.com/Azure/azure-rest-
   1. `properties.agent_hosting_configurations` (`ManagedClusterAgentHostingConfiguration`)
   2. Optional `properties.network_injections` (`NetworkInjection` when a subnet is provided)
   3. Account-level managed identity (`identity.user_assigned_identities` including the hosting-management UAI)
-  4. The `--agent-hosting` array and `--subnet` argument, validation, help, and tests.
+  4. The flattened `--agent-hosting-*` arguments and optional `--subnet`, validation, help, and tests.
 * **Prerequisite**: `azure-mgmt-cognitiveservices>=15.0.0b5` (which introduced `AgentHostingConfiguration`, `ManagedClusterAgentHostingConfiguration`, and `AgentHostingType`). In `azure-cli`, [Azure/azure-cli#34112](https://github.com/Azure/azure-cli/pull/34112) upgrades the dependency directly from `15.0.0b4` to `15.0.0b6`.
 
 ---
 
 ## 2. API Specification
 
-The service API represents agent hosting configuration, network injection, and account identity as separate properties. The selected CLI design accepts `--agent-hosting` as an array containing one configuration object, with the optional subnet supplied through `--subnet`.
+The service API represents agent hosting configuration, network injection, and account identity as separate properties. The selected CLI design accepts flattened arguments for one hosting configuration and wraps it in a one-item array for the API, with the optional subnet supplied through `--subnet`.
 
 ### 2.1 Agent Hosting Configuration
 
@@ -44,11 +44,11 @@ The optional `--subnet` maps to REST `networkInjections[0].subnetArmId` / SDK `n
 
 ## 3. CLI Argument Options
 
-Target command: `az cognitiveservices account create` (`--agent-hosting` is marked `is_preview=True`; `--subnet` is not).
+Target command: `az cognitiveservices account create` (hosting arguments are marked `is_preview=True`; `--subnet` is not).
 
-### 3.1 Option A: JSON Array (Selected)
+### 3.1 Option A: JSON Array (Not Selected)
 
-Selected to preserve the `AgentHostingConfiguration[]` shape: the CLI accepts an array containing exactly one Agent Hosting object. The object is expanded into `agentHostingConfigurations[0]` and the account identity. Accepts an inline JSON array or `@<file>` parsed via `shell_safe_json_parse`:
+Alternative preserving the `AgentHostingConfiguration[]` shape through an inline JSON array or `@<file>`. Not selected because the current scope is one configuration with simple fields: flattened arguments avoid JSON quoting and expose per-field help and validation. Any future array-input support will be handled separately.
 
 | CLI Option | Python Argument | Mapped SDK Target | Requirement | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -81,9 +81,9 @@ az cognitiveservices account create \
 
 ---
 
-### 3.2 Option B: Flattened Arguments
+### 3.2 Option B: Flattened Arguments (Selected)
 
-Alternative design exposing flattened parameters under `arg_group="Agent Hosting"`. Not selected because it spreads one provisioning aggregate across multiple flags and makes the complete configuration harder to pass through files or other tooling.
+Selected for the single-configuration scope, following the repository guideline to expose simple object properties as individual parameters under `arg_group="Agent Hosting"` (`doc/command_guidelines.md`, Single Complex Parameters). The CLI sets `hostingType="ManagedCluster"` internally.
 
 | CLI Option | Python Argument | Mapped SDK Target | Requirement |
 | :--- | :--- | :--- | :--- |
@@ -118,21 +118,21 @@ az cognitiveservices account create \
 ## 4. Implementation Notes
 
 1. **Trigger & Argument Validation**:
-   * Parse `--agent-hosting` in `_params.py` with `type=shell_safe_json_parse`, following the current repository pattern for JSON arguments. `custom.py:create()` receives the parsed value and validates its schema.
-   * If both `--agent-hosting` and `--subnet` are `None` (not provided): preserve existing behavior (do not send empty `agentHostingConfigurations` or `networkInjections` arrays).
-   * Require the parsed value to be a `list` of length `1` (`minItems=1`, `maxItems=1`; reject non-list, `[]`, and `len > 1`). Require the item to be a `dict` with the 6 required `camelCase` keys (`name`, `hostingType == "ManagedCluster"`, `clusterResourceId`, `hostingManagementIdentityResourceId`, `storageAccountResourceId`, and `workloadIdentityResourceId`). Reject unknown keys and empty/non-string values. Validate the 4 required ARM IDs with `is_valid_resource_id()`.
-   * Map the object to `ManagedClusterAgentHostingConfiguration` and `hostingManagementIdentityResourceId` to the account identity.
-   * Handle `--subnet` separately from the hosting model builder: validate a non-empty string and `is_valid_resource_id()`, then construct `NetworkInjection` as in Section 2.2. Neither argument requires the other; omit the corresponding property when its argument is not provided.
+   * Register the five `--agent-hosting-*` arguments in `_params.py`, defaulting to `None`.
+   * If all hosting arguments and `--subnet` are `None` (not provided): preserve existing behavior (do not send empty `agentHostingConfigurations` or `networkInjections` arrays).
+   * If any hosting argument is provided, require all five. Reject empty/non-string values and validate the 4 required ARM IDs with `is_valid_resource_id()`.
+   * Build one `ManagedClusterAgentHostingConfiguration` with `hostingType="ManagedCluster"` and wrap it in a one-item list for the API.
+   * Handle `--subnet` separately from the hosting model builder: validate a non-empty string and `is_valid_resource_id()`, then construct `NetworkInjection` as in Section 2.2. Hosting and subnet inputs are independent; omit each property when its corresponding inputs are not provided.
 2. **Account Identity Construction (`custom.py`)**:
    * Keep existing `has_system_identity = bool(assign_identity or allow_project_management)` logic in `create()`.
-   * Collect `hostingManagementIdentityResourceId` from the validated aggregate into `user_assigned_identities` (do not attach `workloadIdentityResourceId` to the account identity).
+   * Add the validated `--agent-hosting-management-identity` to `user_assigned_identities` (do not attach the workload identity to the account identity).
    * Construct `Identity` directly in `create()` (without modifying shared `compose_identity()`):
      * `SystemAssigned, UserAssigned` when both `has_system_identity` and `user_assigned_identities` are present (default for `AIServices`).
      * `UserAssigned` when `not has_system_identity` and `user_assigned_identities` is present.
      * `SystemAssigned` when `has_system_identity` is present without BYO AKS (unchanged existing behavior).
 3. **Validation Boundary & Isolation**:
-   * **CLI**: Checks the aggregate JSON schema, non-empty strings, and `is_valid_resource_id()` syntax, then constructs SDK models. No extra preflight `GET` calls are made to AKS, Storage, subnet, UAI, or RBAC.
-   * **Zero Impact on Existing Commands**: Both arguments are scoped to `cognitiveservices account create`, with `--agent-hosting` under `Agent Hosting` and `--subnet` under `Network`. Shared helpers in `_utils.py` are not modified, and both new `create()` parameters default to `None`.
+   * **CLI**: Checks hosting argument completeness, non-empty strings, and `is_valid_resource_id()` syntax, then constructs SDK models. No extra preflight `GET` calls are made to AKS, Storage, subnet, UAI, or RBAC.
+   * **Zero Impact on Existing Commands**: All new arguments are scoped to `cognitiveservices account create`, with `--agent-hosting-*` under `Agent Hosting` and `--subnet` under `Network`. Shared helpers in `_utils.py` are not modified, and all new `create()` parameters default to `None`.
    * **REST Service (Vienna RP)**: Validates resource types, `name` constraints, distinct management vs. workload UAIs, subscription/region alignment, AKS OIDC/Workload Identity state, and RBAC permissions.
 
 ---
@@ -141,15 +141,15 @@ az cognitiveservices account create \
 
 | File Path | Planned Change |
 | :--- | :--- |
-| `src/azure-cli/azure/cli/command_modules/cognitiveservices/_params.py` | Register `--agent-hosting` (preview) and `--subnet` arguments and their parameter help under `cognitiveservices account create`. |
-| `src/azure-cli/azure/cli/command_modules/cognitiveservices/custom.py` | Map `--agent-hosting` to `properties.agent_hosting_configurations` and `params.identity`; independently validate and map `--subnet` to `properties.network_injections` in `create()`. |
+| `src/azure-cli/azure/cli/command_modules/cognitiveservices/_params.py` | Register the five `--agent-hosting-*` arguments (preview) and `--subnet` with parameter help under `cognitiveservices account create`. |
+| `src/azure-cli/azure/cli/command_modules/cognitiveservices/custom.py` | Map the flattened hosting arguments to `properties.agent_hosting_configurations` and `params.identity`; independently validate and map `--subnet` to `properties.network_injections` in `create()`. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/_help.py` | Add a BYO AKS account creation example. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/tests/latest/test_agent_hosting.py` | Add `ScenarioTest` (`self.cmd(...)` for CI `missing_parameter_test_coverage`) and unit tests for argument validation, serialized wire payload (`agentHostingConfigurations`, `networkInjections`, `identity`), all four hosting/subnet combinations, and non-BYO regression. |
 
 ### Verification Checklist
 
-* **Pre-request Validation**: Non-list input, empty list `[]`, multi-item list (`len > 1`), non-object item, unknown/missing keys, empty/non-string values, unsupported `hostingType`, and invalid ARM resource IDs fail before any SDK call.
+* **Pre-request Validation**: Partial hosting arguments, empty/non-string values, and invalid ARM resource IDs fail before any SDK call.
 * **Wire Serialization**: Verify the serialized body passed to `client.begin_create` contains 1 `agentHostingConfigurations` item (`hostingType="ManagedCluster"`), expected `identity` (`SystemAssigned, UserAssigned` default for `AIServices`, or `UserAssigned` when system identity is disabled, with only `hostingManagementIdentityResourceId` in `userAssignedIdentities`), and either 1 `networkInjections` item (`scenario="agent"`, `subnetArmId`, `useMicrosoftManagedNetwork=False`) when `--subnet` is provided or no `networkInjections` field when it is omitted.
-* **Non-BYO & Update Regression**: Non-BYO `account create` sends no `agentHostingConfigurations`; `--subnet` alone adds network injection without changing identity. With neither argument, the existing payload is unchanged. `account update` omits `agentHostingConfigurations`.
+* **Non-BYO & Update Regression**: Non-BYO `account create` sends no `agentHostingConfigurations`; `--subnet` alone adds network injection without changing identity. With no new arguments, the existing payload is unchanged. `account update` omits `agentHostingConfigurations`.
 * **Live ARM Verification**: Creating a new BYO AKS account via `az cognitiveservices account create` reaches `Succeeded` and `account show` returns the expected bindings.
 * **Checks**: `azdev style cognitiveservices`, `azdev linter cognitiveservices`, and `azdev test test_agent_hosting`.

@@ -279,15 +279,33 @@ def load_arguments(self, _):
         "cognitiveservices account create", arg_group="Agent Hosting"
     ) as c:
         c.argument(
-            "agent_hosting",
-            type=shell_safe_json_parse,
+            "agent_hosting_name",
             is_preview=True,
-            help=(
-                "JSON array or `@<file>` containing exactly one agent hosting configuration. "
-                "Required object properties: name, hostingType, clusterResourceId, "
-                "hostingManagementIdentityResourceId, storageAccountResourceId, and workloadIdentityResourceId. "
-                "The object is expanded into the account's agent hosting configuration and managed identity. "
-            ),
+            help="Name of the agent hosting configuration. Specify all five --agent-hosting-* arguments together.",
+        )
+        c.argument(
+            "agent_hosting_cluster",
+            is_preview=True,
+            help="ARM resource ID of the customer-owned AKS managed cluster. Required when configuring agent hosting.",
+        )
+        c.argument(
+            "agent_hosting_storage",
+            is_preview=True,
+            help="ARM resource ID of the storage account. Required when configuring agent hosting.",
+        )
+        c.argument(
+            "agent_hosting_management_identity",
+            options_list=["--agent-hosting-management-identity", "--agent-hosting-mi"],
+            is_preview=True,
+            help="ARM resource ID of the hosting-management user-assigned identity. "
+                 "Required when configuring agent hosting. Automatically assigned to the account.",
+        )
+        c.argument(
+            "agent_hosting_workload_identity",
+            options_list=["--agent-hosting-workload-identity", "--agent-hosting-wi"],
+            is_preview=True,
+            help="ARM resource ID of the workload user-assigned identity. "
+                 "Required when configuring agent hosting. Not assigned to the account.",
         )
 
     with self.argument_context(

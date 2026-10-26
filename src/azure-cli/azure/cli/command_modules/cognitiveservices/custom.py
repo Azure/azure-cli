@@ -22,7 +22,7 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
     AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
     Identity, ResourceIdentityType as IdentityType, UserAssignedIdentity, \
-    AgentHostingType, ManagedClusterAgentHostingConfiguration, NetworkInjection, ScenarioType, \
+    ManagedClusterAgentHostingConfiguration, NetworkInjection, ScenarioType, \
     Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
     CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod, \
     ConnectionPropertiesV2BasicResource, ConnectionUpdateContent, \
@@ -150,88 +150,52 @@ def _kind_uses_project_management(kind):
     return kind in ["AIServices"]
 
 
-_AGENT_HOSTING_REQUIRED_KEYS = {
-    "name",
-    "hostingType",
-    "clusterResourceId",
-    "hostingManagementIdentityResourceId",
-    "storageAccountResourceId",
-    "workloadIdentityResourceId",
-}
-
-_AGENT_HOSTING_REQUIRED_RESOURCE_ID_FIELDS = (
-    "clusterResourceId",
-    "hostingManagementIdentityResourceId",
-    "storageAccountResourceId",
-    "workloadIdentityResourceId",
-)
-
-
-def _build_agent_hosting_models(agent_hosting):
-    if agent_hosting is None:
+def _build_agent_hosting_models(
+    agent_hosting_name,
+    agent_hosting_cluster,
+    agent_hosting_storage,
+    agent_hosting_management_identity,
+    agent_hosting_workload_identity,
+):
+    arguments = {
+        "--agent-hosting-name": agent_hosting_name,
+        "--agent-hosting-cluster": agent_hosting_cluster,
+        "--agent-hosting-storage": agent_hosting_storage,
+        "--agent-hosting-management-identity": agent_hosting_management_identity,
+        "--agent-hosting-workload-identity": agent_hosting_workload_identity,
+    }
+    if all(value is None for value in arguments.values()):
         return None, None
 
-    configurations = agent_hosting
-    if not isinstance(configurations, list) or len(configurations) != 1:
-        raise InvalidArgumentValueError(
-            "--agent-hosting must be a JSON array containing exactly one configuration."
+    missing_arguments = [option for option, value in arguments.items() if value is None]
+    if missing_arguments:
+        raise RequiredArgumentMissingError(
+            "When configuring agent hosting, specify {}.".format(", ".join(missing_arguments))
         )
 
-    configuration = configurations[0]
-    if not isinstance(configuration, dict):
-        raise InvalidArgumentValueError(
-            "Each item in --agent-hosting must be a JSON object."
-        )
-
-    configuration_keys = set(configuration)
-    missing_keys = sorted(_AGENT_HOSTING_REQUIRED_KEYS - configuration_keys)
-    unknown_keys = sorted(
-        str(key) for key in configuration_keys - _AGENT_HOSTING_REQUIRED_KEYS
-    )
-    if missing_keys or unknown_keys:
-        details = []
-        if missing_keys:
-            details.append("missing keys: {}".format(", ".join(missing_keys)))
-        if unknown_keys:
-            details.append("unknown keys: {}".format(", ".join(unknown_keys)))
-        raise InvalidArgumentValueError(
-            "The agent hosting object must include all required fields and no unknown fields ({}).".format(
-                "; ".join(details)
-            )
-        )
-
-    for field_name in configuration_keys:
-        value = configuration[field_name]
+    for option, value in arguments.items():
         if not isinstance(value, str) or not value.strip():
             raise InvalidArgumentValueError(
-                "Field '{}' in --agent-hosting must be a non-empty string.".format(
-                    field_name
-                )
+                "{} must be a non-empty string.".format(option)
             )
-
-    if configuration["hostingType"] != AgentHostingType.MANAGED_CLUSTER.value:
-        raise InvalidArgumentValueError(
-            "Field 'hostingType' in --agent-hosting must be 'ManagedCluster'."
-        )
 
     from azure.mgmt.core.tools import is_valid_resource_id
 
-    for field_name in _AGENT_HOSTING_REQUIRED_RESOURCE_ID_FIELDS:
-        if not is_valid_resource_id(configuration[field_name]):
+    for option, value in arguments.items():
+        if option != "--agent-hosting-name" and not is_valid_resource_id(value):
             raise InvalidArgumentValueError(
-                "Field '{}' in --agent-hosting must be a fully qualified "
-                "Azure resource ID.".format(field_name)
+                "{} must be a fully qualified Azure resource ID.".format(option)
             )
 
     hosting_configuration = ManagedClusterAgentHostingConfiguration(
-        name=configuration["name"],
-        hosting_management_identity_resource_id=configuration["hostingManagementIdentityResourceId"],
-        workload_identity_resource_id=configuration["workloadIdentityResourceId"],
-        cluster_resource_id=configuration["clusterResourceId"],
-        storage_account_resource_id=configuration["storageAccountResourceId"],
+        name=agent_hosting_name,
+        hosting_management_identity_resource_id=agent_hosting_management_identity,
+        workload_identity_resource_id=agent_hosting_workload_identity,
+        cluster_resource_id=agent_hosting_cluster,
+        storage_account_resource_id=agent_hosting_storage,
     )
     user_assigned_identities = {
-        configuration["hostingManagementIdentityResourceId"]: UserAssignedIdentity()
+        agent_hosting_management_identity: UserAssignedIdentity()
     }
     return [hosting_configuration], user_assigned_identities
 
@@ -254,7 +218,7 @@ def _build_network_injections(subnet):
     ]
 
 
-def create(
+def create(  # pylint: disable=too-many-locals
     client,
     resource_group_name,
     account_name,
@@ -269,7 +233,11 @@ def create(
     encryption=None,
     allow_project_management=None,
     yes=None,
-    agent_hosting=None,
+    agent_hosting_name=None,
+    agent_hosting_cluster=None,
+    agent_hosting_storage=None,
+    agent_hosting_management_identity=None,
+    agent_hosting_workload_identity=None,
     subnet=None,
 ):  # pylint: disable=unused-argument
     """
@@ -297,7 +265,11 @@ def create(
         properties.encryption = json.loads(encryption)
 
     hosting_configurations, user_assigned_identities = _build_agent_hosting_models(
-        agent_hosting
+        agent_hosting_name,
+        agent_hosting_cluster,
+        agent_hosting_storage,
+        agent_hosting_management_identity,
+        agent_hosting_workload_identity,
     )
     network_injections = _build_network_injections(subnet)
     if hosting_configurations is not None:
