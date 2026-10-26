@@ -23,7 +23,7 @@ class ContainerappBreakingChangeTest(unittest.TestCase):
             self.assertEqual(change.current_default, 'log-analytics')
             self.assertEqual(change.new_default, 'azure-monitor')
             self.assertIn('--logs-destination', change.message)
-            self.assertIn('in a future release', change.message)
+            self.assertIn('in 2.93.0', change.message)
             self.assertIn('https://github.com/Azure/azure-cli/pull/34228', change.message)
             self.assertTrue(change.to_tag(DummyCli()).always_display)
 

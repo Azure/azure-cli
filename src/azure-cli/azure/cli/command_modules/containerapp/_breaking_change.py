@@ -10,6 +10,6 @@ register_default_value_breaking_change(
     '--logs-destination',
     'log-analytics',
     'azure-monitor',
-    target_version=None,
+    target_version='2.93.0',
     doc_link='https://github.com/Azure/azure-cli/pull/34228',
 )
