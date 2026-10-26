@@ -63,6 +63,13 @@ def _container_command(verb, workspace):
         verb, workspace["subscription"], workspace["resource_group"], workspace["azure_monitor_workspace_name"])
 
 
+def workspace_write_access_error(problem):
+    """Return the error for a caller who needs write access on an Azure Monitor workspace."""
+    return ForbiddenError(
+        "{} You need write access on that Azure Monitor workspace, for example the Monitoring Contributor role. "
+        "Ask its owner for that access, then run this command again.".format(problem))
+
+
 def _wait_for_container(cli_ctx, workspace):
     from azure.cli.command_modules.monitor.aaz.latest.monitor.account.trace_container._show import Show
     from azure.cli.core.commands.command_operation import WaitCommandOperation
@@ -90,9 +97,8 @@ def ensure_trace_container(cli_ctx, workspace_id, retention_days=None, trace_met
         container = get_trace_container(cli_ctx, workspace)
     except HttpResponseError as ex:
         if ex.status_code == 403:
-            raise ForbiddenError(
-                "Reading the trace container of {} was denied. You need read access to that Azure Monitor "
-                "workspace.".format(workspace_id)) from ex
+            raise workspace_write_access_error(
+                "Reading the trace container of {} was denied.".format(workspace_id)) from ex
         raise
 
     if container is None:
@@ -108,10 +114,8 @@ def ensure_trace_container(cli_ctx, workspace_id, retention_days=None, trace_met
                 Create(cli_ctx=cli_ctx)(command_args={**workspace, **settings}))
         except HttpResponseError as ex:
             if ex.status_code == 403:
-                raise ForbiddenError(
-                    "Creating the trace container of {} was denied. Ask the owner of that Azure Monitor workspace "
-                    "to run:\n  {}\nThen run this command again.".format(
-                        workspace_id, _container_command("create", workspace))) from ex
+                raise workspace_write_access_error(
+                    "Creating the trace container of {} was denied.".format(workspace_id)) from ex
             raise
         logger.warning("Created the trace container of %s: retention %s days, trace metrics %s.",
                        workspace_id, settings["retention_days"], settings["trace_metrics"])

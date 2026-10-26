@@ -83,7 +83,7 @@ def _report_destinations(scope, associations):
 def create_trace_association(cmd, resource_uri, azure_monitor_workspace, trace_retention_days=None,
                              trace_metrics=None, yes=False):
     from azure.cli.command_modules.monitor.operations.trace_container import (
-        ensure_trace_container, parse_workspace_id)
+        ensure_trace_container, parse_workspace_id, workspace_write_access_error)
     scope = _Scope(resource_uri)
     parse_workspace_id(azure_monitor_workspace)
     if trace_retention_days is not None and not 4 <= trace_retention_days <= 730:
@@ -105,9 +105,13 @@ def create_trace_association(cmd, resource_uri, azure_monitor_workspace, trace_r
     try:
         association = scope.aaz_command("create")(cli_ctx=cmd.cli_ctx)(command_args={
             **scope.args, "azure_monitor_workspace": azure_monitor_workspace})
-    except HttpResponseError:
+    except HttpResponseError as ex:
         logger.warning("The trace container is ready, but the association at %s was not written. Run this command "
                        "again after fixing the error below.", scope.id)
+        # ARM checks that the caller can write the workspace the association points to.
+        if ex.status_code == 403 and ex.error and ex.error.code == "LinkedAuthorizationFailed":
+            raise workspace_write_access_error("Sending traces from {} to {} was denied.".format(
+                scope.id, azure_monitor_workspace)) from ex
         raise
     if replaced:
         logger.warning("Replaced %s with %s at %s.", replaced, azure_monitor_workspace, scope.id)

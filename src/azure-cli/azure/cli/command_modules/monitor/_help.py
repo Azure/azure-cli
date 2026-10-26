@@ -641,7 +641,7 @@ short-summary: Route the traces of a scope to an Azure Monitor workspace.
 long-summary: >
     Creates the association of the scope, or replaces its workspace. Associations of other scopes are unchanged.
     If the workspace has no trace container, one is created first. Replacing the workspace of a resource group or
-    subscription asks for confirmation.
+    subscription asks for confirmation. You need write access on both the scope and the workspace.
 examples:
   - name: Route the traces of an Application Insights component to an Azure Monitor workspace.
     text: |

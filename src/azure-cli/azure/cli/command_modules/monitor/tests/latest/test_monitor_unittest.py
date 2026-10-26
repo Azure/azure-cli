@@ -278,3 +278,59 @@ class MonitorTraceTest(unittest.TestCase):
             'To change it, run: az monitor account trace-container update --subscription {} -g rg1 -w amw1 '
             '--retention-days 7 --trace-metrics Enabled'.format(self.subscription),
             'Or run this command without --trace-retention-days and --trace-metrics.'])
+
+    @staticmethod
+    def _forbidden(code):
+        from azure.core.exceptions import HttpResponseError, ODataV4Format
+        error = HttpResponseError(message='denied')
+        error.status_code = 403
+        error.error = ODataV4Format({'error': {'code': code, 'message': 'denied'}})
+        return error
+
+    def test_monitor_trace_container_access(self):
+        from azure.cli.core.azclierror import ForbiddenError
+        from azure.cli.command_modules.monitor.operations import trace_container
+
+        workspace_id = '/subscriptions/{}/resourceGroups/rg1/providers/Microsoft.Monitor/accounts/amw1'.format(
+            self.subscription)
+        with mock.patch.object(trace_container, 'get_trace_container',
+                               side_effect=self._forbidden('AuthorizationFailed')):
+            with self.assertRaisesRegex(ForbiddenError, 'Reading the trace container of .* was denied. You need '
+                                                        'write access on that Azure Monitor workspace'):
+                trace_container.ensure_trace_container(mock.MagicMock(), workspace_id)
+
+        create = mock.Mock()
+        create.return_value.side_effect = self._forbidden('AuthorizationFailed')
+        with mock.patch.object(trace_container, 'get_trace_container', return_value=None), \
+                mock.patch('azure.cli.command_modules.monitor.aaz.latest.monitor.account.trace_container._create.'
+                           'Create', create):
+            with self.assertRaisesRegex(ForbiddenError, 'Creating the trace container of .* was denied. You need '
+                                                        'write access on that Azure Monitor workspace'):
+                trace_container.ensure_trace_container(mock.MagicMock(), workspace_id)
+
+    def test_monitor_trace_association_workspace_access(self):
+        import re
+        from azure.core.exceptions import HttpResponseError
+        from azure.cli.core.azclierror import ForbiddenError
+        from azure.cli.command_modules.monitor.operations import trace_association, trace_container
+
+        component = '/subscriptions/{}/resourceGroups/rg1/providers/Microsoft.Insights/components/ai1'.format(
+            self.subscription)
+        workspace_id = '/subscriptions/{}/resourceGroups/rg1/providers/Microsoft.Monitor/accounts/amw1'.format(
+            self.subscription)
+        create = mock.Mock()
+        with mock.patch.object(trace_association, '_list', return_value=[]), \
+                mock.patch.object(trace_container, 'ensure_trace_container'), \
+                mock.patch.object(trace_association._Scope, 'aaz_command', return_value=create):
+            create.return_value.side_effect = self._forbidden('LinkedAuthorizationFailed')
+            expected = 'Sending traces from {} to {} was denied. You need write access on that Azure Monitor ' \
+                       'workspace'.format(re.escape(component), re.escape(workspace_id))
+            with self.assertRaisesRegex(ForbiddenError, expected):
+                trace_association.create_trace_association(mock.Mock(), component, workspace_id)
+
+            # Other errors keep the service's message.
+            other = self._forbidden('AuthorizationFailed')
+            create.return_value.side_effect = other
+            with self.assertRaises(HttpResponseError) as error:
+                trace_association.create_trace_association(mock.Mock(), component, workspace_id)
+            self.assertIs(error.exception, other)
