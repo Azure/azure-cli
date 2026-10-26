@@ -337,7 +337,7 @@ class ClusterUpdate(_ClusterUpdate):
             return
 
         platform = instance.properties.platform
-        subnet_id = platform.subnet_id
+        subnet_id = platform.subnet_id.to_serialized_data()
         if has_value(container_registry_arg):
             args.container_registry_managed_identity = _resolve_identity_resource_id(
                 container_registry_arg.to_serialized_data(),
@@ -372,9 +372,9 @@ class ClusterUpdate(_ClusterUpdate):
             )
             operator_identities.service_managed_identity = service
 
-        assigned_resource_ids = set(operator_identities.control_plane_operators.values())
-        assigned_resource_ids.update(operator_identities.data_plane_operators.values())
-        assigned_resource_ids.add(operator_identities.service_managed_identity)
+        assigned_resource_ids = set(operator_identities.control_plane_operators.to_serialized_data().values())
+        assigned_resource_ids.update(operator_identities.data_plane_operators.to_serialized_data().values())
+        assigned_resource_ids.add(operator_identities.service_managed_identity.to_serialized_data())
         instance.identity.user_assigned_identities = {
             resource_id: {} for resource_id in assigned_resource_ids
         }
