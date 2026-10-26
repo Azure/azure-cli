@@ -334,10 +334,10 @@ type: command
 short-summary: Create a deployment for Azure Cognitive Services account.
 long-summary: |
   To deploy an Anthropic model, use an eligible Foundry account and supply --organization-name, --industry,
-  and --country together when provider onboarding is required. Use values for the real organization using
+  and --country for every Anthropic deployment. Use values for the real organization using
   the model. Country names are converted to two-letter country codes before being sent to the service.
-  Existing provider onboarding can be reused by omitting all three arguments. Model availability,
-  Marketplace eligibility, terms, and quota requirements still apply.
+  These arguments are not required for other model formats. Model availability, Marketplace eligibility,
+  terms, and quota requirements still apply.
 examples:
   - name: Create a deployment for Azure Cognitive Services account.
     text: az cognitiveservices account deployment create -g yuanyang-test-sdk -n yytest-oai --deployment-name dpy --model-name ada --model-version "1" --model-format OpenAI --sku-capacity 1 --sku-name "Standard"

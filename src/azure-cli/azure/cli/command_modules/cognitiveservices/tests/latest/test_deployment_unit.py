@@ -7,6 +7,7 @@ import io
 import json
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from itertools import product
 from unittest import mock
 
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
@@ -71,7 +72,7 @@ class CognitiveServicesDeploymentUnitTests(unittest.TestCase):
                 self.assertEqual(payload['properties']['modelProviderData']['countryCode'], expected)
 
     def test_cognitiveservices_deployment_provider_data_optional(self):
-        for model_format in ('OpenAI', 'Anthropic'):
+        for model_format in ('OpenAI', 'Meta'):
             with self.subTest(model_format=model_format):
                 self.arguments['model_format'] = model_format
                 deployment_begin_create_or_update(**self.arguments)
@@ -79,6 +80,7 @@ class CognitiveServicesDeploymentUnitTests(unittest.TestCase):
                 self.assertNotIn('modelProviderData', payload['properties'])
 
     def test_cognitiveservices_deployment_existing_options(self):
+        self.arguments['model_format'] = 'OpenAI'
         deployment_begin_create_or_update(
             **self.arguments, model_source='my-source', scale_settings_scale_type='Manual',
             scale_settings_capacity=3, spillover_deployment_name='my-spillover')
@@ -90,13 +92,27 @@ class CognitiveServicesDeploymentUnitTests(unittest.TestCase):
         self.assertNotIn('modelProviderData', payload['properties'])
 
     def test_cognitiveservices_deployment_missing_provider_fields(self):
-        for missing in self.provider_arguments:
-            with self.subTest(missing=missing):
-                arguments = dict(self.provider_arguments)
-                del arguments[missing]
-                with self.assertRaises(RequiredArgumentMissingError):
-                    deployment_begin_create_or_update(**self.arguments, **arguments)
-                self.client.begin_create_or_update.assert_not_called()
+        for model_format in ('Anthropic', 'anthropic', 'ANTHROPIC'):
+            self.arguments['model_format'] = model_format
+            for included in product((False, True), repeat=3):
+                if all(included):
+                    continue
+                arguments = {
+                    field: value for (field, value), include in zip(self.provider_arguments.items(), included)
+                    if include
+                }
+                with self.subTest(model_format=model_format, fields=tuple(arguments)):
+                    with self.assertRaises(RequiredArgumentMissingError):
+                        deployment_begin_create_or_update(**self.arguments, **arguments)
+                    self.client.begin_create_or_update.assert_not_called()
+
+    def test_cognitiveservices_deployment_anthropic_format_casing(self):
+        for model_format in ('Anthropic', 'anthropic', 'ANTHROPIC'):
+            with self.subTest(model_format=model_format):
+                self.arguments['model_format'] = model_format
+                deployment_begin_create_or_update(**self.arguments, **self.provider_arguments)
+                payload = self.client.begin_create_or_update.call_args.args[3].as_dict()
+                self.assertEqual(payload['properties']['modelProviderData']['countryCode'], 'US')
 
     def test_cognitiveservices_deployment_empty_provider_fields(self):
         for field in self.provider_arguments:
@@ -143,6 +159,23 @@ class CognitiveServicesDeploymentUnitTests(unittest.TestCase):
 
 
 class CognitiveServicesDeploymentCliUnitTests(unittest.TestCase):
+
+    def test_cognitiveservices_deployment_cli_requires_anthropic_provider_arguments(self):
+        cli = DummyCli()
+        with mock.patch(
+                'azure.cli.command_modules.cognitiveservices._client_factory.'
+                'get_cognitiveservices_management_client') as factory, \
+                mock.patch('azure.cli.core.extension.get_extensions', return_value=[]), \
+                redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            exit_code = cli.invoke([
+                'cognitiveservices', 'account', 'deployment', 'create',
+                '-g', 'my-rg', '-n', 'my-account', '--deployment-name', 'my-haiku',
+                '--model-name', 'claude-haiku-4-5', '--model-version', '2',
+                '--model-format', 'Anthropic', '--sku-name', 'GlobalStandard', '--sku-capacity', '1',
+            ])
+
+        self.assertNotEqual(exit_code, 0)
+        factory.return_value.deployments.begin_create_or_update.assert_not_called()
 
     def test_cognitiveservices_deployment_cli_provider_arguments(self):
         for country_option, country in (('--country', 'United States'), ('--country-code', 'US')):
