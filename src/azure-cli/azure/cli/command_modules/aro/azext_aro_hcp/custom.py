@@ -508,7 +508,11 @@ class RequestCredential(_RequestCredential):
             return result
 
         kubeconfig = result["kubeconfig"].replace("\\n", "\n")
-        kubeconfig = _embed_private_key(kubeconfig, private_key_pem)
+        user_name = "{}-{}-admin".format(
+            self.ctx.args.resource_group.to_serialized_data(),
+            self.ctx.args.name.to_serialized_data(),
+        )
+        kubeconfig = _embed_private_key(kubeconfig, private_key_pem, user_name)
         path = self.ctx.args.file.to_serialized_data()
         if has_value(self.ctx.args.context_name):
             context_name = self.ctx.args.context_name.to_serialized_data()

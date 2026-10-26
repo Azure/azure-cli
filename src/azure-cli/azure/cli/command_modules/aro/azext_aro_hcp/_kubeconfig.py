@@ -201,10 +201,14 @@ def _generate_admin_credential_request():
     return private_key_pem, csr_pem
 
 
-def _embed_private_key(kubeconfig, private_key_pem):
+def _embed_private_key(kubeconfig, private_key_pem, user_name):
     config = yaml.safe_load(kubeconfig)
     user = next(item for item in config["users"] if item["name"] == "admin")
 
     user["user"]["client-key-data"] = base64.b64encode(private_key_pem).decode("ascii")
     user["user"].pop("client-key", None)
+    user["name"] = user_name
+    for context in config["contexts"]:
+        if context["context"].get("user") == "admin":
+            context["context"]["user"] = user_name
     return yaml.safe_dump(config, default_flow_style=False)

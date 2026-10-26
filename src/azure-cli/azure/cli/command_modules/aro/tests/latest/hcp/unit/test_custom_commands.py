@@ -538,6 +538,7 @@ class RequestCredentialTest(unittest.TestCase):
                 file=_Arg("/tmp/config"),
                 context_name=_Arg(None),
                 name=_Arg("cluster-one"),
+                resource_group=_Arg("group-one"),
                 overwrite_existing=_Arg(False),
             ),
         )
@@ -545,7 +546,7 @@ class RequestCredentialTest(unittest.TestCase):
         self.assertIsNone(command._output())
 
         self.assertFalse(hasattr(command, "_private_key_pem"))
-        embed_private_key.assert_called_once_with("config\n", b"private-key")
+        embed_private_key.assert_called_once_with("config\n", b"private-key", "group-one-cluster-one-admin")
         print_or_merge.assert_called_once_with(
             "/tmp/config", "embedded", False, "cluster-one-admin"
         )
