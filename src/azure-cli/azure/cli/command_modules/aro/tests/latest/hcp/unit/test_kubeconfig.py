@@ -75,9 +75,13 @@ class CredentialHelperTest(unittest.TestCase):
             ],
         })
 
-        config = yaml.safe_load(_embed_private_key(kubeconfig, private_key_pem))
+        config = yaml.safe_load(_embed_private_key(kubeconfig, private_key_pem, "cluster-admin"))
 
         self.assertEqual("unchanged", config["users"][0]["user"]["client-key-data"])
+        self.assertEqual("other", config["users"][0]["name"])
+        self.assertEqual("other", config["contexts"][0]["context"]["user"])
+        self.assertEqual("cluster-admin", config["users"][1]["name"])
+        self.assertEqual("cluster-admin", config["contexts"][1]["context"]["user"])
         admin_credentials = config["users"][1]["user"]
         self.assertNotIn("client-key", admin_credentials)
         self.assertEqual(private_key_pem, base64.b64decode(admin_credentials["client-key-data"]))
@@ -167,12 +171,41 @@ class MergeKubernetesConfigurationsTest(unittest.TestCase):
 
 class PrintOrMergeCredentialsTest(unittest.TestCase):
 
+    def test_merges_credentials_for_two_clusters_without_user_collision(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "config")
+            for resource_group in ("group-one", "group-two"):
+                user_name = resource_group + "-cluster-admin"
+                kubeconfig = _embed_private_key(
+                    yaml.safe_dump(_config("cluster")), resource_group.encode("ascii"), user_name
+                )
+                print_or_merge_credentials(path, kubeconfig, False, resource_group + "-context")
+
+            merged = load_kubernetes_configuration(path)
+            self.assertEqual(
+                ["group-one-cluster-admin", "group-two-cluster-admin"],
+                [user["name"] for user in merged["users"]],
+            )
+            self.assertEqual(
+                ["group-one-cluster-admin", "group-two-cluster-admin"],
+                [context["context"]["user"] for context in merged["contexts"]],
+            )
+            self.assertEqual(
+                [b"group-one", b"group-two"],
+                [base64.b64decode(user["user"]["client-key-data"]) for user in merged["users"]],
+            )
+
     def test_dash_prints_kubeconfig(self):
-        kubeconfig = yaml.safe_dump(_config())
+        kubeconfig = _embed_private_key(
+            yaml.safe_dump(_config()), b"private-key", "cluster-one-admin"
+        )
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             print_or_merge_credentials("-", kubeconfig, False, None)
         self.assertEqual(kubeconfig + "\n", output.getvalue())
+        config = yaml.safe_load(output.getvalue())
+        self.assertEqual("cluster-one-admin", config["users"][0]["name"])
+        self.assertEqual("cluster-one-admin", config["contexts"][0]["context"]["user"])
 
     def test_creates_parent_and_secure_config(self):
         with tempfile.TemporaryDirectory() as directory:
