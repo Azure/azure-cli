@@ -444,6 +444,8 @@ class GetVersions(_GetVersions):
 
 class RequestCredential(_RequestCredential):
 
+    AZ_SUPPORT_NO_WAIT = False
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._private_key_pem = None
@@ -451,6 +453,7 @@ class RequestCredential(_RequestCredential):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.no_wait = AAZBoolArg(default=False, registered=False)
         args_schema.certificate_signing_request = AAZStrArg(
             options=["--certificate-signing-request"],
         )
