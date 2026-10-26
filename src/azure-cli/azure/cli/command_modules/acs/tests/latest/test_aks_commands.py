@@ -15823,18 +15823,18 @@ spec:
                 "resource_group": resource_group,
                 "name": self.create_random_name("cliakstest", 16),
                 "location": resource_group_location,
-                "node_pool_name": self.create_random_name("gpu", 6),
+                "node_pool_name": self.create_random_name("n", 6),
                 "ssh_key_value": self.generate_ssh_keys(),
             }
         )
         self.cmd(
             "aks create --resource-group={resource_group} --name={name} --location={location} "
-            "--ssh-key-value={ssh_key_value}",
+            "--ssh-key-value={ssh_key_value} --kms-infrastructure-encryption Enabled",
             checks=[self.check("provisioningState", "Succeeded")],
         )
         self.cmd(
             "aks nodepool add --resource-group={resource_group} --cluster-name={name} "
-            "--name={node_pool_name} --node-vm-size Standard_NC6s_v3 --node-count 1 --enable-managed-gpu",
+            "--name={node_pool_name} --node-vm-size Standard_NV6ads_A10_v5 --node-count 1 --enable-managed-gpu=true",
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("gpuProfile.driver", "Install"),
