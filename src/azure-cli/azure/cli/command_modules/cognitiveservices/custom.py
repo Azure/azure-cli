@@ -159,10 +159,6 @@ _AGENT_HOSTING_REQUIRED_KEYS = {
     "workloadIdentityResourceId",
 }
 
-_AGENT_HOSTING_OPTIONAL_KEYS = {
-    "agentSubnetResourceId",
-}
-
 _AGENT_HOSTING_REQUIRED_RESOURCE_ID_FIELDS = (
     "clusterResourceId",
     "hostingManagementIdentityResourceId",
@@ -173,7 +169,7 @@ _AGENT_HOSTING_REQUIRED_RESOURCE_ID_FIELDS = (
 
 def _build_agent_hosting_models(agent_hosting):
     if agent_hosting is None:
-        return None, None, None
+        return None, None
 
     configurations = agent_hosting
     if not isinstance(configurations, list) or len(configurations) != 1:
@@ -187,15 +183,10 @@ def _build_agent_hosting_models(agent_hosting):
             "Each item in --agent-hosting must be a JSON object."
         )
 
-    configuration = dict(configuration)
-    if configuration.get("agentSubnetResourceId") is None:
-        configuration.pop("agentSubnetResourceId", None)
-
     configuration_keys = set(configuration)
-    allowed_keys = _AGENT_HOSTING_REQUIRED_KEYS | _AGENT_HOSTING_OPTIONAL_KEYS
     missing_keys = sorted(_AGENT_HOSTING_REQUIRED_KEYS - configuration_keys)
     unknown_keys = sorted(
-        str(key) for key in configuration_keys - allowed_keys
+        str(key) for key in configuration_keys - _AGENT_HOSTING_REQUIRED_KEYS
     )
     if missing_keys or unknown_keys:
         details = []
@@ -225,10 +216,7 @@ def _build_agent_hosting_models(agent_hosting):
 
     from azure.mgmt.core.tools import is_valid_resource_id
 
-    resource_id_fields = list(_AGENT_HOSTING_REQUIRED_RESOURCE_ID_FIELDS)
-    if "agentSubnetResourceId" in configuration:
-        resource_id_fields.append("agentSubnetResourceId")
-    for field_name in resource_id_fields:
+    for field_name in _AGENT_HOSTING_REQUIRED_RESOURCE_ID_FIELDS:
         if not is_valid_resource_id(configuration[field_name]):
             raise InvalidArgumentValueError(
                 "Field '{}' in --agent-hosting must be a fully qualified "
@@ -242,19 +230,28 @@ def _build_agent_hosting_models(agent_hosting):
         cluster_resource_id=configuration["clusterResourceId"],
         storage_account_resource_id=configuration["storageAccountResourceId"],
     )
-    network_injections = None
-    if "agentSubnetResourceId" in configuration:
-        network_injections = [
-            NetworkInjection(
-                scenario=ScenarioType.AGENT,
-                subnet_arm_id=configuration["agentSubnetResourceId"],
-                use_microsoft_managed_network=False,
-            )
-        ]
     user_assigned_identities = {
         configuration["hostingManagementIdentityResourceId"]: UserAssignedIdentity()
     }
-    return [hosting_configuration], network_injections, user_assigned_identities
+    return [hosting_configuration], user_assigned_identities
+
+
+def _build_network_injections(subnet):
+    if subnet is None:
+        return None
+
+    from azure.mgmt.core.tools import is_valid_resource_id
+
+    if not isinstance(subnet, str) or not subnet.strip() or not is_valid_resource_id(subnet):
+        raise InvalidArgumentValueError("--subnet must be a fully qualified Azure resource ID.")
+
+    return [
+        NetworkInjection(
+            scenario=ScenarioType.AGENT,
+            subnet_arm_id=subnet,
+            use_microsoft_managed_network=False,
+        )
+    ]
 
 
 def create(
@@ -273,6 +270,7 @@ def create(
     allow_project_management=None,
     yes=None,
     agent_hosting=None,
+    subnet=None,
 ):  # pylint: disable=unused-argument
     """
     Create an Azure Cognitive Services account.
@@ -298,9 +296,10 @@ def create(
     if encryption is not None:
         properties.encryption = json.loads(encryption)
 
-    hosting_configurations, network_injections, user_assigned_identities = _build_agent_hosting_models(
+    hosting_configurations, user_assigned_identities = _build_agent_hosting_models(
         agent_hosting
     )
+    network_injections = _build_network_injections(subnet)
     if hosting_configurations is not None:
         properties.agent_hosting_configurations = hosting_configurations
     if network_injections is not None:

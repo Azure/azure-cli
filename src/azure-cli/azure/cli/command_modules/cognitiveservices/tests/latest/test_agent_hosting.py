@@ -42,13 +42,12 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
     )
     SUBNET_ID = (
         f'/subscriptions/{MOCKED_SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/'
-        'Microsoft.Network/virtualNetworks/vnet1/subnets/agent-subnet'
+        'Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1'
     )
     CONFIGURATION = {
         'name': 'default',
         'hostingType': 'ManagedCluster',
         'clusterResourceId': CLUSTER_ID,
-        'agentSubnetResourceId': SUBNET_ID,
         'hostingManagementIdentityResourceId': MANAGEMENT_IDENTITY,
         'storageAccountResourceId': STORAGE_ID,
         'workloadIdentityResourceId': WORKLOAD_IDENTITY,
@@ -64,6 +63,7 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
             'kind': 'AIServices',
             'location': 'westus',
             'agent_hosting': [copy.deepcopy(self.CONFIGURATION)],
+            'subnet': self.SUBNET_ID,
         }
         arguments.update(overrides)
         result = account_create(**arguments)
@@ -118,30 +118,50 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
         )
 
     def test_agent_hosting_omits_network_injection_without_subnet(self):
-        configuration = copy.deepcopy(self.CONFIGURATION)
-        del configuration['agentSubnetResourceId']
-
-        client, _ = self._call_create(agent_hosting=[configuration])
+        client, _ = self._call_create(subnet=None)
 
         request = client.begin_create.call_args.args[2].as_dict()
         self.assertIn('agentHostingConfigurations', request['properties'])
         self.assertNotIn('networkInjections', request['properties'])
 
-    def test_agent_hosting_null_subnet_matches_omitted_subnet(self):
-        configuration = copy.deepcopy(self.CONFIGURATION)
-        configuration['agentSubnetResourceId'] = None
+    def test_subnet_without_hosting_preserves_identity(self):
+        for kind, assign_identity in (('AIServices', False), ('Face', False), ('Face', True)):
+            with self.subTest(kind=kind, assign_identity=assign_identity):
+                client, _ = self._call_create(
+                    agent_hosting=None, kind=kind, assign_identity=assign_identity,
+                )
+                baseline_client, _ = self._call_create(
+                    agent_hosting=None, subnet=None, kind=kind, assign_identity=assign_identity,
+                )
 
-        null_client, _ = self._call_create(agent_hosting=[configuration])
+                request = client.begin_create.call_args.args[2].as_dict()
+                baseline = baseline_client.begin_create.call_args.args[2].as_dict()
+                self.assertEqual(
+                    request['properties'].pop('networkInjections'),
+                    [{
+                        'scenario': 'agent',
+                        'subnetArmId': self.SUBNET_ID,
+                        'useMicrosoftManagedNetwork': False,
+                    }],
+                )
+                self.assertNotIn('agentHostingConfigurations', request['properties'])
+                self.assertEqual(request, baseline)
 
-        self.assertIn('agentSubnetResourceId', configuration)
-        self.assertIsNone(configuration['agentSubnetResourceId'])
-        del configuration['agentSubnetResourceId']
-        omitted_client, _ = self._call_create(agent_hosting=[configuration])
+    def test_subnet_rejects_invalid_values(self):
+        for agent_hosting in (None, [self.CONFIGURATION]):
+            for subnet in ('', '   ', False, 0, 1, [], {}, 'not-a-resource-id', 'null'):
+                with self.subTest(agent_hosting=agent_hosting, subnet=subnet):
+                    client = mock.Mock()
+                    with self.assertRaisesRegex(InvalidArgumentValueError, '--subnet'):
+                        self._call_create(client=client, agent_hosting=agent_hosting, subnet=subnet)
+                    client.begin_create.assert_not_called()
 
-        self.assertEqual(
-            null_client.begin_create.call_args.args[2].as_dict(),
-            omitted_client.begin_create.call_args.args[2].as_dict(),
-        )
+    def test_agent_hosting_rejects_nested_subnet(self):
+        for subnet in (self.SUBNET_ID, None):
+            with self.subTest(subnet=subnet):
+                configuration = copy.deepcopy(self.CONFIGURATION)
+                configuration['agentSubnetResourceId'] = subnet
+                self._assert_invalid_configuration([configuration])
 
     def test_agent_hosting_rejects_invalid_collection_shapes(self):
         invalid_values = (
@@ -166,9 +186,7 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
 
     def test_agent_hosting_rejects_empty_and_non_string_fields(self):
         for field_name in self.CONFIGURATION:
-            invalid_values = ('', '   ', False, 0, 1, [], {})
-            if field_name != 'agentSubnetResourceId':
-                invalid_values += (None,)
+            invalid_values = ('', '   ', False, 0, 1, [], {}, None)
             for value in invalid_values:
                 with self.subTest(field_name=field_name, value=value):
                     configuration = copy.deepcopy(self.CONFIGURATION)
@@ -183,7 +201,6 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
     def test_agent_hosting_rejects_invalid_resource_ids(self):
         for field_name in (
             'clusterResourceId',
-            'agentSubnetResourceId',
             'hostingManagementIdentityResourceId',
             'storageAccountResourceId',
             'workloadIdentityResourceId',
@@ -196,6 +213,7 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
     def test_agent_hosting_non_byo_create_preserves_existing_payload(self):
         client, _ = self._call_create(
             agent_hosting=None,
+            subnet=None,
         )
 
         request = client.begin_create.call_args.args[2].as_dict()
@@ -265,7 +283,8 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
                     '--kind AIServices '
                     '--sku S0 '
                     '--location westus '
-                    f'--agent-hosting {shlex.quote("@" + configuration_file_path)}'
+                    f'--agent-hosting {shlex.quote("@" + configuration_file_path)} '
+                    f'--subnet {CognitiveServicesAgentHostingUnitTests.SUBNET_ID}'
                 )
 
                 request = accounts_client.begin_create.call_args.args[2].as_dict()
@@ -279,6 +298,33 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
                 )
         finally:
             os.remove(configuration_file_path)
+
+    def test_cognitiveservices_subnet_without_hosting(self):
+        with mock.patch(
+            'azure.cli.command_modules.cognitiveservices._client_factory.'
+            'get_cognitiveservices_management_client'
+        ) as get_management_client:
+            accounts_client = mock.Mock()
+            accounts_client.begin_create.return_value = None
+            get_management_client.return_value.accounts = accounts_client
+
+            self.cmd(
+                'az cognitiveservices account create '
+                '--name myAccount '
+                '--resource-group myResourceGroup '
+                '--kind AIServices '
+                '--sku S0 '
+                '--location westus '
+                f'--subnet {CognitiveServicesAgentHostingUnitTests.SUBNET_ID}'
+            )
+
+            request = accounts_client.begin_create.call_args.args[2].as_dict()
+            self.assertNotIn('agentHostingConfigurations', request['properties'])
+            self.assertEqual(
+                request['properties']['networkInjections'][0]['subnetArmId'],
+                CognitiveServicesAgentHostingUnitTests.SUBNET_ID,
+            )
+            self.assertEqual(request['identity'], {'type': 'SystemAssigned'})
 
     def test_cognitiveservices_agent_hosting_argument_validation(self):
         with mock.patch(

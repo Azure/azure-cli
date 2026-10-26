@@ -286,11 +286,14 @@ def load_arguments(self, _):
                 "JSON array or `@<file>` containing exactly one agent hosting configuration. "
                 "Required object properties: name, hostingType, clusterResourceId, "
                 "hostingManagementIdentityResourceId, storageAccountResourceId, and workloadIdentityResourceId. "
-                "Optional object property: agentSubnetResourceId. "
                 "The object is expanded into the account's agent hosting configuration and managed identity. "
-                "agentSubnetResourceId adds network injection when provided."
             ),
         )
+
+    with self.argument_context(
+        "cognitiveservices account create", arg_group="Network"
+    ) as c:
+        c.argument("subnet", help="ARM resource ID of the subnet for network injection.")
 
     with self.argument_context(
         "cognitiveservices account update", arg_group="AI Services"
