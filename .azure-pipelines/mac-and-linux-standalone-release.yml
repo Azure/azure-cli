@@ -18,43 +18,16 @@ trigger: none
 pr: none
 
 parameters:
-  # Build parameters
-  - name: PythonVersion
-    displayName: 'Python Version (Homebrew)'
-    type: string
-    default: '3.14'
-  
-  # Sign/notarize parameters
-  - name: BundleId
-    displayName: 'Bundle ID for notarization'
-    type: string
-    default: 'com.microsoft.azure.cli'
-  
-  # Publish parameters
+  # Repository, Python, and signing settings are fixed below, not queue-time inputs.
   - name: PublishToGitHub
     displayName: 'Publish to GitHub Release'
     type: boolean
     default: true
   
-  - name: GitHubRepo
-    displayName: 'GitHub Repository (owner/repo)'
-    type: string
-    default: 'Azure/homebrew-azure-cli'
-  
   - name: UpdateHomebrew
     displayName: 'Update Homebrew cask after release'
     type: boolean
     default: true
-  
-  - name: HomebrewTapRepo
-    displayName: 'Homebrew Tap Repository'
-    type: string
-    default: 'Azure/homebrew-azure-cli'
-  
-  - name: ESRPServiceConnection
-    displayName: 'ESRP Service Connection'
-    type: string
-    default: 'ame_esrp_connection'
   
   - name: Debug
     displayName: 'Enable debug diagnostics'
@@ -71,15 +44,13 @@ resources:
 
 variables:
   - template: templates/variables.yml
+  - name: standalone_python_version
+    value: '3.14'
+    readonly: true
   - ${{ if eq(variables['System.TeamProject'], 'release') }}:
     - group: 'AME ESRP Variable Group'
     - group: 'esrp-signing-codes'
     - group: 'get-github-pat-token'
-  
-  - name: GitHubRepo
-    value: ${{ parameters.GitHubRepo }}
-  - name: HomebrewTapRepo
-    value: ${{ parameters.HomebrewTapRepo }}
   
   # Disable auto-injection tasks
   - name: Codeql.Enabled
@@ -110,13 +81,13 @@ jobs:
 # ============================================================================
 - template: templates/macos/macos-build-jobs.yml
   parameters:
-    PythonVersion: ${{ parameters.PythonVersion }}
+    PythonVersion: ${{ variables.standalone_python_version }}
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
     MacosIntelImage: ${{ variables.macos_intel_pool }}
 
 - template: templates/linux/linux-build-jobs.yml
   parameters:
-    PythonVersion: ${{ parameters.PythonVersion }}
+    PythonVersion: ${{ variables.standalone_python_version }}
     LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
     LinuxX64Pool: ${{ variables.ubuntu_pool }}
 
@@ -131,11 +102,11 @@ jobs:
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
   - template: templates/macos/macos-sign-notarize-jobs.yml
     parameters:
-      BundleId: ${{ parameters.BundleId }}
-      PythonVersion: ${{ parameters.PythonVersion }}
+      BundleId: 'com.microsoft.azure.cli'
+      PythonVersion: ${{ variables.standalone_python_version }}
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
-      ESRPServiceConnection: ${{ parameters.ESRPServiceConnection }}
+      ESRPServiceConnection: 'ame_esrp_connection'
       UseCurrentPipelineArtifacts: true
       dependsOn:
       - VerifyMacOSCli
@@ -158,8 +129,8 @@ jobs:
       MacosIntelImage: ${{ variables.macos_intel_pool }}
       LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
       LinuxX64Pool: ${{ variables.ubuntu_pool }}
-      PythonVersion: ${{ parameters.PythonVersion }}
-      GitHubRepo: $(GitHubRepo)
+      PythonVersion: ${{ variables.standalone_python_version }}
+      GitHubRepo: 'Azure/homebrew-azure-cli'
       Debug: ${{ parameters.Debug }}
       CaskDependsOn:
       - CreateMacOSFinalTarball
@@ -184,13 +155,13 @@ jobs:
       PublishToGitHub: ${{ parameters.PublishToGitHub }}
       UpdateHomebrew: ${{ parameters.UpdateHomebrew }}
       TestAfterPublish: false
-      GitHubRepo: $(GitHubRepo)
-      HomebrewTapRepo: ${{ parameters.HomebrewTapRepo }}
+      GitHubRepo: 'Azure/homebrew-azure-cli'
+      HomebrewTapRepo: 'Azure/homebrew-azure-cli'
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
       LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
       LinuxX64Pool: ${{ variables.ubuntu_pool }}
-      PythonVersion: ${{ parameters.PythonVersion }}
+      PythonVersion: ${{ variables.standalone_python_version }}
       Debug: ${{ parameters.Debug }}
       dependsOn:
       - TestMacOSTempTapCask
@@ -202,4 +173,3 @@ jobs:
 # - CreateGitHubRelease (conditional)
 # - UpdateHomebrewCask (conditional)
 # - PrintSummary
-
