@@ -98,6 +98,25 @@ class TestAAZIdentity(unittest.TestCase):
         result = self.identity._build_identity(data, result)
         self.assertTrue(result == {})
 
+    def test_remove_single_user_assigned_identity(self):
+        for identity_type in ("UserAssigned", "SystemAssigned,UserAssigned"):
+            for identity_id in ("b", "missing"):
+                with self.subTest(identity_type=identity_type, identity_id=identity_id):
+                    result = {
+                        "type": identity_type,
+                        "userAssignedIdentities": {"a": {}, "b": {}},
+                    }
+                    data = {
+                        "userAssigned": [identity_id],
+                        "action": "remove",
+                    }
+                    result = self.identity._build_identity(data, result)
+                    expected_identities = {"a": {}} if identity_id == "b" else {"a": {}, "b": {}}
+                    self.assertEqual(result, {
+                        "type": identity_type,
+                        "userAssignedIdentities": expected_identities,
+                    })
+
     def test_remove_command(self):
         result = {
             "type": "systemAssigned, userAssigned",
