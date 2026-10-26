@@ -667,13 +667,13 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account deployment create', arg_group='Model provider') as c:
         c.argument('organization_name',
                    help='Name of the organization using the Anthropic model. '
-                        'Specify together with --industry and --country.')
+                        'Required for Anthropic deployments. Specify together with --industry and --country.')
         c.argument('industry',
                    help='Industry of the organization using the Anthropic model, such as Law. '
-                        'Specify together with --organization-name and --country.')
+                        'Required for Anthropic deployments. Specify together with --organization-name and --country.')
         c.argument('country', options_list=['--country', '--country-code'],
                    help='ISO country name or code of the organization, such as "United States" or US. '
-                        'Specify together with --organization-name and --industry.')
+                        'Required for Anthropic deployments. Specify together with --organization-name and --industry.')
 
     with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentScaleSettings') as c:
         c.argument(

@@ -383,7 +383,7 @@ def deployment_begin_create_or_update(
         '--industry': industry,
         '--country': country,
     }
-    if any(value is not None for value in provider_arguments.values()):
+    if model_format.lower() == 'anthropic' or any(value is not None for value in provider_arguments.values()):
         for option, value in provider_arguments.items():
             if value is None:
                 raise RequiredArgumentMissingError(
