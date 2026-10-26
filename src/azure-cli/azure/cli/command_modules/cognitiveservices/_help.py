@@ -342,7 +342,7 @@ examples:
   - name: Create a deployment for Azure Cognitive Services account.
     text: az cognitiveservices account deployment create -g yuanyang-test-sdk -n yytest-oai --deployment-name dpy --model-name ada --model-version "1" --model-format OpenAI --sku-capacity 1 --sku-name "Standard"
   - name: Create an Anthropic Claude deployment with organization information.
-    text: az cognitiveservices account deployment create -g myResourceGroup -n myFoundryAccount --deployment-name my-haiku --model-name claude-haiku-4-5 --model-version "2" --model-format Anthropic --sku-capacity 1 --sku-name GlobalStandard --organization-name Contoso --industry Law --country "United States"
+    text: az cognitiveservices account deployment create -g myResourceGroup -n myFoundryAccount --deployment-name my-haiku --model-name claude-haiku-4-5 --model-version "2" --model-format Anthropic --sku-capacity 1 --sku-name GlobalStandard --organization-name "Contoso" --industry "Law" --country "United States"
 """
 
 helps[
