@@ -24,9 +24,19 @@ Environment variable fallbacks (used when a CLI flag is omitted):
 import argparse
 import os
 from pathlib import Path
+import re
 
 DEFAULT_TEMPLATE = "scripts/release/standalone/templates/azure-cli.rb.in"
 DEFAULT_OUTPUT = "azure-cli.rb"
+FIELD_PATTERNS = {
+    "version": r"[0-9]+\.[0-9]+\.[0-9]+(?:[a-z][a-z0-9]*)?",
+    "arm64_macos_sha": r"[0-9a-fA-F]{64}",
+    "x86_64_macos_sha": r"[0-9a-fA-F]{64}",
+    "arm64_linux_sha": r"[0-9a-fA-F]{64}",
+    "x86_64_linux_sha": r"[0-9a-fA-F]{64}",
+    "github_repo": r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9_.-]+",
+    "python_version": r"3\.[0-9]+",
+}
 
 
 def _env_or_arg(value: str, env_key: str) -> str:
@@ -36,6 +46,12 @@ def _env_or_arg(value: str, env_key: str) -> str:
 def _require(value: str, name: str) -> str:
     if not value:
         raise SystemExit(f"Missing required value: {name}")
+    return value
+
+
+def _validate_value(value: str, name: str) -> str:
+    if not re.fullmatch(FIELD_PATTERNS[name], value, flags=re.ASCII):
+        raise SystemExit(f"Invalid value for {name}")
     return value
 
 
@@ -72,9 +88,32 @@ def generate_cask(args: argparse.Namespace) -> None:
         "{{ github_repo }}": github_repo,
         "{{ python_version }}": python_version,
     }
+    for key, value in replacements.items():
+        _validate_value(value, key[3:-3])
 
     content = _render_template(template_path, replacements)
     output_path.write_text(content)
+
+
+def validate_cask(cask_path: Path, template_path: Path, github_repo: str, python_version: str) -> None:
+    """Check the complete publication source without evaluating Ruby."""
+    _validate_value(github_repo, "github_repo")
+    _validate_value(python_version, "python_version")
+    template = template_path.read_text()
+    if not template.endswith("\n"):
+        template += "\n"
+    pattern = re.escape(template)
+    for name, field_pattern in FIELD_PATTERNS.items():
+        placeholder = "{{ " + name + " }}"
+        if template.count(placeholder) != 1:
+            raise SystemExit(f"Expected one template placeholder for {name}")
+        pattern = pattern.replace(re.escape(placeholder), f"(?P<{name}>{field_pattern})")
+    match = re.fullmatch(pattern, cask_path.read_text(), flags=re.ASCII)
+    if match is None:
+        raise SystemExit("Cask does not match the trusted template and validated field formats")
+    if match["github_repo"] != github_repo or match["python_version"] != python_version:
+        raise SystemExit("Cask repository or Python version does not match the pipeline settings")
+    print(f"Validated publication cask: {cask_path}")
 
 
 def main() -> None:
@@ -88,10 +127,19 @@ def main() -> None:
     parser.add_argument("--python-version", dest="python_version", help="Python major.minor version, e.g. 3.14")
     parser.add_argument("--template", dest="template", help="Template path (.rb.in)")
     parser.add_argument("--output", dest="output", help="Output cask path (.rb)")
+    parser.add_argument("--validate", metavar="CASK", help="Validate an existing publication cask without evaluating Ruby")
     parser.set_defaults(func=generate_cask)
 
     args = parser.parse_args()
-    args.func(args)
+    if args.validate:
+        validate_cask(
+            Path(args.validate),
+            Path(_env_or_arg(args.template, "TEMPLATE") or DEFAULT_TEMPLATE),
+            _require(_env_or_arg(args.github_repo, "GITHUB_REPO"), "github_repo"),
+            _require(_env_or_arg(args.python_version, "PYTHON_VERSION"), "python_version"),
+        )
+    else:
+        args.func(args)
 
 
 if __name__ == "__main__":
