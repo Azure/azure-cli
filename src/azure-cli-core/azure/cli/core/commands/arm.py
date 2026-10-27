@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+# pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 
 import argparse
@@ -75,7 +75,7 @@ class ArmTemplateBuilder:
                    output_type='string', path=None):
 
         if provider and property_type:
-            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
+            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(
                 provider=provider, type=property_type, property=property_name)
         else:
             value = "[reference('{}')".format(property_name)
@@ -175,8 +175,7 @@ class ResourceId(str):
         return str.__new__(cls, val)
 
 
-def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type,
-                    **_):  # pylint: disable=redefined-builtin
+def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
     ''' Checks if the given resource exists. '''
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
@@ -774,6 +773,11 @@ def create_role_assignment(cli_ctx, principal_id, identity_role=None, identity_s
     import time
     from azure.core.exceptions import HttpResponseError
 
+    # Coerce AAZSimpleValue/model values to plain strings for SDK 5.0.0b2 compatibility
+    principal_id = str(principal_id) if principal_id else principal_id
+    identity_role = str(identity_role) if identity_role else identity_role
+    identity_scope = str(identity_scope) if identity_scope else identity_scope
+
     identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
     assignments_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_assignments
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
@@ -818,7 +822,7 @@ def resolve_role_id(cli_ctx, role, scope):
         except ValueError:
             pass
         if not role_id:  # retrieve role id
-            role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
+            role_defs = list(client.list(scope, filter="roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
             if len(role_defs) > 1:

@@ -14,7 +14,9 @@ class TestIdentity(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_identity_mgmt_')
     def test_identity_management(self, resource_group):
         self.kwargs.update({
-            'identity': 'myidentity'
+            'identity': 'myidentity',
+            'resource_restriction_compute': '\{"providers":\["Microsoft.Compute"\]\}',
+            'resource_restriction_empty': '\{"providers":\[\]\}'
         })
 
         operations = self.cmd('identity list-operations').get_output_in_json()
@@ -23,13 +25,8 @@ class TestIdentity(ScenarioTest):
         self.cmd('identity create -n {identity} -g {rg}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('isolationScope', 'None')
-        ])
-
-        self.cmd('identity update -n {identity} -g {rg} --isolation-scope Regional', checks=[
-            self.check('name', '{identity}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('isolationScope', 'Regional')
+            self.check('isolationScope', 'None'),
+            self.check('assignmentRestrictions.providers', [])
         ])
 
         self.cmd('identity list-resources -g {rg} -n {identity}')
@@ -50,6 +47,18 @@ class TestIdentity(ScenarioTest):
         ])
 
         self.cmd('identity delete -n {identity} -g {rg}')
+
+        self.cmd('identity create -n {identity} -g {rg} --resource-restriction {resource_restriction_compute}', checks=[
+            self.check('name', '{identity}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('assignmentRestrictions.providers[0]', 'Microsoft.Compute')
+        ])
+
+        self.cmd('identity update -n {identity} -g {rg} --resource-restriction {resource_restriction_empty}', checks=[
+            self.check('name', '{identity}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('assignmentRestrictions.providers', [])
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_federated_identity_credential_', location='centraluseuap')
     def test_federated_identity_credential(self, resource_group):
@@ -202,4 +211,3 @@ class TestIdentity(ScenarioTest):
                      self.check('type(@)', 'array'),
                      self.check('length(@)', 0)
                  ])
-        

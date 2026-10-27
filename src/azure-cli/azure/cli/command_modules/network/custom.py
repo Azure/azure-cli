@@ -49,6 +49,10 @@ from .aaz.latest.network.application_gateway.root_cert import Create as _RootCer
 from .aaz.latest.network.application_gateway.routing_rule import Create as _RoutingRuleCreate, \
     Update as _RoutingRuleUpdate
 from .aaz.latest.network.application_gateway.rule import Create as _RuleCreate, Update as _RuleUpdate
+from .aaz.latest.network.application_gateway.advanced_routing_map import Create as _AdvancedRoutingMapCreate, \
+    Update as _AdvancedRoutingMapUpdate
+from .aaz.latest.network.application_gateway.advanced_routing_map.rule import \
+    Create as _AdvancedRoutingMapRuleCreate, Update as _AdvancedRoutingMapRuleUpdate
 from .aaz.latest.network.application_gateway.settings import Create as _SettingsCreate, Update as _SettingsUpdate
 from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
 from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
@@ -75,6 +79,8 @@ from .aaz.latest.network.express_route.peering.connection import Create as _Expr
 from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
 from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
 from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
+from .aaz.latest.network.first_party_service_tag import Create as _FirstPartyServiceTagCreate, \
+    List as _FirstPartyServiceTagList, Show as _FirstPartyServiceTagShow, Update as _FirstPartyServiceTagUpdate
 from .aaz.latest.network.nic import Create as _NICCreate, Update as _NICUpdate
 from .aaz.latest.network.nic.ip_config import Create as _NICIPConfigCreate, Update as _NICIPConfigUpdate
 from .aaz.latest.network.nic.ip_config.inbound_nat_rule import Add as _NICIPConfigNATAdd, \
@@ -90,7 +96,7 @@ from .aaz.latest.network.private_endpoint.ip_config import Add as _PrivateEndpoi
 from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
     Update as _PrivateLinkServiceUpdate
 from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
-from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
+from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate, Update as _PublicIpPrefixUpdate
 from .aaz.latest.network.security_partner_provider import Create as _SecurityPartnerProviderCreate, \
     Update as _SecurityPartnerProviderUpdate
 from .aaz.latest.network.virtual_appliance import Create as _VirtualApplianceCreate, Update as _VirtualApplianceUpdate
@@ -354,6 +360,9 @@ class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
         )
         args_schema.http2.enum = AAZArgEnum({"Enabled": True, "Disabled": False})
         args_schema.custom_error_configurations._registered = False
+        # managed by the advanced-routing-map / advanced-routing-set subgroups
+        args_schema.advanced_routing_condition_sets._registered = False
+        args_schema.advanced_routing_maps._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -722,14 +731,13 @@ class IdentityAssign(_IdentityAssign):
                          "/userAssignedIdentities/{}",
             ),
         )
-        args_schema.type._registered = False
-        args_schema.user_assigned_identities._registered = False
+        args_schema.mi_system_assigned._registered = False
+        args_schema.mi_user_assigned._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.type = "UserAssigned"
-        args.user_assigned_identities = {args.identity.to_serialized_data(): {}}
+        args.mi_user_assigned = [args.identity.to_serialized_data()]
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
@@ -1007,6 +1015,24 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
 
 # region application-gateway ssl-profile
 class SSLProfileAdd(_SSLProfileAdd):
+    AZ_HELP = {
+        **_SSLProfileAdd.AZ_HELP,
+        "examples": [
+            {
+                "name": "Add an SSL profile for an existing application gateway.",
+                "text": "az network application-gateway ssl-profile add --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile",
+            },
+            {
+                "name": "Add an SSL profile in Passthrough mode. The gateway forwards the client certificate "
+                        "to the backend without verifying it.",
+                "text": "az network application-gateway ssl-profile add --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile "
+                        "--auth-configuration verify-client-auth-mode=Passthrough",
+            },
+        ],
+    }
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
@@ -1025,7 +1051,6 @@ class SSLProfileAdd(_SSLProfileAdd):
                          "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
             ),
         )
-        args_schema.auth_configuration._registered = False
         args_schema.client_certificates._registered = False
         return args_schema
 
@@ -1045,6 +1070,24 @@ class SSLProfileAdd(_SSLProfileAdd):
 
 
 class SSLProfileUpdate(_SSLProfileUpdate):
+    AZ_HELP = {
+        **_SSLProfileUpdate.AZ_HELP,
+        "examples": [
+            {
+                "name": "Update SSL profile for an existing application gateway.",
+                "text": "az network application-gateway ssl-profile update --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile --client-auth-configuration False",
+            },
+            {
+                "name": "Update an SSL profile to Passthrough mode. The gateway forwards the client certificate "
+                        "to the backend without verifying it.",
+                "text": "az network application-gateway ssl-profile update --gateway-name MyAppGateway "
+                        "-g MyResourceGroup --name MySslProfile "
+                        "--auth-configuration verify-client-auth-mode=Passthrough",
+            },
+        ],
+    }
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
@@ -1066,7 +1109,6 @@ class SSLProfileUpdate(_SSLProfileUpdate):
             ),
             nullable=True,
         )
-        args_schema.auth_configuration._registered = False
         args_schema.client_certificates._registered = False
         return args_schema
 
@@ -1414,6 +1456,10 @@ class RuleCreate(_RuleCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.advanced_routing_map._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/advancedRoutingMaps/{}",
+        )
         args_schema.address_pool._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendAddressPools/{}",
@@ -1443,14 +1489,15 @@ class RuleCreate(_RuleCreate):
     def pre_instance_create(self):
         args = self.ctx.args
         instance = self.ctx.vars.instance
-        if not has_value(args.address_pool) and not has_value(args.redirect_config):
+        skip_backend = has_value(args.redirect_config) or has_value(args.advanced_routing_map)
+        if not has_value(args.address_pool) and not skip_backend:
             address_pools = instance.properties.backend_address_pools
             if len(address_pools) == 1:
                 args.address_pool = instance.properties.backend_address_pools[0].id
             elif len(address_pools) > 1:
                 err_msg = "Multiple backend address pools found. Specify --address-pool explicitly."
                 raise ArgumentUsageError(err_msg)
-        if not has_value(args.http_settings) and not has_value(args.redirect_config):
+        if not has_value(args.http_settings) and not skip_backend:
             settings = instance.properties.backend_http_settings_collection
             if len(settings) == 1:
                 args.http_settings = instance.properties.backend_http_settings_collection[0].id
@@ -1475,6 +1522,10 @@ class RuleUpdate(_RuleUpdate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.advanced_routing_map._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/advancedRoutingMaps/{}",
+        )
         args_schema.address_pool._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/applicationGateways/{gateway_name}/backendAddressPools/{}",
@@ -1512,8 +1563,105 @@ class RuleUpdate(_RuleUpdate):
             instance.properties.redirect_configuration = None
         if not has_value(instance.properties.rewrite_rule_set.id):
             instance.properties.rewrite_rule_set = None
+        if not has_value(instance.properties.advanced_routing_map.id):
+            instance.properties.advanced_routing_map = None
         if not has_value(instance.properties.url_path_map.id):
             instance.properties.url_path_map = None
+
+
+_AG_ROUTING_REFS = {
+    "address_pool": ("backendAddressPools", "backend address pool"),
+    "http_settings": ("backendHttpSettingsCollection", "HTTP settings"),
+    "redirect_config": ("redirectConfigurations", "redirect configuration"),
+    "rewrite_rule_set": ("rewriteRuleSets", "rewrite rule set"),
+}
+
+
+def _set_ag_child_id_fmt(args_schema, names, prefix=""):
+    from azure.cli.core.aaz import AAZResourceIdArgFormat
+    children = {k: v[0] for k, v in _AG_ROUTING_REFS.items()}
+    children["condition_set"] = "advancedRoutingConditionSets"
+    for name in names:
+        args_schema[prefix + name]._fmt = AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/applicationGateways/{gateway_name}/" + children[name] + "/{}")
+    return args_schema
+
+
+class AdvancedRoutingMapCreate(_AdvancedRoutingMapCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZIntArg, AAZIntArgFormat, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.advanced_routing_rules._registered = False
+        args_schema.rule_name = AAZStrArg(
+            options=["--rule-name"], arg_group="First Rule", default="rule1",
+            help="Name of the first advanced routing rule.",
+        )
+        args_schema.priority = AAZIntArg(
+            options=["--priority"], arg_group="First Rule", required=True,
+            help="Priority of the first advanced routing rule. Rules are evaluated in ascending priority order.",
+            fmt=AAZIntArgFormat(maximum=1000, minimum=1),
+        )
+        args_schema.condition_set = AAZStrArg(
+            options=["--condition-set"], arg_group="First Rule", required=True,
+            help="Name or ID of the advanced routing condition set of the first rule.",
+        )
+        for name, (_, desc) in _AG_ROUTING_REFS.items():
+            args_schema[name] = AAZStrArg(
+                options=["--" + name.replace("_", "-")], arg_group="First Rule",
+                help=f"Name or ID of the {desc} of the first rule.",
+            )
+        _set_ag_child_id_fmt(args_schema, _AG_ROUTING_REFS, prefix="default_")
+        return _set_ag_child_id_fmt(args_schema, [*_AG_ROUTING_REFS, "condition_set"])
+
+    def pre_operations(self):
+        args = self.ctx.args
+        refs = {
+            "advanced_routing_condition_set": args.condition_set,
+            "backend_address_pool": args.address_pool,
+            "backend_http_settings": args.http_settings,
+            "redirect_configuration": args.redirect_config,
+            "rewrite_rule_set": args.rewrite_rule_set,
+        }
+        args.advanced_routing_rules = [{
+            "name": args.rule_name,
+            "priority": args.priority,
+            **{k: {"id": v} for k, v in refs.items() if has_value(v)},
+        }]
+
+
+class AdvancedRoutingMapUpdate(_AdvancedRoutingMapUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        return _set_ag_child_id_fmt(super()._build_arguments_schema(*args, **kwargs), _AG_ROUTING_REFS,
+                                    prefix="default_")
+
+    def post_instance_update(self, instance):
+        for prop in ("default_backend_address_pool", "default_backend_http_settings",
+                     "default_redirect_configuration", "default_rewrite_rule_set"):
+            if not has_value(instance.properties[prop].id):
+                instance.properties[prop] = None
+
+
+class AdvancedRoutingMapRuleCreate(_AdvancedRoutingMapRuleCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        return _set_ag_child_id_fmt(super()._build_arguments_schema(*args, **kwargs),
+                                    [*_AG_ROUTING_REFS, "condition_set"])
+
+
+class AdvancedRoutingMapRuleUpdate(_AdvancedRoutingMapRuleUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        return _set_ag_child_id_fmt(super()._build_arguments_schema(*args, **kwargs),
+                                    [*_AG_ROUTING_REFS, "condition_set"])
+
+    def post_instance_update(self, instance):
+        for prop in ("advanced_routing_condition_set", "backend_address_pool", "backend_http_settings",
+                     "redirect_configuration", "rewrite_rule_set"):
+            if not has_value(instance.properties[prop].id):
+                instance.properties[prop] = None
 
 
 class RoutingRuleCreate(_RoutingRuleCreate):
@@ -2096,7 +2244,7 @@ def update_waf_managed_rule_set(cmd, resource_group_name, policy_name,
     rule_group_override = {
         "rule_group_name": rule_group_name,
         "rules": managed_rule_overrides
-    } if managed_rule_overrides else None
+    } if rule_group_name is not None else None
 
     if rule_group_override is None:
         rule_group_overrides = []
@@ -5205,11 +5353,80 @@ def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, p
 
 
 # region PublicIPAddresses
+def _add_root_resource_guid(schema):
+    from azure.cli.core.aaz import AAZStrType
+    if not hasattr(schema, "resource_guid"):
+        schema.resource_guid = AAZStrType(
+            serialized_name="resourceGuid",
+            flags={"read_only": True},
+        )
+    return schema
+
+
+class FirstPartyServiceTagCreate(_FirstPartyServiceTagCreate):
+    class FirstPartyServiceTagsCreateOrUpdate(_FirstPartyServiceTagCreate.FirstPartyServiceTagsCreateOrUpdate):
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            return _add_root_resource_guid(super()._build_schema_on_200_201())
+
+
+class FirstPartyServiceTagShow(_FirstPartyServiceTagShow):
+    class FirstPartyServiceTagsGet(_FirstPartyServiceTagShow.FirstPartyServiceTagsGet):
+        @classmethod
+        def _build_schema_on_200(cls):
+            return _add_root_resource_guid(super()._build_schema_on_200())
+
+
+class FirstPartyServiceTagList(_FirstPartyServiceTagList):
+    class FirstPartyServiceTagsList(_FirstPartyServiceTagList.FirstPartyServiceTagsList):
+        @classmethod
+        def _build_schema_on_200(cls):
+            schema = super()._build_schema_on_200()
+            _add_root_resource_guid(schema.value.Element)
+            return schema
+
+
+class FirstPartyServiceTagUpdate(_FirstPartyServiceTagUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.value._registered = False
+        args_schema.location._registered = False
+        return args_schema
+
+    class FirstPartyServiceTagsGet(_FirstPartyServiceTagUpdate.FirstPartyServiceTagsGet):
+        @classmethod
+        def _build_schema_on_200(cls):
+            return _add_root_resource_guid(super()._build_schema_on_200())
+
+    class FirstPartyServiceTagsCreateOrUpdate(_FirstPartyServiceTagUpdate.FirstPartyServiceTagsCreateOrUpdate):
+        @property
+        def method(self):
+            return "PATCH"
+
+        @property
+        def content(self):
+            from azure.cli.core.aaz import AAZObjectType, AAZDictType, AAZStrType
+            content, builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True}},
+            )
+            builder.set_prop("tags", AAZDictType, ".tags")
+            builder.get(".tags").set_elements(AAZStrType, ".")
+            return self.serialize_content(content)
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            return _add_root_resource_guid(super()._build_schema_on_200_201())
+
+
 def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None, dns_name_scope=None,
                      idle_timeout=4, reverse_fqdn=None, version=None, sku=None, tier=None, zone=None, ip_tags=None,
                      public_ip_prefix=None, edge_zone=None, ip_address=None,
-                     protection_mode=None, ddos_protection_plan=None):
+                     protection_mode=None, ddos_protection_plan=None, ddos_custom_policy=None,
+                     first_party_service_tag_id=None):
     public_ip_args = {
         'name': public_ip_address_name,
         "resource_group": resource_group_name,
@@ -5218,7 +5435,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         'allocation_method': allocation_method,
         'idle_timeout': idle_timeout,
         'ip_address': ip_address,
-        'ip_tags': ip_tags
+        'ip_tags': ip_tags,
+        'first_party_service_tag_id': first_party_service_tag_id
     }
 
     if public_ip_prefix:
@@ -5266,8 +5484,53 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args['ddos_protection_mode'] = protection_mode
     if ddos_protection_plan:
         public_ip_args['ddos_protection_plan'] = ddos_protection_plan
+    if ddos_custom_policy:
+        if not is_valid_resource_id(ddos_custom_policy):
+            ddos_custom_policy = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='ddosCustomPolicies',
+                name=ddos_custom_policy,
+            )
+        public_ip_args['ddos_custom_policy'] = {'id': ddos_custom_policy}
 
     return PublicIPCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
+
+
+def _add_first_party_service_tag_argument(args_schema):
+    from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
+    args_schema.first_party_service_tag_id = AAZResourceIdArg(
+        options=["--first-party-service-tag-id", "--fpst-id"],
+        help="The resource ID of the first party service tag associated with the IP tag.",
+        fmt=AAZResourceIdArgFormat(
+            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
+                     "/firstPartyServiceTags/{}",
+        ),
+    )
+
+
+def _normalize_ip_tags(ip_tags_arg, first_party_service_tag_id_arg):
+    first_party_service_tag_id = (
+        first_party_service_tag_id_arg.to_serialized_data()
+        if has_value(first_party_service_tag_id_arg) else None
+    )
+    if not has_value(ip_tags_arg):
+        if first_party_service_tag_id:
+            raise ArgumentUsageError("`--first-party-service-tag-id` requires exactly one value in `--ip-tags`.")
+        return None
+
+    ip_tags = ip_tags_arg.to_serialized_data()
+    if ip_tags is None:
+        return []
+    if isinstance(ip_tags, dict):
+        ip_tags = [{"ip_tag_type": key, "tag": value} for key, value in ip_tags.items()]
+
+    if first_party_service_tag_id:
+        if len(ip_tags) != 1:
+            raise ArgumentUsageError("`--first-party-service-tag-id` requires exactly one value in `--ip-tags`.")
+        ip_tags[0]["first_party_service_tag_id"] = first_party_service_tag_id
+    return ip_tags
 
 
 class PublicIPCreate(_PublicIPCreate):
@@ -5283,7 +5546,13 @@ class PublicIPCreate(_PublicIPCreate):
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
                      "/ddosProtectionPlans/{}",
         )
+        _add_first_party_service_tag_argument(args_schema)
         return args_schema
+
+    def pre_operations(self):
+        ip_tags = _normalize_ip_tags(self.ctx.args.ip_tags, self.ctx.args.first_party_service_tag_id)
+        if ip_tags is not None:
+            self.ctx.args.ip_tags = ip_tags
 
 
 class PublicIPUpdate(_PublicIPUpdate):
@@ -5306,20 +5575,21 @@ class PublicIPUpdate(_PublicIPUpdate):
         )
         args_schema.ip_tags.Element = AAZStrArg()
         args_schema.ip_tags_list._registered = False
+        _add_first_party_service_tag_argument(args_schema)
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.ip_tags):
-            if (ip_tags := args.ip_tags.to_serialized_data()) is None:
-                args.ip_tags_list = []
-            else:
-                args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]
+        ip_tags = _normalize_ip_tags(args.ip_tags, args.first_party_service_tag_id)
+        if ip_tags is not None:
+            args.ip_tags_list = ip_tags
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.ddos_settings.ddos_protection_plan.id):
             instance.properties.ddos_settings.ddos_protection_plan = None
+        if not has_value(instance.properties.ddos_settings.ddos_custom_policy.id):
+            instance.properties.ddos_settings.ddos_custom_policy = None
 
 
 class PublicIpPrefixCreate(_PublicIpPrefixCreate):
@@ -5338,6 +5608,7 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         args_schema.ip_tags.Element = AAZStrArg()
         args_schema.type._registered = False
         args_schema.ip_tags_list._registered = False
+        _add_first_party_service_tag_argument(args_schema)
 
         return args_schema
 
@@ -5345,11 +5616,30 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         args = self.ctx.args
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
-        if has_value(args.ip_tags):
-            ip_tags = []
-            for k, v in args.ip_tags.to_serialized_data().items():
-                ip_tags.append({"ip_tag_type": k, "tag": v})
+        ip_tags = _normalize_ip_tags(args.ip_tags, args.first_party_service_tag_id)
+        if ip_tags is not None:
             args.ip_tags_list = ip_tags
+
+
+class PublicIpPrefixUpdate(_PublicIpPrefixUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.ip_tags = AAZDictArg(
+            options=["--ip-tags"],
+            help="The list of tags associated with the public IP prefix in 'TYPE=VAL' format.",
+            nullable=True,
+        )
+        args_schema.ip_tags.Element = AAZStrArg()
+        _add_first_party_service_tag_argument(args_schema)
+        return args_schema
+
+    def pre_instance_update(self, instance):
+        ip_tags = _normalize_ip_tags(self.ctx.args.ip_tags, self.ctx.args.first_party_service_tag_id)
+        if ip_tags is not None:
+            instance.properties.ip_tags = ip_tags
 # endregion
 
 
@@ -5359,7 +5649,8 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    monitor_port=80, monitor_protocol="HTTP",
                                    profile_status="Enabled",
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
-                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None,
+                                   record_type=None):
     from .aaz.latest.network.traffic_manager.profile import Create
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
@@ -5382,6 +5673,8 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         "timeout": timeout,
         "max_failures": max_failures
     }
+    if record_type is not None:
+        args["record_type"] = record_type
 
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
@@ -5390,7 +5683,8 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
                                    ttl=None, timeout=None, interval=None, max_failures=None,
-                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None,
+                                   record_type=None):
     from .aaz.latest.network.traffic_manager.profile import Update
     args = {
         "name": traffic_manager_profile_name,
@@ -5422,6 +5716,8 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         args["timeout"] = timeout
     if max_failures is not None:
         args["max_failures"] = max_failures
+    if record_type is not None:
+        args["record_type"] = record_type
 
     return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
@@ -6723,10 +7019,16 @@ class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
 
 def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
                               detection_rule_name=None, detection_mode=None, traffic_type=None,
-                              packets_per_second=None, no_wait=None):
+                              packets_per_second=None, mitigation_rules=None, no_wait=None):
     from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate, Show as DdosCustomPolicyShow
     from .operations.ddos_custom_policy import convert_ddos_custom_policy_to_snake_case, combine_old_and_new_custom_policy
     from ._template_builder import build_ddos_custom_policy
+
+    if mitigation_rules:
+        # `--mitigation-rules` is parsed by the AAZ action; materialize it into plain dicts so it can be merged.
+        args = DdosCustomPolicyCreate._build_arguments_schema()()
+        mitigation_rules.apply(args, 'mitigation_rules')
+        mitigation_rules = args.mitigation_rules.to_serialized_data()
 
     existing_policy = None
 
@@ -6747,7 +7049,7 @@ def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name,
                        ddos_custom_policy_name, resource_group_name, err)
 
     policy = build_ddos_custom_policy(cmd, ddos_custom_policy_name, location, tags, detection_rule_name, detection_mode,
-                                      packets_per_second, traffic_type)
+                                      packets_per_second, traffic_type, mitigation_rules)
 
     if existing_policy:
         policy = combine_old_and_new_custom_policy(existing_policy, policy)

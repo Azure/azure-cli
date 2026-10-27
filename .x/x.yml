@@ -1,0 +1,25 @@
+schema_version: 1
+repository: Azure/azure-cli
+profile:
+  base_branch: dev
+  kind: cli
+  module_root: src/azure-cli/azure/cli/command_modules
+  target_kind: module
+  workflow: full
+  live_test: true
+  live_test_workflow: live-test.yml
+  triage_agent: Fixer
+  triage_handoffs: {}
+  triage_labels:
+  - bug
+  needs_info_label: agent-assist-needs-info
+  title_style: cli
+  pr_doc_url: https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules#submitting-pull-requests
+  generation_source_repository: Azure/aaz
+dependencies:
+  python:
+    aaz-dev: 4.6.2
+    azdev: 0.2.13
+    azure-cli: 2.90.0
+    azure-cli-testsdk: 0.3.0
+    pytest: 8.4.2

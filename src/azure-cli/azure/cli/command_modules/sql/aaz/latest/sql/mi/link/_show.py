@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-08-01-preview",
+        "version": "2025-08-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2023-08-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.sql/managedinstances/{}/distributedavailabilitygroups/{}", "2025-08-01-preview"],
         ]
     }
 
@@ -130,7 +130,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-08-01-preview",
+                    "api-version", "2025-08-01-preview",
                     required=True,
                 ),
             }
@@ -194,6 +194,9 @@ class Show(AAZCommand):
             )
             properties.instance_link_role = AAZStrType(
                 serialized_name="instanceLinkRole",
+            )
+            properties.link_mode = AAZStrType(
+                serialized_name="linkMode",
             )
             properties.partner_availability_group_name = AAZStrType(
                 serialized_name="partnerAvailabilityGroupName",

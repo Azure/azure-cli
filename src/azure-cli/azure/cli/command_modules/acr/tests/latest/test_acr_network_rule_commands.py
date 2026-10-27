@@ -51,6 +51,7 @@ class AcrNetworkRuleCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('networkRuleSet.defaultAction', '{deny_action}'),
                          self.check('networkRuleSet.virtualNetworkRules[0].virtualNetworkResourceId', subnet_id),
+                         self.check('networkRuleSet.virtualNetworkRules[0].virtualNetworkSubnetResourceId', subnet_id),
                          self.check('networkRuleSet.virtualNetworkRules[0].action', '{allow_action}'),
                          self.check('networkRuleSet.ipRules', [])])
 
@@ -60,12 +61,14 @@ class AcrNetworkRuleCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('networkRuleSet.defaultAction', '{deny_action}'),
                          self.check('networkRuleSet.virtualNetworkRules[0].virtualNetworkResourceId', subnet_id),
+                         self.check('networkRuleSet.virtualNetworkRules[0].virtualNetworkSubnetResourceId', subnet_id),
                          self.check('networkRuleSet.virtualNetworkRules[0].action', '{allow_action}'),
                          self.check('networkRuleSet.ipRules[0].ipAddressOrRange', '{ip_address}'),
                          self.check('networkRuleSet.ipRules[0].action', '{allow_action}')])
 
         self.cmd('acr network-rule list -g {rg} -n {registry_name}',
                  checks=[self.check('virtualNetworkRules[0].virtualNetworkResourceId', subnet_id),
+                         self.check('virtualNetworkRules[0].virtualNetworkSubnetResourceId', subnet_id),
                          self.check('virtualNetworkRules[0].action', '{allow_action}'),
                          self.check('ipRules[0].ipAddressOrRange', '{ip_address}'),
                          self.check('ipRules[0].action', '{allow_action}')])

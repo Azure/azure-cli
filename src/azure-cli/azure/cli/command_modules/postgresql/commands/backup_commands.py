@@ -21,10 +21,11 @@ def _generate_backup_name(client, resource_group_name, server_name):
     on_demand_count = sum(1 for name in existing_names if name.startswith(_BACKUP_NAME_PREFIX))
 
     date_str = datetime.utcnow().strftime("%m%d%Y")
-    backup_name = f"{_BACKUP_NAME_PREFIX}-{date_str}-{on_demand_count + 1}"
-
-    if backup_name in existing_names:
-        backup_name = f"{_BACKUP_NAME_PREFIX}-{date_str}-{on_demand_count + 2}"
+    suffix = on_demand_count + 1
+    backup_name = f"{_BACKUP_NAME_PREFIX}-{date_str}-{suffix}"
+    while backup_name in existing_names:
+        suffix += 1
+        backup_name = f"{_BACKUP_NAME_PREFIX}-{date_str}-{suffix}"
 
     return backup_name
 

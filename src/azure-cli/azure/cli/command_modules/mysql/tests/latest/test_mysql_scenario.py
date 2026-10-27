@@ -16,6 +16,7 @@ from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk.preparers import AbstractPreparer, SingleValueReplacer, StorageAccountPreparer
 from azure.core.exceptions import HttpResponseError
+from knack.util import CLIError
 from ..._client_factory import cf_mysql_flexible_private_dns_zone_suffix_operations
 from ..._network import prepare_private_dns_zone
 from ...custom import DbContext as MysqlDbContext, _determine_iops
@@ -224,7 +225,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertIn('ado.net', connection_string['connectionStrings'])
 
         self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
-                 checks=[JMESPathCheck('type(@)', 'array')])
+                 checks=[JMESPathCheck('type(@)', 'array'),
+                         JMESPathCheck('length(@) > `0`', True)])
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
@@ -737,9 +739,21 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_location = DEFAULT_PAIRED_LOCATION
         replication_role = 'Replica'
 
-        user = self.cmd('ad signed-in-user show').get_output_in_json()
+        try:
+            # In interactive/delegated auth, `az ad signed-in-user show` returns the signed-in user.
+            user = self.cmd('ad signed-in-user show').get_output_in_json()
+            caller_object_id = user['id']
+        except (CLIError, HttpResponseError):
+            # `az ad signed-in-user show` calls Graph /me which is delegated-only. Under
+            # service-principal/OIDC auth (as used in live-test CI pipelines), the Graph API
+            # returns an HTTP 400. The role module's graph_err_handler converts the raw
+            # GraphError into a CLIError, which is what the test SDK re-raises here.
+            # Fall back to resolving the caller's object ID via `az ad sp show`.
+            account = self.cmd('account show').get_output_in_json()
+            sp_client_id = account['user']['name']
+            caller_object_id = self.cmd('ad sp show --id {}'.format(sp_client_id)).get_output_in_json()['id']
 
-        self.cmd('keyvault set-policy --name {} --object-id {} --key-permissions all'.format(vault_name, user['id']))
+        self.cmd('keyvault set-policy --name {} --object-id {} --key-permissions all'.format(vault_name, caller_object_id))
 
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
@@ -2301,6 +2315,53 @@ class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
         self.assertEqual(reschedule_start_time, maintenance_rescheduled_time)
 
 
+class FlexibleServerMaintenanceBatchScenarioTest(ScenarioTest):
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_mysql_flexible_server_maintenance_batch_mgmt(self, resource_group):
+        self._test_maintenance_batch_mgmt('mysql', resource_group)
+
+    def _test_maintenance_batch_mgmt(self, database_engine, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        self.cmd('{} flexible-server create -g {} -n {} --public-access none --tier GeneralPurpose --sku-name {}'
+                 .format(database_engine, resource_group, server_name, DEFAULT_GENERAL_PURPOSE_SKU))
+
+        # set a custom maintenance window together with a batch
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Fri:13:00" --maintenance-batch Batch1'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('maintenanceWindow.customWindow', 'Enabled'),
+                     JMESPathCheck('maintenanceWindow.dayOfWeek', 5),
+                     JMESPathCheck('maintenanceWindow.startHour', 13),
+                     JMESPathCheck('maintenanceWindow.batchOfMaintenance', 'Batch1')])
+
+        # update the window only (no --maintenance-batch): the existing batch must be preserved
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Sat:14:00"'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('maintenanceWindow.dayOfWeek', 6),
+                     JMESPathCheck('maintenanceWindow.startHour', 14),
+                     JMESPathCheck('maintenanceWindow.batchOfMaintenance', 'Batch1')])
+
+        # change the batch explicitly
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Sat:14:00" --maintenance-batch Batch2'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('maintenanceWindow.batchOfMaintenance', 'Batch2')])
+
+        # guardrail: --maintenance-batch without --maintenance-window is rejected
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-batch Batch2'
+                 .format(database_engine, resource_group, server_name), expect_failure=True)
+
+        # guardrail: --maintenance-batch cannot be combined with disabling the window
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window "Disabled" --maintenance-batch Batch2'
+                 .format(database_engine, resource_group, server_name), expect_failure=True)
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'
+                 .format(database_engine, resource_group, server_name))
+
+
 class MySQLExportTest(ScenarioTest):
     profile = None
 
@@ -2374,3 +2435,42 @@ class MySQLExportTest(ScenarioTest):
 
         # deletion of single server created
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server), checks=NoneCheck())
+
+
+class MySQLFabricMirroringEnableDisableTest(ScenarioTest):
+    """Scenario tests for Fabric Mirroring enable/disable commands."""
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2euap')
+    @live_only()
+    def test_mysql_fabric_mirroring_enable_disable(self, resource_group):
+        # Arrange
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        identity_name = self.create_random_name('identity', 24)
+        location = 'eastus2euap'
+
+        # Create server (GeneralPurpose tier required for Fabric Mirroring, using Standard_D2ads_v5 valid in eastus2euap)
+        create_result = self.cmd('mysql flexible-server create -l {} -g {} -n {} --public-access {} --tier GeneralPurpose --sku-name {}'
+                                 .format(location, resource_group, server_name, '0.0.0.0', 'Standard_D2ads_v5')).get_output_in_json()
+
+        # Verify server was created by checking the host contains the server name
+        self.assertIn(server_name, create_result['host'])
+
+        # Set binlog_row_image to 'noblob' as required for Fabric Mirroring
+        self.cmd('mysql flexible-server parameter set -g {} -s {} -n binlog_row_image -v noblob'
+                 .format(resource_group, server_name))
+
+        # Create User Assigned Managed Identity
+        identity_result = self.cmd('identity create -g {} -n {}'.format(resource_group, identity_name)).get_output_in_json()
+        identity_id = identity_result['id']
+
+        # Enable Fabric Mirroring
+        self.cmd('mysql flexible-server mirroring enable -g {} -n {} --identity-resource-id {}'
+                 .format(resource_group, server_name, identity_id))
+
+        # Disable Fabric Mirroring
+        self.cmd('mysql flexible-server mirroring disable -g {} -n {}'
+                 .format(resource_group, server_name))
+
+        # Cleanup
+        self.cmd('mysql flexible-server delete -g {} -n {} --yes'.format(resource_group, server_name))

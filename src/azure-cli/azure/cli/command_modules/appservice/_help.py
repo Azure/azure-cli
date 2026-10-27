@@ -48,10 +48,10 @@ examples:
         az appservice plan create -g MyResourceGroup -n MyPlan --is-linux
   - name: Create a Windows app service plan.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan
+        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux false
   - name: Create a Windows app service plan with a specific SKU.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1
+        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1 --is-linux false
   - name: Create a Linux app service plan with four Linux workers.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku P0V3
@@ -1216,20 +1216,33 @@ short-summary: List available built-in stacks which can be used for function app
 
 helps['functionapp flex-migration'] = """
 type: group
-short-summary: Manage migration of Linux Consumption function apps to the Flex Consumption plan.
+short-summary: Manage migration between Linux Consumption and Flex Consumption plans.
 """
 
 helps['functionapp flex-migration start'] = """
 type: command
-short-summary: Create a Flex Consumption app with the same settings as the provided Linux Consumption function app.
+short-summary: Migrate a Linux Consumption function app to Flex Consumption. Supports side-by-side (new app) or in-place (same app) upgrade.
 examples:
-  - name: Migrate a Linux Consumption function app to the Flex Consumption plan.
+  - name: Migrate a Linux Consumption function app to the Flex Consumption plan (side-by-side, creates a new app).
     text: >
         az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount
 
   - name: Migrate a Linux Consumption function app to the Flex Consumption plan without migrating managed identity configurations.
     text: >
         az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount --skip-managed-identities
+
+  - name: Upgrade a Linux Consumption function app to Flex Consumption in place (same app, same name).
+    text: >
+        az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --in-place
+"""
+
+helps['functionapp flex-migration revert'] = """
+type: command
+short-summary: Revert an in-place upgraded Flex Consumption function app to Linux Consumption.
+examples:
+  - name: Revert a function app to Linux Consumption within its revert window.
+    text: >
+        az functionapp flex-migration revert --source-name MyFunctionApp --source-resource-group MyResourceGroup
 """
 
 helps['functionapp flex-migration list'] = """
@@ -1971,6 +1984,68 @@ examples:
     text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup
 """
 
+helps['webapp exec'] = """
+type: command
+short-summary: Open an interactive shell session or run a command in a Linux web app container.
+long-summary: |
+    Interact with your Linux web app container in two modes:
+    - 'shell' (default): open an interactive shell session in your main app container.
+    - 'execute': fire-and-forget a command in your main app container; returns immediately, no output.
+
+    Only supported for Linux App Service plans.
+
+    'shell' mode: Open an interactive shell in your app's main container.
+    Use --target kudu to connect to the Kudu container instead.
+    A session ends automatically after 3 hours of inactivity,
+    and may also end if the underlying instance is reimaged or platform components are updated.
+
+    'execute' mode: Fire-and-forget a command in the main app container. A 'succeeded' result means the command was accepted.
+    It does not confirm the command ran or completed, and no logs, output, or exit code are returned. For immediate output, use 'shell' mode.
+    The CLI reports failure only if the command (or the shell) could not be started.
+    This makes execute mode well-suited to background or long-running work.
+    The process runs detached and lives for the lifetime of the container (or until it finishes on its own).
+    Use --command to run a single program, e.g. "npm start".
+    Use --shell-command to run a shell command line where shell operators (|, &&, >, etc.) work, e.g. "cat log.txt | grep error > out.txt".
+    Check the parameters and examples below, including how to capture output to a file.
+examples:
+  - name: Start an interactive shell session with the web app container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell
+  - name: Start an interactive shell session on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --instance MyInstanceId
+  - name: Start an interactive shell session using a specific shell
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --shell /bin/sh
+  - name: Start an interactive shell session with the Kudu container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --target kudu
+  - name: Run a direct command in the container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "mkdir /home/site/newdir"
+  - name: Run a shell command and redirect output to a file
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --shell-command "echo hello > /home/LogFiles/out.txt 2>&1"
+  - name: Run a command in a specific working directory
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --cwd /home/site --command "touch newfile.txt"
+  - name: Run a Python script in the container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "python3 /home/site/wwwroot/script.py"
+  - name: Run a shell command with a non-default shell
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --shell /bin/sh --shell-command "echo hi | grep h"
+  - name: Execute a command on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "touch newfile.txt" --instance MyInstanceId
+  - name: Execute a command on all instances
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command "touch newfile.txt" --instance all
+  - name: Execute a command on a deployment slot
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp -s staging --mode execute --command "touch newfile.txt"
+"""
+
 helps['webapp delete'] = """
 type: command
 short-summary: Delete a web app.
@@ -2430,6 +2505,123 @@ examples:
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --filename 2026_04_13_lw0sdlwk000002_failure.log
   - name: Show the latest startup log for a specific worker instance
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
+"""
+
+helps['webapp troubleshoot config'] = """
+type: command
+short-summary: Validate configuration for a Linux web app and surface a recent runtime error.
+long-summary: >
+    Aggregates two data sources into a single report:
+
+    (1) Built-in configuration checks — a set of common
+    Linux App Service settings (linuxFxVersion, port binding, startup
+    command, alwaysOn, health check path, ...) evaluated against the
+    running site's configuration snapshot.
+
+    (2) The site runtime status error reported by App Service for the worker
+    represented by the configuration-check snapshot.
+    Use `--instance` with a worker machine name to retrieve that worker's
+    configuration checks. The instance ID returned by those checks is used
+    to select the matching runtime error. If the configuration snapshot is
+    unavailable, the machine name is resolved through ARM so an error from
+    another worker is not returned.
+    Runtime errors are surfaced only when they occurred within the last
+    15 minutes. Older errors are omitted from both structured output and
+    the `--report` view.
+    For a 24-hour lookback of runtime status and startup attempts, run
+    `az webapp troubleshoot status`.
+
+    By default the command returns a structured payload so the standard
+    `-o json/yaml/tsv/table` formatters handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
+examples:
+  - name: Run the built-in configuration checks and show a recent runtime error, if any (JSON by default)
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Target a deployment slot
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --slot staging
+  - name: Run checks and show a recent runtime error for a specific worker instance
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
+"""
+
+helps['webapp troubleshoot'] = """
+type: group
+short-summary: Diagnose common Linux web app problems.
+long-summary: >
+    Preview command group that pairs built-in configuration checks (from
+    KuduLite on the worker) with per-instance runtime status and startup
+    summaries from ARM. Use when a Linux app is failing to start, returning
+    HTTP 502/503, or exhibiting other post-deployment misbehavior.
+"""
+
+helps['webapp troubleshoot status'] = """
+type: command
+short-summary: Show site runtime status and recent startup summary for a Linux web app.
+long-summary: |
+    Aggregates two data sources:
+
+      - Site Runtime Status
+      - Startup summary: KuduLite (SCM) /api/startuplogs/summary (counts of
+        successful and failed startup attempts in the last 24h, plus the
+        most recent success and failure timestamps).
+
+    Use --instance to scope both to a single worker. By default the command
+    returns a structured payload so the standard `-o json/yaml/table` formatters
+    handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
+examples:
+  - name: Show status for all instances of a web app (JSON by default)
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Show status scoped to a single worker instance
+    text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup --instance 7c2d9
+parameters:
+  - name: --instance
+    short-summary: Scope the report to a single worker instance.
+    long-summary: >
+        Accepts either the hex instanceId (from `az webapp list-instances`) or the
+        machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of
+        every instance seen in the last 24 hours.
+  - name: --report
+    short-summary: Print a human-readable, color-coded report instead of returning structured data.
+    long-summary: >
+        When set, the command writes a formatted report (overview table plus
+        per-instance Last runtime status and Startup summary) to stdout and
+        returns no machine-readable output. Omit --report to keep the default
+        structured payload that works with `-o json`, `-o yaml`, and `-o table`.
+"""
+
+helps['webapp troubleshoot collect'] = """
+type: group
+short-summary: Collect diagnostic artifacts from a Linux web app.
+"""
+
+helps['webapp troubleshoot collect network-capture'] = """
+type: command
+short-summary: Collect and analyze a packet capture from a Linux web app container.
+long-summary: |
+  Runs a bounded tcpdump capture in one app container instance and analyzes it in Kudu.
+  The command does not download files locally; it returns authenticated Kudu links for
+  viewing the analysis report and downloading the raw pcap. Network captures can contain
+  credentials, cookies, request bodies, and other sensitive application data.
+
+    Use --collect-only to show only the raw packet capture link. Kudu still performs the
+    processing required to finalize the capture, but the analysis report link is omitted.
+
+    This command supports Linux web apps on dedicated App Service plans. Captures are
+    limited to one worker instance per command invocation. When --instance is omitted,
+    an interactive terminal prompts you to select from the app's current workers. Scripts
+    and other non-interactive callers must specify --instance. Capture duration defaults
+    to 60 seconds and can be changed with --duration.
+examples:
+  - name: Capture and analyze traffic for the default 60 seconds
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp
+  - name: Capture traffic for 30 seconds from a specific worker
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --instance 7c2d9 --duration 30
+  - name: Show only the raw packet capture link
+    text: az webapp troubleshoot collect network-capture -g MyResourceGroup -n MyWebApp --collect-only
 """
 
 helps['functionapp log'] = """
@@ -3420,4 +3612,35 @@ helps['webapp deploy'] = """
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
     - name: Deploy a zip file with enriched error diagnostics on failure.
       text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
+    - name: Deploy a Python app and show a Secure Build summary and full-report link.
+      text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --show-secure-build
+"""
+
+helps['webapp secure-build'] = """
+    type: group
+    short-summary: Review open source vulnerabilities in a web app's packages.
+"""
+
+helps['webapp secure-build show'] = """
+    type: command
+    short-summary: Show the Secure Build report for the active deployment of a Linux web app.
+    long-summary: "The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Output follows the Azure CLI output configuration and is JSON when no format is configured. Use --output table for a human-readable summary and up to 20 findings; when --query is supplied, standard query processing controls the resulting table shape. JSON output and the provided Kudu link contain the full report. Secure Build currently supports Python dependency information produced by supported platform builds."
+    examples:
+    - name: Show a human-readable Secure Build report for the active deployment.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --output table
+    - name: Show the complete Secure Build report as JSON.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --output json
+    - name: Run a fresh analysis for a deployment slot and show critical findings.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --slot staging --rescan --query "findings[?advisory.severity=='CRITICAL']" --output table
+"""
+
+helps['webapp troubleshoot deployment'] = """
+    type: command
+    short-summary: Show the latest deployment state and diagnostic information for a Linux web app.
+    long-summary: Returns a point-in-time snapshot from Kudu and enriches it with platform build and runtime status when available. The command supports Linux web apps and does not wait for deployment completion.
+    examples:
+    - name: Show the latest deployment status for a web app.
+      text: az webapp troubleshoot deployment --resource-group ResourceGroup --name AppName
+    - name: Show the latest deployment status for a deployment slot.
+      text: az webapp troubleshoot deployment --resource-group ResourceGroup --name AppName --slot staging
 """

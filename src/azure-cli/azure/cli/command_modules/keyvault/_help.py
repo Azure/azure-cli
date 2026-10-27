@@ -10,6 +10,10 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['keyvault'] = """
 type: group
 short-summary: Manage KeyVault keys, secrets, and certificates.
+long-summary: |
+    All Key Vault control plane API versions before 2026-02-01 retire on February 27, 2027. This retirement is separate from access-control migration. For the API-version update checklist, see [Plan for Azure RBAC as the default access control model in Key Vault](https://learn.microsoft.com/azure/key-vault/general/access-control-default).
+
+    Upgrade to Azure CLI 2.90.0 or later, which supports API version 2026-02-01 and later. Use of API versions earlier than 2026-02-01 will be suspended after February 27, 2027.
 """
 
 helps['keyvault backup'] = """
@@ -973,6 +977,46 @@ examples:
   - name: Pause CLI until the HSM is created.
     text: |
         az keyvault wait-hsm --hsm-name MyHSM --created
+"""
+
+helps['keyvault ekm-connection'] = """
+type: group
+short-summary: Manage External Key Manager (EKM) connection for a Managed HSM.
+"""
+
+helps['keyvault ekm-connection create'] = """
+type: command
+short-summary: Create the EKM connection.
+"""
+
+helps['keyvault ekm-connection update'] = """
+type: command
+short-summary: Update the EKM connection.
+"""
+
+helps['keyvault ekm-connection show'] = """
+type: command
+short-summary: Show the EKM connection.
+"""
+
+helps['keyvault ekm-connection check'] = """
+type: command
+short-summary: Check connectivity and authentication with the EKM proxy.
+"""
+
+helps['keyvault ekm-connection delete'] = """
+type: command
+short-summary: Delete the EKM connection.
+"""
+
+helps['keyvault ekm-connection certificate'] = """
+type: group
+short-summary: Manage EKM proxy certificate information.
+"""
+
+helps['keyvault ekm-connection certificate show'] = """
+type: command
+short-summary: Show the EKM proxy client certificate.
 """
 
 helps['keyvault security-domain'] = """

@@ -14,7 +14,9 @@ time az self-test
 time az --version
 
 cd /azure-cli/
-python -m pip install --upgrade setuptools
+# Provision build and setuptools for scripts/ci/build.sh's --no-isolation builds,
+# keeping setuptools at or above the security floor.
+python -m pip install --upgrade "setuptools>=78.1.1" build
 ./scripts/ci/build.sh
 
 # From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.

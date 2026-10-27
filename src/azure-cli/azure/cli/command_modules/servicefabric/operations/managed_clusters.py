@@ -15,6 +15,7 @@ from azure.cli.command_modules.servicefabric._sf_utils import (
 from azure.mgmt.servicefabricmanagedclusters.models import (
     NetworkSecurityRule,
     ManagedCluster,
+    ManagedClusterProperties,
     Sku,
     ClientCertificate
 )
@@ -88,18 +89,20 @@ def create_cluster(cmd,
                 client_cert_issuer_thumbprint = ','.join(client_cert_issuer_thumbprint)
             client_certs.append(ClientCertificate(is_admin=client_cert_is_admin, common_name=client_cert_common_name, issuer_thumbprint=client_cert_issuer_thumbprint))
 
-        new_cluster = ManagedCluster(location=location,
-                                     dns_name=dns_name,
-                                     admin_user_name=admin_user_name,
-                                     admin_password=admin_password,
-                                     sku=skuObj,
-                                     client_connection_port=client_connection_port,
-                                     http_gateway_connection_port=gateway_connection_port,
-                                     clients=client_certs,
-                                     cluster_upgrade_mode=upgrade_mode,
-                                     cluster_upgrade_cadence=upgrade_cadence,
-                                     cluster_code_version=code_version,
-                                     tags=tags)
+        new_cluster = ManagedCluster(
+            location=location,
+            sku=skuObj,
+            tags=tags,
+            properties=ManagedClusterProperties(
+                dns_name=dns_name,
+                admin_user_name=admin_user_name,
+                admin_password=admin_password,
+                client_connection_port=client_connection_port,
+                http_gateway_connection_port=gateway_connection_port,
+                clients=client_certs,
+                cluster_upgrade_mode=upgrade_mode,
+                cluster_upgrade_cadence=upgrade_cadence,
+                cluster_code_version=code_version))
 
         logger.info("Creating managed cluster '%s'", cluster_name)
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, new_cluster)
@@ -122,19 +125,19 @@ def update_cluster(cmd,
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
         if client_connection_port is not None:
-            cluster.client_connection_port = client_connection_port
+            cluster.properties.client_connection_port = client_connection_port
         if gateway_connection_port is not None:
-            cluster.http_gateway_connection_port = gateway_connection_port
+            cluster.properties.http_gateway_connection_port = gateway_connection_port
         if dns_name is not None:
-            cluster.dns_name = dns_name
+            cluster.properties.dns_name = dns_name
         if tags is not None:
             cluster.tags = tags
 
-        if not cluster.public_ip_prefix_id:
-            cluster.public_ip_prefix_id = None
+        if not cluster.properties.public_ip_prefix_id:
+            cluster.properties.public_ip_prefix_id = None
 
-        if not cluster.public_i_pv6_prefix_id:
-            cluster.public_i_pv6_prefix_id = None
+        if not cluster.properties.public_i_pv6_prefix_id:
+            cluster.properties.public_i_pv6_prefix_id = None
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
@@ -154,23 +157,23 @@ def add_client_cert(cmd,
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
-        if cluster.clients is None:
-            cluster.clients = []
+        if cluster.properties.clients is None:
+            cluster.properties.clients = []
 
         if thumbprint is not None:
-            cluster.clients.append(ClientCertificate(is_admin=is_admin, thumbprint=thumbprint))
+            cluster.properties.clients.append(ClientCertificate(is_admin=is_admin, thumbprint=thumbprint))
         elif common_name is not None:
             if issuer_thumbprint is not None:
                 issuer_thumbprint = ','.join(issuer_thumbprint)
-            cluster.clients.append(ClientCertificate(is_admin=is_admin, common_name=common_name, issuer_thumbprint=issuer_thumbprint))
+            cluster.properties.clients.append(ClientCertificate(is_admin=is_admin, common_name=common_name, issuer_thumbprint=issuer_thumbprint))
         else:
             raise CLIError("Thumbprint and Common name are empty")
 
-        if not cluster.public_ip_prefix_id:
-            cluster.public_ip_prefix_id = None
+        if not cluster.properties.public_ip_prefix_id:
+            cluster.properties.public_ip_prefix_id = None
 
-        if not cluster.public_i_pv6_prefix_id:
-            cluster.public_i_pv6_prefix_id = None
+        if not cluster.properties.public_i_pv6_prefix_id:
+            cluster.properties.public_i_pv6_prefix_id = None
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
@@ -188,22 +191,22 @@ def delete_client_cert(cmd,
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
-        if not cluster.public_ip_prefix_id:
-            cluster.public_ip_prefix_id = None
+        if not cluster.properties.public_ip_prefix_id:
+            cluster.properties.public_ip_prefix_id = None
 
-        if not cluster.public_i_pv6_prefix_id:
-            cluster.public_i_pv6_prefix_id = None
+        if not cluster.properties.public_i_pv6_prefix_id:
+            cluster.properties.public_i_pv6_prefix_id = None
 
-        if cluster.clients is not None:
-            initial_size = len(cluster.clients)
+        if cluster.properties.clients is not None:
+            initial_size = len(cluster.properties.clients)
             if thumbprint is not None:
                 thumbprint = [x.lower() for x in thumbprint]
-                cluster.clients = [cert for cert in cluster.clients if cert.thumbprint.lower() not in thumbprint]
+                cluster.properties.clients = [cert for cert in cluster.properties.clients if cert.thumbprint.lower() not in thumbprint]
             if common_name is not None:
                 common_name = [x.lower() for x in common_name]
-                cluster.clients = [cert for cert in cluster.clients if cert.common_name.lower() not in common_name]
+                cluster.properties.clients = [cert for cert in cluster.properties.clients if cert.common_name.lower() not in common_name]
 
-            if initial_size > len(cluster.clients):
+            if initial_size > len(cluster.properties.clients):
                 poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
                 return LongRunningOperation(cmd.cli_ctx)(poller)
         return cluster
@@ -253,8 +256,8 @@ def add_network_security_rule(cmd,
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
-        if cluster.network_security_rules is None:
-            cluster.network_security_rules = []
+        if cluster.properties.network_security_rules is None:
+            cluster.properties.network_security_rules = []
 
         new_network_securityRule = NetworkSecurityRule(name=name,
                                                        access=access,
@@ -271,13 +274,13 @@ def add_network_security_rule(cmd,
                                                        destination_address_prefix=dest_addr_prefix,
                                                        source_address_prefix=source_addr_prefix)
 
-        cluster.network_security_rules.append(new_network_securityRule)
+        cluster.properties.network_security_rules.append(new_network_securityRule)
 
-        if not cluster.public_ip_prefix_id:
-            cluster.public_ip_prefix_id = None
+        if not cluster.properties.public_ip_prefix_id:
+            cluster.properties.public_ip_prefix_id = None
 
-        if not cluster.public_i_pv6_prefix_id:
-            cluster.public_i_pv6_prefix_id = None
+        if not cluster.properties.public_i_pv6_prefix_id:
+            cluster.properties.public_i_pv6_prefix_id = None
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
@@ -326,13 +329,13 @@ def update_network_security_rule(cmd,
                                                            destination_address_prefixes=dest_addr_prefixes if dest_addr_prefixes is not None else existing_nsg.destination_address_prefixes,
                                                            source_address_prefixes=source_addr_prefixes if source_addr_prefixes is not None else existing_nsg.source_address_prefixes)
 
-        if not cluster.public_ip_prefix_id:
-            cluster.public_ip_prefix_id = None
+        if not cluster.properties.public_ip_prefix_id:
+            cluster.properties.public_ip_prefix_id = None
 
-        if not cluster.public_i_pv6_prefix_id:
-            cluster.public_i_pv6_prefix_id = None
+        if not cluster.properties.public_i_pv6_prefix_id:
+            cluster.properties.public_i_pv6_prefix_id = None
 
-        update_in_collection(cluster, 'network_security_rules', updated_network_securityRule, 'name')
+        update_in_collection(cluster.properties, 'network_security_rules', updated_network_securityRule, 'name')
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
@@ -364,7 +367,7 @@ def list_network_security_rules(client,
                                 cluster_name):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
-        return cluster.network_security_rules
+        return cluster.properties.network_security_rules
 
     except HttpResponseError as ex:
         logger.error("HttpResponseError: %s", ex)
@@ -379,18 +382,18 @@ def delete_network_security_rule(cmd,
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
-        if not cluster.public_ip_prefix_id:
-            cluster.public_ip_prefix_id = None
+        if not cluster.properties.public_ip_prefix_id:
+            cluster.properties.public_ip_prefix_id = None
 
-        if not cluster.public_i_pv6_prefix_id:
-            cluster.public_i_pv6_prefix_id = None
+        if not cluster.properties.public_i_pv6_prefix_id:
+            cluster.properties.public_i_pv6_prefix_id = None
 
-        if cluster.network_security_rules is not None:
-            initial_size = len(cluster.network_security_rules)
+        if cluster.properties.network_security_rules is not None:
+            initial_size = len(cluster.properties.network_security_rules)
             if name is not None:
-                cluster.network_security_rules = [nsg for nsg in cluster.network_security_rules if nsg.name != name]
+                cluster.properties.network_security_rules = [nsg for nsg in cluster.properties.network_security_rules if nsg.name != name]
 
-            if initial_size > len(cluster.network_security_rules):
+            if initial_size > len(cluster.properties.network_security_rules):
                 poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
                 return LongRunningOperation(cmd.cli_ctx)(poller)
 

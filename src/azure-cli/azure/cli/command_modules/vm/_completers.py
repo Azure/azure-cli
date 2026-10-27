@@ -26,10 +26,10 @@ def get_vm_size_completion_list(cmd, prefix, namespace):  # pylint: disable=unus
 
 @Completer
 def get_vm_run_command_completion_list(cmd, prefix, namespace):  # pylint: disable=unused-argument
-    from ._client_factory import _compute_client_factory
+    from .aaz.latest.vm.run_command import ListBySubscription
     try:
         location = namespace.location
     except AttributeError:
         location = get_one_of_subscription_locations(cmd.cli_ctx)
-    result = _compute_client_factory(cmd.cli_ctx).virtual_machine_run_commands.list(location)
-    return [r.id for r in result]
+    result = ListBySubscription(cli_ctx=cmd.cli_ctx)({'location': location})
+    return [r.get('id') for r in result if r.get('id')]

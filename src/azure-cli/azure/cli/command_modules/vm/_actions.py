@@ -191,7 +191,12 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None, 
         try:
             response = requests.get(target_url, verify=not should_disable_connection_verify())
             if response.status_code == 200:
-                dic = json.loads(response.content.decode())
+                try:
+                    dic = json.loads(response.content.decode())
+                except json.JSONDecodeError as ex:
+                    logger.warning("Failed to parse image alias doc '%s'. Error: '%s'. Use local copy instead.",
+                                   target_url, ex)
+                    dic = json.loads(alias_json)
             else:
                 logger.warning("Failed to retrieve image alias doc '%s'. Error: '%s'. Use local copy instead.",
                                target_url, response)

@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-08-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2025-07-01"],
         ]
     }
 
@@ -78,10 +78,33 @@ class Update(AAZCommand):
         _args_schema.next_hop_type = AAZStrArg(
             options=["--next-hop-type"],
             help="The type of Azure hop the packet should be sent to.",
-            enum={"Internet": "Internet", "None": "None", "VirtualAppliance": "VirtualAppliance", "VirtualNetworkGateway": "VirtualNetworkGateway", "VnetLocal": "VnetLocal"},
+            enum={"Internet": "Internet", "None": "None", "VirtualAppliance": "VirtualAppliance", "VirtualApplianceEcmp": "VirtualApplianceEcmp", "VirtualNetworkGateway": "VirtualNetworkGateway", "VnetLocal": "VnetLocal"},
         )
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.next_hop = AAZObjectArg(
+            options=["--next-hop"],
+            arg_group="Properties",
+            help="The next hop definition containing ECMP next hop IP addresses. Only allowed when nextHopType is VirtualApplianceEcmp.",
+            nullable=True,
+        )
+
+        next_hop = cls._args_schema.next_hop
+        next_hop.next_hop_ip_addresses = AAZListArg(
+            options=["next-hop-ip-addresses"],
+            help="List of next hop IP addresses for ECMP routing. Must contain between 2 and 64 IP addresses.",
+            fmt=AAZListArgFormat(
+                max_length=64,
+                min_length=2,
+            ),
+        )
+
+        next_hop_ip_addresses = cls._args_schema.next_hop.next_hop_ip_addresses
+        next_hop_ip_addresses.Element = AAZStrArg(
+            nullable=True,
+        )
 
         # define Arg Group "RouteParameters"
         return cls._args_schema
@@ -168,7 +191,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -199,7 +222,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_route_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_common_route_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -271,7 +294,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -314,7 +337,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_route_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_common_route_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -335,8 +358,17 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+                properties.set_prop("nextHop", AAZObjectType, ".next_hop")
                 properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
                 properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
+
+            next_hop = _builder.get(".properties.nextHop")
+            if next_hop is not None:
+                next_hop.set_prop("nextHopIpAddresses", AAZListType, ".next_hop_ip_addresses", typ_kwargs={"flags": {"required": True}})
+
+            next_hop_ip_addresses = _builder.get(".properties.nextHop.nextHopIpAddresses")
+            if next_hop_ip_addresses is not None:
+                next_hop_ip_addresses.set_elements(AAZStrType, ".")
 
             return _instance_value
 
@@ -352,37 +384,43 @@ class Update(AAZCommand):
 class _UpdateHelper:
     """Helper class for Update"""
 
-    _schema_route_read = None
+    _schema_common_route_read = None
 
     @classmethod
-    def _build_schema_route_read(cls, _schema):
-        if cls._schema_route_read is not None:
-            _schema.etag = cls._schema_route_read.etag
-            _schema.id = cls._schema_route_read.id
-            _schema.name = cls._schema_route_read.name
-            _schema.properties = cls._schema_route_read.properties
-            _schema.type = cls._schema_route_read.type
+    def _build_schema_common_route_read(cls, _schema):
+        if cls._schema_common_route_read is not None:
+            _schema.etag = cls._schema_common_route_read.etag
+            _schema.id = cls._schema_common_route_read.id
+            _schema.name = cls._schema_common_route_read.name
+            _schema.properties = cls._schema_common_route_read.properties
+            _schema.type = cls._schema_common_route_read.type
             return
 
-        cls._schema_route_read = _schema_route_read = AAZObjectType()
+        cls._schema_common_route_read = _schema_common_route_read = AAZObjectType()
 
-        route_read = _schema_route_read
-        route_read.etag = AAZStrType(
+        common_route_read = _schema_common_route_read
+        common_route_read.etag = AAZStrType(
             flags={"read_only": True},
         )
-        route_read.id = AAZStrType()
-        route_read.name = AAZStrType()
-        route_read.properties = AAZObjectType(
+        common_route_read.id = AAZStrType()
+        common_route_read.name = AAZStrType()
+        common_route_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        route_read.type = AAZStrType()
+        common_route_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-        properties = _schema_route_read.properties
+        properties = _schema_common_route_read.properties
         properties.address_prefix = AAZStrType(
             serialized_name="addressPrefix",
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
+        )
+        properties.next_hop = AAZObjectType(
+            serialized_name="nextHop",
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",
@@ -396,11 +434,20 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
-        _schema.etag = cls._schema_route_read.etag
-        _schema.id = cls._schema_route_read.id
-        _schema.name = cls._schema_route_read.name
-        _schema.properties = cls._schema_route_read.properties
-        _schema.type = cls._schema_route_read.type
+        next_hop = _schema_common_route_read.properties.next_hop
+        next_hop.next_hop_ip_addresses = AAZListType(
+            serialized_name="nextHopIpAddresses",
+            flags={"required": True},
+        )
+
+        next_hop_ip_addresses = _schema_common_route_read.properties.next_hop.next_hop_ip_addresses
+        next_hop_ip_addresses.Element = AAZStrType()
+
+        _schema.etag = cls._schema_common_route_read.etag
+        _schema.id = cls._schema_common_route_read.id
+        _schema.name = cls._schema_common_route_read.name
+        _schema.properties = cls._schema_common_route_read.properties
+        _schema.type = cls._schema_common_route_read.type
 
 
 __all__ = ["Update"]

@@ -186,6 +186,10 @@ parameters:
     type: int
     short-summary: NAT gateway idle timeout in minutes.
     long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --outbound-type-sku
+    type: string
+    short-summary: SKU of the managed NAT Gateway (Standard or StandardV2).
+    long-summary: Only valid with --outbound-type managedNATGateway. Omit to default to StandardV2 where the region supports it, otherwise Standard. StandardV2 adds zone resiliency, IPv6 support, and higher bandwidth.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
@@ -330,6 +334,22 @@ parameters:
   - name: --enable-high-log-scale-mode
     type: bool
     short-summary: Enable High Log Scale Mode for Container Logs. Auto-enabled when --enable-container-network-logs is specified.
+  - name: --enable-azure-monitor-logs
+    type: bool
+    short-summary: Enable Azure Monitor logs (Container Insights) for the cluster using managed identity authentication.
+    long-summary: |
+        Configures Container Insights through the cluster's Azure Monitor profile instead of the monitoring addon.
+        Cannot be combined with "--enable-addons monitoring" or with "--enable-msi-auth-for-monitoring".
+        Requires the cluster to use a managed identity; clusters created with service principal authentication are not supported.
+  - name: --syslog-port
+    type: int
+    short-summary: TCP port that the Azure Monitor agent listens on for syslog data. Requires --enable-azure-monitor-logs.
+  - name: --enable-prometheus-metrics-scraping
+    type: bool
+    short-summary: Enable Prometheus metrics scraping by the Azure Monitor agent. Requires --enable-azure-monitor-logs.
+  - name: --disable-prometheus-metrics-scraping
+    type: bool
+    short-summary: Disable Prometheus metrics scraping by the Azure Monitor agent. Requires --enable-azure-monitor-logs.
   - name: --sku
     type: string
     short-summary: Specify SKU name for managed clusters. Use '--sku base' enables a base managed cluster. Use '--sku automatic' enables an automatic managed cluster.
@@ -510,6 +530,10 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --kms-infrastructure-encryption
+    type: string
+    short-summary: Enable encryption at rest of Kubernetes resource objects using service-managed keys.
+    long-summary: Enable infrastructure encryption for Kubernetes resource objects. This feature provides encryption at rest for cluster secrets and configuration using service-managed keys. The only accepted value is "Enabled"; once enabled it cannot be disabled. For more information see https://aka.ms/aks/kubernetesResourceObjectEncryption.
   - name: --enable-image-cleaner
     type: bool
     short-summary: Enable ImageCleaner Service.
@@ -558,9 +582,36 @@ parameters:
   - name: --enable-windows-recording-rules
     type: bool
     short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
+  - name: --enable-control-plane-metrics --enable-cp-metrics
+    type: bool
+    short-summary: Enable collection of Azure Monitor managed Prometheus control plane metrics for managed cluster components (controlplane-apiserver and controlplane-etcd targets by default). Requires Azure Monitor metrics to be enabled (already enabled or via --enable-azure-monitor-metrics).
   - name: --enable-azure-monitor-app-monitoring
     type: bool
     short-summary: Enable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
+  - name: --enable-opentelemetry-metrics
+    type: bool
+    short-summary: Enable the OpenTelemetry (OTLP) metrics receiver. Requires --enable-azure-monitor-metrics.
+  - name: --disable-opentelemetry-metrics
+    type: bool
+    short-summary: Disable the OpenTelemetry (OTLP) metrics receiver.
+  - name: --opentelemetry-metrics-port-http
+    type: int
+    short-summary: HTTP/protobuf port for the OpenTelemetry metrics receiver.
+  - name: --opentelemetry-metrics-port-grpc
+    type: int
+    short-summary: gRPC port for the OpenTelemetry metrics receiver.
+  - name: --enable-opentelemetry-logs-traces
+    type: bool
+    short-summary: Enable the OpenTelemetry (OTLP) logs and traces receiver. Requires --enable-azure-monitor-logs.
+  - name: --disable-opentelemetry-logs-traces
+    type: bool
+    short-summary: Disable the OpenTelemetry (OTLP) logs and traces receiver.
+  - name: --opentelemetry-logs-traces-port-http
+    type: int
+    short-summary: HTTP/protobuf port for the OpenTelemetry logs and traces receiver.
+  - name: --opentelemetry-logs-traces-port-grpc
+    type: int
+    short-summary: gRPC port for the OpenTelemetry logs and traces receiver.
   - name: --nodepool-taints
     type: string
     short-summary: The node taints for all node pool.
@@ -676,6 +727,9 @@ parameters:
     long-summary: |
         Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
           - "KataVmIsolation" for Kata.
+  - name: --enable-upstream-kubescheduler-user-configuration
+    type: bool
+    short-summary: Enable user-defined scheduler configuration for kube-scheduler upstream on the cluster.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -746,6 +800,14 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-keda
   - name: Create a kubernetes cluster with the Azure Monitor managed service for Prometheus integration enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics
+  - name: Create a kubernetes cluster with Azure Monitor logs (Container Insights) enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-logs
+  - name: Create a kubernetes cluster with Azure Monitor logs enabled and syslog collected on a custom port.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-logs --enable-syslog --syslog-port 28330
+  - name: Create a kubernetes cluster with the OpenTelemetry logs and traces receiver enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-logs --enable-opentelemetry-logs-traces --opentelemetry-logs-traces-port-grpc 4317
+  - name: Create a kubernetes cluster with the OpenTelemetry metrics receiver enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-metrics --enable-opentelemetry-metrics --opentelemetry-metrics-port-grpc 4319
   - name: Create a kubernetes cluster with vertical pod autoscaler enaled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-vpa
   - name: create a kubernetes cluster with a Capacity Reservation Group(CRG) ID.
@@ -772,13 +834,13 @@ short-summary: Update a managed Kubernetes cluster. When called with no optional
 parameters:
   - name: --enable-cluster-autoscaler -e
     type: bool
-    short-summary: Enable cluster autoscaler.
+    short-summary: Enable cluster autoscaler. For VirtualMachines pools, converts all manual scale profiles to autoscale profiles using the same min/max counts.
   - name: --disable-cluster-autoscaler -d
     type: bool
-    short-summary: Disable cluster autoscaler.
+    short-summary: Disable cluster autoscaler. For VirtualMachines pools, converts all autoscale profiles back to manual scale profiles.
   - name: --update-cluster-autoscaler -u
     type: bool
-    short-summary: Update min-count or max-count for cluster autoscaler.
+    short-summary: Update min-count or max-count for cluster autoscaler. Not supported for VirtualMachines pools; use 'az aks nodepool auto-scale update' instead.
   - name: --min-count
     type: int
     short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 1000]
@@ -861,6 +923,10 @@ parameters:
     type: int
     short-summary: NAT gateway idle timeout in minutes.
     long-summary: Desired idle timeout for NAT gateway outbound flows, default is 4 minutes. Please specify a value in the range of [4, 120]. Valid for Standard SKU load balancer cluster with managedNATGateway outbound type only.
+  - name: --outbound-type-sku
+    type: string
+    short-summary: SKU of the managed NAT Gateway (Standard or StandardV2).
+    long-summary: Only valid with --outbound-type managedNATGateway. Migrate an existing Standard (V1) cluster to StandardV2 by passing StandardV2. StandardV2 adds zone resiliency, IPv6 support, and higher bandwidth. Downgrade from StandardV2 to Standard is not supported.
   - name: --outbound-type
     type: string
     short-summary: How outbound traffic will be configured for a cluster.
@@ -1018,6 +1084,10 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --kms-infrastructure-encryption
+    type: string
+    short-summary: Enable encryption at rest of Kubernetes resource objects using service-managed keys.
+    long-summary: Enable infrastructure encryption for Kubernetes resource objects. This feature provides encryption at rest for cluster secrets and configuration using service-managed keys. The only accepted value is "Enabled"; once enabled it cannot be disabled. For more information see https://aka.ms/aks/kubernetesResourceObjectEncryption.
   - name: --enable-image-cleaner
     type: bool
     short-summary: Enable ImageCleaner Service.
@@ -1102,12 +1172,84 @@ parameters:
   - name: --disable-azure-monitor-metrics
     type: bool
     short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
+    long-summary: |
+        If OpenTelemetry metrics are enabled, they are disabled as well, since they are collected
+        through the managed Prometheus pipeline. Confirmation is requested first unless "--yes" is
+        specified.
+  - name: --enable-control-plane-metrics --enable-cp-metrics
+    type: bool
+    short-summary: Enable collection of Azure Monitor managed Prometheus control plane metrics for managed cluster components (controlplane-apiserver and controlplane-etcd targets by default). Requires Azure Monitor metrics to be enabled (already enabled or via --enable-azure-monitor-metrics).
+  - name: --disable-control-plane-metrics --disable-cp-metrics
+    type: bool
+    short-summary: Disable collection of Azure Monitor managed Prometheus control plane metrics. Leaves Azure Monitor metrics enabled.
   - name: --enable-azure-monitor-app-monitoring
     type: bool
     short-summary: Enable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
   - name: --disable-azure-monitor-app-monitoring
     type: bool
     short-summary: Disable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
+  - name: --enable-azure-monitor-logs
+    type: bool
+    short-summary: Enable Azure Monitor logs (Container Insights) for the cluster using managed identity authentication.
+    long-summary: |
+        Configures Container Insights through the cluster's Azure Monitor profile instead of the monitoring addon.
+        Clusters still using legacy shared key authentication must first migrate to managed identity authentication.
+        Requires the cluster to use a managed identity; clusters using service principal authentication are not supported.
+        Fails if Azure Monitor logs is already enabled on the cluster. To change the configuration, run "az aks update --disable-azure-monitor-logs" first.
+  - name: --disable-azure-monitor-logs
+    type: bool
+    short-summary: Disable Azure Monitor logs (Container Insights) for the cluster.
+    long-summary: |
+        Disables Container Insights, removes the data collection rule association, and resets the Container Insights settings (syslog port, Prometheus scraping and container network logs) back to their defaults. The workspace is left recorded on the profile but is unused while disabled, and is replaced on the next enable.
+        If OpenTelemetry logs and traces are enabled they are disabled as well, and confirmation is requested first unless "--yes" is specified.
+  - name: --workspace-resource-id
+    type: string
+    short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
+  - name: --enable-msi-auth-for-monitoring
+    type: bool
+    short-summary: Enable Managed Identity Auth for Monitoring addon.
+  - name: --enable-syslog
+    type: bool
+    short-summary: Enable syslog data collection for Monitoring addon.
+  - name: --data-collection-settings
+    type: string
+    short-summary: Path to JSON file containing data collection settings for Monitoring addon.
+  - name: --ampls-resource-id
+    type: string
+    short-summary: Resource ID of Azure Monitor Private Link scope for Monitoring Addon.
+  - name: --syslog-port
+    type: int
+    short-summary: TCP port that the Azure Monitor agent listens on for syslog data. Requires Azure Monitor logs to be enabled.
+  - name: --enable-prometheus-metrics-scraping
+    type: bool
+    short-summary: Enable Prometheus metrics scraping by the Azure Monitor agent. Requires Azure Monitor logs to be enabled.
+  - name: --disable-prometheus-metrics-scraping
+    type: bool
+    short-summary: Disable Prometheus metrics scraping by the Azure Monitor agent. Requires Azure Monitor logs to be enabled.
+  - name: --enable-opentelemetry-metrics
+    type: bool
+    short-summary: Enable the OpenTelemetry (OTLP) metrics receiver. Requires Azure Monitor metrics to be enabled.
+  - name: --disable-opentelemetry-metrics
+    type: bool
+    short-summary: Disable the OpenTelemetry (OTLP) metrics receiver.
+  - name: --opentelemetry-metrics-port-http
+    type: int
+    short-summary: HTTP/protobuf port for the OpenTelemetry metrics receiver.
+  - name: --opentelemetry-metrics-port-grpc
+    type: int
+    short-summary: gRPC port for the OpenTelemetry metrics receiver.
+  - name: --enable-opentelemetry-logs-traces
+    type: bool
+    short-summary: Enable the OpenTelemetry (OTLP) logs and traces receiver. Requires Azure Monitor logs to be enabled.
+  - name: --disable-opentelemetry-logs-traces
+    type: bool
+    short-summary: Disable the OpenTelemetry (OTLP) logs and traces receiver.
+  - name: --opentelemetry-logs-traces-port-http
+    type: int
+    short-summary: HTTP/protobuf port for the OpenTelemetry logs and traces receiver.
+  - name: --opentelemetry-logs-traces-port-grpc
+    type: int
+    short-summary: gRPC port for the OpenTelemetry logs and traces receiver.
   - name: --nodepool-taints
     type: string
     short-summary: The node taints for all node pool.
@@ -1226,9 +1368,25 @@ parameters:
         Auto: A standard set of Karpenter NodePools are provisioned.
         None: No Karpenter NodePools are provisioned.
         WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted by that action.
+  - name: --enable-upstream-kubescheduler-user-configuration
+    type: bool
+    short-summary: Enable user-defined scheduler configuration for kube-scheduler upstream on the cluster.
+  - name: --disable-upstream-kubescheduler-user-configuration
+    type: bool
+    short-summary: Disable user-defined scheduler configuration for kube-scheduler upstream on the cluster.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
+  - name: Enable Azure Monitor logs (Container Insights) on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-azure-monitor-logs
+  - name: Disable Azure Monitor logs (Container Insights) on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-azure-monitor-logs
+  - name: Change the syslog port used by Azure Monitor logs on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-syslog --syslog-port 28330
+  - name: Enable the OpenTelemetry logs and traces receiver on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-opentelemetry-logs-traces --opentelemetry-logs-traces-port-grpc 4317
+  - name: Enable the OpenTelemetry metrics receiver on an existing cluster.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-opentelemetry-metrics --opentelemetry-metrics-port-grpc 4319
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
@@ -1456,6 +1614,27 @@ type: command
 short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
 """
 
+helps["aks install-desktop"] = """
+type: command
+short-summary: Download and install AKS Desktop for the current platform.
+long-summary: >
+  On macOS and Linux systems using Debian packages, complete installation in the opened application.
+  GUI installer downloads are retained under the Azure CLI configuration directory; remove the logged installer
+  directory after installation. Debian packages are used only on compatible x64 Linux systems with xdg-open
+  and a graphical session. Other Linux systems, or systems where the Debian installer cannot be opened,
+  use the portable archive when available.
+  If GitHub API requests are rate-limited, set the GH_TOKEN environment variable or wait for the rate limit to reset.
+  Prefer GH_TOKEN over --gh-token, which can expose credentials in shell history, process listings, and debug logs.
+  An explicit --gh-token value overrides GH_TOKEN.
+  The token is used only to retrieve release metadata, not to download the installer. If requests with a token
+  are rate-limited, wait for the rate limit to reset and check the token's quota.
+examples:
+  - name: Install the latest stable version of AKS Desktop
+    text: az aks install-desktop
+  - name: Install a specific version of AKS Desktop
+    text: az aks install-desktop --version 0.9.1
+"""
+
 helps["aks list"] = """
 type: command
 short-summary: List managed Kubernetes clusters.
@@ -1487,16 +1666,16 @@ helps["aks maintenanceconfiguration add"] = """
     parameters:
         - name: --weekday
           type: string
-          short-summary: A day in week on which maintenance is allowed. E.g. Monday. Applicable to default maintenance configuration only.
+          short-summary: A day in week on which maintenance is allowed (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --start-hour
           type: string
-          short-summary: The start time of 1 hour window which maintenance is allowd. E.g. 1 means it's allowd between 1:00 am and 2:00 am. Applicable to default maintenance configuration only.
+          short-summary: The start of a 1-hour maintenance window, e.g. 1 means 1:00am-2:00am (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --schedule-type
           type: string
-          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. Only applicable to 'aksManagedAutoUpgradeSchedule' and 'aksManagedNodeOSUpgradeSchedule' maintenance configuration.
+          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. For default maintenance configuration, only 'Weekly' is supported.
         - name: --start-date
           type: string
-          short-summary: The date the maintenance configuration activates. If not specified, the maintenance window will be active right away."
+          short-summary: The date the maintenance configuration activates. If not specified, the maintenance window will be active right away. Supported for all configuration types, including default."
         - name: --start-time
           type: string
           short-summary: The start time of the maintenance window. Accepted values are from '00:00' to '23:59'. '--utc-offset' applies to this field. For example, '02:00' with '--utc-offset +02:00' means UTC time '00:00'.
@@ -1505,25 +1684,25 @@ helps["aks maintenanceconfiguration add"] = """
           short-summary: The length of maintenance window range from 4 to 24 hours.
         - name: --utc-offset
           type: string
-          short-summary: The UTC offset in format +/-HH:mm. For example, '+05:30' for IST and '-07:00' for PST. If not specified, the default is '+00:00'.
+          short-summary: The UTC offset in format +/-HH:mm. For example, '+05:30' for IST and '-07:00' for PST. If not specified, the default is '+00:00'. Supported for all configuration types, including default.
         - name: --interval-days
           type: int
-          short-summary: The number of days between each set of occurrences for daily schedule type.
+          short-summary: The number of days between each set of occurrences for daily schedule type. Not applicable to default maintenance configuration.
         - name: --interval-weeks
           type: int
-          short-summary: The number of weeks between each set of occurrences. Applicable to weekly schedule types only.
+          short-summary: The number of weeks between each set of occurrences. Applicable to weekly schedule types only. Cannot be specified for default maintenance configuration (the interval is always 1 week).
         - name: --interval-months
           type: int
-          short-summary: The number of months between each set of occurrences. Applicable to absolute and relative monthly schedule types.
+          short-summary: The number of months between each set of occurrences. Applicable to absolute and relative monthly schedule types. Not applicable to default maintenance configuration.
         - name: --day-of-week
           type: string
           short-summary: Specify on which day of the week the maintenance occurs. E.g. "Monday". Applicable to weekly and relative monthly schedule types.
         - name: --day-of-month
           type: int
-          short-summary: Specify on which day of the month the maintenance occurs. E.g. 1 indicates the 1st of the month. Applicable to absolute monthly schedule type only.
+          short-summary: Specify on which day of the month the maintenance occurs. E.g. 1 indicates the 1st of the month. Applicable to absolute monthly schedule type only. Not applicable to default maintenance configuration.
         - name: --week-index
           type: string
-          short-summary: Specify on which instance of the allowed days specified in '--day-of-week' the maintenance occurs. Applicable to relative monthly schedule type only.
+          short-summary: Specify on which instance of the allowed days specified in '--day-of-week' the maintenance occurs. Applicable to relative monthly schedule type only. Not applicable to default maintenance configuration.
         - name: --config-file
           type: string
           short-summary: The maintenance configuration json file.
@@ -1569,6 +1748,10 @@ helps["aks maintenanceconfiguration add"] = """
                         }
                       ]
               }
+        - name: Add default maintenance configuration with weekly maintenanceWindow schedule.
+          text: |
+            az aks maintenanceconfiguration add -g MyResourceGroup --cluster-name test1 -n default --schedule-type Weekly --day-of-week Monday --duration 4 --start-time 09:00
+              The maintenance is allowed on Monday from 09:00 to 13:00 (UTC) every week. Use --utc-offset to adjust the timezone and --start-date to set an activation date.
         - name: Add aksManagedNodeOSUpgradeSchedule maintenance configuration with daily schedule.
           text: |
             az aks maintenanceconfiguration add -g MyResourceGroup --cluster-name test1 -n aksManagedNodeOSUpgradeSchedule --schedule-type Daily --interval-days 2 --duration 12 --utc-offset=-08:00 --start-date 2023-01-16 --start-time 00:00
@@ -1621,16 +1804,16 @@ helps["aks maintenanceconfiguration update"] = """
     parameters:
         - name: --weekday
           type: string
-          short-summary: A day in week on which maintenance is allowed. E.g. Monday. Applicable to default maintenance configuration only.
+          short-summary: A day in week on which maintenance is allowed (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --start-hour
           type: string
-          short-summary: The start time of 1 hour window which maintenance is allowd. E.g. 1 means it's allowd between 1:00 am and 2:00 am. Applicable to default maintenance configuration only.
+          short-summary: The start of a 1-hour maintenance window, e.g. 1 means 1:00am-2:00am (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --schedule-type
           type: string
-          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. Only applicable to 'aksManagedAutoUpgradeSchedule' and 'aksManagedNodeOSUpgradeSchedule' maintenance configuration.
+          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. For default maintenance configuration, only 'Weekly' is supported.
         - name: --start-date
           type: string
-          short-summary: The date the maintenance configuration activates. If not specified, the maintenance window will be active right away."
+          short-summary: The date the maintenance configuration activates. If not specified, the maintenance window will be active right away. Supported for all configuration types, including default."
         - name: --start-time
           type: string
           short-summary: The start time of the maintenance window. Accepted values are from '00:00' to '23:59'. '--utc-offset' applies to this field. For example, '02:00' with '--utc-offset +02:00' means UTC time '00:00'.
@@ -1639,25 +1822,25 @@ helps["aks maintenanceconfiguration update"] = """
           short-summary: The length of maintenance window range from 4 to 24 hours.
         - name: --utc-offset
           type: string
-          short-summary: The UTC offset in format +/-HH:mm. For example, '+05:30' for IST and '-07:00' for PST. If not specified, the default is '+00:00'.
+          short-summary: The UTC offset in format +/-HH:mm. For example, '+05:30' for IST and '-07:00' for PST. If not specified, the default is '+00:00'. Supported for all configuration types, including default.
         - name: --interval-days
           type: int
-          short-summary: The number of days between each set of occurrences for daily schedule type.
+          short-summary: The number of days between each set of occurrences for daily schedule type. Not applicable to default maintenance configuration.
         - name: --interval-weeks
           type: int
-          short-summary: The number of weeks between each set of occurrences. Applicable to weekly schedule types only.
+          short-summary: The number of weeks between each set of occurrences. Applicable to weekly schedule types only. Cannot be specified for default maintenance configuration (the interval is always 1 week).
         - name: --interval-months
           type: int
-          short-summary: The number of months between each set of occurrences. Applicable to absolute and relative monthly schedule types.
+          short-summary: The number of months between each set of occurrences. Applicable to absolute and relative monthly schedule types. Not applicable to default maintenance configuration.
         - name: --day-of-week
           type: string
           short-summary: Specify on which day of the week the maintenance occurs. E.g. "Monday". Applicable to weekly and relative monthly schedule types.
         - name: --day-of-month
           type: int
-          short-summary: Specify on which day of the month the maintenance occurs. E.g. 1 indicates the 1st of the month. Applicable to absolute monthly schedule type only.
+          short-summary: Specify on which day of the month the maintenance occurs. E.g. 1 indicates the 1st of the month. Applicable to absolute monthly schedule type only. Not applicable to default maintenance configuration.
         - name: --week-index
           type: string
-          short-summary: Specify on which instance of the allowed days specified in '--day-of-week' the maintenance occurs. Applicable to relative monthly schedule type only.
+          short-summary: Specify on which instance of the allowed days specified in '--day-of-week' the maintenance occurs. Applicable to relative monthly schedule type only. Not applicable to default maintenance configuration.
         - name: --config-file
           type: string
           short-summary: The maintenance configuration json file.
@@ -1703,6 +1886,10 @@ helps["aks maintenanceconfiguration update"] = """
                         }
                       ]
               }
+        - name: Update default maintenance configuration with weekly maintenanceWindow schedule.
+          text: |
+            az aks maintenanceconfiguration update -g MyResourceGroup --cluster-name test1 -n default --schedule-type Weekly --day-of-week Monday --duration 4 --start-time 09:00
+              The maintenance is allowed on Monday from 09:00 to 13:00 (UTC) every week. Use --utc-offset to adjust the timezone and --start-date to set an activation date.
         - name: Update aksManagedNodeOSUpgradeSchedule maintenance configuration with daily schedule.
           text: |
             az aks maintenanceconfiguration update -g MyResourceGroup --cluster-name test1 -n aksManagedNodeOSUpgradeSchedule --schedule-type Daily --interval-days 2 --duration 12 --utc-offset=-08:00 --start-date 2023-01-16 --start-time 00:00
@@ -2012,6 +2199,7 @@ parameters:
   - name: --enable-fips-image
     type: bool
     short-summary: Use FIPS-enabled OS on agent nodes.
+    long-summary: Automatically enabled for Windows2025 node pools because Windows2025 requires a FIPS-enabled OS image.
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to create this nodepool.
@@ -2039,6 +2227,9 @@ parameters:
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --enable-managed-dranet
+    type: bool
+    short-summary: Enable Managed DRANET on the node pool.
   - name: --node-public-ip-tags
     type: string
     short-summary: The ipTags of the node public IPs.
@@ -2063,6 +2254,10 @@ parameters:
   - name: --gpu-driver
     type: string
     short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None". Default is "Install".
+  - name: --enable-managed-gpu
+    type: bool
+    short-summary: Enable the Managed GPU experience, which installs additional components like DCGM metrics for monitoring on top of the GPU driver.
+    long-summary: Installs the GPU driver even if --gpu-driver is set to None. For more details, visit https://aka.ms/aks/managed-gpu.
   - name: --gateway-prefix-size
     type: int
     short-summary: The size of Public IPPrefix attached to the Gateway-mode node pool. The node pool must be in Gateway mode.
@@ -2102,6 +2297,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
   - name: Create a nodepool with KataVmIsolation enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
+  - name: Create a GPU node pool with the Managed GPU experience enabled.
+    text: az aks nodepool add -g MyResourceGroup -n gpunp --cluster-name MyManagedCluster --node-vm-size Standard_NC6s_v3 --enable-managed-gpu
 """
 
 helps["aks nodepool delete"] = """
@@ -2125,6 +2322,17 @@ short-summary: Get the available upgrade versions for an agent pool of the manag
 examples:
   - name: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
     text: az aks nodepool get-upgrades --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
+    crafted: true
+"""
+
+helps["aks nodepool get-rollback-versions"] = """
+type: command
+short-summary: Get the available rollback versions for an agent pool of the managed Kubernetes cluster.
+long-summary: |
+    Get the list of historically used Kubernetes and node image versions that can be used for rollback operations.
+examples:
+  - name: Get the available rollback versions for an agent pool.
+    text: az aks nodepool get-rollback-versions --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
     crafted: true
 """
 
@@ -2154,13 +2362,13 @@ long-summary: Update a node pool to enable/disable cluster-autoscaler or change 
 parameters:
   - name: --enable-cluster-autoscaler -e
     type: bool
-    short-summary: Enable cluster autoscaler.
+    short-summary: Enable cluster autoscaler. For VirtualMachines pools, converts all manual scale profiles to autoscale profiles using the same min/max counts.
   - name: --disable-cluster-autoscaler -d
     type: bool
-    short-summary: Disable cluster autoscaler.
+    short-summary: Disable cluster autoscaler. For VirtualMachines pools, converts all autoscale profiles back to manual scale profiles.
   - name: --update-cluster-autoscaler -u
     type: bool
-    short-summary: Update min-count or max-count for cluster autoscaler.
+    short-summary: Update min-count or max-count for cluster autoscaler. Not supported for VirtualMachines pools; use 'az aks nodepool auto-scale update' instead.
   - name: --min-count
     type: int
     short-summary: Minimum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [0, 1000] for user nodepool, and [1,1000] for system nodepool.
@@ -2203,9 +2411,15 @@ parameters:
   - name: --asg-ids
     type: string
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
+  - name: --enable-managed-dranet
+    type: bool
+    short-summary: Enable Managed DRANET on the node pool.
   - name: --os-sku
     type: string
-    short-summary: The os-sku of the agent node pool.
+    short-summary: The OS SKU of the agent node pool.
+    long-summary: |
+        Windows2022 node pools can be upgraded to Windows2025. Specify --enable-fips-image when upgrading a non-FIPS node pool.
+        Downgrading from Windows2025 to Windows2022 is not supported.
   - name: --enable-fips-image
     type: bool
     short-summary: Switch to use FIPS-enabled OS on agent nodes.
@@ -2251,6 +2465,11 @@ examples:
     text: az aks nodepool update --disable-cluster-autoscaler -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
   - name: Update min-count or max-count for cluster autoscaler.
     text: az aks nodepool update --update-cluster-autoscaler --min-count 1 --max-count 10 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
+  - name: Upgrade a Windows2022 node pool to Windows2025 with a FIPS-enabled OS image.
+    text: |
+        az aks nodepool update --resource-group MyResourceGroup \\
+            --cluster-name MyManagedCluster --name npwin \\
+            --os-sku Windows2025 --enable-fips-image
 """
 
 helps["aks nodepool upgrade"] = """
@@ -2290,6 +2509,29 @@ parameters:
   - name: --if-none-match
     type: string
     short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
+"""
+
+helps["aks nodepool rollback"] = """
+type: command
+short-summary: Rollback an agent pool to the most recently used configuration (N-1).
+long-summary: |
+    Rollback an agent pool to the most recently used version based on rollback history.
+    This will rollback both the Kubernetes version and node image version to their most recent previous state.
+    For downgrades to older versions (N-2 or earlier), use a separate downgrade operation.
+parameters:
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
+examples:
+  - name: Rollback a nodepool to the most recently used version.
+    text: az aks nodepool rollback --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
+    crafted: true
 """
 
 helps["aks nodepool stop"] = """
@@ -2371,7 +2613,7 @@ examples:
 
 helps["aks nodepool manual-scale"] = """
     type: group
-    short-summary: Commands to manage nodepool virtualMachineProfile.scale.manual.
+    short-summary: Commands to manage nodepool virtualMachinesProfile.scale.manual.
 """
 
 helps["aks nodepool manual-scale add"] = """
@@ -2408,6 +2650,62 @@ helps["aks nodepool manual-scale delete"] = """
         - name: --current-vm-sizes
           type: string
           short-summary: Comma-separated list of sizes in the manual to be deleted.
+"""
+
+helps["aks nodepool auto-scale"] = """
+    type: group
+    short-summary: Commands to manage nodepool virtualMachinesProfile.scale.autoscale.
+"""
+
+helps["aks nodepool auto-scale add"] = """
+    type: command
+    short-summary: Add a new autoscale profile to a VirtualMachines agentpool in the managed Kubernetes cluster.
+    parameters:
+        - name: --node-vm-size
+          type: string
+          short-summary: VM size for the autoscale profile.
+        - name: --min-count
+          type: int
+          short-summary: Minimum number of nodes for autoscaling.
+        - name: --max-count
+          type: int
+          short-summary: Maximum number of nodes for autoscaling.
+    examples:
+        - name: Add an autoscale profile to a VirtualMachines agentpool
+          text: az aks nodepool auto-scale add -g MyResourceGroup --cluster-name MyMC --name MyNodePool --node-vm-size Standard_D2s_v3 --min-count 3 --max-count 5
+"""
+
+helps["aks nodepool auto-scale update"] = """
+    type: command
+    short-summary: Update an existing autoscale profile of a VirtualMachines agentpool in the managed Kubernetes cluster.
+    parameters:
+        - name: --current-node-vm-size
+          type: string
+          short-summary: The current VM size of the autoscale profile to be updated.
+        - name: --node-vm-size
+          type: string
+          short-summary: The new VM size for the autoscale profile.
+        - name: --min-count
+          type: int
+          short-summary: Minimum number of nodes for autoscaling.
+        - name: --max-count
+          type: int
+          short-summary: Maximum number of nodes for autoscaling.
+    examples:
+        - name: Update an existing autoscale profile in a VirtualMachines agentpool
+          text: az aks nodepool auto-scale update -g MyResourceGroup --cluster-name MyMC --name MyNodePool --current-node-vm-size Standard_D2s_v3 --node-vm-size Standard_D8s_v3 --min-count 2 --max-count 4
+"""
+
+helps["aks nodepool auto-scale delete"] = """
+    type: command
+    short-summary: Delete an existing autoscale profile from a VirtualMachines agentpool in the managed Kubernetes cluster.
+    parameters:
+        - name: --current-node-vm-size
+          type: string
+          short-summary: The VM size of the autoscale profile to be deleted.
+    examples:
+        - name: Delete an autoscale profile from a VirtualMachines agentpool
+          text: az aks nodepool auto-scale delete -g MyResourceGroup --cluster-name MyMC --name MyNodePool --current-node-vm-size Standard_D2s_v3
 """
 
 helps["aks show"] = """
@@ -2524,7 +2822,7 @@ parameters:
     short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
   - name: --endpoint -e
     type: string
-    short-summary: The endpoint type to be used for a Azure Dev Spaces controller. See https://aka.ms/azds-networking for more information.
+    short-summary: The endpoint type to be used for an Azure Dev Spaces controller. See https://aka.ms/azds-networking for more information.
 examples:
   - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
     text: |-
@@ -2779,6 +3077,71 @@ helps["aks trustedaccess rolebinding delete"] = """
         - name: --name -n
           type: string
           short-summary: Specify the role binding name.
+"""
+
+helps["aks identity-binding"] = """
+    type: group
+    short-summary: Commands to manage identity bindings in Azure Kubernetes Service.
+"""
+
+helps["aks identity-binding list"] = """
+    type: command
+    short-summary: List all identity bindings under a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed Kubernetes cluster.
+    examples:
+        - name: List all identity bindings in a managed cluster
+          text: az aks identity-binding list -g myResourceGroup --cluster-name myCluster
+"""
+
+helps["aks identity-binding show"] = """
+    type: command
+    short-summary: Show details of a specific identity binding in a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed Kubernetes cluster.
+        - name: --name -n
+          type: string
+          short-summary: Name of the identity binding to show.
+    examples:
+        - name: Show details of an identity binding
+          text: az aks identity-binding show -g myResourceGroup --cluster-name myCluster -n myIdentityBinding
+"""
+
+helps["aks identity-binding create"] = """
+    type: command
+    short-summary: Create a new identity binding in a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed Kubernetes cluster.
+        - name: --name -n
+          type: string
+          short-summary: Name of the identity binding to create.
+        - name: --managed-identity-resource-id
+          type: string
+          short-summary: The resource ID of the managed identity to use.
+    examples:
+        - name: Create a new identity binding
+          text: az aks identity-binding create -g myResourceGroup --cluster-name myCluster -n myIdentityBinding --managed-identity-resource-id /subscriptions/0000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myIdentity
+"""
+
+helps["aks identity-binding delete"] = """
+    type: command
+    short-summary: Delete a specific identity binding in a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed Kubernetes cluster.
+        - name: --name -n
+          type: string
+          short-summary: Name of the identity binding to delete.
+    examples:
+        - name: Delete an identity binding
+          text: az aks identity-binding delete -g myResourceGroup --cluster-name myCluster -n myIdentityBinding
 """
 
 helps["aks mesh"] = """

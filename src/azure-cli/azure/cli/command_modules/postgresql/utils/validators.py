@@ -28,9 +28,7 @@ from .._client_factory import cf_postgres_check_resource_availability, cf_postgr
 from .._config_reader import get_cloud_cluster
 from ._flexible_server_location_capabilities_util import (
     get_performance_tiers,
-    get_performance_tiers_for_storage,
-    get_postgres_location_capability_info,
-    get_postgres_server_capability_info)
+    get_performance_tiers_for_storage)
 from ._flexible_server_util import (
     _is_resource_name,
     get_id_components,
@@ -42,6 +40,9 @@ from ._flexible_server_util import (
 
 logger = get_logger(__name__)
 IP_ADDRESS_CHECKER = 'https://api.ipify.org'
+
+# Compute tiers ordered from lowest to highest capability.
+PG_TIER_RANK = {'burstable': 0, 'generalpurpose': 1, 'memoryoptimized': 2}
 
 
 # pylint: disable=import-outside-toplevel, raise-missing-from, unbalanced-tuple-unpacking
@@ -151,27 +152,19 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 
 
 # pylint: disable=too-many-locals
-def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
+def pg_arguments_validator(db_context, list_location_capability_info,
+                           tier, sku_name, storage_gb, server_name=None, database_name=None,
                            zone=None, standby_availability_zone=None,
                            zonal_resiliency=None, allow_same_zone=False, subnet=None,
                            public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
+                           federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, cluster_size=None,
                            password_auth=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     validate_database_name(database_name)
-    is_create = not instance
-    if is_create:
-        list_location_capability_info = get_postgres_location_capability_info(
-            db_context.cmd,
-            location)
-    else:
-        list_location_capability_info = get_postgres_server_capability_info(
-            db_context.cmd,
-            resource_group=parse_resource_id(instance.id)["resource_group"],
-            server_name=instance.name)
     sku_info = list_location_capability_info['sku_info']
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
@@ -199,7 +192,10 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_zonal_resiliency_validator(zonal_resiliency, allow_same_zone,
                                    standby_availability_zone, zone, tier, single_az, instance)
     pg_version_validator(version, list_location_capability_info['server_versions'])
-    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
+    pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key,
+                      geo_redundant_backup, instance,
+                      federated_client_id=federated_client_id,
+                      backup_federated_client_id=backup_federated_client_id)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
                                  admin_name, admin_id, admin_type, instance)
@@ -377,7 +373,9 @@ def _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported
 
 
 def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup_byok_key=None,
-                      geo_redundant_backup=None, instance=None):
+                      geo_redundant_backup=None, instance=None,
+                      federated_client_id=None, backup_federated_client_id=None):
+
     if bool(byok_identity is None) ^ bool(byok_key is None):
         raise ArgumentUsageError('A user-assigned identity and Key Vault key must be provided together. '
                                  'Provide --identity and --key together.')
@@ -390,6 +388,20 @@ def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup
        byok_identity.lower() == backup_byok_identity.lower():
         raise ArgumentUsageError('The primary user-assigned identity and backup identity cannot be the same. '
                                  'Provide different identities for --identity and --backup-identity.')
+
+    if (federated_client_id or backup_federated_client_id) and byok_identity is None:
+        if instance is None:
+            raise ArgumentUsageError('To use --federated-client-id or --geo-backup-federated-client-id, '
+                                     'provide --identity and --key together.')
+        if not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault'):
+            logger.warning('You cannot update data encryption properties on a server '
+                           'that was not created with data encryption..')
+
+    if bool(federated_client_id is not None) and bool(backup_federated_client_id is not None) and \
+       federated_client_id.lower() == backup_federated_client_id.lower():
+        raise ArgumentUsageError('The primary federated client ID and backup federated client ID cannot be the same. '
+                                 'Provide different IDs for --federated-client-id and '
+                                 '--geo-backup-federated-client-id.')
 
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
@@ -761,15 +773,12 @@ def validate_vnet_location(vnet, location):
         raise ValidationError('The virtual network must be in the same location as the server.')
 
 
-def validate_postgres_replica(cmd, tier, location, instance, sku_name,
-                              storage_gb, performance_tier=None, list_location_capability_info=None):
+def validate_postgres_replica(tier, instance, sku_name, storage_gb,
+                              list_location_capability_info, performance_tier=None):
     # Tier validation
     if tier == 'Burstable':
         raise ValidationError('Read replica is not supported for the Burstable pricing tier. '
                               'Scale up the source server to General Purpose or Memory Optimized. ')
-
-    if not list_location_capability_info:
-        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
     sku_info = list_location_capability_info['sku_info']
     _pg_tier_validator(tier, sku_info)  # need to be validated first
@@ -890,6 +899,19 @@ def pg_restore_validator(compute_tier, **args):
     if is_ssdv2_enabled and compute_tier.lower() == 'burstable':
         raise ValidationError('Invalid value for --tier. Burstable tier is not supported for servers with '
                               '--storage-type set to "PremiumV2_LRS".')
+
+
+def pg_restore_tier_validator(target_tier, source_tier, sku_info):
+    _pg_tier_validator(target_tier, sku_info)
+    target_rank = PG_TIER_RANK.get(target_tier.lower())
+    source_rank = PG_TIER_RANK.get(source_tier.lower())
+    if target_rank is not None and source_rank is not None and target_rank < source_rank:
+        raise ValidationError('Invalid value for --tier. The restored server must not go below the source server '
+                              'compute tier. The source server compute tier is {}.'.format(source_tier))
+
+
+def pg_restore_sku_validator(sku_name, sku_info, tier):
+    _pg_sku_name_validator(sku_name, sku_info, tier, None)
 
 
 def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,

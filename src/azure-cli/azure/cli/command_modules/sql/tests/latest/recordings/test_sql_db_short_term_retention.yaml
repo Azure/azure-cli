@@ -1,43 +1,200 @@
 interactions:
 - request:
-    body: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24}}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
-      - sql db str-policy set
+      - sql db show
       Connection:
       - keep-alive
-      Content-Length:
-      - '69'
-      Content-Type:
-      - application/json
       ParameterSetName:
-      - -g -s -n --retention-days --diffbackup-hours
+      - --subscription -g -s -n
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default?api-version=2024-11-01-preview
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001?api-version=2024-11-01-preview
   response:
     body:
-      string: '{"operation":"UpdateLogicalDatabase","startTime":"2025-08-05T14:45:07.407Z"}'
+      string: '{"error": {"code": "ResourceNotFound", "message": "The Resource ''Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001''
+        under resource group ''strtestrg'' was not found. For more details please
+        go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/locations/westus/shortTermRetentionPolicyAzureAsyncOperation/65945d9e-2db8-41f9-baba-f32eafd02d80?api-version=2024-11-01-preview&t=638900019075617520&c=MIIIrzCCBpegAwIBAgITUQB_nY_WoSbNATDH2QABAH-djzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDQwHhcNMjUwNzE4MTE0ODEyWhcNMjYwMTE0MTE0ODEyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Yf2tzpQe96HmJYXWKDNIrKc9-o37fE5ZS4b0aA-QzeDYNU6SChIwqP2YcbSNanIvEZtyMLND05wziTsehor3TYDGdCUQTvHHMESwVZ_KfUoGcL_A8mkKSxKrnxatUado60utWQNKPx612AzyZrXK16o7OkYiqjeD3g74_notDIhNC7tO7x-bt73jOlCV4zusxXJgPHm3r_2uEhI7JEDW63UZZQLec3BGIMNQ6qeGsmha1hZKDOOJ0TvkFvcCep_8XOCH0cnbG3of4-EoQB7vPWTAYN1IAuf_75kUZFCq0BXRl5XdxWyWnPe9iEj5Zr_xqiVBExfmaRww6UeijHVUCAwEAAaOCBJwwggSYMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHkBggrBgEFBQcBAQSCAdYwggHSMGgGCCsGAQUFBzAChlxodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDEuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDIuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDMuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDQuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDAdBgNVHQ4EFgQUvMJ4Tm18Izes1FcZ2XAEMHzPZp4wDgYDVR0PAQH_BAQDAgWgMIIBNQYDVR0fBIIBLDCCASgwggEkoIIBIKCCARyGQmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DUkwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDEuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDIuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDMuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDQuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwHwYDVR0jBBgwFoAUOXFdqRUQLcTffi9ZbkBNwN_vNpowHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4ICAQDaxLpctX4jhwHu-mzX41_6auhZiKzgsqu6dCEnzG4Zj0DzCBfri-_5qdITCoCAbwxf-slBI3HfVL_NLYzx9O7iO8s4bc6uW6cYI8sk3nUHO5xHWf1cEYoa-XxQ2eSRFBU5Caf-XAjAfjgM-fyhHratIk62VOaqHYQr0M5wtXbWN1g_NNpM3eAfGJgTeuJzIvl-73RuK8VVs71jCs4DP92f74Eiz4mDC1kvxeGGRNkZirdosmarZnOLVe68hDuJCE-4I3qqDZXOYzIghXqhYWcQtztazZ4X8p-vnvW2t-ESKoktRcYl6_nvzCjnePLpH_Vs-Qt1ukHZ23BuCJpjLbVj7HTiaIVXCkYmP-iVpYN8s2ROSp4gBcGadyvBY922M6pMOgB8TAwyCmlAs5glnz4GPHAj47lUO_svkSiLXSpwRReCPkSLOfNJOThuCO8S7IrLGDptqkMHyAIXUVTZTh3PW9UicNi44sC_WkzX9NiAbPuwW5IhT8IzzJr-VcqT8VDCxzblbRv6HQfFVTy1K67ZE119xwAvp6Dk32IQGAOHjeKH6kFABKe0DDu5gttcd_XDHBmtBZ4-IQV8vozB0ioBUqMdKqVOvmF1thxnLWLXfqxxBjc2CSkeixa8WKdvzGKkxSmDmGS91XZWAbmkze2zg8eKrhWm0pcYuxU-2SF0zw&s=woOLBCVcIXjP-lJ-ovYHpHnE60_1z7UeVY3rJZKjxpluW2zl_TcWOKSXRxyFjRWpDbX4qeF8iHXY6oF72fdCH5qqKWOG2koiAESCVXp9Oc2o3Vwzdq2TvlF731jk8M7tf9rG1usm0NhnOzibUJ9tQpg10-BDb43Ks-gY7VkH8RNvtv2oWUbD4Ic4CneVf66a7oD_aVPG76UJ_WtwWEzBuFroXJ3b2gOY2OjRw_86ZKc6zrty9jnXIVIJy48pqcGBLqwJaWHFIXL-jkehgzWW08fOmVOhtMpuZoEDEnImcU4Vv7nVYeCnxPkneNH3pK9TDQ7-u9MHz_9AiiEK_W3jnw&h=YS5OW-8vWh2XtpH9WhEbexIhmhrFVzjqrvX5xAY5vh0
       cache-control:
       - no-cache
       content-length:
-      - '76'
+      - '248'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:06 GMT
+      - Tue, 13 Oct 2026 14:10:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-msedge-ref:
+      - 'Ref A: CC1B0B1F770D4C8A909F591952C29899 Ref B: CWL211060613062 Ref C: 2026-10-13T14:10:01Z'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --service-objective --backup-storage-redundancy --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver?api-version=2024-11-01-preview
+  response:
+    body:
+      string: '{"kind": "v12.0", "properties": {"administratorLogin": "SqlAdmin",
+        "version": "12.0", "state": "Ready", "fullyQualifiedDomainName": "strtestserver.database.windows.net",
+        "privateEndpointConnections": [], "minimalTlsVersion": "1.2", "publicNetworkAccess":
+        "Enabled", "administrators": {"administratorType": "ActiveDirectory", "principalType":
+        "Group", "login": "test@example.com", "sid": "6149290a-54f9-4fcc-bbcd-dbc6befb0ee6",
+        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}, "restrictOutboundNetworkAccess":
+        "Disabled", "externalGovernanceStatus": "Disabled", "retentionDays": -1},
+        "location": "westus2", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver",
+        "name": "strtestserver", "type": "Microsoft.Sql/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '799'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:10:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 5A57944B430847BE89206FC63B357589 Ref B: CWL211060413034 Ref C: 2026-10-13T14:10:02Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --service-objective --backup-storage-redundancy --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver?api-version=2024-11-01-preview
+  response:
+    body:
+      string: '{"kind": "v12.0", "properties": {"administratorLogin": "SqlAdmin",
+        "version": "12.0", "state": "Ready", "fullyQualifiedDomainName": "strtestserver.database.windows.net",
+        "privateEndpointConnections": [], "minimalTlsVersion": "1.2", "publicNetworkAccess":
+        "Enabled", "administrators": {"administratorType": "ActiveDirectory", "principalType":
+        "Group", "login": "test@example.com", "sid": "6149290a-54f9-4fcc-bbcd-dbc6befb0ee6",
+        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"}, "restrictOutboundNetworkAccess":
+        "Disabled", "externalGovernanceStatus": "Disabled", "retentionDays": -1},
+        "location": "westus2", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver",
+        "name": "strtestserver", "type": "Microsoft.Sql/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '799'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:10:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: F37AA087D63243C29ADE6A7064A71FBC Ref B: CWL211060613062 Ref C: 2026-10-13T14:10:02Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2", "sku": {"name": "S0"}, "properties": {"requestedBackupStorageRedundancy":
+      "Local"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '107'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n --service-objective --backup-storage-redundancy --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001?api-version=2024-11-01-preview
+  response:
+    body:
+      string: '{"operation": "CreateLogicalDatabase", "startTime": "2026-10-13T14:10:03.703Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/databaseAzureAsyncOperation/6d080332-15f0-44c7-8808-e1e414efdd65?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      cache-control:
+      - no-cache
+      content-length:
+      - '79'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:10:03 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/locations/westus/shortTermRetentionPolicyOperationResults/65945d9e-2db8-41f9-baba-f32eafd02d80?api-version=2024-11-01-preview&t=638900019075773774&c=MIIIrzCCBpegAwIBAgITUQB_nY_WoSbNATDH2QABAH-djzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDQwHhcNMjUwNzE4MTE0ODEyWhcNMjYwMTE0MTE0ODEyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Yf2tzpQe96HmJYXWKDNIrKc9-o37fE5ZS4b0aA-QzeDYNU6SChIwqP2YcbSNanIvEZtyMLND05wziTsehor3TYDGdCUQTvHHMESwVZ_KfUoGcL_A8mkKSxKrnxatUado60utWQNKPx612AzyZrXK16o7OkYiqjeD3g74_notDIhNC7tO7x-bt73jOlCV4zusxXJgPHm3r_2uEhI7JEDW63UZZQLec3BGIMNQ6qeGsmha1hZKDOOJ0TvkFvcCep_8XOCH0cnbG3of4-EoQB7vPWTAYN1IAuf_75kUZFCq0BXRl5XdxWyWnPe9iEj5Zr_xqiVBExfmaRww6UeijHVUCAwEAAaOCBJwwggSYMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHkBggrBgEFBQcBAQSCAdYwggHSMGgGCCsGAQUFBzAChlxodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDEuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDIuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDMuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDQuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDAdBgNVHQ4EFgQUvMJ4Tm18Izes1FcZ2XAEMHzPZp4wDgYDVR0PAQH_BAQDAgWgMIIBNQYDVR0fBIIBLDCCASgwggEkoIIBIKCCARyGQmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DUkwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDEuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDIuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDMuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDQuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwHwYDVR0jBBgwFoAUOXFdqRUQLcTffi9ZbkBNwN_vNpowHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4ICAQDaxLpctX4jhwHu-mzX41_6auhZiKzgsqu6dCEnzG4Zj0DzCBfri-_5qdITCoCAbwxf-slBI3HfVL_NLYzx9O7iO8s4bc6uW6cYI8sk3nUHO5xHWf1cEYoa-XxQ2eSRFBU5Caf-XAjAfjgM-fyhHratIk62VOaqHYQr0M5wtXbWN1g_NNpM3eAfGJgTeuJzIvl-73RuK8VVs71jCs4DP92f74Eiz4mDC1kvxeGGRNkZirdosmarZnOLVe68hDuJCE-4I3qqDZXOYzIghXqhYWcQtztazZ4X8p-vnvW2t-ESKoktRcYl6_nvzCjnePLpH_Vs-Qt1ukHZ23BuCJpjLbVj7HTiaIVXCkYmP-iVpYN8s2ROSp4gBcGadyvBY922M6pMOgB8TAwyCmlAs5glnz4GPHAj47lUO_svkSiLXSpwRReCPkSLOfNJOThuCO8S7IrLGDptqkMHyAIXUVTZTh3PW9UicNi44sC_WkzX9NiAbPuwW5IhT8IzzJr-VcqT8VDCxzblbRv6HQfFVTy1K67ZE119xwAvp6Dk32IQGAOHjeKH6kFABKe0DDu5gttcd_XDHBmtBZ4-IQV8vozB0ioBUqMdKqVOvmF1thxnLWLXfqxxBjc2CSkeixa8WKdvzGKkxSmDmGS91XZWAbmkze2zg8eKrhWm0pcYuxU-2SF0zw&s=IT2JLeKaM_AzN9u_cLipRu8E9mkw6MqwFn3eipmvlYI_Ddgl0Ojfzisp7XDI0QXGrb54OXbdT__qBY-HGf088UCYogpw1roc8eHaFPXbMXSgy83678ztu8tGtmUAmLvodFWxz1_XNPdSDb_lY-r5jNeqFX5FQeZbS99lPWp7NSBKjmnyr9oGOPzrh-CcBqPAlyeIs5EHldZmIwlTnPAsWAeTrvH3ashy-n0N0W0ogZXNPjLnpN_ZeKkyD3Rig3aDDFHlcY005rvFitFO_fslGY8h1mGPhEvCFea9-NKjlYeS_MrxJHjDBeNjWkHJy9WZ7wCpcamWOu40iqHgCBE7ig&h=Fgl4mBejnePyocs96NsruxT0bJuBvizmxgGBAYKGjkw
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/databaseOperationResults/6d080332-15f0-44c7-8808-e1e414efdd65?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -47,13 +204,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/southindia/43144af8-4bfa-4571-8e51-aaaafabd7e74
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/ce65639b-f813-46d5-a16f-853b49c86bd7
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 27BA848EC9914E669F15E4D55FEB8A4F Ref B: MAA201060513053 Ref C: 2025-08-05T14:45:04Z'
+      - 'Ref A: D3162710D4CE42DEB094471581476839 Ref B: CWL211060613040 Ref C: 2026-10-13T14:10:03Z'
     status:
       code: 202
       message: Accepted
@@ -63,29 +220,30 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
-      - sql db str-policy set
+      - sql db create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --retention-days --diffbackup-hours
+      - --subscription -g -s -n --service-objective --backup-storage-redundancy --yes
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/locations/westus/shortTermRetentionPolicyAzureAsyncOperation/65945d9e-2db8-41f9-baba-f32eafd02d80?api-version=2024-11-01-preview&t=638900019075617520&c=MIIIrzCCBpegAwIBAgITUQB_nY_WoSbNATDH2QABAH-djzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDQwHhcNMjUwNzE4MTE0ODEyWhcNMjYwMTE0MTE0ODEyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Yf2tzpQe96HmJYXWKDNIrKc9-o37fE5ZS4b0aA-QzeDYNU6SChIwqP2YcbSNanIvEZtyMLND05wziTsehor3TYDGdCUQTvHHMESwVZ_KfUoGcL_A8mkKSxKrnxatUado60utWQNKPx612AzyZrXK16o7OkYiqjeD3g74_notDIhNC7tO7x-bt73jOlCV4zusxXJgPHm3r_2uEhI7JEDW63UZZQLec3BGIMNQ6qeGsmha1hZKDOOJ0TvkFvcCep_8XOCH0cnbG3of4-EoQB7vPWTAYN1IAuf_75kUZFCq0BXRl5XdxWyWnPe9iEj5Zr_xqiVBExfmaRww6UeijHVUCAwEAAaOCBJwwggSYMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHkBggrBgEFBQcBAQSCAdYwggHSMGgGCCsGAQUFBzAChlxodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDEuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDIuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDMuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDQuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDAdBgNVHQ4EFgQUvMJ4Tm18Izes1FcZ2XAEMHzPZp4wDgYDVR0PAQH_BAQDAgWgMIIBNQYDVR0fBIIBLDCCASgwggEkoIIBIKCCARyGQmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DUkwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDEuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDIuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDMuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDQuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwHwYDVR0jBBgwFoAUOXFdqRUQLcTffi9ZbkBNwN_vNpowHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4ICAQDaxLpctX4jhwHu-mzX41_6auhZiKzgsqu6dCEnzG4Zj0DzCBfri-_5qdITCoCAbwxf-slBI3HfVL_NLYzx9O7iO8s4bc6uW6cYI8sk3nUHO5xHWf1cEYoa-XxQ2eSRFBU5Caf-XAjAfjgM-fyhHratIk62VOaqHYQr0M5wtXbWN1g_NNpM3eAfGJgTeuJzIvl-73RuK8VVs71jCs4DP92f74Eiz4mDC1kvxeGGRNkZirdosmarZnOLVe68hDuJCE-4I3qqDZXOYzIghXqhYWcQtztazZ4X8p-vnvW2t-ESKoktRcYl6_nvzCjnePLpH_Vs-Qt1ukHZ23BuCJpjLbVj7HTiaIVXCkYmP-iVpYN8s2ROSp4gBcGadyvBY922M6pMOgB8TAwyCmlAs5glnz4GPHAj47lUO_svkSiLXSpwRReCPkSLOfNJOThuCO8S7IrLGDptqkMHyAIXUVTZTh3PW9UicNi44sC_WkzX9NiAbPuwW5IhT8IzzJr-VcqT8VDCxzblbRv6HQfFVTy1K67ZE119xwAvp6Dk32IQGAOHjeKH6kFABKe0DDu5gttcd_XDHBmtBZ4-IQV8vozB0ioBUqMdKqVOvmF1thxnLWLXfqxxBjc2CSkeixa8WKdvzGKkxSmDmGS91XZWAbmkze2zg8eKrhWm0pcYuxU-2SF0zw&s=woOLBCVcIXjP-lJ-ovYHpHnE60_1z7UeVY3rJZKjxpluW2zl_TcWOKSXRxyFjRWpDbX4qeF8iHXY6oF72fdCH5qqKWOG2koiAESCVXp9Oc2o3Vwzdq2TvlF731jk8M7tf9rG1usm0NhnOzibUJ9tQpg10-BDb43Ks-gY7VkH8RNvtv2oWUbD4Ic4CneVf66a7oD_aVPG76UJ_WtwWEzBuFroXJ3b2gOY2OjRw_86ZKc6zrty9jnXIVIJy48pqcGBLqwJaWHFIXL-jkehgzWW08fOmVOhtMpuZoEDEnImcU4Vv7nVYeCnxPkneNH3pK9TDQ7-u9MHz_9AiiEK_W3jnw&h=YS5OW-8vWh2XtpH9WhEbexIhmhrFVzjqrvX5xAY5vh0
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/databaseAzureAsyncOperation/6d080332-15f0-44c7-8808-e1e414efdd65?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"name":"65945d9e-2db8-41f9-baba-f32eafd02d80","status":"Succeeded","startTime":"2025-08-05T14:45:07.407Z"}'
+      string: '{"name": "6d080332-15f0-44c7-8808-e1e414efdd65", "status": "InProgress",
+        "startTime": "2026-10-13T14:10:03.703Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '113'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:07 GMT
+      - Tue, 13 Oct 2026 14:10:03 GMT
       expires:
       - '-1'
       pragma:
@@ -97,11 +255,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/southindia/af86f6b7-117f-4e27-9ae9-feb21e9fad66
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/6abed077-bcc7-4b7f-92fe-d920bfd4c73b
       x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      - '16498'
       x-msedge-ref:
-      - 'Ref A: 8950BD71234B4B10B26A0D31652C3DE9 Ref B: MAA201060513027 Ref C: 2025-08-05T14:45:07Z'
+      - 'Ref A: CD8C25D3FCEA4675BBF676C92E5A8624 Ref B: CWL211060613062 Ref C: 2026-10-13T14:10:04Z'
     status:
       code: 200
       message: OK
@@ -111,29 +269,30 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
-      - sql db str-policy set
+      - sql db create
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --retention-days --diffbackup-hours
+      - --subscription -g -s -n --service-objective --backup-storage-redundancy --yes
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/databaseAzureAsyncOperation/6d080332-15f0-44c7-8808-e1e414efdd65?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"properties":{"retentionDays":7,"diffBackupIntervalInHours":24},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+      string: '{"name": "6d080332-15f0-44c7-8808-e1e414efdd65", "status": "InProgress",
+        "startTime": "2026-10-13T14:10:03.703Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '376'
+      - '113'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:10 GMT
+      - Tue, 13 Oct 2026 14:10:19 GMT
       expires:
       - '-1'
       pragma:
@@ -145,11 +304,215 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/jioindiacentral/dbbe21b8-ec4c-45c4-8699-1ec16fcb11f4
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/b930237b-07a6-4b81-8522-3eb0c5067084
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 2F968C3E4F23464F83DD667F693982F9 Ref B: MAA201060516033 Ref C: 2025-08-05T14:45:09Z'
+      - 'Ref A: 8BB347C265F9493A882148E3913FA41B Ref B: CWL211060613042 Ref C: 2026-10-13T14:10:19Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --service-objective --backup-storage-redundancy --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/databaseAzureAsyncOperation/6d080332-15f0-44c7-8808-e1e414efdd65?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "6d080332-15f0-44c7-8808-e1e414efdd65", "status": "InProgress",
+        "startTime": "2026-10-13T14:10:03.703Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:10:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/c5c99ae2-9386-48d7-805f-731d172f8491
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: CCCC17333B854B069368EE0F607C74E3 Ref B: CWL211060613023 Ref C: 2026-10-13T14:10:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --service-objective --backup-storage-redundancy --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/databaseAzureAsyncOperation/6d080332-15f0-44c7-8808-e1e414efdd65?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "6d080332-15f0-44c7-8808-e1e414efdd65", "status": "InProgress",
+        "startTime": "2026-10-13T14:10:03.703Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:10:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/f53eaade-7037-4a82-a867-d633f326036f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: CB7AC0612C3641F6BADEF7845570B668 Ref B: CWL211060613060 Ref C: 2026-10-13T14:10:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --service-objective --backup-storage-redundancy --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/databaseAzureAsyncOperation/6d080332-15f0-44c7-8808-e1e414efdd65?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "6d080332-15f0-44c7-8808-e1e414efdd65", "status": "Succeeded",
+        "startTime": "2026-10-13T14:10:03.703Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/635d0985-3a38-4072-9db0-58dea1f80f16
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 93A9E0D0AA6443C9BE7C92A0A3930CB8 Ref B: CWL211060613052 Ref C: 2026-10-13T14:11:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --service-objective --backup-storage-redundancy --yes
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001?api-version=2024-11-01-preview
+  response:
+    body:
+      string: '{"sku": {"name": "Standard", "tier": "Standard", "capacity": 10}, "kind":
+        "v12.0,user", "properties": {"collation": "SQL_Latin1_General_CP1_CI_AS",
+        "maxSizeBytes": 268435456000, "status": "Online", "databaseId": "9aa3c446-64a8-475e-b866-ca76a0ab6d7e",
+        "creationDate": "2026-10-13T14:11:01.077Z", "currentServiceObjectiveName":
+        "S0", "requestedServiceObjectiveName": "S0", "defaultSecondaryLocation": "westcentralus",
+        "catalogCollation": "SQL_Latin1_General_CP1_CI_AS", "zoneRedundant": false,
+        "readScale": "Disabled", "currentSku": {"name": "Standard", "tier": "Standard",
+        "capacity": 10}, "currentBackupStorageRedundancy": "Local", "requestedBackupStorageRedundancy":
+        "Local", "maintenanceConfigurationId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default",
+        "isLedgerOn": false, "isInfraEncryptionEnabled": false, "availabilityZone":
+        "NoPreference"}, "location": "westus2", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001",
+        "name": "clisqldbstr000001", "type": "Microsoft.Sql/servers/databases"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1186'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 724745AE2BA943DBBDF30FA8E6474E31 Ref B: CWL211060413034 Ref C: 2026-10-13T14:11:06Z'
     status:
       code: 200
       message: OK
@@ -159,29 +522,33 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql db str-policy show
       Connection:
       - keep-alive
+      Content-Type:
+      - application/json
       ParameterSetName:
-      - -g -s -n
+      - --subscription -g -s -n
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"properties":{"retentionDays":7,"diffBackupIntervalInHours":24},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '376'
+      - '399'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:12 GMT
+      - Tue, 13 Oct 2026 14:11:06 GMT
       expires:
       - '-1'
       pragma:
@@ -193,11 +560,269 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/southindia/067e7cc6-0b7c-46f3-9de8-395bf842fdca
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/15655e19-db2d-4849-8a5a-e4a14613aee0
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 0D6E7ED03B264F4E9770836E4EE55758 Ref B: MAA201060514031 Ref C: 2025-08-05T14:45:11Z'
+      - 'Ref A: 3E812BE1F01440369ED3AE43B7162A4C Ref B: CWL211060613060 Ref C: 2026-10-13T14:11:07Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '69'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --diffbackup-hours
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T14:11:07.987Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/033aa85e-0af4-49d3-8a8c-0dc2bf951ea4?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      cache-control:
+      - no-cache
+      content-length:
+      - '79'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:07 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyOperationResults/033aa85e-0af4-49d3-8a8c-0dc2bf951ea4?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/96d79902-56ac-4219-976e-d9e98708cacf
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 5D89F9E90DA249ED8CF446C5731D23E6 Ref B: CWL211060413042 Ref C: 2026-10-13T14:11:07Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --diffbackup-hours
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/033aa85e-0af4-49d3-8a8c-0dc2bf951ea4?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "033aa85e-0af4-49d3-8a8c-0dc2bf951ea4", "status": "InProgress",
+        "startTime": "2026-10-13T14:11:07.987Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/8b1bc68a-bdeb-481e-b62d-f62e06bef3c3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: C3F76223642C48CE85142A28E7A21098 Ref B: CWL211060413054 Ref C: 2026-10-13T14:11:08Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --diffbackup-hours
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/033aa85e-0af4-49d3-8a8c-0dc2bf951ea4?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "033aa85e-0af4-49d3-8a8c-0dc2bf951ea4", "status": "Succeeded",
+        "startTime": "2026-10-13T14:11:07.987Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/cb36d1fc-7960-42db-a652-5c4c80865812
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 773A608C1D694DFE920637896573AD32 Ref B: CWL211060613052 Ref C: 2026-10-13T14:11:23Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --diffbackup-hours
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/5ddd2bf7-6536-43c2-bad4-1b6cf21dcda3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 332CA05F001A47109990E8B5C143B2D3 Ref B: CWL211060613040 Ref C: 2026-10-13T14:11:24Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/315a174c-4799-4db9-a5d9-fe7180d80927
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E13DC0358AE64385B21B54A40773DF00 Ref B: CWL211060413040 Ref C: 2026-10-13T14:11:25Z'
     status:
       code: 200
       message: OK
@@ -207,7 +832,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql db str-policy set
       Connection:
@@ -217,29 +842,29 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -s -n --retention-days --diffbackup-hours
+      - --subscription -g -s -n --retention-days --diffbackup-hours
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation":"UpdateLogicalDatabase","startTime":"2025-08-05T14:45:14.897Z"}'
+      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T14:11:25.983Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/locations/westus/shortTermRetentionPolicyAzureAsyncOperation/ffaf0583-e64f-47a3-b901-222092063ee2?api-version=2024-11-01-preview&t=638900019151062452&c=MIIIrzCCBpegAwIBAgITUQB_nY_WoSbNATDH2QABAH-djzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDQwHhcNMjUwNzE4MTE0ODEyWhcNMjYwMTE0MTE0ODEyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Yf2tzpQe96HmJYXWKDNIrKc9-o37fE5ZS4b0aA-QzeDYNU6SChIwqP2YcbSNanIvEZtyMLND05wziTsehor3TYDGdCUQTvHHMESwVZ_KfUoGcL_A8mkKSxKrnxatUado60utWQNKPx612AzyZrXK16o7OkYiqjeD3g74_notDIhNC7tO7x-bt73jOlCV4zusxXJgPHm3r_2uEhI7JEDW63UZZQLec3BGIMNQ6qeGsmha1hZKDOOJ0TvkFvcCep_8XOCH0cnbG3of4-EoQB7vPWTAYN1IAuf_75kUZFCq0BXRl5XdxWyWnPe9iEj5Zr_xqiVBExfmaRww6UeijHVUCAwEAAaOCBJwwggSYMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHkBggrBgEFBQcBAQSCAdYwggHSMGgGCCsGAQUFBzAChlxodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDEuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDIuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDMuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDQuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDAdBgNVHQ4EFgQUvMJ4Tm18Izes1FcZ2XAEMHzPZp4wDgYDVR0PAQH_BAQDAgWgMIIBNQYDVR0fBIIBLDCCASgwggEkoIIBIKCCARyGQmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DUkwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDEuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDIuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDMuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDQuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwHwYDVR0jBBgwFoAUOXFdqRUQLcTffi9ZbkBNwN_vNpowHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4ICAQDaxLpctX4jhwHu-mzX41_6auhZiKzgsqu6dCEnzG4Zj0DzCBfri-_5qdITCoCAbwxf-slBI3HfVL_NLYzx9O7iO8s4bc6uW6cYI8sk3nUHO5xHWf1cEYoa-XxQ2eSRFBU5Caf-XAjAfjgM-fyhHratIk62VOaqHYQr0M5wtXbWN1g_NNpM3eAfGJgTeuJzIvl-73RuK8VVs71jCs4DP92f74Eiz4mDC1kvxeGGRNkZirdosmarZnOLVe68hDuJCE-4I3qqDZXOYzIghXqhYWcQtztazZ4X8p-vnvW2t-ESKoktRcYl6_nvzCjnePLpH_Vs-Qt1ukHZ23BuCJpjLbVj7HTiaIVXCkYmP-iVpYN8s2ROSp4gBcGadyvBY922M6pMOgB8TAwyCmlAs5glnz4GPHAj47lUO_svkSiLXSpwRReCPkSLOfNJOThuCO8S7IrLGDptqkMHyAIXUVTZTh3PW9UicNi44sC_WkzX9NiAbPuwW5IhT8IzzJr-VcqT8VDCxzblbRv6HQfFVTy1K67ZE119xwAvp6Dk32IQGAOHjeKH6kFABKe0DDu5gttcd_XDHBmtBZ4-IQV8vozB0ioBUqMdKqVOvmF1thxnLWLXfqxxBjc2CSkeixa8WKdvzGKkxSmDmGS91XZWAbmkze2zg8eKrhWm0pcYuxU-2SF0zw&s=OaFsDHV98uA3lKyWofGrxHTE98UERlRyOFVxHZH_okQgXBNrc8io1t-cemPoZslf0lfAr2LppCygRlNybprZMaW0_l1iiCx4FzjYrCSj7j9N0EcyA6QmCOSbOx3a5Bn4s_2ccW7s7lcKyiy7haZLGKECuY7cZcdLkflmL-5EA_1gV-FrQkanFDVAqHAhdVKkdpTpEs_pzLA5kSXOSgNPgLDx4dqtoMyACL2iOPUycyp0nDDHUpo2C9pG5cYTTP_kIKRNonMMiDJq97ZNXVTkycehQysCY4EbXAR1A3Eh0ecQmJ0jEqKQ9WiT4xTz-4TjATDbPUZUOX-wltLq6dqIFg&h=oU2ns9yZ82ri-lbymYCDUvG-t7ZKAsFrbTXGtq-qwIA
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/63f797f5-0d09-4673-8122-12fe37aca2a0?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
-      - '76'
+      - '79'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:14 GMT
+      - Tue, 13 Oct 2026 14:11:25 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/locations/westus/shortTermRetentionPolicyOperationResults/ffaf0583-e64f-47a3-b901-222092063ee2?api-version=2024-11-01-preview&t=638900019151374972&c=MIIIrzCCBpegAwIBAgITUQB_nY_WoSbNATDH2QABAH-djzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDQwHhcNMjUwNzE4MTE0ODEyWhcNMjYwMTE0MTE0ODEyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Yf2tzpQe96HmJYXWKDNIrKc9-o37fE5ZS4b0aA-QzeDYNU6SChIwqP2YcbSNanIvEZtyMLND05wziTsehor3TYDGdCUQTvHHMESwVZ_KfUoGcL_A8mkKSxKrnxatUado60utWQNKPx612AzyZrXK16o7OkYiqjeD3g74_notDIhNC7tO7x-bt73jOlCV4zusxXJgPHm3r_2uEhI7JEDW63UZZQLec3BGIMNQ6qeGsmha1hZKDOOJ0TvkFvcCep_8XOCH0cnbG3of4-EoQB7vPWTAYN1IAuf_75kUZFCq0BXRl5XdxWyWnPe9iEj5Zr_xqiVBExfmaRww6UeijHVUCAwEAAaOCBJwwggSYMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHkBggrBgEFBQcBAQSCAdYwggHSMGgGCCsGAQUFBzAChlxodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDEuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDIuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDMuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDQuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDAdBgNVHQ4EFgQUvMJ4Tm18Izes1FcZ2XAEMHzPZp4wDgYDVR0PAQH_BAQDAgWgMIIBNQYDVR0fBIIBLDCCASgwggEkoIIBIKCCARyGQmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DUkwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDEuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDIuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDMuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDQuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwHwYDVR0jBBgwFoAUOXFdqRUQLcTffi9ZbkBNwN_vNpowHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4ICAQDaxLpctX4jhwHu-mzX41_6auhZiKzgsqu6dCEnzG4Zj0DzCBfri-_5qdITCoCAbwxf-slBI3HfVL_NLYzx9O7iO8s4bc6uW6cYI8sk3nUHO5xHWf1cEYoa-XxQ2eSRFBU5Caf-XAjAfjgM-fyhHratIk62VOaqHYQr0M5wtXbWN1g_NNpM3eAfGJgTeuJzIvl-73RuK8VVs71jCs4DP92f74Eiz4mDC1kvxeGGRNkZirdosmarZnOLVe68hDuJCE-4I3qqDZXOYzIghXqhYWcQtztazZ4X8p-vnvW2t-ESKoktRcYl6_nvzCjnePLpH_Vs-Qt1ukHZ23BuCJpjLbVj7HTiaIVXCkYmP-iVpYN8s2ROSp4gBcGadyvBY922M6pMOgB8TAwyCmlAs5glnz4GPHAj47lUO_svkSiLXSpwRReCPkSLOfNJOThuCO8S7IrLGDptqkMHyAIXUVTZTh3PW9UicNi44sC_WkzX9NiAbPuwW5IhT8IzzJr-VcqT8VDCxzblbRv6HQfFVTy1K67ZE119xwAvp6Dk32IQGAOHjeKH6kFABKe0DDu5gttcd_XDHBmtBZ4-IQV8vozB0ioBUqMdKqVOvmF1thxnLWLXfqxxBjc2CSkeixa8WKdvzGKkxSmDmGS91XZWAbmkze2zg8eKrhWm0pcYuxU-2SF0zw&s=mGAYGZ8fsYbjVoyk8c5BY7TqYMAGeEgWTF_rQsmw2vRpkQZ8ln8mwj5Z0gRIdLNTI7pxkt7eUQuX1eZvRz-IY-m6zprS4kNIepmn9tyCofufV3tXPyfW66zNdq-BlaQ16ob8kbzwV2RHULNQxRuoNv1bCihTCDw9vyJI43LltwTKUlbm3m9Yjk9SLj_6IzSRj6EneWxmFx6xppXscxnXprWqlsRDtoGTv_7ucF7yl9WW8KXzFNstt3sHbWXF9zgZjBI8UkwljJ56HtmZNBlqvyDI7XRByF8UxmEeCItmfKGwaNOYrBLPlFt4VDgo9m_PjjkonsoXSHNQybpkcufSxQ&h=u8H7QcxxFwakJa-5REatx3glsYi2caB5Phlur5JHQUs
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyOperationResults/63f797f5-0d09-4673-8122-12fe37aca2a0?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -249,13 +874,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/southindia/5580234c-6ab4-4e56-882d-e60fb6b07fe5
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/9f38c418-d127-4241-8c7a-22dc39a34698
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 26D35AD4101140369754082296929903 Ref B: MAA201060514029 Ref C: 2025-08-05T14:45:12Z'
+      - 'Ref A: F733FB5CD78943FB8639E83806FDC42F Ref B: CWL211060413062 Ref C: 2026-10-13T14:11:25Z'
     status:
       code: 202
       message: Accepted
@@ -265,29 +890,30 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql db str-policy set
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --retention-days --diffbackup-hours
+      - --subscription -g -s -n --retention-days --diffbackup-hours
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/locations/westus/shortTermRetentionPolicyAzureAsyncOperation/ffaf0583-e64f-47a3-b901-222092063ee2?api-version=2024-11-01-preview&t=638900019151062452&c=MIIIrzCCBpegAwIBAgITUQB_nY_WoSbNATDH2QABAH-djzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDQwHhcNMjUwNzE4MTE0ODEyWhcNMjYwMTE0MTE0ODEyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Yf2tzpQe96HmJYXWKDNIrKc9-o37fE5ZS4b0aA-QzeDYNU6SChIwqP2YcbSNanIvEZtyMLND05wziTsehor3TYDGdCUQTvHHMESwVZ_KfUoGcL_A8mkKSxKrnxatUado60utWQNKPx612AzyZrXK16o7OkYiqjeD3g74_notDIhNC7tO7x-bt73jOlCV4zusxXJgPHm3r_2uEhI7JEDW63UZZQLec3BGIMNQ6qeGsmha1hZKDOOJ0TvkFvcCep_8XOCH0cnbG3of4-EoQB7vPWTAYN1IAuf_75kUZFCq0BXRl5XdxWyWnPe9iEj5Zr_xqiVBExfmaRww6UeijHVUCAwEAAaOCBJwwggSYMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHkBggrBgEFBQcBAQSCAdYwggHSMGgGCCsGAQUFBzAChlxodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDEuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDIuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDMuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDQuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDAdBgNVHQ4EFgQUvMJ4Tm18Izes1FcZ2XAEMHzPZp4wDgYDVR0PAQH_BAQDAgWgMIIBNQYDVR0fBIIBLDCCASgwggEkoIIBIKCCARyGQmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DUkwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDEuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDIuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDMuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDQuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwHwYDVR0jBBgwFoAUOXFdqRUQLcTffi9ZbkBNwN_vNpowHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4ICAQDaxLpctX4jhwHu-mzX41_6auhZiKzgsqu6dCEnzG4Zj0DzCBfri-_5qdITCoCAbwxf-slBI3HfVL_NLYzx9O7iO8s4bc6uW6cYI8sk3nUHO5xHWf1cEYoa-XxQ2eSRFBU5Caf-XAjAfjgM-fyhHratIk62VOaqHYQr0M5wtXbWN1g_NNpM3eAfGJgTeuJzIvl-73RuK8VVs71jCs4DP92f74Eiz4mDC1kvxeGGRNkZirdosmarZnOLVe68hDuJCE-4I3qqDZXOYzIghXqhYWcQtztazZ4X8p-vnvW2t-ESKoktRcYl6_nvzCjnePLpH_Vs-Qt1ukHZ23BuCJpjLbVj7HTiaIVXCkYmP-iVpYN8s2ROSp4gBcGadyvBY922M6pMOgB8TAwyCmlAs5glnz4GPHAj47lUO_svkSiLXSpwRReCPkSLOfNJOThuCO8S7IrLGDptqkMHyAIXUVTZTh3PW9UicNi44sC_WkzX9NiAbPuwW5IhT8IzzJr-VcqT8VDCxzblbRv6HQfFVTy1K67ZE119xwAvp6Dk32IQGAOHjeKH6kFABKe0DDu5gttcd_XDHBmtBZ4-IQV8vozB0ioBUqMdKqVOvmF1thxnLWLXfqxxBjc2CSkeixa8WKdvzGKkxSmDmGS91XZWAbmkze2zg8eKrhWm0pcYuxU-2SF0zw&s=OaFsDHV98uA3lKyWofGrxHTE98UERlRyOFVxHZH_okQgXBNrc8io1t-cemPoZslf0lfAr2LppCygRlNybprZMaW0_l1iiCx4FzjYrCSj7j9N0EcyA6QmCOSbOx3a5Bn4s_2ccW7s7lcKyiy7haZLGKECuY7cZcdLkflmL-5EA_1gV-FrQkanFDVAqHAhdVKkdpTpEs_pzLA5kSXOSgNPgLDx4dqtoMyACL2iOPUycyp0nDDHUpo2C9pG5cYTTP_kIKRNonMMiDJq97ZNXVTkycehQysCY4EbXAR1A3Eh0ecQmJ0jEqKQ9WiT4xTz-4TjATDbPUZUOX-wltLq6dqIFg&h=oU2ns9yZ82ri-lbymYCDUvG-t7ZKAsFrbTXGtq-qwIA
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/63f797f5-0d09-4673-8122-12fe37aca2a0?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"name":"ffaf0583-e64f-47a3-b901-222092063ee2","status":"Succeeded","startTime":"2025-08-05T14:45:14.897Z"}'
+      string: '{"name": "63f797f5-0d09-4673-8122-12fe37aca2a0", "status": "InProgress",
+        "startTime": "2026-10-13T14:11:25.983Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '113'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:16 GMT
+      - Tue, 13 Oct 2026 14:11:25 GMT
       expires:
       - '-1'
       pragma:
@@ -299,11 +925,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/westus/24c16521-ca71-4b9e-9ffe-505be1053c7f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/ced393bb-c170-4f90-9843-f9fe809e951f
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 634B9D33DCC242E6B71840DAF7A999EA Ref B: MAA201060516037 Ref C: 2025-08-05T14:45:15Z'
+      - 'Ref A: 83C3FA6AFE1445669B5292B519C89953 Ref B: CWL211060613034 Ref C: 2026-10-13T14:11:26Z'
     status:
       code: 200
       message: OK
@@ -313,29 +939,30 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql db str-policy set
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --retention-days --diffbackup-hours
+      - --subscription -g -s -n --retention-days --diffbackup-hours
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/63f797f5-0d09-4673-8122-12fe37aca2a0?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"properties":{"retentionDays":6,"diffBackupIntervalInHours":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+      string: '{"name": "63f797f5-0d09-4673-8122-12fe37aca2a0", "status": "Succeeded",
+        "startTime": "2026-10-13T14:11:25.983Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '376'
+      - '112'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:17 GMT
+      - Tue, 13 Oct 2026 14:11:41 GMT
       expires:
       - '-1'
       pragma:
@@ -347,11 +974,113 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/southindia/966d3863-bff5-472c-9fd7-6a0ae54f1aed
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/5cc7a2b5-3cd3-4e2f-b65d-d7f52afe8238
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 3562ABFBB162486791E96083F2FB3C9B Ref B: MAA201060513009 Ref C: 2025-08-05T14:45:16Z'
+      - 'Ref A: 6283BF686FDF49068C7E227EE321F258 Ref B: CWL211060413034 Ref C: 2026-10-13T14:11:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --diffbackup-hours
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 6, "diffBackupIntervalInHours": 12,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/636b0350-d0a3-4809-8205-d720a3fe6108
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 7F5CFAABEB0A4016A11F582B436AE997 Ref B: CWL211060413054 Ref C: 2026-10-13T14:11:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 6, "diffBackupIntervalInHours": 12,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/6768e942-f938-4957-9d8e-2751f9e77ed3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 9A3F59915E0F4C8E96B44CB1514BA75A Ref B: CWL211060613023 Ref C: 2026-10-13T14:11:42Z'
     status:
       code: 200
       message: OK
@@ -361,7 +1090,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql db str-policy set
       Connection:
@@ -371,29 +1100,29 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -s -n --retention-days
+      - --subscription -g -s -n --retention-days
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation":"UpdateLogicalDatabase","startTime":"2025-08-05T14:45:20.017Z"}'
+      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T14:11:43.427Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/locations/westus/shortTermRetentionPolicyAzureAsyncOperation/8d4f7582-0d10-42d6-9011-a5c69bd92b22?api-version=2024-11-01-preview&t=638900019201614722&c=MIIIrzCCBpegAwIBAgITUQB_nY_WoSbNATDH2QABAH-djzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDQwHhcNMjUwNzE4MTE0ODEyWhcNMjYwMTE0MTE0ODEyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Yf2tzpQe96HmJYXWKDNIrKc9-o37fE5ZS4b0aA-QzeDYNU6SChIwqP2YcbSNanIvEZtyMLND05wziTsehor3TYDGdCUQTvHHMESwVZ_KfUoGcL_A8mkKSxKrnxatUado60utWQNKPx612AzyZrXK16o7OkYiqjeD3g74_notDIhNC7tO7x-bt73jOlCV4zusxXJgPHm3r_2uEhI7JEDW63UZZQLec3BGIMNQ6qeGsmha1hZKDOOJ0TvkFvcCep_8XOCH0cnbG3of4-EoQB7vPWTAYN1IAuf_75kUZFCq0BXRl5XdxWyWnPe9iEj5Zr_xqiVBExfmaRww6UeijHVUCAwEAAaOCBJwwggSYMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHkBggrBgEFBQcBAQSCAdYwggHSMGgGCCsGAQUFBzAChlxodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDEuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDIuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDMuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDQuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDAdBgNVHQ4EFgQUvMJ4Tm18Izes1FcZ2XAEMHzPZp4wDgYDVR0PAQH_BAQDAgWgMIIBNQYDVR0fBIIBLDCCASgwggEkoIIBIKCCARyGQmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DUkwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDEuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDIuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDMuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDQuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwHwYDVR0jBBgwFoAUOXFdqRUQLcTffi9ZbkBNwN_vNpowHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4ICAQDaxLpctX4jhwHu-mzX41_6auhZiKzgsqu6dCEnzG4Zj0DzCBfri-_5qdITCoCAbwxf-slBI3HfVL_NLYzx9O7iO8s4bc6uW6cYI8sk3nUHO5xHWf1cEYoa-XxQ2eSRFBU5Caf-XAjAfjgM-fyhHratIk62VOaqHYQr0M5wtXbWN1g_NNpM3eAfGJgTeuJzIvl-73RuK8VVs71jCs4DP92f74Eiz4mDC1kvxeGGRNkZirdosmarZnOLVe68hDuJCE-4I3qqDZXOYzIghXqhYWcQtztazZ4X8p-vnvW2t-ESKoktRcYl6_nvzCjnePLpH_Vs-Qt1ukHZ23BuCJpjLbVj7HTiaIVXCkYmP-iVpYN8s2ROSp4gBcGadyvBY922M6pMOgB8TAwyCmlAs5glnz4GPHAj47lUO_svkSiLXSpwRReCPkSLOfNJOThuCO8S7IrLGDptqkMHyAIXUVTZTh3PW9UicNi44sC_WkzX9NiAbPuwW5IhT8IzzJr-VcqT8VDCxzblbRv6HQfFVTy1K67ZE119xwAvp6Dk32IQGAOHjeKH6kFABKe0DDu5gttcd_XDHBmtBZ4-IQV8vozB0ioBUqMdKqVOvmF1thxnLWLXfqxxBjc2CSkeixa8WKdvzGKkxSmDmGS91XZWAbmkze2zg8eKrhWm0pcYuxU-2SF0zw&s=YelxBZJt18eZ6XXvbOKXcmrQcT6nz8h8it0Z1ZIIThn2M8w178o7A7VDcxVU00zUsfggmETm6WAjVSDAUyEeUWMjw2x1ZKtIy3qeaG5hQLGUJCQyw0iq2YFn5a-EigTjpT9FfbTwHi5037T6gTQbC2ckVBnpUTUSa8S0Yn0J0V2RN1xeztiIXOqe5RS6U8mgIQE8Ulg4gO6INcmk4wEj2cuXd6fw6QTeyHD-WAfBtlcsXRgmzH6iw4P2Z1D_xFYsbmIx5o0jfnIgfk7PkW9m11gHaLbhdoVN0IdHBIi9uGgVAeG09sQdLAq6Kbqg30BVZs2ohpj73PtgnmZr0ylm6w&h=gVgdBp1jnAMEtitJZ_MQI1GFzLxTmpeRrjtnZOldrTw
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/4ae5398c-48e3-4555-872b-f18370336006?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
-      - '76'
+      - '79'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:19 GMT
+      - Tue, 13 Oct 2026 14:11:42 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/locations/westus/shortTermRetentionPolicyOperationResults/8d4f7582-0d10-42d6-9011-a5c69bd92b22?api-version=2024-11-01-preview&t=638900019201770979&c=MIIIrzCCBpegAwIBAgITUQB_nY_WoSbNATDH2QABAH-djzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDQwHhcNMjUwNzE4MTE0ODEyWhcNMjYwMTE0MTE0ODEyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Yf2tzpQe96HmJYXWKDNIrKc9-o37fE5ZS4b0aA-QzeDYNU6SChIwqP2YcbSNanIvEZtyMLND05wziTsehor3TYDGdCUQTvHHMESwVZ_KfUoGcL_A8mkKSxKrnxatUado60utWQNKPx612AzyZrXK16o7OkYiqjeD3g74_notDIhNC7tO7x-bt73jOlCV4zusxXJgPHm3r_2uEhI7JEDW63UZZQLec3BGIMNQ6qeGsmha1hZKDOOJ0TvkFvcCep_8XOCH0cnbG3of4-EoQB7vPWTAYN1IAuf_75kUZFCq0BXRl5XdxWyWnPe9iEj5Zr_xqiVBExfmaRww6UeijHVUCAwEAAaOCBJwwggSYMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHkBggrBgEFBQcBAQSCAdYwggHSMGgGCCsGAQUFBzAChlxodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDEuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDIuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDMuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDQuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDAdBgNVHQ4EFgQUvMJ4Tm18Izes1FcZ2XAEMHzPZp4wDgYDVR0PAQH_BAQDAgWgMIIBNQYDVR0fBIIBLDCCASgwggEkoIIBIKCCARyGQmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DUkwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDEuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDIuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDMuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDQuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwHwYDVR0jBBgwFoAUOXFdqRUQLcTffi9ZbkBNwN_vNpowHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4ICAQDaxLpctX4jhwHu-mzX41_6auhZiKzgsqu6dCEnzG4Zj0DzCBfri-_5qdITCoCAbwxf-slBI3HfVL_NLYzx9O7iO8s4bc6uW6cYI8sk3nUHO5xHWf1cEYoa-XxQ2eSRFBU5Caf-XAjAfjgM-fyhHratIk62VOaqHYQr0M5wtXbWN1g_NNpM3eAfGJgTeuJzIvl-73RuK8VVs71jCs4DP92f74Eiz4mDC1kvxeGGRNkZirdosmarZnOLVe68hDuJCE-4I3qqDZXOYzIghXqhYWcQtztazZ4X8p-vnvW2t-ESKoktRcYl6_nvzCjnePLpH_Vs-Qt1ukHZ23BuCJpjLbVj7HTiaIVXCkYmP-iVpYN8s2ROSp4gBcGadyvBY922M6pMOgB8TAwyCmlAs5glnz4GPHAj47lUO_svkSiLXSpwRReCPkSLOfNJOThuCO8S7IrLGDptqkMHyAIXUVTZTh3PW9UicNi44sC_WkzX9NiAbPuwW5IhT8IzzJr-VcqT8VDCxzblbRv6HQfFVTy1K67ZE119xwAvp6Dk32IQGAOHjeKH6kFABKe0DDu5gttcd_XDHBmtBZ4-IQV8vozB0ioBUqMdKqVOvmF1thxnLWLXfqxxBjc2CSkeixa8WKdvzGKkxSmDmGS91XZWAbmkze2zg8eKrhWm0pcYuxU-2SF0zw&s=uIJXF80tY2aWTc8LsysmBmEUjprU6stxMTmYpvp9GXd0eZ5C8gHW8xWXqwFXCS5RXKJgao3WV4cvLAa4_72KOUWY11M5zu8cik6g3lgv7UynmUKnUXWZ73DUuA5nZlfEdPhWeG91CWgyJiY2lwD-Jr06m0juxmX_W5ftfInwTJwWnXevE1tXJwZMAypEb8KWE9YiI8GC0TegOvuT5KmbaQeW3c1P5DP3bGl42QoeuyaOjqsRHu0eK2tO_fhBzIdFy_pZqq0Id5bW-Ifrj-m4cnjLvnKOHTLVtI3e4gj93vsG4vBPRcGBtZZw73XF9JxqgFXXP9_H4Jj7jutzuLMMuw&h=yRLvOKqRCdfg7k9eQlNsCXRoiEMMtucq3mXY2BttARk
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyOperationResults/4ae5398c-48e3-4555-872b-f18370336006?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -403,13 +1132,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/southindia/bd32b957-d1e1-4871-a1e3-fbe80a8b89d0
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/0392753d-e1f1-43f4-980e-913e1777d4f8
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: EC4A018BB0AC4E7F883AED5D310EAD80 Ref B: MAA201060514037 Ref C: 2025-08-05T14:45:18Z'
+      - 'Ref A: 47E4C4A1C07F433C8A5B7BDFFC2A82FE Ref B: CWL211060413036 Ref C: 2026-10-13T14:11:43Z'
     status:
       code: 202
       message: Accepted
@@ -419,29 +1148,30 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql db str-policy set
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --retention-days
+      - --subscription -g -s -n --retention-days
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/locations/westus/shortTermRetentionPolicyAzureAsyncOperation/8d4f7582-0d10-42d6-9011-a5c69bd92b22?api-version=2024-11-01-preview&t=638900019201614722&c=MIIIrzCCBpegAwIBAgITUQB_nY_WoSbNATDH2QABAH-djzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDQwHhcNMjUwNzE4MTE0ODEyWhcNMjYwMTE0MTE0ODEyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM4Yf2tzpQe96HmJYXWKDNIrKc9-o37fE5ZS4b0aA-QzeDYNU6SChIwqP2YcbSNanIvEZtyMLND05wziTsehor3TYDGdCUQTvHHMESwVZ_KfUoGcL_A8mkKSxKrnxatUado60utWQNKPx612AzyZrXK16o7OkYiqjeD3g74_notDIhNC7tO7x-bt73jOlCV4zusxXJgPHm3r_2uEhI7JEDW63UZZQLec3BGIMNQ6qeGsmha1hZKDOOJ0TvkFvcCep_8XOCH0cnbG3of4-EoQB7vPWTAYN1IAuf_75kUZFCq0BXRl5XdxWyWnPe9iEj5Zr_xqiVBExfmaRww6UeijHVUCAwEAAaOCBJwwggSYMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHkBggrBgEFBQcBAQSCAdYwggHSMGgGCCsGAQUFBzAChlxodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDEuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDIuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDMuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDBYBggrBgEFBQcwAoZMaHR0cDovL2NybDQuYW1lLmdibC9haWEvbWVsMDFwa2lpbnRjYTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNydDAdBgNVHQ4EFgQUvMJ4Tm18Izes1FcZ2XAEMHzPZp4wDgYDVR0PAQH_BAQDAgWgMIIBNQYDVR0fBIIBLDCCASgwggEkoIIBIKCCARyGQmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DUkwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDEuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDIuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDMuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybIY0aHR0cDovL2NybDQuYW1lLmdibC9jcmwvQU1FJTIwSW5mcmElMjBDQSUyMDA0KDEpLmNybDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwHwYDVR0jBBgwFoAUOXFdqRUQLcTffi9ZbkBNwN_vNpowHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4ICAQDaxLpctX4jhwHu-mzX41_6auhZiKzgsqu6dCEnzG4Zj0DzCBfri-_5qdITCoCAbwxf-slBI3HfVL_NLYzx9O7iO8s4bc6uW6cYI8sk3nUHO5xHWf1cEYoa-XxQ2eSRFBU5Caf-XAjAfjgM-fyhHratIk62VOaqHYQr0M5wtXbWN1g_NNpM3eAfGJgTeuJzIvl-73RuK8VVs71jCs4DP92f74Eiz4mDC1kvxeGGRNkZirdosmarZnOLVe68hDuJCE-4I3qqDZXOYzIghXqhYWcQtztazZ4X8p-vnvW2t-ESKoktRcYl6_nvzCjnePLpH_Vs-Qt1ukHZ23BuCJpjLbVj7HTiaIVXCkYmP-iVpYN8s2ROSp4gBcGadyvBY922M6pMOgB8TAwyCmlAs5glnz4GPHAj47lUO_svkSiLXSpwRReCPkSLOfNJOThuCO8S7IrLGDptqkMHyAIXUVTZTh3PW9UicNi44sC_WkzX9NiAbPuwW5IhT8IzzJr-VcqT8VDCxzblbRv6HQfFVTy1K67ZE119xwAvp6Dk32IQGAOHjeKH6kFABKe0DDu5gttcd_XDHBmtBZ4-IQV8vozB0ioBUqMdKqVOvmF1thxnLWLXfqxxBjc2CSkeixa8WKdvzGKkxSmDmGS91XZWAbmkze2zg8eKrhWm0pcYuxU-2SF0zw&s=YelxBZJt18eZ6XXvbOKXcmrQcT6nz8h8it0Z1ZIIThn2M8w178o7A7VDcxVU00zUsfggmETm6WAjVSDAUyEeUWMjw2x1ZKtIy3qeaG5hQLGUJCQyw0iq2YFn5a-EigTjpT9FfbTwHi5037T6gTQbC2ckVBnpUTUSa8S0Yn0J0V2RN1xeztiIXOqe5RS6U8mgIQE8Ulg4gO6INcmk4wEj2cuXd6fw6QTeyHD-WAfBtlcsXRgmzH6iw4P2Z1D_xFYsbmIx5o0jfnIgfk7PkW9m11gHaLbhdoVN0IdHBIi9uGgVAeG09sQdLAq6Kbqg30BVZs2ohpj73PtgnmZr0ylm6w&h=gVgdBp1jnAMEtitJZ_MQI1GFzLxTmpeRrjtnZOldrTw
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/4ae5398c-48e3-4555-872b-f18370336006?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"name":"8d4f7582-0d10-42d6-9011-a5c69bd92b22","status":"Succeeded","startTime":"2025-08-05T14:45:20.017Z"}'
+      string: '{"name": "4ae5398c-48e3-4555-872b-f18370336006", "status": "InProgress",
+        "startTime": "2026-10-13T14:11:43.427Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '113'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:20 GMT
+      - Tue, 13 Oct 2026 14:11:43 GMT
       expires:
       - '-1'
       pragma:
@@ -453,11 +1183,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/westus/20999639-0ac8-4b87-b197-a970e01de17f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/2b924d09-afc2-49c0-bb42-09ce44d9cb03
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: D2DE9966C21C48BCAE30016DF601DC0E Ref B: MAA201060515035 Ref C: 2025-08-05T14:45:20Z'
+      - 'Ref A: 7002DE7B868A41F7977BF54EAF156FA9 Ref B: CWL211060413036 Ref C: 2026-10-13T14:11:43Z'
     status:
       code: 200
       message: OK
@@ -467,29 +1197,30 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql db str-policy set
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -s -n --retention-days
+      - --subscription -g -s -n --retention-days
       User-Agent:
-      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.0 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/4ae5398c-48e3-4555-872b-f18370336006?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"properties":{"retentionDays":5,"diffBackupIntervalInHours":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_donnotdelete/providers/Microsoft.Sql/servers/clitestserverdonotdelete/databases/clitestdatabase/backupShortTermRetentionPolicies/default","name":"default","type":"Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+      string: '{"name": "4ae5398c-48e3-4555-872b-f18370336006", "status": "Succeeded",
+        "startTime": "2026-10-13T14:11:43.427Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '376'
+      - '112'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 05 Aug 2025 14:45:22 GMT
+      - Tue, 13 Oct 2026 14:11:59 GMT
       expires:
       - '-1'
       pragma:
@@ -501,11 +1232,839 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ddad7356-c68c-455e-9513-c3d44d92a933/westus/d2c457bc-d0af-4b5c-bc0f-036db4b8179d
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/2e265788-bc5f-41c0-a6b9-106b9af8d988
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: C3E4E12480B541F382AF5B8FEB65EA88 Ref B: MAA201060515019 Ref C: 2025-08-05T14:45:21Z'
+      - 'Ref A: AC960C4593704CE6A35F1F43E0B47790 Ref B: CWL211060613062 Ref C: 2026-10-13T14:11:59Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 5, "diffBackupIntervalInHours": 12,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/46381a6d-6e1c-47ff-83dd-93444c546894
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 44787135AE824F79AF7E28ABE76EC689 Ref B: CWL211060613031 Ref C: 2026-10-13T14:11:59Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 5, "diffBackupIntervalInHours": 12,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:11:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/896d1926-58dc-400f-ae98-3068835d62d4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 9C4B6B7226EB4F6B9EE8D8026DE87300 Ref B: CWL211060613060 Ref C: 2026-10-13T14:12:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"diffBackupIntervalInHours": 24}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n --diffbackup-hours
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T14:12:01.003Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/ba491a2c-f3af-4f50-94cd-0241b453f4fb?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      cache-control:
+      - no-cache
+      content-length:
+      - '79'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:00 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyOperationResults/ba491a2c-f3af-4f50-94cd-0241b453f4fb?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/abeae054-d323-4a0c-a0b9-27d98c039cf3
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: FA9B681FDFE34103834F349D600D6366 Ref B: CWL211060613034 Ref C: 2026-10-13T14:12:00Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --diffbackup-hours
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/ba491a2c-f3af-4f50-94cd-0241b453f4fb?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "ba491a2c-f3af-4f50-94cd-0241b453f4fb", "status": "InProgress",
+        "startTime": "2026-10-13T14:12:01.003Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '113'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/6444a4cc-288d-4f51-8798-1eb3638d8880
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 44B11007746F48E297476E7F4E2EC4E8 Ref B: CWL211060413040 Ref C: 2026-10-13T14:12:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --diffbackup-hours
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/ba491a2c-f3af-4f50-94cd-0241b453f4fb?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "ba491a2c-f3af-4f50-94cd-0241b453f4fb", "status": "Succeeded",
+        "startTime": "2026-10-13T14:12:01.003Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/15a75077-ebde-4d7e-88c7-2a647bf2c462
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: ADDB97611B1C45BE8A21D4A1E6EE06AE Ref B: CWL211060413040 Ref C: 2026-10-13T14:12:16Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --diffbackup-hours
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 5, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/43348712-e538-4784-bb29-38cf54fae231
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 0E8D45FF60434876AA4A7C5E99E614BC Ref B: CWL211060613052 Ref C: 2026-10-13T14:12:17Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 5, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/dca51fc7-8a54-41b9-b287-3f3f2947fde5
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 4CC3D98BD7174E96875BF327D4F50D23 Ref B: CWL211060613025 Ref C: 2026-10-13T14:12:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"retentionDays": 7, "lockImmutability": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '63'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --lock-immutability
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T14:12:19.01Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/8fb12a7e-bf41-4ebe-b8cb-8059076934d3?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:19 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyOperationResults/8fb12a7e-bf41-4ebe-b8cb-8059076934d3?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/990fc58e-75e4-4ee3-9c83-4f90cd382371
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: D52FAD17791D45DC81E0E8422BA06929 Ref B: CWL211060413060 Ref C: 2026-10-13T14:12:18Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --lock-immutability
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/8fb12a7e-bf41-4ebe-b8cb-8059076934d3?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "8fb12a7e-bf41-4ebe-b8cb-8059076934d3", "status": "InProgress",
+        "startTime": "2026-10-13T14:12:19.01Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/9b4769b3-2218-4c19-b451-9dcaa3c997f6
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 30F7457BB5554C9C87009A64E2631E23 Ref B: CWL211060413054 Ref C: 2026-10-13T14:12:19Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --lock-immutability
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/8fb12a7e-bf41-4ebe-b8cb-8059076934d3?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "8fb12a7e-bf41-4ebe-b8cb-8059076934d3", "status": "Succeeded",
+        "startTime": "2026-10-13T14:12:19.01Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '111'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/9f850533-997a-41b1-8e55-e6d7f2b97ea3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: FB2B08448B5942A7AA6F7B2B3CC1D5B0 Ref B: CWL211060413031 Ref C: 2026-10-13T14:12:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --lock-immutability
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/114851c2-9799-46ba-9ef0-feb16fd042ec
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A0A5C4FD4E35436C88F6EF7837379FDC Ref B: CWL211060413029 Ref C: 2026-10-13T14:12:37Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/6605fbb7-194b-416b-865f-f74f53e7f213
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 700C8FDED79D4E89ACD1EF94B370FE37 Ref B: CWL211060413025 Ref C: 2026-10-13T14:12:37Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"retentionDays": 8}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy set
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '36'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n --retention-days --no-wait
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"operation": "UpdateLogicalDatabase", "startTime": "2026-10-13T14:12:38.473Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyAzureAsyncOperation/4893eb45-4def-4fcf-bc53-1240847645a0?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      cache-control:
+      - no-cache
+      content-length:
+      - '79'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westus2/shortTermRetentionPolicyOperationResults/4893eb45-4def-4fcf-bc53-1240847645a0?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/bd661521-3e52-4f34-b1c0-b1557aebccf4
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: D39E73311CC14DAE8E5B569589A31171 Ref B: CWL211060413054 Ref C: 2026-10-13T14:12:38Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - resource wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --ids --api-version --interval --timeout --custom
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 7, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/373c2298-6836-4691-85a9-7eb66abf1aa1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: C866899A977748B2A511DBDE0DFB08E8 Ref B: CWL211060613029 Ref C: 2026-10-13T14:12:38Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - resource wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --ids --api-version --interval --timeout --custom
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/71fb5fc1-4837-450c-aeba-ccb350d8a101
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: ECF15361B06C483B93F604D2AF9D9DBF Ref B: CWL211060413031 Ref C: 2026-10-13T14:12:44Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql db str-policy show
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --subscription -g -s -n
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 8, "diffBackupIntervalInHours": 24,
+        "immutabilityStatus": "Disabled"}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/servers/strtestserver/databases/clisqldbstr000001/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 13 Oct 2026 14:12:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westus2/47ed2c4a-1f6b-4184-aee6-433806f9ab5e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: C7696F950C3A48B7AB674F9F658C8F6E Ref B: CWL211060613060 Ref C: 2026-10-13T14:12:44Z'
     status:
       code: 200
       message: OK

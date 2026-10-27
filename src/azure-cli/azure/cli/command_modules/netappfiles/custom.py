@@ -8,7 +8,7 @@
 from enum import Enum
 
 from knack.log import get_logger
-from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.azclierror import ValidationError, MutuallyExclusiveArgumentError
 from azure.cli.core.aaz import has_value, AAZJsonSelector
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
@@ -183,34 +183,227 @@ class ActiveDirectoryList(_ActiveDirectoryList):
 
 
 # region Pool
+# Allowed pool sizes per service: 512 GiB or any positive multiple of 1 TiB.
+_POOL_MIN_BYTES = 512 * gib_scale  # 549755813888
+_POOL_TIB_BYTES = tib_scale        # 1099511627776
+
+# AFEC feature gating the 512 GiB minimum pool size.
+_POOL_HALF_TIB_FEATURE = "Microsoft.NetApp/ANFHalfTiBPoolSize"
+_POOL_HALF_TIB_HINT = (
+    "Provisioning a 512 GiB (0.5 TiB) pool requires the AFEC feature "
+    "'{feature}' to be registered on your subscription. Register it with: "
+    "az feature register --namespace Microsoft.NetApp "
+    "--name ANFHalfTiBPoolSize"
+).format(feature=_POOL_HALF_TIB_FEATURE)
+
+
+def _augment_pool_size_error(error, requested_bytes):
+    """If the service rejected a sub-1-TiB pool size, append an AFEC hint to
+    the error message. Returns the (possibly mutated) error for the caller to raise."""
+    if requested_bytes is None or requested_bytes >= _POOL_TIB_BYTES:
+        return error
+    msg = str(getattr(error, "message", "")) or str(error)
+    # Idempotent: result() calls wait() internally, so both patched methods may
+    # see the same exception. Skip if the hint is already present.
+    if _POOL_HALF_TIB_FEATURE in msg:
+        return error
+    if "InvalidValueReceivedFor" in msg or "Pool.Size" in msg or "tebibyte" in msg.lower():
+        hint = " Hint: {}".format(_POOL_HALF_TIB_HINT)
+        new_msg = (msg + hint) if msg else hint
+        try:
+            error.message = new_msg
+        except AttributeError:
+            pass
+        # HttpResponseError.__str__ reads from args[0] (set by Exception.__init__),
+        # not from .message, so update args as well so the hint surfaces to users.
+        try:
+            if error.args:
+                error.args = (new_msg,) + tuple(error.args[1:])
+            else:
+                error.args = (new_msg,)
+        except (AttributeError, TypeError):
+            pass
+    return error
+
+
+def _wrap_pool_poller(poller, requested_bytes):
+    """Monkey-patch ``poller.result`` / ``poller.wait`` to augment AFEC-related
+    service errors with an actionable hint. Returns the same poller instance so
+    the CLI's ``isinstance(result, poller_classes())`` check still recognizes it."""
+    if poller is None:
+        return poller
+    original_result = poller.result
+    original_wait = poller.wait
+
+    def result(timeout=None):
+        try:
+            return original_result(timeout=timeout)
+        except Exception as ex:  # pylint: disable=broad-except
+            _augment_pool_size_error(ex, requested_bytes)
+            raise
+
+    def wait(timeout=None):
+        try:
+            return original_wait(timeout=timeout)
+        except Exception as ex:  # pylint: disable=broad-except
+            _augment_pool_size_error(ex, requested_bytes)
+            raise
+
+    poller.result = result
+    poller.wait = wait
+    return poller
+
+
+def _resolve_pool_size_bytes(args, default_bytes=None):
+    """Resolve and validate the pool size in bytes from --size (TiB float) or --size-in-bytes.
+
+    Returns the resolved byte value, or None if neither was supplied and no default provided.
+    Raises MutuallyExclusiveArgumentError if both are supplied, ValidationError if the
+    resulting bytes value is not 512 GiB and not a positive multiple of 1 TiB.
+    """
+    size_set = has_value(args.size_tib)
+    bytes_set = has_value(args.size_in_bytes)
+    if size_set and bytes_set:
+        raise MutuallyExclusiveArgumentError(
+            "Specify either --size (TiB) or --size-in-bytes, not both.")
+
+    if bytes_set:
+        bytes_val = int(args.size_in_bytes.to_serialized_data())
+    elif size_set:
+        bytes_val = int(round(float(args.size_tib.to_serialized_data()) * tib_scale))
+    elif default_bytes is not None:
+        bytes_val = default_bytes
+    else:
+        return None
+
+    if bytes_val != _POOL_MIN_BYTES and (bytes_val <= 0 or bytes_val % _POOL_TIB_BYTES != 0):
+        raise ValidationError(
+            "Invalid pool size {} bytes. Allowed values are 549755813888 (512 GiB) "
+            "or a positive multiple of 1099511627776 (1 TiB). When using --size, "
+            "valid values are 0.5 or any positive integer number of TiB.".format(bytes_val))
+
+    return bytes_val
+
+
+def _customize_pool_size_args(args_schema, *, on_update):
+    """Hide aaz int `size` from the CLI and expose user-facing `--size` (float TiB) and
+    `--size-in-bytes` (int). The aaz int `size` field is preserved for body serialization
+    and gets populated by pre_operations.
+    """
+
+    # TODO: 0.5 sized pools are currently preview only and gated by AFEC, so we are not advertising the float `--size` arg until
+    # the feature is more widely available. For now, users can use `--size-in-bytes 549755813888` to get a 512 GiB pool.
+    # When we do enable the `--size` arg, we should set its default to 4 (TiB) to preserve existing behavior where omitting size defaults to 4 TiB.
+
+    from azure.cli.core.aaz import AAZIntArg, AAZFloatArg, AAZFloatArgFormat
+
+    # # Keep aaz `size` AAZIntArg for body serialization but hide it from the CLI surface.
+    args_schema.size._registered = False
+    args_schema.size._required = False
+    # # Drop the alias so we can reuse --size for our float arg.
+    args_schema._fields_alias_map.pop("--size", None)
+
+    args_schema.size_tib = AAZFloatArg(
+        options=["--size"],
+        arg_group="Properties",
+        help="Provisioned size of the pool. Must be an integer number of tebibytes in multiples of 4. "
+             "Use either --size or --size-in-bytes, not both.",
+        nullable=on_update,
+        fmt=AAZFloatArgFormat(minimum=0.5),
+    )
+    args_schema.size_in_bytes = AAZIntArg(
+        options=["--size-in-bytes"],
+        arg_group="Properties",
+        help="Provisioned size of the pool (in bytes). Allowed values are in 1TiB chunks (value must be multiple of 1099511627776). "
+             "Use either --size or --size-in-bytes, not both.",
+        nullable=on_update,
+    )
+
+    # args_schema.size_tib = AAZFloatArg(
+    #     options=["--size"],
+    #     arg_group="Properties",
+    #     help="Provisioned size of the pool in tebibytes (TiB). Use 0.5 for the 512 GiB minimum; "
+    #          "otherwise an integer multiple of 1 TiB. Use either --size or --size-in-bytes, not both.",
+    #     nullable=on_update,
+    #     fmt=AAZFloatArgFormat(minimum=0.5),
+    # )
+    # args_schema.size_in_bytes = AAZIntArg(
+    #     options=["--size-in-bytes"],
+    #     arg_group="Properties",
+    #     help="Provisioned size of the pool in bytes. Allowed values: 549755813888 (512 GiB) "
+    #          "or any positive multiple of 1099511627776 (1 TiB). "
+    #          "Use either --size or --size-in-bytes, not both.",
+    #     nullable=on_update,
+    # )
+
+
+def _resolved_pool_bytes(cmd):
+    """Return the resolved aaz `size` value (bytes) from a Pool command instance,
+    or None if ctx/args have not been initialized yet or `size` is unset."""
+    ctx = getattr(cmd, "ctx", None)
+    if ctx is None or getattr(ctx, "args", None) is None:
+        return None
+    size_arg = getattr(ctx.args, "size", None)
+    if size_arg is None or not has_value(size_arg):
+        return None
+    return size_arg.to_serialized_data()
+
+
 class PoolCreate(_PoolCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-
+        _customize_pool_size_args(args_schema, on_update=False)
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        # RP expects bytes but CLI allows integer TiBs for ease of use
-        logger.debug("ANF log: PoolCreate: size: %s", args.size)
-        if has_value(args.size):
-            args.size = int(args.size.to_serialized_data()) * tib_scale
+        # RP expects bytes; CLI accepts TiB (float) via --size or raw bytes via --size-in-bytes.
+        logger.debug("ANF log: PoolCreate: size_tib: %s, size_in_bytes: %s",
+                     args.size_tib, args.size_in_bytes)
+        # Default to 4 TiB on create when nothing supplied (preserves prior behavior).
+        bytes_val = _resolve_pool_size_bytes(args, default_bytes=4 * tib_scale)
+        args.size = bytes_val
+
+    def _handler(self, command_args):
+        # super()._handler initializes self.ctx and (in --no-wait path) runs the
+        # first LRO step synchronously, so service rejections (e.g. AFEC-gated
+        # 0.5 TiB) can be raised here before we get a poller to wrap.
+        try:
+            poller = super()._handler(command_args)
+        except Exception as ex:  # pylint: disable=broad-except
+            raise _augment_pool_size_error(ex, _resolved_pool_bytes(self))
+        if poller is None:
+            return poller  # --no-wait path (no exception)
+        return _wrap_pool_poller(poller, _resolved_pool_bytes(self))
 
 
 class PoolUpdate(_PoolUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-
+        _customize_pool_size_args(args_schema, on_update=True)
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        # RP expects bytes but CLI allows integer TiBs for ease of use
-        logger.debug("ANF log: PoolUpdate: size: %s", args.size)
-        if has_value(args.size):
-            args.size = int(args.size.to_serialized_data()) * tib_scale
+        # RP expects bytes; CLI accepts TiB (float) via --size or raw bytes via --size-in-bytes.
+        logger.debug("ANF log: PoolUpdate: size_tib: %s, size_in_bytes: %s",
+                     args.size_tib, args.size_in_bytes)
+        # No default on update: only set args.size if the user supplied one of the two args.
+        bytes_val = _resolve_pool_size_bytes(args, default_bytes=None)
+        if bytes_val is not None:
+            args.size = bytes_val
+
+    def _handler(self, command_args):
+        # See PoolCreate._handler for why we wrap super() too.
+        try:
+            poller = super()._handler(command_args)
+        except Exception as ex:  # pylint: disable=broad-except
+            raise _augment_pool_size_error(ex, _resolved_pool_bytes(self))
+        if poller is None:
+            return poller
+        return _wrap_pool_poller(poller, _resolved_pool_bytes(self))
 
 # endregion
 

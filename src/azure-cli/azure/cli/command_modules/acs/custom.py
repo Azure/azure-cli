@@ -15,6 +15,7 @@ from .aaz.latest.aks.safeguards._update import Update
 from .aaz.latest.aks.safeguards._create import Create
 import base64
 import errno
+import hashlib
 import io
 import json
 import os
@@ -26,6 +27,7 @@ import ssl
 import stat
 import subprocess
 import sys
+import tarfile
 import tempfile
 import threading
 import time
@@ -61,6 +63,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
+    CONST_NODEPOOL_MODE_MACHINES,
     CONST_NODEPOOL_MODE_USER,
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_ROTATION_POLL_INTERVAL,
@@ -68,6 +71,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_SECRET_ROTATION_ENABLED,
     CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_SSH_ACCESS_LOCALUSER,
     CONST_VIRTUAL_NODE_ADDON_NAME,
     CONST_VIRTUAL_NODE_SUBNET_NAME,
     DecoratorEarlyExitException,
@@ -89,6 +93,7 @@ from azure.cli.command_modules.acs.addonconfiguration import (
     add_virtual_node_role_assignment,
     ensure_container_insights_for_monitoring,
     ensure_default_log_analytics_workspace_for_monitoring,
+    warn_on_legacy_monitoring_auth,
 )
 from azure.cli.core._profile import Profile
 from azure.cli.core.azclierror import (
@@ -352,8 +357,14 @@ def _aks_browse(
         return return_msg
 
     # otherwise open the kube-dashboard addon
-    if not which('kubectl'):
+    # Resolve kubectl to an absolute path from PATH so subprocess does not
+    # fall back to searching the current working directory (Windows
+    # CreateProcess), which could execute a repo-controlled kubectl(.exe)
+    # against the temporary kubeconfig.
+    kubectl_path = which('kubectl')
+    if not kubectl_path:
         raise FileOperationError('Can not find kubectl executable in PATH')
+    kubectl_path = os.path.abspath(kubectl_path)
 
     fd, browse_path = tempfile.mkstemp()
     try:
@@ -364,7 +375,7 @@ def _aks_browse(
         try:
             dashboard_pod = subprocess.check_output(
                 [
-                    "kubectl",
+                    kubectl_path,
                     "get",
                     "pods",
                     "--kubeconfig",
@@ -394,7 +405,7 @@ def _aks_browse(
         try:
             dashboard_port = subprocess.check_output(
                 [
-                    "kubectl",
+                    kubectl_path,
                     "get",
                     "pods",
                     "--kubeconfig",
@@ -456,7 +467,7 @@ def _aks_browse(
             try:
                 subprocess.check_output(
                     [
-                        "kubectl",
+                        kubectl_path,
                         "--kubeconfig",
                         browse_path,
                         "proxy",
@@ -478,7 +489,7 @@ def _aks_browse(
                         logger.warning(
                             'The "--listen-address" argument will be ignored.')
                     try:
-                        subprocess.call(["kubectl", "--kubeconfig",
+                        subprocess.call([kubectl_path, "--kubeconfig",
                                         browse_path, "proxy", "--port", listen_port], timeout=timeout)
                     except subprocess.TimeoutExpired:
                         logger.warning(
@@ -875,7 +886,11 @@ def aks_create(
     load_balancer_idle_timeout=None,
     load_balancer_backend_pool_type=None,
     nat_gateway_managed_outbound_ip_count=None,
+    nat_gateway_managed_outbound_ipv6_count=None,
     nat_gateway_idle_timeout=None,
+    nat_gateway_sku=None,
+    nat_gateway_outbound_ip_ids=None,
+    nat_gateway_outbound_ip_prefix_ids=None,
     outbound_type=None,
     network_plugin=None,
     network_plugin_mode=None,
@@ -923,6 +938,7 @@ def aks_create(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    kms_infrastructure_encryption=None,
     enable_image_cleaner=False,
     image_cleaner_interval_hours=None,
     enable_keda=False,
@@ -948,6 +964,20 @@ def aks_create(
     data_collection_settings=None,
     ampls_resource_id=None,
     enable_high_log_scale_mode=None,
+    # azure monitor logs (container insights on the azure monitor profile)
+    enable_azure_monitor_logs=False,
+    syslog_port=None,
+    enable_prometheus_metrics_scraping=False,
+    disable_prometheus_metrics_scraping=False,
+    # opentelemetry
+    enable_opentelemetry_metrics=False,
+    disable_opentelemetry_metrics=False,
+    opentelemetry_metrics_port_http=None,
+    opentelemetry_metrics_port_grpc=None,
+    enable_opentelemetry_logs_traces=False,
+    disable_opentelemetry_logs_traces=False,
+    opentelemetry_logs_traces_port_http=None,
+    opentelemetry_logs_traces_port_grpc=None,
     aci_subnet_name=None,
     appgw_name=None,
     appgw_subnet_cidr=None,
@@ -1008,6 +1038,7 @@ def aks_create(
     ksm_metric_annotations_allow_list=None,
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
+    enable_control_plane_metrics=False,
     enable_azure_monitor_app_monitoring=False,
     # azure container storage
     enable_azure_container_storage=None,
@@ -1044,6 +1075,10 @@ def aks_create(
     enable_app_routing_istio=False,
     # gateway api
     enable_gateway_api=False,
+    # user-defined scheduler configuration
+    enable_upstream_kubescheduler_user_configuration=False,
+    # ssh access
+    ssh_access=CONST_SSH_ACCESS_LOCALUSER,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1052,8 +1087,8 @@ def aks_create(
     existing_mc = None
     try:
         existing_mc = client.get(resource_group_name, name)
-    # pylint: disable=broad-except
-    except Exception as ex:
+
+    except Exception as ex:  # pylint: disable=broad-exception-caught
         logger.debug("failed to get cluster, error: %s", ex)
     if existing_mc:
         raise ClientRequestError(
@@ -1103,7 +1138,11 @@ def aks_update(
     load_balancer_backend_pool_type=None,
     load_balancer_sku=None,
     nat_gateway_managed_outbound_ip_count=None,
+    nat_gateway_managed_outbound_ipv6_count=None,
     nat_gateway_idle_timeout=None,
+    nat_gateway_sku=None,
+    nat_gateway_outbound_ip_ids=None,
+    nat_gateway_outbound_ip_prefix_ids=None,
     outbound_type=None,
     auto_upgrade_channel=None,
     node_os_upgrade_channel=None,
@@ -1153,6 +1192,7 @@ def aks_update(
     azure_keyvault_kms_key_id=None,
     azure_keyvault_kms_key_vault_network_access=None,
     azure_keyvault_kms_key_vault_resource_id=None,
+    kms_infrastructure_encryption=None,
     enable_image_cleaner=False,
     disable_image_cleaner=False,
     image_cleaner_interval_hours=None,
@@ -1209,8 +1249,30 @@ def aks_update(
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
     disable_azure_monitor_metrics=False,
+    enable_control_plane_metrics=False,
+    disable_control_plane_metrics=False,
     enable_azure_monitor_app_monitoring=False,
     disable_azure_monitor_app_monitoring=False,
+    # azure monitor logs (container insights on the azure monitor profile)
+    enable_azure_monitor_logs=False,
+    disable_azure_monitor_logs=False,
+    workspace_resource_id=None,
+    enable_msi_auth_for_monitoring=None,
+    enable_syslog=None,
+    data_collection_settings=None,
+    ampls_resource_id=None,
+    syslog_port=None,
+    enable_prometheus_metrics_scraping=False,
+    disable_prometheus_metrics_scraping=False,
+    # opentelemetry
+    enable_opentelemetry_metrics=False,
+    disable_opentelemetry_metrics=False,
+    opentelemetry_metrics_port_http=None,
+    opentelemetry_metrics_port_grpc=None,
+    enable_opentelemetry_logs_traces=False,
+    disable_opentelemetry_logs_traces=False,
+    opentelemetry_logs_traces_port_http=None,
+    opentelemetry_logs_traces_port_grpc=None,
     # azure container storage
     enable_azure_container_storage=None,
     disable_azure_container_storage=None,
@@ -1245,6 +1307,9 @@ def aks_update(
     # gateway api
     enable_gateway_api=False,
     disable_gateway_api=False,
+    # user-defined scheduler configuration
+    enable_upstream_kubescheduler_user_configuration=False,
+    disable_upstream_kubescheduler_user_configuration=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1311,6 +1376,10 @@ def aks_upgrade(cmd,
             if vmas_cluster:
                 raise CLIError('This cluster is using AvailabilitySet. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets or VirtualMachines cluster.')
+            # Skip Machines mode pools to avoid a known client-side error: these pools are containers of individual machines and do not support node image version upgrade.
+            if (agent_pool_profile.mode or "").lower() == CONST_NODEPOOL_MODE_MACHINES.lower():
+                logger.warning("Skipping node image upgrade for agent pool '%s': Machines mode pools do not support node image version upgrade.", agent_pool_profile.name)
+                continue
             agent_pool_client = cf_agent_pools(cmd.cli_ctx)
             _upgrade_single_nodepool_image_version(True, agent_pool_client,
                                                    resource_group_name, name, agent_pool_profile.name)
@@ -1372,6 +1441,10 @@ def aks_upgrade(cmd,
 
     if upgrade_all:
         for agent_profile in (instance.agent_pool_profiles or []):
+            # Skip Machines mode pools to avoid a known client-side error: these pools are containers of individual machines and do not support Kubernetes version upgrade.
+            if (agent_profile.mode or "").lower() == CONST_NODEPOOL_MODE_MACHINES.lower():
+                logger.warning("Skipping Kubernetes version upgrade for agent pool '%s': Machines mode pools do not support Kubernetes version upgrade.", agent_profile.name)
+                continue
             agent_profile.orchestrator_version = kubernetes_version
             agent_profile.creation_data = None
 
@@ -1539,14 +1612,67 @@ def _remove_nulls(managed_clusters):
 
 
 # pylint: disable=line-too-long
-def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
+def _validate_addons_for_disable(instance, addons):
+    """Validate every addon name and installed state before any cleanup runs.
+
+    aks_disable_addons deletes the monitoring data collection rule association before it builds the
+    updated cluster payload. _update_addons rejects unknown or not-installed addons, but by then the
+    association is already gone, and the raised error skips the cluster PUT — leaving monitoring
+    enabled on the cluster with nothing for the agent to collect into. Fail here instead, before
+    anything is deleted. The checks mirror _update_addons so the two cannot drift.
+    """
+    addon_profiles = instance.addon_profiles or {}
+    installed = {key.lower() for key in addon_profiles}
+    for addon_arg in addons.split(','):
+        if addon_arg not in ADDONS:
+            raise CLIError("Invalid addon name: {}.".format(addon_arg))
+        addon = ADDONS[addon_arg]
+        if addon == CONST_VIRTUAL_NODE_ADDON_NAME:
+            # Only Linux is supported for now, matching _update_addons.
+            addon += 'Linux'
+        # kube-dashboard is exempt: _update_addons synthesizes a disabled profile for it rather
+        # than failing, so disabling it on a cluster that never had it is not an error.
+        if addon.lower() not in installed and addon != CONST_KUBE_DASHBOARD_ADDON_NAME:
+            raise CLIError("The addon {} is not installed.".format(addon))
+
+
+def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False, yes=False):
+    from azure.cli.command_modules.acs.managed_cluster_decorator import (
+        _is_opentelemetry_logs_traces_enabled,
+        _reset_container_insights_to_defaults,
+    )
+
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     monitoring_addon_key = get_monitoring_addon_key(
         instance.addon_profiles, CONST_MONITORING_ADDON_NAME
     )
+
+    # Every addon is validated up front, because the cleanup below is destructive and a later
+    # failure would skip the cluster PUT that is supposed to accompany it.
+    _validate_addons_for_disable(instance, addons)
+
+    disabling_monitoring = CONST_MONITORING_ADDON_NAME in [
+        ADDONS.get(addon) for addon in addons.split(",")
+    ]
+
+    # OpenTelemetry logs and traces are collected by the Container Insights agent, so disabling the
+    # monitoring addon necessarily turns them off too. The confirmation is taken before any cleanup
+    # runs, otherwise declining the prompt would leave the DCR association already deleted.
+    opentelemetry_logs_traces_enabled = (
+        disabling_monitoring and _is_opentelemetry_logs_traces_enabled(instance)
+    )
+    if opentelemetry_logs_traces_enabled and not yes:
+        msg = (
+            "OpenTelemetry logs and traces are enabled on this cluster and are collected by "
+            "Azure Monitor logs. Disabling the monitoring addon will also disable OpenTelemetry "
+            "logs and traces. Do you want to continue?"
+        )
+        if not prompt_y_n(msg, default="n"):
+            return None
+
     try:
-        if addons == "monitoring" and monitoring_addon_key in instance.addon_profiles and \
+        if disabling_monitoring and monitoring_addon_key in instance.addon_profiles and \
                 instance.addon_profiles[monitoring_addon_key].enabled and \
                 CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[monitoring_addon_key].config and \
                 str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
@@ -1582,6 +1708,26 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
         no_wait=no_wait
     )
 
+    if disabling_monitoring:
+        # The legacy addon and the AMP containerInsights profile are two views of the same feature,
+        # and the RP only copies a containerInsights field onto the cluster when that field is
+        # present on the request. Disabling therefore has to reset them explicitly, otherwise a
+        # later --enable-azure-monitor-logs silently re-onboards with the old syslog port, scraping
+        # choice and container network logs setting.
+        if instance.azure_monitor_profile and instance.azure_monitor_profile.container_insights:
+            _reset_container_insights_to_defaults(
+                instance.azure_monitor_profile.container_insights
+            )
+        # OpenTelemetry logs and traces ride on the Container Insights agent, so they go down with
+        # it. The confirmation for this was taken above.
+        if opentelemetry_logs_traces_enabled:
+            open_telemetry_logs_and_traces = (
+                instance.azure_monitor_profile.app_monitoring.open_telemetry_logs_and_traces
+            )
+            open_telemetry_logs_and_traces.enabled = False
+            open_telemetry_logs_and_traces.http_port = None
+            open_telemetry_logs_and_traces.grpc_port = None
+
     # send the managed cluster representation to update the addon profiles
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
@@ -1604,6 +1750,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       ampls_resource_id=None,
                       enable_high_log_scale_mode=None,
                       no_wait=False,):
+    warn_on_legacy_monitoring_auth(enable_msi_auth_for_monitoring, addons)
     instance = client.get(resource_group_name, name)
     msi_auth = False
     if instance.service_principal_profile.client_id == "msi":
@@ -2191,8 +2338,14 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 
 def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
-    if not which("kubectl"):
+    # Resolve kubectl to an absolute path from PATH. Passing a bare "kubectl"
+    # to subprocess lets Windows CreateProcess search the current working
+    # directory first, allowing a repo-controlled kubectl(.exe) to run and read
+    # the temporary kubeconfig credentials. Always invoke the resolved path.
+    kubectl_path = which("kubectl")
+    if not kubectl_path:
         raise ValidationError("Can not find kubectl executable in PATH")
+    kubectl_path = os.path.abspath(kubectl_path)
 
     return_msg = None
     fd, browse_path = tempfile.mkstemp()
@@ -2204,7 +2357,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
         # Get kubectl minor version
         kubectl_minor_version = -1
         try:
-            kubectl_cmd = ["kubectl", "version", "-o", "json", "--kubeconfig", browse_path]
+            kubectl_cmd = [kubectl_path, "version", "-o", "json", "--kubeconfig", browse_path]
             output = subprocess.Popen(kubectl_cmd, stdout=subprocess.PIPE)
             jsonS, _ = output.communicate()
             kubectl_version = json.loads(jsonS)
@@ -2240,6 +2393,21 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                         "args": ["-v6", acr],
                         "stdin": True,
                         "stdinOnce": True,
+                        # On national/sovereign clouds, node provisioning stamps
+                        # "cloud": "AzureStackCloud" in /etc/kubernetes/azure.json and
+                        # writes the cloud-specific endpoints to a companion
+                        # /etc/kubernetes/akscustom.json (a go-autorest environment file).
+                        # go-autorest's EnvironmentFromName only resolves AzureStackCloud
+                        # when AZURE_ENVIRONMENT_FILEPATH points at that file; otherwise
+                        # canipull aborts with "Unknown Azure cloud name: AzureStackCloud"
+                        # before running any MSI/ACR check. The env var is ignored on public
+                        # clouds (cloud != AzureStackCloud), so this is safe everywhere.
+                        "env": [
+                            {
+                                "name": "AZURE_ENVIRONMENT_FILEPATH",
+                                "value": "/etc/kubernetes/akscustom.json",
+                            }
+                        ],
                         "volumeMounts": [
                             {"name": "azurejson", "mountPath": "/etc/kubernetes"},
                             {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
@@ -2279,7 +2447,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
 
         try:
             cmd = [
-                "kubectl",
+                kubectl_path,
                 "run",
                 "--kubeconfig",
                 browse_path,
@@ -2331,6 +2499,395 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
                         install_location, base_src_url, arch=arch)
     k8s_install_kubelogin(cmd, kubelogin_version,
                           kubelogin_install_location, kubelogin_base_src_url, arch=arch, gh_token=gh_token)
+
+
+_AKS_DESKTOP_RELEASES_API = 'https://api.github.com/repos/Azure/aks-desktop/releases'
+_AKS_DESKTOP_DOWNLOAD_PREFIX = 'https://github.com/Azure/aks-desktop/releases/download/'
+
+
+def _get_aks_desktop_platform():
+    system = platform.system()
+    machine = platform.machine().lower()
+    if machine in ('amd64', 'x86_64'):
+        arch = 'x64'
+    elif machine in ('aarch64', 'arm64', 'armv8', 'armv8l'):
+        arch = 'arm64'
+    elif system == 'Linux' and machine.startswith('armv7'):
+        arch = 'armv7l'
+    else:
+        raise ValidationError(
+            "AKS Desktop does not publish an artifact for architecture '{}'."
+            .format(machine or 'unknown'))
+
+    system_names = {
+        'Windows': 'win',
+        'Darwin': 'mac',
+        'Linux': 'linux',
+    }
+    if system not in system_names:
+        raise ValidationError(
+            "AKS Desktop does not support operating system '{}'."
+            .format(system or 'unknown'))
+    return system_names[system], arch
+
+
+def _get_aks_desktop_release(version=None, gh_token=None):
+    # urllib includes invalid header values in errors, which would expose the token.
+    if gh_token and ('\r' in gh_token or '\n' in gh_token):
+        raise InvalidArgumentValueError('The GitHub token must not contain carriage returns or line feeds.')
+
+    requested_version = None
+    if version is not None:
+        version = version[1:] if version.startswith('v') else version
+        if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?', version):
+            raise InvalidArgumentValueError(
+                "AKS Desktop version '{}' is invalid. Specify a semantic version such as '0.9.1'."
+                .format(version))
+        requested_version = version
+        release_url = '{}/tags/v{}'.format(_AKS_DESKTOP_RELEASES_API, version)
+    else:
+        release_url = _AKS_DESKTOP_RELEASES_API + '/latest'
+
+    logger.warning('Getting AKS Desktop release metadata from "%s".', release_url)
+    try:
+        release = json.loads(_urlopen_read(release_url, gh_token=gh_token))
+    except (OSError, ValueError) as ex:
+        status = getattr(ex, 'code', None)
+        headers = getattr(ex, 'headers', None) or {}
+        if status == 429 or (status == 403 and (
+                headers.get('X-RateLimit-Remaining') == '0' or headers.get('Retry-After') is not None)):
+            recommendation = (
+                "Please wait for the GitHub API rate limit to reset and check your token's quota."
+                if gh_token else
+                'Please set the GH_TOKEN environment variable or wait for the GitHub API rate limit to reset.')
+            raise ClientRequestError(
+                'GitHub API rate limit exceeded while getting AKS Desktop release metadata from "{}" ({}).'
+                .format(release_url, ex), recommendation=recommendation)
+        raise ClientRequestError(
+            'Failed to get AKS Desktop release metadata from "{}" ({}).'.format(release_url, ex),
+            recommendation='Please check the error and retry later.')
+
+    tag = release.get('tag_name', '')
+    if not re.fullmatch(r'v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?', tag):
+        raise ClientRequestError(
+            'The AKS Desktop release returned an invalid tag name.',
+            recommendation='Please retry later, or specify a version with --version.')
+    release_version = tag[1:] if tag.startswith('v') else tag
+    if requested_version and release_version != requested_version:
+        raise ClientRequestError(
+            "The AKS Desktop release metadata returned version '{}' instead of requested version '{}'."
+            .format(release_version, requested_version))
+    return release, release_version
+
+
+def _select_aks_desktop_asset(release, version, system, arch, prefer_deb=True):
+    names = {
+        ('win', 'x64'): ['aks-desktop-{}-win-x64.exe'.format(version)],
+        ('win', 'arm64'): ['aks-desktop-{}-win-arm64.exe'.format(version)],
+        ('mac', 'x64'): ['aks-desktop-{}-mac-x64.dmg'.format(version)],
+        ('mac', 'arm64'): ['aks-desktop-{}-mac-arm64.dmg'.format(version)],
+        ('linux', 'x64'): ['aks-desktop-{}-linux-x64.tar.gz'.format(version)],
+        ('linux', 'arm64'): ['aks-desktop-{}-linux-arm64.tar.gz'.format(version)],
+        ('linux', 'armv7l'): ['aks-desktop-{}-linux-armv7l.tar.gz'.format(version)],
+    }.get((system, arch), [])
+
+    if (prefer_deb and (system, arch) == ('linux', 'x64') and
+            (os.environ.get('DISPLAY') or os.environ.get('WAYLAND_DISPLAY'))):
+        try:
+            os_release = platform.freedesktop_os_release()
+        except OSError:
+            os_release = {}
+        distro_ids = {os_release.get('ID'), *os_release.get('ID_LIKE', '').split()}
+        if distro_ids.intersection(('debian', 'ubuntu')) and shutil.which('xdg-open'):
+            names.insert(0, 'aks-desktop_{}-1_amd64.deb'.format(version))
+
+    assets = release.get('assets') or []
+    for name in names:
+        matches = [asset for asset in assets if asset.get('name') == name]
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            raise ClientRequestError(
+                "The AKS Desktop release contains multiple artifacts matching '{}'."
+                .format(name))
+    raise ResourceNotFoundError(
+        "AKS Desktop version '{}' does not publish an artifact for {}/{}."
+        .format(version, system, arch))
+
+
+def _download_aks_desktop_asset(asset, destination):
+    from urllib.parse import urlparse
+    from urllib.request import (
+        build_opener,
+        HTTPRedirectHandler,
+        HTTPSHandler,
+        Request,
+    )
+
+    url = asset.get('browser_download_url', '')
+    if not url.startswith(_AKS_DESKTOP_DOWNLOAD_PREFIX):
+        raise ClientRequestError(
+            'The AKS Desktop release returned an unexpected download URL.')
+
+    class HttpsOnlyRedirectHandler(HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            if urlparse(newurl).scheme != 'https':
+                raise ClientRequestError(
+                    'The AKS Desktop download redirected to an insecure URL.')
+            return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+    digest = asset.get('digest', '')
+    if not isinstance(digest, str) or not re.fullmatch(r'sha256:[0-9a-fA-F]{64}', digest):
+        raise ClientRequestError(
+            'The AKS Desktop release artifact does not include a valid SHA-256 digest.')
+
+    logger.warning('Downloading AKS Desktop from "%s".', url)
+    request = Request(url, headers={'User-Agent': 'azure-cli'})
+    opener = build_opener(HttpsOnlyRedirectHandler(), HTTPSHandler(context=_ssl_context()))
+    actual_digest = hashlib.sha256()
+    try:
+        with opener.open(request) as response, open(destination, 'wb') as output:
+            while True:
+                chunk = response.read(1024 * 1024)
+                if not chunk:
+                    break
+                output.write(chunk)
+                actual_digest.update(chunk)
+    except OSError as ex:
+        raise ClientRequestError(
+            'Failed to download AKS Desktop from "{}" ({}).'.format(url, ex))
+
+    if actual_digest.hexdigest().lower() != digest.split(':', 1)[1].lower():
+        raise ClientRequestError(
+            'The downloaded AKS Desktop artifact did not match its published SHA-256 digest.')
+
+
+def _extract_aks_desktop_archive_compat(archive, destination):
+    # Keep path validation consistent across Python data-filter implementations.
+    root = os.path.realpath(destination)
+
+    def contained_path(path):
+        resolved = os.path.realpath(os.path.join(root, path))
+        if os.path.commonpath([root, resolved]) != root:
+            raise tarfile.ExtractError('Archive path escapes the extraction directory: {}'.format(path))
+        return resolved
+
+    def extract_member(member, expected_target=None):
+        name = member.name.lstrip('/' + os.sep)
+        if os.path.isabs(name):
+            raise tarfile.ExtractError('Absolute archive path: {}'.format(member.name))
+        resolved = contained_path(name)
+        if member.isdir():
+            # Ignore archive directory modes so subsequent members remain accessible.
+            os.makedirs(resolved, mode=0o755, exist_ok=True)
+            return None
+        if not (member.isreg() or member.issym() or member.islnk()):
+            raise tarfile.ExtractError('Unsupported archive member: {}'.format(member.name))
+        if resolved == root:
+            raise tarfile.ExtractError('An archive file or link cannot replace the extraction directory')
+
+        # Resolve parents, but retain the leaf so replacing a link unlinks the link itself.
+        parent = contained_path(os.path.dirname(name))
+        target = os.path.join(parent, os.path.basename(name))
+        if expected_target is not None and (target != expected_target or os.path.lexists(target)):
+            raise tarfile.ExtractError('Ambiguous destination for deferred archive hardlink: {}'.format(member.name))
+        link_target = None
+        if member.issym() or member.islnk():
+            if os.path.isabs(member.linkname):
+                raise tarfile.ExtractError('Absolute archive link: {}'.format(member.linkname))
+            linkname = os.path.normpath(member.linkname)
+            link_target = contained_path(os.path.join(parent, linkname) if member.issym() else linkname)
+            if member.islnk():
+                try:
+                    target_mode = os.stat(link_target).st_mode
+                except FileNotFoundError:
+                    # Preserve the canonical destination before later members can rebind its parents.
+                    return target
+                if not stat.S_ISREG(target_mode):
+                    raise tarfile.ExtractError('Archive hardlink target is not a regular file: {}'.format(linkname))
+
+        os.makedirs(parent, mode=0o755, exist_ok=True)
+        if member.islnk() and target == link_target:
+            pass  # A hardlink to the same existing regular file needs no replacement.
+        else:
+            if os.path.lexists(target):
+                os.unlink(target)
+            if member.issym():
+                os.symlink(linkname, target)
+                return None
+            if member.islnk():
+                os.link(link_target, target)
+            else:
+                # Never ask tarfile to follow a link or recursively extract its target.
+                with archive.extractfile(member) as source, open(target, 'wb') as output:
+                    shutil.copyfileobj(source, output)
+
+        # Match data_filter: no ownership, special bits, or group/other writes.
+        mode = member.mode & 0o755
+        if not mode & 0o100:
+            mode &= ~0o111
+        os.chmod(target, mode | 0o600)
+        return None
+
+    pending = []
+    for member in archive:
+        deferred_target = extract_member(member)
+        if deferred_target is not None:
+            pending.append((member, deferred_target))
+    # Resolve forward hardlinks without tarfile's unvalidated link-target extraction.
+    while pending:
+        unresolved = [(member, target) for member, target in pending
+                      if extract_member(member, target) is not None]
+        if len(unresolved) == len(pending):
+            raise tarfile.ExtractError('Unresolved or cyclic archive hardlink: {}'.format(unresolved[0][0].name))
+        pending = unresolved
+
+
+def _extract_aks_desktop_archive(archive_path, destination):
+    try:
+        os.makedirs(destination, exist_ok=True)
+        with tarfile.open(archive_path, 'r:gz') as archive:
+            for member in archive.getmembers():
+                # Older data filters resolve these names differently from extraction (CPython gh-149486).
+                if (member.issym() or member.islnk()) and member.name.endswith(('/', '\\')):
+                    raise FileOperationError('The AKS Desktop archive contains an unsafe link name.')
+            _extract_aks_desktop_archive_compat(archive, destination)
+    except (OSError, tarfile.TarError) as ex:
+        raise FileOperationError(
+            'Failed to extract the AKS Desktop archive ({}).'.format(ex))
+
+
+def _install_aks_desktop_archive(installer_path, version):
+    install_root = os.path.join(os.path.expanduser('~'), '.local', 'share', 'aks-desktop')
+    install_dir = os.path.join(install_root, version)
+    staging_dir = None
+    backup_dir = None
+    backup_path = None
+    published = False
+    try:
+        os.makedirs(install_root, exist_ok=True)
+        if os.path.lexists(install_dir) and (os.path.islink(install_dir) or not os.path.isdir(install_dir)):
+            raise FileOperationError(
+                'The AKS Desktop installation path "{}" is not a regular directory.'.format(install_dir))
+        staging_dir = tempfile.mkdtemp(prefix='.{}-staging-'.format(version), dir=install_root)
+        _extract_aks_desktop_archive(installer_path, staging_dir)
+        executable = next(
+            (os.path.join(root, name)
+             for root, _, files in os.walk(staging_dir)
+             for name in files if name == 'aks-desktop' and os.path.isfile(os.path.join(root, name))),
+            None)
+        if not executable:
+            raise FileOperationError(
+                'The AKS Desktop archive does not contain the expected executable.')
+        os.chmod(executable, os.stat(executable).st_mode | stat.S_IXUSR)
+        executable_path = os.path.join(install_dir, os.path.relpath(executable, staging_dir))
+
+        try:
+            if os.path.exists(install_dir):
+                backup_dir = tempfile.mkdtemp(prefix='.{}-backup-'.format(version), dir=install_root)
+                backup_path = os.path.join(backup_dir, version)
+                os.replace(install_dir, backup_path)
+            # Replacing a nonempty directory requires a backup rename first. Publication is atomic,
+            # but the version path is briefly absent between these renames (not an atomic exchange).
+            os.replace(staging_dir, install_dir)
+            published = True
+        except BaseException as ex:  # Restore the old installation even when interrupted.
+            if backup_path and os.path.exists(backup_path):
+                try:
+                    os.replace(backup_path, install_dir)
+                except BaseException as rollback_error:  # pylint: disable=broad-exception-caught
+                    raise FileOperationError(
+                        'Failed to publish AKS Desktop ({}), and rollback failed ({}). '
+                        'Recover the previous installation from "{}" to "{}".'
+                        .format(ex, rollback_error, backup_path, install_dir)) from rollback_error
+            raise
+        logger.warning('AKS Desktop was installed at "%s".', install_dir)
+        return executable_path
+    except OSError as ex:
+        raise FileOperationError('Failed to install the AKS Desktop archive ({}).'.format(ex)) from ex
+    finally:
+        if backup_dir:
+            if published or not os.listdir(backup_dir):
+                try:
+                    shutil.rmtree(backup_dir)
+                except OSError as ex:
+                    if not published:
+                        raise
+                    logger.warning(
+                        'AKS Desktop was installed, but the previous installation backup at "%s" '
+                        'could not be removed (%s). Remove it manually when no longer needed.', backup_dir, ex)
+            else:
+                # Never delete the only good installation, including on interruption during rollback.
+                logger.warning('The previous AKS Desktop installation is retained at "%s".', backup_path)
+        if staging_dir and os.path.exists(staging_dir):
+            shutil.rmtree(staging_dir)
+
+
+def _launch_aks_desktop_installer(installer_path, system, version):
+    try:
+        if system == 'win':
+            subprocess.run([installer_path], check=True)
+        elif system == 'mac':
+            subprocess.run(['open', installer_path], check=True)
+        elif installer_path.endswith('.deb'):
+            subprocess.run(['xdg-open', installer_path], check=True)
+        else:
+            executable = _install_aks_desktop_archive(installer_path, version)
+            subprocess.Popen([executable])
+    except FileNotFoundError as ex:
+        raise FileOperationError(
+            "The required installer launcher '{}' was not found.".format(ex.filename))
+    except subprocess.CalledProcessError as ex:
+        raise ClientRequestError(
+            'The AKS Desktop installer exited with code {}.'.format(ex.returncode))
+
+
+def aks_install_desktop(cmd, version=None, gh_token=None):
+    from azure.cli.core._environment import get_config_dir
+
+    del cmd
+    if gh_token is None:
+        gh_token = os.environ.get('GH_TOKEN')
+    system, arch = _get_aks_desktop_platform()
+    release, release_version = _get_aks_desktop_release(version, gh_token=gh_token)
+    asset = _select_aks_desktop_asset(
+        release, release_version, system, arch)
+
+    while True:
+        # GUI launchers return before the installer has finished consuming its file.
+        gui_installer = system == 'mac' or asset['name'].endswith('.deb')
+        download_dir = None
+        if gui_installer:
+            download_dir = os.path.join(get_config_dir(), 'aks-desktop', 'installers')
+            os.makedirs(download_dir, mode=0o700, exist_ok=True)
+        installer_dir = tempfile.mkdtemp(prefix='aks-desktop-', dir=download_dir)
+        keep_installer = False
+        try:
+            installer_path = os.path.join(installer_dir, asset['name'])
+            _download_aks_desktop_asset(asset, installer_path)
+            try:
+                _launch_aks_desktop_installer(installer_path, system, release_version)
+            except (ClientRequestError, FileOperationError, OSError) as ex:
+                if not (system == 'linux' and asset['name'].endswith('.deb')):
+                    raise
+                try:
+                    asset = _select_aks_desktop_asset(
+                        release, release_version, system, arch, prefer_deb=False)
+                except ResourceNotFoundError as missing_archive:
+                    raise ClientRequestError(
+                        '{} No portable archive is available as a fallback ({}).'.format(ex, missing_archive)) from ex
+                logger.warning('The Debian installer could not be opened (%s). Using the portable archive.', ex)
+                # The finally block removes the failed DEB before the single archive retry.
+                continue
+            if gui_installer:
+                keep_installer = True
+                logger.warning(
+                    'AKS Desktop installer retained at "%s". Complete installation in the opened application, '
+                    'then remove "%s" when it is no longer needed.', installer_path, installer_dir)
+            return
+        finally:
+            if not keep_installer:
+                shutil.rmtree(installer_dir)
 
 
 # determine the architecture for the binary based on platform.machine()
@@ -2386,8 +2943,8 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
     user_path = ""
     try:
         user_path = get_windows_user_path()
-    # pylint: disable=broad-except
-    except Exception as e:
+
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.debug("failed to get user path, error: %s", e)
         log_windows_post_installation_manual_steps_warning(
             install_dir, binary_name)
@@ -2404,8 +2961,8 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
     try:
         subprocess.run(setxexp, shell=True, check=True, capture_output=True)
         log_windows_successful_installation_warning(install_dir)
-    # pylint: disable=broad-except
-    except Exception as e:
+
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.debug("failed to set user path, error: %s", e)
         log_windows_post_installation_manual_steps_warning(
             install_dir, binary_name)
@@ -2529,6 +3086,43 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
                        install_dir, cli)
 
 
+# get the latest version of kubelogin
+def _get_latest_kubelogin_version(cloud_name, gh_token=None):
+    if cloud_name.lower() == 'azurechinacloud':
+        latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
+        logger.warning(
+            'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
+        return json.loads(latest_release)['tag_name'].strip()
+
+    latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
+    fallback_url = 'https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-version.txt'
+    logger.warning(
+        'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
+    try:
+        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
+        return json.loads(latest_release)['tag_name'].strip()
+    except URLError as ex:
+        # the GitHub api answers with 403 or 429 when the rate limit is exceeded
+        if getattr(ex, 'code', None) not in (403, 429):
+            raise
+        logger.warning(
+            'The GitHub api rate limit was exceeded (%s), getting the latest version of kubelogin from "%s"',
+            ex, fallback_url)
+        try:
+            latest_version = _urlopen_read(fallback_url).decode('UTF-8', errors='replace').strip()
+        except OSError as fallback_ex:
+            raise ClientRequestError(
+                'Failed to get the latest version of kubelogin from "{}" ({}) and "{}" ({}).'.format(
+                    latest_release_url, ex, fallback_url, fallback_ex),
+                recommendation='Please retry later, or specify a version with --kubelogin-version.')
+        if not re.fullmatch(r'v?\d+\.\d+\.\d+', latest_version):
+            raise ClientRequestError(
+                'Unexpected version "{}" returned by "{}".'.format(latest_version[:50], fallback_url),
+                recommendation='Please retry later, or specify a version with --kubelogin-version.')
+        return latest_version if latest_version.startswith('v') else 'v' + latest_version
+
+
 # install kubelogin
 def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None, arch=None, gh_token=None):
     """
@@ -2543,13 +3137,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             source_url = 'https://mirror.azure.cn/kubernetes/kubelogin'
 
     if client_version == 'latest':
-        latest_release_url = 'https://api.github.com/repos/Azure/kubelogin/releases/latest'
-        if cloud_name.lower() == 'azurechinacloud':
-            latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
-        logger.warning(
-            'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
-        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
-        client_version = json.loads(latest_release)['tag_name'].strip()
+        client_version = _get_latest_kubelogin_version(cloud_name, gh_token=gh_token)
     else:
         client_version = "v%s" % client_version
 
@@ -2841,7 +3429,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     :param space_name: Name of the new or existing dev space to select. Defaults to an \
     interactive selection experience.
     :type space_name: String
-    :param endpoint_type: The endpoint type to be used for a Azure Dev Spaces controller. \
+    :param endpoint_type: The endpoint type to be used for an Azure Dev Spaces controller. \
     See https://aka.ms/azds-networking for more information.
     :type endpoint_type: String
     :param prompt: Do not prompt for confirmation. Requires --space.
@@ -2995,6 +3583,7 @@ def aks_agentpool_add(
     gpu_instance_profile=None,
     allowed_host_ports=None,
     asg_ids=None,
+    enable_managed_dranet=False,
     node_public_ip_tags=None,
     disable_windows_outbound_nat=False,
     workload_runtime=None,
@@ -3011,6 +3600,9 @@ def aks_agentpool_add(
     # local DNS
     localdns_config=None,
     enable_artifact_streaming=False,
+    # ssh access
+    ssh_access=CONST_SSH_ACCESS_LOCALUSER,
+    enable_managed_gpu=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3060,6 +3652,7 @@ def aks_agentpool_update(
     aks_custom_headers=None,
     allowed_host_ports=None,
     asg_ids=None,
+    enable_managed_dranet=False,
     os_sku=None,
     enable_fips_image=False,
     disable_fips_image=False,
@@ -3076,6 +3669,9 @@ def aks_agentpool_update(
     gpu_driver=None,
     enable_artifact_streaming=False,
     disable_artifact_streaming=False,
+    # ssh access
+    ssh_access=None,
+    yes=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3102,6 +3698,104 @@ def aks_agentpool_update(
 
 def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_name, nodepool_name):
     return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
+
+
+def aks_agentpool_get_rollback_versions(cmd, client, resource_group_name, cluster_name, nodepool_name):
+    upgrade_profile = client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
+    return upgrade_profile.recently_used_versions
+
+
+def aks_agentpool_rollback(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    nodepool_name,
+    aks_custom_headers=None,
+    if_match=None,
+    if_none_match=None,
+    no_wait=False,
+):
+    from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
+
+    managed_clusters_client = cf_managed_clusters(cmd.cli_ctx)
+    managed_cluster = managed_clusters_client.get(resource_group_name, cluster_name)
+    auto_upgrade_profile = getattr(managed_cluster, "auto_upgrade_profile", None)
+
+    upgrade_channel = getattr(auto_upgrade_profile, "upgrade_channel", None) if auto_upgrade_profile else None
+    node_os_upgrade_channel = (
+        getattr(auto_upgrade_profile, "node_os_upgrade_channel", None) if auto_upgrade_profile else None
+    )
+
+    upgrade_channel_value = getattr(upgrade_channel, "value", upgrade_channel)
+    node_os_upgrade_channel_value = getattr(node_os_upgrade_channel, "value", node_os_upgrade_channel)
+
+    upgrade_channel_enabled = upgrade_channel_value and str(upgrade_channel_value).lower() != "none"
+    node_os_channel_enabled = (
+        node_os_upgrade_channel_value and str(node_os_upgrade_channel_value).lower() not in ["none", "unmanaged"]
+    )
+
+    if upgrade_channel_enabled:
+        logger.warning(
+            "Auto-upgrade is enabled on cluster '%s' (upgradeChannel=%s). "
+            "Rollback will not succeed until auto-upgrade is disabled. Please disable auto-upgrade to roll back the node pool.",
+            cluster_name,
+            upgrade_channel_value or "none",
+        )
+    elif node_os_channel_enabled:
+        logger.warning(
+            "nodeOSUpgradeChannel is enabled on cluster '%s' (nodeOSUpgradeChannel=%s). "
+            "The orchestrator version rollback will proceed, but the node image rollback "
+            "will not succeed. Please disable nodeOSUpgradeChannel if you want to roll back the node image.",
+            cluster_name,
+            node_os_upgrade_channel_value,
+        )
+
+    logger.info("Fetching the most recent rollback version...")
+    upgrade_profile = client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
+
+    if not upgrade_profile.recently_used_versions:
+        raise CLIError(
+            "No rollback versions available. The nodepool must have been upgraded at least once "
+            "to have rollback history available."
+        )
+
+    sorted_versions = sorted(
+        upgrade_profile.recently_used_versions,
+        key=lambda version: version.timestamp if version.timestamp else datetime.datetime.min,
+        reverse=True,
+    )
+    most_recent = sorted_versions[0]
+
+    logger.info(
+        "Rolling back to the most recent version: Kubernetes version: %s, Node image version: %s (timestamp: %s)",
+        most_recent.orchestrator_version,
+        most_recent.node_image_version,
+        most_recent.timestamp,
+    )
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    instance.orchestrator_version = most_recent.orchestrator_version
+    instance.node_image_version = most_recent.node_image_version
+
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+        allow_appending_values_to_same_key=True,
+    )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+        headers=aks_custom_headers,
+        **build_etag_kwargs(if_match, if_none_match),
+    )
 
 
 def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
@@ -3192,6 +3886,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         instance.upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
     if undrainable_node_behavior:
         instance.upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
+    if max_unavailable:
+        instance.upgrade_settings.max_unavailable = max_unavailable
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
@@ -3515,6 +4211,120 @@ def aks_agentpool_manual_scale_delete(cmd,    # pylint: disable=unused-argument
     )
 
 
+def aks_agentpool_auto_scale_add(cmd,
+                                 client,
+                                 resource_group_name,
+                                 cluster_name,
+                                 nodepool_name,
+                                 node_vm_size,
+                                 min_count,
+                                 max_count,
+                                 no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot add autoscale profile to a non-virtualmachines node pool.")
+
+    AutoScaleProfile = cmd.get_models(
+        "AutoScaleProfile",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+    new_autoscale_profile = AutoScaleProfile(
+        size=node_vm_size,
+        min_count=int(min_count),
+        max_count=int(max_count),
+    )
+    if instance.virtual_machines_profile.scale.autoscale is None:
+        instance.virtual_machines_profile.scale.autoscale = []
+    instance.virtual_machines_profile.scale.autoscale.append(new_autoscale_profile)
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_auto_scale_update(cmd,    # pylint: disable=unused-argument
+                                    client,
+                                    resource_group_name,
+                                    cluster_name,
+                                    nodepool_name,
+                                    current_node_vm_size,
+                                    node_vm_size=None,
+                                    min_count=None,
+                                    max_count=None,
+                                    no_wait=False):
+    if node_vm_size is None and min_count is None and max_count is None:
+        raise RequiredArgumentMissingError(
+            "specify --node-vm-size, --min-count, or --max-count (or a combination)."
+        )
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot update autoscale profile in a non-virtualmachines node pool.")
+
+    autoscale_exists = False
+    for a in instance.virtual_machines_profile.scale.autoscale or []:
+        if a.size == current_node_vm_size:
+            autoscale_exists = True
+            if node_vm_size is not None:
+                a.size = node_vm_size
+            if min_count is not None:
+                a.min_count = int(min_count)
+            if max_count is not None:
+                a.max_count = int(max_count)
+            break
+    if not autoscale_exists:
+        raise InvalidArgumentValueError(
+            f"Autoscale profile with size {current_node_vm_size} doesn't exist in node pool {nodepool_name}."
+        )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_auto_scale_delete(cmd,    # pylint: disable=unused-argument
+                                    client,
+                                    resource_group_name,
+                                    cluster_name,
+                                    nodepool_name,
+                                    current_node_vm_size,
+                                    no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot delete autoscale profile from a non-virtualmachines node pool.")
+
+    autoscale_exists = False
+    for a in instance.virtual_machines_profile.scale.autoscale or []:
+        if a.size == current_node_vm_size:
+            autoscale_exists = True
+            instance.virtual_machines_profile.scale.autoscale.remove(a)
+            break
+    if not autoscale_exists:
+        raise InvalidArgumentValueError(
+            f"Autoscale profile with size {current_node_vm_size} doesn't exist in node pool {nodepool_name}."
+        )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     return instance
@@ -3671,6 +4481,50 @@ def aks_trustedaccess_role_binding_update(cmd, client, resource_group_name, clus
 
 def aks_trustedaccess_role_binding_delete(cmd, client, resource_group_name, cluster_name, role_binding_name):
     return client.begin_delete(resource_group_name, cluster_name, role_binding_name)
+
+
+def aks_identity_binding_create(cmd, client, resource_group_name, cluster_name, name,
+                                managed_identity_resource_id, no_wait=False):
+    IdentityBinding, IdentityBindingProperties, IdentityBindingManagedIdentityProfile = cmd.get_models(
+        "IdentityBinding",
+        "IdentityBindingProperties",
+        "IdentityBindingManagedIdentityProfile",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="identity_bindings",
+    )
+    instance = IdentityBinding(
+        properties=IdentityBindingProperties(
+            managed_identity=IdentityBindingManagedIdentityProfile(
+                resource_id=managed_identity_resource_id,
+            )
+        )
+    )
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        name,
+        instance,
+    )
+
+
+def aks_identity_binding_delete(cmd, client, resource_group_name, cluster_name, name, no_wait=False):  # pylint: disable=unused-argument
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete,
+        resource_group_name,
+        cluster_name,
+        name,
+    )
+
+
+def aks_identity_binding_show(cmd, client, resource_group_name, cluster_name, name):  # pylint: disable=unused-argument
+    return client.get(resource_group_name, cluster_name, name)
+
+
+def aks_identity_binding_list(cmd, client, resource_group_name, cluster_name):  # pylint: disable=unused-argument
+    return client.list_by_managed_cluster(resource_group_name, cluster_name)
 
 
 def aks_mesh_enable(

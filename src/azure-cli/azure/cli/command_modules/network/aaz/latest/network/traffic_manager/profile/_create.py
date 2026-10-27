@@ -15,19 +15,19 @@ from azure.cli.core.aaz import *
     "network traffic-manager profile create",
 )
 class Create(AAZCommand):
-    """Create a traffic manager profile.
+    """Create a Traffic Manager profile.
 
     :example: Create a traffic manager profile with performance routing.
-        az network traffic-manager profile create -g MyResourceGroup -n MyTmProfile --routing-method Performance --unique-dns-name mywebapp --ttl 30 --protocol HTTP --port 80 --path "/"
+        az network traffic-manager profile create -g MyResourceGroup -n MyTmProfile --routing-method Performance --unique-dns-name mywebapp --ttl 30 --protocol HTTP --port 80 --path "/" --record-type A
 
     :example: Create a traffic manager profile.
-        az network traffic-manager profile create -n MyTmProfile -g MyResourceGroup --routing-method subnet --unique-dns-name mywebapp --custom-headers [{name:foo,value:bar}] --status-code-ranges [{min:200,max:202}] --path "/"
+        az network traffic-manager profile create -n MyTmProfile -g MyResourceGroup --routing-method subnet --unique-dns-name mywebapp --custom-headers [{name:foo,value:bar}] --status-code-ranges [{min:200,max:202}] --path "/" --record-type A
     """
 
     _aaz_info = {
-        "version": "2022-04-01",
+        "version": "2026-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2022-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2026-09-01"],
         ]
     }
 
@@ -181,6 +181,12 @@ class Create(AAZCommand):
             default="Enabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
+        _args_schema.record_type = AAZStrArg(
+            options=["--record-type"],
+            arg_group="Properties",
+            help="When record type is set, a traffic manager profile will allow only endpoints that match this type. If it is not set, traffic manager profile will allow adding all types of endpoints. It is returned as null when this is not set.",
+            enum={"A": "A", "AAAA": "AAAA", "CNAME": "CNAME"},
+        )
         _args_schema.routing_method = AAZStrArg(
             options=["--routing-method"],
             arg_group="Properties",
@@ -254,7 +260,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -290,6 +296,7 @@ class Create(AAZCommand):
                 properties.set_prop("maxReturn", AAZIntType, ".max_return")
                 properties.set_prop("monitorConfig", AAZObjectType)
                 properties.set_prop("profileStatus", AAZStrType, ".status")
+                properties.set_prop("recordType", AAZStrType, ".record_type")
                 properties.set_prop("trafficRoutingMethod", AAZStrType, ".routing_method")
 
             dns_config = _builder.get(".properties.dnsConfig")
@@ -375,6 +382,9 @@ class Create(AAZCommand):
             )
             properties.profile_status = AAZStrType(
                 serialized_name="profileStatus",
+            )
+            properties.record_type = AAZStrType(
+                serialized_name="recordType",
             )
             properties.traffic_routing_method = AAZStrType(
                 serialized_name="trafficRoutingMethod",

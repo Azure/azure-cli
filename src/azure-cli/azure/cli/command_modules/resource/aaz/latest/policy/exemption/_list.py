@@ -30,11 +30,11 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-07-01-preview",
+        "version": "2026-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policyexemptions", "2022-07-01-preview"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policyexemptions", "2022-07-01-preview"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.authorization/policyexemptions", "2022-07-01-preview"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policyexemptions", "2026-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policyexemptions", "2026-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.authorization/policyexemptions", "2026-01-01-preview"],
         ]
     }
 
@@ -58,10 +58,11 @@ class List(AAZCommand):
         _args_schema.management_group = AAZStrArg(
             options=["--management-group"],
             help={"short-summary": "The management group.", "long-summary": "Indicates that policy exemptions whose scope covers the management group with the given name should be listed."},
+            fmt=AAZStrArgFormat(
+                min_length=1,
+            ),
         )
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            help={"short-summary": "The resource group.", "long-summary": "Indicates that policy exemptions whose scope covers the resource group with the given name are to be listed."},
-        )
+        _args_schema.resource_group = AAZResourceGroupNameArg()
         _args_schema.filter = AAZStrArg(
             options=["--filter"],
             help={"short-summary": "Filter list results.", "long-summary": "The filter to limit list results. Valid values are: 'atScope()', 'atExactScope()', 'atScopeAndBelow()' or 'policyDefinitionId eq '{value}''. If filter is not provided, no filtering is performed. If filter atScope() is provided, the returned list includes all policy assignments that apply to the given scope, which is everything in the unfiltered list except those applied to sub scopes contained within the given scope. If filter atExactScope() is provided, the returned list includes all policy assignments at the given scope.  If filter atScopeAndBelow() is provided, the returned list includes all policy assignments at the given scope and those in sub scopes contained within the given scope. If filter policyDefinitionId eq '{value}' is provided, the returned list includes all policy assignments of the policy definition whose id is {value}."},
@@ -137,7 +138,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-07-01-preview",
+                    "api-version", "2026-01-01-preview",
                     required=True,
                 ),
             }
@@ -172,9 +173,10 @@ class List(AAZCommand):
             _schema_on_200 = cls._schema_on_200
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
-                flags={"read_only": True},
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -187,7 +189,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _element.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -212,7 +214,7 @@ class List(AAZCommand):
             properties.expires_on = AAZStrType(
                 serialized_name="expiresOn",
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.policy_assignment_id = AAZStrType(
                 serialized_name="policyAssignmentId",
                 flags={"required": True},
@@ -223,9 +225,6 @@ class List(AAZCommand):
             properties.resource_selectors = AAZListType(
                 serialized_name="resourceSelectors",
             )
-
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
 
             policy_definition_reference_ids = cls._schema_on_200.value.Element.properties.policy_definition_reference_ids
             policy_definition_reference_ids.Element = AAZStrType()
@@ -318,7 +317,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-07-01-preview",
+                    "api-version", "2026-01-01-preview",
                     required=True,
                 ),
             }
@@ -353,9 +352,10 @@ class List(AAZCommand):
             _schema_on_200 = cls._schema_on_200
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
-                flags={"read_only": True},
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -368,7 +368,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _element.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -393,7 +393,7 @@ class List(AAZCommand):
             properties.expires_on = AAZStrType(
                 serialized_name="expiresOn",
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.policy_assignment_id = AAZStrType(
                 serialized_name="policyAssignmentId",
                 flags={"required": True},
@@ -404,9 +404,6 @@ class List(AAZCommand):
             properties.resource_selectors = AAZListType(
                 serialized_name="resourceSelectors",
             )
-
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
 
             policy_definition_reference_ids = cls._schema_on_200.value.Element.properties.policy_definition_reference_ids
             policy_definition_reference_ids.Element = AAZStrType()
@@ -503,7 +500,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-07-01-preview",
+                    "api-version", "2026-01-01-preview",
                     required=True,
                 ),
             }
@@ -538,9 +535,10 @@ class List(AAZCommand):
             _schema_on_200 = cls._schema_on_200
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
-                flags={"read_only": True},
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -553,7 +551,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
+                flags={"client_flatten": True},
             )
             _element.system_data = AAZObjectType(
                 serialized_name="systemData",
@@ -578,7 +576,7 @@ class List(AAZCommand):
             properties.expires_on = AAZStrType(
                 serialized_name="expiresOn",
             )
-            properties.metadata = AAZDictType()
+            properties.metadata = AAZAnyType()
             properties.policy_assignment_id = AAZStrType(
                 serialized_name="policyAssignmentId",
                 flags={"required": True},
@@ -589,9 +587,6 @@ class List(AAZCommand):
             properties.resource_selectors = AAZListType(
                 serialized_name="resourceSelectors",
             )
-
-            metadata = cls._schema_on_200.value.Element.properties.metadata
-            metadata.Element = AAZAnyType()
 
             policy_definition_reference_ids = cls._schema_on_200.value.Element.properties.policy_definition_reference_ids
             policy_definition_reference_ids.Element = AAZStrType()

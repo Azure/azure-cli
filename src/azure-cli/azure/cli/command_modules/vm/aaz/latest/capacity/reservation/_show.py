@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations/{}", "2026-04-01"],
         ]
     }
 
@@ -138,7 +138,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -186,6 +186,10 @@ class Show(AAZCommand):
             _schema_on_200.sku = AAZObjectType(
                 flags={"required": True},
             )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -213,6 +217,9 @@ class Show(AAZCommand):
                 serialized_name="reservationId",
                 flags={"read_only": True},
             )
+            properties.schedule_profile = AAZObjectType(
+                serialized_name="scheduleProfile",
+            )
             properties.time_created = AAZStrType(
                 serialized_name="timeCreated",
                 flags={"read_only": True},
@@ -223,9 +230,17 @@ class Show(AAZCommand):
             )
 
             instance_view = cls._schema_on_200.properties.instance_view
+            instance_view.reservation_state_info = AAZObjectType(
+                serialized_name="reservationStateInfo",
+            )
             instance_view.statuses = AAZListType()
             instance_view.utilization_info = AAZObjectType(
                 serialized_name="utilizationInfo",
+            )
+
+            reservation_state_info = cls._schema_on_200.properties.instance_view.reservation_state_info
+            reservation_state_info.reservation_state = AAZStrType(
+                serialized_name="reservationState",
             )
 
             statuses = cls._schema_on_200.properties.instance_view.statuses
@@ -245,14 +260,32 @@ class Show(AAZCommand):
                 serialized_name="currentCapacity",
                 flags={"read_only": True},
             )
+            utilization_info.used_reserved_count_by_subscription = AAZDictType(
+                serialized_name="usedReservedCountBySubscription",
+                flags={"read_only": True},
+            )
             utilization_info.virtual_machines_allocated = AAZListType(
                 serialized_name="virtualMachinesAllocated",
                 flags={"read_only": True},
             )
 
+            used_reserved_count_by_subscription = cls._schema_on_200.properties.instance_view.utilization_info.used_reserved_count_by_subscription
+            used_reserved_count_by_subscription.Element = AAZIntType()
+
             virtual_machines_allocated = cls._schema_on_200.properties.instance_view.utilization_info.virtual_machines_allocated
             virtual_machines_allocated.Element = AAZObjectType()
             _ShowHelper._build_schema_sub_resource_read_only_read(virtual_machines_allocated.Element)
+
+            schedule_profile = cls._schema_on_200.properties.schedule_profile
+            schedule_profile.end = AAZStrType()
+            schedule_profile.minimum_commitment_days = AAZIntType(
+                serialized_name="minimumCommitmentDays",
+            )
+            schedule_profile.modifiable_until = AAZStrType(
+                serialized_name="modifiableUntil",
+                flags={"read_only": True},
+            )
+            schedule_profile.start = AAZStrType()
 
             virtual_machines_associated = cls._schema_on_200.properties.virtual_machines_associated
             virtual_machines_associated.Element = AAZObjectType()
@@ -262,6 +295,26 @@ class Show(AAZCommand):
             sku.capacity = AAZIntType()
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()

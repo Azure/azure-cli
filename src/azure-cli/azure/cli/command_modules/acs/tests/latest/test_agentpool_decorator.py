@@ -25,6 +25,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_SCALE_SET_PRIORITY_SPOT,
     CONST_SPOT_EVICTION_POLICY_DEALLOCATE,
     CONST_SPOT_EVICTION_POLICY_DELETE,
+    CONST_SSH_ACCESS_LOCALUSER,
+    CONST_SSH_ACCESS_DISABLED,
+    CONST_SSH_ACCESS_ENTRAID,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
     CONST_VIRTUAL_MACHINES,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
@@ -1034,6 +1037,78 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         with self.assertRaises(DecoratorEarlyExitException):
             ctx_6.get_update_enable_disable_cluster_autoscaler_and_min_max_count()
 
+    def common_get_node_count_from_vms_agentpool(self):
+        ctx = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool = self.create_initialized_agentpool_instance(
+            type_properties_type=CONST_VIRTUAL_MACHINES,
+            virtual_machine_nodes_status=[
+                self.models.VirtualMachineNodes(size="Standard_D2s_v3", count=2),
+                self.models.VirtualMachineNodes(size="Standard_D4s_v3", count=3),
+            ],
+        )
+        ctx.attach_agentpool(agentpool)
+        self.assertEqual(ctx.get_node_count_from_vms_agentpool(agentpool), 5)
+
+    def common_get_update_enable_disable_cluster_autoscaler_and_min_max_count_vmsize_vms(self):
+        # enable autoscaler: default vm size should come from existing manual profile
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "update_cluster_autoscaler": False,
+                    "enable_cluster_autoscaler": True,
+                    "disable_cluster_autoscaler": False,
+                    "min_count": 1,
+                    "max_count": 3,
+                    "node_vm_size": None,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            type_properties_type=CONST_VIRTUAL_MACHINES,
+            virtual_machines_profile=self.models.VirtualMachinesProfile(
+                scale=self.models.ScaleProfile(
+                    manual=[
+                        self.models.ManualScaleProfile(size="Standard_D2s_v3", count=2),
+                    ]
+                )
+            ),
+        )
+        ctx_1.attach_agentpool(agentpool_1)
+        self.assertEqual(
+            ctx_1.get_update_enable_disable_cluster_autoscaler_and_min_max_count_vmsize_vms(),
+            (True, False, 1, 3, "Standard_D2s_v3"),
+        )
+
+        # update-cluster-autoscaler is rejected for VirtualMachines pools
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict(
+                {
+                    "update_cluster_autoscaler": True,
+                    "enable_cluster_autoscaler": False,
+                    "disable_cluster_autoscaler": False,
+                    "min_count": 1,
+                    "max_count": 3,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        ctx_2.attach_agentpool(agentpool_1)
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_update_enable_disable_cluster_autoscaler_and_min_max_count_vmsize_vms()
+
     def common_get_priority(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -1359,6 +1434,41 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         # Update takes directly from flag value not from agentpool property
         self.assertEqual(ctx_2.get_enable_fips_image(), False)
 
+    def common_get_enable_fips_image_windows2025(self):
+        cases = [
+            (DecoratorMode.CREATE, {"os_sku": CONST_OS_SKU_WINDOWS2025}, True),
+            (DecoratorMode.CREATE, {"os_sku": CONST_OS_SKU_WINDOWS2025, "enable_fips_image": True}, True),
+            (DecoratorMode.CREATE, {"os_sku": CONST_OS_SKU_WINDOWS2022}, False),
+            (DecoratorMode.CREATE, {"os_sku": "Ubuntu"}, False),
+            (DecoratorMode.CREATE, {"os_sku": "Ubuntu", "enable_fips_image": True}, True),
+            (DecoratorMode.UPDATE, {"os_sku": CONST_OS_SKU_WINDOWS2025}, False),
+            (DecoratorMode.UPDATE, {"os_sku": CONST_OS_SKU_WINDOWS2025, "enable_fips_image": True}, True),
+        ]
+        for decorator_mode, raw_parameters, expected in cases:
+            with self.subTest(decorator_mode=decorator_mode, raw_parameters=raw_parameters):
+                ctx = AKSAgentPoolContext(
+                    self.cmd,
+                    AKSAgentPoolParamDict(raw_parameters),
+                    self.models,
+                    decorator_mode,
+                    self.agentpool_decorator_mode,
+                )
+                self.assertEqual(ctx.get_enable_fips_image(), expected)
+                ctx.attach_agentpool(
+                    self.create_initialized_agentpool_instance(os_sku=raw_parameters["os_sku"])
+                )
+                self.assertEqual(ctx.get_enable_fips_image(), expected)
+
+        ctx = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"os_sku": CONST_OS_SKU_WINDOWS2025, "disable_fips_image": True}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        with self.assertRaisesRegex(ArgumentUsageError, "Windows2025"):
+            ctx.get_enable_fips_image()
+
     def common_get_disable_fips_image(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -1407,6 +1517,34 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         ctx_2.attach_agentpool(agentpool_2)
         self.assertEqual(ctx_2.get_enable_artifact_streaming(), None)
+
+    def common_get_enable_managed_dranet(self):
+        ctx_0 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_0.get_enable_managed_dranet(), False)
+
+        ctx_1 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"enable_managed_dranet": False}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_1.get_enable_managed_dranet(), False)
+
+        ctx_2 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"enable_managed_dranet": True}),
+            self.models,
+            DecoratorMode.UPDATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_2.get_enable_managed_dranet(), True)
 
     def common_get_disable_artifact_streaming(self):
         # default
@@ -1960,6 +2098,12 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_update_enable_disable_cluster_autoscaler_and_min_max_count(self):
         self.common_get_update_enable_disable_cluster_autoscaler_and_min_max_count()
 
+    def test_get_node_count_from_vms_agentpool(self):
+        self.common_get_node_count_from_vms_agentpool()
+
+    def test_get_update_enable_disable_cluster_autoscaler_and_min_max_count_vmsize_vms(self):
+        self.common_get_update_enable_disable_cluster_autoscaler_and_min_max_count_vmsize_vms()
+
     def test_get_priority(self):
         self.common_get_priority()
 
@@ -2002,11 +2146,17 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_enable_fips_image(self):
         self.common_get_enable_fips_image()
 
+    def test_get_enable_fips_image_windows2025(self):
+        self.common_get_enable_fips_image_windows2025()
+
     def test_get_disable_fips_image(self):
         self.common_get_disable_fips_image()
 
     def test_get_enable_artifact_streaming(self):
         self.common_get_enable_artifact_streaming()
+
+    def test_get_enable_managed_dranet(self):
+        self.common_get_enable_managed_dranet()
 
     def test_get_disable_artifact_streaming(self):
         self.common_get_disable_artifact_streaming()
@@ -2064,6 +2214,38 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
 
     def test_get_gpu_driver(self):
         self.common_get_gpu_driver()
+
+    def test_get_enable_managed_gpu(self):
+        for value in (None, False, True):
+            with self.subTest(value=value):
+                ctx = AKSAgentPoolContext(
+                    self.cmd,
+                    AKSAgentPoolParamDict({"enable_managed_gpu": value}),
+                    self.models,
+                    DecoratorMode.CREATE,
+                    self.agentpool_decorator_mode,
+                )
+                self.assertEqual(ctx.get_enable_managed_gpu(), value)
+                agentpool = self.create_initialized_agentpool_instance()
+                ctx.attach_agentpool(agentpool)
+                self.assertEqual(ctx.get_enable_managed_gpu(), value)
+
+        for mode, expected in (("Managed", True), ("Unmanaged", False)):
+            with self.subTest(mode=mode):
+                ctx = AKSAgentPoolContext(
+                    self.cmd,
+                    AKSAgentPoolParamDict({"enable_managed_gpu": None}),
+                    self.models,
+                    DecoratorMode.CREATE,
+                    self.agentpool_decorator_mode,
+                )
+                agentpool = self.create_initialized_agentpool_instance(
+                    gpu_profile=self.models.GPUProfile(
+                        nvidia=self.models.NvidiaGPUProfile(management_mode=mode)
+                    )
+                )
+                ctx.attach_agentpool(agentpool)
+                self.assertEqual(ctx.get_enable_managed_gpu(), expected)
 
     def test_get_gateway_prefix_size(self):
         self.common_get_gateway_prefix_size()
@@ -2162,6 +2344,12 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_update_enable_disable_cluster_autoscaler_and_min_max_count(self):
         self.common_get_update_enable_disable_cluster_autoscaler_and_min_max_count()
 
+    def test_get_node_count_from_vms_agentpool(self):
+        self.common_get_node_count_from_vms_agentpool()
+
+    def test_get_update_enable_disable_cluster_autoscaler_and_min_max_count_vmsize_vms(self):
+        self.common_get_update_enable_disable_cluster_autoscaler_and_min_max_count_vmsize_vms()
+
     def test_get_priority(self):
         self.common_get_priority()
 
@@ -2204,8 +2392,14 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_enable_fips_image(self):
         self.common_get_enable_fips_image()
 
+    def test_get_enable_fips_image_windows2025(self):
+        self.common_get_enable_fips_image_windows2025()
+
     def test_get_enable_artifact_streaming(self):
         self.common_get_enable_artifact_streaming()
+
+    def test_get_enable_managed_dranet(self):
+        self.common_get_enable_managed_dranet()
 
     def test_get_disable_artifact_streaming(self):
         self.common_get_disable_artifact_streaming()
@@ -2734,6 +2928,82 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+    def common_set_up_ssh_access(self):
+        # default is localuser
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_LOCALUSER},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.set_up_ssh_access(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_ssh_access(agentpool_1)
+        dec_agentpool_1 = self._restore_defaults_in_agentpool(dec_agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_LOCALUSER,
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # disabled
+        dec_2 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_DISABLED},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.set_up_ssh_access(agentpool_2)
+        dec_agentpool_2 = self._restore_defaults_in_agentpool(dec_agentpool_2)
+        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            )
+        )
+        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+
+        # entraid
+        dec_3 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_ENTRAID},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_3.context.attach_agentpool(agentpool_3)
+        dec_agentpool_3 = dec_3.set_up_ssh_access(agentpool_3)
+        dec_agentpool_3 = self._restore_defaults_in_agentpool(dec_agentpool_3)
+        ground_truth_agentpool_3 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_ENTRAID,
+            )
+        )
+        self.assertEqual(dec_agentpool_3, ground_truth_agentpool_3)
+
+        # None, no change
+        dec_4 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": None},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_4 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_4.context.attach_agentpool(agentpool_4)
+        dec_agentpool_4 = dec_4.set_up_ssh_access(agentpool_4)
+        dec_agentpool_4 = self._restore_defaults_in_agentpool(dec_agentpool_4)
+        ground_truth_agentpool_4 = self.create_initialized_agentpool_instance()
+        self.assertEqual(dec_agentpool_4, ground_truth_agentpool_4)
+
     def common_set_up_gpu_profile(self):
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
@@ -2800,6 +3070,31 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
+    def common_set_up_managed_dranet(self):
+        dec_1 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"enable_managed_dranet": False},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.set_up_agentpool_network_profile(agentpool_1)
+        self.assertIsNone(dec_agentpool_1.network_profile)
+
+        dec_2 = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"enable_managed_dranet": True},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance(restore_defaults=False)
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.set_up_agentpool_network_profile(agentpool_2)
+        self.assertEqual(dec_agentpool_2.network_profile.dranet.mode, "Managed")
+
     def common_set_up_virtual_machines_profile(self):
         dec_1 = AKSAgentPoolAddDecorator(
             self.cmd,
@@ -2820,6 +3115,9 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             type=CONST_VIRTUAL_MACHINES,
             count=None,
             vm_size=None,
+            enable_auto_scaling=False,
+            min_count=None,
+            max_count=None,
             virtual_machines_profile=self.models.VirtualMachinesProfile(
                 scale=self.models.ScaleProfile(
                     manual=[
@@ -2832,6 +3130,49 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
             )
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # VirtualMachines pool with cluster autoscaler enabled should be expressed through
+        # virtualMachinesProfile.scale.autoscale, not the VMSS-only enable_auto_scaling/min/max fields
+        dec_autoscale = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {
+                "vm_set_type": "VirtualMachines",
+                "vm_sizes": "Standard_D4s_v3",
+                "node_count": 3,
+                "enable_cluster_autoscaler": True,
+                "min_count": 2,
+                "max_count": 5,
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_autoscale = self.create_initialized_agentpool_instance(
+            type=CONST_VIRTUAL_MACHINES, restore_defaults=False
+        )
+        dec_autoscale.context.attach_agentpool(agentpool_autoscale)
+        dec_agentpool_autoscale = dec_autoscale.set_up_virtual_machines_profile(agentpool_autoscale)
+        dec_agentpool_autoscale = self._restore_defaults_in_agentpool(dec_agentpool_autoscale)
+        ground_truth_agentpool_autoscale = self.create_initialized_agentpool_instance(
+            type=CONST_VIRTUAL_MACHINES,
+            count=None,
+            vm_size=None,
+            enable_auto_scaling=False,
+            min_count=None,
+            max_count=None,
+            virtual_machines_profile=self.models.VirtualMachinesProfile(
+                scale=self.models.ScaleProfile(
+                    autoscale=[
+                        self.models.AutoScaleProfile(
+                            size="Standard_D4s_v3",
+                            min_count=2,
+                            max_count=5,
+                        )
+                    ]
+                )
+            )
+        )
+        self.assertEqual(dec_agentpool_autoscale, ground_truth_agentpool_autoscale)
 
         # fail on passing more than 1 vm_sizes
         dec_2 = AKSAgentPoolAddDecorator(
@@ -2909,9 +3250,75 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
     def test_set_up_agentpool_security_profile(self):
         self.common_set_up_agentpool_security_profile()
-    
+
+    def test_set_up_ssh_access(self):
+        self.common_set_up_ssh_access()
+
     def test_set_up_gpu_profile(self):
         self.common_set_up_gpu_profile()
+
+    def test_set_up_gpu_profile_with_managed_gpu(self):
+        for driver in (None, "Install", "None"):
+            with self.subTest(driver=driver):
+                dec = AKSAgentPoolAddDecorator(
+                    self.cmd,
+                    self.client,
+                    {"enable_managed_gpu": True, "gpu_driver": driver},
+                    self.resource_type,
+                    self.agentpool_decorator_mode,
+                )
+                with self.assertRaises(CLIInternalError):
+                    dec.set_up_gpu_profile(None)
+                agentpool = self.create_initialized_agentpool_instance()
+                dec.context.attach_agentpool(agentpool)
+
+                self.assertIs(dec.set_up_gpu_profile(agentpool), agentpool)
+                self.assertEqual(
+                    agentpool.gpu_profile.as_dict(),
+                    {"driver": "Install", "nvidia": {"managementMode": "Managed"}},
+                )
+
+    def test_set_up_gpu_profile_without_managed_gpu(self):
+        for enabled in (None, False):
+            for driver in (None, "Install", "None"):
+                with self.subTest(enabled=enabled, driver=driver):
+                    dec = AKSAgentPoolAddDecorator(
+                        self.cmd,
+                        self.client,
+                        {"enable_managed_gpu": enabled, "gpu_driver": driver},
+                        self.resource_type,
+                        self.agentpool_decorator_mode,
+                    )
+                    agentpool = self.create_initialized_agentpool_instance()
+                    dec.context.attach_agentpool(agentpool)
+                    dec.set_up_gpu_profile(agentpool)
+
+                    if driver is None:
+                        self.assertIsNone(agentpool.gpu_profile)
+                    else:
+                        self.assertEqual(agentpool.gpu_profile.as_dict(), {"driver": driver})
+
+    def test_set_up_gpu_profile_preserves_nvidia_profile(self):
+        dec = AKSAgentPoolAddDecorator(
+            self.cmd,
+            self.client,
+            {"gpu_driver": "Install"},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        nvidia = self.models.NvidiaGPUProfile(management_mode="Managed")
+        gpu_profile = self.models.GPUProfile(nvidia=nvidia)
+        agentpool = self.create_initialized_agentpool_instance(gpu_profile=gpu_profile)
+        dec.context.attach_agentpool(agentpool)
+
+        dec.set_up_gpu_profile(agentpool)
+
+        self.assertIs(agentpool.gpu_profile, gpu_profile)
+        self.assertIs(agentpool.gpu_profile.nvidia, nvidia)
+        self.assertEqual(
+            agentpool.gpu_profile.as_dict(),
+            {"driver": "Install", "nvidia": {"managementMode": "Managed"}},
+        )
 
     def test_set_up_artifact_streaming(self):
         self.common_set_up_artifact_streaming()
@@ -2964,6 +3371,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             dec_agentpool_1 = dec_1.construct_agentpool_profile_default()
 
         ground_truth_upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
+        # CLI will create sshAccess=localuser by default
+        ground_truth_security_profile_1 = self.models.AgentPoolSecurityProfile()
+        ground_truth_security_profile_1.ssh_access = CONST_SSH_ACCESS_LOCALUSER
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             nodepool_name="test_nodepool_name",
             os_type=CONST_DEFAULT_NODE_OS_TYPE,
@@ -2981,6 +3391,7 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
             host_group_id=None,
             capacity_reservation_group_id=None,
+            security_profile=ground_truth_security_profile_1,
         )
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
             ground_truth_agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
@@ -3024,6 +3435,9 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
 
     def test_set_up_agentpool_gateway_profile(self):
         self.common_set_up_agentpool_gateway_profile()
+
+    def test_set_up_managed_dranet(self):
+        self.common_set_up_managed_dranet()
 
 class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecoratorCommonTestCase):
     def setUp(self):
@@ -3076,6 +3490,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
     def test_set_up_agentpool_security_profile(self):
         self.common_set_up_agentpool_security_profile()
 
+    def test_set_up_ssh_access(self):
+        self.common_set_up_ssh_access()
+
     def test_set_up_virtual_machines_profile(self):
         self.common_set_up_virtual_machines_profile()
 
@@ -3124,6 +3541,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             dec_agentpool_1 = dec_1.construct_agentpool_profile_default()
 
         upgrade_settings_1 = self.models.AgentPoolUpgradeSettings()
+        # CLI will create sshAccess=localuser by default
+        ground_truth_security_profile_1 = self.models.AgentPoolSecurityProfile()
+        ground_truth_security_profile_1.ssh_access = CONST_SSH_ACCESS_LOCALUSER
         ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
             nodepool_name="nodepool1",
             orchestrator_version="",
@@ -3142,6 +3562,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
             host_group_id=None,
             capacity_reservation_group_id=None,
+            security_profile=ground_truth_security_profile_1,
         )
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
@@ -3152,6 +3573,9 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
 
     def test_set_up_agentpool_gateway_profile(self):
         self.common_set_up_agentpool_gateway_profile()
+
+    def test_set_up_managed_dranet(self):
+        self.common_set_up_managed_dranet()
 
 class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
@@ -3262,6 +3686,85 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
             enable_auto_scaling=False, node_count=3, min_count=None, max_count=None
         )
         self.assertEqual(dec_agentpool_2, grond_truth_agentpool_2)
+
+    def common_update_auto_scaler_properties_vms(self):
+        # enable autoscaler on VirtualMachines pool: manual -> autoscale conversion
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_cluster_autoscaler": True,
+                "disable_cluster_autoscaler": False,
+                "update_cluster_autoscaler": False,
+                "min_count": 1,
+                "max_count": 4,
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            virtual_machines_profile=self.models.VirtualMachinesProfile(
+                scale=self.models.ScaleProfile(
+                    manual=[
+                        self.models.ManualScaleProfile(size="Standard_D2s_v3", count=2),
+                        self.models.ManualScaleProfile(size="Standard_D4s_v3", count=1),
+                    ]
+                )
+            ),
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool_1.type = CONST_VIRTUAL_MACHINES
+        else:
+            if agentpool_1.properties is None:
+                agentpool_1.properties = self.models.AgentPoolManagedClusterAgentPoolProfileProperties()
+            agentpool_1.properties.type_properties_type = CONST_VIRTUAL_MACHINES
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_auto_scaler_properties_vms(agentpool_1)
+        self.assertEqual(len(dec_agentpool_1.virtual_machines_profile.scale.autoscale), 2)
+        self.assertEqual(dec_agentpool_1.virtual_machines_profile.scale.autoscale[0].size, "Standard_D2s_v3")
+        self.assertEqual(dec_agentpool_1.virtual_machines_profile.scale.autoscale[0].min_count, 1)
+        self.assertEqual(dec_agentpool_1.virtual_machines_profile.scale.autoscale[0].max_count, 4)
+        self.assertEqual(dec_agentpool_1.virtual_machines_profile.scale.autoscale[1].size, "Standard_D4s_v3")
+        self.assertEqual(dec_agentpool_1.virtual_machines_profile.scale.autoscale[1].min_count, 1)
+        self.assertEqual(dec_agentpool_1.virtual_machines_profile.scale.autoscale[1].max_count, 4)
+
+        # disable autoscaler on VirtualMachines pool: autoscale -> manual conversion
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_cluster_autoscaler": False,
+                "disable_cluster_autoscaler": True,
+                "update_cluster_autoscaler": False,
+                "min_count": None,
+                "max_count": None,
+            },
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance(
+            virtual_machines_profile=self.models.VirtualMachinesProfile(
+                scale=self.models.ScaleProfile(
+                    autoscale=[
+                        self.models.AutoScaleProfile(size="Standard_D2s_v3", min_count=2, max_count=5),
+                        self.models.AutoScaleProfile(size="Standard_D4s_v3", min_count=1, max_count=4),
+                    ]
+                )
+            ),
+        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool_2.type = CONST_VIRTUAL_MACHINES
+        else:
+            if agentpool_2.properties is None:
+                agentpool_2.properties = self.models.AgentPoolManagedClusterAgentPoolProfileProperties()
+            agentpool_2.properties.type_properties_type = CONST_VIRTUAL_MACHINES
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.update_auto_scaler_properties_vms(agentpool_2)
+        self.assertEqual(len(dec_agentpool_2.virtual_machines_profile.scale.manual), 2)
+        self.assertEqual(dec_agentpool_2.virtual_machines_profile.scale.manual[0].size, "Standard_D2s_v3")
+        self.assertEqual(dec_agentpool_2.virtual_machines_profile.scale.manual[0].count, 2)
+        self.assertEqual(dec_agentpool_2.virtual_machines_profile.scale.manual[1].size, "Standard_D4s_v3")
+        self.assertEqual(dec_agentpool_2.virtual_machines_profile.scale.manual[1].count, 1)
 
     def common_update_label_tag_taint(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
@@ -3443,6 +3946,126 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         dec_3.context.attach_agentpool(agentpool_2)
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_3.update_artifact_streaming(agentpool_2)
+
+    def common_update_ssh_access(self):
+        # set a new value with --yes, no prompt
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_DISABLED, "yes": True},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_ssh_access(None)
+        agentpool_1 = self.create_initialized_agentpool_instance()
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_ssh_access(agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # None, no change
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": None},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance()
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.update_ssh_access(agentpool_2)
+        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance()
+        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+
+        # already set to the same value, no prompt needed, directly return
+        dec_3 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_DISABLED},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            )
+        )
+        dec_3.context.attach_agentpool(agentpool_3)
+        dec_agentpool_3 = dec_3.update_ssh_access(agentpool_3)
+        ground_truth_agentpool_3 = self.create_initialized_agentpool_instance(
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            )
+        )
+        self.assertEqual(dec_agentpool_3, ground_truth_agentpool_3)
+
+        # prompt rejected, early exit
+        dec_4 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_ENTRAID, "yes": False},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_4 = self.create_initialized_agentpool_instance()
+        dec_4.context.attach_agentpool(agentpool_4)
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.prompt_y_n",
+            return_value=False,
+        ), self.assertRaises(DecoratorEarlyExitException):
+            dec_4.update_ssh_access(agentpool_4)
+
+    def common_update_managed_dranet(self):
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_managed_dranet": False},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            network_profile=self.models.AgentPoolNetworkProfile(
+                dranet=self.models.DRANETProfile(mode="Managed")
+            )
+        )
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_network_profile(agentpool_1)
+        self.assertEqual(dec_agentpool_1.network_profile.dranet.mode, "Managed")
+
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_managed_dranet": True},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance()
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.update_network_profile(agentpool_2)
+        self.assertEqual(dec_agentpool_2.network_profile.dranet.mode, "Managed")
+
+        dec_3 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"enable_managed_dranet": False},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance()
+        dec_3.context.attach_agentpool(agentpool_3)
+        with patch.object(dec_3.context, "get_asg_ids", return_value=[]), patch.object(
+            dec_3.context, "get_allowed_host_ports", return_value=[]
+        ):
+            dec_agentpool_3 = dec_3.update_network_profile(agentpool_3)
+        self.assertIsNotNone(dec_agentpool_3.network_profile)
+        self.assertEqual(dec_agentpool_3.network_profile.application_security_groups, [])
+        self.assertEqual(dec_agentpool_3.network_profile.allowed_host_ports, [])
 
     def common_update_fips_image(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
@@ -3672,6 +4295,9 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
     def test_update_auto_scaler_properties(self):
         self.common_update_auto_scaler_properties()
 
+    def test_update_auto_scaler_properties_vms(self):
+        self.common_update_auto_scaler_properties_vms()
+
     def test_update_label_tag_taint(self):
         self.common_update_label_tag_taint()
 
@@ -3689,6 +4315,12 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
 
     def test_update_artifact_streaming(self):
         self.common_update_artifact_streaming()
+
+    def test_update_managed_dranet(self):
+        self.common_update_managed_dranet()
+
+    def test_update_ssh_access(self):
+        self.common_update_ssh_access()
 
     def test_update_agentpool_profile_default(self):
         import inspect
@@ -3767,6 +4399,53 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
             headers={},
         )
 
+    def test_update_agentpool_windows2025(self):
+        for current_fips, enable_fips_image, expected_fips in [
+            (False, True, True),
+            (True, False, True),
+            (False, False, False),
+        ]:
+            with self.subTest(current_fips=current_fips, enable_fips_image=enable_fips_image):
+                dec = AKSAgentPoolUpdateDecorator(
+                    self.cmd,
+                    self.client,
+                    {
+                        "resource_group_name": "test_rg_name",
+                        "cluster_name": "test_cluster_name",
+                        "nodepool_name": "test_nodepool_name",
+                        "os_sku": CONST_OS_SKU_WINDOWS2025,
+                        "enable_fips_image": enable_fips_image,
+                    },
+                    self.resource_type,
+                    self.agentpool_decorator_mode,
+                )
+                self.client.get = Mock(
+                    return_value=self.create_initialized_agentpool_instance(
+                        nodepool_name="test_nodepool_name",
+                        os_type="Windows",
+                        os_sku=CONST_OS_SKU_WINDOWS2022,
+                        enable_fips=current_fips,
+                    )
+                )
+                with patch(
+                    "azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools",
+                    return_value=Mock(list=Mock(return_value=[])),
+                ):
+                    agentpool = dec.update_agentpool_profile_default()
+                self.assertEqual(agentpool.os_sku, CONST_OS_SKU_WINDOWS2025)
+                self.assertEqual(agentpool.enable_fips, expected_fips)
+                with patch("azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait") as put_agentpool:
+                    dec.update_agentpool(agentpool)
+                put_agentpool.assert_called_once_with(
+                    False,
+                    self.client.begin_create_or_update,
+                    "test_rg_name",
+                    "test_cluster_name",
+                    "test_nodepool_name",
+                    agentpool,
+                    headers={},
+                )
+
     def test_update_localdns_profile(self):
         self.common_update_localdns_profile()
 
@@ -3809,6 +4488,9 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
     def test_update_auto_scaler_properties(self):
         self.common_update_auto_scaler_properties()
 
+    def test_update_auto_scaler_properties_vms(self):
+        self.common_update_auto_scaler_properties_vms()
+
     def test_update_label_tag_taint(self):
         self.common_update_label_tag_taint()
 
@@ -3820,6 +4502,12 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
 
     def test_update_artifact_streaming(self):
         self.common_update_artifact_streaming()
+
+    def test_update_managed_dranet(self):
+        self.common_update_managed_dranet()
+
+    def test_update_ssh_access(self):
+        self.common_update_ssh_access()
 
     def test_update_agentpool_profile_default(self):
         import inspect

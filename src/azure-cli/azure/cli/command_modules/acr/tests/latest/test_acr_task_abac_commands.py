@@ -248,8 +248,9 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         if os.environ.get(ENV_LIVE_TEST, False):
             time.sleep(30)
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
-                     checks=[self.check('principalId', '{principal_id}')])
+            response = self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
+                                checks=[self.check('principalId', '{principal_id}')]).get_output_in_json()
+        self.kwargs['repository_contributor_assignment_id'] = response['id']
 
         # Wait for the role assignment to propagate
         if os.environ.get(ENV_LIVE_TEST, False):
@@ -261,8 +262,9 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
 
         # Assign Control Plane permissions
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-            self.cmd('role assignment create --role "AcrPush" --assignee {principal_id} --scope {registry_resource_id}',
-                     checks=[self.check('principalId', '{principal_id}')])
+            response = self.cmd('role assignment create --role "AcrPush" --assignee {principal_id} --scope {registry_resource_id}',
+                                checks=[self.check('principalId', '{principal_id}')]).get_output_in_json()
+        self.kwargs['acr_push_assignment_id'] = response['id']
 
         # Wait for the role assignment to propagate
         if os.environ.get(ENV_LIVE_TEST, False):
@@ -282,9 +284,9 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
                          self.check('credentials.sourceRegistry.identity', '{identity}'),
                          self.check('credentials.sourceRegistry.loginMode', '{auth_mode}')])
 
-        # Remove role assignement
-        self.cmd('role assignment delete --role "AcrPush" --assignee {principal_id} --scope {registry_resource_id}', expect_failure=False)
-        self.cmd('role assignment delete --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}', expect_failure=False)
+        # Delete by ID to avoid recording unrelated inherited role assignments.
+        self.cmd('role assignment delete --ids {acr_push_assignment_id}', expect_failure=False)
+        self.cmd('role assignment delete --ids {repository_contributor_assignment_id}', expect_failure=False)
         if os.environ.get(ENV_LIVE_TEST, False):
             time.sleep(45)
 

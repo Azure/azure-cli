@@ -1,0 +1,37 @@
+schema: spec-driven
+
+context: |
+  Repository: Azure CLI.
+  Use Azure CLI command module names as OpenSpec spec domains for module-specific behavior.
+  Module-specific behavior belongs under openspec/specs/<module-name>/spec.md.
+  Shared custom code authoring and agent workflow rules belong under openspec/specs/custom-code-authoring/spec.md.
+
+  Custom code changes must first be routed as exactly one of:
+  - aaz-subclass-custom
+  - legacy-sdk-backed-custom
+  - legacy-non-sdk-custom
+
+  Use repository evidence before asking the user. Prefer current file context, nearby command registration, generated AAZ assets, client factories, handler shapes, and neighboring command patterns.
+  Do not edit generated AAZ files under aaz/latest unless explicitly requested and regeneration risk is accepted.
+  Prefer existing command group style, local validators/helpers, table transformers, and narrow validation commands.
+
+rules:
+  proposal:
+    - Include target module, command group, command/action, intended behavior, and known API/source constraints.
+    - State whether the change affects user-facing CLI behavior, custom-code authoring workflow, or both.
+    - Keep scope explicit and list non-goals when the request could be mistaken for another custom-code route.
+  specs:
+    - Use Azure CLI command module names as spec domains.
+    - For module-specific behavior, write delta specs under specs/<module-name>/spec.md within the change.
+    - For shared custom code authoring behavior, write delta specs under specs/custom-code-authoring/spec.md.
+    - Use SHALL requirements with concrete scenarios.
+    - Specify externally observable behavior, not incidental implementation details, unless the spec is for agent workflow behavior.
+  design:
+    - Include router output: route, evidence, next_skill, resolved slots, and open questions.
+    - Explain why the selected route is not one of the other two routes.
+    - Identify generated files, manual files, command registration files, client factories, or external tools involved.
+    - Identify the narrowest validation command before implementation.
+  tasks:
+    - Include command registration, handler/custom class edits, parameter/help updates, and tests only when needed.
+    - Keep tasks grouped by affected file or workflow step.
+    - Include a focused validation task for the touched behavior.

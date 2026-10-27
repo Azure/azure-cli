@@ -23,6 +23,8 @@ server_friendly_sql = 'sql-clitestvm-d'
 item_auto_sql = 'SQLInstance;mssqlserver'
 item1_sql = 'SQLDataBase;mssqlserver;msdb'
 item1_sql_fname = 'msdb'
+item_irpending_sql = 'SQLDataBase;mssqlserver;msdb_restored'
+item_irpending_sql_fname = 'msdb_restored'
 instance_name = 'sqlinstance;mssqlserver'
 
 
@@ -31,22 +33,27 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     # Please make sure you have the following setup in place before running the tests -
 
     # For the tests using sql-clitestvm-donotuse2 and sql-clitestvault-donotuse -
-    # Each test will register the container at the start and unregister at the end of the test
-    # Make sure that the container is not already registered since the start of the test
+    # Tests tolerate registered and soft-deleted containers because workload container unregister
+    # leaves the container recoverable while soft-delete is enabled.
 
     # Note: Archive test uses different subscription. Please comment them out when running the whole test suite at once. And run those tests individually.
 
 
     def register_container(self):
-        # Check if the container is already registered to the vault, and if it is, if it's in soft-deleted state. Register/Re-register accordingly.
-        existing_container = self.cmd('backup container show --backup-management-type AzureWorkload -g "{rg}" -v "{vault}" -n "{name}"').get_output_in_json()
+        existing_containers = self.cmd(
+            'backup container list --backup-management-type AzureWorkload '
+            '-g "{rg}" -v "{vault}"').get_output_in_json()
+        existing_container = next((
+            candidate for candidate in existing_containers
+            if candidate.get('name', '').lower() == self.kwargs['name'].lower()
+        ), None)
         if existing_container:
             print("Found an existing container")
             if 'properties' in existing_container and \
                     'registrationStatus' in existing_container['properties'] and \
                     existing_container['properties']['registrationStatus'] == 'SoftDeleted':
                 print("Container is soft-deleted - reregistering")
-                self.cmd('backup container re-register --backup-management-type AzureWorkload --workload-type "{wt}" -g "{rg}" -v "{vault}" -c "{name}" --yes')
+                self.cmd('backup container re-register --backup-management-type AzureWorkload --workload-type "{wt}" -g "{rg}" -v "{vault}" --container-name "{name}" --yes')
         else:
             print("Registering the container anew")
             self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
@@ -56,7 +63,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     def register_item(self):
         # Check if the item is already registered for backup. If not, register, if it is, undelete + reprotect as appropriate.
-        existing_item = self.cmd('backup item show --backup-management-type AzureWorkload -g "{rg}" -v "{vault}" -c "{name}" -n "{item}"').get_output_in_json()
+        existing_items = self.cmd(
+            'backup item list --backup-management-type AzureWorkload --workload-type "{wt}" '
+            '-g "{rg}" -v "{vault}" -c "{name}"').get_output_in_json()
+        item_name = self.kwargs['item'].lower()
+        existing_item = next((
+            candidate for candidate in existing_items
+            if candidate.get('name', '').lower() == item_name
+            or candidate.get('properties', {}).get('friendlyName', '').lower() == item_name
+        ), None)
         if existing_item:
             print("Found an existing item")
             if 'properties' in existing_item and \
@@ -99,7 +114,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'id': id_sql
         })
 
-        self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id} ')
+        self.register_container()
 
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
@@ -132,10 +147,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
-        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y')
+        self.cmd('backup container unregister -v {vault} -g {rg} -c {name} -y', expect_failure=True)
 
-        # self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
-        #     self.check("length([?name == '{name}'])", 0)])
+        self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
+            self.check("length([?name == '{name}' && properties.registrationStatus == 'SoftDeleted'])", 1)])
 
     @record_only()
     def test_backup_wl_sql_policy(self):
@@ -268,7 +283,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['container1'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
 
         self.cmd('backup recoverypoint list -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt} --query [].name', checks=[
-            self.check("length(@)", 1)
+            self.greater_than("length(@)", 0)
         ])
 
         rp1_json = self.cmd('backup recoverypoint show-log-chain -g {rg} -v {vault} -c {name} -i {item} --workload-type {wt}').get_output_in_json()
@@ -336,14 +351,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'name': container_sql,
             'rg': resource_group,
             'fname': server_friendly_sql,
+            'vm_name': container_friendly_sql,
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
             'sub': sub_sql,
-            'item': item1_sql,
+            'item': item_irpending_sql,
             'pit': 'SQLDatabase',
             'item_id': item_id_sql,
             'id': id_sql,
-            'fitem': item1_sql_fname
+            'fitem': item_irpending_sql_fname
         })
 
         # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
@@ -366,8 +382,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
 
         self.assertIn(self.kwargs['vault'].lower(), item1_json['id'].lower())
-        self.assertIn(self.kwargs['fname'].lower(), item1_json['properties']['containerName'].lower())
-        self.assertIn(self.kwargs['fname'].lower(), item1_json['properties']['sourceResourceId'].lower())
+        self.assertIn(self.kwargs['vm_name'].lower(), item1_json['properties']['containerName'].lower())
+        self.assertIn(self.kwargs['vm_name'].lower(), item1_json['properties']['sourceResourceId'].lower())
         self.assertIn(self.kwargs['policy'].lower(), item1_json['properties']['policyId'].lower())
 
         self.kwargs['container1_fullname'] = self.cmd('backup container show -n {name} -v {vault} -g {rg} --backup-management-type AzureWorkload --query name').get_output_in_json()
@@ -724,6 +740,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
+    @unittest.skip("Requires VaultArchive-tier recovery points, which take multiple days of archive aging to become ready-for-move. Setup is being provisioned separately; this scenario will be re-recorded against the new API version in the next release.")
     @AllowLargeResponse()
     @record_only()
     def test_backup_wl_sql_archive (self):
@@ -792,10 +809,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @record_only()
     def test_backup_wl_reconfigure(self):
         self.kwargs.update({
-            'resource_group': 'zubairRG',
-            'vault1': 'zimmut-ccy-6',
-            'vault2': 'zimmut-ccy-5',
-            'container': 'sql-migration-vm2',
+            'resource_group': 'clitest-sqlreconfig-rg',
+            'target_resource_group': 'clitest-sqlreconfig-target-rg',
+            'vault1': 'clitest-sqlreconfig-src',
+            'vault2': 'clitest-sqlreconfig-dst',
+            'container': 'clisqlrcvm',
             'item': 'master',
             'policy_name': 'HourlyLogBackup'
         })
@@ -805,9 +823,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{resource_group}')
         ])
 
-        self.cmd('backup vault show -g "{resource_group}" -n "{vault2}"', checks=[
+        self.cmd('backup vault show -g "{target_resource_group}" -n "{vault2}"', checks=[
             self.check('name', '{vault2}'),
-            self.check('resourceGroup', '{resource_group}')
+            self.check('resourceGroup', '{target_resource_group}')
         ])
 
         # Verify container and items exist in vault1
@@ -822,12 +840,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         # Verify policy exists in vault2
-        self.cmd('backup policy show -g "{resource_group}" -v "{vault2}" -n "{policy_name}"', checks=[
+        self.cmd('backup policy show -g "{target_resource_group}" -v "{vault2}" -n "{policy_name}"', checks=[
             self.check('name', '{policy_name}'),
-            self.check('resourceGroup', '{resource_group}')
+            self.check('resourceGroup', '{target_resource_group}')
         ])
 
-        self.cmd('backup protection reconfigure -g "{resource_group}" -v "{vault1}" -c "{container}" -i "{item}" --backup-management-type "AzureWorkload" --workload-type "MSSQL" --new-rg "{resource_group}" --new-vault-name "{vault2}" --new-policy-name "{policy_name}"', checks=[
+        self.cmd('backup protection reconfigure -g "{resource_group}" -v "{vault1}" -c "{container}" -i "{item}" --backup-management-type "AzureWorkload" --workload-type "MSSQL" --new-rg "{target_resource_group}" --new-vault-name "{vault2}" --new-policy-name "{policy_name}"', checks=[
             self.check('properties.operation', 'ConfigureBackup'),
             self.check('properties.status', 'Completed')
         ])

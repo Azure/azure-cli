@@ -15,7 +15,7 @@ set -exv
 ls -Rl /mnt/artifacts
 
 WORKDIR=`cd $(dirname $0); cd ../../../; pwd`
-PYTHON_VERSION="3.13.13"
+PYTHON_VERSION="3.14.9"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Update APT packages
@@ -37,11 +37,12 @@ $PYTHON_SRC_DIR/*/configure --srcdir $PYTHON_SRC_DIR/* --prefix $WORKDIR/python_
 make
 make install
 
-$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip setuptools
+# Keep setuptools at or above the security floor.
+$WORKDIR/python_env/bin/python3 -m pip install --upgrade pip "setuptools>=78.1.1"
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
-find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
+find ${WORKDIR}/src/ -name pyproject.toml -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
 pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
 $WORKDIR/python_env/bin/python3 ${WORKDIR}/scripts/trim_sdk.py
 

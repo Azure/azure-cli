@@ -28,30 +28,12 @@ from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              SettingsParameterDescription,
                                              NodeTypeDescription,
                                              EndpointRangeDescription)
-from azure.mgmt.compute.models import (VaultCertificate,
-                                       Sku as ComputeSku,
-                                       UpgradePolicy,
-                                       ImageReference,
-                                       ApiEntityReference,
-                                       VaultSecretGroup,
-                                       VirtualMachineScaleSetOSDisk,
-                                       VirtualMachineScaleSetVMProfile,
-                                       VirtualMachineScaleSetExtensionProfile,
-                                       VirtualMachineScaleSetOSProfile,
-                                       VirtualMachineScaleSetStorageProfile,
-                                       VirtualMachineScaleSet,
-                                       VirtualMachineScaleSetNetworkConfiguration,
-                                       VirtualMachineScaleSetIPConfiguration,
-                                       VirtualMachineScaleSetNetworkProfile,
-                                       SubResource,
-                                       UpgradeMode)
 from azure.mgmt.storage.models import StorageAccountCreateParameters
 
 from knack.log import get_logger
 
 from ._client_factory import (resource_client_factory,
                               keyvault_client_factory,
-                              compute_client_factory,
                               storage_client_factory)
 logger = get_logger(__name__)
 
@@ -461,27 +443,29 @@ def remove_client_cert(cmd,
 
 
 def add_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, number_of_nodes_to_add):
+    from ..vm.operations.vmss import VMSSCreate
     cli_ctx = cmd.cli_ctx
     number_of_nodes_to_add = int(number_of_nodes_to_add)
     if number_of_nodes_to_add <= 0:
         raise CLIError("--number-of-nodes-to-add must be greater than 0")
-    compute_client = compute_client_factory(cli_ctx)
     cluster = client.get(resource_group_name, cluster_name)
     node_types = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
     if node_types is None:
         raise CLIError("Failed to find the node type in the cluster")
     node_type = node_types[0]
 
-    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type.name)
-    vmss.sku.capacity = vmss.sku.capacity + number_of_nodes_to_add
+    vmss = _get_cluster_vmss_by_node_type(cmd, resource_group_name, cluster.cluster_id, node_type.name)
+
+    vmss['sku']['capacity'] = vmss['sku']['capacity'] + number_of_nodes_to_add
+    vmss['resource_group'] = resource_group_name
+    vmss['vm_scale_set_name'] = vmss['name']
 
     # update vmss
-    vmss_poll = compute_client.virtual_machine_scale_sets.begin_create_or_update(
-        resource_group_name, vmss.name, vmss)
+    vmss_poll = VMSSCreate(cli_ctx=cli_ctx)(command_args=vmss)
     LongRunningOperation(cli_ctx)(vmss_poll)
 
     # update cluster
-    node_type.vm_instance_count = vmss.sku.capacity
+    node_type.vm_instance_count = vmss['sku']['capacity']
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
 
     update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
@@ -489,11 +473,11 @@ def add_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, 
 
 
 def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, number_of_nodes_to_remove):
+    from ..vm.operations.vmss import VMSSCreate
     cli_ctx = cmd.cli_ctx
     number_of_nodes_to_remove = int(number_of_nodes_to_remove)
     if number_of_nodes_to_remove <= 0:
         raise CLIError("--number-of-nodes-to-remove must be greater than 0")
-    compute_client = compute_client_factory(cli_ctx)
     cluster = client.get(resource_group_name, cluster_name)
     node_types = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
     if node_types is None or len(node_types) == 0:
@@ -501,16 +485,17 @@ def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_typ
 
     node_type = node_types[0]
     reliability_required_instance_count = _get_target_instance(cluster.reliability_level)
-    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type.name)
-    vmss.sku.capacity = vmss.sku.capacity - number_of_nodes_to_remove
-    if vmss.sku.capacity < reliability_required_instance_count:
+    vmss = _get_cluster_vmss_by_node_type(cmd, resource_group_name, cluster.cluster_id, node_type.name)
+    vmss['sku']['capacity'] = vmss['sku']['capacity'] - number_of_nodes_to_remove
+    if vmss['sku']['capacity'] < reliability_required_instance_count:
         raise CLIError("Can't delete node since current reliability level is {} requires at least {} nodes.".format(
             cluster.reliability_level,
             reliability_required_instance_count))
 
     # update vmss
-    vmss_poll = compute_client.virtual_machine_scale_sets.begin_create_or_update(
-        resource_group_name, vmss.name, vmss)
+    vmss['resource_group'] = resource_group_name
+    vmss['vm_scale_set_name'] = vmss['name']
+    vmss_poll = VMSSCreate(cli_ctx=cli_ctx)(command_args=vmss)
     LongRunningOperation(cli_ctx)(vmss_poll)
 
     # update cluster
@@ -533,14 +518,15 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
     curr_node_type_durability = node_type_ref.durability_level
 
     # get vmss extension durability
-    compute_client = compute_client_factory(cli_ctx)
-    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type)
+    vmss = _get_cluster_vmss_by_node_type(cmd, resource_group_name, cluster.cluster_id, node_type)
 
     fabric_ext_ref = _get_sf_vm_extension(vmss)
     if fabric_ext_ref is None:
         raise CLIError("Failed to find service fabric extension.")
 
-    curr_vmss_durability_level = fabric_ext_ref.settings['durabilityLevel']
+    setting = fabric_ext_ref.get('settings', {})
+    # Settings is a freeform dict; Service Fabric stores keys in their original casing, so read using the original key name.
+    curr_vmss_durability_level = setting.get('durabilityLevel')
 
     # check upgrade
     if curr_node_type_durability.lower() != curr_vmss_durability_level.lower():
@@ -557,10 +543,14 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
         LongRunningOperation(cli_ctx)(update_cluster_poll)
 
     # update vmss sf extension durability
-    if curr_vmss_durability_level.lower() != durability_level.lower():
-        fabric_ext_ref.settings['durabilityLevel'] = durability_level
-        fabric_ext_ref.settings['enableParallelJobs'] = True
-        vmss_poll = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss.name, vmss)
+    if curr_vmss_durability_level.lower() != durability_level.lower() and fabric_ext_ref.get('settings'):
+        from ..vm.operations.vmss import VMSSCreate
+        # Use snake_case since the backend accepts it; keeps naming consistent across the migrated module.
+        fabric_ext_ref['settings']['durability_level'] = durability_level
+        fabric_ext_ref['settings']['enable_parallel_jobs'] = True
+        vmss['resource_group'] = resource_group_name
+        vmss['vm_scale_set_name'] = vmss['name']
+        vmss_poll = VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
         LongRunningOperation(cli_ctx)(vmss_poll)
 
     return client.get(resource_group_name, cluster_name)
@@ -682,21 +672,24 @@ def update_cluster_reliability_level(cmd,
     if node_types is None:
         raise CLIError("Failed to find the node type in the cluster")
     node_type = node_types[0]
-    compute_client = compute_client_factory(cli_ctx)
-    vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type.name)
+    vmss = _get_cluster_vmss_by_node_type(cmd, resource_group_name, cluster.cluster_id, node_type.name)
     if instance_target == instance_now:
         return cluster
     if instance_target > instance_now:
-        if vmss.sku.capacity < instance_target:
+        capacity = vmss.get('sku', {}).get('capacity')
+        if capacity is not None and capacity < instance_target:
             if auto_add_node is not True:
                 raise CLIError('Please use --auto_add_node to automatically increase the nodes,{} requires {} nodes, but currenty there are {}'.
-                               format(reliability_level, instance_target, vmss.sku.capacity))
-            vmss.sku.capacity = instance_target
-            vmss_poll = compute_client.virtual_machine_scale_sets.begin_create_or_update(
-                resource_group_name, vmss.name, vmss)
+                               format(reliability_level, instance_target, vmss['sku']['capacity']))
+            vmss['sku']['capacity'] = instance_target
+            from ..vm.operations.vmss import VMSSCreate
+            vmss['resource_group'] = resource_group_name
+            vmss['vm_scale_set_name'] = vmss['name']
+            vmss_poll = VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
             LongRunningOperation(cli_ctx)(vmss_poll)
 
-    node_type.vm_instance_count = vmss.sku.capacity
+    if vmss.get('sku', {}).get('capacity') is not None:
+        node_type.vm_instance_count = vmss['sku']['capacity']
     patch_request = ClusterUpdateParameters(
         node_types=cluster.node_types, reliability_level=reliability_level)
     update_cluster_poll = client.begin_update(resource_group_name, cluster_name, patch_request)
@@ -750,6 +743,7 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
     from .aaz.latest.network.public_ip import Create as PublicIPCreate
     from .aaz.latest.network.vnet import List as VNetList
     from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, List as SubnetList
+    from ..vm.operations.vmss import VMSSCreate
 
     cli_ctx = cmd.cli_ctx
     subnet_name = "subnet_{}".format(1)
@@ -876,9 +870,9 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
     backend_address_pools = []
     inbound_nat_pools = []
     for p in new_load_balancer["backendAddressPools"]:
-        backend_address_pools.append(SubResource(id=p["id"]))
+        backend_address_pools.append({'id': p["id"]})
     for p in new_load_balancer["inboundNatPools"]:
-        inbound_nat_pools.append(SubResource(id=p["id"]))
+        inbound_nat_pools.append({'id': p["id"]})
 
     network_config_name = 'NIC-{}-{}'.format(node_type_name.lower(), node_type_name.lower())
     if len(network_config_name) >= 24:
@@ -887,16 +881,24 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
     ip_config_name = 'Nic-{}'.format(node_type_name.lower())
     if len(ip_config_name) >= 24:
         ip_config_name = network_config_name[0:22]
-    vm_network_profile = VirtualMachineScaleSetNetworkProfile(network_interface_configurations=[VirtualMachineScaleSetNetworkConfiguration(name=network_config_name,
-                                                                                                                                           primary=True,
-                                                                                                                                           ip_configurations=[VirtualMachineScaleSetIPConfiguration(name=ip_config_name,
-                                                                                                                                                                                                    load_balancer_backend_address_pools=backend_address_pools,
-                                                                                                                                                                                                    load_balancer_inbound_nat_pools=inbound_nat_pools,
-                                                                                                                                                                                                    subnet=ApiEntityReference(id=subnet["id"]))])])
-    compute_client = compute_client_factory(cli_ctx)
+
+    vm_network_profile = {
+        'network_interface_configurations': [{
+            'name': network_config_name,
+            'ip_configurations': [{
+                'name': ip_config_name,
+                'load_balancer_backend_address_pools': backend_address_pools,
+                'load_balancer_inbound_nat_pools': inbound_nat_pools,
+                'subnet': {
+                    'id': subnet["id"]
+                }
+            }],
+            'primary': True
+        }]
+    }
 
     node_type_name_ref = cluster.node_types[0].name
-    vmss_reference = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type_name_ref)
+    vmss_reference = _get_cluster_vmss_by_node_type(cmd, resource_group_name, cluster.cluster_id, node_type_name_ref)
 
     def create_vhd(cli_ctx, resource_group_name, cluster_name, node_type, location):
         storage_name = '{}{}'.format(cluster_name.lower(), node_type.lower())
@@ -939,94 +941,132 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
         offer = 'UbuntuServer'
         version = 'latest'
         sku = os_dic['UbuntuServer1604']
-    storage_profile = VirtualMachineScaleSetStorageProfile(image_reference=ImageReference(publisher=publisher,
-                                                                                          offer=offer,
-                                                                                          sku=sku,
-                                                                                          version=version),
-                                                           os_disk=VirtualMachineScaleSetOSDisk(caching='ReadOnly',
-                                                                                                create_option='FromImage',
-                                                                                                name='vmssosdisk',
-                                                                                                vhd_containers=create_vhd(cli_ctx, resource_group_name, cluster_name, node_type_name, location)))
 
-    os_profile = VirtualMachineScaleSetOSProfile(computer_name_prefix=node_type_name,
-                                                 admin_password=vm_password,
-                                                 admin_username=vm_user_name,
-                                                 secrets=vmss_reference.virtual_machine_profile.os_profile.secrets)
+    storage_profile = {
+        'image_reference': {
+            'offer': offer,
+            'publisher': publisher,
+            'sku': sku,
+            'version': version
+        },
+        'os_disk': {
+            'caching': 'ReadOnly',
+            'create_option': 'FromImage',
+            'name': 'vmssosdisk',
+            'vhd_containers': create_vhd(cli_ctx, resource_group_name, cluster_name, node_type_name, location)
+        }
+    }
+
+    os_profile = {
+        'admin_password': vm_password,
+        'admin_username': vm_user_name,
+        'computer_name_prefix': node_type_name,
+        'secrets': vmss_reference.get('virtual_machine_profile', {}).get('os_profile', {}).get('secrets', [])
+    }
 
     diagnostics_storage_name = cluster.diagnostics_storage_account_config.storage_account_name
 
     diagnostics_ext = None
     fabric_ext = None
-    diagnostics_exts = [e for e in vmss_reference.virtual_machine_profile.extension_profile.extensions if e.type_properties_type.lower(
-    ) == 'IaaSDiagnostics'.lower()]
+    diagnostics_exts = [
+        e for e in vmss_reference.get('virtual_machine_profile', {}).get('extension_profile', {}).get('extensions', [])
+        if e.get('type', '').lower() == 'IaaSDiagnostics'.lower()]
     if any(diagnostics_exts):
         diagnostics_ext = diagnostics_exts[0]
-        diagnostics_account = diagnostics_ext.settings['StorageAccount']
-        storage_client = storage_client_factory(cli_ctx)
-        list_results = storage_client.storage_accounts.list_keys(
-            resource_group_name, diagnostics_account)
-        import json
-        json_data = json.loads(
-            '{"storageAccountName": "", "storageAccountKey": "", "storageAccountEndPoint": ""}')
-        json_data['storageAccountName'] = diagnostics_account
-        json_data['storageAccountKey'] = list_results.keys_property[0].value
-        json_data['storageAccountEndPoint'] = "https://core.windows.net/"
-        diagnostics_ext.protected_settings = json_data
 
-    fabric_exts = [e for e in vmss_reference.virtual_machine_profile.extension_profile.extensions if e.type_properties_type.lower(
-    ) == SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME or e.type_properties_type.lower() == SERVICE_FABRIC_LINUX_NODE_EXT_NAME]
+        setting = diagnostics_ext.get('settings', {})
+        # Settings is a freeform dict; IaaSDiagnostics stores keys in their original casing, so read using the original key name.
+        diagnostics_account = setting.get('StorageAccount')
+        storage_client = storage_client_factory(cli_ctx)
+        list_results = storage_client.storage_accounts.list_keys(resource_group_name, diagnostics_account)
+        # Use snake_case since the backend accepts it; keeps naming consistent across the migrated module.
+        diagnostics_ext['protected_settings'] = {
+            'storage_account_name': diagnostics_account,
+            'storage_account_key': list_results.keys_property[0].value,
+            'storage_account_end_point': 'https://core.windows.net/'
+        }
+
+    fabric_exts = [
+        e for e in vmss_reference.get('virtual_machine_profile', {}).get('extension_profile', {}).get('extensions', [])
+        if e.get('type', '').lower() in [SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME, SERVICE_FABRIC_LINUX_NODE_EXT_NAME]]
+
     if any(fabric_exts):
         fabric_ext = fabric_exts[0]
 
     if fabric_ext is None:
         raise CLIError("No valid fabric extension found")
 
-    fabric_ext.settings['nodeTypeRef'] = node_type_name
-    fabric_ext.settings['durabilityLevel'] = durability_level
-    if 'nicPrefixOverride' not in fabric_ext.settings:
-        fabric_ext.settings['nicPrefixOverride'] = address_prefix
+    if not fabric_ext.get('settings'):
+        fabric_ext['settings'] = {}
+
+    # Use snake_case since the backend accepts it; keeps naming consistent across the migrated module.
+    fabric_ext['settings']['node_type_ref'] = node_type_name
+    fabric_ext['settings']['durability_level'] = durability_level
+    # Migrate legacy camelCase key to snake_case since the backend accepts it; keeps naming consistent across the migrated module.
+    if 'nicPrefixOverride' not in fabric_ext['settings']:
+        fabric_ext['settings']['nic_prefix_override'] = address_prefix
+    else:
+        fabric_ext['settings']['nic_prefix_override'] = fabric_ext['settings'].pop('nicPrefixOverride')
     storage_client = storage_client_factory(cli_ctx)
     list_results = storage_client.storage_accounts.list_keys(
         resource_group_name, diagnostics_storage_name)
-    import json
-    json_data = json.loads(
-        '{"StorageAccountKey1": "", "StorageAccountKey2": ""}')
-    fabric_ext.protected_settings = json_data
-    fabric_ext.protected_settings['StorageAccountKey1'] = list_results.keys_property[0].value
-    fabric_ext.protected_settings['StorageAccountKey2'] = list_results.keys_property[1].value
+    fabric_ext['protected_settings'] = {
+        'storage_account_key_1': list_results.keys_property[0].value,
+        'storage_account_key_2': list_results.keys_property[1].value
+    }
 
     extensions = [fabric_ext]
     if diagnostics_ext:
         extensions.append(diagnostics_ext)
-    vm_ext_profile = VirtualMachineScaleSetExtensionProfile(
-        extensions=extensions)
 
-    virtual_machine_scale_set_profile = VirtualMachineScaleSetVMProfile(extension_profile=vm_ext_profile,
-                                                                        os_profile=os_profile,
-                                                                        storage_profile=storage_profile,
-                                                                        network_profile=vm_network_profile)
+    vm_ext_profile = {
+        'extensions': extensions
+    }
 
-    poller = compute_client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name,
-                                                                              node_type_name,
-                                                                              VirtualMachineScaleSet(location=location,
-                                                                                                     sku=ComputeSku(name=vm_sku, tier=vm_tier, capacity=capacity),
-                                                                                                     overprovision=False,
-                                                                                                     upgrade_policy=UpgradePolicy(mode=UpgradeMode.automatic),
-                                                                                                     virtual_machine_profile=virtual_machine_scale_set_profile))
+    virtual_machine_scale_set_profile = {
+        'extension_profile': vm_ext_profile,
+        'network_profile': vm_network_profile,
+        'os_profile': os_profile,
+        'storage_profile': storage_profile
+    }
+
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': node_type_name,
+        'location': location,
+        'sku': {
+            'capacity': capacity,
+            'name': vm_sku,
+            'tier': vm_tier
+        },
+        'overprovision': False,
+        'upgrade_policy': {
+            'mode': 'Automatic'
+        },
+        'virtual_machine_profile': virtual_machine_scale_set_profile
+    }
+    poller = VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     LongRunningOperation(cli_ctx)(poller)
 
 
-def _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster_id, node_type_name):
-
-    vmsses = list(compute_client.virtual_machine_scale_sets.list(resource_group_name))
+def _get_cluster_vmss_by_node_type(cmd, resource_group_name, cluster_id, node_type_name):
+    from ..vm.operations.vmss import VMSSList, convert_show_result_to_snake_case
+    vmsses = VMSSList(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name
+    })
 
     for vmss in vmsses:
+        vmss = convert_show_result_to_snake_case(vmss)
         fabric_ext = _get_sf_vm_extension(vmss)
         if fabric_ext is not None:
             curr_cluster_id = _get_cluster_id_in_sf_extension(fabric_ext)
-            if curr_cluster_id.lower() == cluster_id.lower() and fabric_ext.settings["nodeTypeRef"].lower() == node_type_name.lower():
+            setting = fabric_ext.get('settings', {})
+            # Settings is a freeform dict; Service Fabric stores keys in their original casing, so read using the original key name.
+            if (curr_cluster_id.lower() == cluster_id.lower() and
+                    setting.get('nodeTypeRef', '').lower() == node_type_name.lower()):
                 return vmss
-    raise CLIError("Failed to find vmss in resource group {} for cluster id {} and node type {}".format(resource_group_name, cluster_id, node_type_name))
+    raise CLIError("Failed to find vmss in resource group {} for cluster id {} and node type {}".format(
+        resource_group_name, cluster_id, node_type_name))
 
 
 def _verify_cert_function_parameter(certificate_file=None,
@@ -1159,44 +1199,59 @@ def _create_certificate(cmd,
 
 # pylint: disable=inconsistent-return-statements
 def _add_cert_to_vmss(cli_ctx, vmss, resource_group_name, vault_id, secret_url):
-    compute_client = compute_client_factory(cli_ctx)
-    secrets = [
-        s for s in vmss.virtual_machine_profile.os_profile.secrets if s.source_vault.id == vault_id]
+    from ..vm.operations.vmss import VMSSCreate
+
+    secrets = [s for s in vmss.get('virtual_machine_profile', {}).get('os_profile', {}).get('secrets', [])
+               if s.get('source_vault', {}).get('id') == vault_id]
     if secrets is None or secrets == []:
-        if vmss.virtual_machine_profile.os_profile.secrets is None:
-            vmss.virtual_machine_profile.os_profile.secrets = []
+        if vmss.get('virtual_machine_profile', {}).get('os_profile', {}).get('secrets') is None:
+            if not vmss.get('virtual_machine_profile'):
+                vmss['virtual_machine_profile'] = {}
+            if not vmss['virtual_machine_profile'].get('os_profile'):
+                vmss['virtual_machine_profile']['os_profile'] = {}
+            vmss['virtual_machine_profile']['os_profile']['secrets'] = []
         new_vault_certificates = []
-        new_vault_certificates.append(VaultCertificate(certificate_url=secret_url, certificate_store='my'))
-        new_source_vault = SubResource(id=vault_id)
-        vmss.virtual_machine_profile.os_profile.secrets.append(VaultSecretGroup(source_vault=new_source_vault,
-                                                                                vault_certificates=new_vault_certificates))
+        new_vault_certificates.append({
+            'certificate_store': 'my',
+            'certificate_url': secret_url
+        })
+        vmss['virtual_machine_profile']['os_profile']['secrets'].append({
+            'source_vault': {
+                'id': vault_id
+            },
+            'vault_certificates': new_vault_certificates
+        })
     else:
-        if secrets[0].vault_certificates is not None:
-            certs = [
-                c for c in secrets[0].vault_certificates if c.certificate_url == secret_url]
+        if secrets[0].get('vault_certificates') is not None:
+            certs = [c for c in secrets[0]['vault_certificates'] if c.get('certificate_url') == secret_url]
             if certs is None or certs == []:
-                secrets[0].vault_certificates.append(
-                    VaultCertificate(certificate_url=secret_url, certificate_store='my'))
+                secrets[0]['vault_certificates'].append({
+                    'certificate_store': 'my',
+                    'certificate_url': secret_url
+                })
             else:
                 return
         else:
-            secrets[0].vault_certificates = []
-            secrets[0].vault_certificates.append(
-                VaultCertificate(secret_url, 'my'))
+            secrets[0]['vault_certificates'] = []
+            secrets[0]['vault_certificates'].append({
+                'certificate_store': 'my',
+                'certificate_url': secret_url
+            })
 
-    poller = compute_client.virtual_machine_scale_sets.begin_create_or_update(
-        resource_group_name, vmss.name, vmss)
+    vmss['resource_group'] = resource_group_name
+    vmss['vm_scale_set_name'] = vmss['name']
+    poller = VMSSCreate(cli_ctx=cli_ctx)(command_args=vmss)
     return LongRunningOperation(cli_ctx)(poller)
 
 
 def _get_sf_vm_extension(vmss):
     fabric_ext = None
-    for ext in vmss.virtual_machine_profile.extension_profile.extensions:
+    for ext in vmss.get('virtual_machine_profile', {}).get('extension_profile', {}).get('extensions', []):
         extension_type = None
-        if hasattr(ext, 'type1') and ext.type1 is not None:
-            extension_type = ext.type1.lower()
-        elif hasattr(ext, 'type_properties_type') and ext.type_properties_type is not None:
-            extension_type = ext.type_properties_type.lower()
+        if ext.get('type1'):
+            extension_type = ext['type1'].lower()
+        elif ext.get('type'):
+            extension_type = ext['type'].lower()
 
         if extension_type is not None and extension_type in (SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME, SERVICE_FABRIC_LINUX_NODE_EXT_NAME):
             fabric_ext = ext
@@ -1208,19 +1263,24 @@ def _get_sf_vm_extension(vmss):
 
 
 def _get_cluster_id_in_sf_extension(fabric_ext):
-    cluster_endpoint = fabric_ext.settings["clusterEndpoint"]
+    setting = fabric_ext.get('settings', {})
+    # Settings is a freeform dict; Service Fabric stores keys in their original casing, so read using the original key name.
+    cluster_endpoint = setting.get('clusterEndpoint')
     endpoint_list = cluster_endpoint.split('/')
     cluster_id = endpoint_list[len(endpoint_list) - 1]
     return cluster_id
 
 
 def _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster_id, vault_id, secret_url, is_cluster_cert=False, thumbprint=None):
-    threads = []
+    from ..vm.operations.vmss import VMSSList, convert_show_result_to_snake_case
     import threading
-    compute_client = compute_client_factory(cli_ctx)
-    vmsses = list(compute_client.virtual_machine_scale_sets.list(resource_group_name))
+    threads = []
+    vmsses = VMSSList(cli_ctx=cli_ctx)(command_args={
+        'resource_group': resource_group_name
+    })
     if vmsses is not None:
         for vmss in vmsses:
+            vmss = convert_show_result_to_snake_case(vmss)
             fabric_ext = _get_sf_vm_extension(vmss)
             if fabric_ext is not None and (cluster_id is None or _get_cluster_id_in_sf_extension(fabric_ext).lower() == cluster_id.lower()):
 
@@ -1229,7 +1289,11 @@ def _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster_id, vault_id, se
                     import json
                     secondary_setting = json.loads(
                         '{{"thumbprint":"{0}","x509StoreName":"{1}"}}'.format(thumbprint, 'my'))
-                    fabric_ext.settings["certificateSecondary"] = secondary_setting
+
+                    if not fabric_ext.get('settings'):
+                        fabric_ext['settings'] = {}
+                    # Use snake_case since the backend accepts it; keeps naming consistent across the migrated module.
+                    fabric_ext["settings"]["certificate_secondary"] = secondary_setting
 
                 t = threading.Thread(target=_add_cert_to_vmss, args=[cli_ctx, vmss, resource_group_name, vault_id, secret_url])
                 t.start()

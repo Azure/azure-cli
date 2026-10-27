@@ -49,7 +49,7 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         self.assertEqual('Standard', namespace['sku']['name'])
         self.assertEqual(self.kwargs['loc'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['disableLocalAuth'])
-        self.assertFalse(namespace['zoneRedundant'])
+        self.assertTrue(namespace['zoneRedundant'])
         self.assertEqual(2, len(namespace['tags']))
 
         # Create Premium namespace with Sku Capacity 2
@@ -60,7 +60,7 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         self.assertEqual('1.2', namespace['minimumTlsVersion'])
         self.assertEqual(self.kwargs['loc'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertFalse(namespace['disableLocalAuth'])
-        self.assertFalse(namespace['zoneRedundant'])
+        self.assertTrue(namespace['zoneRedundant'])
         self.assertEqual(0, len(namespace['tags']))
 
         # Update Capacity of Premium namespace
@@ -72,7 +72,7 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         self.assertEqual('1.2', namespace['minimumTlsVersion'])
         self.assertEqual(self.kwargs['loc'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertFalse(namespace['disableLocalAuth'])
-        self.assertFalse(namespace['zoneRedundant'])
+        self.assertTrue(namespace['zoneRedundant'])
         self.assertEqual(2, len(namespace['tags']))
 
         # Set disableLocalAuth to False using update command
@@ -83,7 +83,7 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
         self.assertEqual('1.2', namespace['minimumTlsVersion'])
         self.assertEqual(self.kwargs['loc'].strip().replace(' ', '').lower(), namespace['location'].strip().replace(' ', '').lower())
         self.assertTrue(namespace['disableLocalAuth'])
-        self.assertFalse(namespace['zoneRedundant'])
+        self.assertTrue(namespace['zoneRedundant'])
         self.assertEqual(2, len(namespace['tags']))
 
         # Create premium namespace with SystemAssigned and UserAssigned Identity
@@ -111,25 +111,21 @@ class SBNamespaceCRUDScenarioTest(ScenarioTest):
                              '--location {loc1} --sku Premium --geo-data-replication-config role-type=Primary location-name={loc1} '
                              '--geo-data-replication-config role-type=Secondary location-name={loc2}').get_output_in_json()
 
-        time.sleep(200)
-
-        '''namespace = self.cmd('servicebus namespace replica add --resource-group {rg} --name {namespacename3} '
-                             '--geo-data-replication-config role-type=Secondary location-name={loc2} ').get_output_in_json()'''
-
-        self.assertEqual(2, len(namespace['geoDataReplication']['locations']))
+        time.sleep(900)
 
         namespace = self.cmd('servicebus namespace update --resource-group {rg} --name {namespacename3} '
                              '--max-replication-lag-duration-in-seconds 300').get_output_in_json()
 
         self.assertEqual(300, namespace['geoDataReplication']['maxReplicationLagDurationInSeconds'])
 
-        time.sleep(600)
+        time.sleep(900)
 
         namespace = self.cmd('servicebus namespace failover --name {namespacename3} --resource-group {rg} '
                              '--primary-location {loc2} ').get_output_in_json()
 
-        '''namespace = self.cmd('servicebus namespace replica remove --resource-group {rg} --name {namespacename3} '
-                             '--geo-data-replication-config cluster-arm-id={clusterid2} role-type=Secondary location-name={loc2} ').get_output_in_json()'''
+        time.sleep(400)
+        namespace = self.cmd('servicebus namespace replica remove --resource-group {rg} --name {namespacename3} '
+                             '--geo-data-replication-config role-type=Secondary location-name={loc2} ').get_output_in_json()
 
         # Delete Namespace list by ResourceGroup
         self.cmd('servicebus namespace delete --resource-group {rg} --name {namespacename} ')

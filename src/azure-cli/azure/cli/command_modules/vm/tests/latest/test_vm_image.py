@@ -69,6 +69,18 @@ class TestVMImage(unittest.TestCase):
                                      'offer': 'CentOS', 'sku': '8_5-gen2', 'version': 'latest',
                                      'architecture': 'x64'})
 
+    @mock.patch('requests.get', autospec=True)
+    def test_when_alias_doc_is_invalid_json(self, mock_get):
+        from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
+        cli_ctx = DummyCli()
+        cli_ctx.cloud.endpoints.vm_image_alias_doc = 'https://example.invalid/aliases.json'
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.content = b'404: Not Found'
+
+        images = load_images_from_aliases_doc(cli_ctx)
+
+        self.assertEqual(images[0]['urnAlias'], 'AzureLinux4')
+
 
 if __name__ == '__main__':
     unittest.main()

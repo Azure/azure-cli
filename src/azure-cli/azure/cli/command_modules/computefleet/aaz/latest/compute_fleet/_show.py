@@ -18,16 +18,14 @@ from azure.cli.core.aaz import *
 class Show(AAZCommand):
     """Get a Fleet
 
-    Get a Fleet by fleet name
-
     :example: Fleets_Get
-        az azure-fleet show --resource-group rgazurefleet --fleet-name testFleet
+        az compute-fleet show --resource-group rgazurefleet --fleet-name testFleet
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2026-08-01"],
         ]
     }
 
@@ -126,7 +124,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }
@@ -233,10 +231,14 @@ class Show(AAZCommand):
             properties.additional_locations_profile = AAZObjectType(
                 serialized_name="additionalLocationsProfile",
             )
+            properties.capacity_type = AAZStrType(
+                serialized_name="capacityType",
+            )
             properties.compute_profile = AAZObjectType(
                 serialized_name="computeProfile",
                 flags={"required": True},
             )
+            properties.mode = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -257,6 +259,9 @@ class Show(AAZCommand):
             )
             properties.vm_attributes = AAZObjectType(
                 serialized_name="vmAttributes",
+            )
+            properties.vm_name_prefix = AAZStrType(
+                serialized_name="vmNamePrefix",
             )
             properties.vm_sizes_profile = AAZListType(
                 serialized_name="vmSizesProfile",
@@ -634,7 +639,7 @@ class _ShowHelper:
             flags={"read_only": True},
         )
         properties.publisher = AAZStrType()
-        properties.settings = AAZFreeFormDictType()
+        properties.settings = AAZDictType()
         properties.suppress_failures = AAZBoolType(
             serialized_name="suppressFailures",
         )
@@ -656,6 +661,9 @@ class _ShowHelper:
 
         provision_after_extensions = _schema_base_virtual_machine_profile_read.extension_profile.extensions.Element.properties.provision_after_extensions
         provision_after_extensions.Element = AAZStrType()
+
+        settings = _schema_base_virtual_machine_profile_read.extension_profile.extensions.Element.properties.settings
+        settings.Element = AAZAnyType()
 
         hardware_profile = _schema_base_virtual_machine_profile_read.hardware_profile
         hardware_profile.vm_size_properties = AAZObjectType(

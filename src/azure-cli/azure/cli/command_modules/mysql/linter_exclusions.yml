@@ -12,4 +12,31 @@ mysql flexible-server export create:
 mysql flexible-server import stop-replication:
     rule_exclusions:
       - missing_command_test_coverage
+
+mysql flexible-server mirroring enable:
+  parameters:
+      server_name:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+
+mysql flexible-server mirroring disable:
+  parameters:
+      server_name:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+
+mysql flexible-server parameter list:
+  parameters:
+      tags:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      keyword:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      page:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      page_size:
+          rule_exclusions:
+          - missing_parameter_test_coverage
 ...

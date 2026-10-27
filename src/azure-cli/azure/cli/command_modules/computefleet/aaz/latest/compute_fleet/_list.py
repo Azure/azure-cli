@@ -18,17 +18,15 @@ from azure.cli.core.aaz import *
 class List(AAZCommand):
     """List Fleet resources by subscription ID and resource group
 
-    List Fleet resources by subscription ID and resource group
-
     :example: Fleets_ListBySubscription
-        az azure-fleet list
+        az compute-fleet list
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.azurefleet/fleets", "2024-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.azurefleet/fleets", "2026-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets", "2026-08-01"],
         ]
     }
 
@@ -54,12 +52,12 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.FleetsListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
             self.FleetsListBySubscription(ctx=self.ctx)()
+        if condition_1:
+            self.FleetsListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -75,7 +73,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class FleetsListByResourceGroup(AAZHttpOperation):
+    class FleetsListBySubscription(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -89,7 +87,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureFleet/fleets",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.AzureFleet/fleets",
                 **self.url_parameters
             )
 
@@ -105,10 +103,6 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -119,7 +113,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }
@@ -237,10 +231,14 @@ class List(AAZCommand):
             properties.additional_locations_profile = AAZObjectType(
                 serialized_name="additionalLocationsProfile",
             )
+            properties.capacity_type = AAZStrType(
+                serialized_name="capacityType",
+            )
             properties.compute_profile = AAZObjectType(
                 serialized_name="computeProfile",
                 flags={"required": True},
             )
+            properties.mode = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -261,6 +259,9 @@ class List(AAZCommand):
             )
             properties.vm_attributes = AAZObjectType(
                 serialized_name="vmAttributes",
+            )
+            properties.vm_name_prefix = AAZStrType(
+                serialized_name="vmNamePrefix",
             )
             properties.vm_sizes_profile = AAZListType(
                 serialized_name="vmSizesProfile",
@@ -465,7 +466,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class FleetsListBySubscription(AAZHttpOperation):
+    class FleetsListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -479,7 +480,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.AzureFleet/fleets",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureFleet/fleets",
                 **self.url_parameters
             )
 
@@ -495,6 +496,10 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -505,7 +510,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }
@@ -623,10 +628,14 @@ class List(AAZCommand):
             properties.additional_locations_profile = AAZObjectType(
                 serialized_name="additionalLocationsProfile",
             )
+            properties.capacity_type = AAZStrType(
+                serialized_name="capacityType",
+            )
             properties.compute_profile = AAZObjectType(
                 serialized_name="computeProfile",
                 flags={"required": True},
             )
+            properties.mode = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -647,6 +656,9 @@ class List(AAZCommand):
             )
             properties.vm_attributes = AAZObjectType(
                 serialized_name="vmAttributes",
+            )
+            properties.vm_name_prefix = AAZStrType(
+                serialized_name="vmNamePrefix",
             )
             properties.vm_sizes_profile = AAZListType(
                 serialized_name="vmSizesProfile",
@@ -1024,7 +1036,7 @@ class _ListHelper:
             flags={"read_only": True},
         )
         properties.publisher = AAZStrType()
-        properties.settings = AAZFreeFormDictType()
+        properties.settings = AAZDictType()
         properties.suppress_failures = AAZBoolType(
             serialized_name="suppressFailures",
         )
@@ -1046,6 +1058,9 @@ class _ListHelper:
 
         provision_after_extensions = _schema_base_virtual_machine_profile_read.extension_profile.extensions.Element.properties.provision_after_extensions
         provision_after_extensions.Element = AAZStrType()
+
+        settings = _schema_base_virtual_machine_profile_read.extension_profile.extensions.Element.properties.settings
+        settings.Element = AAZAnyType()
 
         hardware_profile = _schema_base_virtual_machine_profile_read.hardware_profile
         hardware_profile.vm_size_properties = AAZObjectType(

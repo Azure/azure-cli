@@ -24,9 +24,9 @@ class Remove(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyassignments/{}", "2024-05-01", "identity"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyassignments/{}", "2025-11-01", "identity"],
         ]
     }
 
@@ -52,7 +52,7 @@ class Remove(AAZCommand):
             help={"short-summary": "The name of the policy assignment.", "long-summary": "The name of the policy assignment is the name segment of its resource ID."},
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
             ),
         )
         _args_schema.scope = AAZStrArg(
@@ -84,9 +84,9 @@ class Remove(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.PolicyAssignmentsGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.selectors.subresource.required())
+        self.post_instance_update(self.ctx.selectors.subresource.get())
         self.PolicyAssignmentsCreate(ctx=self.ctx)()
         self.post_operations()
 
@@ -107,7 +107,7 @@ class Remove(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
 
     class SubresourceSelector(AAZJsonSelector):
@@ -166,7 +166,7 @@ class Remove(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -246,7 +246,7 @@ class Remove(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -296,7 +296,7 @@ class Remove(AAZCommand):
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.selectors.subresource.required())
+            self._update_instance(self.ctx.selectors.subresource.get())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
@@ -398,11 +398,15 @@ class _RemoveHelper:
         properties.enforcement_mode = AAZStrType(
             serialized_name="enforcementMode",
         )
+        properties.instance_id = AAZStrType(
+            serialized_name="instanceId",
+            flags={"read_only": True},
+        )
         properties.latest_definition_version = AAZStrType(
             serialized_name="latestDefinitionVersion",
             flags={"read_only": True},
         )
-        properties.metadata = AAZDictType()
+        properties.metadata = AAZAnyType()
         properties.non_compliance_messages = AAZListType(
             serialized_name="nonComplianceMessages",
         )
@@ -420,9 +424,9 @@ class _RemoveHelper:
         properties.scope = AAZStrType(
             flags={"read_only": True},
         )
-
-        metadata = _schema_policy_assignment_read.properties.metadata
-        metadata.Element = AAZAnyType()
+        properties.self_serve_exemption_settings = AAZObjectType(
+            serialized_name="selfServeExemptionSettings",
+        )
 
         non_compliance_messages = _schema_policy_assignment_read.properties.non_compliance_messages
         non_compliance_messages.Element = AAZObjectType()
@@ -466,6 +470,15 @@ class _RemoveHelper:
         selectors = _schema_policy_assignment_read.properties.resource_selectors.Element.selectors
         selectors.Element = AAZObjectType()
         cls._build_schema_selector_read(selectors.Element)
+
+        self_serve_exemption_settings = _schema_policy_assignment_read.properties.self_serve_exemption_settings
+        self_serve_exemption_settings.enabled = AAZBoolType()
+        self_serve_exemption_settings.policy_definition_reference_ids = AAZListType(
+            serialized_name="policyDefinitionReferenceIds",
+        )
+
+        policy_definition_reference_ids = _schema_policy_assignment_read.properties.self_serve_exemption_settings.policy_definition_reference_ids
+        policy_definition_reference_ids.Element = AAZStrType()
 
         system_data = _schema_policy_assignment_read.system_data
         system_data.created_at = AAZStrType(

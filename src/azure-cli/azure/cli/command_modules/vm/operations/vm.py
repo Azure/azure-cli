@@ -10,7 +10,7 @@ from knack.log import get_logger
 from azure.cli.core.aaz import AAZStrType
 from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes, Patch as _VMPatch,
                              Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate,
-                             ListUsage as _VMListUsage, Deallocate as _VMDeallocate)
+                             ListUsage as _VMListUsage)
 from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
@@ -265,16 +265,6 @@ class VMListUsage(_VMListUsage):
         return result, next_link
 
 
-class VMDeallocate(_VMDeallocate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-
-        args_schema.force_deallocate._registered = False
-
-        return args_schema
-
-
 def convert_show_result_to_snake_case(result):
     new_result = {}
     if "id" in result:
@@ -341,6 +331,8 @@ def convert_show_result_to_snake_case(result):
         new_result["eviction_policy"] = result["evictionPolicy"]
     if "extensionsTimeBudget" in result:
         new_result["extensions_time_budget"] = result["extensionsTimeBudget"]
+    if "flexProfile" in result:
+        new_result["flex_profile"] = result["flexProfile"]
     if "hardwareProfile" in result:
         new_result["hardware_profile"] = result["hardwareProfile"]
     if "host" in result:
@@ -412,6 +404,10 @@ def convert_show_result_to_snake_case(result):
     if "capacityReservationGroup" in capacity_reservation:
         capacity_reservation["capacity_reservation_group"] = capacity_reservation["capacityReservationGroup"]
         capacity_reservation.pop("capacityReservationGroup")
+    if "disableCapacityReservationAssignment" in capacity_reservation:
+        capacity_reservation["disable_capacity_reservation_assignment"] = \
+            capacity_reservation["disableCapacityReservationAssignment"]
+        capacity_reservation.pop("disableCapacityReservationAssignment")
 
     diagnostics_profile = new_result.get("diagnostics_profile", {}) or {}
     if "bootDiagnostics" in diagnostics_profile:
@@ -423,7 +419,15 @@ def convert_show_result_to_snake_case(result):
         boot_diagnostics["storage_uri"] = boot_diagnostics["storageUri"]
         boot_diagnostics.pop("storageUri")
 
+    flex_profile = new_result.get("flex_profile", {}) or {}
+    if "preferredVMSize" in flex_profile:
+        flex_profile["preferred_vm_size"] = flex_profile["preferredVMSize"]
+        flex_profile.pop("preferredVMSize")
+
     hardware_profile = new_result.get("hardware_profile", {}) or {}
+    if "processorMode" in hardware_profile:
+        hardware_profile["processor_mode"] = hardware_profile["processorMode"]
+        hardware_profile.pop("processorMode")
     if "vmSize" in hardware_profile:
         hardware_profile["vm_size"] = hardware_profile["vmSize"]
         hardware_profile.pop("vmSize")
@@ -804,6 +808,9 @@ def convert_show_result_to_snake_case(result):
     if "inVMAccessControlProfileReferenceId" in wire_server:
         wire_server["in_vm_access_control_profile_reference_id"] = wire_server["inVMAccessControlProfileReferenceId"]
         wire_server.pop("inVMAccessControlProfileReferenceId")
+    if "useLocalFileRules" in wire_server:
+        wire_server["use_local_file_rules"] = wire_server["useLocalFileRules"]
+        wire_server.pop("useLocalFileRules")
 
     uefi_settings = security_profile.get("uefi_settings", {}) or {}
     if "secureBootEnabled" in uefi_settings:

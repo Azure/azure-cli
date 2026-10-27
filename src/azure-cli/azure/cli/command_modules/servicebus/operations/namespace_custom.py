@@ -33,14 +33,15 @@ def create_replica_location_object(col):
     return replica_location_object
 
 
+# pylint: disable=too-many-locals
 def create_servicebus_namespace(cmd, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
                                 capacity=None, zone_redundant=None, mi_user_assigned=None,
                                 mi_system_assigned=None, encryption_config=None, minimum_tls_version=None,
                                 disable_local_auth=None, alternate_name=None, public_network_access=None,
                                 require_infrastructure_encryption=None, premium_messaging_partitions=None,
                                 max_replication_lag_duration_in_seconds=None,
-                                geo_data_replication_config=None
-                                ):
+                                geo_data_replication_config=None,
+                                ip_address_type=None):
 
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
     user_assigned_identity = {}
@@ -61,7 +62,8 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
         "disable_local_auth": disable_local_auth,
         "alternate_name": alternate_name,
         "public_network_access": public_network_access,
-        "premium_messaging_partitions": premium_messaging_partitions
+        "premium_messaging_partitions": premium_messaging_partitions,
+        "ip_address_type": ip_address_type
     }
 
     if mi_system_assigned:
@@ -410,6 +412,10 @@ def cli_remove_location(cmd, resource_group_name, namespace_name, geo_data_repli
         replica_object = create_replica_location_object(col)
         replica_location_object.append(replica_object)
     for col in geo_data_replication_config:
+        if col.get('cluster_arm_id', None) in (None, ''):
+            col.pop('cluster_arm_id', None)
+        if 'role_type' in col and isinstance(col['role_type'], str):
+            col['role_type'] = col['role_type'].capitalize()
         if col in replica_location_object:
             replica_location_object.remove(col)
     return Update(cli_ctx=cmd.cli_ctx)(command_args={

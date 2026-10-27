@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """Gets the primary and secondary connection strings for the Namespace.
+
+    :example: NameSpaceAuthorizationRuleListKey
+        az eventhubs georecovery-alias authorization-rule keys list --resource-group exampleResourceGroup --namespace-name sdk-Namespace-2702 --alias sdk-DisasterRecovery-4047 --authorization-rule-name sdk-Authrules-1746
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/disasterrecoveryconfigs/{}/authorizationrules/{}/listkeys", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/disasterrecoveryconfigs/{}/authorizationrules/{}/listkeys", "2026-07-01-preview"],
         ]
     }
 
@@ -63,6 +66,7 @@ class List(AAZCommand):
             help="The Namespace name",
             required=True,
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -145,7 +149,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

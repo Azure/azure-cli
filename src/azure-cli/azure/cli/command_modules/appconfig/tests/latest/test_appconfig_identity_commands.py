@@ -6,17 +6,18 @@
 # pylint: disable=line-too-long
 
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher
 
 class AppConfigIdentityScenarioTest(ScenarioTest):
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
+        register_appconfig_query_matcher(self)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_identity(self, resource_group, location):
-        config_store_prefix = get_resource_name_prefix('IdentityTest')
+        config_store_prefix = 'IdentityTest'
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
@@ -31,7 +32,7 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
             'identity_name': identity_name
         })
 
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
         user_assigned_identity = _create_user_assigned_identity(self, self.kwargs)
 
         self.kwargs.update({

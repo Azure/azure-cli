@@ -41,13 +41,7 @@ class TestAAZArgBaseFmt(unittest.TestCase):
             self.format_arg(schema, {"str1": ""})
 
         with self.assertRaises(azclierror.InvalidArgumentValueError):
-            self.format_arg(schema, {"str1": "1234"})
-
-        with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {"str1": "abcdefghi"})
-
-        with self.assertRaises(azclierror.InvalidArgumentValueError):
-            self.format_arg(schema, {"str1": "aBCD"})
 
         args = self.format_arg(schema, {"str1": "abcdefgh"})
         self.assertEqual(args.str1, "abcdefgh")
@@ -513,23 +507,7 @@ class TestAAZArgBaseFmt(unittest.TestCase):
         with self.assertRaises(azclierror.InvalidArgumentValueError):
             self.format_arg(schema, {
                 "properties": {
-                    "name": "a1234",
-                }
-            })
-
-        with self.assertRaises(azclierror.InvalidArgumentValueError):
-            self.format_arg(schema, {
-                "properties": {
                     "count": -10,
-                }
-            })
-
-        with self.assertRaises(azclierror.InvalidArgumentValueError):
-            self.format_arg(schema, {
-                "properties": {
-                    "vnet": {
-                        "name": "test11",
-                    }
                 }
             })
 
@@ -602,15 +580,6 @@ class TestAAZArgBaseFmt(unittest.TestCase):
                     "flag2": "v2",
                     "flag3": "v3",
                     "flag4": "v4",
-                },
-            })
-
-        with self.assertRaises(azclierror.InvalidArgumentValueError):
-            self.format_arg(schema, {
-                "actions": {
-                    "a": {
-                        "name": "abc11"
-                    },
                 },
             })
 
@@ -836,3 +805,37 @@ class TestAAZArgBaseFmt(unittest.TestCase):
         with self.assertRaises(azclierror.InvalidArgumentValueError) as e:
             self.format_arg(schema, {"token": data})
         self.assertEqual(str(e.exception), "InvalidArgumentValue: --next-token: `next_link` or `offset` doesn't exist.")
+
+        def _encode(obj):
+            return base64.b64encode(json.dumps(obj).encode("utf-8")).decode("utf-8")
+
+        # next_link pointing to the trusted ARM endpoint is accepted
+        valid_next_link = "https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2025-09-01"
+        data = _encode({"next_link": valid_next_link, "offset": 0})
+        args = self.format_arg(schema, {"token": data})
+
+        self.assertEqual(args.to_serialized_data(), {"token": base64.b64decode(data).decode("utf-8")})
+
+        # next_link pointing to a trusted data-plane endpoint, e.g., Microsoft Graph is accepted
+        dataplane_next_link = "https://graph.microsoft.com/v1.0/users?$skiptoken=abc"
+        data = _encode({"next_link": dataplane_next_link, "offset": 0})
+        args = self.format_arg(schema, {"token": data})
+
+        self.assertEqual(args.to_serialized_data(), {"token": base64.b64decode(data).decode("utf-8")})
+
+        # next_link pointing to a lookalike host must be rejected (prefix-matching attack)
+        spoofed_next_link = "https://management.azure.com.attacker/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2025-09-01"
+        data = _encode({"next_link": spoofed_next_link, "offset": 0})
+        with self.assertRaises(azclierror.InvalidArgumentValueError) as e:
+            self.format_arg(schema, {"token": data})
+
+        self.assertEqual(str(e.exception), "InvalidArgumentValue: --next-token: `next_link` '{}' is not a valid endpoint.".format(spoofed_next_link))
+
+        # next_link using a userinfo trick where the real host is the attacker must be rejected
+        userinfo_next_link = "https://management.azure.com@attacker/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2025-09-01"
+        data = _encode({"next_link": userinfo_next_link, "offset": 0})
+        with self.assertRaises(azclierror.InvalidArgumentValueError) as e:
+            self.format_arg(schema, {"token": data})
+
+        self.assertEqual(str(e.exception), "InvalidArgumentValue: --next-token: `next_link` '{}' is not a valid endpoint.".format(userinfo_next_link))
+

@@ -1443,7 +1443,7 @@ def update_containerappsjob_logic(cmd,
         r = ContainerAppsJobClient.update(
             cmd=cmd, resource_group_name=resource_group_name, name=name, containerapp_job_envelope=new_containerappsjob, no_wait=no_wait)
 
-        if "properties" in r and "provisioningState" in r["properties"] and r["properties"]["provisioningState"].lower() == "waiting" and not no_wait:
+        if not no_wait and "properties" in r and "provisioningState" in r["properties"] and r["properties"]["provisioningState"].lower() == "waiting":
             logger.warning('Containerapps job update in progress. Please monitor the update using `az containerapp job show -n {} -g {}`'.format(name, resource_group_name))
 
         return r
@@ -1653,7 +1653,8 @@ def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=Non
 
 def listexecution_containerappsjob(cmd, resource_group_name, name):
     try:
-        executions = ContainerAppsJobClient.get_executions(cmd=cmd, resource_group_name=resource_group_name, name=name)
+        executions = ContainerAppsJobClient.get_executions(
+            cmd=cmd, resource_group_name=resource_group_name, name=name)
         return executions['value']
     except CLIError as e:
         handle_raw_exception(e)

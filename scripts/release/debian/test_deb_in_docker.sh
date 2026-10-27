@@ -14,7 +14,8 @@ time az self-test
 time az --version
 
 cd /azure-cli/
-/opt/az/bin/python3 -m pip install wheel
+# `build` is the PEP 517 frontend used by scripts/ci/build.sh.
+/opt/az/bin/python3 -m pip install wheel build
 ln -sf /opt/az/bin/python3 /usr/bin/python
 ./scripts/ci/build.sh
 

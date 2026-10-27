@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-03-01",
+        "version": "2026-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies/{}", "2025-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies/{}", "2026-03-01"],
         ]
     }
 
@@ -81,11 +81,20 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The list of DDoS detection rules associated with the custom policy.",
         )
+        _args_schema.mitigation_rules = AAZListArg(
+            options=["--mitigation-rules"],
+            arg_group="Properties",
+            help="The list of DDoS mitigation rules associated with the custom policy.",
+        )
 
         detection_rules = cls._args_schema.detection_rules
         detection_rules.Element = AAZObjectArg()
 
         _element = cls._args_schema.detection_rules.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The name of the DDoS detection rule.",
@@ -109,6 +118,128 @@ class Create(AAZCommand):
             options=["traffic-type"],
             help="The traffic type (one of Tcp, Udp, TcpSyn) that the detection rule will be applied upon.",
             enum={"Tcp": "Tcp", "TcpSyn": "TcpSyn", "Udp": "Udp"},
+        )
+
+        mitigation_rules = cls._args_schema.mitigation_rules
+        mitigation_rules.Element = AAZObjectArg()
+
+        _element = cls._args_schema.mitigation_rules.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="The name of the DDoS mitigation rule.",
+            required=True,
+        )
+        _element.source_policy_overrides = AAZListArg(
+            options=["source-policy-overrides"],
+            help="Source-specific actions that override the default mitigations. A rule supports at most one Deny override and one Permit override.",
+        )
+        _element.tcp_default_mitigations = AAZObjectArg(
+            options=["tcp-default-mitigations"],
+            help="The default TCP mitigations. This property is valid only when trafficScope is Tcp.",
+        )
+        _element.traffic_scope = AAZStrArg(
+            options=["traffic-scope"],
+            help="The traffic protocol to which the mitigation rule applies.",
+            required=True,
+            enum={"Tcp": "Tcp", "Udp": "Udp"},
+        )
+        _element.udp_default_mitigations = AAZObjectArg(
+            options=["udp-default-mitigations"],
+            help="The default UDP mitigations. This property is valid only when trafficScope is Udp.",
+        )
+
+        source_policy_overrides = cls._args_schema.mitigation_rules.Element.source_policy_overrides
+        source_policy_overrides.Element = AAZObjectArg()
+
+        _element = cls._args_schema.mitigation_rules.Element.source_policy_overrides.Element
+        _element.conditions = AAZObjectArg(
+            options=["conditions"],
+            help="The source conditions that select traffic for the action.",
+            required=True,
+        )
+        _element.policy_action = AAZObjectArg(
+            options=["policy-action"],
+            help="The action to apply to matching traffic.",
+            required=True,
+        )
+
+        conditions = cls._args_schema.mitigation_rules.Element.source_policy_overrides.Element.conditions
+        conditions.geo_matches = AAZListArg(
+            options=["geo-matches"],
+            help="The geographic matches. Entries are evaluated with OR semantics.",
+        )
+        conditions.ip_prefixes = AAZListArg(
+            options=["ip-prefixes"],
+            help="The IPv4 or IPv6 CIDR prefixes in `<address>/<prefix-length>` format. Entries are evaluated with OR semantics.",
+        )
+
+        geo_matches = cls._args_schema.mitigation_rules.Element.source_policy_overrides.Element.conditions.geo_matches
+        geo_matches.Element = AAZObjectArg()
+
+        _element = cls._args_schema.mitigation_rules.Element.source_policy_overrides.Element.conditions.geo_matches.Element
+        _element.continent = AAZStrArg(
+            options=["continent"],
+            help="The continent to match. Country membership follows the service-defined mapping documented on DdosGeoMatch.",
+            enum={"Africa": "Africa", "Antarctica": "Antarctica", "Asia": "Asia", "Europe": "Europe", "NorthAmerica": "NorthAmerica", "Oceania": "Oceania", "SouthAmerica": "SouthAmerica"},
+        )
+        _element.country_code = AAZStrArg(
+            options=["country-code"],
+            help="The uppercase two-letter ISO 3166-1 alpha-2 code for the country or territory to match.",
+            fmt=AAZStrArgFormat(
+                pattern="^[A-Z]{2}$",
+            ),
+        )
+
+        ip_prefixes = cls._args_schema.mitigation_rules.Element.source_policy_overrides.Element.conditions.ip_prefixes
+        ip_prefixes.Element = AAZStrArg()
+
+        policy_action = cls._args_schema.mitigation_rules.Element.source_policy_overrides.Element.policy_action
+        policy_action.action_type = AAZStrArg(
+            options=["action-type"],
+            help="The source policy action type.",
+            required=True,
+            enum={"Deny": "Deny", "Permit": "Permit"},
+        )
+
+        tcp_default_mitigations = cls._args_schema.mitigation_rules.Element.tcp_default_mitigations
+        tcp_default_mitigations.per_source_connection_rate_limiting = AAZObjectArg(
+            options=["per-source-connection-rate-limiting"],
+            help="The per-source rate limit for new TCP connection establishments.",
+        )
+        tcp_default_mitigations.per_source_rate_limiting = AAZObjectArg(
+            options=["per-source-rate-limiting"],
+            help="The per-source TCP packet rate limit.",
+        )
+
+        per_source_connection_rate_limiting = cls._args_schema.mitigation_rules.Element.tcp_default_mitigations.per_source_connection_rate_limiting
+        per_source_connection_rate_limiting.connections_per_second = AAZIntArg(
+            options=["connections-per-second"],
+            help="The maximum number of new TCP connections established per second from a source IP.",
+            required=True,
+        )
+
+        per_source_rate_limiting = cls._args_schema.mitigation_rules.Element.tcp_default_mitigations.per_source_rate_limiting
+        per_source_rate_limiting.packets_per_second = AAZIntArg(
+            options=["packets-per-second"],
+            help="The maximum number of TCP packets allowed per second from a source IP.",
+            required=True,
+        )
+
+        udp_default_mitigations = cls._args_schema.mitigation_rules.Element.udp_default_mitigations
+        udp_default_mitigations.per_source_rate_limiting = AAZObjectArg(
+            options=["per-source-rate-limiting"],
+            help="The per-source UDP packet rate limit.",
+        )
+
+        per_source_rate_limiting = cls._args_schema.mitigation_rules.Element.udp_default_mitigations.per_source_rate_limiting
+        per_source_rate_limiting.packets_per_second = AAZIntArg(
+            options=["packets-per-second"],
+            help="The maximum number of UDP packets allowed per second from a source IP.",
+            required=True,
         )
         return cls._args_schema
 
@@ -193,7 +324,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-03-01",
+                    "api-version", "2026-03-01",
                     required=True,
                 ),
             }
@@ -225,6 +356,7 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("detectionRules", AAZListType, ".detection_rules")
+                properties.set_prop("mitigationRules", AAZListType, ".mitigation_rules")
 
             detection_rules = _builder.get(".properties.detectionRules")
             if detection_rules is not None:
@@ -232,6 +364,7 @@ class Create(AAZCommand):
 
             _elements = _builder.get(".properties.detectionRules[]")
             if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
@@ -244,6 +377,75 @@ class Create(AAZCommand):
             if traffic_detection_rule is not None:
                 traffic_detection_rule.set_prop("packetsPerSecond", AAZIntType, ".packets_per_second")
                 traffic_detection_rule.set_prop("trafficType", AAZStrType, ".traffic_type")
+
+            mitigation_rules = _builder.get(".properties.mitigationRules")
+            if mitigation_rules is not None:
+                mitigation_rules.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.mitigationRules[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
+
+            properties = _builder.get(".properties.mitigationRules[].properties")
+            if properties is not None:
+                properties.set_prop("sourcePolicyOverrides", AAZListType, ".source_policy_overrides")
+                properties.set_prop("tcpDefaultMitigations", AAZObjectType, ".tcp_default_mitigations")
+                properties.set_prop("trafficScope", AAZStrType, ".traffic_scope", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("udpDefaultMitigations", AAZObjectType, ".udp_default_mitigations")
+
+            source_policy_overrides = _builder.get(".properties.mitigationRules[].properties.sourcePolicyOverrides")
+            if source_policy_overrides is not None:
+                source_policy_overrides.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.mitigationRules[].properties.sourcePolicyOverrides[]")
+            if _elements is not None:
+                _elements.set_prop("conditions", AAZObjectType, ".conditions", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("policyAction", AAZObjectType, ".policy_action", typ_kwargs={"flags": {"required": True}})
+
+            conditions = _builder.get(".properties.mitigationRules[].properties.sourcePolicyOverrides[].conditions")
+            if conditions is not None:
+                conditions.set_prop("geoMatches", AAZListType, ".geo_matches")
+                conditions.set_prop("ipPrefixes", AAZListType, ".ip_prefixes")
+
+            geo_matches = _builder.get(".properties.mitigationRules[].properties.sourcePolicyOverrides[].conditions.geoMatches")
+            if geo_matches is not None:
+                geo_matches.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.mitigationRules[].properties.sourcePolicyOverrides[].conditions.geoMatches[]")
+            if _elements is not None:
+                _elements.set_prop("continent", AAZStrType, ".continent")
+                _elements.set_prop("countryCode", AAZStrType, ".country_code")
+
+            ip_prefixes = _builder.get(".properties.mitigationRules[].properties.sourcePolicyOverrides[].conditions.ipPrefixes")
+            if ip_prefixes is not None:
+                ip_prefixes.set_elements(AAZStrType, ".")
+
+            policy_action = _builder.get(".properties.mitigationRules[].properties.sourcePolicyOverrides[].policyAction")
+            if policy_action is not None:
+                policy_action.set_prop("actionType", AAZStrType, ".action_type", typ_kwargs={"flags": {"required": True}})
+
+            tcp_default_mitigations = _builder.get(".properties.mitigationRules[].properties.tcpDefaultMitigations")
+            if tcp_default_mitigations is not None:
+                tcp_default_mitigations.set_prop("perSourceConnectionRateLimiting", AAZObjectType, ".per_source_connection_rate_limiting")
+                tcp_default_mitigations.set_prop("perSourceRateLimiting", AAZObjectType, ".per_source_rate_limiting")
+
+            per_source_connection_rate_limiting = _builder.get(".properties.mitigationRules[].properties.tcpDefaultMitigations.perSourceConnectionRateLimiting")
+            if per_source_connection_rate_limiting is not None:
+                per_source_connection_rate_limiting.set_prop("connectionsPerSecond", AAZIntType, ".connections_per_second", typ_kwargs={"flags": {"required": True}})
+
+            per_source_rate_limiting = _builder.get(".properties.mitigationRules[].properties.tcpDefaultMitigations.perSourceRateLimiting")
+            if per_source_rate_limiting is not None:
+                per_source_rate_limiting.set_prop("packetsPerSecond", AAZIntType, ".packets_per_second", typ_kwargs={"flags": {"required": True}})
+
+            udp_default_mitigations = _builder.get(".properties.mitigationRules[].properties.udpDefaultMitigations")
+            if udp_default_mitigations is not None:
+                udp_default_mitigations.set_prop("perSourceRateLimiting", AAZObjectType, ".per_source_rate_limiting")
+
+            per_source_rate_limiting = _builder.get(".properties.mitigationRules[].properties.udpDefaultMitigations.perSourceRateLimiting")
+            if per_source_rate_limiting is not None:
+                per_source_rate_limiting.set_prop("packetsPerSecond", AAZIntType, ".packets_per_second", typ_kwargs={"flags": {"required": True}})
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -292,8 +494,15 @@ class Create(AAZCommand):
             properties.front_end_ip_configuration = AAZListType(
                 serialized_name="frontEndIpConfiguration",
             )
+            properties.mitigation_rules = AAZListType(
+                serialized_name="mitigationRules",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.public_ip_addresses = AAZListType(
+                serialized_name="publicIPAddresses",
                 flags={"read_only": True},
             )
             properties.resource_guid = AAZStrType(
@@ -341,9 +550,119 @@ class Create(AAZCommand):
 
             front_end_ip_configuration = cls._schema_on_200_201.properties.front_end_ip_configuration
             front_end_ip_configuration.Element = AAZObjectType()
+            _CreateHelper._build_schema_common_sub_resource_read(front_end_ip_configuration.Element)
 
-            _element = cls._schema_on_200_201.properties.front_end_ip_configuration.Element
-            _element.id = AAZStrType()
+            mitigation_rules = cls._schema_on_200_201.properties.mitigation_rules
+            mitigation_rules.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.mitigation_rules.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200_201.properties.mitigation_rules.Element.properties
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.source_policy_overrides = AAZListType(
+                serialized_name="sourcePolicyOverrides",
+            )
+            properties.tcp_default_mitigations = AAZObjectType(
+                serialized_name="tcpDefaultMitigations",
+            )
+            properties.traffic_scope = AAZStrType(
+                serialized_name="trafficScope",
+                flags={"required": True},
+            )
+            properties.udp_default_mitigations = AAZObjectType(
+                serialized_name="udpDefaultMitigations",
+            )
+
+            source_policy_overrides = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.source_policy_overrides
+            source_policy_overrides.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.source_policy_overrides.Element
+            _element.conditions = AAZObjectType(
+                flags={"required": True},
+            )
+            _element.policy_action = AAZObjectType(
+                serialized_name="policyAction",
+                flags={"required": True},
+            )
+
+            conditions = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.conditions
+            conditions.geo_matches = AAZListType(
+                serialized_name="geoMatches",
+            )
+            conditions.ip_prefixes = AAZListType(
+                serialized_name="ipPrefixes",
+            )
+
+            geo_matches = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.conditions.geo_matches
+            geo_matches.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.conditions.geo_matches.Element
+            _element.continent = AAZStrType()
+            _element.country_code = AAZStrType(
+                serialized_name="countryCode",
+            )
+
+            ip_prefixes = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.conditions.ip_prefixes
+            ip_prefixes.Element = AAZStrType()
+
+            policy_action = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.source_policy_overrides.Element.policy_action
+            policy_action.action_type = AAZStrType(
+                serialized_name="actionType",
+                flags={"required": True},
+            )
+
+            tcp_default_mitigations = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.tcp_default_mitigations
+            tcp_default_mitigations.per_source_connection_rate_limiting = AAZObjectType(
+                serialized_name="perSourceConnectionRateLimiting",
+            )
+            tcp_default_mitigations.per_source_rate_limiting = AAZObjectType(
+                serialized_name="perSourceRateLimiting",
+            )
+
+            per_source_connection_rate_limiting = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.tcp_default_mitigations.per_source_connection_rate_limiting
+            per_source_connection_rate_limiting.connections_per_second = AAZIntType(
+                serialized_name="connectionsPerSecond",
+                flags={"required": True},
+            )
+
+            per_source_rate_limiting = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.tcp_default_mitigations.per_source_rate_limiting
+            per_source_rate_limiting.packets_per_second = AAZIntType(
+                serialized_name="packetsPerSecond",
+                flags={"required": True},
+            )
+
+            udp_default_mitigations = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.udp_default_mitigations
+            udp_default_mitigations.per_source_rate_limiting = AAZObjectType(
+                serialized_name="perSourceRateLimiting",
+            )
+
+            per_source_rate_limiting = cls._schema_on_200_201.properties.mitigation_rules.Element.properties.udp_default_mitigations.per_source_rate_limiting
+            per_source_rate_limiting.packets_per_second = AAZIntType(
+                serialized_name="packetsPerSecond",
+                flags={"required": True},
+            )
+
+            public_ip_addresses = cls._schema_on_200_201.properties.public_ip_addresses
+            public_ip_addresses.Element = AAZObjectType()
+            _CreateHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
 
             tags = cls._schema_on_200_201.tags
             tags.Element = AAZStrType()
@@ -353,6 +672,21 @@ class Create(AAZCommand):
 
 class _CreateHelper:
     """Helper class for Create"""
+
+    _schema_common_sub_resource_read = None
+
+    @classmethod
+    def _build_schema_common_sub_resource_read(cls, _schema):
+        if cls._schema_common_sub_resource_read is not None:
+            _schema.id = cls._schema_common_sub_resource_read.id
+            return
+
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType()
+
+        common_sub_resource_read = _schema_common_sub_resource_read
+        common_sub_resource_read.id = AAZStrType()
+
+        _schema.id = cls._schema_common_sub_resource_read.id
 
 
 __all__ = ["Create"]

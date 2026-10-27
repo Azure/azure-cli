@@ -14,6 +14,7 @@ from pathlib import Path
 
 from knack.log import get_logger
 from azure.cli.core.decorators import retry
+from azure.cli.core.util import sdk_no_wait
 
 import azure.core.rest
 
@@ -30,7 +31,8 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     ManagedNetworkSettingsEx, \
     OutboundRuleBasicResource, FqdnOutboundRule, \
     PrivateEndpointOutboundRule, PrivateEndpointOutboundRuleDestination, \
-    ServiceTagOutboundRule, ServiceTagOutboundRuleDestination
+    ServiceTagOutboundRule, ServiceTagOutboundRuleDestination, \
+    Compute, ClusterComputeProperties, Pool
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 from azure.cli.core.azclierror import (
     BadRequestError,
@@ -392,6 +394,105 @@ def deployment_begin_create_or_update(
     if spillover_deployment_name is not None:
         dpy.properties.spillover_deployment_name = spillover_deployment_name
     return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)
+
+
+def managed_compute_deployment_create(
+        client, resource_group_name, account_name, deployment_name,
+        model, deployment_template=None, accelerator_type=None,
+        version_upgrade_option=None,
+        sku_name=None, sku_capacity=None, tags=None):
+    """
+    Create a managed compute deployment for Azure Cognitive Services account.
+    """
+    from azure.mgmt.cognitiveservices.models import ManagedComputeDeployment, ManagedComputeDeploymentProperties
+    properties = ManagedComputeDeploymentProperties(
+        model=model,
+        deployment_template=deployment_template,
+        accelerator_type=accelerator_type,
+        version_upgrade_option=version_upgrade_option,
+    )
+    deployment = ManagedComputeDeployment(properties=properties)
+    if sku_name is not None:
+        deployment.sku = Sku(name=sku_name, capacity=sku_capacity)
+    if tags is not None:
+        deployment.tags = tags
+    return client.begin_create_or_update(
+        resource_group_name, account_name, deployment_name, deployment)
+
+
+def managed_compute_deployment_update(
+        client, resource_group_name, account_name, deployment_name,
+        sku_name=None, sku_capacity=None, tags=None):
+    """
+    Update a managed compute deployment for Azure Cognitive Services account.
+    Only SKU (name/capacity) and tags can be updated.
+    """
+    from azure.mgmt.cognitiveservices.models import PatchResourceSku
+    patch = PatchResourceSku()
+    if sku_name is not None or sku_capacity is not None:
+        patch.sku = Sku(name=sku_name, capacity=sku_capacity)
+    if tags is not None:
+        patch.tags = tags
+    return client.begin_update(
+        resource_group_name, account_name, deployment_name, patch)
+
+
+def managed_compute_deployment_show(client, resource_group_name, account_name, deployment_name):
+    """
+    Show a managed compute deployment for Azure Cognitive Services account.
+    """
+    return client.get(resource_group_name, account_name, deployment_name)
+
+
+def managed_compute_deployment_list(client, resource_group_name, account_name):
+    """
+    List managed compute deployments for Azure Cognitive Services account.
+    """
+    return client.list(resource_group_name, account_name)
+
+
+def managed_compute_deployment_delete(client, resource_group_name, account_name, deployment_name):
+    """
+    Delete a managed compute deployment from Azure Cognitive Services account.
+    """
+    return client.begin_delete(resource_group_name, account_name, deployment_name)
+
+
+def adapter_deployment_create(
+        client, resource_group_name, account_name, adapter_deployment_name,
+        source_model_id, target_deployment_name):
+    """
+    Create (or replace / re-target) a LoRA adapter deployment attached to a managed compute deployment.
+    """
+    from azure.mgmt.cognitiveservices.models import AdapterDeployment, AdapterDeploymentProperties
+    properties = AdapterDeploymentProperties(
+        source_model_id=source_model_id,
+        target_deployment_name=target_deployment_name,
+    )
+    adapter_deployment = AdapterDeployment(properties=properties)
+    return client.begin_create_or_update(
+        resource_group_name, account_name, adapter_deployment_name, adapter_deployment)
+
+
+def adapter_deployment_show(client, resource_group_name, account_name, adapter_deployment_name):
+    """
+    Show an adapter deployment for Azure Cognitive Services account.
+    """
+    return client.get(resource_group_name, account_name, adapter_deployment_name)
+
+
+def adapter_deployment_list(client, resource_group_name, account_name):
+    """
+    List adapter deployments for Azure Cognitive Services account.
+    """
+    return client.list(resource_group_name, account_name)
+
+
+def adapter_deployment_delete(client, resource_group_name, account_name, adapter_deployment_name):
+    """
+    Delete an adapter deployment from Azure Cognitive Services account.
+    """
+    return client.begin_delete(resource_group_name, account_name, adapter_deployment_name)
 
 
 def commitment_plan_create_or_update(
@@ -2576,3 +2677,48 @@ def project_connection_update(
     """
     project_connection = ConnectionUpdateContent(properties=instance.properties)
     return project_connection
+
+
+def compute_begin_create_or_update(
+        client, resource_group_name, account_name, compute_name,
+        location, pool_name, instance_type, node_count,
+        vm_priority=None, no_wait=False):
+    """
+    Create a compute resource for Azure Cognitive Services account.
+    """
+    properties = ClusterComputeProperties(
+        location=location,
+        pools=[
+            Pool(
+                name=pool_name,
+                instance_type=instance_type,
+                node_count=node_count,
+                vm_priority=vm_priority,
+            )
+        ],
+    )
+    resource = Compute(properties=properties)
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name=resource_group_name,
+        account_name=account_name,
+        compute_name=compute_name,
+        resource=resource,
+    )
+
+
+def compute_list(client, resource_group_name, account_name):
+    return client.list(resource_group_name, account_name)
+
+
+def compute_show(client, resource_group_name, account_name, compute_name):
+    return client.get(resource_group_name, account_name, compute_name)
+
+
+def compute_delete(client, resource_group_name, account_name, compute_name, no_wait=False):
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete,
+        resource_group_name, account_name, compute_name,
+    )

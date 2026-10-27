@@ -26,7 +26,6 @@ from ._format import (
 )
 
 from ._util import (
-    get_sql_backup_short_term_retention_policies_operations,
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations,
     get_sql_databases_operations,
@@ -55,7 +54,6 @@ from ._util import (
     get_sql_recoverable_managed_databases_operations,
     get_sql_managed_database_advanced_threat_protection_settings_operations,
     get_sql_managed_database_restore_details_operations,
-    get_sql_managed_backup_short_term_retention_policies_operations,
     get_sql_managed_database_long_term_retention_policies_operations,
     get_sql_managed_database_long_term_retention_backups_operations,
     get_sql_managed_instance_advanced_threat_protection_settings_operations,
@@ -384,17 +382,11 @@ def load_command_table(self, _):
             'restore',
             'restore_geo_backup')
 
-    backup_short_term_retention_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#BackupShortTermRetentionPoliciesOperations.{}',
-        client_factory=get_sql_backup_short_term_retention_policies_operations)
-
-    with self.command_group('sql db str-policy',
-                            backup_short_term_retention_policies_operations,
-                            client_factory=get_sql_backup_short_term_retention_policies_operations) as g:
+    with self.command_group('sql db str-policy') as g:
 
         g.custom_command('set', 'update_short_term_retention', supports_no_wait=True)
         g.custom_show_command('show', 'get_short_term_retention')
-        g.wait_command('wait')
+        g.custom_wait_command('wait', 'get_short_term_retention_for_wait')
 
     database_sensitivity_labels_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',
@@ -951,13 +943,7 @@ def load_command_table(self, _):
                                  setter_type=managed_database_advanced_threat_protection_setting_update_sdk,
                                  custom_func_name='midb_advanced_threat_protection_setting_update')
 
-    managed_backup_short_term_retention_policies_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#ManagedBackupShortTermRetentionPoliciesOperations.{}',
-        client_factory=get_sql_managed_backup_short_term_retention_policies_operations)
-
-    with self.command_group('sql midb short-term-retention-policy',
-                            managed_backup_short_term_retention_policies_operations,
-                            client_factory=get_sql_managed_backup_short_term_retention_policies_operations) as g:
+    with self.command_group('sql midb short-term-retention-policy') as g:
 
         g.custom_command(
             'set',
@@ -974,8 +960,8 @@ def load_command_table(self, _):
                             managed_database_long_term_retention_policies_operations,
                             client_factory=get_sql_managed_database_long_term_retention_policies_operations) as g:
 
-        g.custom_command('set', 'update_long_term_retention_mi', is_preview=True)
-        g.custom_show_command('show', 'get_long_term_retention_mi', is_preview=True)
+        g.custom_command('set', 'update_long_term_retention_mi')
+        g.custom_show_command('show', 'get_long_term_retention_mi')
 
     managed_database_long_term_retention_backups_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionManagedInstanceBackupsOperations.{}',
@@ -984,11 +970,11 @@ def load_command_table(self, _):
     with self.command_group('sql midb ltr-backup',
                             managed_database_long_term_retention_backups_operations,
                             client_factory=get_sql_managed_database_long_term_retention_backups_operations) as g:
-        g.custom_show_command('show', 'get_long_term_retention_mi_backup', is_preview=True)
+        g.custom_show_command('show', 'get_long_term_retention_mi_backup')
         g.custom_command(
             'list',
-            'list_long_term_retention_mi_backups', is_preview=True)
-        g.custom_command('delete', 'delete_long_term_retention_mi_backup', confirmation=True, is_preview=True)
+            'list_long_term_retention_mi_backups')
+        g.custom_command('delete', 'delete_long_term_retention_mi_backup', confirmation=True)
 
     with self.command_group('sql midb ltr-backup',
                             managed_databases_operations,
@@ -996,8 +982,7 @@ def load_command_table(self, _):
         g.custom_command(
             'restore',
             'restore_long_term_retention_mi_backup',
-            supports_no_wait=True,
-            is_preview=True)
+            supports_no_wait=True)
         g.wait_command('wait')
 
     with self.command_group('sql midb log-replay',

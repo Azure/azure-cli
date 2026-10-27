@@ -60,9 +60,9 @@ def transform_key_encryption_output(result, **command_args):  # pylint: disable=
         'kid': result.key_id,
         'result': base64.b64encode(result.ciphertext).decode('utf-8'),
         'algorithm': result.algorithm,
-        'iv': binascii.hexlify(result.iv) if result.iv else None,
-        'tag': binascii.hexlify(result.tag) if result.tag else None,
-        'aad': binascii.hexlify(result.aad) if result.aad else None
+        'iv': binascii.hexlify(result.iv).decode('ascii') if result.iv else None,
+        'tag': binascii.hexlify(result.tag).decode('ascii') if result.tag else None,
+        'aad': binascii.hexlify(result.aad).decode('ascii') if result.aad else None
     }
     return output
 
@@ -101,9 +101,17 @@ def transform_key_list_output(result, **command_args):  # pylint: disable=unused
         k['attributes'] = key._attributes    # pylint: disable=protected-access
         k['kid'] = key.id
         k['name'] = key.name
+        k['keySize'] = key.key_size
         k['managed'] = key.managed
         k['tags'] = key.tags
         k['releasePolicy'] = key.release_policy
+
+        # External key (EKM) is a preview property and may not exist on all SDK versions.
+        external_key = getattr(key, 'external_key', None)
+        external_key_id = getattr(external_key, 'id', None) if external_key else None
+        if external_key_id:
+            k['externalKeyId'] = external_key_id
+
         output.append(k)
     return output
 
@@ -129,6 +137,7 @@ def transform_key_output(result, **command_args):
             'expires': result.properties.expires_on,
             'exportable': result.properties.exportable,
             'hsmPlatform': result.properties.hsm_platform,
+            'keySize': result.properties.key_size,
             'notBefore': result.properties.not_before,
             'recoverableDays': result.properties.recoverable_days,
             'recoveryLevel': result.properties.recovery_level,
@@ -139,6 +148,13 @@ def transform_key_output(result, **command_args):
         'tags': result.properties.tags,
         'releasePolicy': result.properties.release_policy
     }
+
+    # External key (EKM) is a preview property and may not exist on all SDK versions.
+    external_key = getattr(result.properties, 'external_key', None)
+    external_key_id = getattr(external_key, 'id', None) if external_key else None
+    if external_key_id:
+        output['externalKeyId'] = external_key_id
+
     if isinstance(result, DeletedKey):
         output['deletedDate'] = result.deleted_date
         output['scheduledPurgeDate'] = result.scheduled_purge_date

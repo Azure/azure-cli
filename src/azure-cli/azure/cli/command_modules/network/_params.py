@@ -617,6 +617,7 @@ def load_arguments(self, _):
         c.argument('name', completer=None)
         c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard", "StandardV2"]), default="Standard")
         c.argument('tier', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(["Regional", "Global"]))
+        c.argument('first_party_service_tag_id', options_list=['--first-party-service-tag-id', '--fpst-id'], help='The resource ID of the first party service tag associated with the IP tag. Requires exactly one value in `--ip-tags`.')
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)
 
@@ -626,6 +627,7 @@ def load_arguments(self, _):
         c.argument('protection_mode', options_list=['--ddos-protection-mode', '--protection-mode'],
                    help='The DDoS protection mode of the public IP', arg_type=get_enum_type(['Enabled', 'Disabled', 'VirtualNetworkInherited']))
         c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan associated with the public IP. Can only be set if `--protection-mode` is Enabled.')
+        c.argument('ddos_custom_policy', help='Name or ID of a DDoS custom policy associated with the public IP. Note: A DDoS custom policy can only be attached to an instance-level public IP (a public IP associated with a NIC/VM) or a Load Balancer frontend IP configuration; attaching one to a standalone public IP is rejected by the service.')
 
     for scope in ['public-ip', 'lb frontend-ip', 'cross-region-lb frontend-ip']:
         with self.argument_context('network {}'.format(scope)) as c:
@@ -641,6 +643,7 @@ def load_arguments(self, _):
         c.argument('unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
         c.argument('max_return', help="Maximum number of endpoints to be returned for MultiValue routing type.", type=int)
         c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
+        c.argument('record_type', help='When record type is set, a traffic manager profile will allow only endpoints that match this type. If it is not set, traffic manager profile will allow adding all types of endpoints. It is returned as null when this is not set.', arg_type=get_enum_type(['A', 'AAAA', 'CNAME']))
 
     with self.argument_context('network traffic-manager profile', arg_group='Monitor Configuration') as c:
         c.argument('monitor_path', help='Path to monitor. Use ""(\'""\' in PowerShell) for none.', options_list=['--path', c.deprecate(target='--monitor-path', redirect='--path', hide=True)])
@@ -853,4 +856,9 @@ def load_arguments(self, _):
         c.argument('detection_mode', arg_group='Detection Rules', help='The detection mode for the DDoS detection rule.')
         c.argument('traffic_type', arg_group='Detection Rules', help='The traffic type (one of Tcp, Udp, TcpSyn) that the detection rule will be applied upon.')
         c.argument('packets_per_second', arg_group='Detection Rules', help='The customized packets per second threshold.')
+        from .aaz.latest.network.ddos_custom_policy import Create as _DdosCustomPolicyCreate
+        # reuse the generated AAZ arg so shorthand/JSON parsing, `??` help and validation stay in sync with the API
+        mitigation_rules = _DdosCustomPolicyCreate._build_arguments_schema().mitigation_rules.to_cmd_arg('mitigation_rules').type.settings  # pylint: disable=protected-access
+        c.argument('mitigation_rules', options_list=['--mitigation-rules'], arg_group='Mitigation Rules',
+                   action=mitigation_rules['action'], nargs=mitigation_rules['nargs'], help=mitigation_rules['help'])
     # endregion

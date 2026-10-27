@@ -32,12 +32,54 @@ def transform_web_output(web):
     props = ['name', 'state', 'location', 'resourceGroup', 'defaultHostName', 'appServicePlanId', 'ftpPublishingUrl']
     result = {k: web[k] for k in web if k in props}
     # to get width under control, also the plan usually is in the same RG
-    result['appServicePlan'] = result.pop('appServicePlanId').split('/')[-1]
+    app_service_plan_id = result.pop('appServicePlanId', None)
+    if app_service_plan_id is not None:
+        result['appServicePlan'] = app_service_plan_id.split('/')[-1]
     return result
 
 
 def transform_web_list_output(webs):
     return [transform_web_output(w) for w in webs]
+
+
+def _transform_site_output(result, remove_server_farm_id):
+    """Restore appServicePlanId after serializing azure-mgmt-web Site models."""
+    from azure.cli.core.util import todict
+    from azure.cli.core.commands import AzCliCommandInvoker
+
+    result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
+    sites = result if isinstance(result, list) else [result]
+    for site in sites:
+        if not isinstance(site, dict):
+            continue
+
+        app_service_plan_id = site.get('appServicePlanId')
+        if app_service_plan_id is None:
+            app_service_plan_id = site.get('serverFarmId')
+
+        properties = site.get('properties')
+        if app_service_plan_id is None and isinstance(properties, dict):
+            app_service_plan_id = properties.get('appServicePlanId')
+            if app_service_plan_id is None:
+                app_service_plan_id = properties.get('serverFarmId')
+
+        if app_service_plan_id is not None:
+            site['appServicePlanId'] = app_service_plan_id
+
+        if remove_server_farm_id:
+            site.pop('serverFarmId', None)
+            if isinstance(properties, dict):
+                properties.pop('serverFarmId', None)
+
+    return result
+
+
+def transform_webapp_site_output(result):
+    return _transform_site_output(result, remove_server_farm_id=True)
+
+
+def transform_site_output(result):
+    return _transform_site_output(result, remove_server_farm_id=False)
 
 
 def transform_runtime_list_output(result):
@@ -46,6 +88,144 @@ def transform_runtime_list_output(result):
         ('OS', r['os']), ('Runtime', r['runtime']), ('Version', r['version']),
         ('Config', r['config']), ('Support', r['support']), ('End of Life', r['end_of_life'])
     ]) for r in result]
+
+
+def transform_secure_build_output(result):
+    import sys
+    from .custom import _render_secure_build_table_report, _secure_build_finding_rows
+    if isinstance(result, dict):
+        _render_secure_build_table_report(result, file=sys.stdout)
+        return []
+    rows = _secure_build_finding_rows(result)
+    for row in rows:
+        row.pop('Details URL', None)
+    return rows
+
+
+def transform_troubleshoot_deployment_output(result):
+    from collections import OrderedDict
+
+    if not isinstance(result, dict):
+        return []
+    runtime = result.get('runtime') or {}
+    return [OrderedDict([
+        ('DeploymentId', result.get('deploymentId') or '-'),
+        ('State', result.get('state') or 'Unknown'),
+        ('Active', result.get('active', False)),
+        ('Succeeded', runtime.get('instancesSuccessful', '-')),
+        ('Failed', runtime.get('instancesFailed', '-')),
+        ('LastDeploymentTime', result.get('lastDeploymentTime') or '-'),
+    ])]
+
+
+def transform_troubleshoot_config_output(result):
+    """Flatten the troubleshoot config payload into a per-setting table.
+
+    Reads Settings out of the nested ``configCheck`` field (the verbatim SCM
+    body). Falls back gracefully for non-dict / empty payloads (e.g. --report
+    was passed and the command returned ``None``).
+    """
+    from collections import OrderedDict
+    if not isinstance(result, dict):
+        return []
+    config_check = result.get('configCheck') or {}
+    settings = config_check.get('Settings') or config_check.get('settings') or []
+    if not isinstance(settings, list):
+        return []
+    written_at = config_check.get('WrittenAt') or config_check.get('writtenAt')
+    if isinstance(written_at, str):
+        written_at = written_at.strip()
+    details_header = (
+        'Details (Last Updated: {})'.format(written_at)
+        if written_at else 'Details'
+    )
+    return [OrderedDict([
+        ('Setting', s.get('Setting') or s.get('setting') or ''),
+        ('Value', s.get('Value') if s.get('Value') is not None else s.get('value') or ''),
+        (details_header, s.get('Details') or s.get('details') or ''),
+    ]) for s in settings if isinstance(s, dict)]
+
+
+def transform_troubleshoot_status_output(result):
+    """Flatten the nested `instances` payload into one row per worker for `-o table`.
+    Column layout: InstanceId / State / Details / (LastError /
+    LastErrorTimestamp / LastErrorDetails only when any row has an error) /
+    Succeeded (last 24h) / Failed (last 24h).
+
+    Also queues a post-output hint trailer (via ``atexit``) when at least one
+    instance has a visible error, so users see the recommended follow-up
+    ``az webapp log`` commands under the table.
+
+    The framework's default table renderer would only surface top-level scalars
+    (name, resourceGroup) and drop every meaningful field."""
+    from collections import OrderedDict
+    from ._troubleshoot_status_report import _format_dt, _short_id, _startup_fetch_failed
+
+    items = (result or {}).get('instances') or []
+    app_name = (result or {}).get('name') or '<webapp>'
+    resource_group = (result or {}).get('resourceGroup') or '<resource-group>'
+
+    # LastError is nullable on the backend SiteRuntimeStatusOnWorker contract.
+    # A 'Started' instance is healthy, so any LastError it still carries is stale
+    # and must not be shown. Surface the LastError columns only when an instance
+    # reports a LastError while NOT 'Started'.
+    def _has_visible_error(item):
+        return bool(item.get('lastError')) and item.get('state') != 'Started'
+
+    def _dash(value):
+        # Render an empty cell as '-' so a missing value in a shown column is
+        # visually distinct from an accidentally blank row.
+        if value is None or value == '':
+            return '-'
+        return value
+
+    show_errors = any(_has_visible_error(item) for item in items)
+
+    rows = []
+    for item in items:
+        startup = item.get('startup') or {}
+        # KuduLite returns a SummaryFetchStatus failure reason when it couldn't
+        # read this worker's log directory; count/timestamp fields are
+        # meaningless in that case.
+        has_startup_error = bool(_startup_fetch_failed(startup))
+        succeeded = None if has_startup_error else startup.get('Succeeded')
+        failed = None if has_startup_error else startup.get('Failed')
+
+        row = OrderedDict([
+            ('InstanceId', _dash(_short_id(item.get('instanceId')))),
+            ('State', _dash(item.get('state'))),
+            ('Details', _dash(item.get('details'))),
+        ])
+        if show_errors:
+            if _has_visible_error(item):
+                row['LastError'] = _dash(item.get('lastError'))
+                row['LastErrorTimestamp'] = _dash(_format_dt(item.get('lastErrorTimestamp')))
+                row['LastErrorDetails'] = _dash(item.get('lastErrorDetails'))
+            else:
+                row['LastError'] = '-'
+                row['LastErrorTimestamp'] = '-'
+                row['LastErrorDetails'] = '-'
+        row['Succeeded (last 24h)'] = _dash(succeeded)
+        row['Failed (last 24h)'] = _dash(failed)
+        rows.append(row)
+
+    # Trailer is only meaningful for -o table; this transformer is only invoked
+    # by knack when the user selected table output, so guarding on show_errors
+    # is sufficient. Deferring via atexit ensures the hint prints AFTER knack
+    # has flushed the table to stdout.
+    if show_errors:
+        import atexit
+        import sys as _sys
+
+        def _print_hint(app=app_name, rg=resource_group):
+            _sys.stderr.write(
+                '\n\u25b6 Hint:\n'
+                '  Check application logs:  az webapp log tail -n {name} -g {rg}\n'
+                '  Check startup logs:      az webapp log startup show -n {name} -g {rg}\n'
+                .format(name=app, rg=rg))
+
+        atexit.register(_print_hint)
+    return rows
 
 
 def ex_handler_factory(creating_plan=False):
@@ -129,13 +309,21 @@ def load_command_table(self, _):
 
     logicapp_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.logicapp.custom#{}')
 
+    webapp_exec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.webapp_exec#{}')
+
+    network_capture_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appservice.network_capture#{}')
+
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_vnet_integration)
         g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory(), validator=validate_webapp_up,
                          deprecate_info=g.deprecate(redirect='webapp create and webapp deploy'))
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
-        g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
+        g.custom_command('exec', 'webapp_exec', custom_command_type=webapp_exec_custom, exception_handler=ex_handler_factory(), is_preview=True)
+        g.custom_command('list', 'list_webapp', transform=transform_webapp_site_output,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_app', transform=transform_webapp_site_output,
+                              table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -259,6 +447,23 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_startup_logs')
         g.custom_show_command('show', 'show_startup_log')
 
+    with self.command_group('webapp troubleshoot', is_preview=True) as g:
+        g.custom_command('config', 'troubleshoot_config',
+                         table_transformer=transform_troubleshoot_config_output)
+        g.custom_command('status', 'troubleshoot_status',
+                         table_transformer=transform_troubleshoot_status_output)
+        g.custom_command('deployment', 'troubleshoot_deployment',
+                         table_transformer=transform_troubleshoot_deployment_output)
+
+    with self.command_group('webapp secure-build', is_preview=True) as g:
+        g.custom_show_command('show', 'show_secure_build_report',
+                              table_transformer=transform_secure_build_output)
+
+    with self.command_group('webapp troubleshoot collect', is_preview=True) as g:
+        g.custom_command('network-capture', 'collect_network_capture',
+                         custom_command_type=network_capture_custom,
+                         exception_handler=ex_handler_factory())
+
     with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')
@@ -351,11 +556,11 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_plan_managed_instance_network')
         g.custom_command('remove', 'remove_plan_managed_instance_network')
 
-    with self.command_group('appservice plan managed-instance instance', custom_command_type=appservice_custom, is_preview=True) as g:
+    with self.command_group('appservice plan managed-instance instance', custom_command_type=appservice_custom) as g:
         g.custom_command('connect', 'connect_to_plan_instance')
         g.custom_command('recycle', 'recycle_plan_managed_instance')
 
-    with self.command_group('appservice plan identity', is_preview=True) as g:
+    with self.command_group('appservice plan identity') as g:
         g.custom_show_command('show', 'show_plan_identity')
         g.custom_command('assign', 'assign_plan_identity')
         g.custom_command('remove', 'remove_plan_identity')
@@ -372,8 +577,10 @@ def load_command_table(self, _):
                          validator=validate_functionapp)
         g.custom_command('list-runtimes', 'list_function_app_runtimes')
         g.custom_command('list-flexconsumption-runtimes', 'list_flex_function_app_runtimes')
-        g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_functionapp', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_function_app', transform=transform_site_output,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_functionapp', transform=transform_site_output,
+                              table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -390,6 +597,7 @@ def load_command_table(self, _):
 
     with self.command_group('functionapp flex-migration') as g:
         g.custom_command('start', 'migrate_consumption_to_flex', exception_handler=ex_handler_factory())
+        g.custom_command('revert', 'revert_flex_migration', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_flex_migration_candidates', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp deployment config') as g:
@@ -596,8 +804,10 @@ def load_command_table(self, _):
 
     with self.command_group('logicapp', custom_command_type=logicapp_custom) as g:
         g.custom_command('create', 'create_logicapp', exception_handler=ex_handler_factory())
-        g.custom_command('list', 'list_logicapp', table_transformer=transform_web_list_output)
-        g.custom_show_command('show', 'show_logicapp', table_transformer=transform_web_output)
+        g.custom_command('list', 'list_logicapp', transform=transform_site_output,
+                         table_transformer=transform_web_list_output)
+        g.custom_show_command('show', 'show_logicapp', transform=transform_site_output,
+                              table_transformer=transform_web_output)
         g.custom_command('scale', 'scale_logicapp', exception_handler=ex_handler_factory())
 
     with self.command_group('logicapp config appsettings', custom_command_type=logicapp_custom) as g:

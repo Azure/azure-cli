@@ -57,7 +57,7 @@ def load_arguments_eh(self, _):
                    help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
         c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
         c.argument('max_replication_lag_duration_in_seconds', type=int, options_list=['--max-replication-lag-duration-in-seconds', '--max-lag'], help='The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas')
-
+        c.argument('ip_address_type', help='The IP address type for the namespace. Determines whether the namespace supports IPv4 only or both IPv4 and IPv6 (dualstack).  Allowed values: DualStack, IPv4.')
     with self.argument_context('eventhubs namespace create') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='Cluster ARM ID of the Namespace')
 

@@ -142,7 +142,7 @@ def _create_role_assignment(cli_ctx, role, assignee, scope=None):
     definitions_client = auth_client.role_definitions
 
     assignment_name = uuid.uuid4()
-    role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+    role_defs = list(definitions_client.list(scope, filter="roleName eq '{}'".format(role)))
     role_id = role_defs[0].id
 
     api_version = supported_api_version(cli_ctx, resource_type=ResourceType.MGMT_AUTHORIZATION, max_api='2015-07-01')

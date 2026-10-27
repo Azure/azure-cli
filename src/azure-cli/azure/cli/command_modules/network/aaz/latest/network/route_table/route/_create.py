@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-08-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2025-07-01"],
         ]
     }
 
@@ -69,10 +69,31 @@ class Create(AAZCommand):
         _args_schema.next_hop_type = AAZStrArg(
             options=["--next-hop-type"],
             help="The type of Azure hop the packet should be sent to.",
-            enum={"Internet": "Internet", "None": "None", "VirtualAppliance": "VirtualAppliance", "VirtualNetworkGateway": "VirtualNetworkGateway", "VnetLocal": "VnetLocal"},
+            enum={"Internet": "Internet", "None": "None", "VirtualAppliance": "VirtualAppliance", "VirtualApplianceEcmp": "VirtualApplianceEcmp", "VirtualNetworkGateway": "VirtualNetworkGateway", "VnetLocal": "VnetLocal"},
         )
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.next_hop = AAZObjectArg(
+            options=["--next-hop"],
+            arg_group="Properties",
+            help="The next hop definition containing ECMP next hop IP addresses. Only allowed when nextHopType is VirtualApplianceEcmp.",
+        )
+
+        next_hop = cls._args_schema.next_hop
+        next_hop.next_hop_ip_addresses = AAZListArg(
+            options=["next-hop-ip-addresses"],
+            help="List of next hop IP addresses for ECMP routing. Must contain between 2 and 64 IP addresses.",
+            required=True,
+            fmt=AAZListArgFormat(
+                max_length=64,
+                min_length=2,
+            ),
+        )
+
+        next_hop_ip_addresses = cls._args_schema.next_hop.next_hop_ip_addresses
+        next_hop_ip_addresses.Element = AAZStrArg()
 
         # define Arg Group "RouteParameters"
         return cls._args_schema
@@ -162,7 +183,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -193,8 +214,17 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("addressPrefix", AAZStrType, ".address_prefix")
+                properties.set_prop("nextHop", AAZObjectType, ".next_hop")
                 properties.set_prop("nextHopIpAddress", AAZStrType, ".next_hop_ip_address")
                 properties.set_prop("nextHopType", AAZStrType, ".next_hop_type", typ_kwargs={"flags": {"required": True}})
+
+            next_hop = _builder.get(".properties.nextHop")
+            if next_hop is not None:
+                next_hop.set_prop("nextHopIpAddresses", AAZListType, ".next_hop_ip_addresses", typ_kwargs={"flags": {"required": True}})
+
+            next_hop_ip_addresses = _builder.get(".properties.nextHop.nextHopIpAddresses")
+            if next_hop_ip_addresses is not None:
+                next_hop_ip_addresses.set_elements(AAZStrType, ".")
 
             return self.serialize_content(_content_value)
 
@@ -224,7 +254,9 @@ class Create(AAZCommand):
             _schema_on_200_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200_201.type = AAZStrType()
+            _schema_on_200_201.type = AAZStrType(
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200_201.properties
             properties.address_prefix = AAZStrType(
@@ -232,6 +264,10 @@ class Create(AAZCommand):
             )
             properties.has_bgp_override = AAZBoolType(
                 serialized_name="hasBgpOverride",
+                flags={"read_only": True},
+            )
+            properties.next_hop = AAZObjectType(
+                serialized_name="nextHop",
             )
             properties.next_hop_ip_address = AAZStrType(
                 serialized_name="nextHopIpAddress",
@@ -244,6 +280,15 @@ class Create(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+
+            next_hop = cls._schema_on_200_201.properties.next_hop
+            next_hop.next_hop_ip_addresses = AAZListType(
+                serialized_name="nextHopIpAddresses",
+                flags={"required": True},
+            )
+
+            next_hop_ip_addresses = cls._schema_on_200_201.properties.next_hop.next_hop_ip_addresses
+            next_hop_ip_addresses.Element = AAZStrType()
 
             return cls._schema_on_200_201
 

@@ -813,6 +813,35 @@ class AcrCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @live_only()
+    def test_acr_create_with_dual_stack_endpoints(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20)
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus '
+                 '--data-endpoint-enabled true --endpoint-protocol IPv4AndIPv6',
+                 checks=[self.check('endpointProtocol', 'IPv4AndIPv6'),
+                         self.check('dataEndpointEnabled', True)])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4',
+                 checks=[self.check('endpointProtocol', 'IPv4')])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4AndIPv6',
+                 checks=[self.check('endpointProtocol', 'IPv4AndIPv6')])
+
+    @ResourceGroupPreparer()
+    @live_only()
+    def test_acr_create_with_data_endpoint(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20)
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus '
+                 '--data-endpoint-enabled true',
+                 checks=[self.check('dataEndpointEnabled', True)])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --data-endpoint-enabled false',
+                 checks=[self.check('dataEndpointEnabled', False)])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --data-endpoint-enabled true',
+                 checks=[self.check('dataEndpointEnabled', True)])
+
+    @ResourceGroupPreparer()
+    @live_only()
     def test_acr_create_invalid_name(self, resource_group):
         from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -906,14 +935,15 @@ class AcrCommandsTests(ScenarioTest):
 
         self.kwargs["home_location"] = result["location"]
 
-        self.cmd('acr replication show --name {home_location} --registry {registry_2} --resource-group {rg}',
-                 checks=[self.check('zoneRedundancy', 'Enabled')])
-
         self.cmd('acr replication create --registry {registry_1}  -g {rg} --location {location_2} --zone-redundancy Enabled',
                  checks=[self.check('zoneRedundancy', 'Enabled')])
 
         self.cmd('acr replication create --registry {registry_2}  -g {rg} --location {location_2}',
                  checks=[self.check('zoneRedundancy', 'Disabled')])
+
+        # The home replication is created with the first geo-replication.
+        self.cmd('acr replication show --name {home_location} --registry {registry_2} --resource-group {rg}',
+                 checks=[self.check('zoneRedundancy', 'Enabled')])
 
         self.cmd('acr replication create --registry {registry_2}  -g {rg} --location {location_3} --zone-redundancy Disabled',
                  checks=[self.check('zoneRedundancy', 'Disabled')])
@@ -981,7 +1011,82 @@ class AcrCommandsTests(ScenarioTest):
                     self.check('metadataSearch', 'Enabled')])
 
         self._core_registry_scenario(registry_name, resource_group, resource_group_location)
-        
+
+    @live_only()
+    @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
+    def test_acr_create_with_writable_cache_repos_default_disabled(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('writableCacheRepos', 'Disabled')])
+
+        # Update without --writable-cache-repos flag should preserve Disabled default
+        self.cmd('acr update -n {registry_name} -g {rg} --admin-enabled true',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('adminUserEnabled', True),
+                    self.check('writableCacheRepos', 'Disabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --writable-cache-repos Enabled',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('writableCacheRepos', 'Enabled')])
+
+        # Update without --writable-cache-repos flag should preserve Enabled value
+        self.cmd('acr update -n {registry_name} -g {rg} --admin-enabled false',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('adminUserEnabled', False),
+                    self.check('writableCacheRepos', 'Enabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --writable-cache-repos Disabled',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('writableCacheRepos', 'Disabled')])
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)
+
+    @live_only()
+    @ResourceGroupPreparer()
+    @AllowLargeResponse(size_kb=99999)
+    def test_acr_create_with_writable_cache_repos_enabled(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Premium'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --writable-cache-repos Enabled',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('adminUserEnabled', False),
+                         self.check('sku.name', 'Premium'),
+                         self.check('sku.tier', 'Premium'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('writableCacheRepos', 'Enabled')])
+
+        self.cmd('acr update -n {registry_name} -g {rg} --writable-cache-repos Disabled',
+            checks=[self.check('name', '{registry_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('writableCacheRepos', 'Disabled')])
+
+        self._core_registry_scenario(registry_name, resource_group, resource_group_location)
+
     @ResourceGroupPreparer()
     @AllowLargeResponse(size_kb=99999)
     def test_acr_create_with_domain_name_label_scope_tenant_reuse(self, resource_group, resource_group_location):

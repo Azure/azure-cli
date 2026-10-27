@@ -139,6 +139,10 @@ def get_postgres_skus(sku_info, tier):
     return _get_available_values(sku_info, 'skus', tier)
 
 
+def get_postgres_default_sku(sku_info, tier):
+    return _get_available_values(sku_info, 'default_sku_name', tier)
+
+
 def get_postgres_storage_sizes(sku_info, tier):
     return _get_available_values(sku_info, 'storage_sizes', tier)
 
@@ -371,8 +375,10 @@ def _is_resource_name(resource):
     return False
 
 
-def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byok_identity=None,
-                                       byok_key=None, backup_byok_key=None, instance=None):
+def build_identity_and_data_encryption(byok_identity=None, backup_byok_identity=None,
+                                       byok_key=None, backup_byok_key=None,
+                                       federated_client_id=None, backup_federated_client_id=None,
+                                       instance=None):
     identity, data_encryption = None, None
 
     primary_user_assigned_identity_id = byok_identity
@@ -397,6 +403,8 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
             primary_key_uri=primary_key_uri,
             geo_backup_user_assigned_identity_id=geo_backup_user_assigned_identity_id,
             geo_backup_key_uri=geo_backup_key_uri,
+            primary_federated_identity_client_id=federated_client_id,
+            geo_backup_federated_identity_client_id=backup_federated_client_id,
             type="AzureKeyVault")
 
     return identity, data_encryption

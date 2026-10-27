@@ -6,6 +6,7 @@
 import logging
 import re
 import types
+import uuid
 
 from azure.core.pipeline.policies import SansIOHTTPPolicy, UserAgentPolicy
 from knack.log import get_logger
@@ -111,7 +112,7 @@ def get_custom_hook_policy(cli_ctx):
         http_request = request.http_request
         if getattr(http_request, 'method', '') == 'GET':
             return
-        ACQUIRE_POLICY_TOKEN_URL = '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-03-01'
+        ACQUIRE_POLICY_TOKEN_URL = '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-11-01'
         policy_token = None
 
         from azure.cli.core.azclierror import ServiceError
@@ -135,10 +136,18 @@ def get_custom_hook_policy(cli_ctx):
                 },
                 "changeReference": cli_ctx.data.get('_change_reference', None)
             }
+
+            # Reuse the original request's x-ms-correlation-request-id so the acquirePolicyToken call shares the same correlation ID as the operation it is gating.
+            headers = ['Content-Type=application/json', 'x-ms-force-sync=true']
+            correlation_id = http_request.headers.get('x-ms-correlation-request-id')
+            if not correlation_id:
+                correlation_id = str(uuid.uuid4())
+                http_request.headers['x-ms-correlation-request-id'] = correlation_id
+            headers.append('x-ms-correlation-request-id={}'.format(correlation_id))
+
             acquire_policy_token_response = send_raw_request(cli_ctx, 'POST',
                                                              ACQUIRE_POLICY_TOKEN_URL,
-                                                             headers=['Content-Type=application/json',
-                                                                      'x-ms-force-sync=true'],
+                                                             headers=headers,
                                                              body=json.dumps(acquire_policy_token_body))
             if acquire_policy_token_response.status_code == 200 and acquire_policy_token_response.content:
                 response_content = json.loads(acquire_policy_token_response.content)

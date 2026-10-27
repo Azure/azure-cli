@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from azure.cli.command_modules.acs._helpers import (
@@ -22,6 +23,15 @@ from azure.cli.command_modules.acs._helpers import (
     map_azure_error_to_cli_error,
     safe_list_get,
     safe_lower,
+)
+from azure.cli.command_modules.acs.azurecontainerstorage import _helpers as acstor_helpers
+from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+    CONST_ACSTOR_K8S_EXTENSION_NAME,
+    CONST_ACSTOR_V1_K8S_EXTENSION_NAME,
+    CONST_DISK_TYPE_PV_WITH_ANNOTATION,
+    CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM,
+    CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME,
+    CONST_K8S_EXTENSION_CUSTOM_MOD_NAME,
 )
 from azure.cli.command_modules.acs.base_decorator import BaseAKSModels
 from azure.cli.command_modules.acs.tests.latest.mocks import MockCLI, MockCmd
@@ -205,6 +215,73 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(check_is_managed_aad_cluster(mc_2), True)
+
+
+class AzureContainerStorageHelpersTestCase(unittest.TestCase):
+    def _patch_k8s_extension_modules(self, extension):
+        client_factory = Mock()
+        client_factory.cf_k8s_extension_operation.return_value = Mock()
+        custom_mod = Mock()
+        custom_mod.show_k8s_extension.return_value = extension
+
+        def get_module(module_name):
+            if module_name == CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME:
+                return client_factory
+            if module_name == CONST_K8S_EXTENSION_CUSTOM_MOD_NAME:
+                return custom_mod
+            raise AssertionError(module_name)
+
+        return patch.object(acstor_helpers, "get_k8s_extension_module", side_effect=get_module)
+
+    def test_get_extension_installed_and_cluster_configs_v1_reads_lowercase_boolean_strings(self):
+        extension = SimpleNamespace(
+            extension_type=CONST_ACSTOR_V1_K8S_EXTENSION_NAME,
+            configuration_settings={
+                "global.cli.activeControl": "true",
+                "global.cli.storagePool.azureDisk.enabled": "true",
+                "global.cli.storagePool.elasticSan.enabled": "false",
+                "global.cli.storagePool.ephemeralDisk.nvme.enabled": "true",
+                "global.cli.storagePool.ephemeralDisk.temp.enabled": "false",
+                "global.cli.resources.ioEngine.cpu": "2.5",
+                "global.cli.storagePool.ephemeralDisk.enableEphemeralBypassAnnotation": "true",
+                "global.cli.storagePool.ephemeralDisk.nvme.perfTier": "premium",
+            }
+        )
+
+        with self._patch_k8s_extension_modules(extension):
+            result = acstor_helpers.get_extension_installed_and_cluster_configs_v1(
+                Mock(cli_ctx=Mock()), "rg", "cluster", []
+            )
+
+        self.assertEqual(
+            result,
+            (
+                True,
+                True,
+                False,
+                False,
+                True,
+                2.5,
+                CONST_DISK_TYPE_PV_WITH_ANNOTATION,
+                CONST_EPHEMERAL_NVME_PERF_TIER_PREMIUM,
+            )
+        )
+
+    def test_get_extension_installed_and_cluster_configs_reads_boolean_settings(self):
+        extension = SimpleNamespace(
+            extension_type=CONST_ACSTOR_K8S_EXTENSION_NAME,
+            configuration_settings={
+                "csiDriverConfigs.local-csi-driver.enabled": True,
+                "csiDriverConfigs.azuresan-csi-driver.enabled": False,
+            }
+        )
+
+        with self._patch_k8s_extension_modules(extension):
+            result = acstor_helpers.get_extension_installed_and_cluster_configs(
+                Mock(cli_ctx=Mock()), "rg", "cluster"
+            )
+
+        self.assertEqual(result, (True, True, False))
 
 
 class ErrorMappingTestCase(unittest.TestCase):

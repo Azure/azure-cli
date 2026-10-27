@@ -100,3 +100,20 @@ helps['aro wait'] = """
   short-summary: Wait for a cluster to reach a desired state.
   long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
 """
+
+helps['aro identity'] = """
+  type: group
+  short-summary: Manage identities related to Azure Red Hat OpenShift clusters.
+"""
+
+helps['aro identity get-required'] = """
+  type: command
+  short-summary: Get required identities
+  long-summary: Get required identities for creating a cluster with managed identities.
+"""
+
+helps['aro identity create-required'] = """
+  type: command
+  short-summary: Create required identities
+  long-summary: Create required identities to prepare for creating a cluster with managed identities.
+"""

@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an ApplicationGroup for a Namespace.
+
+    :example: ApplicationGroupDelete
+        az eventhubs namespace application-group delete --resource-group contosotest --namespace-name contoso-ua-test-eh-system-1 --application-group-name appGroup1
     """
 
     _aaz_info = {
-        "version": "2023-01-01-preview",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/applicationgroups/{}", "2023-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/applicationgroups/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -57,6 +60,7 @@ class Delete(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -133,7 +137,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01-preview",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

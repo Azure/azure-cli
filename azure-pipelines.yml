@@ -18,14 +18,15 @@ variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
   - group: 'AME ESRP Variable Group'
+  - group: 'esrp-signing-codes'
 - name: Codeql.Enabled
   value: false
 - name: ComponentDetection.ForceScan
   value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
 
-# macOS Cask parameters
-- name: macos_cask_python_version
-  value: '3.13'
+# Standalone tarball and Cask parameters
+- name: standalone_python_version
+  value: '3.14'
 
 parameters:
 - name: architectures
@@ -37,6 +38,20 @@ parameters:
   - name: ARM64
     value: arm64
     pool: pool-ubuntu-latest-arm64
+
+# Azure Linux versions to build in parallel. AZL3 is the current stable release;
+# AZL4 is being onboarded (currently beta) to pick up the patched OpenSSL and
+# resolve the S360 vulnerability. Both are built and published side-by-side
+# until AZL4 reaches GA and AZL3 is deprecated.
+- name: azureLinuxVersions
+  type: object
+  default:
+  - name: '3.0'
+    tag: '3.0'
+    image: mcr.microsoft.com/azurelinux/base/core:3.0
+  - name: '4.0 (Beta)'
+    tag: '4.0'
+    image: mcr.microsoft.com/azurelinux-beta/base/core:4.0
 
 jobs:
 - job: CheckPullRequest
@@ -137,9 +152,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -152,9 +167,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -167,9 +182,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - task: BatchScript@1
     inputs:
@@ -184,9 +199,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -351,13 +366,14 @@ jobs:
   dependsOn: BuildRpmPackagesAzureLinux
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-azurelinux3.0-${{ arch.value }}
-          dockerfile: azure-linux.dockerfile
-          packageArtifactName: rpm-azurelinux3.0-${{ arch.value }}
-          image: mcr.microsoft.com/azurelinux/base/core:3.0
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            pool: ${{ arch.pool }}
+            artifactName: docker-azurelinux${{ azl.tag }}-${{ arch.value }}
+            dockerfile: azure-linux.dockerfile
+            packageArtifactName: rpm-azurelinux${{ azl.tag }}-${{ arch.value }}
+            image: ${{ azl.image }}
   pool:
     name: $(pool)
   steps:
@@ -395,10 +411,11 @@ jobs:
     - ExtractMetadata
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          pool: ${{ arch.pool }}
-          artifactName: docker-azurelinux3.0-${{ arch.value }}
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            pool: ${{ arch.pool }}
+            artifactName: docker-azurelinux${{ azl.tag }}-${{ arch.value }}
   pool:
     name: $(pool)
   steps:
@@ -439,9 +456,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - task: PipAuthenticate@1
     condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
@@ -476,8 +493,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -516,13 +533,35 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
       pythonVersion: '$(python.version)'
       module: 'azure-cli-core'
+
+- job: TestPackagingMetadata
+  displayName: Test Packaging Metadata
+  timeoutInMinutes: 10
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  strategy:
+    matrix:
+      Python310:
+        python.version: '3.10'
+      Python314:
+        python.version: '3.14'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+  - bash: |
+      set -e
+      python -m pip install docutils requests packaging tomli
+      python -B -m unittest discover -s tools/automation/tests -t tools -p 'test_*.py' -v
+      python -B scripts/ci/check_package_versions.py
+    displayName: Validate source metadata and packaging automation
 
 - job: TestTelemetry
   displayName: Unit Test for Telemetry
@@ -533,8 +572,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -553,14 +592,14 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel setuptools
+  - bash: pip install --upgrade pip wheel build "setuptools>=78.1.1"
     displayName: 'Install pip and wheel'
   - bash: ./scripts/ci/test_profile_integration.sh
     displayName: 'Run Integration Test against Profiles'
@@ -574,148 +613,17 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel setuptools
+  - bash: pip install --upgrade pip wheel build "setuptools>=78.1.1"
     displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'
-
-- job: BuildHomebrewFormula
-  displayName: Build Homebrew Formula
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  pool:
-    name: ${{ variables.ubuntu_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-  - bash: |
-      #!/bin/bash
-      
-      root=$(cd $(dirname $0); pwd)
-      
-      set -evx
-      
-      CLI_VERSION=`cat $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata/version`
-      HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
-      
-      docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
-      src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
-      
-      echo "Generating formula in docker container ... "
-      docker run -v $docker_files:/mnt/scripts \
-                 -v $src_files:/mnt/src \
-                 -e CLI_VERSION=$CLI_VERSION \
-                 -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
-                 --name azurecli \
-                 mcr.microsoft.com/azurelinux/base/python:3.12 \
-                 /mnt/scripts/run.sh
-      
-      # clean up
-      rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
-      
-      docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
-      docker rm --force azurecli
-    displayName: 'Build homebrew formula'
-
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'SBOM'
-    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
-    inputs:
-      BuildDropPath: $(Build.ArtifactStagingDirectory)
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: homebrew'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: homebrew
-
-- job: TestHomebrewFormula
-  displayName: Test Homebrew Formula
-
-  dependsOn: BuildHomebrewFormula
-  condition: succeeded()
-  pool:
-    vmImage: ${{ variables.macos_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Homebrew'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
-      artifactName: homebrew
-
-
-  - bash: |
-      set -ev
-      # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
-      # See: https://github.com/Azure/azure-cli/issues/29054
-      python_version=3.13
-      brew unlink python@$python_version && brew link --overwrite python@$python_version
-      
-      echo == Remove pre-installed azure-cli ==
-      brew uninstall azure-cli
-      
-      echo == Install azure-cli.rb formula ==
-      # Need to create a dummy homebrew tap to install the formula
-      git config --global user.email "you@example.com"
-      git config --global user.name "Your Name"
-      brew tap-new dev/azure-cli
-      cp $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/
-      brew install --build-from-source dev/homebrew-azure-cli/azure-cli
-      
-      echo == Az Version ==
-      az --version
-      
-      echo == Run Self-Test ==
-      az self-test
-
-    displayName: 'Bash Script'
-
-- job: TestHomebrewPackage
-  displayName: Test Homebrew Package
-  timeoutInMinutes: 180
-  dependsOn: BuildHomebrewFormula
-  # condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
-  condition: false
-  pool:
-    vmImage: ${{ variables.macos_pool }}
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Metadata'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-      artifactName: metadata
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/homebrew'
-      artifactName: homebrew
-
-
-  - bash: ./scripts/release/homebrew/test_homebrew_package.sh
-
-
-    displayName: 'Test Homebrew Package'
 
 # ============================================================================
 # HOMEBREW CASK JOBS (Pre-built, signed, notarized binaries)
@@ -726,9 +634,17 @@ jobs:
 # Phase 1: Build unsigned tarballs (ARM64 + Intel)
 - template: .azure-pipelines/templates/macos/macos-build-jobs.yml
   parameters:
-    PythonVersion: $(macos_cask_python_version)
+    PythonVersion: $(standalone_python_version)
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
     MacosIntelImage: ${{ variables.macos_intel_pool }}
+    condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+    dependsOn: ['ExtractMetadata']
+
+- template: .azure-pipelines/templates/linux/linux-build-jobs.yml
+  parameters:
+    PythonVersion: $(standalone_python_version)
+    LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+    LinuxX64Pool: ${{ variables.ubuntu_pool }}
     condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
     dependsOn: ['ExtractMetadata']
 
@@ -739,32 +655,37 @@ jobs:
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
       BundleId: 'com.microsoft.azure.cli'
-      PythonVersion: $(macos_cask_python_version)
+      PythonVersion: $(standalone_python_version)
       ESRPServiceConnection: 'ame_esrp_connection'
       UseCurrentPipelineArtifacts: true
       dependsOn: ['VerifyMacOSCli']
 
 # Phase 3: Generate cask and test via temp tap
 - ${{ if eq(variables['System.TeamProject'], 'release') }}:
-  - template: .azure-pipelines/templates/macos/macos-cask-generation-and-tests.yml
+  - template: .azure-pipelines/templates/standalone/cask-generation-and-tests.yml
     parameters:
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
       MacosIntelImage: ${{ variables.macos_intel_pool }}
-      PythonVersion: $(macos_cask_python_version)
+      LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
+      LinuxX64Pool: ${{ variables.ubuntu_pool }}
+      PythonVersion: $(standalone_python_version)
       GitHubRepo: $(Build.Repository.Name)
       Debug: false
-      dependsOn: ['CreateFinalTarball']
+      CaskDependsOn: ['CreateMacOSFinalTarball', 'BuildLinuxCli']
+      MacosDependsOn: ['CreateMacOSFinalTarball']
+      LinuxDependsOn: ['BuildLinuxCli']
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/azurelinux/base/core:3.0
-          artifact: rpm-azurelinux3.0-${{ arch.value }}
-          pool: ${{ arch.pool }}
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            image: ${{ azl.image }}
+            artifact: rpm-azurelinux${{ azl.tag }}-${{ arch.value }}
+            pool: ${{ arch.pool }}
   pool:
     name: $(pool)
   steps:
@@ -806,11 +727,12 @@ jobs:
     name: $(pool)
   strategy:
     matrix:
-      ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
-          image: mcr.microsoft.com/azurelinux/base/core:3.0
-          artifact: rpm-azurelinux3.0-${{ arch.value }}
-          pool: ${{ arch.pool }}
+      ${{ each azl in parameters.azureLinuxVersions }}:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux ${{ azl.name }} ${{ arch.name }}:
+            image: ${{ azl.image }}
+            artifact: rpm-azurelinux${{ azl.tag }}-${{ arch.value }}
+            pool: ${{ arch.pool }}
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -979,13 +901,14 @@ jobs:
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
 
-        # https://wiki.debian.org/DebianReleases
-        Bullseye ${{ arch.name }}:
-          # 11
-          deb_system: debian
-          distro: bullseye
+        Resolute ${{ arch.name }}:
+          # 26.04
+          deb_system: ubuntu
+          distro: resolute
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
+
+        # https://wiki.debian.org/DebianReleases
         Bookworm ${{ arch.name }}:
           # 12
           deb_system: debian
@@ -1029,6 +952,11 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
+        Resolute ${{ arch.name }}:
+          deb_system: ubuntu
+          distro: resolute
+          arch: ${{ arch.value }}
+          pool: ${{ arch.pool }}
         Jammy ${{ arch.name }}:
           deb_system: ubuntu
           distro: jammy
@@ -1037,11 +965,6 @@ jobs:
         Noble ${{ arch.name }}:
           deb_system: ubuntu
           distro: noble
-          arch: ${{ arch.value }}
-          pool: ${{ arch.pool }}
-        Bullseye ${{ arch.name }}:
-          deb_system: debian
-          distro: bullseye
           arch: ${{ arch.value }}
           pool: ${{ arch.pool }}
         Bookworm ${{ arch.name }}:
@@ -1087,9 +1010,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1104,9 +1027,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1120,9 +1043,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1137,8 +1060,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1166,9 +1089,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.13'
+      displayName: 'Use Python 3.14'
       inputs:
-        versionSpec: 3.13
+        versionSpec: '3.14'
     - bash: |
         #!/usr/bin/env bash
         set -ev
@@ -1184,9 +1107,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1207,9 +1130,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.13'
+      displayName: 'Use Python 3.14'
       inputs:
-        versionSpec: 3.13
+        versionSpec: '3.14'
     - template: .azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev
@@ -1242,7 +1165,7 @@ jobs:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.11
+      versionSpec: '3.11'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1251,7 +1174,6 @@ jobs:
       cd ..
       git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
       azdev extension repo add ./azure-cli-extensions
-      pip install setuptools==70.0.0 wheel==0.30.0
       azdev extension add "*"
       pip install msrestazure markupsafe==2.0.1
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.

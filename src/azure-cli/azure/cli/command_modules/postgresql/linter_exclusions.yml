@@ -38,4 +38,17 @@ postgres flexible-server replica list:
 postgres flexible-server revive-dropped:
     rule_exclusions:
       - missing_command_test_coverage
+postgres flexible-server maintenance-event apply-now:
+  rule_exclusions:
+  - missing_command_test_coverage
+postgres flexible-server maintenance-event list:
+  rule_exclusions:
+    - missing_command_test_coverage
+    - no_ids_for_list_commands
+postgres flexible-server maintenance-event reschedule:
+  rule_exclusions:
+    - missing_command_test_coverage
+postgres flexible-server maintenance-event show:
+  rule_exclusions:
+    - missing_command_test_coverage
 ...

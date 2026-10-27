@@ -30,6 +30,7 @@ class List(AAZCommand):
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/virtualnetworks", "2025-07-01"],
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks", "2025-07-01"],
         ]
     }
@@ -51,14 +52,17 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
-        )
+        _args_schema.resource_group = AAZResourceGroupNameArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualNetworksList(ctx=self.ctx)()
+        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        if condition_0:
+            self.VirtualNetworksList(ctx=self.ctx)()
+        if condition_1:
+            self.VirtualNetworksListAll(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -107,6 +111,288 @@ class List(AAZCommand):
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2025-07-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.extended_location = AAZObjectType(
+                serialized_name="extendedLocation",
+            )
+            _ListHelper._build_schema_common_extended_location_read(_element.extended_location)
+            _element.id = AAZStrType()
+            _element.location = AAZStrType()
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.tags = AAZDictType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.address_space = AAZObjectType(
+                serialized_name="addressSpace",
+            )
+            _ListHelper._build_schema_common_address_space_read(properties.address_space)
+            properties.bgp_communities = AAZObjectType(
+                serialized_name="bgpCommunities",
+            )
+            _ListHelper._build_schema_common_virtual_network_bgp_communities_read(properties.bgp_communities)
+            properties.ddos_protection_plan = AAZObjectType(
+                serialized_name="ddosProtectionPlan",
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.ddos_protection_plan)
+            properties.default_public_nat_gateway = AAZObjectType(
+                serialized_name="defaultPublicNatGateway",
+                flags={"read_only": True},
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.default_public_nat_gateway)
+            properties.dhcp_options = AAZObjectType(
+                serialized_name="dhcpOptions",
+            )
+            properties.enable_ddos_protection = AAZBoolType(
+                serialized_name="enableDdosProtection",
+            )
+            properties.enable_vm_protection = AAZBoolType(
+                serialized_name="enableVmProtection",
+            )
+            properties.encryption = AAZObjectType()
+            _ListHelper._build_schema_common_virtual_network_encryption_read(properties.encryption)
+            properties.flow_logs = AAZListType(
+                serialized_name="flowLogs",
+                flags={"read_only": True},
+            )
+            properties.flow_timeout_in_minutes = AAZIntType(
+                serialized_name="flowTimeoutInMinutes",
+            )
+            properties.ip_allocations = AAZListType(
+                serialized_name="ipAllocations",
+            )
+            properties.private_endpoint_v_net_policies = AAZStrType(
+                serialized_name="privateEndpointVNetPolicies",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.resource_guid = AAZStrType(
+                serialized_name="resourceGuid",
+                flags={"read_only": True},
+            )
+            properties.subnets = AAZListType()
+            properties.summarized_gateway_prefixes = AAZObjectType(
+                serialized_name="summarizedGatewayPrefixes",
+            )
+            _ListHelper._build_schema_common_address_space_read(properties.summarized_gateway_prefixes)
+            properties.virtual_network_peerings = AAZListType(
+                serialized_name="virtualNetworkPeerings",
+            )
+
+            dhcp_options = cls._schema_on_200.value.Element.properties.dhcp_options
+            dhcp_options.dns_servers = AAZListType(
+                serialized_name="dnsServers",
+            )
+
+            dns_servers = cls._schema_on_200.value.Element.properties.dhcp_options.dns_servers
+            dns_servers.Element = AAZStrType()
+
+            flow_logs = cls._schema_on_200.value.Element.properties.flow_logs
+            flow_logs.Element = AAZObjectType()
+            _ListHelper._build_schema_common_flow_log_read(flow_logs.Element)
+
+            ip_allocations = cls._schema_on_200.value.Element.properties.ip_allocations
+            ip_allocations.Element = AAZObjectType()
+            _ListHelper._build_schema_common_sub_resource_read(ip_allocations.Element)
+
+            subnets = cls._schema_on_200.value.Element.properties.subnets
+            subnets.Element = AAZObjectType()
+            _ListHelper._build_schema_common_subnet_read(subnets.Element)
+
+            virtual_network_peerings = cls._schema_on_200.value.Element.properties.virtual_network_peerings
+            virtual_network_peerings.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.virtual_network_peerings.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties.virtual_network_peerings.Element.properties
+            properties.allow_forwarded_traffic = AAZBoolType(
+                serialized_name="allowForwardedTraffic",
+            )
+            properties.allow_gateway_transit = AAZBoolType(
+                serialized_name="allowGatewayTransit",
+            )
+            properties.allow_virtual_network_access = AAZBoolType(
+                serialized_name="allowVirtualNetworkAccess",
+            )
+            properties.do_not_verify_remote_gateways = AAZBoolType(
+                serialized_name="doNotVerifyRemoteGateways",
+            )
+            properties.enable_only_i_pv6_peering = AAZBoolType(
+                serialized_name="enableOnlyIPv6Peering",
+            )
+            properties.local_address_space = AAZObjectType(
+                serialized_name="localAddressSpace",
+            )
+            _ListHelper._build_schema_common_address_space_read(properties.local_address_space)
+            properties.local_subnet_names = AAZListType(
+                serialized_name="localSubnetNames",
+            )
+            properties.local_virtual_network_address_space = AAZObjectType(
+                serialized_name="localVirtualNetworkAddressSpace",
+            )
+            _ListHelper._build_schema_common_address_space_read(properties.local_virtual_network_address_space)
+            properties.peer_complete_vnets = AAZBoolType(
+                serialized_name="peerCompleteVnets",
+            )
+            properties.peering_state = AAZStrType(
+                serialized_name="peeringState",
+            )
+            properties.peering_sync_level = AAZStrType(
+                serialized_name="peeringSyncLevel",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.remote_address_space = AAZObjectType(
+                serialized_name="remoteAddressSpace",
+            )
+            _ListHelper._build_schema_common_address_space_read(properties.remote_address_space)
+            properties.remote_bgp_communities = AAZObjectType(
+                serialized_name="remoteBgpCommunities",
+            )
+            _ListHelper._build_schema_common_virtual_network_bgp_communities_read(properties.remote_bgp_communities)
+            properties.remote_subnet_names = AAZListType(
+                serialized_name="remoteSubnetNames",
+            )
+            properties.remote_virtual_network = AAZObjectType(
+                serialized_name="remoteVirtualNetwork",
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.remote_virtual_network)
+            properties.remote_virtual_network_address_space = AAZObjectType(
+                serialized_name="remoteVirtualNetworkAddressSpace",
+            )
+            _ListHelper._build_schema_common_address_space_read(properties.remote_virtual_network_address_space)
+            properties.remote_virtual_network_encryption = AAZObjectType(
+                serialized_name="remoteVirtualNetworkEncryption",
+                flags={"read_only": True},
+            )
+            _ListHelper._build_schema_common_virtual_network_encryption_read(properties.remote_virtual_network_encryption)
+            properties.resource_guid = AAZStrType(
+                serialized_name="resourceGuid",
+                flags={"read_only": True},
+            )
+            properties.use_remote_gateways = AAZBoolType(
+                serialized_name="useRemoteGateways",
+            )
+
+            local_subnet_names = cls._schema_on_200.value.Element.properties.virtual_network_peerings.Element.properties.local_subnet_names
+            local_subnet_names.Element = AAZStrType()
+
+            remote_subnet_names = cls._schema_on_200.value.Element.properties.virtual_network_peerings.Element.properties.remote_subnet_names
+            remote_subnet_names.Element = AAZStrType()
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
+
+            return cls._schema_on_200
+
+    class VirtualNetworksListAll(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/virtualNetworks",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,

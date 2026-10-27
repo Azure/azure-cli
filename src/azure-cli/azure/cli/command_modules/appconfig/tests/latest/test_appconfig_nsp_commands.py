@@ -8,7 +8,7 @@
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer, get_resource_name_prefix
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer
 
 
 class AppconfigNspLiveScenarioTest(ScenarioTest):
@@ -21,8 +21,8 @@ class AppconfigNspLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse(size_kb=99999)
     def test_azconfig_nsp_mgmt(self, resource_group, location):
-        store_name_prefix = get_resource_name_prefix('NspStore')
-        nsp_name_prefix = get_resource_name_prefix('Nsp')
+        store_name_prefix = 'NspStore'
+        nsp_name_prefix = 'Nsp'
         config_store_name = self.create_random_name(prefix=store_name_prefix, length=24)
         nsp_name = self.create_random_name(prefix=nsp_name_prefix, length=24)
 
@@ -64,8 +64,8 @@ class AppconfigNspLiveScenarioTest(ScenarioTest):
         nsp_id = self.cmd('network perimeter show -n {nsp_name} -g {rg}').get_output_in_json()['id']
         store_id = self.cmd('appconfig show -n {config_store_name} -g {rg}').get_output_in_json()['id']
 
-        association_name_prefix = get_resource_name_prefix('NspAssoc')
-        profile_name_prefix = get_resource_name_prefix('NspProfile')
+        association_name_prefix = 'NspAssoc'
+        profile_name_prefix = 'NspProfile'
         association_name = self.create_random_name(prefix=association_name_prefix, length=24)
         profile_name = self.create_random_name(prefix=profile_name_prefix, length=24)
 

@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2021-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/routetables/{}/routes/{}", "2025-07-01"],
         ]
     }
 
@@ -126,7 +126,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-08-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -167,7 +167,9 @@ class Wait(AAZWaitCommand):
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.type = AAZStrType()
+            _schema_on_200.type = AAZStrType(
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200.properties
             properties.address_prefix = AAZStrType(
@@ -175,6 +177,10 @@ class Wait(AAZWaitCommand):
             )
             properties.has_bgp_override = AAZBoolType(
                 serialized_name="hasBgpOverride",
+                flags={"read_only": True},
+            )
+            properties.next_hop = AAZObjectType(
+                serialized_name="nextHop",
             )
             properties.next_hop_ip_address = AAZStrType(
                 serialized_name="nextHopIpAddress",
@@ -187,6 +193,15 @@ class Wait(AAZWaitCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+
+            next_hop = cls._schema_on_200.properties.next_hop
+            next_hop.next_hop_ip_addresses = AAZListType(
+                serialized_name="nextHopIpAddresses",
+                flags={"required": True},
+            )
+
+            next_hop_ip_addresses = cls._schema_on_200.properties.next_hop.next_hop_ip_addresses
+            next_hop_ip_addresses.Element = AAZStrType()
 
             return cls._schema_on_200
 

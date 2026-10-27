@@ -34,6 +34,10 @@ class FleetTestHelper:
         public_ip_address_id,
         subnetname,
         ip_address_properties,
+        regular_capacity=3,
+        spot_capacity=3,
+        mode="Managed",
+        vm_name_prefix="testPrefix",
     ):
         subnet_addressPrefixes = "10.0.0.0/24"
         vnet_addressPrefixes = "10.0.0.0/16"
@@ -81,8 +85,8 @@ class FleetTestHelper:
         }
 
         spot_priority_profile = {
-            "capacity": 3,
-            "min_capacity": 1,
+            "capacity": spot_capacity,
+            "min_capacity": 0,
             "max_price_per_vm": 1.00865,
             "eviction_policy": "Delete",
             "allocation_strategy": "PriceCapacityOptimized",
@@ -90,7 +94,7 @@ class FleetTestHelper:
         }
 
         regular_priority_profile = {
-            "capacity": 3,
+            "capacity": regular_capacity,
             "min_capacity": 1,
             "allocation_strategy": "LowestPrice",
         }
@@ -156,7 +160,6 @@ class FleetTestHelper:
 
         computeProfile = {
             "computeApiVersion": "2023-09-01",
-            "platformFaultDomainCount": 1,
             "baseVirtualMachineProfile": {
                 "storageProfile": storageProfile,
                 "networkProfile": networkProfile,
@@ -165,11 +168,16 @@ class FleetTestHelper:
             },
         }
 
+        if mode == "Managed":
+            computeProfile["platformFaultDomainCount"] = 1
+
         computeFleetData = {
             "spot-priority-profile": spot_priority_profile,
             "vm-sizes-profile": vm_sizes_profile,
             "compute-profile": computeProfile,
             "regular-priority-profile": regular_priority_profile,
+            "mode": mode,
+            "vm-name-prefix": vm_name_prefix,
             "zones": ["1", "2", "3"],
             "tags": {"key3518": "luvrnuvsgdpbuofdskkcoqhfh"},
         }

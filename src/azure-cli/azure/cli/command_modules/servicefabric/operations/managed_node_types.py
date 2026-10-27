@@ -9,8 +9,10 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt.servicefabricmanagedclusters.models import (
     NodeType,
+    NodeTypeProperties,
     EndpointRangeDescription,
     VMSSExtension,
+    VMSSExtensionProperties,
     VaultSecretGroup,
     VaultCertificate,
     SubResource,
@@ -67,28 +69,32 @@ def create_node_type(cmd,
         vm_image_version = "latest"
 
     try:
-        new_node_type = NodeType(is_primary=primary,
-                                 vm_instance_count=int(instance_count),
-                                 data_disk_size_gb=disk_size,
-                                 data_disk_type=disk_type,
-                                 vm_size=vm_size,
-                                 vm_image_publisher=vm_image_publisher,
-                                 vm_image_offer=vm_image_offer,
-                                 vm_image_sku=vm_image_sku,
-                                 vm_image_version=vm_image_version,
-                                 capacities=capacity,
-                                 placement_properties=placement_property,
-                                 is_stateless=is_stateless,
-                                 multiple_placement_groups=multiple_placement_groups,
-                                 tags=tags)
+        new_node_type = NodeType(
+            properties=NodeTypeProperties(
+                is_primary=primary,
+                vm_instance_count=int(instance_count),
+                data_disk_size_gb=disk_size,
+                data_disk_type=disk_type,
+                vm_size=vm_size,
+                vm_image_publisher=vm_image_publisher,
+                vm_image_offer=vm_image_offer,
+                vm_image_sku=vm_image_sku,
+                vm_image_version=vm_image_version,
+                capacities=capacity,
+                placement_properties=placement_property,
+                is_stateless=is_stateless,
+                multiple_placement_groups=multiple_placement_groups),
+            tags=tags)
 
         if application_start_port and application_end_port:
-            new_node_type.application_ports = EndpointRangeDescription(start_port=application_start_port,
-                                                                       end_port=application_end_port)
+            new_node_type.properties.application_ports = EndpointRangeDescription(
+                start_port=application_start_port,
+                end_port=application_end_port)
 
         if ephemeral_start_port and ephemeral_end_port:
-            new_node_type.ephemeral_ports = EndpointRangeDescription(start_port=ephemeral_start_port,
-                                                                     end_port=ephemeral_end_port)
+            new_node_type.properties.ephemeral_ports = EndpointRangeDescription(
+                start_port=ephemeral_start_port,
+                end_port=ephemeral_end_port)
 
         logger.info("Creating node type '%s'", node_type_name)
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, new_node_type)
@@ -117,24 +123,26 @@ def update_node_type(cmd,
         node_type = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
         if instance_count is not None:
-            node_type.vm_instance_count = instance_count
+            node_type.properties.vm_instance_count = instance_count
 
         if application_start_port and application_end_port:
-            node_type.application_ports = EndpointRangeDescription(start_port=application_start_port,
-                                                                   end_port=application_end_port)
+            node_type.properties.application_ports = EndpointRangeDescription(
+                start_port=application_start_port,
+                end_port=application_end_port)
 
         if ephemeral_start_port and ephemeral_end_port:
-            node_type.ephemeral_ports = EndpointRangeDescription(start_port=ephemeral_start_port,
-                                                                 end_port=ephemeral_end_port)
+            node_type.properties.ephemeral_ports = EndpointRangeDescription(
+                start_port=ephemeral_start_port,
+                end_port=ephemeral_end_port)
 
         if capacity is not None:
-            node_type.capacities = capacity
+            node_type.properties.capacities = capacity
 
         if placement_property is not None:
-            node_type.placement_properties = placement_property
+            node_type.properties.placement_properties = placement_property
 
         if vm_size is not None:
-            node_type.vm_size = vm_size
+            node_type.properties.vm_size = vm_size
 
         if tags is not None:
             node_type.tags = tags
@@ -214,20 +222,23 @@ def add_vm_extension(cmd,
     try:
         node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
-        if node_type.vm_extensions is None:
-            node_type.vm_extensions = []
+        if node_type.properties.vm_extensions is None:
+            node_type.properties.vm_extensions = []
 
-        newExtension = VMSSExtension(name=extension_name,
-                                     publisher=publisher,
-                                     type=extension_type,
-                                     type_handler_version=type_handler_version,
-                                     force_update_tag=force_update_tag,
-                                     auto_upgrade_minor_version=auto_upgrade_minor_version,
-                                     settings=setting,
-                                     protected_settings=protected_setting,
-                                     provision_after_extensions=provision_after_extension)
+        newExtension = VMSSExtension(
+            name=extension_name,
+            properties=VMSSExtensionProperties(
+                publisher=publisher,
+                type=extension_type,
+                type_handler_version=type_handler_version,
+                force_update_tag=force_update_tag,
+                auto_upgrade_minor_version=auto_upgrade_minor_version,
+                settings=setting,
+                protected_settings=protected_setting,
+                provision_after_extensions=provision_after_extension)
+        )
 
-        node_type.vm_extensions.append(newExtension)
+        node_type.properties.vm_extensions.append(newExtension)
 
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
@@ -245,10 +256,10 @@ def delete_vm_extension(cmd,
     try:
         node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
-        if node_type.vm_extensions is not None:
-            original_len = len(node_type.vm_extensions)
-            node_type.vm_extensions = list(filter(lambda x: x.name.lower() != extension_name.lower(), node_type.vm_extensions))
-            if original_len == len(node_type.vm_extensions):
+        if node_type.properties.vm_extensions is not None:
+            original_len = len(node_type.properties.vm_extensions)
+            node_type.properties.vm_extensions = list(filter(lambda x: x.name.lower() != extension_name.lower(), node_type.properties.vm_extensions))
+            if original_len == len(node_type.properties.vm_extensions):
                 raise 'Extension with name {} not found'.format(extension_name)
 
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
@@ -269,10 +280,10 @@ def add_vm_secret(cmd,
     try:
         node_type: NodeType = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
-        if node_type.vm_secrets is None:
-            node_type.vm_secrets = []
+        if node_type.properties.vm_secrets is None:
+            node_type.properties.vm_secrets = []
 
-        vault = next((x for x in node_type.vm_secrets if x.source_vault.id.lower() == source_vault_id.lower()), None)
+        vault = next((x for x in node_type.properties.vm_secrets if x.source_vault.id.lower() == source_vault_id.lower()), None)
 
         vault_certificate = VaultCertificate(certificate_store=certificate_store, certificate_url=certificate_url)
         new_vault_secret_group = False
@@ -287,7 +298,7 @@ def add_vm_secret(cmd,
         vault.vault_certificates.append(vault_certificate)
 
         if new_vault_secret_group:
-            node_type.vm_secrets.append(vault)
+            node_type.properties.vm_secrets.append(vault)
 
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)

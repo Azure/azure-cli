@@ -24,10 +24,10 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-05-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions/{}", "2024-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions/{}", "2024-05-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions/{}", "2025-11-01"],
         ]
     }
 
@@ -56,7 +56,7 @@ class Delete(AAZCommand):
             help="The name of the policy definition.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
             ),
         )
         return cls._args_schema
@@ -125,7 +125,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -183,7 +183,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }

@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/availabilitysets/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/availabilitysets/{}", "2025-04-01"],
         ]
     }
 
@@ -120,7 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-04-01",
                     required=True,
                 ),
             }
@@ -166,6 +166,10 @@ class Show(AAZCommand):
                 flags={"client_flatten": True},
             )
             _schema_on_200.sku = AAZObjectType()
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -188,11 +192,18 @@ class Show(AAZCommand):
             properties.statuses = AAZListType(
                 flags={"read_only": True},
             )
+            properties.virtual_machine_scale_set_migration_info = AAZObjectType(
+                serialized_name="virtualMachineScaleSetMigrationInfo",
+                flags={"read_only": True},
+            )
             properties.virtual_machines = AAZListType(
                 serialized_name="virtualMachines",
             )
 
             scheduled_events_policy = cls._schema_on_200.properties.scheduled_events_policy
+            scheduled_events_policy.all_instances_down = AAZObjectType(
+                serialized_name="allInstancesDown",
+            )
             scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectType(
                 serialized_name="scheduledEventsAdditionalPublishingTargets",
             )
@@ -203,6 +214,11 @@ class Show(AAZCommand):
                 serialized_name="userInitiatedRedeploy",
             )
 
+            all_instances_down = cls._schema_on_200.properties.scheduled_events_policy.all_instances_down
+            all_instances_down.automatically_approve = AAZBoolType(
+                serialized_name="automaticallyApprove",
+            )
+
             scheduled_events_additional_publishing_targets = cls._schema_on_200.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets
             scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectType(
                 serialized_name="eventGridAndResourceGraph",
@@ -210,6 +226,9 @@ class Show(AAZCommand):
 
             event_grid_and_resource_graph = cls._schema_on_200.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
             event_grid_and_resource_graph.enable = AAZBoolType()
+            event_grid_and_resource_graph.scheduled_events_api_version = AAZStrType(
+                serialized_name="scheduledEventsApiVersion",
+            )
 
             user_initiated_reboot = cls._schema_on_200.properties.scheduled_events_policy.user_initiated_reboot
             user_initiated_reboot.automatically_approve = AAZBoolType(
@@ -233,6 +252,28 @@ class Show(AAZCommand):
             _element.message = AAZStrType()
             _element.time = AAZStrType()
 
+            virtual_machine_scale_set_migration_info = cls._schema_on_200.properties.virtual_machine_scale_set_migration_info
+            virtual_machine_scale_set_migration_info.default_virtual_machine_scale_set_info = AAZObjectType(
+                serialized_name="defaultVirtualMachineScaleSetInfo",
+                flags={"read_only": True},
+            )
+            virtual_machine_scale_set_migration_info.migrate_to_virtual_machine_scale_set = AAZObjectType(
+                serialized_name="migrateToVirtualMachineScaleSet",
+                flags={"read_only": True},
+            )
+            _ShowHelper._build_schema_sub_resource_read(virtual_machine_scale_set_migration_info.migrate_to_virtual_machine_scale_set)
+
+            default_virtual_machine_scale_set_info = cls._schema_on_200.properties.virtual_machine_scale_set_migration_info.default_virtual_machine_scale_set_info
+            default_virtual_machine_scale_set_info.constrained_maximum_capacity = AAZBoolType(
+                serialized_name="constrainedMaximumCapacity",
+                flags={"read_only": True},
+            )
+            default_virtual_machine_scale_set_info.default_virtual_machine_scale_set = AAZObjectType(
+                serialized_name="defaultVirtualMachineScaleSet",
+                flags={"read_only": True},
+            )
+            _ShowHelper._build_schema_sub_resource_read(default_virtual_machine_scale_set_info.default_virtual_machine_scale_set)
+
             virtual_machines = cls._schema_on_200.properties.virtual_machines
             virtual_machines.Element = AAZObjectType()
             _ShowHelper._build_schema_sub_resource_read(virtual_machines.Element)
@@ -241,6 +282,26 @@ class Show(AAZCommand):
             sku.capacity = AAZIntType()
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
