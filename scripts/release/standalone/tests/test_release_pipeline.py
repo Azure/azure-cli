@@ -40,6 +40,20 @@ def bash_step(path, display_name):
 
 class TestReleasePipeline(unittest.TestCase):
 
+    def test_cask_info_checks_the_installed_temporary_tap(self):
+        cask = "test/azure-cli-pipeline-test/azure-cli"
+        source = "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
+        for step in ("Install and test cask", "Install and test Linux cask"):
+            with self.subTest(step=step):
+                script = bash_step(GENERATION, step)
+                self.assertIn(f"brew install --cask {cask}", script)
+                info_commands = [line.strip() for line in script.splitlines()
+                                 if line.strip().startswith("brew info ")]
+                self.assertEqual(info_commands, [
+                    f"brew info --cask {cask}",
+                    f'brew info --cask {cask} | grep -F "{source}"',
+                ])
+
     def test_string_parameters_never_enter_bash_source(self):
         paths = (
             PUBLISH, GENERATION,

@@ -260,8 +260,8 @@ jobs:
       
       # Verify installation
       echo "=== Verifying Installation ==="
-      brew info --cask azure-cli
-      brew info --cask azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
+      brew info --cask test/azure-cli-pipeline-test/azure-cli
+      brew info --cask test/azure-cli-pipeline-test/azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
       which az
       az --version
       
@@ -365,8 +365,8 @@ jobs:
 
       brew install "python@$CASK_PYTHON_VERSION"
       brew install --cask test/azure-cli-pipeline-test/azure-cli
-      brew info --cask azure-cli
-      brew info --cask azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
+      brew info --cask test/azure-cli-pipeline-test/azure-cli
+      brew info --cask test/azure-cli-pipeline-test/azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
       az version
     displayName: 'Install and test Linux cask'
     env:
