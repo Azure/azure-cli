@@ -20,6 +20,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from .._transformers import transform_response_with_bytearray
 from ..util import get_datetime_from_string
+from ..storage_url_helpers import same_url_origin as _same_url_origin
 
 logger = get_logger(__name__)
 
@@ -1101,41 +1102,6 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
         return None
 
     return reader.readall().decode("utf-8")
-
-
-def _normalize_url_origin(url):
-    from ipaddress import ip_address
-    from urllib.parse import urlsplit
-    import idna
-
-    try:
-        parsed = urlsplit(url)
-        scheme = parsed.scheme.lower()
-        hostname = parsed.hostname
-        if scheme not in ('http', 'https') or not hostname:
-            return None
-
-        hostname = hostname.rstrip('.')
-        if not hostname:
-            return None
-        try:
-            hostname = ip_address(hostname).compressed
-        except ValueError:
-            hostname = idna.encode(hostname, uts46=True).decode('ascii').lower().rstrip('.')
-            if not hostname:
-                return None
-
-        port = parsed.port
-        if port is None:
-            port = 443 if scheme == 'https' else 80
-        return scheme, hostname, port
-    except (UnicodeError, ValueError):
-        return None
-
-
-def _same_url_origin(first_url, second_url):
-    first_origin = _normalize_url_origin(first_url)
-    return first_origin is not None and first_origin == _normalize_url_origin(second_url)
 
 
 def _account_names_match(first_client, second_client):
