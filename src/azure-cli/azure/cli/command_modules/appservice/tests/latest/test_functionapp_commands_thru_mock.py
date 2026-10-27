@@ -5,9 +5,14 @@
 import unittest
 from unittest import mock
 import os
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from types import SimpleNamespace
+from urllib.parse import urlparse
 
 from azure.mgmt.web import WebSiteManagementClient
 from knack.util import CLIError
+from azure.cli.command_modules.appservice import custom
 from azure.cli.command_modules.appservice.custom import (
     enable_zip_deploy_functionapp,
     enable_zip_deploy,
@@ -60,6 +65,169 @@ def _get_flex_zip_deploy_headers(cmd_mock_client):
     headers['User-Agent'] = get_az_user_agent()
     headers['x-ms-client-request-id'] = cmd_mock_client.data['headers']['x-ms-client-request-id']
     return headers
+
+
+class TestFlexAppHealthCheck(unittest.TestCase):
+    def setUp(self):
+        self.cmd = mock.Mock()
+        patches = mock.patch.multiple(custom, _generic_site_operation=mock.DEFAULT, list_host_keys=mock.DEFAULT)
+        self.mocks = patches.start()
+        self.addCleanup(patches.stop)
+        self.site = self.mocks['_generic_site_operation']
+        self.keys = self.mocks['list_host_keys']
+        self.site.return_value = SimpleNamespace(
+            default_host_name='app.azurewebsites.net',
+            host_name_ssl_states=[SimpleNamespace(host_type='Standard', name='custom.example.com')])
+        self.keys.return_value = SimpleNamespace(master_key='fake-master-key')
+        for attribute, target in (
+                ('get', 'requests.get'),
+                ('sleep', 'azure.cli.command_modules.appservice.custom.time.sleep'),
+                ('disable_verify', 'azure.cli.core.util.should_disable_connection_verify')):
+            patcher = mock.patch(target)
+            setattr(self, attribute, patcher.start())
+            self.addCleanup(patcher.stop)
+        self.disable_verify.return_value = False
+        self.get.return_value.status_code = 200
+
+    def test_functionapp_health_uses_default_hostname(self):
+        for hostname in ('app.azurewebsites.net', 'app.azurewebsites.us', 'app.chinacloudsites.cn',
+                         'App-unique.westus-01.azurewebsites.net'):
+            with self.subTest(hostname=hostname):
+                self.site.return_value.default_host_name = hostname
+                self.assertEqual(custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app'),
+                                 'Deployment was successful.')
+                self.get.assert_called_with(
+                    'https://{}/admin/host/status'.format(hostname),
+                    headers={'x-functions-key': 'fake-master-key'}, verify=True, allow_redirects=False)
+        self.site.assert_called_with(self.cmd.cli_ctx, 'rg', 'app', 'get')
+
+    def test_functionapp_health_invalid_hostname_fails_before_keys(self):
+        for hostname in (None, '', 123, 'https://app.example.com', 'user@app.example.com',
+                         'app.example.com:443', 'app.example.com/path', 'app.example.com?query',
+                         'app.example.com#fragment', 'app.example.com\\other', ' app.example.com',
+                         'app.example.com\n', 'app..example.com', '-app.example.com',
+                         'app-.example.com', 'app%2eexample.com', 'app_example.com',
+                         'a' * 64 + '.example.com', '.'.join(['a' * 63] * 4)):
+            with self.subTest(hostname=hostname):
+                self.site.return_value.default_host_name = hostname
+                with self.assertRaisesRegex(ResourceNotFoundError, 'Failed to retrieve Host Uri'):
+                    custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app')
+                self.keys.assert_not_called()
+                self.get.assert_not_called()
+
+    def test_functionapp_health_redirect_is_terminal(self):
+        for status in range(300, 400):
+            with self.subTest(status=status):
+                self.get.reset_mock()
+                self.get.side_effect = [SimpleNamespace(status_code=status),
+                                        AssertionError('A redirect must not be retried')]
+                with self.assertRaisesRegex(CLIError, 'app appears to be unhealthy'):
+                    custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app')
+                self.assertEqual(self.get.call_count, 1)
+                self.assertFalse(self.get.call_args.kwargs['allow_redirects'])
+
+    def test_functionapp_health_non_redirect_retries(self):
+        for status in (403, 500, 503):
+            with self.subTest(status=status):
+                self.get.reset_mock()
+                self.get.side_effect = [SimpleNamespace(status_code=status, reason='Forbidden'),
+                                        SimpleNamespace(status_code=200)]
+                self.assertEqual(custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app'),
+                                 'Deployment was successful.')
+                self.assertEqual(self.get.call_count, 2)
+
+    def test_functionapp_health_retries_are_bounded(self):
+        for status in (403, 500):
+            with self.subTest(status=status):
+                self.get.reset_mock()
+                self.get.side_effect = [SimpleNamespace(status_code=status, reason='Forbidden')] * 15 + [
+                    AssertionError('Health check exceeded its retry limit')]
+                with self.assertRaisesRegex(CLIError, 'app appears to be unhealthy'):
+                    custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app')
+                self.assertEqual(self.get.call_count, 15)
+
+    def test_functionapp_health_key_fetch_failure(self):
+        self.keys.side_effect = CLIError('Key retrieval failed')
+        with self.assertRaisesRegex(ResourceNotFoundError, 'Failed to fetch host key'):
+            custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app')
+        self.get.assert_not_called()
+
+    def test_functionapp_health_tls_verification_setting(self):
+        self.disable_verify.return_value = True
+        custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app')
+        self.assertFalse(self.get.call_args.kwargs['verify'])
+
+    def test_functionapp_health_tls_failure_is_not_suppressed(self):
+        from requests.exceptions import SSLError
+        self.get.side_effect = SSLError('Certificate verification failed')
+        with self.assertRaises(SSLError):
+            custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app')
+        self.get.assert_called_once()
+        self.assertTrue(self.get.call_args.kwargs['verify'])
+
+    def test_functionapp_health_other_success_status_remains_unhealthy(self):
+        self.get.return_value.status_code = 202
+        with self.assertRaisesRegex(CLIError, 'app appears to be unhealthy'):
+            custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app')
+        self.get.assert_called_once()
+
+    def test_functionapp_health_key_stays_on_default_origin_loopback(self):
+        import requests
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.server.observed.append((self.path, self.headers.get('x-functions-key')))
+                self.send_response(302 if self.server.redirect_target else 200)
+                if self.server.redirect_target:
+                    self.send_header('Location', self.server.redirect_target)
+                self.end_headers()
+
+            def log_message(self, format, *args):
+                pass
+
+        servers = []
+        for _ in range(2):
+            server = HTTPServer(('127.0.0.1', 0), Handler)
+            server.observed = []
+            server.redirect_target = None
+            thread = threading.Thread(target=server.serve_forever, kwargs={'poll_interval': 0.01}, daemon=True)
+            self.addCleanup(server.server_close)
+            self.addCleanup(thread.join, 5)
+            self.addCleanup(server.shutdown)
+            thread.start()
+            servers.append(server)
+
+        default, other = servers
+        origins = {
+            'app.azurewebsites.net': 'http://127.0.0.1:{}'.format(default.server_port),
+            'custom.example.com': 'http://127.0.0.1:{}'.format(other.server_port)
+        }
+        session = requests.Session()
+        session.trust_env = False
+        self.addCleanup(session.close)
+
+        def loopback_get(url, **kwargs):
+            parsed = urlparse(url)
+            # Keep real Requests redirect handling, but send initial requests only to loopback.
+            return session.get(origins[parsed.hostname] + parsed.path, timeout=5, **kwargs)
+
+        self.get.side_effect = loopback_get
+        with self.subTest(disclosure_path='custom hostname first'):
+            self.assertEqual(custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app'),
+                             'Deployment was successful.')
+            self.assertEqual(other.observed, [])
+            self.assertEqual(default.observed, [('/admin/host/status', 'fake-master-key')])
+
+        default.observed.clear()
+        other.observed.clear()
+        self.site.return_value.host_name_ssl_states = [
+            SimpleNamespace(host_type='Standard', name='app.azurewebsites.net')]
+        default.redirect_target = origins['custom.example.com'] + '/redirect-target'
+        with self.subTest(disclosure_path='cross-origin redirect'):
+            with self.assertRaisesRegex(CLIError, 'app appears to be unhealthy'):
+                custom.check_flex_app_after_deployment(self.cmd, 'rg', 'app')
+            self.assertEqual(other.observed, [])
+            self.assertEqual(default.observed, [('/admin/host/status', 'fake-master-key')])
 
 
 class TestFunctionappMocked(unittest.TestCase):
@@ -280,7 +448,7 @@ class TestFunctionappMocked(unittest.TestCase):
         self.assertEqual(result, "Deployment was successful.")
         requests_get_mock.assert_called_with('https://mock-func.azurewebsites.net/admin/host/status',
                                              headers={"x-functions-key": 'master-key'},
-                                             verify=True)
+                                             verify=True, allow_redirects=False)
 
     @mock.patch('time.sleep')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_host_url', side_effect=ValueError())
