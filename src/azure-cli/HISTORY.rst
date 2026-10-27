@@ -13,7 +13,7 @@ Release History
 * `az aks create`: Add `--ssh-access` with `localuser`, `disabled` and `entraid` options to configure SSH access for the node pools (#34161)
 * `az aks nodepool add/update`: Add `--ssh-access` with `localuser`, `disabled` and `entraid` options to configure SSH access for the node pool (#34161)
 * `az aks create/update`: Add `--kms-infrastructure-encryption` to support KMS platform-managed keys (PMK) (#34204)
-* `az aks`: Allow longer node pool names; the service enforces the actual limit. (#34216)
+* `az aks`: Allow longer node pool names; the service enforces the actual limit (#34216)
 * `az aks nodepool add`: Make `--enable-managed-gpu` generally available (#34268)
 
 **App Service**
@@ -21,7 +21,7 @@ Release History
 * `az webapp show/list`: Restore `appServicePlanId` and remove `serverFarmId` from output (#34149)
 * `az functionapp show/list`: Add `appServicePlanId` to output while retaining `serverFarmId` (#34149)
 * `az logicapp show/list`: Add `appServicePlanId` to output while retaining `serverFarmId` (#34149)
-* `az functionapp list --output table`: Handle apps without an App Service Plan ID (#34149)
+* `az functionapp list`: Handle apps without an App Service Plan ID when using `--output table` (#34149)
 
 **ARM**
 
@@ -38,7 +38,7 @@ Release History
 
 **Cognitive Services**
 
-* `az cognitiveservices agent`: Deprecate hosted agent commands (#34177)
+* `az cognitiveservices agent`: Announce hosted agent command deprecation (#34177)
 * `az cognitiveservices account adapter-deployment`: Add new command group (preview) (#34112)
 
 **Compute**
@@ -50,7 +50,7 @@ Release History
 **Compute Fleet**
 
 * `az compute-fleet`: Support API version 2026-08-01 (#34170)
-* `az compute-fleet identity`: Add commands to assign, remove, show, and wait for managed identities (#34170)
+* `az compute-fleet identity`: Add `assign`, `remove`, `show`, and `wait` commands for managed identities (#34170)
 
 **Container app**
 
