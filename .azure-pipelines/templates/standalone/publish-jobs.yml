@@ -318,7 +318,10 @@ jobs:
         fi
         
         brew tap "$RELEASE_HOMEBREW_TAP"
-        brew install --cask azure-cli
+        tap_owner="${RELEASE_HOMEBREW_TAP%%/*}"
+        tap_repository="${RELEASE_HOMEBREW_TAP#*/}"
+        published_cask="$tap_owner/${tap_repository#homebrew-}/azure-cli"
+        brew install --cask "$published_cask"
         
         which az
         az version
@@ -329,7 +332,7 @@ jobs:
         echo "Installed version: $INSTALLED_VERSION"
         echo "Published cask installation successful ($(Architecture))"
         
-        brew uninstall --cask azure-cli
+        brew uninstall --cask "$published_cask"
       displayName: 'Test published cask install'
       env:
         RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}
@@ -362,9 +365,12 @@ jobs:
         brew uninstall --cask azure-cli 2>/dev/null || true
         brew install "python@$RELEASE_PYTHON_VERSION"
         brew tap "$RELEASE_HOMEBREW_TAP"
-        brew install --cask azure-cli
+        tap_owner="${RELEASE_HOMEBREW_TAP%%/*}"
+        tap_repository="${RELEASE_HOMEBREW_TAP#*/}"
+        published_cask="$tap_owner/${tap_repository#homebrew-}/azure-cli"
+        brew install --cask "$published_cask"
         az version
-        brew uninstall --cask azure-cli
+        brew uninstall --cask "$published_cask"
       displayName: 'Test published Linux cask install'
       env:
         RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}

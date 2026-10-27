@@ -275,13 +275,20 @@ jobs:
       CASK_PYTHON_VERSION: ${{ parameters.PythonVersion }}
 
   - bash: |
+      set -euo pipefail
       echo "=== Cleanup ($(Architecture)) ==="
       
       # Uninstall the cask
-      brew uninstall --cask azure-cli 2>/dev/null || true
+      installed_casks=$(brew list --cask --full-name)
+      if grep -Fxq 'test/azure-cli-pipeline-test/azure-cli' <<< "$installed_casks"; then
+        brew uninstall --cask test/azure-cli-pipeline-test/azure-cli
+      fi
       
       # Remove temporary tap
-      brew untap test/azure-cli-pipeline-test 2>/dev/null || true
+      installed_taps=$(brew tap)
+      if grep -Fxq 'test/azure-cli-pipeline-test' <<< "$installed_taps"; then
+        brew untap test/azure-cli-pipeline-test
+      fi
       
       echo "Cleanup complete"
     displayName: 'Cleanup'
@@ -373,8 +380,15 @@ jobs:
       CASK_PYTHON_VERSION: ${{ parameters.PythonVersion }}
 
   - bash: |
-      brew uninstall --cask azure-cli 2>/dev/null || true
-      brew untap test/azure-cli-pipeline-test 2>/dev/null || true
+      set -euo pipefail
+      installed_casks=$(brew list --cask --full-name)
+      if grep -Fxq 'test/azure-cli-pipeline-test/azure-cli' <<< "$installed_casks"; then
+        brew uninstall --cask test/azure-cli-pipeline-test/azure-cli
+      fi
+      installed_taps=$(brew tap)
+      if grep -Fxq 'test/azure-cli-pipeline-test' <<< "$installed_taps"; then
+        brew untap test/azure-cli-pipeline-test
+      fi
     displayName: 'Cleanup'
     condition: always()
 

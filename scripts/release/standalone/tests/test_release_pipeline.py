@@ -40,6 +40,72 @@ def bash_step(path, display_name):
 
 class TestReleasePipeline(unittest.TestCase):
 
+    def run_with_brew_stub(self, script, **settings):
+        with tempfile.TemporaryDirectory(prefix="cask commands ") as directory:
+            root = Path(directory)
+            log = root / "brew.jsonl"
+            brew = root / "brew"
+            brew.write_text(
+                f"#!{sys.executable}\n"
+                "import json, os, sys\n"
+                "args = sys.argv[1:]\n"
+                "with open(os.environ['BREW_ARGUMENT_LOG'], 'a') as log:\n"
+                "    log.write(json.dumps(args) + '\\n')\n"
+                "if args == ['list', '--cask', '--full-name']:\n"
+                "    print(os.environ.get('INSTALLED_CASKS', ''))\n"
+                "if args == ['tap']:\n"
+                "    print(os.environ.get('INSTALLED_TAPS', ''))\n"
+                "if args and args[0] == os.environ.get('BREW_FAIL_COMMAND'):\n"
+                "    sys.exit(7)\n",
+            )
+            brew.chmod(0o755)
+            az = root / "az"
+            az.write_text(f"#!{sys.executable}\nprint('2.91.0')\n")
+            az.chmod(0o755)
+            result = subprocess.run(
+                ["/bin/bash", "-c", script.replace("$(Architecture)", "arm64")],
+                env={
+                    "PATH": str(root) + os.pathsep + os.defpath,
+                    "HOME": str(root),
+                    "BREW_ARGUMENT_LOG": str(log),
+                    "RELEASE_HOMEBREW_TAP": "Azure/homebrew-azure-cli",
+                    "RELEASE_PYTHON_VERSION": "3.14",
+                    **settings,
+                },
+                cwd=root, capture_output=True, text=True, timeout=10, check=False,
+            )
+            calls = [json.loads(line) for line in log.read_text().splitlines()]
+            return result, calls
+
+    def test_published_tests_install_and_remove_the_custom_tap_cask(self):
+        for step in ("Test published cask install", "Test published Linux cask install"):
+            with self.subTest(step=step):
+                result, calls = self.run_with_brew_stub(bash_step(PUBLISH, step))
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn(["install", "--cask", "Azure/azure-cli/azure-cli"], calls)
+                self.assertEqual(calls[-1], ["uninstall", "--cask", "Azure/azure-cli/azure-cli"])
+                self.assertNotIn(["install", "--cask", "azure-cli"], calls)
+
+    def test_temporary_cleanup_is_specific_and_surfaces_failures(self):
+        cleanups = [script for script, label in bash_steps(GENERATION) if label == "displayName: 'Cleanup'"]
+        self.assertEqual(len(cleanups), 2)
+        installed = {
+            "INSTALLED_CASKS": "test/azure-cli-pipeline-test/azure-cli\nhomebrew/cask/another-cask",
+            "INSTALLED_TAPS": "test/azure-cli-pipeline-test",
+        }
+        for script in cleanups:
+            with self.subTest(script=script):
+                result, calls = self.run_with_brew_stub(script, **installed)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn(["uninstall", "--cask", "test/azure-cli-pipeline-test/azure-cli"], calls)
+                self.assertIn(["untap", "test/azure-cli-pipeline-test"], calls)
+                result, calls = self.run_with_brew_stub(script)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(calls, [["list", "--cask", "--full-name"], ["tap"]])
+                for command in ("list", "uninstall", "untap"):
+                    result, _ = self.run_with_brew_stub(script, **installed, BREW_FAIL_COMMAND=command)
+                    self.assertEqual(result.returncode, 7, result.stderr)
+
     def test_cask_info_checks_the_installed_temporary_tap(self):
         cask = "test/azure-cli-pipeline-test/azure-cli"
         source = "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
