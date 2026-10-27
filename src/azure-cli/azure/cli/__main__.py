@@ -19,7 +19,7 @@ from knack.events import EVENT_CLI_PRE_EXECUTE
 from knack.log import get_logger
 
 __author__ = "Microsoft Corporation <python@microsoft.com>"
-__version__ = "2.91.0"
+__version__ = "2.92.0"
 
 
 logger = get_logger(__name__)
