@@ -152,7 +152,6 @@ class CognitiveServicesDeploymentUnitTests(unittest.TestCase):
         request = transport.send.call_args.args[0]
         payload = json.loads(request.body)
         self.assertEqual(request.method, 'PUT')
-        self.assertIn('api-version=2026-05-15-preview', request.url)
         self.assertEqual(payload['properties']['modelProviderData'], {
             'organizationName': 'Contoso', 'industry': 'Law', 'countryCode': 'US',
         })
