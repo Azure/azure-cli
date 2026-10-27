@@ -2254,6 +2254,10 @@ parameters:
   - name: --gpu-driver
     type: string
     short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None". Default is "Install".
+  - name: --enable-managed-gpu
+    type: bool
+    short-summary: Enable the Managed GPU experience, which installs additional components like DCGM metrics for monitoring on top of the GPU driver.
+    long-summary: Installs the GPU driver even if --gpu-driver is set to None. For more details, visit https://aka.ms/aks/managed-gpu.
   - name: --gateway-prefix-size
     type: int
     short-summary: The size of Public IPPrefix attached to the Gateway-mode node pool. The node pool must be in Gateway mode.
@@ -2293,6 +2297,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
   - name: Create a nodepool with KataVmIsolation enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
+  - name: Create a GPU node pool with the Managed GPU experience enabled.
+    text: az aks nodepool add -g MyResourceGroup -n gpunp --cluster-name MyManagedCluster --node-vm-size Standard_NC6s_v3 --enable-managed-gpu
 """
 
 helps["aks nodepool delete"] = """

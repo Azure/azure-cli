@@ -3602,6 +3602,7 @@ def aks_agentpool_add(
     enable_artifact_streaming=False,
     # ssh access
     ssh_access=CONST_SSH_ACCESS_LOCALUSER,
+    enable_managed_gpu=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
