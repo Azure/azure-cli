@@ -4070,20 +4070,15 @@ def _put_egress_config(cmd, resource_group_name, name, connections, enabled=None
     return command(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def set_egress_config(cmd, resource_group_name, name, enabled=None, connections=None, slot=None):
-    from ._constants import EGRESS_ENABLED_STATES
-
-    configured_connections = {}
-    connection_names = set()
-    for definition in connections or []:
-        connection_name, connection = _build_egress_connection(**definition)
-        if connection_name.lower() in connection_names:
-            raise InvalidArgumentValueError("Connection names must be unique regardless of casing.")
-        connection_names.add(connection_name.lower())
-        configured_connections[connection_name] = connection
+def set_egress_config(cmd, resource_group_name, name, enabled=None, slot=None):
     if enabled is not None:
-        enabled = _egress_enum(enabled, EGRESS_ENABLED_STATES, '--enabled')
-    return _put_egress_config(cmd, resource_group_name, name, configured_connections, enabled, slot)
+        if not isinstance(enabled, bool):
+            raise InvalidArgumentValueError("Specify true or false for --enabled.")
+        enabled = 'Enabled' if enabled else 'Disabled'
+    config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    if enabled is None:
+        enabled = config.get('enabled')
+    return _put_egress_config(cmd, resource_group_name, name, config.get('connections') or {}, enabled, slot)
 
 
 def _find_egress_connection(connections, connection_name):

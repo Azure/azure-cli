@@ -166,16 +166,17 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
             'settings': {'OrdersDb': {'role': 'Value'}},
             'identityScope': 'https://database.windows.net/.default',
         }
-        api_definition = (
-            ' --connection name=api protocol=Http auth=Credential source=AppSettings '
-            'host-setting=API_HOST credential-setting=API_TOKEN credential-header=Authorization '
-            'credential-format="Bearer {{value}}"')
+        api_arguments = (
+            'connection add --connection-name api --protocol Http --auth Credential --source AppSettings '
+            '--host-setting API_HOST --credential-setting API_TOKEN --credential-header Authorization '
+            '--credential-format "Bearer {{value}}"')
         sql_arguments = (
             ' --protocol Tds --auth ManagedIdentity --source ConnectionStrings --value-setting OrdersDb '
             '--identity-scope https://database.windows.net/.default')
         self.assertFalse(self._configuration().get('connections'))
 
-        result = self._egress('set --enabled Enabled' + api_definition).get_output_in_json()
+        self.assertEqual(self._egress(api_arguments).get_output_in_json(), api)
+        result = self._egress('set --enabled true').get_output_in_json()
         self.assertEqual(result['properties']['connections'], {'api': api})
         self._assert_configuration({'api': api}, 'Enabled')
 
@@ -193,6 +194,13 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self.assertEqual(
             self._egress('connection show --connection-name OrDeRs-Db').get_output_in_json(), sql)
 
+        self._egress('set')
+        self.assertEqual(self._configuration(), before)
+        self._egress('set --enabled false')
+        self._assert_configuration({'api': api, 'orders-db': sql}, 'Disabled')
+        self._egress('set --enabled')
+        self._assert_configuration({'api': api, 'orders-db': sql}, 'Enabled')
+
         for action in ['show', 'remove']:
             result = self._egress('connection ' + action + ' --connection-name missing', expect_failure=True)
             self.assertNotEqual(result.exit_code, 0)
@@ -201,17 +209,17 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self._egress('connection remove --connection-name ORDERS-DB')
         self._assert_configuration({'api': api}, 'Enabled')
 
-        result = self._egress(
-            'set --enabled Disabled --connection name=orders-db protocol=Tds auth=ManagedIdentity '
-            'source=ConnectionStrings value-setting=OrdersDb '
-            'identity-scope=https://database.windows.net/.default '
-            'identity-resource-id={identity_id}').get_output_in_json()
-        self.assertEqual(result['properties']['connections'], {'orders-db': sql})
-        self._assert_configuration({'orders-db': sql}, 'Disabled')
-
-        self._egress('connection remove --connection-name ORDERS-DB')
-        self.assertFalse(self._configuration().get('connections'))
-        self._egress('set --enabled Enabled' + api_definition)
-        self._assert_configuration({'api': api}, 'Enabled')
+        self._egress('set --enabled false')
+        disabled = self._assert_configuration({'api': api}, 'Disabled')
         self._egress('set')
+        self.assertEqual(self._configuration(), disabled)
+        self._egress('connection remove --connection-name API')
+        self.assertFalse(self._configuration().get('connections'))
+
+        self.assertEqual(self._egress(
+            'connection add --connection-name orders-db' + sql_arguments +
+            ' --identity-resource-id {identity_id}').get_output_in_json(), sql)
+        self._egress('set --enabled true')
+        self._assert_configuration({'orders-db': sql}, 'Enabled')
+        self._egress('connection remove --connection-name ORDERS-DB')
         self.assertFalse(self._configuration().get('connections'))

@@ -55,35 +55,6 @@ class RegistryAdapterAddAction(KeyValueAddAction):
         return result
 
 
-class EgressConnectionAddAction(KeyValueAddAction):
-    _keys = {
-        'name', 'protocol', 'auth', 'source', 'host-setting', 'credential-setting',
-        'username-setting', 'value-setting', 'identity-resource-id', 'identity-scope',
-        'credential-header', 'credential-format',
-    }
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        from azure.cli.core.azclierror import InvalidArgumentValueError
-
-        seen = set()
-        for item in values:
-            key, separator, value = item.partition('=')
-            if not separator or key not in self._keys or not value:
-                raise InvalidArgumentValueError(
-                    "Invalid --connection entry. Use nonempty KEY=VALUE pairs. Supported keys: {}."
-                    .format(', '.join(sorted(self._keys))))
-            if key in seen:
-                raise InvalidArgumentValueError("Duplicate key '{}' in --connection.".format(key))
-            seen.add(key)
-        return super().__call__(parser, namespace, values, option_string)
-
-    def _remap_key_value_pairs(self, parsed_pairs):
-        return {
-            'connection_name' if key == 'name' else key.replace('-', '_'): value
-            for key, value in parsed_pairs.items()
-        }
-
-
 class StorageMountAddAction(KeyValueAddAction):
     def _remap_key_value_pairs(self, parsed_pairs):
         """Remap key value pairs to match the expected storage mount structure."""

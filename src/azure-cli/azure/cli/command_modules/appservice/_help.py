@@ -1455,24 +1455,20 @@ short-summary: Manage virtualized backend connections for a web app.
 
 helps['webapp config egress set'] = """
 type: command
-short-summary: Replace the egress configuration for a web app.
+short-summary: Set the enabled state of a web app's egress configuration.
 long-summary: |
-  All existing connections are replaced. Connections omitted from the request are removed.
-  Omit --connection entirely to clear the configuration. To change just one connection, use
-  "az webapp config egress connection add" instead. Reference existing app setting or connection
-  string names, never their secret values. The platform validates protocol and authentication
-  combinations and requires referenced settings and managed identities to exist.
+  Read the existing egress configuration, update its enabled state, and write it back while
+  preserving all connections and their settings, identities, and credential injection configuration.
+  Use --enabled true to enable virtual connections or --enabled false to disable them.
+  If --enabled is omitted, write back the existing configuration without changing its enabled state.
+  Manage individual connections with "az webapp config egress connection add" and
+  "az webapp config egress connection remove".
 examples:
-  - name: Enable a Redis connection and a managed identity SQL connection.
-    text: >-
-      az webapp config egress set --resource-group MyRG --name MyApp --enabled Enabled
-      --connection name=cache protocol=Redis auth=Credential host-setting=REDIS_HOST credential-setting=REDIS_PASSWORD
-      --connection name=orders-db protocol=Tds auth=ManagedIdentity source=ConnectionStrings value-setting=OrdersDb
-  - name: Configure HTTP credential injection for a deployment slot.
-    text: >-
-      az webapp config egress set --resource-group MyRG --name MyApp --slot staging --enabled Enabled
-      --connection name=api protocol=Http auth=Credential host-setting=API_HOST credential-setting=API_KEY credential-header=X-API-Key
-  - name: Clear all egress connections.
+  - name: Enable virtual connections without modifying any connection definitions.
+    text: az webapp config egress set --resource-group MyRG --name MyApp --enabled true
+  - name: Disable virtual connections for a deployment slot while preserving its connections.
+    text: az webapp config egress set --resource-group MyRG --name MyApp --slot staging --enabled false
+  - name: Write back the existing configuration without changing its enabled state or connections.
     text: az webapp config egress set --resource-group MyRG --name MyApp
 """
 
