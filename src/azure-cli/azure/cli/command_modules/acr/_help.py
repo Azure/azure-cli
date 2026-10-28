@@ -1918,6 +1918,7 @@ long-summary: Managed identities can be user-assigned or system-assigned
 helps['acr identity remove'] = """
 type: command
 short-summary: Remove a managed identity from a container registry
+long-summary: An identity used for customer-managed encryption cannot be removed. Configure encryption to use a replacement identity before removing the current identity.
 """
 
 helps['acr identity show'] = """
