@@ -23,6 +23,7 @@ from azure.cli.command_modules.backup._validators import \
 allowed_container_types = ['AzureIaasVM']
 allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'SAPASE', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase', 'SAPAseDatabase', 'SAPHanaDBInstance']
 allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPAseDatabase', 'SAPHanaDatabase', 'SQLDataBase', 'SAPHanaDBInstance']
+allowed_container_registration_workload_types = allowed_azure_workload_types + ['AzureFileShare']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
 allowed_extended_backup_management_types = allowed_backup_management_types + ['MAB']
 allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPAseDatabase', 'SAPHanaDatabase', 'SAPHanaSystem', 'SAPHanaDBInstance']
@@ -32,6 +33,7 @@ allowed_rehyd_priority_type = ['Standard', 'High']
 allowed_softdelete_options = ['Enable', 'Disable', 'AlwaysOn']
 allowed_immutability_options = ['Disabled', 'Locked', 'Unlocked']
 allowed_granularitylevel_options = ['VaultLevel', 'ProtectedItemLevel', 'ProtectedItemWithParentTag']
+allowed_afs_access_types = ['KeyBased', 'IdentityBased']
 enable_disable_options = ['Enable', 'Disable']
 enable_disable_permadisable_options = ['Enable', 'Disable', 'PermanentlyDisable']
 allowed_disk_access_options = ['EnablePrivateAccessForAllDisks', 'EnablePublicAccessForAllDisks', 'SameAsOnSourceDisks']
@@ -66,6 +68,7 @@ backup_management_type = CLIArgumentType(help=backup_management_type_help, arg_t
 extended_backup_management_type = CLIArgumentType(help=backup_management_type_help, arg_type=get_enum_type(allowed_extended_backup_management_types), options_list=['--backup-management-type'])
 workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_workload_types), options_list=['--workload-type'])
 azure_workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_azure_workload_types), options_list=['--workload-type'])
+container_registration_workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_container_registration_workload_types), options_list=['--workload-type'])
 restore_mode_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'])
 restore_mode_workload_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['AlternateWorkloadRestore', 'OriginalWorkloadRestore', 'RestoreAsFiles']), options_list=['--restore-mode'])
 resolve_conflict_type = CLIArgumentType(help=resolve_conflict_help, arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'])
@@ -205,7 +208,18 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('backup_management_type', backup_management_type)
         c.argument('resource_id', resource_id_type)
-        c.argument('workload_type', azure_workload_type)
+        c.argument('workload_type', container_registration_workload_type)
+        c.argument('storage_account', options_list=['--storage-account'],
+                   help='Name of the storage account to register for Azure Files backup.')
+        c.argument('access_type', options_list=['--access-type'],
+                   arg_type=get_enum_type(allowed_afs_access_types),
+                   help='Authentication type used to access the storage account.')
+        c.argument('mi_system_assigned', action='store_true',
+                   help="Use the Recovery Services vault's system-assigned managed identity.")
+        c.argument('mi_user_assigned',
+                   help='ARM ID of a user-assigned managed identity associated with the Recovery Services vault.')
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true',
+                   help='Do not prompt for confirmation when re-registering the storage account.')
 
     # Item
     with self.argument_context('backup item') as c:
@@ -377,6 +391,15 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('azure_file_share', options_list=['--azure-file-share'], help='Name of the Azure FileShare.')
         c.argument('storage_account', options_list=['--storage-account'], help='Name of the Storage Account of the FileShare.')
+        c.argument('access_type', options_list=['--access-type'],
+                   arg_type=get_enum_type(allowed_afs_access_types),
+                   help='Authentication type used to access the storage account.')
+        c.argument('mi_system_assigned', action='store_true',
+                   help="Use the Recovery Services vault's system-assigned managed identity.")
+        c.argument('mi_user_assigned',
+                   help='ARM ID of a user-assigned managed identity associated with the Recovery Services vault.')
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true',
+                   help='Do not prompt for confirmation when re-registering the storage account.')
 
     for command in ["enable-for-azurewl", "auto-enable-for-azurewl", 'auto-disable-for-azurewl']:
         with self.argument_context('backup protection ' + command) as c:
@@ -447,6 +470,12 @@ def load_arguments(self, _):
         c.argument('target_resource_group_name',
                    options_list=['--target-resource-group-name', '--target-rg-name'],
                    help='Resource group of the destination storage account to which the content will be restored, needed if it is different from the vault resource group')
+        c.argument('target_subscription_id',
+                   help='Subscription ID of the destination storage account for cross-subscription restore.')
+        c.argument('mi_system_assigned', action='store_true',
+                   help="Use the Recovery Services vault's system-assigned managed identity for restore.")
+        c.argument('mi_user_assigned',
+                   help='ARM ID of the user-assigned managed identity to use for restore.')
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
         c.argument('use_secondary_region', action='store_true', help='Use this flag to restore from a recovery point in secondary region. Supports only Alternate Location Restore.')
 
@@ -456,6 +485,15 @@ def load_arguments(self, _):
         c.argument('target_file_share', options_list=['--target-file-share'], help='Destination file share to which content will be restored')
         c.argument('target_folder', options_list=['--target-folder'], help='Destination folder to which content will be restored. To restore content to root , leave the folder name empty')
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Destination storage account to which content will be restored')
+        c.argument('target_resource_group_name',
+                   options_list=['--target-resource-group-name', '--target-rg-name'],
+                   help='Resource group of the destination storage account to which the content will be restored, needed if it is different from the vault resource group')
+        c.argument('target_subscription_id',
+                   help='Subscription ID of the destination storage account for cross-subscription restore.')
+        c.argument('mi_system_assigned', action='store_true',
+                   help="Use the Recovery Services vault's system-assigned managed identity for restore.")
+        c.argument('mi_user_assigned',
+                   help='ARM ID of the user-assigned managed identity to use for restore.')
         c.argument('source_file_type', arg_type=get_enum_type(['File', 'Directory']), options_list=['--source-file-type'], help='Specify the source file type to be selected')
         c.argument('source_file_path', options_list=['--source-file-path'], nargs='+', help="""The absolute path of the file, to be restored within the file share, as a string. This path is the same path used in the 'az storage file download' or 'az storage file show' CLI commands.""")
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')

@@ -21,7 +21,7 @@ class CognitiveServicesCommandTests(ScenarioTest):
             'sname': sname,
             'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS',
+            'location': 'southcentralus',
             'tags': tagname + '=' + tagvalue
         })
 
@@ -73,7 +73,7 @@ class CognitiveServicesCommandTests(ScenarioTest):
             'name': self.create_random_name(prefix='cs_cli_test_', length=16),
             'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS'
+            'location': 'southcentralus'
         })
 
         self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
@@ -116,7 +116,7 @@ class CognitiveServicesCommandTests(ScenarioTest):
             'name': self.create_random_name(prefix='cs_cli_test_', length=16),
             'kind': 'TextAnalytics',
             'sku': 'S',
-            'location': 'SOUTHCENTRALUS'
+            'location': 'southcentralus'
         })
 
         self.cmd('az cognitiveservices account create -n {name} -g {rg} --kind {kind} --sku {sku} -l {location}',

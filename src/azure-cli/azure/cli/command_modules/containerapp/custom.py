@@ -1653,7 +1653,8 @@ def stop_containerappsjob(cmd, resource_group_name, name, job_execution_name=Non
 
 def listexecution_containerappsjob(cmd, resource_group_name, name):
     try:
-        executions = ContainerAppsJobClient.get_executions(cmd=cmd, resource_group_name=resource_group_name, name=name)
+        executions = ContainerAppsJobClient.get_executions(
+            cmd=cmd, resource_group_name=resource_group_name, name=name)
         return executions['value']
     except CLIError as e:
         handle_raw_exception(e)
