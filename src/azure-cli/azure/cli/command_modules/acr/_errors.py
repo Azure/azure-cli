@@ -100,6 +100,12 @@ CONNECTIVITY_WWW_AUTHENTICATE_ERROR = ErrorClass(
 )
 
 
+CONNECTIVITY_UNTRUSTED_REALM_ERROR = ErrorClass(
+    "CONNECTIVITY_UNTRUSTED_REALM_ERROR",
+    "Registry '{}' returned an authentication challenge with an untrusted token endpoint. The token endpoint must use HTTPS and match the registry login server. No credentials were sent to it."
+)
+
+
 CONNECTIVITY_REFRESH_TOKEN_ERROR = ErrorClass(
     "CONNECTIVITY_REFRESH_TOKEN_ERROR",
     "Access to registry '{}' was denied. Response code: {}. Please try running 'az login' again to refresh permissions."
