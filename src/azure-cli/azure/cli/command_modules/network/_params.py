@@ -137,6 +137,8 @@ def load_arguments(self, _):
         c.argument('subnet', help=subnet_help, completer=subnet_completion_list, arg_group='Network')
 
     with self.argument_context('network application-gateway create', arg_group='Gateway') as c:
+        c.argument('deployment_tier', arg_type=get_enum_type(['Standard', 'NetworkIsolated', 'Accelerated', 'Elastic']),
+                   help='Deployment tier. Applicable to Standard_v2 and WAF_v2 SKUs. Omit to use service behavior.')
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.')
         c.argument('frontend_port', help='The front end port number.')
         c.argument('cert_password', help='The certificate password')
