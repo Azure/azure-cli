@@ -41,16 +41,25 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
         'Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1'
     )
     HOSTING_ARGUMENTS = {
-        'agent_hosting_name': 'default',
         'agent_hosting_cluster': CLUSTER_ID,
         'agent_hosting_storage': STORAGE_ID,
         'agent_hosting_management_identity': MANAGEMENT_IDENTITY,
         'agent_hosting_workload_identity': WORKLOAD_IDENTITY,
     }
 
+    def setUp(self):
+        patcher = mock.patch('azure.cli.command_modules.cognitiveservices._agent_hosting.prepare_agent_hosting')
+        self.prepare = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.prepare.return_value = {
+            'storage': self.STORAGE_ID, 'management_identity': self.MANAGEMENT_IDENTITY,
+            'workload_identity': self.WORKLOAD_IDENTITY,
+        }
+
     def _call_create(self, include_hosting=True, **overrides):
         client = overrides.pop('client', mock.Mock())
         arguments = {
+            'cmd': mock.Mock(),
             'client': client,
             'resource_group_name': self.RESOURCE_GROUP,
             'account_name': self.ACCOUNT_NAME,
@@ -142,27 +151,45 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
                 )
                 self.assertNotIn('agentHostingConfigurations', request['properties'])
                 self.assertEqual(request, baseline)
+        self.prepare.assert_not_called()
 
     def test_subnet_rejects_invalid_values(self):
         for include_hosting in (False, True):
             for subnet in ('', '   ', False, 0, 1, [], {}, 'not-a-resource-id', 'null'):
                 with self.subTest(include_hosting=include_hosting, subnet=subnet):
                     client = mock.Mock()
-                    with self.assertRaisesRegex(InvalidArgumentValueError, '--subnet'):
+                    with self.assertRaisesRegex(InvalidArgumentValueError, '--agent-subnet'):
                         self._call_create(client=client, include_hosting=include_hosting, subnet=subnet)
                     client.begin_create.assert_not_called()
 
-    def test_agent_hosting_rejects_partial_arguments(self):
+    def test_agent_hosting_requires_cluster_and_accepts_optional_dependencies(self):
         for count in range(1, len(self.HOSTING_ARGUMENTS)):
             for provided in combinations(self.HOSTING_ARGUMENTS, count):
                 with self.subTest(provided=provided):
                     client = mock.Mock()
                     arguments = {name: self.HOSTING_ARGUMENTS[name] for name in provided}
-                    with self.assertRaises(RequiredArgumentMissingError) as error:
+                    if 'agent_hosting_cluster' in provided:
                         self._call_create(client=client, include_hosting=False, **arguments)
-                    for missing in self.HOSTING_ARGUMENTS.keys() - arguments.keys():
-                        self.assertIn('--' + missing.replace('_', '-'), str(error.exception))
-                    client.begin_create.assert_not_called()
+                        client.begin_create.assert_called_once()
+                    else:
+                        with self.assertRaisesRegex(RequiredArgumentMissingError, '--agent-hosting-cluster'):
+                            self._call_create(client=client, include_hosting=False, **arguments)
+                        client.begin_create.assert_not_called()
+
+    def test_agent_hosting_minimal_arguments_prepare_dependencies(self):
+        client, _ = self._call_create(include_hosting=False, agent_hosting_cluster=self.CLUSTER_ID)
+        self.prepare.assert_called_once()
+        self.assertIsNone(self.prepare.call_args.kwargs['storage'])
+        self.assertEqual(client.begin_create.call_args.args[2].as_dict()['properties']
+                         ['agentHostingConfigurations'][0]['storageAccountResourceId'], self.STORAGE_ID)
+
+    def test_agent_hosting_failed_preflight_does_not_submit_account(self):
+        from azure.cli.core.azclierror import ValidationError
+        self.prepare.side_effect = ValidationError('Preflight failed')
+        client = mock.Mock()
+        with self.assertRaisesRegex(ValidationError, 'Preflight failed'):
+            self._call_create(client=client)
+        client.begin_create.assert_not_called()
 
     def test_agent_hosting_rejects_empty_and_non_string_arguments(self):
         for argument in self.HOSTING_ARGUMENTS:
@@ -213,35 +240,18 @@ class CognitiveServicesAgentHostingUnitTests(unittest.TestCase):
 
 
 class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
-    def test_cognitiveservices_account_create_without_hosting(self):
-        with mock.patch(
-            'azure.cli.command_modules.cognitiveservices._client_factory.'
-            'get_cognitiveservices_management_client'
-        ) as get_management_client:
-            accounts_client = mock.Mock()
-            accounts_client.begin_create.return_value = None
-            get_management_client.return_value.accounts = accounts_client
-
-            self.cmd(
-                'az cognitiveservices account create '
-                '--name myAccount '
-                '--resource-group myResourceGroup '
-                '--kind AIServices '
-                '--sku S0 '
-                '--location westus'
-            )
-
-            request = accounts_client.begin_create.call_args.args[2].as_dict()
-            self.assertNotIn('agentHostingConfigurations', request['properties'])
-            self.assertNotIn('networkInjections', request['properties'])
-            self.assertEqual(request['identity'], {'type': 'SystemAssigned'})
+    def setUp(self):
+        super().setUp()
+        patcher = mock.patch('azure.cli.command_modules.cognitiveservices._agent_hosting.prepare_agent_hosting')
+        self.prepare = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.prepare.return_value = {
+            'storage': CognitiveServicesAgentHostingUnitTests.STORAGE_ID,
+            'management_identity': CognitiveServicesAgentHostingUnitTests.MANAGEMENT_IDENTITY,
+            'workload_identity': CognitiveServicesAgentHostingUnitTests.WORKLOAD_IDENTITY,
+        }
 
     def test_cognitiveservices_agent_hosting_flattened_arguments(self):
-        for subnet in (None, CognitiveServicesAgentHostingUnitTests.SUBNET_ID):
-            with self.subTest(subnet=subnet):
-                self._assert_flattened_arguments(subnet)
-
-    def _assert_flattened_arguments(self, subnet):
         with mock.patch(
             'azure.cli.command_modules.cognitiveservices._client_factory.'
             'get_cognitiveservices_management_client'
@@ -257,45 +267,27 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
                 '--kind AIServices '
                 '--sku S0 '
                 '--location westus '
-                '--agent-hosting-name default '
                 f'--agent-hosting-cluster {CognitiveServicesAgentHostingUnitTests.CLUSTER_ID} '
                 f'--agent-hosting-storage {CognitiveServicesAgentHostingUnitTests.STORAGE_ID} '
                 '--agent-hosting-management-identity '
                 f'{CognitiveServicesAgentHostingUnitTests.MANAGEMENT_IDENTITY} '
                 f'--agent-hosting-workload-identity {CognitiveServicesAgentHostingUnitTests.WORKLOAD_IDENTITY} '
-                + (f'--subnet {subnet}' if subnet is not None else '')
+                f'--agent-subnet {CognitiveServicesAgentHostingUnitTests.SUBNET_ID}'
             )
 
-            request = accounts_client.begin_create.call_args.args[2].as_dict()
             self.assertEqual(
-                request['properties']['agentHostingConfigurations'],
-                [{
-                    'name': 'default',
-                    'hostingType': 'ManagedCluster',
-                    'clusterResourceId': CognitiveServicesAgentHostingUnitTests.CLUSTER_ID,
-                    'storageAccountResourceId': CognitiveServicesAgentHostingUnitTests.STORAGE_ID,
-                    'hostingManagementIdentityResourceId': CognitiveServicesAgentHostingUnitTests.MANAGEMENT_IDENTITY,
-                    'workloadIdentityResourceId': CognitiveServicesAgentHostingUnitTests.WORKLOAD_IDENTITY,
-                }],
-            )
-            self.assertEqual(
-                request['identity'],
+                self.prepare.call_args.kwargs,
                 {
-                    'type': 'SystemAssigned, UserAssigned',
-                    'userAssignedIdentities': {CognitiveServicesAgentHostingUnitTests.MANAGEMENT_IDENTITY: {}},
+                    'kind': 'AIServices',
+                    'custom_domain': None,
+                    'cluster': CognitiveServicesAgentHostingUnitTests.CLUSTER_ID,
+                    'storage': CognitiveServicesAgentHostingUnitTests.STORAGE_ID,
+                    'management_identity': CognitiveServicesAgentHostingUnitTests.MANAGEMENT_IDENTITY,
+                    'workload_identity': CognitiveServicesAgentHostingUnitTests.WORKLOAD_IDENTITY,
+                    'subnet': CognitiveServicesAgentHostingUnitTests.SUBNET_ID,
                 },
             )
-            if subnet is None:
-                self.assertNotIn('networkInjections', request['properties'])
-            else:
-                self.assertEqual(
-                    request['properties']['networkInjections'],
-                    [{
-                        'scenario': 'agent',
-                        'subnetArmId': subnet,
-                        'useMicrosoftManagedNetwork': False,
-                    }],
-                )
+            accounts_client.begin_create.assert_called_once()
 
     def test_cognitiveservices_agent_hosting_identity_aliases(self):
         with mock.patch(
@@ -313,45 +305,21 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
                 '--kind AIServices '
                 '--sku S0 '
                 '--location westus '
-                '--agent-hosting-name default '
                 f'--agent-hosting-cluster {CognitiveServicesAgentHostingUnitTests.CLUSTER_ID} '
                 f'--agent-hosting-storage {CognitiveServicesAgentHostingUnitTests.STORAGE_ID} '
                 f'--agent-hosting-mi {CognitiveServicesAgentHostingUnitTests.MANAGEMENT_IDENTITY} '
                 f'--agent-hosting-wi {CognitiveServicesAgentHostingUnitTests.WORKLOAD_IDENTITY}'
             )
 
-            request = accounts_client.begin_create.call_args.args[2].as_dict()
             self.assertEqual(
-                request['identity']['userAssignedIdentities'],
-                {CognitiveServicesAgentHostingUnitTests.MANAGEMENT_IDENTITY: {}},
+                self.prepare.call_args.kwargs['management_identity'],
+                CognitiveServicesAgentHostingUnitTests.MANAGEMENT_IDENTITY,
             )
             self.assertEqual(
-                request['properties']['agentHostingConfigurations'][0]['workloadIdentityResourceId'],
+                self.prepare.call_args.kwargs['workload_identity'],
                 CognitiveServicesAgentHostingUnitTests.WORKLOAD_IDENTITY,
             )
-
-    def test_cognitiveservices_agent_hosting_argument_validation(self):
-        for argument in CognitiveServicesAgentHostingUnitTests.HOSTING_ARGUMENTS:
-            with mock.patch(
-                'azure.cli.command_modules.cognitiveservices._client_factory.'
-                'get_cognitiveservices_management_client'
-            ) as get_management_client:
-                accounts_client = mock.Mock()
-                get_management_client.return_value.accounts = accounts_client
-                with self.subTest(argument=argument):
-                    option = '--' + argument.replace('_', '-')
-                    value = CognitiveServicesAgentHostingUnitTests.HOSTING_ARGUMENTS[argument]
-                    with self.assertRaisesRegex(RequiredArgumentMissingError, 'When configuring agent hosting'):
-                        self.cmd(
-                            'az cognitiveservices account create '
-                            '--name myAccount '
-                            '--resource-group myResourceGroup '
-                            '--kind AIServices '
-                            '--sku S0 '
-                            '--location westus '
-                            f'{option} {value}'
-                        )
-                    accounts_client.begin_create.assert_not_called()
+            accounts_client.begin_create.assert_called_once()
 
     def test_cognitiveservices_subnet_without_hosting(self):
         with mock.patch(
@@ -369,7 +337,7 @@ class CognitiveServicesAgentHostingScenarioTests(ScenarioTest):
                 '--kind AIServices '
                 '--sku S0 '
                 '--location westus '
-                f'--subnet {CognitiveServicesAgentHostingUnitTests.SUBNET_ID}'
+                f'--agent-subnet {CognitiveServicesAgentHostingUnitTests.SUBNET_ID}'
             )
 
             request = accounts_client.begin_create.call_args.args[2].as_dict()

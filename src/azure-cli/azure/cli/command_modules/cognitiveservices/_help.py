@@ -62,20 +62,14 @@ examples:
                 "keyVaultUri": "https://issue23056kv.vault.azure.net/"
               }
             }'
-  - name: Create an AI Services account hosted on a customer-owned AKS cluster.
+  - name: Create an AI Services account with customer-owned AKS, automatically creating Storage and managed identities.
     text: |
         az cognitiveservices account create \\
             --name foundryByocAccount \\
             --resource-group myResourceGroup \\
-            --kind AIServices \\
-            --sku S0 \\
-            --location westus \\
-            --subnet "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1" \\
-            --agent-hosting-name default \\
-            --agent-hosting-cluster "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1" \\
-            --agent-hosting-storage "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/storage1" \\
-            --agent-hosting-management-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/account-control-plane" \\
-            --agent-hosting-workload-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aks-workload"
+            --kind AIServices --sku S0 --location westus \\
+            --custom-domain foundrybyocaccount \\
+            --agent-hosting-cluster "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1"
 """
 
 helps[

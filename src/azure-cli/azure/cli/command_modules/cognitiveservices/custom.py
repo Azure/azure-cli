@@ -151,44 +151,16 @@ def _kind_uses_project_management(kind):
 
 
 def _build_agent_hosting_models(
-    agent_hosting_name,
     agent_hosting_cluster,
     agent_hosting_storage,
     agent_hosting_management_identity,
     agent_hosting_workload_identity,
 ):
-    arguments = {
-        "--agent-hosting-name": agent_hosting_name,
-        "--agent-hosting-cluster": agent_hosting_cluster,
-        "--agent-hosting-storage": agent_hosting_storage,
-        "--agent-hosting-management-identity": agent_hosting_management_identity,
-        "--agent-hosting-workload-identity": agent_hosting_workload_identity,
-    }
-    if all(value is None for value in arguments.values()):
+    if agent_hosting_cluster is None:
         return None, None
 
-    missing_arguments = [option for option, value in arguments.items() if value is None]
-    if missing_arguments:
-        raise RequiredArgumentMissingError(
-            "When configuring agent hosting, specify {}.".format(", ".join(missing_arguments))
-        )
-
-    for option, value in arguments.items():
-        if not isinstance(value, str) or not value.strip():
-            raise InvalidArgumentValueError(
-                "{} must be a non-empty string.".format(option)
-            )
-
-    from azure.mgmt.core.tools import is_valid_resource_id
-
-    for option, value in arguments.items():
-        if option != "--agent-hosting-name" and not is_valid_resource_id(value):
-            raise InvalidArgumentValueError(
-                "{} must be a fully qualified Azure resource ID.".format(option)
-            )
-
     hosting_configuration = ManagedClusterAgentHostingConfiguration(
-        name=agent_hosting_name,
+        name="default",
         hosting_management_identity_resource_id=agent_hosting_management_identity,
         workload_identity_resource_id=agent_hosting_workload_identity,
         cluster_resource_id=agent_hosting_cluster,
@@ -204,11 +176,6 @@ def _build_network_injections(subnet):
     if subnet is None:
         return None
 
-    from azure.mgmt.core.tools import is_valid_resource_id
-
-    if not isinstance(subnet, str) or not subnet.strip() or not is_valid_resource_id(subnet):
-        raise InvalidArgumentValueError("--subnet must be a fully qualified Azure resource ID.")
-
     return [
         NetworkInjection(
             scenario=ScenarioType.AGENT,
@@ -219,6 +186,7 @@ def _build_network_injections(subnet):
 
 
 def create(  # pylint: disable=too-many-locals
+    cmd,
     client,
     resource_group_name,
     account_name,
@@ -233,7 +201,6 @@ def create(  # pylint: disable=too-many-locals
     encryption=None,
     allow_project_management=None,
     yes=None,
-    agent_hosting_name=None,
     agent_hosting_cluster=None,
     agent_hosting_storage=None,
     agent_hosting_management_identity=None,
@@ -264,14 +231,30 @@ def create(  # pylint: disable=too-many-locals
     if encryption is not None:
         properties.encryption = json.loads(encryption)
 
+    from ._agent_hosting import prepare_agent_hosting
+    from ._agent_hosting_preflight import validate_resource_ids
+    validate_resource_ids(
+        cluster=agent_hosting_cluster, storage=agent_hosting_storage,
+        management_identity=agent_hosting_management_identity,
+        workload_identity=agent_hosting_workload_identity, subnet=subnet)
+    network_injections = _build_network_injections(subnet)
+    if agent_hosting_cluster is not None:
+        resolved = prepare_agent_hosting(
+            cmd, resource_group_name, account_name, location, tags,
+            kind=kind, custom_domain=custom_domain,
+            cluster=agent_hosting_cluster, storage=agent_hosting_storage,
+            management_identity=agent_hosting_management_identity,
+            workload_identity=agent_hosting_workload_identity, subnet=subnet)
+        agent_hosting_storage = resolved['storage']
+        agent_hosting_management_identity = resolved['management_identity']
+        agent_hosting_workload_identity = resolved['workload_identity']
+
     hosting_configurations, user_assigned_identities = _build_agent_hosting_models(
-        agent_hosting_name,
         agent_hosting_cluster,
         agent_hosting_storage,
         agent_hosting_management_identity,
         agent_hosting_workload_identity,
     )
-    network_injections = _build_network_injections(subnet)
     if hosting_configurations is not None:
         properties.agent_hosting_configurations = hosting_configurations
     if network_injections is not None:
