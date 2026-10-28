@@ -31,7 +31,8 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
                          '/providers/Microsoft.DBforMySQL/locations/eastus/checkNameAvailability')
     operation_path = ('/subscriptions/' + subscription +
                       '/providers/Microsoft.DBforMySQL/locations/eastus/azureAsyncOperation/rename-operation')
-    api_version = '2025-06-01-preview'
+    api_version = '2025-12-30'
+    availability_api_version = '2025-06-01-preview'
 
     def setUp(self):
         self.responses = []
@@ -40,11 +41,17 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
         credential.get_token.return_value = AccessToken('test-token', 4102444800)
         self.session = MagicMock()
         self.session.request.side_effect = self._request
-        self.client = MySQLManagementClient(
-            credential, self.subscription, base_url=self.endpoint, api_version=self.api_version,
-            transport=RequestsTransport(session=self.session), polling_interval=0, retry_total=0)
-        self.addCleanup(self.client.close)
-        factory = patch.object(_client_factory, 'get_mgmt_service_client', return_value=self.client)
+        self.clients = {}
+        for api_version in (self.api_version, self.availability_api_version):
+            client = MySQLManagementClient(
+                credential, self.subscription, base_url=self.endpoint, api_version=api_version,
+                transport=RequestsTransport(session=self.session), polling_interval=0, retry_total=0)
+            self.clients[api_version] = client
+            self.addCleanup(client.close)
+        self.client = self.clients[self.api_version]
+        factory = patch.object(
+            _client_factory, 'get_mgmt_service_client',
+            side_effect=lambda cli_ctx, client_type, **kwargs: self.clients[kwargs['api_version']])
         self.factory = factory.start()
         self.addCleanup(factory.stop)
         environment = patch.dict('os.environ', {_client_factory.RM_URI_OVERRIDE: ''})
@@ -59,7 +66,8 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
         self.assertEqual(expected_method, method)
         self.assertEqual(self.endpoint, '{}://{}'.format(parsed.scheme, parsed.netloc))
         self.assertEqual(path, parsed.path)
-        self.assertEqual([self.api_version], parse_qs(parsed.query)['api-version'])
+        api_version = self.availability_api_version if path == self.availability_path else self.api_version
+        self.assertEqual([api_version], parse_qs(parsed.query)['api-version'])
         data = kwargs.get('data')
         self.requests.append((method, path, json.loads(data) if data else None))
         response = requests.Response()
@@ -360,10 +368,32 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
         self.assertFalse(self.responses)
 
     def test_mysql_rename_factory_preserves_cloud_and_api_version(self):
-        servers = _client_factory.cf_mysql_flexible_servers(self.cmd.cli_ctx, None)
+        servers = _client_factory.cf_mysql_flexible_servers_rename(self.cmd.cli_ctx, None)
         self.assertIs(self.client.servers, servers)
         self.factory.assert_called_once_with(
             self.cmd.cli_ctx, MySQLManagementClient, api_version=self.api_version)
+
+    def test_mysql_rename_factory_preserves_endpoint_and_subscription_overrides(self):
+        subscription = '11111111-1111-1111-1111-111111111111'
+        with patch.dict('os.environ', {
+                _client_factory.RM_URI_OVERRIDE: self.endpoint,
+                _client_factory.SUB_ID_OVERRIDE: subscription,
+                _client_factory.AZURE_CLIENT_ID: ''}), \
+                patch('azure.mgmt.mysqlflexibleservers.MySQLManagementClient',
+                      return_value=self.client) as client_type:
+            servers = _client_factory.cf_mysql_flexible_servers_rename(self.cmd.cli_ctx, None)
+        self.assertIs(self.client.servers, servers)
+        client_type.assert_called_once()
+        self.assertEqual(subscription, client_type.call_args.kwargs['subscription_id'])
+        self.assertEqual(self.endpoint, client_type.call_args.kwargs['base_url'])
+        self.assertEqual(self.api_version, client_type.call_args.kwargs['api_version'])
+        self.factory.assert_not_called()
+
+    def test_mysql_rename_does_not_change_default_server_api_version(self):
+        servers = _client_factory.cf_mysql_flexible_servers(self.cmd.cli_ctx, None)
+        self.assertIs(self.clients[self.availability_api_version].servers, servers)
+        self.factory.assert_called_once_with(
+            self.cmd.cli_ctx, MySQLManagementClient, api_version=self.availability_api_version)
 
 
 if __name__ == '__main__':

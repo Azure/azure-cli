@@ -15,6 +15,8 @@ SUB_ID_OVERRIDE = 'AZURE_CLI_RDBMS_SUB_ID'
 # Pin the flexible server management API version. The SDK default advanced to a newer
 # preview; keep the CLI on the version the existing commands were built and recorded against.
 MYSQL_FLEXIBLE_API_VERSION = '2025-06-01-preview'
+# Rename uses the ARM-registered stable API without changing existing commands.
+MYSQL_FLEXIBLE_RENAME_API_VERSION = '2025-12-30'
 # Fabric mirroring operations are only available from this newer API version.
 MYSQL_FLEXIBLE_FABRIC_MIRRORING_API_VERSION = '2025-12-01-preview'
 
@@ -97,6 +99,11 @@ def get_mysql_management_client(cli_ctx, **_):
 # Meru operations for flexible servers
 def cf_mysql_flexible_servers(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).servers
+
+
+def cf_mysql_flexible_servers_rename(cli_ctx, _):
+    return get_mysql_flexible_management_client(
+        cli_ctx, api_version=MYSQL_FLEXIBLE_RENAME_API_VERSION).servers
 
 
 def cf_mysql_flexible_firewall_rules(cli_ctx, _):
