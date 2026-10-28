@@ -7,8 +7,9 @@ import time
 import os
 import unittest
 
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, live_only
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure.cli.core.util import CLIError
 from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk.base import execute
@@ -47,10 +48,21 @@ managed_instance_name_max_length = 20
 # they are retained independently of the SDK upgrade and must match the subscription used for live runs.
 
 
+def _create_entra_only_auth_args(resource_group, name, location):
+    # Use a test-owned principal rather than an administrator tied to another subscription or tenant.
+    # Identity creation requires an explicit location; the resource group's location is not inferred here.
+    identity = execute(
+        DummyCli(), 'az identity create -g {} -n {}-admin -l {}'.format(resource_group, name, location)
+    ).get_output_in_json()
+    return ("--enable-ad-only-auth --external-admin-name '{}' --external-admin-sid {} "
+            "--external-admin-principal-type Application").format(identity['name'], identity['principalId'])
+
+
 class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
+    # Default to Entra-only fixtures for recording policy; opt out only when a scenario needs local authentication.
     def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='eastasia',
                  admin_user='admin123', admin_password='SecretPassword123',
-                 resource_group_parameter_name='resource_group', skip_delete=True):
+                 resource_group_parameter_name='resource_group', skip_delete=True, enable_ad_only_auth=True):
         super().__init__(name_prefix, server_name_max_length)
         self.location = location
         self.parameter_name = parameter_name
@@ -58,17 +70,25 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
         self.admin_password = admin_password
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
+        self.enable_ad_only_auth = enable_ad_only_auth
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = 'az sql server create -l {} -g {} -n {} -u {} -p {}'
-        execute(DummyCli(), template.format(self.location, group, name, self.admin_user, self.admin_password))
+        if self.enable_ad_only_auth:
+            auth_args = _create_entra_only_auth_args(group, name, self.location)
+        else:
+            auth_args = '-u {} -p {}'.format(self.admin_user, self.admin_password)
+        execute(DummyCli(), 'az sql server create -l {} -g {} -n {} {}'.format(
+            self.location, group, name, auth_args))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
             execute(DummyCli(), 'az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
+            # Only Entra-only setup creates an administrator identity owned by this preparer.
+            if self.enable_ad_only_auth:
+                execute(DummyCli(), 'az identity delete -g {} -n {}-admin'.format(group, name))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -82,7 +102,7 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     # Recording-environment prerequisites, not SDK requirements; update together for another subscription.
-    subscription_id = '8313371e-0879-428e-b1da-6353575a9192'
+    subscription_id = '857355f0-57d5-4754-b91a-0393dbff9afc'
     existing_mi_name = 'autobot-managed-instance2'
     group = 'CustomerExperienceTeam_RG'
     location = 'indiasouthcentral'
@@ -121,7 +141,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4, enable_ad_only_auth = False,
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4, enable_ad_only_auth = True,
                  family='Gen5', storage=32):
         super().__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
@@ -138,7 +158,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.is_geo_secondary = is_geo_secondary
         self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
         self.v_core = v_core
-        # The SDK upgrade does not require Entra-only auth; keep it opt-in for dedicated auth coverage.
+        # Recording subscriptions enforce Entra-only authentication independently of the SDK version.
         self.enable_ad_only_auth = enable_ad_only_auth
         # Per-test hardware/storage avoids changing shared defaults for the GPv2 memory scenarios.
         self.family = family
@@ -150,12 +170,10 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         subnet = self.subnet
         v_core = self.v_core
 
+        # Retain SQL administrator metadata for MI provisioning while Entra-only auth disables password logins.
         template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {}' \
                    ' --collation {} --capacity {} --storage {} --edition {} --family {} --tags {}' \
                    ' --proxy-override {} --bsr Geo'
-
-        if self.enable_ad_only_auth:
-            template += f" --enable-ad-only-auth --external-admin-name '{self.external_admin_name}' --external-admin-sid '{self.external_admin_sid}' --external-admin-principal-type '{self.external_admin_principal_type}'"
 
         if self.public:
             template += ' --public-data-endpoint-enabled'
@@ -177,6 +195,10 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
             subnet = self.sec_subnet
             v_core = 4
 
+        # Resolve the final MI region before creating its administrator, including geo-secondary overrides.
+        if self.enable_ad_only_auth:
+            template += ' ' + _create_entra_only_auth_args(self.group, name, location)
+
         execute(DummyCli(), template.format(
             self.group, name, location,
             self.admin_user, self.admin_password,
@@ -191,6 +213,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
                 execute(DummyCli(), 'az sql mi delete -g {} -n {} --yes --no-wait'.format(self.group, name))
             except ResourceNotFoundError:
                 pass
+            # Remove the per-MI administrator identity without touching shared tenant principals.
+            if self.enable_ad_only_auth:
+                execute(DummyCli(), 'az identity delete -g {} -n {}-admin'.format(self.group, name))
 
 class SqlServerExternalGovernanceTests(ScenarioTest):
     
@@ -205,6 +230,7 @@ class SqlServerExternalGovernanceTests(ScenarioTest):
                      JMESPathCheck('status', 'Succeeded')])
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
+    # Keep management fixtures policy-compliant; password updates are replaced with identity and metadata updates below.
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='indiasouthcentral')
     @ResourceGroupPreparer(parameter_name='resource_group_2', location='indiasouthcentral')
     def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
@@ -212,54 +238,53 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_3 = self.create_random_name(server_name_prefix, server_name_max_length)
 
-        admin_login = 'admin123'
-        admin_passwords = ['SecretPassword123', 'SecretPassword456', 'SecretPassword789']
+        auth_args_1 = _create_entra_only_auth_args(resource_group_1, server_name_1, resource_group_location)
+        auth_args_2 = _create_entra_only_auth_args(resource_group_2, server_name_2, resource_group_location)
         federated_client_id_1 = '748eaea0-6dbc-4be9-a50b-6a2d3dad00d4'
         federated_client_id_2 = '17deee33-9da7-40ce-a33c-8a96f2f8f07d'
         federated_client_id_3 = '00000000-0000-0000-0000-000000000000'
 
         # test create sql server with minimal required parameters
-        server_1 = self.cmd('sql server create -g {} --name {} '
-                            '--admin-user {} --admin-password {}'
-                            .format(resource_group_1, server_name_1, admin_login, admin_passwords[0]),
+        server_1 = self.cmd('sql server create -g {} --name {} -l {} {}'
+                            .format(resource_group_1, server_name_1, resource_group_location, auth_args_1),
                             checks=[
                                 JMESPathCheck('name', server_name_1),
                                 JMESPathCheck('location', resource_group_location),
                                 JMESPathCheck('resourceGroup', resource_group_1),
-                                JMESPathCheck('administratorLogin', admin_login),
+                                JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                                 JMESPathCheck('identity', None)]).get_output_in_json()
 
         # test list sql server should be 1
         self.cmd('sql server list -g {}'.format(resource_group_1), checks=[JMESPathCheck('length(@)', 1)])
 
-        # test update sql server
-        self.cmd('sql server update -g {} --name {} --admin-password {} -i'
-                 .format(resource_group_1, server_name_1, admin_passwords[1]),
+        # Entra-only servers cannot exercise SQL password updates; keep identity and metadata update coverage.
+        self.cmd('sql server update -g {} --name {} -i'
+                 .format(resource_group_1, server_name_1),
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test update without identity parameter, validate identity still exists
-        # also use --id instead of -g/-n
-        self.cmd('sql server update --ids {} --admin-password {}'
-                 .format(server_1['id'], admin_passwords[0]),
+        # Tags use generic --set because sql server update does not expose a --tags argument.
+        self.cmd('sql server update --ids {} --set tags.purpose=sql-server-mgmt'
+                 .format(server_1['id']),
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
+                     JMESPathCheck('tags.purpose', 'sql-server-mgmt'),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test create another sql server, with identity this time
-        self.cmd('sql server create -g {} --name {} -l {} -i '
-                 '--admin-user {} --admin-password {}'
-                 .format(resource_group_2, server_name_2, resource_group_location, admin_login, admin_passwords[0]),
+        self.cmd('sql server create -g {} --name {} -l {} -i {}'
+                 .format(resource_group_2, server_name_2, resource_group_location, auth_args_2),
                  checks=[
                      JMESPathCheck('name', server_name_2),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('resourceGroup', resource_group_2),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test list sql server in that group should be 1
@@ -274,14 +299,14 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login)])
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True)])
 
         self.cmd('sql server show --id {}'
                  .format(server_1['id']),
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login)])
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True)])
 
         # test delete sql server
         self.cmd('sql server delete --id {} --yes'
@@ -296,22 +321,21 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='westus')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
     def test_sql_server_create_with_tags(self, resource_group, resource_group_location):
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, resource_group_location)
 
         # test create sql server with tags
         server = self.cmd('sql server create -g {} --name {} '
-                         '--admin-user {} --admin-password {} '
+                         '{} '
                          '--tags env=test purpose=demo'
-                         .format(resource_group, server_name, admin_login, admin_password),
+                         .format(resource_group, server_name, auth_args),
                          checks=[
                              JMESPathCheck('name', server_name),
                              JMESPathCheck('location', resource_group_location),
                              JMESPathCheck('resourceGroup', resource_group),
-                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                              JMESPathCheck('tags.env', 'test'),
                              JMESPathCheck('tags.purpose', 'demo')]).get_output_in_json()
 
@@ -321,7 +345,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('tags.env', 'test'),
                      JMESPathCheck('tags.purpose', 'demo')])
 
@@ -329,46 +353,45 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group, server_name), checks=NoneCheck())
 
-    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westus')
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='indiasouthcentral')
     def test_sql_server_public_network_access_create_mgmt(self, resource_group_1, resource_group_location):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_3 = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_passwords = ['SecretPassword123', 'SecretPassword456']
+        auth_args = _create_entra_only_auth_args(resource_group_1, server_name_1, resource_group_location)
 
         # test create sql server with no enable-public-network passed in, verify publicNetworkAccess == Enabled
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {}'
-                 .format(resource_group_1, server_name_1, admin_login, admin_passwords[0]),
+                 '{}'
+                 .format(resource_group_1, server_name_1, auth_args),
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
         # test create sql server with enable-public-network == true passed in, verify publicNetworkAccess == Enabled
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {} --enable-public-network {}'
-                 .format(resource_group_1, server_name_2, admin_login, admin_passwords[0], 'true'),
+                 '{} --enable-public-network {}'
+                 .format(resource_group_1, server_name_2, auth_args, 'true'),
                  checks=[
                      JMESPathCheck('name', server_name_2),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
         # test create sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
         #   note: although server does not have private links, creating server with disabled public network is allowed
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {} -e {}'
-                 .format(resource_group_1, server_name_3, admin_login, admin_passwords[0], 'false'),
+                 '{} -e {}'
+                 .format(resource_group_1, server_name_3, auth_args, 'false'),
                  checks=[
                      JMESPathCheck('name', server_name_3),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
         # test get sql server to verify publicNetworkAccess == 'Disabled' for the above server as expected
@@ -378,24 +401,23 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server_name_3),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
     @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
     def test_sql_server_public_network_access_update_mgmt(self, resource_group, resource_group_location):
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_passwords = ['SecretPassword123', 'SecretPassword456']
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, resource_group_location)
 
         # test create sql server with no enable-public-network passed in, verify publicNetworkAccess == Enabled
-        self.cmd('sql server create -g {} --name {} --admin-user {} --admin-password {}'
-                 .format(resource_group, server_name, admin_login, admin_passwords[0]),
+        self.cmd('sql server create -g {} --name {} {}'
+                 .format(resource_group, server_name, auth_args),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
         # test update sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
@@ -412,13 +434,13 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # test create sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
         #   note: although server does not have private links, creating server with disabled public network is allowed
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {} -e {}'
-                 .format(resource_group, server_name_2, admin_login, admin_passwords[0], 'false'),
+                 '{} -e {}'
+                 .format(resource_group, server_name_2, auth_args, 'false'),
                  checks=[
                      JMESPathCheck('name', server_name_2),
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
         # test update sql server with no enable-public-network passed in, verify publicNetworkAccess == Disabled
@@ -825,13 +847,11 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         # Update only family
         vcore_family_updated = 'Gen5'
 
-        # Work around a retained sku.name conflicting with capacity in the newer API.
-        # This keeps the scenario runnable but does not fix or cover capacity-only updates.
+        # Capacity-only resizing must resolve a matching provisioned SKU rather than retain the previous SKU name.
         vcore_capacity_updated = 8
         vcore_service_objective_updated = 'GP_Gen5_8'
-        self.cmd('sql db update -g {} -s {} -n {} --capacity {} --service-objective {}'
-                 .format(resource_group, server, database_name, vcore_capacity_updated,
-                         vcore_service_objective_updated),
+        self.cmd('sql db update -g {} -s {} -n {} --capacity {}'
+                 .format(resource_group, server, database_name, vcore_capacity_updated),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name),
@@ -1213,11 +1233,11 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('autoPauseDelay', auto_pause_delay),
                      JMESPathCheck('minCapacity', min_capacity)])
 
-        # Work around a retained capacity-qualified sku.name; this does not cover capacity-only updates.
+        # Capacity-only resizing must retain serverless compute while resolving the new capacity-qualified SKU.
         vCores = 8
         serverless_service_objective = 'GP_S_Gen5_{}'.format(vCores)
-        self.cmd('sql db update -g {} -s {} -n {} -c {} --service-objective {}'
-                 .format(resource_group, server, database_name, vCores, serverless_service_objective),
+        self.cmd('sql db update -g {} -s {} -n {} -c {}'
+                 .format(resource_group, server, database_name, vCores),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('name', database_name),
@@ -1260,8 +1280,8 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('autoPauseDelay', auto_pause_delay),
                 JMESPathCheck('minCapacity', min_capacity)])
 
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
     def test_sql_db_serverless_to_provisioned_slo_update(self, resource_group, resource_group_location, server):
         """
@@ -1403,8 +1423,8 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 class SqlServerDbForwardMigrationScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastasia')
-    @SqlServerPreparer(location='eastasia')
+    @ResourceGroupPreparer(location='indiasouthcentral')
+    @SqlServerPreparer(location='indiasouthcentral')
     def test_sql_db_forward_migration_manual_cutover(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
         current_service_objective = 'GP_Gen5_2'
@@ -1815,15 +1835,20 @@ class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='indiasouthcentral')
     @SqlServerPreparer(location='indiasouthcentral')
-    def test_aad_admin(self, resource_group, server):
+    def test_aad_admin(self, resource_group, resource_group_location, server):
+        # Test administrator replacement with owned identities rather than tenant-specific users or groups.
+        administrator = self.cmd('identity show -g {} -n {}-admin'
+                                 .format(resource_group, server)).get_output_in_json()
+        replacement = self.cmd('identity create -g {} -n {}-replacement-admin -l {}'
+                               .format(resource_group, server, resource_group_location)).get_output_in_json()
         self.kwargs.update({
             'rg': resource_group,
             'sn': server,
             'administrator_name': "ActiveDirectory",
-            'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
-            'oid2': 'e4d43337-d52c-4a0c-b581-09055e0359a0',
-            'user': 'DSEngAll',
-            'user2': 'TestUser'
+            'oid': administrator['principalId'],
+            'oid2': replacement['principalId'],
+            'user': administrator['name'],
+            'user2': replacement['name']
         })
 
         print('Arguments are updated with login and sid data')
@@ -1851,12 +1876,18 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
                      self.check('login', '{user2}'),
                      self.check('sid', '{oid2}')])
 
-        self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
+        # Match service/policy error codes because deleting an Entra-only administrator is intentionally rejected.
+        with self.assertRaisesRegex(
+                HttpResponseError,
+                r'\((?:InvalidServerAzureADAdminDeleteOperation|RequestDisallowedByPolicy)\)'):
+            self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
 
         self.cmd('sql server ad-admin list -s {sn} -g {rg}',
                  checks=[
-                     self.check('[0].login', None),
-                     self.check('[0].sid', None)])
+                     self.check('[0].login', '{user2}'),
+                     self.check('[0].sid', '{oid2}')])
+        self.cmd('sql server ad-only-auth get -n {sn} -g {rg}',
+                 checks=[JMESPathCheck('azureAdOnlyAuthentication', True)])
 
 
 class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
@@ -1867,15 +1898,26 @@ class SqlServerADOnlyAuthScenarioTest(ScenarioTest):
         print("Server: {}".format(server))
         print('********************\n')
 
-        user = 'DSEngAll'
-        oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
+        # Reuse the fixture's Entra administrator instead of requiring a pre-existing directory group.
+        administrator = self.cmd('identity show -g {} -n {}-admin'
+                                 .format(resource_group, server)).get_output_in_json()
+        user = administrator['name']
+        oid = administrator['principalId']
 
         self.cmd('sql server ad-admin create -s {} -g {} -u {} -i {}'.format(server, resource_group, user, oid),
                  checks=[])
 
-        self.cmd('sql server ad-only-auth enable -n {} -g {}'.format(server, resource_group), checks=[])
-        self.cmd('sql server ad-only-auth disable -n {} -g {}'.format(server, resource_group), checks=[])
-        self.cmd('sql server ad-only-auth get -n {} -g {}'.format(server, resource_group), checks=[])
+        self.cmd('sql server ad-only-auth enable -n {} -g {}'.format(server, resource_group),
+                 checks=[JMESPathCheck('azureAdOnlyAuthentication', True)])
+        # Server-creation policy does not imply that disabling Entra-only authentication is rejected.
+        self.cmd('sql server ad-only-auth disable -n {} -g {}'.format(server, resource_group),
+                 checks=[JMESPathCheck('azureAdOnlyAuthentication', False)])
+        self.cmd('sql server ad-only-auth get -n {} -g {}'.format(server, resource_group),
+                 checks=[JMESPathCheck('azureAdOnlyAuthentication', False)])
+        self.cmd('sql server ad-only-auth enable -n {} -g {}'.format(server, resource_group),
+                 checks=[JMESPathCheck('azureAdOnlyAuthentication', True)])
+        self.cmd('sql server ad-only-auth get -n {} -g {}'.format(server, resource_group),
+                 checks=[JMESPathCheck('azureAdOnlyAuthentication', True)])
 
 
 class SqlServerDbCopyScenarioTest(ScenarioTest):
@@ -1976,14 +2018,12 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         service_objective = 'GP_Gen5_8'
 
         # copy db with per db cmk Enabled
-        # Recording prerequisite: this key and identity must exist and grant the server access.
-        encryption_protector = "https://pstestkv4.vault.azure.net/keys/testkey3/ca3d115086c345feb6ce09474d9320cb"
-        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+        # Recording prerequisites in SQL_Auditing_Playground_R&D; the identity has Get/WrapKey/UnwrapKey access.
+        encryption_protector = "https://clisqlcmk857355f0.vault.azure.net/keys/perdb-copy-key/94a1bf166f84412f91e04bb5e08dc3c9"
+        umi = "/subscriptions/857355f0-57d5-4754-b91a-0393dbff9afc/resourceGroups/clitest-sql-perdb-cmk/providers/Microsoft.ManagedIdentity/userAssignedIdentities/clitest-sql-perdb-cmk-umi"
 
         # create db with db level encryption protector and umi
 
-        # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
-        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
         self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
                  .format(resource_group_1, server1, database_name, encryption_protector, umi),
                  checks=[
@@ -2185,6 +2225,7 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
 
 class SqlServerDbSecurityScenarioTest(ScenarioTest):
     # Auditing rejects legacy Storage accounts; StorageV2 is a service prerequisite, not an SDK requirement.
+    # Preserve the persisted policy-state assertion alongside the SDK-compatible calculated audit-target fields.
     def _get_storage_endpoint(self, storage_account, resource_group):
         return self.cmd('storage account show -g {} -n {}'
                         ' --query primaryEndpoints.blob'
@@ -2377,12 +2418,13 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('eventHubTargetState', state_disabled),
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
-        # create event hub namespace
+        # Disable Event Hubs SAS authentication to satisfy the recording subscription's local-auth policy.
         eventhub_namespace = 'cliehnamespacedb01'
 
-        self.cmd('eventhubs namespace create -g {} -n {}'
+        self.cmd('eventhubs namespace create -g {} -n {} --disable-local-auth true'
                  .format(resource_group, eventhub_namespace),
                  checks=[
+                     JMESPathCheck('disableLocalAuth', True),
                      JMESPathCheck('provisioningState', 'Succeeded')])
 
         # create event hub
@@ -2586,12 +2628,13 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('eventHubTargetState', state_disabled),
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
-        # create event hub namespace
+        # Keep the server-auditing Event Hubs target compliant with the subscription's no-local-auth policy.
         eventhub_namespace = 'cliehnamespacedb01'
 
-        self.cmd('eventhubs namespace create -g {} -n {}'
+        self.cmd('eventhubs namespace create -g {} -n {} --disable-local-auth true'
                  .format(resource_group, eventhub_namespace),
                  checks=[
+                     JMESPathCheck('disableLocalAuth', True),
                      JMESPathCheck('provisioningState', 'Succeeded')])
 
         # create event hub
@@ -2990,12 +3033,13 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
                      JMESPathCheck('eventHubTargetState', state_disabled),
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
-        # create event hub namespace
+        # The MS-support auditing namespace must also disable local authentication before policy allows creation.
         eventhub_namespace = 'cliehnamespacems02'
 
-        self.cmd('eventhubs namespace create -g {} -n {}'
+        self.cmd('eventhubs namespace create -g {} -n {} --disable-local-auth true'
                  .format(resource_group, eventhub_namespace),
                  checks=[
+                     JMESPathCheck('disableLocalAuth', True),
                      JMESPathCheck('provisioningState', 'Succeeded')])
 
         # create event hub
@@ -3054,8 +3098,9 @@ class SqlServerMSSupportScenarioTest(ScenarioTest):
 
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
     # pylint: disable=too-many-instance-attributes
-    @ResourceGroupPreparer(location='indiasouthcentral')
-    @SqlServerPreparer(location='indiasouthcentral')
+    # Central India supports both Gen2 sizes used here; India South Central does not.
+    @ResourceGroupPreparer(location='centralindia')
+    @SqlServerPreparer(location='centralindia')
     @AllowLargeResponse()
     def test_sql_dw_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
@@ -3065,7 +3110,8 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
         update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
 
         # test sql db commands
-        dw = self.cmd('sql dw create -g {} --server {} --name {}'
+        # Use Gen2 explicitly rather than the legacy DW100 default.
+        dw = self.cmd('sql dw create -g {} --server {} --name {} --service-objective DW100c'
                       .format(resource_group, server, database_name),
                       checks=[
                           JMESPathCheck('resourceGroup', resource_group),
@@ -3505,12 +3551,14 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         service_objective = 'GP_Gen5_8'
 
         self.kwargs.update({
-            "server_name_2" : "cli-automated-tests3",
-            "server_name_3" : "cli-automated-tests4",
+            "server_name_2" : "cli-automated-tests3-857355f0",
+            "server_name_3" : "cli-automated-tests4-857355f0",
             "resource_group_2" : "CLI-Automated-Tests",
-            "resource_group_location_2" : "indiacentral",
-            "resource_group_location_3" : "southindia",
-            "partner_subscription" : "00000000-0000-0000-0000-000000000000"  # replace with actual subscription id for record mode
+            "resource_group_location_2" : "centralindia",
+            "resource_group_location_3" : "eastus",
+            # Playback accounts and recorded partner resource IDs use the sanitized subscription.
+            "partner_subscription": ("857355f0-57d5-4754-b91a-0393dbff9afc"
+                                     if self.in_recording else MOCKED_SUBSCRIPTION_ID)
         })
 
         # helper class so that it's clear which servers are in which groups
@@ -4378,8 +4426,12 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
         location_long_name = 'indiasouthcentral'
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        sql_identity = self.cmd('identity show -g {} -n {}-admin'
+                               .format(resource_group, server)).get_output_in_json()['id']
+        # Import/export must use the Entra administrator identity assigned to the logical server.
+        self.cmd('sql server update -g {} -n {} -i --identity-type UserAssigned '
+                 '--user-assigned-identity-id {} --pid {}'
+                 .format(resource_group, server, sql_identity, sql_identity))
         db_name = 'cliautomationdb01'
         db_name2 = 'cliautomationdb02'
         db_name3 = 'cliautomationdb03'
@@ -4459,11 +4511,11 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  .format(container, storage_account, storageKey),
                  checks=[JMESPathCheck('created', True)])
 
-        # export database to blob container using both keys
-        self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
+        # ManagedIdentity authenticates SQL without a password; keep storage key/SAS coverage unchanged.
+        self.cmd('sql db export -s {} -n {} -g {} --auth-type ManagedIdentity -u {}'
                  ' --storage-key {} --storage-key-type StorageAccessKey'
                  ' --storage-uri {}'
-                 .format(server, db_name, resource_group, admin_password, admin_login, storageKey, bacpacUri),
+                 .format(server, db_name, resource_group, sql_identity, storageKey, bacpacUri),
                  checks=[
                      JMESPathCheck('blobUri', bacpacUri),
                      JMESPathCheck('databaseName', db_name),
@@ -4471,10 +4523,10 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('serverName', server),
                      JMESPathCheck('status', 'Completed')])
 
-        self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
+        self.cmd('sql db export -s {} -n {} -g {} --auth-type ManagedIdentity -u {}'
                  ' --storage-key {} --storage-key-type SharedAccessKey'
                  ' --storage-uri {}'
-                 .format(server, db_name, resource_group, admin_password, admin_login, sasKey, bacpacUri2),
+                 .format(server, db_name, resource_group, sql_identity, sasKey, bacpacUri2),
                  checks=[
                      JMESPathCheck('blobUri', bacpacUri2),
                      JMESPathCheck('databaseName', db_name),
@@ -4483,10 +4535,10 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('status', 'Completed')])
 
         # import bacpac to second database using Storage Key
-        self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
+        self.cmd('sql db import -s {} -n {} -g {} --auth-type ManagedIdentity -u {}'
                  ' --storage-key {} --storage-key-type StorageAccessKey'
                  ' --storage-uri {}'
-                 .format(server, db_name2, resource_group, admin_password, admin_login, storageKey, bacpacUri),
+                 .format(server, db_name2, resource_group, sql_identity, storageKey, bacpacUri),
                  checks=[
                      JMESPathCheck('blobUri', bacpacUri),
                      JMESPathCheck('databaseName', db_name2),
@@ -4495,10 +4547,10 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('status', 'Completed')])
 
         # import bacpac to third database using SAS key
-        self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
+        self.cmd('sql db import -s {} -n {} -g {} --auth-type ManagedIdentity -u {}'
                  ' --storage-key {} --storage-key-type SharedAccessKey'
                  ' --storage-uri {}'
-                 .format(server, db_name3, resource_group, admin_password, admin_login, sasKey, bacpacUri2),
+                 .format(server, db_name3, resource_group, sql_identity, sasKey, bacpacUri2),
                  checks=[
                      JMESPathCheck('blobUri', bacpacUri2),
                      JMESPathCheck('databaseName', db_name3),
@@ -4794,39 +4846,38 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
 
 class SqlServerIdentityTest(ScenarioTest):
 
+    # Own the resource group and reuse its administrator UMI instead of relying on missing cross-subscription fixtures.
+    @ResourceGroupPreparer(location='indiasouthcentral')
     @AllowLargeResponse()
-    def test_sql_server_identity(self):
+    def test_sql_server_identity(self, resource_group, resource_group_location):
         server_name_test = 'umitest'
         server_name = self.create_random_name(server_name_test, managed_instance_name_max_length)
-        admin_login = 'admin123'
-        admin_passwords = ['SecretPassword123', 'SecretPassword456']
         families = ['Gen5']
 
         subnet = '/subscriptions/e64f3e8e-ab91-4a65-8cdd-5cd2f47d00b4/resourceGroups/alswansotest3-rg/providers/Microsoft.Network/virtualNetworks/vnet-alswansotestmi/subnets/ManagedInstance'
 
         license_type = 'LicenseIncluded'
-        loc = 'indiasouthcentral'
+        loc = resource_group_location
         v_cores = 4
         storage_size_in_gb = '32'
         edition = 'GeneralPurpose'
-        resource_group_1 = "cli_test_donnotdelete"
+        resource_group_1 = resource_group
         collation = "SQL_Latin1_General_CP1_CI_AS"
         proxy_override = "Proxy"
 
-        test_umi = '/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
-        umi_list = '/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
-
         identity_type = ResourceIdType.system_assigned_user_assigned.value
-        user = admin_login
+        auth_args = _create_entra_only_auth_args(resource_group_1, server_name, loc)
+        test_umi = self.cmd('identity show -g {} -n {}-admin'
+                           .format(resource_group_1, server_name)).get_output_in_json()['id']
 
         self.cmd('sql server create -g {} -n {} -l {} -i '
-                 '--admin-user {} --admin-password {} --user-assigned-identity-id {} --identity-type {} --pid {}'
-                 .format(resource_group_1, server_name, loc, user, admin_passwords[0], umi_list, identity_type,
+                 '{} --user-assigned-identity-id {} --identity-type {} --pid {}'
+                 .format(resource_group_1, server_name, loc, auth_args, test_umi, identity_type,
                          test_umi),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                      JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned')])
 
         # test show sql server
@@ -4835,10 +4886,11 @@ class SqlServerIdentityTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login)])
+                     JMESPathCheck('administrators.azureAdOnlyAuthentication', True)])
 
         self.cmd('sql server delete -g {} -n {} --yes'
                  .format(resource_group_1, server_name), checks=NoneCheck())
+        self.cmd('identity delete -g {} -n {}-admin'.format(resource_group_1, server_name))
 
         # test show sql server doesn't return anything
         self.cmd('sql server show -g {} -n {}'
@@ -5639,6 +5691,7 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
         # Values of existing resources in order to test this feature
         loc = 'eastus'
         resource_group = ManagedInstancePreparer.group
+        # Keep the maintenance-window subnet in the MI's region and subscription to avoid linked-resource failures.
         subnet = (
             '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/'
             'virtualNetworks/vnet-mi-cmw-eastus/subnets/{}'
@@ -5892,10 +5945,12 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         })
 
         expected_dns_zone = '7773cdecf1ff'
+        # Preserve DNS-partner coverage while satisfying the recording subscription's Entra-only requirement.
+        self.kwargs['auth_args'] = _create_entra_only_auth_args(resource_group, instance_name, location)
         # test create sql managed_instance with dns-zone-partner property
         managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --dns-zone-partner {'
-                                    'dns_zone_partner}',
+                                    'dns_zone_partner} {auth_args}',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -5906,6 +5961,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test delete sql managed instance
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
+        # This live-only scenario owns its administrator identity outside a resource-group preparer.
+        self.cmd('identity delete -g {rg} -n {managed_instance_name}-admin')
 
 class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
@@ -6809,6 +6866,7 @@ class SqlManagedInstanceAzureADOnlyAuthenticationsScenarioTest(ScenarioTest):
 
 
 class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
+    # Use provisionable, distinct partner regions so regional restrictions do not block geo-failover coverage.
     from enum import Enum
 
     class FailoverType(Enum):
@@ -6971,15 +7029,17 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
-                           parameter_name_for_location="resource_group_location_1")
+                           parameter_name_for_location="resource_group_location_1",
+                           location='centralindia')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
-                           parameter_name_for_location="resource_group_location_2")
+                           parameter_name_for_location="resource_group_location_2",
+                           location='eastus')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='northeurope')
+                       location='centralindia')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_2",
-                       location='uksouth')
+                       location='eastus')
     def test_sql_failover_group_mgmt(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -7151,13 +7211,13 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                            parameter_name_for_location="resource_group_location_2")
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='northeurope')
+                       location='indiasouthcentral')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1", 
-                       location='uksouth')
+                       location='eastus')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2", 
-                       location='swedencentral')
+                       location='centralindia')
     def test_sql_failover_group_mgmt_multiple_partners(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -7719,20 +7779,20 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
 
 class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
+    # Entra-only setup prevents authentication policy from obscuring TLS-version create/update coverage.
     @ResourceGroupPreparer(location='eastus')
     def test_sql_server_minimal_tls_version(self, resource_group):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_passwords = ['SecretPassword123', 'SecretPassword456']
         resource_group_location = "eastus"
+        auth_args = _create_entra_only_auth_args(resource_group, server_name_1, resource_group_location)
         tls1_2 = "1.2"
         tls1_3 = "1.3"
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {} --minimal-tls-version {}'
-                 .format(resource_group, server_name_1, admin_login, admin_passwords[0], tls1_2),
+                 '{} --minimal-tls-version {}'
+                 .format(resource_group, server_name_1, auth_args, tls1_2),
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('location', resource_group_location),
@@ -7749,8 +7809,8 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
 
         # test create sql server is created with default tls 1.2 when minimalTlsVersion is not passed explicitly
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {}'
-                 .format(resource_group, server_name_2, admin_login, admin_passwords[0]),
+                 '{}'
+                 .format(resource_group, server_name_2, auth_args),
                  checks=[
                      JMESPathCheck('name', server_name_2),
                      JMESPathCheck('location', resource_group_location),
@@ -8955,11 +9015,13 @@ class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
             'zone_redundant': 'True'
         })
 
-        # Create a zone - redundant managed instance
+        # Preserve zone-redundancy coverage with a test-owned Entra-only administrator.
+        self.kwargs['auth_args'] = _create_entra_only_auth_args(
+            group, self.kwargs['managed_instance_name'], self.kwargs['loc'])
         self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
-                                    '--proxy-override {proxy_override} --zone-redundant {zone_redundant}',
+                                    '--proxy-override {proxy_override} --zone-redundant {zone_redundant} {auth_args}',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -8995,6 +9057,7 @@ class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
         # Delete the managed instance
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
+        self.cmd('identity delete -g {rg} -n {managed_instance_name}-admin')
 
 # Managed server in private subnet is blocked
 # https://msdata.visualstudio.com/Database%20Systems/_git/DsMainDev/pullrequest/1415879
@@ -9027,9 +9090,12 @@ class SqlManagedInstanceHermesCreateScenarioTest(ScenarioTest):
         })
 
         # Create Hermes
+        # GPv2 creation also needs Entra-only authentication on policy-restricted recording subscriptions.
+        self.kwargs['auth_args'] = _create_entra_only_auth_args(
+            group, self.kwargs['managed_instance_name'], self.kwargs['loc'])
         self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
-                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} ',
+                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} {auth_args}',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -9051,6 +9117,7 @@ class SqlManagedInstanceHermesCreateScenarioTest(ScenarioTest):
         # Delete the managed instance
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
+        self.cmd('identity delete -g {rg} -n {managed_instance_name}-admin')
 
 # Managed server in private subnet is blocked
 # https://msdata.visualstudio.com/Database%20Systems/_git/DsMainDev/pullrequest/1415879
@@ -9083,9 +9150,12 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
         })
 
         # Create GPv1
+        # Use Entra-only setup so the GPv1-to-GPv2 update is not blocked by authentication policy.
+        self.kwargs['auth_args'] = _create_entra_only_auth_args(
+            group, self.kwargs['managed_instance_name'], self.kwargs['loc'])
         self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
-                                    '--storage {storage_size_in_gb} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} ',
+                                    '--storage {storage_size_in_gb} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} {auth_args}',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -9120,6 +9190,7 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
         # Delete the managed instance
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
+        self.cmd('identity delete -g {rg} -n {managed_instance_name}-admin')
 
 class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
     # Own the MI lifecycle rather than depending on a shared instance; this is test isolation, not an SDK fix.
@@ -9252,6 +9323,7 @@ class SqlManagedInstanceExternalGovernanceTest(ScenarioTest):
 
 class SqlServerSoftDeleteScenarioTest(ScenarioTest):
     """Test cases for SQL Server Soft Delete functionality"""
+    # Entra-only administrators keep all retention boundaries and recovery flows runnable under recording policy.
 
     @live_only()
     def test_sql_server_soft_delete_retention_days_boundary_validation(self):
@@ -9287,36 +9359,35 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         server_name_0 = self.create_random_name('softdelete', server_name_max_length)
         server_name_1 = self.create_random_name('softdelete', server_name_max_length)
         server_name_7 = self.create_random_name('softdelete', server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name_0, resource_group_location)
         location = resource_group_location
 
         # Test with retention_days = 0 (disabled)
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
+                 '{} '
                  '--soft-delete-retention-days 0'
                  .format(resource_group, server_name_0, location,
-                        admin_login, admin_password),
+                        auth_args),
                  checks=[
                      JMESPathCheck('name', server_name_0),
                      JMESPathCheck('retentionDays', 0)])
 
         # Test with retention_days = 1 (minimum enabled)
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
+                 '{} '
                  '--soft-delete-retention-days 1'
                  .format(resource_group, server_name_1, location,
-                        admin_login, admin_password),
+                        auth_args),
                  checks=[
                      JMESPathCheck('name', server_name_1),
                      JMESPathCheck('retentionDays', 1)])
 
         # Test with retention_days = 7 (maximum)
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
+                 '{} '
                  '--soft-delete-retention-days 7'
                  .format(resource_group, server_name_7, location,
-                        admin_login, admin_password),
+                        auth_args),
                  checks=[
                      JMESPathCheck('name', server_name_7),
                      JMESPathCheck('retentionDays', 7)])
@@ -9337,15 +9408,14 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         - retentionDays 1..7  -> soft delete is enabled with that retention window
         """
         server_name = self.create_random_name('softdelete', server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, resource_group_location)
         location = resource_group_location
 
         # Create server without soft delete parameter
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {}'
+                 '{}'
                  .format(resource_group, server_name, location,
-                        admin_login, admin_password),
+                        auth_args),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('location', location),
@@ -9362,22 +9432,21 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
     def test_sql_server_soft_delete_enable_on_create(self, resource_group, resource_group_location):
         """Test enabling soft delete with retention days on server creation"""
         server_name = self.create_random_name('softdelete', server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, resource_group_location)
         retention_days = 5
         location = resource_group_location
 
         # Create server with soft delete enabled with retention days
         server = self.cmd('sql server create -g {} --name {} -l {} '
-                         '--admin-user {} --admin-password {} '
+                         '{} '
                          '--soft-delete-retention-days {}'
                          .format(resource_group, server_name, location, 
-                                admin_login, admin_password, retention_days),
+                                auth_args, retention_days),
                          checks=[
                              JMESPathCheck('name', server_name),
                              JMESPathCheck('location', location),
                              JMESPathCheck('resourceGroup', resource_group),
-                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                              JMESPathCheck('retentionDays', retention_days)]).get_output_in_json()
         
         # Verify server shows soft delete settings
@@ -9523,22 +9592,21 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         """Test complete soft delete workflow: create server with 2-day retention, delete, restore, and cleanup"""
         server_name = self.create_random_name('softdelete', server_name_max_length)
         restored_server_name = self.create_random_name('restored', server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
         retention_days = 2
         location = 'indiasouthcentral'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, location)
 
         # Create server with soft delete enabled and 2-day retention
         server = self.cmd('sql server create -g {} --name {} -l {} '
-                         '--admin-user {} --admin-password {} '
+                         '{} '
                          '--soft-delete-retention-days {}'
                          .format(resource_group, server_name, location, 
-                                admin_login, admin_password, retention_days),
+                                auth_args, retention_days),
                          checks=[
                              JMESPathCheck('name', server_name),
                              JMESPathCheck('location', location),
                              JMESPathCheck('resourceGroup', resource_group),
-                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                              JMESPathCheck('retentionDays', retention_days)]).get_output_in_json()
 
         # Verify server shows soft delete settings
@@ -9595,6 +9663,7 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
         # Note: ResourceGroupPreparer automatically handles cleanup of the resource group
 
 class SqlServerDeletedServerScenarioTest(ScenarioTest):
+    # Use owned Entra principals for delete/restore fixtures instead of SQL credentials or fixed directory identities.
 
     def test_sql_server_restore_non_existent_deleted_server(self):
         """
@@ -9618,17 +9687,16 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         then verifies it can be listed and shown in deleted servers.
         '''
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, resource_group_location)
         location = resource_group_location
         soft_delete_retention_days = 7
 
         # Create a server with soft delete enabled
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
+                 '{} '
                  '--soft-delete-retention-days {}'
                  .format(resource_group, server_name, location,
-                         admin_login, admin_password, soft_delete_retention_days),
+                         auth_args, soft_delete_retention_days),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('location', location),
@@ -9688,38 +9756,40 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         self.assertIn(f"/resourcegroups/{resource_group.lower()}/", show_original_id)
         self.assertIn(f"/servers/{server_name.lower()}", show_original_id)
 
-    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_server_soft_delete_retention_update_scenarios(self, resource_group, resource_group_location):
         '''
         Comprehensive test for soft delete retention days with various update scenarios.
         Tests retention_days behavior when:
-        1. Server created without soft-delete, update password, then enable soft-delete
-        2. Server created without soft-delete, update both soft-delete and password together
-        3. Server created with soft-delete, disable soft-delete, then update password
-        4. Server created with soft-delete disabled, update password, then enable soft-delete
+        1. Server created without soft-delete, update tags, then enable soft-delete
+        2. Server created without soft-delete, update both soft-delete and tags together
+        3. Server created with soft-delete, disable soft-delete, then update tags
+        4. Server created with soft-delete disabled, update tags, then enable soft-delete
         '''
         location = resource_group_location
-        admin_login = 'admin123'
-        base_password = 'SecretPassword123!'
-        new_password = 'NewPassword456!'
 
-        # ===== SCENARIO 1: Create without soft-delete -> Update password -> Enable soft-delete =====
+        # Tag updates exercise retention preservation without SQL password changes on Entra-only servers.
+        # ===== SCENARIO 1: Create without soft-delete -> Update tags -> Enable soft-delete =====
         server1 = self.create_random_name('sdtest1', server_name_max_length)
+        auth_args = _create_entra_only_auth_args(resource_group, server1, location)
 
         # Create server without soft-delete parameter.
         # Semantics: -1 = never configured, 0 = disabled, 1..7 = enabled.
-        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
-                .format(resource_group, server1, location, admin_login, base_password),
+        self.cmd('sql server create -g {} --name {} -l {} {}'
+                .format(resource_group, server1, location, auth_args),
                 checks=[
                     JMESPathCheck('name', server1),
+                    JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                     JMESPathCheck('retentionDays', -1)])
 
-        # Update password only - retention_days must remain -1 (never configured)
-        self.cmd('sql server update -g {} --name {} --admin-password {}'
-                .format(resource_group, server1, new_password),
+        # Update tags only - retention_days must remain -1 (never configured)
+        self.cmd('sql server update -g {} --name {} --set tags.retentionScenario=updated'
+                .format(resource_group, server1),
                 checks=[
                     JMESPathCheck('name', server1),
+                    JMESPathCheck('tags.retentionScenario', 'updated'),
+                    JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                     JMESPathCheck('retentionDays', -1)])
 
         # Enable soft-delete with 5 days retention
@@ -9729,31 +9799,38 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
                     JMESPathCheck('name', server1),
                     JMESPathCheck('retentionDays', 5)])  # Should be updated to 5
 
-        # ===== SCENARIO 2: Create without soft-delete -> Update soft-delete AND password together =====
+        # ===== SCENARIO 2: Create without soft-delete -> Update soft-delete AND tags together =====
         server2 = self.create_random_name('sdtest2', server_name_max_length)
+        auth_args = _create_entra_only_auth_args(resource_group, server2, location)
 
         # Create server without soft-delete parameter (retentionDays == -1: never configured)
-        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
-                .format(resource_group, server2, location, admin_login, base_password),
+        self.cmd('sql server create -g {} --name {} -l {} {}'
+                .format(resource_group, server2, location, auth_args),
                 checks=[
                     JMESPathCheck('name', server2),
+                    JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                     JMESPathCheck('retentionDays', -1)])
 
-        # Update both soft-delete (3 days) and password together
-        self.cmd('sql server update -g {} --name {} --admin-password {} --soft-delete-retention-days 3'
-                .format(resource_group, server2, new_password),
+        # Update both soft-delete (3 days) and tags together
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 3'
+                 ' --set tags.retentionScenario=updated'
+                .format(resource_group, server2),
                 checks=[
                     JMESPathCheck('name', server2),
+                    JMESPathCheck('tags.retentionScenario', 'updated'),
+                    JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                     JMESPathCheck('retentionDays', 3)])  # Should be updated to 3
 
-        # ===== SCENARIO 3: Create with soft-delete -> Disable soft-delete -> Update password =====
+        # ===== SCENARIO 3: Create with soft-delete -> Disable soft-delete -> Update tags =====
         server3 = self.create_random_name('sdtest3', server_name_max_length)
+        auth_args = _create_entra_only_auth_args(resource_group, server3, location)
         
         # Create server with soft-delete enabled (7 days)
-        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {} --soft-delete-retention-days 7'
-                .format(resource_group, server3, location, admin_login, base_password),
+        self.cmd('sql server create -g {} --name {} -l {} {} --soft-delete-retention-days 7'
+                .format(resource_group, server3, location, auth_args),
                 checks=[
                     JMESPathCheck('name', server3),
+                    JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                     JMESPathCheck('retentionDays', 7)])
         
         # Disable soft-delete (set to 0)
@@ -9763,28 +9840,34 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
                     JMESPathCheck('name', server3),
                     JMESPathCheck('retentionDays', 0)])  # Should be disabled
         
-        # Update password only - retention_days should remain 0
-        self.cmd('sql server update -g {} --name {} --admin-password {}'
-                .format(resource_group, server3, new_password),
+        # Update tags only - retention_days should remain 0
+        self.cmd('sql server update -g {} --name {} --set tags.retentionScenario=updated'
+                .format(resource_group, server3),
                 checks=[
                     JMESPathCheck('name', server3),
+                    JMESPathCheck('tags.retentionScenario', 'updated'),
+                    JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                     JMESPathCheck('retentionDays', 0)])  # Should remain 0
 
-        # ===== SCENARIO 4: Create with soft-delete disabled -> Update password -> Enable soft-delete =====
+        # ===== SCENARIO 4: Create with soft-delete disabled -> Update tags -> Enable soft-delete =====
         server4 = self.create_random_name('sdtest4', server_name_max_length)
+        auth_args = _create_entra_only_auth_args(resource_group, server4, location)
         
         # Create server with soft-delete explicitly disabled (0 days)
-        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {} --soft-delete-retention-days 0'
-                .format(resource_group, server4, location, admin_login, base_password),
+        self.cmd('sql server create -g {} --name {} -l {} {} --soft-delete-retention-days 0'
+                .format(resource_group, server4, location, auth_args),
                 checks=[
                     JMESPathCheck('name', server4),
+                    JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                     JMESPathCheck('retentionDays', 0)])
         
-        # Update password only - retention_days should remain 0
-        self.cmd('sql server update -g {} --name {} --admin-password {}'
-                .format(resource_group, server4, new_password),
+        # Update tags only - retention_days should remain 0
+        self.cmd('sql server update -g {} --name {} --set tags.retentionScenario=updated'
+                .format(resource_group, server4),
                 checks=[
                     JMESPathCheck('name', server4),
+                    JMESPathCheck('tags.retentionScenario', 'updated'),
+                    JMESPathCheck('administrators.azureAdOnlyAuthentication', True),
                     JMESPathCheck('retentionDays', 0)])  # Should remain 0
         
         # Enable soft-delete (4 days)
@@ -9821,16 +9904,15 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         Test deleted-server list without location returns subscription-wide deleted servers.
         '''
         server_name = self.create_random_name('delall', server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, resource_group_location)
         location = resource_group_location
 
         # Create a server with soft delete enabled so it appears in deleted-server listings.
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
+                 '{} '
                  '--soft-delete-retention-days {}'
                  .format(resource_group, server_name, location,
-                         admin_login, admin_password, 7),
+                         auth_args, 7),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('location', location),
@@ -9866,16 +9948,15 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         Test deleted-server show fails when location does not match deleted server location.
         '''
         server_name = self.create_random_name('delwrong', server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, resource_group_location)
         location = resource_group_location
         wrong_location = 'eastus2' if location.lower() != 'eastus2' else 'westus2'
 
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
+                 '{} '
                  '--soft-delete-retention-days {}'
                  .format(resource_group, server_name, location,
-                         admin_login, admin_password, 7),
+                         auth_args, 7),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('location', location),
@@ -9911,17 +9992,16 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         This validates that the _check_live_server_not_exists validation works correctly.
         '''
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, resource_group_location)
         location = resource_group_location
         soft_delete_retention_days = 7
 
         # Create server with soft delete enabled
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
+                 '{} '
                  '--soft-delete-retention-days {}'
                  .format(resource_group, server_name, location,
-                         admin_login, admin_password, soft_delete_retention_days),
+                         auth_args, soft_delete_retention_days),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('location', location),
@@ -9954,17 +10034,16 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         This validates that the error message correctly identifies the resource group mismatch.
         '''
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        auth_args = _create_entra_only_auth_args(resource_group, server_name, resource_group_location)
         location = resource_group_location
         soft_delete_retention_days = 7
 
         # Create server in first resource group with soft delete enabled
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
+                 '{} '
                  '--soft-delete-retention-days {}'
                  .format(resource_group, server_name, location,
-                         admin_login, admin_password, soft_delete_retention_days),
+                         auth_args, soft_delete_retention_days),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('location', location),
@@ -9992,24 +10071,26 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
                  .format(resource_group, server_name))
 
     @ResourceGroupPreparer(parameter_name='resource_group', location='indiasouthcentral')
+    @ResourceGroupPreparer(parameter_name='admin_resource_group', location='indiasouthcentral')
     @AllowLargeResponse(size_kb=9999)
-    def test_sql_server_restore_after_resource_group_removal(self, resource_group, resource_group_location):
+    def test_sql_server_restore_after_resource_group_removal(self, resource_group, resource_group_location,
+                                                           admin_resource_group):
         '''
         Test attempting to restore a deleted server after the resource group has been removed,
         then recreating the resource group and successfully restoring.
         '''
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
+        # The administrator must survive deletion of the SQL server's resource group.
+        auth_args = _create_entra_only_auth_args(admin_resource_group, server_name, resource_group_location)
         location = resource_group_location
         soft_delete_retention_days = 7
 
         # Create server with soft delete enabled
         self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
+                 '{} '
                  '--soft-delete-retention-days {}'
                  .format(resource_group, server_name, location,
-                         admin_login, admin_password, soft_delete_retention_days),
+                         auth_args, soft_delete_retention_days),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('location', location),
@@ -10057,8 +10138,6 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
         rg1_name = self.create_random_name('clitestrg', 24)
         rg2_name = self.create_random_name('clitestrg', 24)
         server_name = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
         location = 'indiasouthcentral'
         soft_delete_retention_days = 7
 
@@ -10075,12 +10154,14 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
                          JMESPathCheck('name', rg2_name),
                          JMESPathCheck('location', location)])
 
+            auth_args = _create_entra_only_auth_args(rg1_name, server_name, location)
+
             # Create server in RG1 with soft-delete enabled
             self.cmd('sql server create -g {} --name {} -l {} '
-                     '--admin-user {} --admin-password {} '
+                     '{} '
                      '--soft-delete-retention-days {}'
                      .format(rg1_name, server_name, location,
-                             admin_login, admin_password, soft_delete_retention_days),
+                             auth_args, soft_delete_retention_days),
                      checks=[
                          JMESPathCheck('name', server_name),
                          JMESPathCheck('location', location),

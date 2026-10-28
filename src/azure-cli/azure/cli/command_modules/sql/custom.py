@@ -2005,6 +2005,9 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
             else ComputeModelType.provisioned)
 
     # Update sku
+    if capacity and not service_objective:
+        # Re-resolve capacity-qualified database SKUs after inferring the existing compute model.
+        instance.sku.name = None
     _db_elastic_pool_update_sku(
         cmd,
         instance,
