@@ -752,6 +752,45 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
         self.cmd('keyvault delete --hsm-name {hsm_name}')
         self.cmd('keyvault purge --hsm-name {hsm_name}')
 
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='clitest-mhsm-rg', location='eastus2euap')
+    def test_keyvault_hsm_v2_sku(self, resource_group):
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e"
+        self.kwargs.update({
+            'hsm_name': self.create_random_name('clitest-mhsm-', 24),
+            'invalid_hsm_name': self.create_random_name('clitest-mhsm-', 24),
+            'loc': 'eastus2euap',
+            'init_admin': logged_in_user,
+            'sku': 'Standard_B1v2'
+        })
+
+        sku_checks = [
+            self.check('sku.name', '{sku}'),
+            self.check('sku.family', 'B')
+        ]
+
+        self.cmd('keyvault create --hsm-name {invalid_hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
+                 '--retention-days 7 --default-action Deny --bypass None --public-network-access Disabled '
+                 '--sku Standard_B99v2', expect_failure=True)
+
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
+                 '--retention-days 7 --default-action Deny --bypass None --public-network-access Disabled '
+                 '--sku {sku}', checks=sku_checks + [
+                     self.check('name', '{hsm_name}'),
+                     self.check('properties.provisioningState', 'Succeeded')
+                 ])
+        self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=sku_checks)
+        self.cmd('keyvault list --resource-type hsm -g {rg} --query "[?name==\'{hsm_name}\']"', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{hsm_name}'),
+            self.check('[0].sku.name', '{sku}'),
+            self.check('[0].sku.family', 'B')
+        ])
+
+        self.cmd('keyvault delete --hsm-name {hsm_name}')
+        self.cmd('keyvault purge --hsm-name {hsm_name} -l {loc}')
+
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
