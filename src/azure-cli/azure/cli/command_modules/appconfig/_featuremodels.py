@@ -31,9 +31,15 @@ def parse_feature_flag_input(value):
     from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError
 
     try:
-        return AAZShortHandSyntaxParser()(value)
+        flag = AAZShortHandSyntaxParser()(value)
     except AAZInvalidShorthandSyntaxError:
-        return shell_safe_json_parse(value, preserve_order=True)
+        flag = shell_safe_json_parse(value, preserve_order=True)
+
+    if not isinstance(flag, dict):
+        raise InvalidArgumentValueError(
+            "--flag must be a JSON object or shorthand-syntax object representing a single feature flag.")
+
+    return flag
 
 
 # Feature Flag Models #

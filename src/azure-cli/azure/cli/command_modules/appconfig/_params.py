@@ -491,7 +491,7 @@ def load_arguments(self, _):
                         "conditions, allocation, variants, telemetry, tags). Accepts a JSON object, a shorthand-syntax "
                         "object, a file path with @ prefix (e.g. @flag.json), or @- to read from stdin. Providing --flag "
                         "replaces the entire feature flag and cannot be combined with --description, "
-                        "--requirement-type or --telemetry-enabled. A feature flag name is required, either inside "
+                        "--requirement-type or --telemetry-enabled. A string feature flag name is required, either inside "
                         "--flag or via --feature-name.")
 
     with self.argument_context('appconfig enhanced-feature-flag show') as c:

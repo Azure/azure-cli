@@ -359,6 +359,9 @@ def validate_enhanced_feature_flag_input(namespace):
             "--flag must be a JSON object or shorthand-syntax object representing a single feature flag.")
 
     flag_name = flag.get(FeatureFlagConstants.NAME)
+    if flag_name is not None and not isinstance(flag_name, str):
+        raise InvalidArgumentValueError("The feature flag 'name' inside --flag must be a string.")
+
     if namespace.feature_name is None and flag_name is None:
         raise RequiredArgumentMissingError(
             "The feature flag 'name' is required. Provide it inside --flag or via --feature-name.")

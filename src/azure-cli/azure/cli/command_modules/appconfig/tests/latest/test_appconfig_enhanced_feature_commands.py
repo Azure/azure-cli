@@ -9,9 +9,10 @@ from unittest.mock import Mock, call, patch
 
 from azure.appconfiguration import FeatureFlag
 from azure.core import MatchConditions
+from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, ResourceNotFoundError as SDKResourceNotFoundError
 from azure.core.paging import ItemPaged
 from azure.cli.testsdk import ScenarioTest
-from azure.cli.core.azclierror import ResourceNotFoundError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, InvalidArgumentValueError
+from azure.cli.core.azclierror import ResourceNotFoundError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, InvalidArgumentValueError, AzureResponseError
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import AppConfigResourceGroupPreparer, create_config_store, CredentialResponseSanitizer, register_appconfig_query_matcher, register_appconfig_recording_processors
@@ -43,7 +44,7 @@ class AppConfigEnhancedFeatureSetTests(ScenarioTest):
                 with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:
                     client = get_client.return_value
                     client.get_feature_flag.return_value = FeatureFlag(name='Beta', enabled=False)
-                    client.set_feature_flag.side_effect = lambda flag: flag
+                    client.set_feature_flag.side_effect = lambda flag, **kwargs: flag
 
                     self.cmd('appconfig enhanced-feature-flag set --endpoint https://example.azconfig.io '
                              '--auth-mode login -y {arguments}',
@@ -82,13 +83,13 @@ class AppConfigEnhancedFeatureSetTests(ScenarioTest):
                  'override', {'source': 'cli', 'added': 'value'})):
             with self.subTest(arguments=arguments):
                 self.kwargs.update({
-                    'flag': '{"name":"Beta","enabled":true,"label":"original",'
+                    'flag': '{"name":"Beta","enabled":true,"label":"original","etag":"stale-etag",'
                             '"tags":{"source":"flag","original":"value"}}',
                     'arguments': arguments
                 })
                 with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:
                     client = get_client.return_value
-                    client.set_feature_flag.side_effect = lambda flag: flag
+                    client.set_feature_flag.side_effect = lambda flag, **kwargs: flag
 
                     self.cmd("appconfig enhanced-feature-flag set --endpoint https://example.azconfig.io "
                              "--auth-mode login --flag '{flag}' -y {arguments}",
@@ -99,7 +100,10 @@ class AppConfigEnhancedFeatureSetTests(ScenarioTest):
 
                     client.get_feature_flag.assert_not_called()
                     client.set_feature_flag.assert_called_once()
+                    self.assertEqual(client.set_feature_flag.call_args.kwargs,
+                                     {'match_condition': MatchConditions.Unconditionally})
                     submitted_flag = client.set_feature_flag.call_args.args[0]
+                    self.assertIsNone(submitted_flag.etag)
                     self.assertEqual(submitted_flag.label, expected_label)
                     self.assertEqual(submitted_flag.tags, expected_tags)
 
@@ -113,6 +117,32 @@ class AppConfigEnhancedFeatureSetTests(ScenarioTest):
                                  "--auth-mode login --feature-name Beta --flag '{flag}' -y")
 
                     get_client.assert_not_called()
+
+    def test_enhanced_feature_set_flag_null(self):
+        for arguments in ('', '--feature-name Beta', '--feature-name Beta --description updated'):
+            with self.subTest(arguments=arguments):
+                self.kwargs['arguments'] = arguments
+                with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:
+                    with self.assertRaisesRegex(InvalidArgumentValueError, '--flag must be a JSON object'):
+                        self.cmd('appconfig enhanced-feature-flag set --endpoint https://example.azconfig.io '
+                                 '--auth-mode login --flag null -y {arguments}')
+
+                    get_client.assert_not_called()
+
+    def test_enhanced_feature_set_flag_name_types(self):
+        for feature_name in (123, 0, True, False, [], ['Beta'], {}, {'name': 'Beta'}):
+            for arguments in ('', '--feature-name Beta'):
+                with self.subTest(feature_name=feature_name, arguments=arguments):
+                    self.kwargs.update({
+                        'flag': json.dumps({'name': feature_name, 'enabled': False}),
+                        'arguments': arguments
+                    })
+                    with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:
+                        with self.assertRaisesRegex(InvalidArgumentValueError, "name.*must be a string"):
+                            self.cmd("appconfig enhanced-feature-flag set --endpoint https://example.azconfig.io "
+                                     "--auth-mode login --flag '{flag}' -y {arguments}")
+
+                        get_client.assert_not_called()
 
     def test_enhanced_feature_set_flag_invalid_names(self):
         for feature_name in ('', 'Beta%', 'Beta:Feature'):
@@ -128,6 +158,65 @@ class AppConfigEnhancedFeatureSetTests(ScenarioTest):
                                      "--auth-mode login --flag '{flag}' -y {arguments}")
 
                         get_client.assert_not_called()
+
+
+class AppConfigEnhancedFeatureConcurrencyTests(ScenarioTest):
+
+    def test_enhanced_feature_conditional_writes(self):
+        for operation, exists, expected_condition in (
+                ('set', False, MatchConditions.IfMissing),
+                ('set', True, MatchConditions.IfNotModified),
+                ('enable', True, MatchConditions.IfNotModified),
+                ('disable', True, MatchConditions.IfNotModified)):
+            with self.subTest(operation=operation, exists=exists):
+                with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:
+                    client = get_client.return_value
+                    if exists:
+                        client.get_feature_flag.return_value = FeatureFlag(
+                            name='Beta', enabled=True, description='preserved', etag='original-etag')
+                    else:
+                        client.get_feature_flag.side_effect = SDKResourceNotFoundError('Not found')
+                    client.set_feature_flag.side_effect = lambda flag, **kwargs: flag
+                    self.kwargs['operation'] = operation
+
+                    self.cmd('appconfig enhanced-feature-flag {operation} --endpoint https://example.azconfig.io '
+                             '--auth-mode login --feature-name Beta -y',
+                             checks=[self.check('name', 'Beta'),
+                                     self.check('enabled', exists and operation != 'disable'),
+                                     self.check('description', 'preserved' if exists else None)])
+
+                    client.get_feature_flag.assert_called_once_with(name='Beta', label=None)
+                    client.set_feature_flag.assert_called_once()
+                    self.assertEqual(client.set_feature_flag.call_args.kwargs, {'match_condition': expected_condition})
+                    submitted_flag = client.set_feature_flag.call_args.args[0]
+                    self.assertEqual(submitted_flag.etag, 'original-etag' if exists else None)
+
+    def test_enhanced_feature_concurrent_write_errors(self):
+        for operation, exists, error in (
+                ('set', False, ResourceExistsError('Concurrent creation')),
+                ('set', True, ResourceModifiedError('Concurrent update')),
+                ('set', True, SDKResourceNotFoundError('Concurrent deletion')),
+                ('enable', True, ResourceModifiedError('Concurrent update')),
+                ('enable', True, SDKResourceNotFoundError('Concurrent deletion')),
+                ('disable', True, ResourceModifiedError('Concurrent update')),
+                ('disable', True, SDKResourceNotFoundError('Concurrent deletion'))):
+            with self.subTest(operation=operation, exists=exists, error=type(error).__name__):
+                with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:
+                    client = get_client.return_value
+                    if exists:
+                        client.get_feature_flag.return_value = FeatureFlag(name='Beta', enabled=False, etag='original-etag')
+                    else:
+                        client.get_feature_flag.side_effect = SDKResourceNotFoundError('Not found')
+                    client.set_feature_flag.side_effect = error
+                    self.kwargs['operation'] = operation
+
+                    with self.assertRaisesRegex(AzureResponseError, str(error)):
+                        self.cmd('appconfig enhanced-feature-flag {operation} --endpoint https://example.azconfig.io '
+                                 '--auth-mode login --feature-name Beta -y')
+
+                    client.set_feature_flag.assert_called_once()
+                    expected_condition = MatchConditions.IfNotModified if exists else MatchConditions.IfMissing
+                    self.assertEqual(client.set_feature_flag.call_args.kwargs, {'match_condition': expected_condition})
 
 
 class AppConfigEnhancedFeatureDeleteTests(ScenarioTest):

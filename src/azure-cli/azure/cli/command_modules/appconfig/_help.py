@@ -620,6 +620,9 @@ helps['appconfig enhanced-feature-flag'] = """
 helps['appconfig enhanced-feature-flag set'] = """
     type: command
     short-summary: Set an enhanced feature flag.
+    long-summary: |
+        Without --flag, preserve unspecified properties and fail if another operation changes the flag before the write completes.
+        Providing --flag replaces the entire flag unconditionally.
     examples:
         - name: Set an enhanced feature flag with label MyLabel.
           text:
@@ -716,6 +719,7 @@ helps['appconfig enhanced-feature-flag list'] = """
 helps['appconfig enhanced-feature-flag enable'] = """
     type: command
     short-summary: Enable an enhanced feature flag to turn it ON for use.
+    long-summary: Fail if another operation changes or deletes the flag before the update completes.
     examples:
         - name: Enable an enhanced feature flag using App Configuration store name.
           text:
@@ -728,6 +732,7 @@ helps['appconfig enhanced-feature-flag enable'] = """
 helps['appconfig enhanced-feature-flag disable'] = """
     type: command
     short-summary: Disable an enhanced feature flag to turn it OFF for use.
+    long-summary: Fail if another operation changes or deletes the flag before the update completes.
     examples:
         - name: Disable an enhanced feature flag using App Configuration store name.
           text:

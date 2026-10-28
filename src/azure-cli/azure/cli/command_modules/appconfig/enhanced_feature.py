@@ -38,6 +38,7 @@ def set_feature(cmd,
                 auth_mode="key",
                 endpoint=None):
     feature_flag_client = get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, endpoint)
+    match_condition = MatchConditions.Unconditionally
 
     if flag is not None:
         # --flag mirrors the data-plane /ff schema (also emitted by 'show'), so deserialize it with the SDK.
@@ -60,6 +61,9 @@ def set_feature(cmd,
 
         if feature_flag is None:
             feature_flag = FeatureFlag(name=feature_name, enabled=False, label=label)
+            match_condition = MatchConditions.IfMissing
+        else:
+            match_condition = MatchConditions.IfNotModified
 
         if description is not None:
             feature_flag.description = description
@@ -83,7 +87,7 @@ def set_feature(cmd,
     user_confirmation(confirmation_message, yes)
 
     try:
-        updated_feature_flag = feature_flag_client.set_feature_flag(feature_flag)
+        updated_feature_flag = feature_flag_client.set_feature_flag(feature_flag, match_condition=match_condition)
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError(str(exception))
 
@@ -237,7 +241,7 @@ def _set_feature_state(cmd, feature_name, enabled, name, label, yes, connection_
     user_confirmation(confirmation_message, yes)
 
     try:
-        updated_feature_flag = feature_flag_client.set_feature_flag(feature_flag)
+        updated_feature_flag = feature_flag_client.set_feature_flag(feature_flag, match_condition=MatchConditions.IfNotModified)
     except HttpResponseError as exception:
         raise CLIErrors.AzureResponseError(str(exception))
 
