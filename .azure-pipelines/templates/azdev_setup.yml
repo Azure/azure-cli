@@ -24,6 +24,7 @@ steps:
       chmod +x env/bin/activate
       . env/bin/activate
 
+      export PIP_CONSTRAINT="$(cd "$CLI_REPO_PATH" && pwd)/.azure-pipelines/requirements-ci.txt"
       python -m pip install -U pip "setuptools>=78.1.1"
       packages=("$AZDEV_PACKAGE")
       if [ -n "$DIFF_TOOL_PACKAGE" ]; then
