@@ -5879,12 +5879,12 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 
     @ResourceGroupPreparer()
     @KeyVaultPreparer(name_prefix='vmkeyvault', name_len=20, key='vault',
-                      additional_params='--enabled-for-deployment true --enabled-for-template-deployment true')
+                      additional_params='--enabled-for-deployment true --enabled-for-template-deployment true --enable-rbac-authorization false')
     def test_vm_create_windows_secrets(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'admin': 'windowsUser',
             'loc': 'westus',
-            'image': 'Win2012R2Datacenter',
+            'image': 'Win2022Datacenter',
             'vm': 'vm-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}])
         })
@@ -5919,7 +5919,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
-    @KeyVaultPreparer(name_prefix='vmsslinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment true --enabled-for-template-deployment true')
+    @KeyVaultPreparer(name_prefix='vmsslinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment true --enabled-for-template-deployment true --enable-rbac-authorization false')
     @AllowLargeResponse()
     def test_vmss_create_linux_secrets(self, resource_group, key_vault):
         self.kwargs.update({
@@ -5939,7 +5939,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
         vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
         self.kwargs['secrets'] = json.dumps(vm_format)
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\'')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-12:12:latest --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\'')
 
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -11054,7 +11054,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.kwargs.update({
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
-            'image-reference': 'Debian:debian-11:11-backports-gen2:latest',
+            'image-reference': 'Debian:debian-12:12-gen2:latest',
             'disk': self.create_random_name(prefix='disk-', length=20),
             'disk2': self.create_random_name(prefix='disk-', length=20),
         })
@@ -11227,7 +11227,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'disk2': self.create_random_name(prefix='d2-', length=20),
             'vm': self.create_random_name(prefix='vm1-', length=20),
             'policy_path': os.path.join(TEST_DIR, 'keyvault', 'policy2.json').replace('\\', '\\\\'),
-            'image': 'MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest'
+            'image': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest'
         })
 
         self.cmd('keyvault create --name {vault} -g {rg} --sku Premium --enable-purge-protection true --retention-days 7 --enable-rbac-authorization false')

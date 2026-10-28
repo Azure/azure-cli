@@ -113,7 +113,7 @@ class CreateVaultSoftDeleteTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.keyvault.custom._create_network_rule_set', return_value=None)
     @mock.patch('azure.cli.core._profile.Profile')
-    @mock.patch('azure.cli.core.util.sdk_no_wait')
+    @mock.patch('azure.cli.command_modules.keyvault.custom.sdk_no_wait')
     def test_create_vault_sets_enable_soft_delete_true(self, mock_sdk_no_wait, mock_profile, _mock_network):
         from azure.cli.command_modules.keyvault.custom import create_vault
 
@@ -153,6 +153,33 @@ class CreateVaultSoftDeleteTest(unittest.TestCase):
         self.assertIs(vault_properties.enable_soft_delete, True,
                       "create_vault must explicitly set enable_soft_delete=True in the request body "
                       "to satisfy Azure Policy checks")
+
+
+class CreateHsmV2SkuTest(unittest.TestCase):
+    """Verify create_hsm sends the Standard_B*v2 SKUs added in API version 2026-05-15 with family 'B'."""
+
+    @mock.patch('azure.cli.command_modules.keyvault.custom.sdk_no_wait')
+    @mock.patch('azure.cli.core._profile.Profile')
+    def test_create_hsm_v2_sku_request_body(self, mock_profile, mock_sdk_no_wait):
+        from azure.mgmt.keyvault import models
+        from azure.cli.command_modules.keyvault.custom import create_hsm
+
+        mock_profile.return_value.get_subscription.return_value = {
+            'tenantId': '00000000-0000-0000-0000-000000000000'
+        }
+        cmd = mock.MagicMock()
+        cmd.cli_ctx.data = {}
+        cmd.get_models.side_effect = lambda name, **_: getattr(models, name)
+
+        for sku in ['Standard_B1v2', 'Standard_B5v2', 'Standard_B10v2', 'Standard_B15v2', 'Standard_B20v2']:
+            with self.subTest(sku=sku):
+                mock_sdk_no_wait.reset_mock()
+                create_hsm(cmd, mock.MagicMock(), resource_group_name='rg', hsm_name='hsm',
+                           administrators=['00000000-0000-0000-0000-000000000001'],
+                           location='eastus', sku=sku)
+
+                parameters = mock_sdk_no_wait.call_args.kwargs['parameters']
+                self.assertEqual(parameters.as_dict()['sku'], {'name': sku, 'family': 'B'})
 
 
 class KeyVaultEkmValidatorUnitTest(unittest.TestCase):

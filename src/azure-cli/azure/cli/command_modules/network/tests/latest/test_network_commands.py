@@ -1634,7 +1634,7 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} '
                  '--sku Standard_v2 --public-ip-address {ip} '
                  '--identity {identity_id} --priority 1001 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --created')
 
         # test validation: --hsm key-id without public-cert-data should fail
         self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name {ag} '
