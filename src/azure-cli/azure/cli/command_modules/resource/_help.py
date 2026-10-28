@@ -2358,6 +2358,8 @@ examples:
     text: az bicep build --file {bicep_file} --outfile {out_file}
   - name: Build a Bicep file without restoring external modules.
     text: az bicep build --file {bicep_file} --no-restore
+  - name: Build a Bicep file using the specified Bicep configuration file instead of discovering bicepconfig.json files.
+    text: az bicep build --file {bicep_file} --config {config_file}
 """
 
 helps['bicep build-params'] = """
@@ -2370,6 +2372,8 @@ examples:
     text: az bicep build-params --file {bicepparam_file} --stdout
   - name: Build a .bicepparam file and save the result to the specified file.
     text: az bicep build-params --file {bicepparam_file} --outfile {out_file}
+  - name: Build a .bicepparam file using the specified Bicep configuration file instead of discovering bicepconfig.json files.
+    text: az bicep build-params --file {bicepparam_file} --config {config_file}
 """
 
 helps['bicep format'] = """
@@ -2390,6 +2394,8 @@ examples:
     text: az bicep format --file {bicep_file} --indent-kind {indent_kind}
   - name: Format a Bicep file set number of spaces to indent with (Only valid with --indent-kind set to Space).
     text: az bicep format --file {bicep_file} --indent-size {indent_size}
+  - name: Format a Bicep file using the formatting settings from the specified Bicep configuration file.
+    text: az bicep format --file {bicep_file} --config {config_file}
 """
 
 helps['bicep decompile'] = """
@@ -2432,6 +2438,8 @@ examples:
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentation-uri {documentation_uri}
   - name: Publish a bicep file with documentation uri and include source code
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentation-uri {documentation_uri} --with-source
+  - name: Publish a bicep file using the specified Bicep configuration file.
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --config {config_file}
 """
 
 helps['bicep restore'] = """
@@ -2442,6 +2450,8 @@ examples:
     text: az bicep restore --file {bicep_file}
   - name: Restore external modules and overwrite cached external modules.
     text: az bicep restore --file {bicep_file} --force
+  - name: Restore external modules using the module aliases and credentials from the specified Bicep configuration file.
+    text: az bicep restore --file {bicep_file} --config {config_file}
 """
 
 helps['bicep version'] = """
@@ -2936,6 +2946,8 @@ examples:
     text: az bicep generate-params --file {bicep_file} --no-restore
   - name: Generate parameters file for a Bicep file with specified output format. Valid values are ( json | bicepparam ).
     text: az bicep generate-params --file {bicep_file} --output-format {output_format} --include-params {include_params}
+  - name: Generate parameters file for a Bicep file using the specified Bicep configuration file.
+    text: az bicep generate-params --file {bicep_file} --config {config_file}
 """
 
 helps['bicep lint'] = """
@@ -2948,6 +2960,8 @@ examples:
     text: az bicep lint --file {bicep_file} --no-restore
   - name: Lint a Bicep file with specified diagnostics format. Valid values are ( default | sarif ).
     text: az bicep lint --file {bicep_file} --diagnostics-format {diagnostics_format}
+  - name: Lint a Bicep file using the linter rules from the specified Bicep configuration file.
+    text: az bicep lint --file {bicep_file} --config {config_file}
 """
 
 helps['bicep snapshot'] = """
@@ -2965,6 +2979,8 @@ examples:
     text: az bicep snapshot --file main.bicepparam --mode Validate
   - name: Capture a snapshot with explicit Azure context.
     text: az bicep snapshot --file main.bicepparam --subscription-id 00000000-0000-0000-0000-000000000000 --resource-group myRg --location westus
+  - name: Capture a snapshot using the specified Bicep configuration file.
+    text: az bicep snapshot --file main.bicepparam --config ./bicepconfig.prod.json
 """
 
 helps['bicep run'] = """
