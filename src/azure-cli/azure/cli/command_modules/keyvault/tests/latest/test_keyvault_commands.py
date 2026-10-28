@@ -770,6 +770,9 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
             self.check('sku.family', 'B')
         ]
 
+        with self.assertRaisesRegex(CLIError, 'Please specify --administrators'):
+            self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --retention-days 7 --sku {sku}')
+
         self.cmd('keyvault create --hsm-name {invalid_hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
                  '--retention-days 7 --default-action Deny --bypass None --public-network-access Disabled '
                  '--sku Standard_B99v2', expect_failure=True)
