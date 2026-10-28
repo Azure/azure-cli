@@ -349,8 +349,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         # self.assertGreater(single_thread_time, multi_thread_time)
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='src_account')
-    @StorageAccountPreparer(parameter_name='dst_account')
+    @StorageAccountPreparer(parameter_name='src_account', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='dst_account', kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_blob_batch_copy(self, src_account_info, dst_account_info, test_dir):
         from datetime import datetime, timedelta

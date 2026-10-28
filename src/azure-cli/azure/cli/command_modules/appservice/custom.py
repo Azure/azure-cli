@@ -874,16 +874,14 @@ def check_flex_app_after_deployment(cmd, resource_group_name, name):
     headers = {"x-functions-key": master_key}
 
     total_trials = 15
-    num_trials = 0
-    while num_trials < total_trials:
+    for _ in range(total_trials):
         time.sleep(2)
         response = requests.get(host_status_url, headers=headers,
-                                verify=not should_disable_connection_verify())
-        if 200 <= response.status_code <= 299:
+                                verify=not should_disable_connection_verify(), allow_redirects=False)
+        if 200 <= response.status_code <= 399:
             break
         if response.status_code == 403 and response.reason == 'Ip Forbidden':
             return "Deployment was successful but health check failed due to IP restriction."
-        num_trials = num_trials + 1
 
     if response.status_code != 200:
         raise CLIError("Deployment was successful but the app appears to be unhealthy. Please "
@@ -6647,14 +6645,13 @@ def _get_scm_url(cmd, resource_group_name, name, slot=None):
 
 
 def _get_host_url(cmd, resource_group_name, name):
-    from azure.mgmt.web.models import HostType
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    for host in app.host_name_ssl_states or []:
-        if host.host_type == HostType.standard:
-            return "https://{}".format(host.name)
-
-    # this should not happen, but throw anyway
-    raise ResourceNotFoundError('Failed to retrieve Host Uri')
+    hostname = app.default_host_name
+    if not isinstance(hostname, str) or not hostname or len(hostname) > 253 or not all(
+            re.fullmatch(r'[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?', label)
+            for label in hostname.split('.')):
+        raise ResourceNotFoundError('Failed to retrieve Host Uri')
+    return "https://{}".format(hostname)
 
 
 def get_publishing_user(cmd):

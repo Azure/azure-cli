@@ -49,6 +49,7 @@ from azure.cli.command_modules.acs.custom import (
     _select_aks_desktop_asset,
     _update_addons,
     aks_install_desktop,
+    aks_agentpool_add,
     aks_agentpool_auto_scale_add,
     aks_agentpool_auto_scale_delete,
     aks_agentpool_auto_scale_update,
@@ -1316,19 +1317,19 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @contextmanager
     def _aks_desktop_archive_extractor(self, fallback):
-        if fallback:
-            # Match the old API: accepting filter= must fail, and an unfiltered call is never safe.
-            def legacy_extractall(archive, path='.', members=None, *, numeric_owner=False):
-                raise AssertionError('The compatibility extractor must not call extractall')
+        def legacy_extractall(archive, path='.', members=None, *, numeric_owner=False):
+            raise AssertionError('The compatibility extractor must not call extractall')
 
+        if fallback:
             with mock.patch.object(tarfile, 'data_filter', None, create=True), \
                     mock.patch.object(tarfile.TarFile, 'extractall', legacy_extractall):
                 yield
         else:
             if not hasattr(tarfile, 'data_filter'):
                 self.skipTest('Native tar extraction filters unavailable')
-            # Exercise pre-3.14 defaults even on newer Python.
-            with mock.patch.object(tarfile.TarFile, 'extraction_filter',
+            # Exercise both filter API states; extraction always uses the strict CLI validator.
+            with mock.patch.object(tarfile.TarFile, 'extractall', legacy_extractall), \
+                    mock.patch.object(tarfile.TarFile, 'extraction_filter',
                                    staticmethod(lambda member, path: member), create=True):
                 yield
 
@@ -1350,7 +1351,7 @@ class AcsCustomCommandTest(unittest.TestCase):
     def test_aks_install_desktop_archive_rejects_unsafe_members(self):
         cases = [
             [('dir', tarfile.DIRTYPE, ''), ('dir/foo', tarfile.SYMTYPE, '.'),
-             ('dir/foo/../../outside', tarfile.REGTYPE, '')],
+             ('dir/foo/../../../outside', tarfile.REGTYPE, '')],
             [('dir', tarfile.DIRTYPE, ''), ('dir/link', tarfile.LNKTYPE, '../outside'),
              ('dir/link', tarfile.REGTYPE, '')],
             [('../outside', tarfile.REGTYPE, '')],
@@ -1382,6 +1383,29 @@ class AcsCustomCommandTest(unittest.TestCase):
                         self.assertEqual(sentinel.read(), b'unchanged')
                     for name in ('pipe', 'device', 'unknown', 'aks-desktop'):
                         self.assertFalse(os.path.lexists(os.path.join(destination, name)))
+
+    @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
+    def test_aks_install_desktop_archive_contains_normalized_traversal(self):
+        name = 'dir/foo/../../outside'
+        for fallback in (False, True):
+            with self.subTest(fallback=fallback), self._aks_desktop_archive_extractor(fallback), \
+                    tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                destination = os.path.join(temp_dir, 'install')
+                outside = os.path.join(temp_dir, 'outside')
+                with open(outside, 'wb') as sentinel:
+                    sentinel.write(b'unchanged')
+                self._write_aks_desktop_archive(archive_path, [
+                    ('dir', tarfile.DIRTYPE, ''),
+                    ('dir/foo', tarfile.SYMTYPE, '.'),
+                    (name, tarfile.REGTYPE, ''),
+                ])
+                # The CLI validator rejects this path even when tarfile would normalize it.
+                with self.assertRaisesRegex(FileOperationError, 'Archive path escapes the extraction directory'):
+                    _extract_aks_desktop_archive(archive_path, destination)
+                self.assertFalse(os.path.lexists(os.path.join(destination, 'outside')))
+                with open(outside, 'rb') as sentinel:
+                    self.assertEqual(sentinel.read(), b'unchanged')
 
     @unittest.skipIf(os.name == 'nt', 'Requires Linux archive link semantics')
     def test_aks_install_desktop_archive_rejects_existing_escaping_symlinks(self):
@@ -2915,6 +2939,42 @@ class TestAksEnableAddonsAutoHLSM(unittest.TestCase):
         mock_ensure.assert_called_once()
         _, kwargs = mock_ensure.call_args
         self.assertIsNone(kwargs.get("enable_high_log_scale_mode"))
+
+
+class AksAgentpoolAddManagedGPUTest(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+
+    @mock.patch("azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools")
+    @mock.patch("azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait")
+    def test_aks_agentpool_add_managed_gpu(self, mock_sdk_no_wait, mock_cf_agent_pools):
+        mock_cf_agent_pools.return_value.list.return_value = []
+        client = mock.Mock()
+        for no_wait in (False, True):
+            with self.subTest(no_wait=no_wait):
+                mock_sdk_no_wait.reset_mock()
+                result = aks_agentpool_add(
+                    self.cmd,
+                    client,
+                    resource_group_name="rg",
+                    cluster_name="cluster",
+                    nodepool_name="gpunp",
+                    node_vm_size="Standard_NC6s_v3",
+                    enable_managed_gpu=True,
+                    no_wait=no_wait,
+                )
+
+                self.assertIs(result, mock_sdk_no_wait.return_value)
+                mock_sdk_no_wait.assert_called_once()
+                args = mock_sdk_no_wait.call_args.args
+                self.assertEqual(
+                    args[:5], (no_wait, client.begin_create_or_update, "rg", "cluster", "gpunp")
+                )
+                self.assertEqual(
+                    args[5].as_dict()["properties"]["gpuProfile"],
+                    {"driver": "Install", "nvidia": {"managementMode": "Managed"}},
+                )
 
 
 class AksAgentpoolUpgradeTest(unittest.TestCase):

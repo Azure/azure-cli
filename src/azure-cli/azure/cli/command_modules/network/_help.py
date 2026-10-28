@@ -6258,4 +6258,8 @@ examples:
         az network ddos-custom-policy create --resource-group rg1 --ddos-custom-policy-name test-ddos-custom-policy \\
             --location centraluseuap --detection-rule-name detectionRuleTcp \\
             --detection-mode TrafficThreshold --traffic-type Tcp --packets-per-second 1000000
+  - name: Create DDoS custom policy with a TCP mitigation rule that denies traffic from a prefix or country
+    text: |
+        az network ddos-custom-policy create --resource-group rg1 --ddos-custom-policy-name test-ddos-custom-policy \\
+            --location centraluseuap --mitigation-rules "[{name:mitigationRuleTcp,traffic-scope:Tcp,tcp-default-mitigations:{per-source-rate-limiting:{packets-per-second:100000},per-source-connection-rate-limiting:{connections-per-second:1000}},source-policy-overrides:[{policy-action:{action-type:Deny},conditions:{ip-prefixes:[198.51.100.0/24],geo-matches:[{country-code:CA}]}}]}]"
 """
