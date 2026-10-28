@@ -24,7 +24,9 @@ steps:
       chmod +x env/bin/activate
       . env/bin/activate
 
-      PIP_CONSTRAINT="$(cd "$CLI_REPO_PATH" && pwd)/.azure-pipelines/pytest-constraints.txt"
+      # Keep constraints available when breaking-change tests switch branches.
+      cp "$CLI_REPO_PATH/.azure-pipelines/pytest-constraints.txt" "$VIRTUAL_ENV/pytest-constraints.txt"
+      PIP_CONSTRAINT="$VIRTUAL_ENV/pytest-constraints.txt"
       export PIP_CONSTRAINT
       echo "##vso[task.setvariable variable=PIP_CONSTRAINT]$PIP_CONSTRAINT"
 
