@@ -145,7 +145,7 @@ def list_feature(cmd,
 
 
 def delete_feature(cmd,
-                   feature_name=None,
+                   feature_name,
                    name=None,
                    label=None,
                    tags=None,
@@ -157,7 +157,7 @@ def delete_feature(cmd,
 
     try:
         feature_flags = feature_flag_client.list_feature_flags(
-            name_filter=feature_name if feature_name else SearchFilterOptions.ANY_KEY,
+            name_filter=feature_name,
             label_filter=SearchFilterOptions.EMPTY_LABEL if label is None else label,
             tags_filter=tags)
         feature_flags = list(feature_flags)

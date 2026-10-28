@@ -337,6 +337,8 @@ def validate_enhanced_feature_flag(namespace):
 
 def validate_enhanced_feature_flag_input(namespace):
     if getattr(namespace, 'flag', None) is None:
+        if namespace.feature_name is None:
+            raise RequiredArgumentMissingError("--feature-name is required when --flag is not provided.")
         return
 
     # --flag is a full-object replacement; it cannot be mixed with the per-property content flags.
