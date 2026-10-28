@@ -1903,23 +1903,32 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('requests.get')
-    def test_troubleshoot_status_limits_orphan_startups_in_structured_output(
+    def test_troubleshoot_status_preserves_orphan_startups_in_structured_output(
             self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
         send_raw_request_mock.side_effect = [
             mock.MagicMock(json=mock.MagicMock(return_value=self._instances_payload({}))),
             mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response([]))),
         ]
-        requests_get_mock.return_value = self._make_response(200, json_data=[{
-            'InstanceId': 'previous-{}'.format(index),
-            'Startup': {'Succeeded': 0, 'Failed': 1},
-        } for index in range(6)])
+        requests_get_mock.return_value = self._make_response(200, json_data=[
+            {'InstanceId': 'previous-f', 'Startup': {
+                'Succeeded': 0, 'Failed': 1, 'MostRecentFailure': '2026-10-09T18:00:00Z'}},
+            {'InstanceId': 'previous-a', 'Startup': {
+                'Succeeded': 1, 'Failed': 0, 'MostRecentSuccess': '2026-10-09T12:00:00Z'}},
+            {'InstanceId': 'previous-e', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+            {'InstanceId': 'previous-b', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+            {'InstanceId': 'previous-d', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+            {'InstanceId': 'previous-c', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+        ])
 
         result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
 
-        self.assertEqual(len(result['orphanStartups']), 5)
+        self.assertEqual(len(result['orphanStartups']), 6)
         self.assertEqual(
             [entry['InstanceId'] for entry in result['orphanStartups']],
-            ['previous-{}'.format(index) for index in range(5)])
+            ['previous-a', 'previous-b', 'previous-c', 'previous-d', 'previous-e', 'previous-f'])
+        self.assertEqual(
+            result['orphanStartups'][-1]['Startup']['MostRecentFailure'],
+            '2026-10-09T18:00:00Z')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
                 return_value={'Authorization': 'Bearer token'})
@@ -2218,7 +2227,8 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
             'https://myapp.scm.azurewebsites.net/api/startuplogs/summary.',
             rendered)
 
-    def test_transform_troubleshoot_status_output_renders_error_columns(self):
+    @mock.patch('atexit.register')
+    def test_transform_troubleshoot_status_output_renders_error_columns(self, register_mock):
         # Regression: the LastError* columns exercise _format_dt only when
         # any instance has a visible error. A missing import there surfaces
         # as knack's opaque "Table output unavailable" message.
@@ -2249,6 +2259,28 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertEqual(row['LastErrorDetails'], 'boom')
         self.assertEqual(row['Succeeded (last 24h)'], 1)
         self.assertEqual(row['Failed (last 24h)'], 2)
+
+        register_mock.assert_called_once()
+        hint_callback = register_mock.call_args.args[0]
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                buffer = io.BytesIO()
+                output = io.TextIOWrapper(buffer, encoding=encoding, errors='strict')
+                with mock.patch.object(sys, 'stderr', output):
+                    hint_callback()
+                    output.flush()
+                rendered = buffer.getvalue().decode(encoding)
+                self.assertIn('Hint:', rendered)
+                self.assertIn('az webapp log tail -n myApp -g myRG', rendered)
+                self.assertIn('az webapp log startup show -n myApp -g myRG', rendered)
+
+        register_mock.reset_mock()
+        transform_troubleshoot_status_output({
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'instances': [{'instanceId': 'healthy', 'state': 'Started'}],
+        })
+        register_mock.assert_not_called()
 
 
 class TestRuntimeFailedHintMocked(unittest.TestCase):
