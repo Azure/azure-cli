@@ -257,6 +257,10 @@ examples:
       Create elastic cluster with node count of 3 and custom database name.
     text: >
       az postgres flexible-server create -g testgroup -n testcluster --location testlocation --node-count 3 --database-name testdatabase
+
+  - name: Create a flexible server with FIPS mode enabled.
+    text: >
+      az postgres flexible-server create --resource-group testgroup --name testserver --location eastus2 --fips-mode Enabled
 """
 
 helps['postgres flexible-server show'] = """
@@ -265,6 +269,8 @@ short-summary: Get the details of a flexible server.
 examples:
   - name: Get the details of a flexible server
     text: az postgres flexible-server show --resource-group testgroup --name testserver
+  - name: Show the FIPS mode of a flexible server.
+    text: az postgres flexible-server show --resource-group testgroup --name testserver --query fipsMode
 """
 
 helps['postgres flexible-server list'] = """
@@ -317,6 +323,10 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
   - name: Update a flexible server's cluster size by scaling up node count. Must be an elastic cluster.
     text: az postgres flexible-server update --resource-group testGroup --name testcluster --node-count 6
+  - name: Enable FIPS mode on a flexible server.
+    text: az postgres flexible-server update --resource-group testgroup --name testserver --fips-mode Enabled
+  - name: Disable FIPS mode on a flexible server.
+    text: az postgres flexible-server update --resource-group testgroup --name testserver --fips-mode Disabled
 """
 
 helps['postgres flexible-server restore'] = """
