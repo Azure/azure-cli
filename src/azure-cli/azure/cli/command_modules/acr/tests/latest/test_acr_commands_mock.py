@@ -54,6 +54,7 @@ from azure.cli.command_modules.acr._docker_utils import (
 from azure.cli.command_modules.acr._docker_utils import ResourceNotFound
 from azure.cli.command_modules.acr._errors import ErrorClass, CONNECTIVITY_UNTRUSTED_REALM_ERROR
 from azure.cli.command_modules.acr._constants import ACR_AUDIENCE_RESOURCE_NAME
+from azure.cli.core.azclierror import AzureResponseError
 from azure.cli.core.mock import DummyCli
 from knack.prompting import NoTTYException
 from knack.util import CLIError
@@ -1319,7 +1320,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                 mock_requests_post.assert_not_called()
 
                 # Username and password path: the password is not posted to any token endpoint
-                with self.assertRaisesRegex(CLIError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
+                with self.assertRaisesRegex(AzureResponseError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
                     get_access_credentials(cmd, test_registry, username='testuser', password='testpassword',
                                            repository=TEST_REPOSITORY,
                                            permission=RepoAccessTokenPermission.METADATA_READ.value)

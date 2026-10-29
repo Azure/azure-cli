@@ -152,7 +152,8 @@ def _handle_challenge_phase(login_server,
                      "login server '%s'.", token_params['realm'], login_server)
         if is_diagnostics_context:
             return CONNECTIVITY_UNTRUSTED_REALM_ERROR.format_error_message(login_server)
-        raise CLIError(CONNECTIVITY_UNTRUSTED_REALM_ERROR.format_error_message(login_server).get_error_message())
+        raise AzureResponseError(CONNECTIVITY_UNTRUSTED_REALM_ERROR.format_error_message(login_server)
+                                 .get_error_message())
 
     return token_params
 
