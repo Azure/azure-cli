@@ -85,7 +85,12 @@ def get_immutability_policy(client, container_name, account_name, if_match=None,
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
                         metadata=None, public_access=None, fail_on_exist=False,
                         default_encryption_scope=None, deny_encryption_scope_override=None, enable_vlw=None,
-                        enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None):
+                        enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None,
+                        blob_access_point_configuration_name=None, blob_access_point_configuration_unique_id=None):
+    if blob_access_point_configuration_unique_id is not None and not blob_access_point_configuration_name:
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
+        raise RequiredArgumentMissingError(
+            '--blob-access-point-configuration-name is required with --blob-access-point-configuration-unique-id.')
     if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
                                              account_name=account_name, container_name=container_name):
         raise CLIError('The specified container already exists.')
@@ -101,6 +106,12 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
         ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
                                                         resource_type=ResourceType.MGMT_STORAGE)
         blob_container.immutable_storage_with_versioning = ImmutableStorageWithVersioning(enabled=enable_vlw)
+    if blob_access_point_configuration_name is not None:
+        BlobAccessPointConfigurationConnection = cmd.get_models(
+            'BlobAccessPointConfigurationConnection', resource_type=ResourceType.MGMT_STORAGE)
+        blob_container.blob_access_point_configuration = BlobAccessPointConfigurationConnection(
+            blob_access_point_configuration_name=blob_access_point_configuration_name,
+            blob_access_point_configuration_unique_id=blob_access_point_configuration_unique_id)
     return client.create(resource_group_name=resource_group_name, account_name=account_name,
                          container_name=container_name, blob_container=blob_container)
 
