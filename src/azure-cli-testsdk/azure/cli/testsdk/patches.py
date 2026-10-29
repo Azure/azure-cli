@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import threading
+
 from .scenario_tests import mock_in_unit_test
 from .scenario_tests.const import MOCKED_SUBSCRIPTION_ID, MOCKED_TENANT_ID
 
@@ -84,15 +86,21 @@ def patch_retrieve_token_for_user(unit_test):
 
 
 def patch_long_run_operation_delay(unit_test):
+    yield_event = threading.Event()
+
     def _shortcut_long_run_operation(*args, **kwargs):  # pylint: disable=unused-argument
         return
+
+    def _yield_to_polling_thread(*args, **kwargs):  # pylint: disable=unused-argument
+        # Playback mocks time.sleep; use a real wait to avoid starving background pollers.
+        yield_event.wait(0.001)
 
     mock_in_unit_test(unit_test,
                       'azure.mgmt.core.polling.arm_polling.ARMPolling._delay',
                       _shortcut_long_run_operation)
     mock_in_unit_test(unit_test,
                       'azure.cli.core.commands.LongRunningOperation._delay',
-                      _shortcut_long_run_operation)
+                      _yield_to_polling_thread)
 
 
 def patch_get_current_system_username(unit_test):
