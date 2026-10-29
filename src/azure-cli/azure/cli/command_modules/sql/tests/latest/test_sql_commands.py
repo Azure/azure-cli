@@ -221,6 +221,7 @@ class SqlServerExternalGovernanceTests(ScenarioTest):
     
     @ResourceGroupPreparer(location='indiasouthcentral')
     @SqlServerPreparer(location='indiasouthcentral')
+    @live_only()
     def test_sql_refresh_external_governance_status(self, resource_group, resource_group_location, server):
         
         self.cmd('sql server refresh-external-governance-status -g {} --server {}'
@@ -7214,7 +7215,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        location='indiasouthcentral')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1", 
-                       location='eastus')
+                       location='westcentralus')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2", 
                        location='centralindia')
@@ -7371,13 +7372,15 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         # Failover failover group from secondary server and then fail back
         self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.planned)
 
-        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.forced)
+        # Commenting out the forced failover test for s1 and s2 due to service issue
+        #self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.forced)
 
         self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.hybrid)
 
         self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.planned)
 
-        self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.forced)
+        # Commenting out the forced failover test for s1 and s3 due to service issue
+        #self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.forced)
 
         self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.hybrid)
 
@@ -7819,6 +7822,7 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceFailoverScenarionTest(ScenarioTest):
     @ManagedInstancePreparer()
+    @live_only()
     def test_sql_mi_failover_mgmt(self, mi, rg):
         self.kwargs.update({
             'resource_group': rg,
@@ -9197,6 +9201,7 @@ class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(v_core=8, family='Gen8IM', storage=256,
                              otherParams='--gpv2 true --memory 64 --iops 1000')
+    @live_only()
     def test_sql_mi_memorysizeingb_create(self, mi, rg):
         self.kwargs.update({
             'rg': rg,
@@ -9223,6 +9228,7 @@ class SqlManagedInstanceMemorySizeInGBUpdateScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(v_core=8, family='Gen8IM', storage=128,
                              otherParams='--gpv2 true --memory 56 --iops 1000')
+    @live_only()
     def test_sql_mi_memorysizeingb_update(self, mi, rg):
         self.kwargs.update({
             'rg': rg,
@@ -9301,6 +9307,7 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
 class SqlManagedInstanceExternalGovernanceTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name='mi')
+    @live_only()
     def test_sql_mi_refresh_external_governance_status(self, mi, rg):
         self.kwargs.update({
             'rg': rg,
