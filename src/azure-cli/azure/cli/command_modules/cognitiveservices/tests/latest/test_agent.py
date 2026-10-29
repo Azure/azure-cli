@@ -54,7 +54,10 @@ from azure.cli.core.azclierror import (
 from azure.cli.command_modules.cognitiveservices.custom import (
     _validate_image_tag,
     _has_dockerfile,
+    _resolve_docker_command,
     _is_docker_running,
+    _build_image_locally,
+    _push_image_to_registry,
     _is_fully_qualified_image,
     _validate_path_for_subprocess,
     _get_agent_container_status,
@@ -300,15 +303,73 @@ class CognitiveServicesAgentHelperTests(unittest.TestCase):
         self.assertFalse(_has_dockerfile('/nonexistent/directory'))
         self.assertFalse(_has_dockerfile(None))
     
-    def test_is_docker_running(self):
-        """Test _is_docker_running (result depends on environment)."""
-        # We can't reliably test this since it depends on Docker being installed
-        # and running. Just verify it returns a boolean without errors.
-        result = _is_docker_running()
-        self.assertIsInstance(result, bool)
-        
-        # Log the result for debugging purposes in test output
-        print(f"Docker running status: {result}")
+    @mock.patch('azure.cli.command_modules.cognitiveservices.custom.subprocess.run')
+    def test_is_docker_running_uses_resolved_path(self, run_mock):
+        run_mock.return_value.returncode = 0
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            docker_path = os.path.join(temp_dir, 'docker.exe')
+            with open(docker_path, 'w'):
+                pass
+
+            with mock.patch(
+                    'azure.cli.command_modules.cognitiveservices.custom.shutil.which',
+                    return_value=docker_path):
+                self.assertTrue(_is_docker_running())
+
+        run_mock.assert_called_once_with(
+            [os.path.realpath(docker_path), 'info'],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+
+    @mock.patch('azure.cli.command_modules.cognitiveservices.custom.subprocess.run')
+    def test_is_docker_running_rejects_current_directory(self, run_mock):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            docker_path = os.path.join(temp_dir, 'docker.exe')
+            with open(docker_path, 'w'):
+                pass
+
+            with mock.patch(
+                    'azure.cli.command_modules.cognitiveservices.custom.shutil.which',
+                    return_value=docker_path), mock.patch(
+                        'azure.cli.command_modules.cognitiveservices.custom.os.getcwd',
+                        return_value=temp_dir):
+                self.assertIsNone(_resolve_docker_command())
+                self.assertFalse(_is_docker_running())
+
+        run_mock.assert_not_called()
+
+    @mock.patch(
+        'azure.cli.command_modules.cognitiveservices.custom._resolve_docker_command',
+        return_value=os.path.abspath('/trusted/docker'),
+    )
+    @mock.patch('azure.cli.command_modules.cognitiveservices.custom.subprocess.run')
+    def test_build_image_locally_uses_resolved_path(self, run_mock, resolve_mock):
+        run_mock.return_value.stdout = ''
+
+        with tempfile.TemporaryDirectory() as source_dir:
+            with open(os.path.join(source_dir, 'Dockerfile'), 'w') as dockerfile:
+                dockerfile.write('FROM scratch\n')
+
+            _build_image_locally(None, source_dir, 'registry.azurecr.io/agent:v1')
+
+        self.assertEqual(run_mock.call_args.args[0][0], resolve_mock.return_value)
+
+    @mock.patch(
+        'azure.cli.command_modules.cognitiveservices.custom._resolve_docker_command',
+        return_value=os.path.abspath('/trusted/docker'),
+    )
+    @mock.patch('azure.cli.command_modules.cognitiveservices.custom.subprocess.run')
+    def test_push_image_to_registry_uses_resolved_path(self, run_mock, resolve_mock):
+        run_mock.return_value.stdout = ''
+        run_mock.return_value.stderr = ''
+
+        _push_image_to_registry(None, 'registry.azurecr.io/agent:v1', 'registry')
+
+        push_command = run_mock.call_args_list[1].args[0]
+        self.assertEqual(push_command[0], resolve_mock.return_value)
     
     def test_agent_create_timeout_parameter_default(self):
         """Test that agent_create accepts timeout parameter with default value."""
