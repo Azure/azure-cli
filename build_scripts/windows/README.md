@@ -6,19 +6,20 @@ This document provides instructions on creating the MSI.
 Prerequisites
 -------------
 
-1. Turn on the '.NET Framework 3.5' Windows Feature (required for WIX Toolset).
+1. Install the .NET SDK 8 or later.
+    https://dotnet.microsoft.com/download
+    - The WiX Toolset is restored from NuGet as part of the build, so it doesn't need to be installed separately.
 
-2. Install 'WIX Toolset build tools' if not already installed. (e.g. WiX v3.10.3)
-    http://wixtoolset.org/releases/
+2. Accept the WiX Toolset Open Source Maintenance Fee (OSMF) EULA, which WiX v7 requires. Either:
+    - run `dotnet build build_scripts\windows\azure-cli.wixproj -t:AcceptEula -p:EulaId=wix7` once per user and machine, or
+    - set the `AcceptEula` environment variable to `wix7` for the build (e.g. in CI).
+    See https://wixtoolset.org/osmf/ for the terms.
 
 3. Get Git for Windows (it has several tools used for the build).
     - https://github.com/git-for-windows/git/releases/download/v2.12.2.windows.1/Git-2.12.2-32-bit.exe
     - Choose the 'Use Git and optional Unix tools from the Windows Command Prompt' option.
 
-4. Install 'Microsoft Build Tools 2015'.
-    https://www.microsoft.com/download/details.aspx?id=48159
-
-5. Clone the repository.
+4. Clone the repository.
     - git clone https://github.com/azure/azure-cli
 
 Note: The above can be done on a Windows 10 VM.

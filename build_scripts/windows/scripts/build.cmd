@@ -4,10 +4,10 @@ SetLocal EnableDelayedExpansion
 REM Double colon :: should not be used in parentheses blocks, so we use REM.
 REM See https://stackoverflow.com/a/12407934/2199657
 
-echo build a msi installer using local cli sources and python executables. You need to have curl.exe, unzip.exe and msbuild.exe available under PATH
+echo build a msi installer using local cli sources and python executables. You need to have curl.exe, unzip.exe and dotnet.exe (.NET SDK 8 or later) available under PATH
 echo.
 
-set "PATH=%PATH%;%ProgramFiles%\Git\bin;%ProgramFiles%\Git\usr\bin;C:\Program Files (x86)\Git\bin;C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin"
+set "PATH=%PATH%;%ProgramFiles%\Git\bin;%ProgramFiles%\Git\usr\bin;C:\Program Files (x86)\Git\bin"
 
 if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
@@ -32,7 +32,6 @@ if "%ARCH%"=="x86" (
 )
 set PYTHON_VERSION=3.14.9
 
-set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-%PYTHON_ARCH%.zip"
 
 REM https://pip.pypa.io/en/stable/installation/#get-pip-py
@@ -48,7 +47,6 @@ set ARTIFACTS_DIR=%~dp0..\artifacts
 mkdir %ARTIFACTS_DIR%
 set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
-set WIX_DIR=%ARTIFACTS_DIR%\wix
 set PYTHON_DIR=%ARTIFACTS_DIR%\Python
 
 REM Get the absolute directory since we pushd into different levels of subdirectories.
@@ -74,24 +72,6 @@ mkdir %TEMP_SCRATCH_FOLDER%
 
 if exist %REPO_ROOT%\privates (
     copy %REPO_ROOT%\privates\*.whl %TEMP_SCRATCH_FOLDER%
-)
-
-if "%TARGET%" == "msi" (
-    REM ensure wix is available
-    if exist %WIX_DIR% (
-        echo Using existing Wix at %WIX_DIR%
-    )
-    if not exist %WIX_DIR% (
-        mkdir %WIX_DIR%
-        pushd %WIX_DIR%
-        echo Downloading Wix.
-        curl --output wix-archive.zip %WIX_DOWNLOAD_URL%
-        unzip wix-archive.zip
-        if %errorlevel% neq 0 goto ERROR
-        del wix-archive.zip
-        echo Wix downloaded and extracted successfully.
-        popd
-    )
 )
 
 REM ensure Python is available
@@ -231,7 +211,9 @@ popd
 
 if "%TARGET%"=="msi" (
     echo Building MSI...
-    msbuild /t:rebuild /p:Configuration=Release /p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
+    REM The WiX Toolset SDK is restored from NuGet. WiX v7 requires accepting its OSMF EULA,
+    REM e.g. by setting the AcceptEula environment variable to wix7. See https://wixtoolset.org/osmf/
+    dotnet build --no-incremental --configuration Release -p:Platform=%ARCH% %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
 ) else (
     echo Building ZIP...
     "%ProgramFiles%\7-Zip\7z.exe" a -tzip "%OUTPUT_DIR%\Microsoft Azure CLI.zip" "%BUILDING_DIR%\*"
