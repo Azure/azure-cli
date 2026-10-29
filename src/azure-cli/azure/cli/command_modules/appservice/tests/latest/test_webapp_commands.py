@@ -2678,6 +2678,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
         ])            
 
 class WebappNetworkConnectionTests(ScenarioTest):
+    @unittest.skip("Linux webapp create requires --runtime/--container-image-name/--sitecontainers-app")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_hybridconnectionE2E(self, resource_group):
