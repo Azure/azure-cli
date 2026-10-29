@@ -72,6 +72,35 @@ def flexible_server_stop(client, resource_group_name=None, server_name=None, no_
     return sdk_no_wait(no_wait, client.begin_stop, resource_group_name, server_name)
 
 
+def flexible_server_rename(cmd, client, resource_group_name, server_name, new_name, no_wait=False):
+    if not new_name:
+        raise InvalidArgumentValueError('--new-name must not be empty.')
+    new_name = new_name.lower()
+    if new_name == server_name.lower():
+        raise InvalidArgumentValueError('--new-name must differ from the current server name, ignoring case.')
+
+    source_server = client.get(resource_group_name, server_name)
+    db_context = DbContext(
+        cmd=cmd, cf_availability=cf_mysql_check_resource_availability,
+        cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
+        location=source_server.location)
+    validate_server_name(db_context, new_name, DELEGATION_SERVICE_NAME)
+
+    parameters = models.Server(
+        location=source_server.location,
+        create_mode='Rename',
+        source_server_resource_id=source_server.id)
+    responses = []
+    client.begin_create(
+        resource_group_name, new_name, parameters, polling=False, raw_response_hook=responses.append)
+    response = responses[-1].http_response
+    return {
+        'statusCode': response.status_code,
+        'content': response.text(),
+        'azureAsyncOperation': response.headers.get('Azure-AsyncOperation')
+    }
+
+
 def flexible_server_update_set(client, resource_group_name, server_name, parameters):
     return client.begin_update(resource_group_name, server_name, parameters)
 

@@ -6,6 +6,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.mysql._client_factory import (
     cf_mysql_advanced_threat_protection,
     cf_mysql_flexible_servers,
+    cf_mysql_flexible_servers_rename,
     cf_mysql_flexible_firewall_rules,
     cf_mysql_flexible_config,
     cf_mysql_flexible_db,
@@ -131,6 +132,11 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'flexible_server_mysql_get')
         g.custom_command('restart', 'flexible_server_restart')
         g.custom_command('detach-vnet', 'flexible_server_detach_vnet')
+        # Register --no-wait explicitly so the command invoker does not discard the initial response.
+        g.custom_command('rename', 'flexible_server_rename', is_preview=True,
+                         client_factory=cf_mysql_flexible_servers_rename,
+                         confirmation='Renaming changes the server resource ID and endpoint. '
+                                      'Update connection strings and resource references after completion. Continue?')
 
     with self.command_group('mysql flexible-server import', mysql_flexible_servers_sdk,
                             custom_command_type=mysql_custom,
