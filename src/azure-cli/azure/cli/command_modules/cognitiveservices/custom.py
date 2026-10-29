@@ -6,6 +6,7 @@
 import json
 import urllib.parse
 import os
+import shutil
 import subprocess
 import sys
 import re
@@ -663,6 +664,34 @@ def _has_dockerfile(source_dir, dockerfile_name='Dockerfile'):
     return os.path.isfile(dockerfile_path)
 
 
+def _resolve_docker_command():
+    """Resolve Docker to an absolute path and reject binaries in the current directory."""
+    resolved_path = shutil.which('docker')
+    if not resolved_path:
+        return None
+
+    resolved_path = os.path.abspath(resolved_path)
+    resolved_real_path = os.path.realpath(resolved_path)
+    cwd = os.path.abspath(os.getcwd())
+
+    def _is_same_dir(first_dir, second_dir):
+        try:
+            return os.path.samefile(first_dir, second_dir)
+        except (OSError, ValueError):
+            return (os.path.normcase(os.path.normpath(first_dir)) ==
+                    os.path.normcase(os.path.normpath(second_dir)))
+
+    if (_is_same_dir(os.path.dirname(resolved_path), cwd) or
+            _is_same_dir(os.path.dirname(resolved_real_path), cwd)):
+        logger.warning(
+            "Refusing to use Docker executable '%s' because it is located in the current working directory.",
+            resolved_real_path,
+        )
+        return None
+
+    return resolved_path
+
+
 def _is_docker_running():
     """
     Check if Docker daemon is accessible.
@@ -670,9 +699,13 @@ def _is_docker_running():
     Returns:
         bool: True if Docker is running, False otherwise
     """
+    docker_command = _resolve_docker_command()
+    if not docker_command:
+        return False
+
     try:
         result = subprocess.run(
-            ['docker', 'info'],
+            [docker_command, 'info'],
             capture_output=True,
             text=True,
             timeout=5
@@ -718,6 +751,9 @@ def _build_image_locally(cmd, source_dir, image_name, dockerfile_name='Dockerfil
 
     # Get timeout from environment variable or use default (30 minutes)
     build_timeout = int(os.environ.get('AZURE_CLI_DOCKER_BUILD_TIMEOUT', 1800))
+    docker_command = _resolve_docker_command()
+    if not docker_command:
+        raise CLIInternalError("Docker executable was not found in a trusted location.")
 
     try:
         # Build the image
@@ -728,7 +764,7 @@ def _build_image_locally(cmd, source_dir, image_name, dockerfile_name='Dockerfil
         # Azure Container Apps/Foundry runs on AMD64, not ARM64
         # This ensures images built on Apple Silicon Macs work in Azure
         build_cmd = [
-            'docker', 'build',
+            docker_command, 'build',
             '--platform', 'linux/amd64',
             '-t', image_name,
             '-f', docker_file_arg,
@@ -801,6 +837,9 @@ def _push_image_to_registry(_cmd, image_name, registry_name):  # pylint: disable
 
     # Get timeout from environment variable or use default (30 minutes)
     push_timeout = int(os.environ.get('AZURE_CLI_DOCKER_PUSH_TIMEOUT', 1800))
+    docker_command = _resolve_docker_command()
+    if not docker_command:
+        raise CLIInternalError("Docker executable was not found in a trusted location.")
 
     try:
         # Login to ACR using Azure CLI credentials
@@ -828,7 +867,7 @@ def _push_image_to_registry(_cmd, image_name, registry_name):  # pylint: disable
         logger.info("ACR login successful")
 
         # Push the image
-        push_cmd = ['docker', 'push', image_name]
+        push_cmd = [docker_command, 'push', image_name]
         logger.warning("Pushing image to ACR: %s", registry_uri)
         logger.info("Running: %s", ' '.join(push_cmd))
         logger.info("Push timeout: %d seconds", push_timeout)
