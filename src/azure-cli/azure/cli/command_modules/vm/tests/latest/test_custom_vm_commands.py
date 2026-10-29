@@ -3,11 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import copy
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 
 from knack.util import CLIError
 
+from azure.cli.command_modules.vm._validators import _validate_capacity_reservation_group
 from azure.cli.command_modules.vm.custom import (enable_boot_diagnostics, disable_boot_diagnostics,
                                                  _merge_secrets, BootLogStreamWriter,
                                                  _get_access_extension_upgrade_info,
@@ -16,9 +19,12 @@ from azure.cli.command_modules.vm.custom import (enable_boot_diagnostics, disabl
                                                  _get_extension_instance_name,
                                                  get_boot_log)
 from azure.cli.command_modules.vm.custom import \
-    (attach_unmanaged_data_disk, detach_unmanaged_data_disk, get_vmss_instance_view)
+    (attach_unmanaged_data_disk, detach_unmanaged_data_disk, get_vmss_instance_view, update_vm)
+from azure.cli.command_modules.vm.operations.vm import VMCreate
 
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core.aaz import AAZCommand
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.commands import AzCliCommand
 
 
@@ -165,6 +171,102 @@ class TestVmCustom(unittest.TestCase):
 
         # assert
         self.assertEqual(result, 'extension-name')
+
+    @staticmethod
+    def _serialize_vm_update_capacity_reservation(existing_capacity_reservation=None, **updates):
+        cmd = _get_test_cmd()
+        parameters = {
+            'id': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm',
+            'location': 'eastus',
+        }
+        if existing_capacity_reservation is not None:
+            parameters['capacityReservation'] = copy.deepcopy(existing_capacity_reservation)
+
+        with mock.patch('azure.cli.command_modules.vm.operations.vm.VMCreate') as vm_create_mock:
+            update_vm(cmd, 'rg', 'vm', parameters=parameters, **updates)
+            command_args = vm_create_mock.return_value.call_args.kwargs['command_args']
+
+        vm_create = VMCreate(cli_ctx=cmd.cli_ctx)
+        AAZCommand._handler(vm_create, command_args)
+        vm_create.ctx._clients['MgmtClient'] = mock.MagicMock()
+        operation = vm_create.VirtualMachinesCreateOrUpdate(ctx=vm_create.ctx)
+        content = operation.serialize_content(operation.content, required=True)
+        return content['properties'].get('capacityReservation')
+
+    def test_vm_update_capacity_reservation_transitions(self):
+        crg_a = {'capacityReservationGroup': {'id': 'CRG-A'}}
+        crg_b = {'capacityReservationGroup': {'id': 'CRG-B'}}
+        disabled = {'disableCapacityReservationAssignment': True}
+        disabled_false = {'disableCapacityReservationAssignment': False}
+
+        cases = (
+            (crg_a, {'disable_capacity_reservation_assignment': True}, disabled),
+            (disabled, {'capacity_reservation_group': 'CRG-B'}, crg_b),
+            (disabled_false, {'capacity_reservation_group': 'CRG-B'}, {
+                'capacityReservationGroup': {'id': 'CRG-B'},
+                'disableCapacityReservationAssignment': False,
+            }),
+            (disabled, {
+                'capacity_reservation_group': 'CRG-B',
+                'disable_capacity_reservation_assignment': False,
+            }, {
+                'capacityReservationGroup': {'id': 'CRG-B'},
+                'disableCapacityReservationAssignment': False,
+            }),
+            (crg_a, {'disable_capacity_reservation_assignment': False}, {
+                'capacityReservationGroup': {'id': 'CRG-A'},
+                'disableCapacityReservationAssignment': False,
+            }),
+            (None, {'capacity_reservation_group': 'CRG-B'}, crg_b),
+            (None, {
+                'capacity_reservation_group': 'CRG-B',
+                'disable_capacity_reservation_assignment': False,
+            }, {
+                'capacityReservationGroup': {'id': 'CRG-B'},
+                'disableCapacityReservationAssignment': False,
+            }),
+            (None, {'disable_capacity_reservation_assignment': True}, disabled),
+            (crg_a, {}, crg_a),
+            (disabled, {}, disabled),
+            (disabled_false, {}, disabled_false),
+            (crg_a, {'size': 'Standard_D2s_v5'}, crg_a),
+            (disabled, {'size': 'Standard_D2s_v5'}, disabled),
+            (disabled_false, {'size': 'Standard_D2s_v5'}, disabled_false),
+            (crg_a, {'capacity_reservation_group': 'None'}, {'capacityReservationGroup': {}}),
+            (disabled, {'capacity_reservation_group': 'None'}, {
+                'capacityReservationGroup': {},
+                'disableCapacityReservationAssignment': True,
+            }),
+            (disabled_false, {'capacity_reservation_group': 'None'}, {
+                'capacityReservationGroup': {},
+                'disableCapacityReservationAssignment': False,
+            }),
+        )
+
+        for existing, updates, expected in cases:
+            with self.subTest(existing=existing, updates=updates):
+                actual = self._serialize_vm_update_capacity_reservation(existing, **updates)
+                self.assertEqual(expected, actual)
+
+    def test_vm_update_capacity_reservation_validation(self):
+        capacity_reservation_group = (
+            '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Compute/capacityReservationGroups/crg'
+        )
+        namespace = SimpleNamespace(
+            capacity_reservation_group=capacity_reservation_group,
+            disable_capacity_reservation_assignment=True,
+            resource_group_name='rg',
+        )
+
+        with self.assertRaisesRegex(
+                MutuallyExclusiveArgumentError,
+                '--capacity-reservation-group cannot be used when '
+                '--disable-capacity-reservation-assignment is set to true.'):
+            _validate_capacity_reservation_group(_get_test_cmd(), namespace)
+
+        namespace.disable_capacity_reservation_assignment = False
+        _validate_capacity_reservation_group(_get_test_cmd(), namespace)
+        self.assertEqual(capacity_reservation_group, namespace.capacity_reservation_group)
 
 
 class TestVMBootLog(unittest.TestCase):
