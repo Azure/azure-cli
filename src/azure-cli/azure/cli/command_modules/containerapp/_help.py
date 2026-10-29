@@ -394,7 +394,8 @@ helps['containerapp env create'] = """
     - name: Create an environment with an auto-generated Log Analytics workspace.
       text: |
           az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
-              --location eastus2
+              --location eastus2 \\
+              --logs-destination log-analytics
     - name: Create a zone-redundant environment
       text: |
           az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
@@ -404,7 +405,8 @@ helps['containerapp env create'] = """
           az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
               --logs-workspace-id myLogsWorkspaceID \\
               --logs-workspace-key myLogsWorkspaceKey \\
-              --location eastus2
+              --location eastus2 \\
+              --logs-destination log-analytics
     - name: Create an environment with workload profiles enabled.
       text: |
           az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
