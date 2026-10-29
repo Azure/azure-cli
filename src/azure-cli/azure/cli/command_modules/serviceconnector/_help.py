@@ -12,6 +12,7 @@ from ._resource_config import (
     TARGET_RESOURCES,
     TARGET_RESOURCES_PARAMS,
     SUPPORTED_AUTH_TYPE,
+    SUPPORTED_CLIENT_TYPE,
     LOCAL_CONNECTION_PARAMS
 )
 
@@ -770,11 +771,75 @@ for target in supported_target_resources:
         service_principal_param=service_principal_param,
         connection_id=connection_id)
 
+    # Preview exposes client type and the auth options registered for the target.
+    # connection_preview_configuration filters on secret and service principal values.
+    # User account examples show that accepted input without describing an auth filter.
+    client_types = SUPPORTED_CLIENT_TYPE.get(source).get(target) or []
+    client_type = client_types[0].value
+    filtering_auth_types = [
+        auth_type for auth_type in auth_types if auth_type != AUTH_TYPE.UserAccount
+    ]
+    filter_auth_type = filtering_auth_types[0]
+    filter_auth_params = get_auth_info_params(filter_auth_type)
+    if filter_auth_type == AUTH_TYPE.ServicePrincipalSecret:
+        filter_auth_label = 'service principal'
+    else:
+        filter_auth_label = 'secret'
+    preview_examples = (
+        "        - name: Preview configurations for a local connection to {target}\n"
+        "          text: |-\n"
+        "                  az connection preview-configuration {target}\n"
+        "        - name: Preview configurations for a local connection to {target} "
+        "filtered by client type and {filter_auth_label} authentication\n"
+        "          text: |-\n"
+        "                  az connection preview-configuration {target} "
+        "--client-type {client_type} {filter_auth_params}"
+    ).format(
+        target=target.value,
+        filter_auth_label=filter_auth_label,
+        client_type=client_type,
+        filter_auth_params=filter_auth_params)
+    for example_auth_type in auth_types:
+        if example_auth_type == filter_auth_type:
+            continue
+        if example_auth_type == AUTH_TYPE.UserAccount:
+            if target == RESOURCE.MysqlFlexible:
+                auth_example = '--user-account mysql-identity-id=xx object-id=XX'
+            else:
+                auth_example = '--user-account object-id=XX'
+            example_name = (
+                'Pass user account auth info when previewing a local connection to {target}'
+            ).format(target=target.value)
+        elif example_auth_type == AUTH_TYPE.ServicePrincipalSecret:
+            auth_example = get_auth_info_params(example_auth_type)
+            example_name = (
+                'Preview configurations for a local connection to {target} '
+                'filtered by service principal authentication'
+            ).format(target=target.value)
+        else:
+            auth_example = get_auth_info_params(example_auth_type)
+            example_name = (
+                'Preview configurations for a local connection to {target} '
+                'filtered by {label} authentication'
+            ).format(target=target.value, label=example_auth_type.value)
+        preview_examples += (
+            "\n"
+            "        - name: {example_name}\n"
+            "          text: |-\n"
+            "                  az connection preview-configuration {target} {auth_example}"
+        ).format(
+            example_name=example_name,
+            target=target.value,
+            auth_example=auth_example)
+
     helps['connection preview-configuration {target}'.format(target=target.value)] = """
       type: command
       short-summary: Preview the expected configurations of local connection to {target}.
+      examples:
+{preview_examples}
     """.format(
-        target=target.value)
+        target=target.value,
+        preview_examples=preview_examples)
 
 
 # special target resource, independent implementation
@@ -815,7 +880,27 @@ helps['connection update {target}'.format(target=target.value)] = """
            server_params=server_params,
            registry_params=registry_params,
            )
+confluent_client_type = SUPPORTED_CLIENT_TYPE.get(source).get(target)[0].value
+confluent_auth_params = get_auth_info_params(
+    SUPPORTED_AUTH_TYPE.get(source).get(target)[0])
+confluent_preview_examples = (
+    "        - name: Preview configurations for a local connection to {target}\n"
+    "          text: |-\n"
+    "                  az connection preview-configuration {target}\n"
+    "        - name: Preview configurations for a local connection to {target} "
+    "filtered by client type and secret authentication\n"
+    "          text: |-\n"
+    "                  az connection preview-configuration {target} "
+    "--client-type {client_type} {auth_params}"
+).format(
+    target=target.value,
+    client_type=confluent_client_type,
+    auth_params=confluent_auth_params)
 helps['connection preview-configuration {target}'.format(target=target.value)] = """
       type: command
       short-summary: Preview the expected configurations of local connection to {target}.
-    """.format(target=target.value)
+      examples:
+{preview_examples}
+    """.format(
+    target=target.value,
+    preview_examples=confluent_preview_examples)
