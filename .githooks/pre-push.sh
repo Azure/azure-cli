@@ -23,34 +23,42 @@ fi
 # Get extension repo paths and join them with spaces
 EXTENSIONS=$(azdev extension repo list -o tsv | tr '\n' ' ' | sed 's/ $//')
 
-# Fetch upstream/dev branch
-printf "\033[0;32mFetching upstream/dev branch...\033[0m\n"
-git fetch upstream dev
+# Detect the remote pointing to Azure/azure-cli
+UPSTREAM_REMOTE=$(git remote -v | grep -i "Azure/azure-cli" | grep "(fetch)" | head -1 | awk '{print $1}')
+if [ -z "$UPSTREAM_REMOTE" ]; then
+    printf "\033[0;31mError: No remote found pointing to Azure/azure-cli. Please run 'git remote add upstream https://github.com/Azure/azure-cli.git' first.\033[0m\n"
+    exit 1
+fi
+printf "\033[0;36mUsing remote: %s\033[0m\n" "$UPSTREAM_REMOTE"
+
+# Fetch remote dev branch
+printf "\033[0;32mFetching %s/dev branch...\033[0m\n" "$UPSTREAM_REMOTE"
+git fetch "$UPSTREAM_REMOTE" dev
 if [ $? -ne 0 ]; then
-    printf "\033[0;31mError: Failed to fetch upstream/dev branch. Please run 'git remote add upstream https://github.com/Azure/azure-cli.git' first.\033[0m\n"
+    printf "\033[0;31mError: Failed to fetch %s/dev branch.\033[0m\n" "$UPSTREAM_REMOTE"
     exit 1
 fi
 
 # Check if current branch needs rebasing
-MERGE_BASE=$(git merge-base HEAD upstream/dev)
-UPSTREAM_HEAD=$(git rev-parse upstream/dev)
+MERGE_BASE=$(git merge-base HEAD "$UPSTREAM_REMOTE/dev")
+UPSTREAM_HEAD=$(git rev-parse "$UPSTREAM_REMOTE/dev")
 printf "\033[0;36mInitial mergeBase: %s\033[0m\n" "$MERGE_BASE"
 
 if [ "$MERGE_BASE" != "$UPSTREAM_HEAD" ]; then
     printf "\n"
-    printf "\033[1;33mYour branch is not up to date with upstream/dev.\033[0m\n"
+    printf "\033[1;33mYour branch is not up to date with %s/dev.\033[0m\n" "$UPSTREAM_REMOTE"
     printf "\033[1;33mWould you like to automatically rebase and setup? [Y/n]\033[0m\n"
 
     read -r INPUT < /dev/tty
     if [ "$INPUT" = "Y" ] || [ "$INPUT" = "y" ]; then
-        printf "\033[0;32mRebasing with upstream/dev...\033[0m\n"
-        git rebase upstream/dev
+        printf "\033[0;32mRebasing with %s/dev...\033[0m\n" "$UPSTREAM_REMOTE"
+        git rebase "$UPSTREAM_REMOTE/dev"
         if [ $? -ne 0 ]; then
             printf "\033[0;31mRebase failed. Please resolve conflicts and try again.\033[0m\n"
             exit 1
         fi
         printf "\033[0;32mRebase completed successfully.\033[0m\n"
-        MERGE_BASE=$(git merge-base HEAD upstream/dev)
+        MERGE_BASE=$(git merge-base HEAD "$UPSTREAM_REMOTE/dev")
         printf "\033[0;36mUpdated mergeBase: %s\033[0m\n" "$MERGE_BASE"
 
         printf "\033[0;32mRunning azdev setup...\033[0m\n"
