@@ -56,6 +56,95 @@ def generate_sas(cmd, client, services, resource_types, permission, expiry, star
                          start=start, ip=ip, protocol=protocol, **kwargs)
 
 
+def _build_sas_policy(cmd, sas_expiration_period=None, sas_expiration_action=None,
+                      require_user_bound_user_delegation_sas=None,
+                      require_user_bound_user_delegation_sas_action=None,
+                      existing_sas_policy=None):
+    if not any([sas_expiration_period is not None,
+                sas_expiration_action is not None,
+                require_user_bound_user_delegation_sas is not None,
+                require_user_bound_user_delegation_sas_action is not None]):
+        return None
+
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if sas_expiration_period is None and sas_expiration_action is not None:
+        raise InvalidArgumentValueError('--sas-expiration-action can only be specified together '
+                                        'with --sas-expiration-period')
+
+    if sas_expiration_period is None:
+        if existing_sas_policy is None or existing_sas_policy.sas_expiration_period is None:
+            raise InvalidArgumentValueError(
+                '--sas-expiration-period is required when configuring a new SAS policy')
+        sas_expiration_period = existing_sas_policy.sas_expiration_period
+
+    if sas_expiration_action is None:
+        sas_expiration_action = 'Log'
+        if existing_sas_policy is not None and existing_sas_policy.expiration_action is not None:
+            sas_expiration_action = existing_sas_policy.expiration_action
+
+    if require_user_bound_user_delegation_sas is None and existing_sas_policy is not None:
+        require_user_bound_user_delegation_sas = existing_sas_policy.require_user_bound_user_delegation_sas
+    if require_user_bound_user_delegation_sas_action is None and existing_sas_policy is not None:
+        require_user_bound_user_delegation_sas_action = \
+            existing_sas_policy.require_user_bound_user_delegation_sas_action
+
+    SasPolicy = cmd.get_models('SasPolicy')
+    return SasPolicy(
+        sas_expiration_period=sas_expiration_period,
+        expiration_action=sas_expiration_action,
+        require_user_bound_user_delegation_sas=require_user_bound_user_delegation_sas,
+        require_user_bound_user_delegation_sas_action=require_user_bound_user_delegation_sas_action)
+
+
+def _build_shared_key_access_policy(cmd, blob=None, file=None, table=None, queue=None, existing_policy=None):
+    settings = {'blob': blob, 'file': file, 'table': table, 'queue': queue}
+    if all(value is None for value in settings.values()):
+        return None
+
+    StorageAccountSharedKeyAccessProperties, ServiceSharedKeyAccessProperties = cmd.get_models(
+        'StorageAccountSharedKeyAccessProperties', 'ServiceSharedKeyAccessProperties')
+    return StorageAccountSharedKeyAccessProperties(**{
+        service: ServiceSharedKeyAccessProperties(enabled=enabled) if enabled is not None
+        else getattr(existing_policy, service) if existing_policy is not None else None
+        for service, enabled in settings.items()
+    })
+
+
+def _build_data_collaboration_policy(cmd, allow_storage_connectors=None, allow_storage_data_shares=None,
+                                     allow_cross_tenant_data_sharing=None, allow_blob_access_points=None,
+                                     existing_policy=None):
+    settings = {
+        'allow_storage_connectors': allow_storage_connectors,
+        'allow_storage_data_shares': allow_storage_data_shares,
+        'allow_cross_tenant_data_sharing': allow_cross_tenant_data_sharing,
+        'allow_blob_access_points': allow_blob_access_points
+    }
+    if all(value is None for value in settings.values()):
+        return None
+
+    StorageDataCollaborationPolicyProperties = cmd.get_models('StorageDataCollaborationPolicyProperties')
+    return StorageDataCollaborationPolicyProperties(**{
+        name: value if value is not None else getattr(existing_policy, name) if existing_policy is not None else None
+        for name, value in settings.items()
+    })
+
+
+def _build_turbo_tier(cmd, status=None, target_percent=None, existing_turbo_tier=None):
+    if status is None and target_percent is None:
+        return None
+    if target_percent is not None and not 10 <= target_percent <= 100:
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError('--turbo-tier-target-percent must be between 10 and 100.')
+
+    TurboTier = cmd.get_models('TurboTier')
+    return TurboTier(
+        status=status if status is not None
+        else existing_turbo_tier.status if existing_turbo_tier is not None else None,
+        target_percent=target_percent if target_percent is not None
+        else existing_turbo_tier.target_percent if existing_turbo_tier is not None else None)
+
+
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument, line-too-long
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
@@ -74,13 +163,21 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            identity_type=None, user_identity_id=None,
                            key_vault_user_identity_id=None, federated_identity_client_id=None,
                            sas_expiration_action=None, sas_expiration_period=None, key_expiration_period_in_days=None,
+                           require_user_bound_user_delegation_sas=None,
+                           require_user_bound_user_delegation_sas_action=None,
+                           allow_cross_tenant_delegation_sas=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
                            enable_smb_oauth=None, zones=None, zone_placement_policy=None,
                            enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None,
-                           allowed_copy_scope=None):
+                           allowed_copy_scope=None, enable_extended_groups=None,
+                           allow_shared_key_access_for_blob=None, allow_shared_key_access_for_file=None,
+                           allow_shared_key_access_for_table=None, allow_shared_key_access_for_queue=None,
+                           allow_storage_connectors=None, allow_storage_data_shares=None,
+                           allow_cross_tenant_data_sharing=None, allow_blob_access_points=None,
+                           turbo_tier_status=None, turbo_tier_target_percent=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -279,16 +376,17 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         KeyPolicy = cmd.get_models('KeyPolicy')
         params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
 
-    if sas_expiration_period is not None or sas_expiration_action is not None:
-        SasPolicy = cmd.get_models('SasPolicy')
-        if sas_expiration_period is None and sas_expiration_action is not None:
-            from azure.cli.core.azclierror import InvalidArgumentValueError
-            raise InvalidArgumentValueError('--sas-expiration-action can only be specified together with'
-                                            ' --sas-expiration-period')
-        if sas_expiration_action is None:
-            sas_expiration_action = 'Log'
-        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period,
-                                      expiration_action=sas_expiration_action)
+    sas_policy = _build_sas_policy(
+        cmd,
+        sas_expiration_period=sas_expiration_period,
+        sas_expiration_action=sas_expiration_action,
+        require_user_bound_user_delegation_sas=require_user_bound_user_delegation_sas,
+        require_user_bound_user_delegation_sas_action=require_user_bound_user_delegation_sas_action)
+    if sas_policy is not None:
+        params.sas_policy = sas_policy
+
+    if allow_cross_tenant_delegation_sas is not None:
+        params.allow_cross_tenant_delegation_sas = allow_cross_tenant_delegation_sas
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
@@ -337,6 +435,17 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if allowed_copy_scope is not None:
         params.allowed_copy_scope = allowed_copy_scope
+
+    if enable_extended_groups is not None:
+        params.enable_extended_groups = enable_extended_groups
+
+    params.allow_shared_key_access_for_services = _build_shared_key_access_policy(
+        cmd, blob=allow_shared_key_access_for_blob, file=allow_shared_key_access_for_file,
+        table=allow_shared_key_access_for_table, queue=allow_shared_key_access_for_queue)
+    params.data_collaboration_policy_properties = _build_data_collaboration_policy(
+        cmd, allow_storage_connectors=allow_storage_connectors, allow_storage_data_shares=allow_storage_data_shares,
+        allow_cross_tenant_data_sharing=allow_cross_tenant_data_sharing, allow_blob_access_points=allow_blob_access_points)
+    params.turbo_tier = _build_turbo_tier(cmd, status=turbo_tier_status, target_percent=turbo_tier_target_percent)
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
@@ -429,12 +538,20 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            identity_type=None, user_identity_id=None,
                            key_vault_user_identity_id=None, federated_identity_client_id=None,
                            sas_expiration_action=None, sas_expiration_period=None, key_expiration_period_in_days=None,
+                           require_user_bound_user_delegation_sas=None,
+                           require_user_bound_user_delegation_sas_action=None,
+                           allow_cross_tenant_delegation_sas=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
                            yes=None, enable_smb_oauth=None, zones=None, zone_placement_policy=None,
                            enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None,
-                           allowed_copy_scope=None):
+                           allowed_copy_scope=None, enable_extended_groups=None,
+                           allow_shared_key_access_for_blob=None, allow_shared_key_access_for_file=None,
+                           allow_shared_key_access_for_table=None, allow_shared_key_access_for_queue=None,
+                           allow_storage_connectors=None, allow_storage_data_shares=None,
+                           allow_cross_tenant_data_sharing=None, allow_blob_access_points=None,
+                           turbo_tier_status=None, turbo_tier_target_percent=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
@@ -702,19 +819,18 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         KeyPolicy = cmd.get_models('KeyPolicy')
         params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
 
-    if sas_expiration_period is not None or sas_expiration_action is not None:
-        SasPolicy = cmd.get_models('SasPolicy')
-        if sas_expiration_period is None and sas_expiration_action is not None:
-            from azure.cli.core.azclierror import InvalidArgumentValueError
-            raise InvalidArgumentValueError('--sas-expiration-action can only be specified together '
-                                            'with --sas-expiration-period')
-        if sas_expiration_action is None:
-            sas_expiration_action = 'Log'
-            if instance.sas_policy is not None and instance.sas_policy.expiration_action is not None:
-                sas_expiration_action = instance.sas_policy.expiration_action
+    sas_policy = _build_sas_policy(
+        cmd,
+        sas_expiration_period=sas_expiration_period,
+        sas_expiration_action=sas_expiration_action,
+        require_user_bound_user_delegation_sas=require_user_bound_user_delegation_sas,
+        require_user_bound_user_delegation_sas_action=require_user_bound_user_delegation_sas_action,
+        existing_sas_policy=instance.sas_policy)
+    if sas_policy is not None:
+        params.sas_policy = sas_policy
 
-        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period,
-                                      expiration_action=sas_expiration_action)
+    if allow_cross_tenant_delegation_sas is not None:
+        params.allow_cross_tenant_delegation_sas = allow_cross_tenant_delegation_sas
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
@@ -760,6 +876,20 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allowed_copy_scope is not None:
         params.allowed_copy_scope = allowed_copy_scope
+
+    if enable_extended_groups is not None:
+        params.enable_extended_groups = enable_extended_groups
+
+    params.allow_shared_key_access_for_services = _build_shared_key_access_policy(
+        cmd, blob=allow_shared_key_access_for_blob, file=allow_shared_key_access_for_file,
+        table=allow_shared_key_access_for_table, queue=allow_shared_key_access_for_queue,
+        existing_policy=instance.allow_shared_key_access_for_services)
+    params.data_collaboration_policy_properties = _build_data_collaboration_policy(
+        cmd, allow_storage_connectors=allow_storage_connectors, allow_storage_data_shares=allow_storage_data_shares,
+        allow_cross_tenant_data_sharing=allow_cross_tenant_data_sharing, allow_blob_access_points=allow_blob_access_points,
+        existing_policy=instance.data_collaboration_policy_properties)
+    params.turbo_tier = _build_turbo_tier(
+        cmd, status=turbo_tier_status, target_percent=turbo_tier_target_percent, existing_turbo_tier=instance.turbo_tier)
 
     return params
 
@@ -1449,15 +1579,8 @@ class FileServiceUsage(_FileServiceUsage):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         _format_storage_account_id(args_schema)
-        args_schema.file_services_name._registered = False
-        args_schema.file_services_name._required = False
-        args_schema.file_service_usages_name._registered = False
-        args_schema.file_service_usages_name._required = False
         return args_schema
 
     def pre_operations(self):
         from .._validators import parse_account_name_aaz
-        args = self.ctx.args
-        parse_account_name_aaz(self, args)
-        args.file_services_name = 'default'
-        args.file_service_usages_name = 'default'
+        parse_account_name_aaz(self, self.ctx.args)
