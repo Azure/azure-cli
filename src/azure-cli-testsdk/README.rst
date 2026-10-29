@@ -2,7 +2,7 @@ Azure CLI Test Modules
 ======================
 
 Playback polling
-----------------
+++++++++++++++++
 
 Playback skips ARM service polling delays. The CLI's foreground completion-check
 loop instead waits briefly (1 ms requested per iteration) using a threading event,
