@@ -318,11 +318,25 @@ class CognitiveServicesAgentHelperTests(unittest.TestCase):
                 self.assertTrue(_is_docker_running())
 
         run_mock.assert_called_once_with(
-            [os.path.realpath(docker_path), 'info'],
+            [os.path.abspath(docker_path), 'info'],
             capture_output=True,
             text=True,
             timeout=5,
         )
+
+    def test_resolve_docker_command_preserves_launcher_symlink(self):
+        docker_path = os.path.abspath('/snap/bin/docker')
+        launcher_path = os.path.abspath('/usr/bin/snap')
+        working_directory = os.path.abspath('/workspace')
+
+        with mock.patch(
+                'azure.cli.command_modules.cognitiveservices.custom.shutil.which',
+                return_value=docker_path), mock.patch(
+                    'azure.cli.command_modules.cognitiveservices.custom.os.path.realpath',
+                    return_value=launcher_path), mock.patch(
+                        'azure.cli.command_modules.cognitiveservices.custom.os.getcwd',
+                        return_value=working_directory):
+            self.assertEqual(_resolve_docker_command(), docker_path)
 
     @mock.patch('azure.cli.command_modules.cognitiveservices.custom.subprocess.run')
     def test_is_docker_running_rejects_current_directory(self, run_mock):

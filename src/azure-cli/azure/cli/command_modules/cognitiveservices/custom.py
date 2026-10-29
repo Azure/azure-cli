@@ -689,7 +689,7 @@ def _resolve_docker_command():
         )
         return None
 
-    return resolved_real_path
+    return resolved_path
 
 
 def _is_docker_running():
