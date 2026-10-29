@@ -1584,6 +1584,48 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 2),
         ])
 
+    @live_only()  # live-only until a StandardV2 NAT gateway recording is captured
+    @AllowLargeResponse(8192)
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_and_update_with_managed_nat_gateway_v2(self, resource_group, resource_group_location):
+        # NAT Gateway V2 GA: outboundType=managedNATGateway + --outbound-type-sku StandardV2.
+        # Record with: azdev test test_aks_create_and_update_with_managed_nat_gateway_v2 --live
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets -c 1 ' \
+                     '--outbound-type=managedNATGateway ' \
+                     '--outbound-type-sku=StandardV2 ' \
+                     '--nat-gateway-managed-outbound-ip-count=1 ' \
+                     '--nat-gateway-idle-timeout=4 ' \
+                     '--generate-ssh-keys ' \
+                     '--location={location}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.outboundType', 'managedNATGateway'),
+            self.check('networkProfile.natGatewayProfile.sku', 'StandardV2'),
+            self.check('networkProfile.natGatewayProfile.idleTimeoutInMinutes', 4),
+            self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 1),
+        ])
+
+        # Update keeps the StandardV2 SKU and applies the new managed outbound IP count / idle timeout.
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--nat-gateway-managed-outbound-ip-count=2 ' \
+                     '--nat-gateway-idle-timeout=30 '
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('networkProfile.outboundType', 'managedNATGateway'),
+            self.check('networkProfile.natGatewayProfile.sku', 'StandardV2'),
+            self.check('networkProfile.natGatewayProfile.idleTimeoutInMinutes', 30),
+            self.check('networkProfile.natGatewayProfile.managedOutboundIpProfile.count', 2),
+        ])
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     def test_aks_update_outbound_from_slb_to_natgateway(self, resource_group, resource_group_location):
@@ -10258,6 +10300,75 @@ spec:
                 self.check('properties.provisioningState', f'Succeeded')
                 ])
 
+        if use_ampls:
+            # Regression coverage for the two private-networking fixes.
+            #
+            # 1. 'aks update --ampls-resource-id <scope>' has to work on a cluster that is already
+            #    private, without --enable-private-cluster being repeated. The private state is now
+            #    read from the cluster itself, so this no longer trips the AMPLS guard.
+            # 2. A later reconfiguration that does not mention AMPLS at all (--enable-syslog here)
+            #    must leave the ingestion and configuration endpoints private. The DCE write used to
+            #    rebuild the body with publicNetworkAccess=Enabled whenever --ampls-resource-id was
+            #    absent, which silently reopened public access on a private ingestion endpoint.
+            self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+            if self.is_live or self.in_recording:
+                time.sleep(60)
+
+            # 1. re-link the scope without re-declaring the cluster as private
+            self.cmd(
+                f'aks update -g={resource_group} -n={aks_name} --ampls-resource-id {ampls_resource_id} --yes',
+                checks=[
+                    self.check('addonProfiles.omsagent.enabled', True),
+                    self.check('addonProfiles.omsagent.config.useAADAuth', 'true')
+                ])
+
+            self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+            if self.is_live or self.in_recording:
+                time.sleep(60)
+
+            # the association must still resolve to the same configuration endpoint
+            dcea_resource_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint"
+            self.cmd(
+                f'rest --method get --url https://management.azure.com{dcea_resource_id}?api-version=2022-06-01',
+                checks=[self.check('properties.dataCollectionEndpointId', f'{config_dce_resource_id}')])
+
+            # 2. a syslog-only update, with no AMPLS argument in sight
+            self.cmd(
+                f'aks update -g={resource_group} -n={aks_name} --enable-syslog --yes',
+                checks=[self.check('addonProfiles.omsagent.enabled', True)])
+
+            self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+            if self.is_live or self.in_recording:
+                time.sleep(60)
+
+            # the configuration endpoint must still be private
+            self.cmd(
+                f'rest --method get --url https://management.azure.com{config_dce_resource_id}?api-version=2022-06-01',
+                checks=[
+                    self.check('properties.networkAcls.publicNetworkAccess', f'Disabled'),
+                    self.check('properties.provisioningState', f'Succeeded')
+                ])
+
+            # the syslog change must actually have landed, otherwise the endpoint checks above
+            # would pass simply because the update was a no-op and rewrote nothing
+            self.cmd(
+                f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2022-06-01',
+                checks=[self.check('properties.dataSources.syslog[0].streams[0]', f'Microsoft-Syslog')])
+
+            if highlogscale_mode_enabled:
+                # the DCR must still point at the same ingestion endpoint, and it must still be private
+                self.cmd(
+                    f'rest --method get --url https://management.azure.com{dcr_resource_id}?api-version=2022-06-01',
+                    checks=[
+                        self.check('properties.dataCollectionEndpointId', f'{ingestion_dce_resource_id}')
+                    ])
+                self.cmd(
+                    f'rest --method get --url https://management.azure.com{ingestion_dce_resource_id}?api-version=2022-06-01',
+                    checks=[
+                        self.check('properties.networkAcls.publicNetworkAccess', f'Disabled'),
+                        self.check('properties.provisioningState', f'Succeeded')
+                    ])
+
         # wait for any in-progress cluster operation to finish before disabling
         self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
         if self.is_live or self.in_recording:
@@ -11358,6 +11469,236 @@ spec:
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('securityProfile.azureKeyVaultKms.enabled', False),
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
+    def test_aks_create_with_kms_pmk_and_update_cmk(self, resource_group, resource_group_location):
+        """Create a PMK-enabled cluster, then enable and disable CMK on it."""
+        aks_name = self.create_random_name('cliakstest', 16)
+        kv_name = self.create_random_name('cliakstestkv', 16)
+        identity_name = self.create_random_name('cliakstestidentity', 24)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'kv_name': kv_name,
+            'identity_name': identity_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create user-assigned identity
+        identity_id = self._get_user_assigned_identity(resource_group)
+        identity_object_id = self._get_principal_id_of_user_assigned_identity(identity_id)
+        assert identity_id is not None
+        assert identity_object_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_object_id': identity_object_id,
+        })
+
+        # create cluster with KMS infrastructure encryption (PMK) enabled
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--assign-identity {identity_id} ' \
+                     '--kms-infrastructure-encryption Enabled ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.kubernetesResourceObjectEncryptionProfile.infrastructureEncryption',
+                       'Enabled'),
+            self.not_exists('securityProfile.azureKeyVaultKms'),
+        ])
+
+        # create key vault and key for CMK
+        create_keyvault = 'keyvault create --resource-group={resource_group} --name={kv_name} ' \
+                          '--enable-rbac-authorization=false --no-self-perms -o json'
+        self.cmd(create_keyvault, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        # set access policy for test identity
+        test_identity_object_id = self._get_test_identity_object_id()
+        test_identity_access_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                                      '--key-permissions all --object-id ' + test_identity_object_id
+        self.cmd(test_identity_access_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        create_key = 'keyvault key create -n kms --vault-name {kv_name} -o json'
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        # PMK requires a versionless key ID, drop the trailing version segment
+        key_id_versionless = key['key']['kid'].rsplit('/', 1)[0]
+        assert key_id_versionless is not None
+
+        kv_resource_id = self.cmd(
+            'keyvault show --resource-group={resource_group} --name={kv_name} --query id -o tsv'
+        ).output.strip()
+        self.kwargs.update({
+            'key_id': key_id_versionless,
+            'kv_resource_id': kv_resource_id,
+        })
+
+        # assign access policy for the cluster identity
+        set_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                     '--object-id {identity_object_id} --key-permissions encrypt decrypt -o json'
+        self.cmd(set_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        # enable CMK on the existing PMK cluster
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} ' \
+                     '--azure-keyvault-kms-key-vault-network-access=Public ' \
+                     '--azure-keyvault-kms-key-vault-resource-id={kv_resource_id} -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id_versionless),
+            self.check('securityProfile.kubernetesResourceObjectEncryptionProfile.infrastructureEncryption',
+                       'Enabled'),
+        ])
+
+        # enabling CMK triggers an async re-encryption of the cluster's Kubernetes secrets,
+        # wait for the cluster to settle before disabling CMK
+        self.cmd('aks wait --resource-group={resource_group} --name={name} --updated '
+                 '--interval 30 --timeout 1800', checks=[self.is_empty()])
+
+        # disable CMK, PMK is preserved
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--disable-azure-keyvault-kms -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', False),
+            self.check('securityProfile.kubernetesResourceObjectEncryptionProfile.infrastructureEncryption',
+                       'Enabled'),
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
+    def test_aks_create_with_kms_pmk_and_cmk(self, resource_group, resource_group_location):
+        """Create a cluster with both PMK and CMK enabled at the same time."""
+        aks_name = self.create_random_name('cliakstest', 16)
+        kv_name = self.create_random_name('cliakstestkv', 16)
+        identity_name = self.create_random_name('cliakstestidentity', 24)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'kv_name': kv_name,
+            'identity_name': identity_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create user-assigned identity
+        identity_id = self._get_user_assigned_identity(resource_group)
+        identity_object_id = self._get_principal_id_of_user_assigned_identity(identity_id)
+        assert identity_id is not None
+        assert identity_object_id is not None
+        self.kwargs.update({
+            'identity_id': identity_id,
+            'identity_object_id': identity_object_id,
+        })
+
+        # create key vault and key
+        create_keyvault = 'keyvault create --resource-group={resource_group} --name={kv_name} ' \
+                          '--enable-rbac-authorization=false --no-self-perms -o json'
+        self.cmd(create_keyvault, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        # set access policy for test identity
+        test_identity_object_id = self._get_test_identity_object_id()
+        test_identity_access_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                                      '--key-permissions all --object-id ' + test_identity_object_id
+        self.cmd(test_identity_access_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        create_key = 'keyvault key create -n kms --vault-name {kv_name} -o json'
+        key = self.cmd(create_key, checks=[
+            self.check('attributes.enabled', True)
+        ]).get_output_in_json()
+        # PMK requires a versionless key ID, drop the trailing version segment
+        key_id_versionless = key['key']['kid'].rsplit('/', 1)[0]
+        assert key_id_versionless is not None
+
+        kv_resource_id = self.cmd(
+            'keyvault show --resource-group={resource_group} --name={kv_name} --query id -o tsv'
+        ).output.strip()
+        self.kwargs.update({
+            'key_id': key_id_versionless,
+            'kv_resource_id': kv_resource_id,
+        })
+
+        # assign access policy for the cluster identity
+        set_policy = 'keyvault set-policy --resource-group={resource_group} --name={kv_name} ' \
+                     '--object-id {identity_object_id} --key-permissions encrypt decrypt -o json'
+        self.cmd(set_policy, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--assign-identity {identity_id} ' \
+                     '--enable-azure-keyvault-kms --azure-keyvault-kms-key-id={key_id} ' \
+                     '--azure-keyvault-kms-key-vault-network-access=Public ' \
+                     '--azure-keyvault-kms-key-vault-resource-id={kv_resource_id} ' \
+                     '--kms-infrastructure-encryption=Enabled ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.azureKeyVaultKms.enabled', True),
+            self.check('securityProfile.azureKeyVaultKms.keyId', key_id_versionless),
+            self.check('securityProfile.kubernetesResourceObjectEncryptionProfile.infrastructureEncryption',
+                       'Enabled'),
+        ])
+
+        # delete
+        cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(cmd, checks=[
+            self.is_empty(),
+        ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
+    def test_aks_update_with_kms_pmk(self, resource_group, resource_group_location):
+        """Enable KMS infrastructure encryption (PMK) on an existing cluster."""
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create cluster without infrastructure encryption
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--ssh-key-value={ssh_key_value} -o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('securityProfile.kubernetesResourceObjectEncryptionProfile'),
+        ])
+
+        # update cluster to enable infrastructure encryption
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--kms-infrastructure-encryption Enabled -o json'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.kubernetesResourceObjectEncryptionProfile.infrastructureEncryption',
+                       'Enabled'),
         ])
 
         # delete
@@ -14566,7 +14907,7 @@ spec:
                 self.check("provisioningState", "Succeeded"),
                 self.check("networkProfile.advancedNetworking.observability.enabled", True),
                 self.check("addonProfiles.omsagent.enabled", True),
-                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"),
+                self.check("azureMonitorProfile.containerInsights.containerNetworkLogs", "Enabled"),
             ],
         )
 
@@ -14587,7 +14928,7 @@ spec:
             ],
         )
         self._wait_for_cluster_property(
-            "addonProfiles.omsagent.config.enableRetinaNetworkFlags", "False"
+            "azureMonitorProfile.containerInsights.containerNetworkLogs", "Disabled"
         )
 
         # update: enable high log scale mode independently via aks update
@@ -14613,7 +14954,7 @@ spec:
             ],
         )
         self._wait_for_cluster_property(
-            "addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"
+            "azureMonitorProfile.containerInsights.containerNetworkLogs", "Enabled"
         )
 
         # delete
@@ -15466,6 +15807,40 @@ spec:
         )
 
         # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="westus3"
+    )
+    def test_aks_nodepool_add_with_enable_managed_gpu(self, resource_group, resource_group_location):
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": self.create_random_name("cliakstest", 16),
+                "location": resource_group_location,
+                "node_pool_name": self.create_random_name("n", 6),
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+        self.cmd(
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --kms-infrastructure-encryption Enabled",
+            checks=[self.check("provisioningState", "Succeeded")],
+        )
+        self.cmd(
+            "aks nodepool add --resource-group={resource_group} --cluster-name={name} "
+            "--name={node_pool_name} --node-vm-size Standard_NV6ads_A10_v5 --node-count 1 --enable-managed-gpu=true",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("gpuProfile.driver", "Install"),
+                self.check("gpuProfile.nvidia.managementMode", "Managed"),
+            ],
+        )
         self.cmd(
             "aks delete -g {resource_group} -n {name} --yes --no-wait",
             checks=[self.is_empty()],

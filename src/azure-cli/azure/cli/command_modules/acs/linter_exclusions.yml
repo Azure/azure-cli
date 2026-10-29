@@ -10,6 +10,18 @@ aks create:
       enable_hosted_system:
           rule_exclusions:
           - missing_parameter_test_coverage
+      nat_gateway_sku:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      nat_gateway_managed_outbound_ipv6_count:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      nat_gateway_outbound_ip_ids:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      nat_gateway_outbound_ip_prefix_ids:
+          rule_exclusions:
+          - missing_parameter_test_coverage
       appgw_watch_namespace:
           rule_exclusions:
           - option_length_too_long
@@ -115,6 +127,9 @@ aks create:
       enable_upstream_kubescheduler_user_configuration:
         rule_exclusions:
           - option_length_too_long
+      kms_infrastructure_encryption:
+        rule_exclusions:
+          - option_length_too_long
 aks enable-addons:
   parameters:
       appgw_watch_namespace:
@@ -134,6 +149,18 @@ aks enable-addons:
         - option_length_too_long
 aks update:
   parameters:
+      nat_gateway_sku:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      nat_gateway_managed_outbound_ipv6_count:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      nat_gateway_outbound_ip_ids:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      nat_gateway_outbound_ip_prefix_ids:
+          rule_exclusions:
+          - missing_parameter_test_coverage
       disable_secret_rotation:
           rule_exclusions:
           - option_length_too_long
@@ -261,6 +288,9 @@ aks update:
         rule_exclusions:
           - option_length_too_long
       disable_upstream_kubescheduler_user_configuration:
+        rule_exclusions:
+          - option_length_too_long
+      kms_infrastructure_encryption:
         rule_exclusions:
           - option_length_too_long
 aks nodepool add:

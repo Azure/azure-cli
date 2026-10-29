@@ -16,7 +16,7 @@ REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/.."
 
 pushd ${REPO_ROOT} > /dev/null
 
-find src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip install --no-deps
+find src/ -name pyproject.toml -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip install --no-deps
 pip install -r ./src/azure-cli/requirements.$(python ./scripts/get-python-version.py).$(uname).txt
 
 popd > /dev/null

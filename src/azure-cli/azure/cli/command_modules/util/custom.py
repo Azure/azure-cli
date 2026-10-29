@@ -181,7 +181,8 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
     importlib.reload(subprocess)
     importlib.reload(json)
 
-    version_result = subprocess.check_output(['az', 'version', '-o', 'json'], shell=platform.system() == 'Windows')
+    az_cmd_prefix = _get_az_cmd_prefix()
+    version_result = subprocess.check_output(az_cmd_prefix + ['version', '-o', 'json'])
     version_json = json.loads(version_result)
     new_version = version_json['azure-cli-core']
 
@@ -196,14 +197,32 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
     for ext_name in exts:
         try:
             logger.warning("Checking update for %s", ext_name)
-            cmds = ['az', 'extension', 'update', '-n', ext_name]
+            cmds = az_cmd_prefix + ['extension', 'update', '-n', ext_name]
             if allow_preview is not None:
                 cmds += ["--allow-preview", str(allow_preview)]
-            subprocess.call(cmds, shell=platform.system() == 'Windows')
+            subprocess.call(cmds)
         except Exception as ex:  # pylint: disable=broad-except
             msg = "Extension {} update failed during az upgrade. {}".format(ext_name, str(ex))
             raise CLIError(msg)
     logger.warning("Upgrade finished.")
+
+
+def _get_az_cmd_prefix():
+    """Return an absolute-path command prefix for spawning 'az', so nothing is resolved from the CWD (CWE-427).
+    On Windows, az.cmd runs through cmd.exe. Fall back to the current interpreter if either can't be resolved.
+    """
+    import platform
+    import sys
+    from azure.cli.core.util import get_safe_executable_path
+
+    az_path = get_safe_executable_path('az')
+    if platform.system() == 'Windows':
+        cmd_path = get_safe_executable_path('cmd.exe')
+        if az_path and cmd_path:
+            return [cmd_path, '/c', az_path]
+    elif az_path:
+        return [az_path]
+    return [sys.executable, '-m', 'azure.cli']
 
 
 def _upgrade_on_windows():
@@ -216,7 +235,7 @@ def _upgrade_on_windows():
     import sys
     import tempfile
 
-    from azure.cli.core.util import rmtree_with_retry
+    from azure.cli.core.util import rmtree_with_retry, get_safe_executable_path
 
     if platform.architecture()[0] == '32bit':
         msi_url = 'https://aka.ms/installazurecliwindows'
@@ -231,7 +250,10 @@ def _upgrade_on_windows():
 
     msi_path = _download_from_url(msi_url, msi_dir)
 
-    subprocess.Popen(['msiexec.exe', '/i', msi_path])
+    msiexec_path = get_safe_executable_path('msiexec.exe')
+    if not msiexec_path:
+        raise CLIError("Unable to locate msiexec.exe. Please install the MSI manually: {}".format(msi_path))
+    subprocess.Popen([msiexec_path, '/i', msi_path])
     logger.warning("Installation started. Please complete the upgrade in the opened window.\nTo update extensions, "
                    "please run `az upgrade` again after completing the upgrade.")
     sys.exit(0)

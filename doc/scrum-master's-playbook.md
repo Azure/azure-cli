@@ -101,7 +101,7 @@ Review and merge (do not squash) the above PR:
 
 ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/phase2-4.png)
 
-As part of "Publish to Homebrew", a PR gets created in [homebrew-core](https://github.com/Homebrew/homebrew-core). Wait for that PR to get approved and merged by community and resume this task to completion:
+As part of "Publish CASK(Homebrew)", a PR gets created in [homebrew-cask](https://github.com/Homebrew/homebrew-cask). Wait for that PR to get approved and merged by the community and resume this task to completion:
 
 ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/phase2-7.png)
 

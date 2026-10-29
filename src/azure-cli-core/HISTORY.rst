@@ -3,6 +3,18 @@
 Release History
 ===============
 
+2.92.0
+++++++
+* Add `get_safe_executable_path` to prevent binary planting when spawning subprocess (#34212)
+* Resolve GHSA-6q48-6c7w-9gw2 (#34250)
+* Add `core.output_newline` config (native|lf) and default to LF line endings on stdout when run from WSL or Git Bash on Windows (#34236)
+* Resolve OpenSSL and Certifi related vulnerabilities (#34275)
+
+2.91.0
+++++++
+* Remove AzureGermanCloud from hard-coded cloud list (#34042)
+* PREVIEW: Enable broker-based authentication on macOS (opt-in via `az config set core.enable_broker_on_mac=true`) (#33376)
+
 2.90.0
 ++++++
 * Minor fixes

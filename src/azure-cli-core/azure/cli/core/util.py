@@ -1634,6 +1634,38 @@ def should_encrypt_token_cache(cli_ctx):
     return encrypt
 
 
+def get_safe_executable_path(executable):
+    """Resolve an executable name to an absolute path like ``shutil.which``, but never from the current working
+    directory, which Windows searches first for bare names (binary planting, CWE-427).
+    Return ``None`` if nothing trusted is found; never fall back to the bare name.
+    """
+    if os.path.dirname(executable):
+        return executable
+    try:
+        cwd = os.getcwd()
+    except OSError:
+        return None  # Fail closed: the directory to exclude is unknown.
+
+    search_dirs = os.environ.get('PATH', os.defpath).split(os.pathsep)
+    names = [executable]
+    if sys.platform.startswith('win'):
+        system_root = os.environ.get('SystemRoot', r'C:\Windows')
+        search_dirs = [os.path.join(system_root, 'System32'), system_root] + search_dirs
+        exts = [ext for ext in os.environ.get('PATHEXT', '.COM;.EXE;.BAT;.CMD').split(os.pathsep) if ext]
+        if os.path.splitext(executable)[1].upper() not in (ext.upper() for ext in exts):
+            names = [executable + ext for ext in exts]
+
+    for directory in (d.strip('"') for d in search_dirs):
+        # Relative entries ('', '.') resolve against the CWD as well.
+        if not os.path.isabs(directory) or not os.path.isdir(directory) or os.path.samefile(directory, cwd):
+            continue
+        for name in names:
+            path = os.path.join(directory, name)
+            if os.path.isfile(path) and os.access(path, os.X_OK):
+                return path
+    return None
+
+
 def run_cmd(args, *, capture_output=False, timeout=None, check=False, encoding=None, env=None):
     """Run command in a subprocess. It reduces (not eliminates) shell injection by forcing args to be a list
     and shell=False. Other arguments are keyword-only. For their documentation, see

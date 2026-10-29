@@ -28,7 +28,7 @@ How to find and install an Extension
 
 - List all available extensions: `az extension list-available`
 
-- Install an extension: `az extension install --name <extension-name>`
+- Install an extension: `az extension add --name <extension-name>`
 
 More details on usage in [Extensions for Azure CLI 2.0](https://learn.microsoft.com/cli/azure/azure-cli-extensions-overview#install-extensions)
 

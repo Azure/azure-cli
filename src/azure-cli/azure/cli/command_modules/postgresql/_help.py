@@ -41,7 +41,7 @@ examples:
         az postgres flexible-server create --location testlocation --resource-group testgroup \\
           --name testserver --admin-user testusername --admin-password testpassword \\
           --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 18 --zonal-resiliency Enabled --zone 1 \\
+          --tags "key=value" --version 19 --zonal-resiliency Enabled --zone 1 \\
           --standby-zone 3
   - name: >
       Create server with high availability feature enabled that allows primary and standby in the same zone when multi-zone capacity is unavailable.
@@ -342,6 +342,10 @@ examples:
         --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServer}
   - name: Restore 'testserver' to current point-in-time as a new server 'testservernew' using Premium SSD v2 Disks by setting storage type to "PremiumV2_LRS"
     text: az postgres flexible-server restore --resource-group testgroup --name testservernew --source-server testserver --storage-type PremiumV2_LRS
+  - name: Restore 'testserver' to current point-in-time as a new server 'testservernew' with a different compute size.
+    text: az postgres flexible-server restore --resource-group testgroup --name testservernew --source-server testserver --sku-name Standard_D4s_v3
+  - name: Restore 'testserver' to current point-in-time as a new server 'testservernew' with a different compute tier and compute size.
+    text: az postgres flexible-server restore --resource-group testgroup --name testservernew --source-server testserver --tier MemoryOptimized --sku-name Standard_E2ds_v4
 """
 
 helps['postgres flexible-server maintenance-event'] = """
@@ -940,10 +944,10 @@ helps['postgres flexible-server upgrade'] = """
 type: command
 short-summary: Upgrade the major version of a flexible server.
 examples:
-  - name: Upgrade server 'testserver' to PostgreSQL major version 18.
-    text: az postgres flexible-server upgrade -g testgroup -n testserver -v 18
+  - name: Upgrade server 'testserver' to PostgreSQL major version 19.
+    text: az postgres flexible-server upgrade -g testgroup -n testserver -v 19
   - name: Run pre-upgrade validation for server targeting a later PostgreSQL major version without performing the upgrade.
-    text: az postgres flexible-server upgrade -g testgroup -n testserver -v 18 --validate-only
+    text: az postgres flexible-server upgrade -g testgroup -n testserver -v 19 --validate-only
 """
 
 helps['postgres flexible-server identity'] = """

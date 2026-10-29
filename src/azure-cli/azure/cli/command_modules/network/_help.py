@@ -1721,6 +1721,8 @@ short-summary: Add ssl profiles of the application gateway.
 examples:
   - name: Add ssl profile for an existing application gateway.
     text: az network application-gateway ssl-profile add --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile
+  - name: Add ssl profile with mutual authentication (mTLS) in passthrough mode. In Passthrough mode the application gateway forwards the client certificate to the backend without verifying it, so certificate validation is delegated entirely to the backend server. Use Strict to have the gateway validate the client certificate itself.
+    text: az network application-gateway ssl-profile add --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --auth-configuration verify-client-auth-mode=Passthrough
 """
 
 helps['network application-gateway ssl-profile update'] = """
@@ -1729,6 +1731,8 @@ short-summary: Update ssl profiles of the application gateway.
 examples:
   - name: Update ssl profile for an existing application gateway.
     text: az network application-gateway ssl-profile update --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --client-auth-configuration False
+  - name: Switch an existing ssl profile to mutual authentication (mTLS) passthrough mode. In Passthrough mode the application gateway forwards the client certificate to the backend without verifying it, leaving validation to the backend server.
+    text: az network application-gateway ssl-profile update --gateway-name MyAppGateway -g MyResourceGroup --name MySslProfile --auth-configuration verify-client-auth-mode=Passthrough
 """
 
 helps['network application-gateway ssl-profile remove'] = """
@@ -6254,4 +6258,8 @@ examples:
         az network ddos-custom-policy create --resource-group rg1 --ddos-custom-policy-name test-ddos-custom-policy \\
             --location centraluseuap --detection-rule-name detectionRuleTcp \\
             --detection-mode TrafficThreshold --traffic-type Tcp --packets-per-second 1000000
+  - name: Create DDoS custom policy with a TCP mitigation rule that denies traffic from a prefix or country
+    text: |
+        az network ddos-custom-policy create --resource-group rg1 --ddos-custom-policy-name test-ddos-custom-policy \\
+            --location centraluseuap --mitigation-rules "[{name:mitigationRuleTcp,traffic-scope:Tcp,tcp-default-mitigations:{per-source-rate-limiting:{packets-per-second:100000},per-source-connection-rate-limiting:{connections-per-second:1000}},source-policy-overrides:[{policy-action:{action-type:Deny},conditions:{ip-prefixes:[198.51.100.0/24],geo-matches:[{country-code:CA}]}}]}]"
 """

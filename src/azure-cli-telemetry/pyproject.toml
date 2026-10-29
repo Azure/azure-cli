@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=78.1.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "azure-cli-telemetry"
+version = "1.1.0"
+description = "Microsoft Azure CLI Telemetry Package"
+dynamic = ["readme"]
+license = "MIT"
+license-files = ["LICENSE.txt"]
+authors = [{ name = "Microsoft Corporation", email = "azpycli@microsoft.com" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    'applicationinsights>=0.11.1,<0.12',
+    'portalocker>=1.6,<4',
+]
+
+[project.urls]
+Homepage = "https://github.com/Azure/azure-cli"
+
+[tool.setuptools]
+include-package-data = false
+zip-safe = false
+packages = ["azure.cli.telemetry", "azure.cli.telemetry.components"]
+
+[tool.setuptools.dynamic]
+readme = { file = ["README.rst", "HISTORY.rst"], content-type = "text/x-rst" }

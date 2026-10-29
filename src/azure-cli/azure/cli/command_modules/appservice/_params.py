@@ -443,15 +443,28 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp flex-migration start') as c:
         c.argument('source_resource_group', help='The resource group of the source function app to migrate from.')
         c.argument('source_name', help='The name of the source function app to migrate from.')
-        c.argument('resource_group', help='The resource group of the target function app to migrate to.')
-        c.argument('name', help='The name of the target function app to migrate to.')
+        c.argument('resource_group', help='The resource group of the target function app to migrate to. Not applicable with --in-place.')
+        c.argument('name', help='The name of the target function app to migrate to. Not applicable with --in-place.')
         c.argument('storage_account', help='The storage account to use for the target function app. If no storage account is provided, the storage account of the source function app will be used.')
         c.argument('maximum_instance_count', type=int, help="The maximum number of instances.")
+        c.argument('in_place', options_list=['--in-place', '-i'], arg_type=get_three_state_flag(), help="Upgrade the source app to Flex Consumption in place (same app, same name, same hostname). Cannot be used with --name or --resource-group.", is_preview=True)
+        c.argument('instance_memory', type=int, help="The instance memory size in MB. See https://aka.ms/flex-instance-sizes for more information on the supported values.")
+        c.argument('always_ready_instances', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`")
+        c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.")
+        c.argument('deployment_storage_container_name', options_list=['--deployment-storage-container-name', '--dscn'], help="The deployment storage account container name.")
+        c.argument('deployment_storage_auth_type', options_list=['--deployment-storage-auth-type', '--dsat'], arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.")
+        c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
+                   "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
+                   "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.")
         c.argument('skip_managed_identities', options_list=['--skip-managed-identities', '--smi'], arg_type=get_three_state_flag(return_label=True), help="Skip migrating managed identities.")
         c.argument('skip_access_restrictions', options_list=['--skip-access-restrictions', '--sar'], arg_type=get_three_state_flag(return_label=True), help="Skip migrating access restrictions.")
         c.argument('skip_storage_mount', options_list=['--skip-storage-mount', '--ssm'], arg_type=get_three_state_flag(return_label=True), help="Skip migrating storage mounts.")
         c.argument('skip_hostnames', options_list=['--skip-hostnames', '--sh'], arg_type=get_three_state_flag(return_label=True), help="Skip migrating hostnames.")
         c.argument('skip_cors', options_list=['--skip-cors', '--sc'], arg_type=get_three_state_flag(return_label=True), help="Skip migrating CORS settings.")
+
+    with self.argument_context('functionapp flex-migration revert') as c:
+        c.argument('source_resource_group', help='The resource group of the function app to revert.')
+        c.argument('source_name', help='The name of the function app to revert.')
 
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -856,12 +869,36 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp log startup show') as c:
         c.argument('filename', options_list=['--filename', '-f'], help='Name of a specific startup log file to display. If not specified, shows the latest log (preferring failures).')
 
+    with self.argument_context('webapp troubleshoot config') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Defaults to the production slot if not specified")
+        c.argument('instance', options_list=['--instance'],
+                   help='Filter configuration checks by worker machine name. The runtime error recommendation '
+                        'uses the corresponding ARM instance ID and never falls back to another worker.')
+        c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(),
+                   help='Print a human-readable report instead of the structured payload.')
+
     with self.argument_context('webapp troubleshoot status') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Defaults to the production slot if not specified")
         c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
         c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
+
+    with self.argument_context('webapp troubleshoot deployment') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+
+    with self.argument_context('webapp secure-build show') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+        c.argument('rescan', options_list=['--rescan'], action='store_true',
+                   help='Run a fresh dependency analysis instead of using a cached report.')
 
     with self.argument_context('webapp troubleshoot collect network-capture') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -1123,7 +1160,14 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('enriched_errors', options_list=['--enriched-errors'],
                    help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
                    arg_type=get_three_state_flag(), default=True)
-        c.argument('tag', help='Linux only. A friendly name used to identify the deployment.')
+        c.argument(
+            'deployment_tag',
+            options_list=['--deploymentTag', c.deprecate(target='--tag', redirect='--deploymentTag')],
+            help='Linux only. A friendly name used to identify the deployment.')
+        c.argument('show_secure_build', options_list=['--show-secure-build'], action='store_true', default=False,
+                   help='Show a Secure Build summary and full-report link after a local deployment, including when --async '
+                        'true is used. For URL deployments, show the command to run after deployment completes. Supported '
+                        'only for Linux web apps. Secure Build analysis can add several minutes to a local deployment.')
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')
