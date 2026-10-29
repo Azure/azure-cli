@@ -363,6 +363,15 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_site_configs')
         g.custom_show_command('show', 'get_site_configs')
 
+    with self.command_group('webapp config egress', is_preview=True) as g:
+        g.custom_command('set', 'set_egress_config')
+        g.custom_show_command('show', 'show_egress_config')
+
+    with self.command_group('webapp config egress connection', is_preview=True) as g:
+        g.custom_command('add', 'add_egress_connection')
+        g.custom_command('remove', 'remove_egress_connection')
+        g.custom_show_command('show', 'show_egress_connection')
+
     with self.command_group('webapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
         g.custom_command('set', 'update_app_settings')

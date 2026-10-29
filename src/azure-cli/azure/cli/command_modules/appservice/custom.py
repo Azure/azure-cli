@@ -116,6 +116,8 @@ from .aaz.latest.appservice.plan.managed_instance import (ShowRdpPassword
                                                           as AppServicePlanManagedInstanceShowRdpPassword)
 from .aaz.latest.appservice.plan.managed_instance.instance import (List as AppServicePlanManagedInstanceList,
                                                                    Recycle as AppServicePlanManagedInstanceRecycle)
+from .aaz.latest.web.site.config.egress import Create as EgressConfigCreate, Show as EgressConfigShow
+from .aaz.latest.web.site.slot.config.egress import Create as SlotEgressConfigCreate, Show as SlotEgressConfigShow
 
 logger = get_logger(__name__)
 
@@ -3987,6 +3989,131 @@ def start_webapp(cmd, resource_group_name, name, slot=None):
 
 def restart_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restart', slot)
+
+
+def _egress_enum(value, choices, argument):
+    for choice in choices:
+        if isinstance(value, str) and value.lower() == choice.lower():
+            return choice
+    raise InvalidArgumentValueError("{} must be one of: {}.".format(argument, ', '.join(choices)))
+
+
+def _validate_egress_name(value, argument, max_length=None):
+    if (not isinstance(value, str) or not value or value[-1].isspace() or
+            (max_length is not None and len(value) > max_length)):
+        raise InvalidArgumentValueError(
+            "{} must be nonempty and must not end in whitespace{}."
+            .format(argument, ", with at most {} characters".format(max_length) if max_length else ""))
+
+
+def _build_egress_connection(connection_name=None, protocol=None, auth=None, source='AppSettings',
+                             host_setting=None, credential_setting=None, username_setting=None, value_setting=None,
+                             identity_resource_id=None, identity_scope=None,
+                             credential_header=None, credential_format=None):
+    from ._constants import EGRESS_PROTOCOLS, EGRESS_AUTH_TYPES, EGRESS_SOURCES
+
+    for argument, value in [('name', connection_name), ('protocol', protocol), ('auth', auth)]:
+        if value is None:
+            raise RequiredArgumentMissingError("Egress connections require '{}'.".format(argument))
+    _validate_egress_name(connection_name, 'Connection name', max_length=256)
+    settings = {}
+    setting_names = set()
+    for role, setting in [('Host', host_setting), ('Credential', credential_setting),
+                          ('Username', username_setting), ('Value', value_setting)]:
+        if setting is not None:
+            _validate_egress_name(setting, '{} setting name'.format(role))
+            if setting.lower() in setting_names:
+                raise InvalidArgumentValueError("Each setting name can have only one role in a connection.")
+            setting_names.add(setting.lower())
+            settings[setting] = {'role': role}
+    if not settings:
+        raise RequiredArgumentMissingError(
+            "Specify at least one of host-setting, credential-setting, username-setting, or value-setting.")
+    connection = {
+        'protocol': _egress_enum(protocol, EGRESS_PROTOCOLS, 'Protocol'),
+        'auth': _egress_enum(auth, EGRESS_AUTH_TYPES, 'Authentication'),
+        'source': _egress_enum(source, EGRESS_SOURCES, 'Source'),
+        'settings': settings,
+    }
+    if identity_resource_id is not None:
+        connection['identityResourceId'] = identity_resource_id
+    if identity_scope is not None:
+        connection['identityScope'] = identity_scope
+    if credential_format is not None and credential_header is None:
+        raise RequiredArgumentMissingError("Specify credential-header when using credential-format.")
+    if credential_header is not None:
+        connection['credentialInjection'] = {'header': credential_header}
+        if credential_format is not None:
+            connection['credentialInjection']['format'] = credential_format
+    return connection_name, connection
+
+
+def show_egress_config(cmd, resource_group_name, name, slot=None):
+    args = {'resource_group': resource_group_name, 'name': name}
+    command = EgressConfigShow
+    if slot:
+        args['slot'] = slot
+        command = SlotEgressConfigShow
+    return command(cli_ctx=cmd.cli_ctx)(command_args=args)
+
+
+def _put_egress_config(cmd, resource_group_name, name, connections, enabled=None, slot=None):
+    args = {'resource_group': resource_group_name, 'name': name, 'connections': connections}
+    if enabled is not None:
+        args['enabled'] = enabled
+    command = EgressConfigCreate
+    if slot:
+        args['slot'] = slot
+        command = SlotEgressConfigCreate
+    return command(cli_ctx=cmd.cli_ctx)(command_args=args)
+
+
+def set_egress_config(cmd, resource_group_name, name, enabled=None, slot=None):
+    if enabled is not None:
+        if not isinstance(enabled, bool):
+            raise InvalidArgumentValueError("Specify true or false for --enabled.")
+        enabled = 'Enabled' if enabled else 'Disabled'
+    config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    if enabled is None:
+        enabled = config.get('enabled')
+    return _put_egress_config(cmd, resource_group_name, name, config.get('connections') or {}, enabled, slot)
+
+
+def _find_egress_connection(connections, connection_name):
+    _validate_egress_name(connection_name, '--connection-name', max_length=256)
+    for key in connections:
+        if key.lower() == connection_name.lower():
+            return key
+    raise ResourceNotFoundError("Egress connection '{}' was not found.".format(connection_name))
+
+
+def add_egress_connection(cmd, resource_group_name, name, connection_name, protocol, auth, source='AppSettings',
+                          host_setting=None, credential_setting=None, username_setting=None, value_setting=None,
+                          identity_resource_id=None, identity_scope=None,
+                          credential_header=None, credential_format=None, slot=None):
+    _, connection = _build_egress_connection(
+        connection_name, protocol, auth, source, host_setting, credential_setting, username_setting, value_setting,
+        identity_resource_id, identity_scope, credential_header, credential_format)
+    config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    connections = dict(config.get('connections') or {})
+    key = next((key for key in connections if key.lower() == connection_name.lower()), connection_name)
+    connections[key] = connection
+    result = _put_egress_config(cmd, resource_group_name, name, connections, config.get('enabled'), slot)
+    result_connections = (result.get('properties') or {}).get('connections') or {}
+    return result_connections[_find_egress_connection(result_connections, connection_name)]
+
+
+def remove_egress_connection(cmd, resource_group_name, name, connection_name, slot=None):
+    config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    connections = dict(config.get('connections') or {})
+    del connections[_find_egress_connection(connections, connection_name)]
+    _put_egress_config(cmd, resource_group_name, name, connections, config.get('enabled'), slot)
+
+
+def show_egress_connection(cmd, resource_group_name, name, connection_name, slot=None):
+    config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    connections = config.get('connections') or {}
+    return connections[_find_egress_connection(connections, connection_name)]
 
 
 def get_site_configs(cmd, resource_group_name, name, slot=None):
