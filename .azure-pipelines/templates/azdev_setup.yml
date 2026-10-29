@@ -31,7 +31,8 @@ steps:
       echo "##vso[task.setvariable variable=PIP_CONSTRAINT]$PIP_CONSTRAINT"
 
       python -m pip install -U pip "setuptools>=78.1.1"
-      packages=("$AZDEV_PACKAGE")
+      # pytest 9.2 reports cannot be marshalled by pytest-forked 1.7.5.
+      packages=("pytest==9.1.1" "$AZDEV_PACKAGE")
       if [ -n "$DIFF_TOOL_PACKAGE" ]; then
         packages+=("$DIFF_TOOL_PACKAGE")
       fi
