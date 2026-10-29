@@ -71,6 +71,40 @@ if ($installed_version -ne $artifact_version){
     Exit 1
 }
 
+# Exercise Git Bash completion against the installed artifact, not a developer CLI.
+$git_bash = Join-Path $env:ProgramFiles "Git\bin\bash.exe"
+$git_cygpath = Join-Path $env:ProgramFiles "Git\usr\bin\cygpath.exe"
+if (-not (Test-Path $git_bash)) {
+    throw "Git Bash is required for the MSI completion tests."
+}
+$cli_root = Split-Path (Split-Path $az_full_path)
+$az_bash_path = Join-Path (Split-Path $az_full_path) "az"
+$python_full_path = Join-Path $cli_root "python.exe"
+$repo_root = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
+$completion_tests = Join-Path $repo_root "src\azure-cli-core\azure\cli\core\tests"
+$original_path = $env:PATH
+try {
+    $env:PATH = "$(Split-Path $git_bash);$(Split-Path $az_full_path);$original_path"
+    $bash_platform = & $git_bash --noprofile --norc -c 'uname -s'
+    if ($LASTEXITCODE -ne 0 -or $bash_platform -notlike 'MINGW*') {
+        throw "The MSI completion tests require Git Bash."
+    }
+    $resolved_az = & $git_bash --noprofile --norc -c 'type -P az'
+    if ($LASTEXITCODE -ne 0) {
+        throw "Git Bash could not find the installed MSI's Bash launcher."
+    }
+    $resolved_az = & $git_cygpath -am $resolved_az
+    if ($LASTEXITCODE -ne 0 -or $resolved_az -ne $az_bash_path.Replace('\', '/')) {
+        throw "Git Bash did not resolve the installed MSI's Bash launcher."
+    }
+    & $python_full_path -m unittest discover -s $completion_tests -p test_argcomplete_shell.py -v
+    if ($LASTEXITCODE -ne 0) {
+        throw "Git Bash completion failed with the installed MSI."
+    }
+} finally {
+    $env:PATH = $original_path
+}
+
 # Test bundled pip with extension installation
 & $az_full_path extension add -n account
 & $az_full_path self-test
