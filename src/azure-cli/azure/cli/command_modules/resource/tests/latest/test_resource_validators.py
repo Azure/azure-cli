@@ -13,6 +13,8 @@ from azure.cli.command_modules.resource._validators import (
     _validate_deployment_name,
     validate_lock_parameters,
 )
+from azure.cli.command_modules.resource.policy import Common
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 
 class NamespaceObject:
@@ -140,6 +142,44 @@ class TestResourceValidators(unittest.TestCase):
         namespace.deployment_name = None
         _validate_deployment_name(namespace)
         self.assertEqual('deployment1', namespace.deployment_name)
+
+
+class TestPolicyCommon(unittest.TestCase):
+
+    @staticmethod
+    def _create_policy_command(scope):
+        cmd = mock.MagicMock()
+        cmd.ctx = mock.MagicMock()
+        cmd.ctx.args = mock.MagicMock()
+        cmd.ctx.args.scope = mock.MagicMock()
+        cmd.ctx.args.scope._data = scope
+        cmd.ctx.args.management_group = None
+        cmd.ctx.args.resource_group = None
+        cmd.subscription_from_scope = None
+        return cmd
+
+    def test_resolve_scope_for_list_raises_for_short_scope(self):
+        cmd = self._create_policy_command('resource-group-name')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            Common.ResolveScopeForList(cmd)
+
+    def test_resolve_scope_for_list_sets_resource_group_for_subscription_scope(self):
+        cmd = self._create_policy_command('/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg')
+
+        Common.ResolveScopeForList(cmd)
+
+        self.assertEqual('00000000-0000-0000-0000-000000000000', cmd.subscription_from_scope)
+        self.assertEqual('test-rg', cmd.ctx.args.resource_group)
+        self.assertIsNone(cmd.ctx.args.management_group)
+
+    def test_resolve_scope_for_list_sets_management_group_for_mg_scope(self):
+        cmd = self._create_policy_command('/providers/Microsoft.Management/managementGroups/test-mg')
+
+        Common.ResolveScopeForList(cmd)
+
+        self.assertEqual('test-mg', cmd.ctx.args.management_group)
+        self.assertIsNone(cmd.ctx.args.resource_group)
 
 
 if __name__ == '__main__':
