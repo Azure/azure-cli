@@ -2470,6 +2470,7 @@ def _audit_policy_validate_arguments(
         storage_endpoint=None,
         storage_account_access_key=None,
         retention_days=None,
+        required_fields=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
         event_hub_target_state=None,
@@ -2492,7 +2493,7 @@ def _audit_policy_validate_arguments(
         event_hub_name is not None
 
     if not state and not blob_storage_arguments_provided and\
-            not log_analytics_arguments_provided and not event_hub_arguments_provided:
+            not log_analytics_arguments_provided and not event_hub_arguments_provided and required_fields is None:
         raise CLIError('Either state or blob storage or log analytics or event hub arguments are missing')
 
     if _is_audit_policy_state_enabled(state) and\
@@ -2503,7 +2504,8 @@ def _audit_policy_validate_arguments(
     if _is_audit_policy_state_disabled(state) and\
             (blob_storage_arguments_provided or
              log_analytics_arguments_provided or
-             event_hub_name):
+             event_hub_name or
+             required_fields is not None):
         raise CLIError('No additional arguments should be provided once state is disabled')
 
     if (_is_audit_policy_state_none_or_disabled(blob_storage_target_state)) and\
@@ -2883,6 +2885,7 @@ def _audit_policy_update_global_settings(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         log_analytics_target_state=None,
         event_hub_target_state=None):
@@ -2924,6 +2927,12 @@ def _audit_policy_update_global_settings(
             category_name=category_name,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
+
+    if required_fields is not None:
+        if not _is_audit_policy_state_enabled(instance.state) or not instance.is_azure_monitor_target_enabled:
+            raise ValidationError(
+                'required-fields can only be specified when auditing and the Azure Monitor target are enabled')
+        instance.required_fields = required_fields
 
 
 def _audit_policy_update_rollback(
@@ -2974,6 +2983,7 @@ def _audit_policy_update(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         category_name=None,
         log_analytics_target_state=None,
@@ -2990,6 +3000,7 @@ def _audit_policy_update(
         storage_endpoint=storage_endpoint,
         storage_account_access_key=storage_account_access_key,
         retention_days=retention_days,
+        required_fields=required_fields,
         log_analytics_target_state=log_analytics_target_state,
         log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
         event_hub_target_state=event_hub_target_state,
@@ -3034,6 +3045,7 @@ def _audit_policy_update(
             storage_endpoint=storage_endpoint,
             storage_account_access_key=storage_account_access_key,
             audit_actions_and_groups=audit_actions_and_groups,
+            required_fields=required_fields,
             retention_days=retention_days,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
@@ -3065,6 +3077,7 @@ def server_audit_policy_update(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
@@ -3087,6 +3100,7 @@ def server_audit_policy_update(
         storage_endpoint=storage_endpoint,
         storage_account_access_key=storage_account_access_key,
         audit_actions_and_groups=audit_actions_and_groups,
+        required_fields=required_fields,
         retention_days=retention_days,
         category_name='SQLSecurityAuditEvents',
         log_analytics_target_state=log_analytics_target_state,
@@ -3108,6 +3122,7 @@ def db_audit_policy_update(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
@@ -3130,6 +3145,7 @@ def db_audit_policy_update(
         storage_endpoint=storage_endpoint,
         storage_account_access_key=storage_account_access_key,
         audit_actions_and_groups=audit_actions_and_groups,
+        required_fields=required_fields,
         retention_days=retention_days,
         category_name='SQLSecurityAuditEvents',
         log_analytics_target_state=log_analytics_target_state,
@@ -4514,7 +4530,7 @@ def server_create(
     if minimal_tls_version is not None:
         kwargs['minimal_tls_version'] = minimal_tls_version
     else:
-        kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
+        kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2.value
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id

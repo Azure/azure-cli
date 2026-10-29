@@ -227,7 +227,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'transparent_data_encryptions_get')
 
     database_encryption_protector_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#DatabaseEncryptionProtectorOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#DatabaseEncryptionProtectorsOperations.{}',
         client_factory=get_sql_database_encryption_protector_operations)
 
     with self.command_group('sql db tde key',
