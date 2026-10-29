@@ -664,6 +664,17 @@ def load_arguments(self, _):
         c.argument('model_version', help='Cognitive Services account deployment model version.')
         c.argument('model_source', help='Cognitive Services account deployment model source.')
 
+    with self.argument_context('cognitiveservices account deployment create', arg_group='Model provider') as c:
+        c.argument('organization_name',
+                   help='Name of the organization using the Anthropic model. '
+                        'Required for Anthropic deployments. Specify together with --industry and --country.')
+        c.argument('industry',
+                   help='Industry of the organization using the Anthropic model, such as Law. '
+                        'Required for Anthropic deployments. Specify together with --organization-name and --country.')
+        c.argument('country', options_list=['--country', '--country-code'],
+                   help='ISO country name or code of the organization, such as "United States" or US. '
+                        'Required for Anthropic deployments. Specify together with --organization-name and --industry.')
+
     with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentScaleSettings') as c:
         c.argument(
             'scale_settings_scale_type', get_enum_type(DeploymentScaleType),
