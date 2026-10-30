@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Assign(AAZCommand):
     """Assign the user or system managed identities.
+
+    :example: Assign a system-assigned identity to a context cache
+        az storage context-cache identity assign --resource-group MyResourceGroup --name mycontextcache --system-assigned
+
+    :example: Assign a user-assigned identity to a context cache
+        az storage context-cache identity assign --resource-group MyResourceGroup --name mycontextcache --user-assigned /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
     """
 
     _aaz_info = {
@@ -210,7 +216,7 @@ class Assign(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "original-uri"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -219,7 +225,7 @@ class Assign(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "original-uri"},
                     path_format_arguments=self.url_parameters,
                 )
 

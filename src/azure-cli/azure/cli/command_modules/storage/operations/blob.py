@@ -90,7 +90,7 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
     if blob_access_point_configuration_unique_id is not None and not blob_access_point_configuration_name:
         from azure.cli.core.azclierror import RequiredArgumentMissingError
         raise RequiredArgumentMissingError(
-            '--blob-access-point-configuration-name is required with --blob-access-point-configuration-unique-id.')
+            'Specify --blob-access-point-configuration-name when using --blob-access-point-configuration-unique-id.')
     if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
                                              account_name=account_name, container_name=container_name):
         raise CLIError('The specified container already exists.')

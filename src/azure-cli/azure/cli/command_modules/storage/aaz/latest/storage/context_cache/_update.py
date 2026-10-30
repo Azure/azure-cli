@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a Context Cache.
+
+    :example: Update a context cache description
+        az storage context-cache update --resource-group MyResourceGroup --name mycontextcache --description 'Updated cache description'
     """
 
     _aaz_info = {
@@ -169,7 +172,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "original-uri"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -178,7 +181,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "original-uri"},
                     path_format_arguments=self.url_parameters,
                 )
 

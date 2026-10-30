@@ -147,8 +147,8 @@ examples:
     text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --sku Standard_LRS
   - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the eastus2euap region with account-scoped encryption key enabled for Table Service.
     text: az storage account create -n mystorageaccount -g MyResourceGroup --kind StorageV2 -l eastus2euap -t Account
-  - name: Create a storage account with per-service Shared Key settings and native data collaboration enabled.
-    text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --kind StorageV2 --sku Standard_LRS --allow-shared-key-access-for-blob false --allow-shared-key-access-for-file true --allow-storage-connectors true --allow-storage-data-shares true
+  - name: Create a storage account with per-service Shared Key settings and Blob Access Point configurations enabled.
+    text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --kind StorageV2 --sku Standard_LRS --allow-shared-key-access-for-blob false --allow-shared-key-access-for-file true --allow-blob-access-points true
   - name: Require user-bound delegation SAS tokens and block tokens that violate the policy.
     text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --kind StorageV2 --sku Standard_LRS --sas-expiration-period 1.00:00:00 --require-user-bound-user-delegation-sas true --require-user-bound-user-delegation-sas-action Block
 """

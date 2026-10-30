@@ -66,16 +66,16 @@ def _build_sas_policy(cmd, sas_expiration_period=None, sas_expiration_action=Non
                 require_user_bound_user_delegation_sas_action is not None]):
         return None
 
-    from azure.cli.core.azclierror import InvalidArgumentValueError
+    from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 
     if sas_expiration_period is None and sas_expiration_action is not None:
-        raise InvalidArgumentValueError('--sas-expiration-action can only be specified together '
-                                        'with --sas-expiration-period')
+        raise InvalidArgumentValueError(
+            'Specify --sas-expiration-period when using --sas-expiration-action.')
 
     if sas_expiration_period is None:
         if existing_sas_policy is None or existing_sas_policy.sas_expiration_period is None:
-            raise InvalidArgumentValueError(
-                '--sas-expiration-period is required when configuring a new SAS policy')
+            raise RequiredArgumentMissingError(
+                'Specify --sas-expiration-period when configuring a new SAS policy.')
         sas_expiration_period = existing_sas_policy.sas_expiration_period
 
     if sas_expiration_action is None:
@@ -111,22 +111,14 @@ def _build_shared_key_access_policy(cmd, blob=None, file=None, table=None, queue
     })
 
 
-def _build_data_collaboration_policy(cmd, allow_storage_connectors=None, allow_storage_data_shares=None,
-                                     allow_cross_tenant_data_sharing=None, allow_blob_access_points=None,
-                                     existing_policy=None):
-    settings = {
-        'allow_storage_connectors': allow_storage_connectors,
-        'allow_storage_data_shares': allow_storage_data_shares,
-        'allow_cross_tenant_data_sharing': allow_cross_tenant_data_sharing,
-        'allow_blob_access_points': allow_blob_access_points
-    }
-    if all(value is None for value in settings.values()):
+def _build_data_collaboration_policy(cmd, allow_blob_access_points=None, existing_policy=None):
+    if allow_blob_access_points is None:
         return None
 
     StorageDataCollaborationPolicyProperties = cmd.get_models('StorageDataCollaborationPolicyProperties')
-    return StorageDataCollaborationPolicyProperties(**{
-        name: value if value is not None else getattr(existing_policy, name) if existing_policy is not None else None
-        for name, value in settings.items()
+    return StorageDataCollaborationPolicyProperties(allow_blob_access_points=allow_blob_access_points, **{
+        name: getattr(existing_policy, name) if existing_policy is not None else None
+        for name in ('allow_storage_connectors', 'allow_storage_data_shares', 'allow_cross_tenant_data_sharing')
     })
 
 
@@ -135,14 +127,15 @@ def _build_turbo_tier(cmd, status=None, target_percent=None, existing_turbo_tier
         return None
     if target_percent is not None and not 10 <= target_percent <= 100:
         from azure.cli.core.azclierror import InvalidArgumentValueError
-        raise InvalidArgumentValueError('--turbo-tier-target-percent must be between 10 and 100.')
+        raise InvalidArgumentValueError('Specify a value between 10 and 100 for --turbo-tier-target-percent.')
 
     TurboTier = cmd.get_models('TurboTier')
     return TurboTier(
         status=status if status is not None
         else existing_turbo_tier.status if existing_turbo_tier is not None else None,
         target_percent=target_percent if target_percent is not None
-        else existing_turbo_tier.target_percent if existing_turbo_tier is not None else None)
+        else existing_turbo_tier.target_percent
+        if existing_turbo_tier is not None and status != 'Disabled' else None)
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument, line-too-long
@@ -175,8 +168,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            allowed_copy_scope=None, enable_extended_groups=None,
                            allow_shared_key_access_for_blob=None, allow_shared_key_access_for_file=None,
                            allow_shared_key_access_for_table=None, allow_shared_key_access_for_queue=None,
-                           allow_storage_connectors=None, allow_storage_data_shares=None,
-                           allow_cross_tenant_data_sharing=None, allow_blob_access_points=None,
+                           allow_blob_access_points=None,
                            turbo_tier_status=None, turbo_tier_target_percent=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
@@ -443,8 +435,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         cmd, blob=allow_shared_key_access_for_blob, file=allow_shared_key_access_for_file,
         table=allow_shared_key_access_for_table, queue=allow_shared_key_access_for_queue)
     params.data_collaboration_policy_properties = _build_data_collaboration_policy(
-        cmd, allow_storage_connectors=allow_storage_connectors, allow_storage_data_shares=allow_storage_data_shares,
-        allow_cross_tenant_data_sharing=allow_cross_tenant_data_sharing, allow_blob_access_points=allow_blob_access_points)
+        cmd, allow_blob_access_points=allow_blob_access_points)
     params.turbo_tier = _build_turbo_tier(cmd, status=turbo_tier_status, target_percent=turbo_tier_target_percent)
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
@@ -549,8 +540,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allowed_copy_scope=None, enable_extended_groups=None,
                            allow_shared_key_access_for_blob=None, allow_shared_key_access_for_file=None,
                            allow_shared_key_access_for_table=None, allow_shared_key_access_for_queue=None,
-                           allow_storage_connectors=None, allow_storage_data_shares=None,
-                           allow_cross_tenant_data_sharing=None, allow_blob_access_points=None,
+                           allow_blob_access_points=None,
                            turbo_tier_status=None, turbo_tier_target_percent=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
@@ -885,8 +875,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         table=allow_shared_key_access_for_table, queue=allow_shared_key_access_for_queue,
         existing_policy=instance.allow_shared_key_access_for_services)
     params.data_collaboration_policy_properties = _build_data_collaboration_policy(
-        cmd, allow_storage_connectors=allow_storage_connectors, allow_storage_data_shares=allow_storage_data_shares,
-        allow_cross_tenant_data_sharing=allow_cross_tenant_data_sharing, allow_blob_access_points=allow_blob_access_points,
+        cmd, allow_blob_access_points=allow_blob_access_points,
         existing_policy=instance.data_collaboration_policy_properties)
     params.turbo_tier = _build_turbo_tier(
         cmd, status=turbo_tier_status, target_percent=turbo_tier_target_percent, existing_turbo_tier=instance.turbo_tier)
