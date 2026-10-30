@@ -352,6 +352,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Whether password authentication is enabled.'
         )
 
+        fips_mode_arg_type = CLIArgumentType(
+            options_list=['--fips-mode'],
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            help='Enable or disable FIPS (Federal Information Processing Standards) mode. '
+                 'The service default is Disabled on creation. If omitted on update, the current value is preserved.'
+        )
+
         pg_bouncer_arg_type = CLIArgumentType(
             options_list=['--pg-bouncer'],
             action='store_true',
@@ -423,6 +430,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('admin_type', options_list=['--admin-type', '-t'],
                        arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
             c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
+            c.argument('fips_mode', arg_type=fips_mode_arg_type)
             c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
             c.argument('storage_type', default=None, arg_type=storage_type_arg_type)
             c.argument('iops', default=None, arg_type=iops_v2_arg_type)
@@ -533,6 +541,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
             c.argument('microsoft_entra_auth', arg_type=microsoft_entra_auth_arg_type)
             c.argument('password_auth', arg_type=password_auth_arg_type)
+            c.argument('fips_mode', arg_type=fips_mode_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('cluster_size', default=None, arg_type=update_node_count_arg_type)
             c.argument('zonal_resiliency', arg_type=zonal_resiliency_arg_type)
