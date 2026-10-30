@@ -36,6 +36,7 @@ class ContainerAppImageRegistryTest(unittest.TestCase):
             "sample.azurecr.io.example.com/app:v1",
             "sample.azurecr.cn.example.com/app:v1",
             "sample.azurecr.us.example.com/app:v1",
+            "sample.westus.geo.azurecr.io.example.com/app:v1",
         ):
             for username, password in ((None, None), ("user", "password")):
                 with self.subTest(image=image, username=username):
@@ -65,6 +66,15 @@ class ContainerAppImageRegistryTest(unittest.TestCase):
             "sample_name.azurecr.io",
             "sample-name.azurecr.io",
             "\u00e9sample.azurecr.io",
+            "\u212aample.azurecr.io",
+            "sample..geo.azurecr.io",
+            "sample.west_us.geo.azurecr.io",
+            "sample.westus.extra.geo.azurecr.io",
+            "sample.westus.notgeo.azurecr.io",
+            "user@sample.westus.geo.azurecr.io",
+            "sample.westus.geo.azurecr.io:443",
+            "\u212aample.westus.geo.azurecr.io",
+            "sample.\u212a.geo.azurecr.io",
             "https:",
         ):
             with self.subTest(server=server):
@@ -82,7 +92,17 @@ class ContainerAppImageRegistryTest(unittest.TestCase):
                 self.assertIsNone(app.acr)
 
     def test_containerapp_image_uses_credentials_for_its_acr_authority(self):
-        for server in ("sample.azurecr.io", "Sample.AzureCR.io", "sample.azurecr.cn", "sample.azurecr.us"):
+        for server in (
+            "sample.azurecr.io",
+            "Sample.AzureCR.io",
+            "sample.azurecr.cn",
+            "sample.azurecr.us",
+            "sample.westus.geo.azurecr.io",
+            "sample.eastus2.geo.azurecr.io",
+            "Sample.WestUS.GEO.AzureCR.io",
+            "sample.chinanorth3.geo.azurecr.cn",
+            "sample.usgovvirginia.geo.azurecr.us",
+        ):
             for reference in ("/team/app:v1", "/team/app@sha256:" + "0" * 64):
                 for username, password in ((None, None), ("user", None), (None, "password")):
                     with self.subTest(server=server, reference=reference, username=username):
@@ -156,3 +176,24 @@ class ContainerAppImageRegistryTest(unittest.TestCase):
         self.mocks["_get_acr_cred"].assert_not_called()
         self.assertIsNone(app.registry_server)
         self.assertIsNone(app.registry_pass)
+
+    def test_containerapp_image_defaults_infer_regional_registry_credentials(self):
+        server = "sample.westus.geo.azurecr.io"
+        app = mock.Mock(
+            image=server + "/team/app:v1",
+            registry_server=None, registry_user=None, registry_pass=None, acr=None
+        )
+        env = mock.Mock()
+        env.name = None
+        resource_group = mock.Mock()
+        resource_group.name = "group"
+        with mock.patch.object(_up_utils, "_get_app_env_and_group"), \
+                mock.patch.object(_up_utils, "_get_env_and_group_from_log_analytics"):
+            _up_utils._set_up_defaults(
+                self.cmd, "app", "group", None, "eastus", resource_group, env, app, False
+            )
+
+        self.mocks["_get_acr_cred"].assert_called_once_with(self.cmd.cli_ctx, "sample")
+        self.assertEqual(app.registry_server, server)
+        self.assertEqual(app.registry_user, "registry-user")
+        self.assertEqual(app.registry_pass, "registry-password")

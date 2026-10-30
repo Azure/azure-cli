@@ -893,6 +893,11 @@ def _get_acr_from_image(cmd, app):
         if not is_acr_url(registry_server):
             return
         registry_name = get_acr_name(registry_server)
+        registry_parts = registry_name.split(".")
+        if len(registry_parts) == 3 and registry_parts[2].lower() == "geo":
+            registry_name, region, _ = registry_parts
+            if not region.isascii() or not region.isalnum():
+                return
         if not registry_name.isascii() or not registry_name.isalnum():
             return
         registry_name = registry_name.lower()
