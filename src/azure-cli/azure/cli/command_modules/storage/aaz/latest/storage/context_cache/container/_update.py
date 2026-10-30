@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a container in a Context Cache.
+
+    :example: Update a context cache container description and expiration
+        az storage context-cache container update --resource-group MyResourceGroup --context-cache-name mycontextcache --name mycontainer --description 'Updated container description' --time-to-live 14
     """
 
     _aaz_info = {
@@ -115,7 +118,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "original-uri"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -124,7 +127,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "original-uri"},
                     path_format_arguments=self.url_parameters,
                 )
 

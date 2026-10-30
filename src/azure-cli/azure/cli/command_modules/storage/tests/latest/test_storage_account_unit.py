@@ -6,6 +6,7 @@
 import contextlib
 import io
 import json
+import shlex
 import unittest
 from unittest import mock
 
@@ -13,7 +14,7 @@ from azure.core.credentials import AccessToken
 from azure.cli.core import get_default_cli
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.storage import models
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.mgmt.storage.models import SasPolicy
 
 from azure.cli.command_modules.storage.operations.account import (
@@ -43,8 +44,8 @@ class StorageAccountSasPolicyTest(unittest.TestCase):
 
     def test_create_user_bound_sas_policy_requires_expiration_period(self):
         with self.assertRaisesRegex(
-                InvalidArgumentValueError,
-                '--sas-expiration-period is required when configuring a new SAS policy'):
+                RequiredArgumentMissingError,
+                'Specify --sas-expiration-period when configuring a new SAS policy.'):
             _build_sas_policy(
                 self.cmd,
                 require_user_bound_user_delegation_sas=True)
@@ -56,7 +57,7 @@ class StorageAccountSasPolicyTest(unittest.TestCase):
 
         with self.assertRaisesRegex(
                 InvalidArgumentValueError,
-                '--sas-expiration-action can only be specified together with --sas-expiration-period'):
+                'Specify --sas-expiration-period when using --sas-expiration-action.'):
             _build_sas_policy(
                 self.cmd,
                 sas_expiration_action='Block',
@@ -169,20 +170,13 @@ class StorageAccountPolicyTest(unittest.TestCase):
             {'blob': {'enabled': False}, 'file': {'enabled': True}, 'table': {'enabled': False}},
             properties['allowSharedKeyAccessForServices'])
 
-    def test_collaboration_policy_preserves_boolean_values(self):
-        settings = {
-            'allow_storage_connectors': 'allowStorageConnectors',
-            'allow_storage_data_shares': 'allowStorageDataShares',
-            'allow_cross_tenant_data_sharing': 'allowCrossTenantDataSharing',
-            'allow_blob_access_points': 'allowBlobAccessPoints'
-        }
+    def test_blob_access_point_policy_preserves_boolean_values(self):
         for operation in [self.create, self.update]:
-            for argument, property_name in settings.items():
-                for enabled in [True, False]:
-                    with self.subTest(operation=operation.__name__, argument=argument, enabled=enabled):
-                        properties = operation(**{argument: enabled})
-                        self.assertEqual(
-                            {property_name: enabled}, properties['dataCollaborationPolicyProperties'])
+            for enabled in [True, False]:
+                with self.subTest(operation=operation.__name__, enabled=enabled):
+                    properties = operation(allow_blob_access_points=enabled)
+                    self.assertEqual(
+                        {'allowBlobAccessPoints': enabled}, properties['dataCollaborationPolicyProperties'])
 
     def test_collaboration_update_preserves_other_settings(self):
         properties = self.update(
@@ -195,13 +189,11 @@ class StorageAccountPolicyTest(unittest.TestCase):
             'allowCrossTenantDataSharing': True, 'allowBlobAccessPoints': False
         }, properties['dataCollaborationPolicyProperties'])
 
-    def test_extended_groups_and_cross_tenant_sas_preserve_boolean_values(self):
+    def test_cross_tenant_sas_preserves_boolean_values(self):
         for operation in [self.create, self.update]:
             for enabled in [True, False]:
                 with self.subTest(operation=operation.__name__, enabled=enabled):
-                    properties = operation(
-                        enable_extended_groups=enabled, allow_cross_tenant_delegation_sas=enabled)
-                    self.assertIs(enabled, properties['enableExtendedGroups'])
+                    properties = operation(allow_cross_tenant_delegation_sas=enabled)
                     self.assertIs(enabled, properties['allowCrossTenantDelegationSas'])
 
     def test_turbo_tier_target_boundaries(self):
@@ -224,10 +216,17 @@ class StorageAccountPolicyTest(unittest.TestCase):
 
     def test_turbo_tier_update_preserves_unspecified_fields(self):
         existing = {'turbo_tier': models.TurboTier(status='Enabled', target_percent=35)}
-        properties = self.update(turbo_tier_status='Disabled', existing=existing)
-        self.assertEqual({'status': 'Disabled', 'targetPercent': 35}, properties['turboTier'])
+        properties = self.update(turbo_tier_status='Enabled', existing=existing)
+        self.assertEqual({'status': 'Enabled', 'targetPercent': 35}, properties['turboTier'])
         properties = self.update(turbo_tier_target_percent=50, existing=existing)
         self.assertEqual({'status': 'Enabled', 'targetPercent': 50}, properties['turboTier'])
+
+    def test_turbo_tier_disable_does_not_send_existing_target(self):
+        for target in (10, 35, 100):
+            with self.subTest(target=target):
+                existing = {'turbo_tier': models.TurboTier(status='Enabled', target_percent=target)}
+                properties = self.update(turbo_tier_status='Disabled', existing=existing)
+                self.assertEqual({'status': 'Disabled'}, properties['turboTier'])
 
     def test_create_serializes_sas_policy(self):
         properties = self.create(
@@ -285,14 +284,13 @@ class StorageAccountPolicyTest(unittest.TestCase):
                     self.cmd, resource_group_name='rg', account_name='storageaccount',
                     sku='Standard_ZRS', kind='StorageV2', location='westus',
                     allow_shared_key_access_for_blob=False, allow_blob_access_points=True,
-                    turbo_tier_status='Enabled', enable_extended_groups=False)
+                    turbo_tier_status='Enabled')
 
         method, properties = self.capture_request(create)
         self.assertEqual('PUT', method)
         self.assertEqual({'blob': {'enabled': False}}, properties['allowSharedKeyAccessForServices'])
         self.assertEqual({'allowBlobAccessPoints': True}, properties['dataCollaborationPolicyProperties'])
         self.assertEqual({'status': 'Enabled'}, properties['turboTier'])
-        self.assertIs(False, properties['enableExtendedGroups'])
 
     def test_update_sends_2026_09_01_patch_preserving_policy_fields(self):
         def update(client):
@@ -312,6 +310,106 @@ class StorageAccountPolicyTest(unittest.TestCase):
         self.assertNotIn('turboTier', properties)
 
 
+class StorageManagementCliTest(unittest.TestCase):
+
+    def setUp(self):
+        self.cli_ctx = get_default_cli()
+        self.client = mock.MagicMock()
+        account = models.StorageAccount(
+            location='westus', sku=models.Sku(name='Standard_ZRS'), kind='StorageV2',
+            encryption=models.Encryption(key_source='Microsoft.Storage'), provisioning_state='Succeeded')
+        self.client.storage_accounts.begin_create.return_value = account
+        self.client.storage_accounts.check_name_availability.return_value = \
+            models.CheckNameAvailabilityResult(name_available=True)
+        self.client.blob_containers.create.return_value = models.BlobContainer()
+        for target, value in [
+                ('azure.cli.core._profile.Profile.get_subscription', {
+                    'id': '00000000-0000-0000-0000-000000000000', 'name': 'unit-test',
+                    'tenantId': '00000000-0000-0000-0000-000000000000',
+                    'user': {'name': 'unit-test', 'type': 'user'}}),
+                ('azure.cli.command_modules.storage.commands.cf_sa', self.client.storage_accounts),
+                ('azure.cli.command_modules.storage.commands.cf_blob_container_mgmt',
+                 self.client.blob_containers),
+                ('azure.cli.command_modules.storage.operations.account.storage_client_factory', self.client)]:
+            patcher = mock.patch(target, return_value=value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        patcher = mock.patch(
+            'azure.mgmt.storage.operations.StorageAccountsOperations.get_properties',
+            autospec=True, return_value=account)
+        self.get_properties = patcher.start()
+        self.addCleanup(patcher.stop)
+        patcher = mock.patch(
+            'azure.mgmt.storage.operations.StorageAccountsOperations.update',
+            autospec=True, return_value=account)
+        self.update = patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def cmd(self, command):
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+            try:
+                result = self.cli_ctx.invoke(
+                    shlex.split(command) + ['--subscription', '00000000-0000-0000-0000-000000000000'],
+                    out_file=output)
+            except SystemExit as error:
+                result = error.code
+        self.assertEqual(0, result or 0, output.getvalue())
+
+    def assert_policies(self, parameters):
+        properties = parameters.as_dict()['properties']
+        expected = {
+            'allowCrossTenantDelegationSas': False,
+            'sasPolicy': {
+                'sasExpirationPeriod': '1.00:00:00', 'expirationAction': 'Block',
+                'requireUserBoundUserDelegationSas': False, 'requireUserBoundUserDelegationSasAction': 'Log'},
+            'allowSharedKeyAccessForServices': {
+                'blob': {'enabled': False}, 'file': {'enabled': True},
+                'table': {'enabled': False}, 'queue': {'enabled': True}},
+            'dataCollaborationPolicyProperties': {
+                'allowBlobAccessPoints': True},
+            'turboTier': {'status': 'Enabled', 'targetPercent': 10}
+        }
+        for name, value in expected.items():
+            self.assertEqual(value, properties[name], name)
+
+    def test_create_policy_arguments_reach_sdk(self):
+        self.cmd('storage account create -g rg -n storageaccount --location westus --sku Standard_ZRS '
+                 '--kind StorageV2 --sas-expiration-period 1.00:00:00 --sas-expiration-action Block '
+                 '--allow-cross-tenant-delegation-sas false '
+                 '--require-user-bound-user-delegation-sas false --require-user-bound-user-delegation-sas-action Log '
+                 '--allow-shared-key-access-for-blob false --allow-shared-key-access-for-file true '
+                 '--allow-shared-key-access-for-table false --allow-shared-key-access-for-queue true '
+                 '--allow-blob-access-points true '
+                 '--turbo-tier-status Enabled --turbo-tier-target-percent 10')
+        self.client.storage_accounts.begin_create.assert_called_once()
+        self.assert_policies(self.client.storage_accounts.begin_create.call_args.args[2])
+
+    def test_update_policy_arguments_reach_sdk(self):
+        self.cmd('storage account update -g rg -n storageaccount '
+                 '--sas-expiration-period 1.00:00:00 --sas-expiration-action Block '
+                 '--allow-cross-tenant-delegation-sas false '
+                 '--require-user-bound-user-delegation-sas false --require-user-bound-user-delegation-sas-action Log '
+                 '--allow-shared-key-access-for-blob false --allow-shared-key-access-for-file true '
+                 '--allow-shared-key-access-for-table false --allow-shared-key-access-for-queue true '
+                 '--allow-blob-access-points true '
+                 '--turbo-tier-status Enabled --turbo-tier-target-percent 10')
+        self.update.assert_called_once()
+        self.get_properties.assert_called_once()
+        self.assert_policies(self.update.call_args.kwargs['parameters'])
+
+    def test_container_attachment_arguments_reach_sdk(self):
+        self.cmd('storage container-rm create -g rg --storage-account storageaccount -n container '
+                 '--blob-access-point-configuration-name accesspoint '
+                 '--blob-access-point-configuration-unique-id 00000000-0000-0000-0000-000000000001')
+        self.client.blob_containers.create.assert_called_once()
+        properties = self.client.blob_containers.create.call_args.kwargs['blob_container'].as_dict()['properties']
+        self.assertEqual({
+            'blobAccessPointConfigurationName': 'accesspoint',
+            'blobAccessPointConfigurationUniqueId': '00000000-0000-0000-0000-000000000001'
+        }, properties['blobAccessPointConfiguration'])
+
+
 class StorageManagementArgumentHelpTest(unittest.TestCase):
 
     @staticmethod
@@ -327,9 +425,9 @@ class StorageManagementArgumentHelpTest(unittest.TestCase):
     def test_account_create_and_update_expose_policy_aliases(self):
         flags = [
             '--blob-shared-key', '--file-shared-key', '--table-shared-key', '--queue-shared-key',
-            '--allow-connectors', '--allow-data-shares', '--cross-tenant-sharing', '--allow-access-points',
+            '--allow-access-points',
             '--cross-tenant-sas', '--user-bound-sas', '--user-bound-action',
-            '--turbo-tier-status', '--turbo-tier-target', '--enable-extended-groups'
+            '--turbo-tier-status', '--turbo-tier-target'
         ]
         for operation in ['create', 'update']:
             with self.subTest(operation=operation):
@@ -337,6 +435,10 @@ class StorageManagementArgumentHelpTest(unittest.TestCase):
                 self.assertEqual(0, result, output)
                 for flag in flags:
                     self.assertIn(flag, output)
+                for flag in ['--allow-storage-connectors', '--allow-connectors',
+                             '--allow-storage-data-shares', '--allow-data-shares',
+                             '--allow-cross-tenant-data-sharing', '--cross-tenant-sharing']:
+                    self.assertNotIn(flag, output)
 
     def test_existing_in_scope_account_options_remain_public(self):
         cases = [

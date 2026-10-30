@@ -6,20 +6,23 @@
 import contextlib
 import io
 import json
+import shlex
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch, sentinel
 from urllib.parse import parse_qs, urlparse
 
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
+from azure.core.pipeline import PipelineContext, PipelineResponse
 from azure.core.pipeline.policies import ContentDecodePolicy
+from azure.core.utils import CaseInsensitiveDict
 from azure.cli.core import get_default_cli
 from azure.cli.core.aaz import AAZCommand, AAZUndefined
 from azure.cli.core.aaz._command_ctx import AAZCommandCtx
+from azure.cli.core.aaz._poller import AAZBasePolling, AAZNoPolling
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.command_modules.storage import StorageCommandsLoader
 from azure.cli.command_modules.storage.aaz.latest.storage.account import blob_access_point_configuration as bap
-from azure.cli.command_modules.storage.aaz.latest.storage.account import connector, data_share
 from azure.cli.command_modules.storage.aaz.latest.storage import context_cache as cache
 from azure.cli.command_modules.storage.aaz.latest.storage.context_cache import container
 from azure.cli.command_modules.storage.aaz.latest.storage.context_cache import identity
@@ -50,7 +53,6 @@ class StorageResourceAazTest(unittest.TestCase):
         schema = command_type.get_arguments_schema()
         defaults = {
             'resource_group': 'myrg', 'account_name': 'mystorage', 'location': 'eastus',
-            'connector_name': 'myconnector', 'data_share_name': 'myshare',
             'blob_access_point_configuration_name': 'myaccesspoint',
             'context_cache_name': 'mycache', 'context_cache_container_name': 'mycontainer',
             'name': 'mycache'
@@ -126,9 +128,6 @@ class StorageResourceAazTest(unittest.TestCase):
         loader = StorageCommandsLoader(self.cli_ctx)
         commands = loader.load_command_table(None)
         expected = {
-            'storage account connector': (
-                'create', 'update', 'delete', 'show', 'list', 'test-existing-connection', 'wait'),
-            'storage account data-share': ('create', 'update', 'delete', 'show', 'list', 'wait'),
             'storage account blob-access-point-configuration': (
                 'create', 'update', 'delete', 'show', 'list',
                 'test-existing-connection', 'test-proposed-connection', 'wait'),
@@ -136,6 +135,8 @@ class StorageResourceAazTest(unittest.TestCase):
             'storage context-cache container': ('create', 'update', 'delete', 'show', 'list', 'wait'),
             'storage context-cache identity': ('assign', 'remove', 'show')
         }
+        for excluded in ('storage account connector', 'storage account data-share'):
+            self.assertFalse([name for name in commands if name == excluded or name.startswith(excluded + ' ')])
         for group, operations in expected.items():
             for operation in operations:
                 name = group + ' ' + operation
@@ -147,120 +148,29 @@ class StorageResourceAazTest(unittest.TestCase):
                     if operation not in ('wait',):
                         self.assertEqual('2026-09-01', command._aaz_info['version'])
 
-    def test_data_share_create_requires_explicit_non_null_collections(self):
-        operation = self._operation(data_share.Create, data_share.Create.DataSharesCreate,
-                                    access_policies=[], assets=[])
-        method, body = self._request_body(operation)
-        self.assertEqual('PUT', method)
-        self.assertEqual({'accessPolicies': [], 'assets': []}, body['properties'])
-        self.assertEqual('eastus', body['location'])
-        for field in ('assets', 'access_policies'):
-            arg = data_share.Create.get_arguments_schema()._fields[field]
-            self.assertTrue(arg._required)
-            self.assertFalse(arg._nullable)
-        for assets in (None, 'null'):
-            with self.subTest(assets=assets):
-                args = ['-g', 'myrg', '--account-name', 'mystorage', '-n', 'myshare', '-l', 'eastus',
-                        '--access-policies', '[]']
-                if assets is not None:
-                    args += ['--assets', assets]
-                result, requests, _ = self._cli_request(
-                    data_share.Create, data_share.Create.DataSharesCreate, args)
-                self.assertNotEqual(0, result)
-                self.assertEqual([], requests)
+    def test_context_cache_help_examples_parse(self):
+        for command_type in [cache.Update, container.Create, container.Update, identity.Assign]:
+            examples = [line.strip() for line in command_type.__doc__.splitlines()
+                        if line.strip().startswith('az ')]
+            self.assertTrue(examples, command_type.AZ_NAME)
+            for example in examples:
+                with self.subTest(command=example):
+                    parsed = []
 
-    def test_data_share_patch_preserves_omitted_and_null_collections(self):
-        for args in ({}, {'assets': None, 'access_policies': None}):
-            with self.subTest(arguments=args):
-                operation = self._operation(
-                    data_share.Update, data_share.Update.DataSharesUpdate, description='updated', **args)
-                method, body = self._request_body(operation)
-                self.assertEqual('PATCH', method)
-                self.assertEqual({'properties': {'description': 'updated'}}, body)
-        result, requests, output = self._cli_request(
-            data_share.Update, data_share.Update.DataSharesUpdate,
-            ['-g', 'myrg', '--account-name', 'mystorage', '-n', 'myshare',
-             '--description', 'updated', '--assets', 'null', '--access-policies', 'null'])
-        self.assertEqual(0, result, output)
-        self.assertEqual({'properties': {'description': 'updated'}}, json.loads(requests[0].body))
+                    def capture(command, command_args):
+                        AAZCommand._handler(command, command_args)
+                        parsed.append(command.ctx.args)
 
-    def test_data_share_patch_replaces_collections_and_preserves_empty_arrays(self):
-        for assets, policies in (
-                ([], []),
-                ([{'asset_path': 'blobServices/default/containers/shared', 'display_name': 'shared'}],
-                 [{'principal_id': SUBSCRIPTION, 'tenant_id': SUBSCRIPTION, 'permission': 'Read'}])):
-            with self.subTest(assets=assets):
-                operation = self._operation(data_share.Update, data_share.Update.DataSharesUpdate,
-                                            assets=assets, access_policies=policies)
-                method, body = self._request_body(operation)
-                self.assertEqual('PATCH', method)
-                self.assertEqual(len(assets), len(body['properties']['assets']))
-                self.assertEqual(len(policies), len(body['properties']['accessPolicies']))
-                if assets:
-                    self.assertEqual('shared', body['properties']['assets'][0]['displayName'])
-                    self.assertEqual(SUBSCRIPTION, body['properties']['accessPolicies'][0]['principalId'])
-
-    def test_data_share_public_collection_arguments_serialize(self):
-        result, requests, output = self._cli_request(
-            data_share.Create, data_share.Create.DataSharesCreate,
-            ['-g', 'myrg', '--account-name', 'mystorage', '-n', 'myshare', '-l', 'eastus',
-             '--assets', json.dumps([{'asset-path': '/shared', 'display-name': 'shared'}]),
-             '--access-policies', json.dumps([{
-                 'principal-id': SUBSCRIPTION, 'tenant-id': SUBSCRIPTION, 'permission': 'Read'
-             }])])
-        self.assertEqual(0, result, output)
-        properties = json.loads(requests[0].body)['properties']
-        self.assertEqual([{'assetPath': '/shared', 'displayName': 'shared'}], properties['assets'])
-        self.assertEqual([{
-            'principalId': SUBSCRIPTION, 'tenantId': SUBSCRIPTION, 'permission': 'Read'
-        }], properties['accessPolicies'])
-
-    def test_connector_create_and_patch_use_discriminated_source(self):
-        source = {
-            'data_share': {
-                'connection': {'data_share': {'data_share_uri': 'azds://eastus:myshare:' + SUBSCRIPTION}},
-                'auth_properties': {'managed_identity': {'identity_resource_id': IDENTITY}}
-            }
-        }
-        operation = self._operation(connector.Create, connector.Create.ConnectorsCreate,
-                                    data_source_type='Azure_DataShare', source=source, test_connection=False)
-        method, body = self._request_body(operation)
-        self.assertEqual('PUT', method)
-        properties = body['properties']
-        self.assertFalse(properties['testConnection'])
-        self.assertEqual('Azure_DataShare', properties['dataSourceType'])
-        self.assertEqual('DataShare', properties['source']['type'])
-        self.assertEqual('DataShare', properties['source']['connection']['type'])
-        self.assertEqual('ManagedIdentity', properties['source']['authProperties']['type'])
-        self.assertEqual(IDENTITY, properties['source']['authProperties']['identityResourceId'])
-        operation = self._operation(
-            connector.Update, connector.Update.ConnectorsUpdate,
-            source={'data_share': {'auth_properties': {'managed_identity': {'identity_resource_id': IDENTITY}}}},
-            test_connection=False)
-        method, body = self._request_body(operation)
-        self.assertEqual('PATCH', method)
-        self.assertNotIn('connection', body['properties']['source'])
-        self.assertNotIn('dataSourceType', body['properties'])
-        self.assertNotIn('location', body)
-        self.assertFalse(body['properties']['testConnection'])
-
-    def test_connector_description_patch_does_not_reset_state(self):
-        operation = self._operation(connector.Update, connector.Update.ConnectorsUpdate, description='updated')
-        method, body = self._request_body(operation)
-        self.assertEqual('PATCH', method)
-        self.assertEqual({'properties': {'description': 'updated'}}, body)
-        result, requests, output = self._cli_request(
-            connector.Update, connector.Update.ConnectorsUpdate,
-            ['-g', 'myrg', '--account-name', 'mystorage', '-n', 'myconnector', '--description', 'updated'])
-        self.assertEqual(0, result, output)
-        self.assertEqual({'properties': {'description': 'updated'}}, json.loads(requests[0].body))
-        operation = self._operation(connector.Update, connector.Update.ConnectorsUpdate, state='Inactive')
-        self.assertEqual({'properties': {'state': 'Inactive'}}, self._request_body(operation)[1])
-        result, requests, output = self._cli_request(
-            connector.Update, connector.Update.ConnectorsUpdate,
-            ['-g', 'myrg', '--account-name', 'mystorage', '-n', 'myconnector', '--state', 'Inactive'])
-        self.assertEqual(0, result, output)
-        self.assertEqual({'properties': {'state': 'Inactive'}}, json.loads(requests[0].body))
+                    output = io.StringIO()
+                    with patch.object(command_type, '_handler', capture), \
+                            contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+                        try:
+                            result = self.cli_ctx.invoke(
+                                shlex.split(example)[1:] + ['--subscription', SUBSCRIPTION], out_file=output)
+                        except SystemExit as error:
+                            result = error.code
+                    self.assertEqual(0, result or 0, output.getvalue())
+                    self.assertEqual(1, len(parsed))
 
     def test_blob_access_point_all_sources_and_connection_types_serialize(self):
         for source_type, wire_type in SOURCE_TYPES.items():
@@ -327,8 +237,6 @@ class StorageResourceAazTest(unittest.TestCase):
 
     def test_connection_tests_send_required_bodies_and_are_long_running(self):
         cases = (
-            (connector.TestExistingConnection,
-             connector.TestExistingConnection.ConnectorsTestExistingConnection, {'unique_id': SUBSCRIPTION}),
             (bap.TestExistingConnection,
              bap.TestExistingConnection.BlobAccessPointConfigurationsTestExistingConnection,
              {'unique_id': SUBSCRIPTION}),
@@ -356,8 +264,6 @@ class StorageResourceAazTest(unittest.TestCase):
 
     def test_new_resource_operations_surface_service_errors(self):
         for command_type, operation_type in (
-                (connector.Show, connector.Show.ConnectorsGet),
-                (data_share.Show, data_share.Show.DataSharesGet),
                 (bap.Show, bap.Show.BlobAccessPointConfigurationsGet),
                 (cache.Show, cache.Show.ContextCachesGet)):
             with self.subTest(command=command_type.AZ_NAME):
@@ -399,6 +305,96 @@ class StorageResourceAazTest(unittest.TestCase):
         fields = container.Update.get_arguments_schema()._fields
         self.assertNotIn('model_name', fields)
         self.assertNotIn('provider', fields)
+
+    def _resource_patch_polling(self, command_type, no_wait=False, failed=False):
+        resource_path = (
+            'https://management.azure.com/subscriptions/' + SUBSCRIPTION +
+            '/resourceGroups/myrg/providers/Microsoft.Storage/contextCaches/mycache')
+        if command_type is container.Update:
+            resource_path += '/contextCacheContainers/mycontainer'
+        resource_url = resource_path + '?api-version=2026-09-01'
+        status_url = (
+            'https://management.azure.com/subscriptions/' + SUBSCRIPTION +
+            '/providers/Microsoft.Storage/locations/eastus/ContextCacheRPOperationStatuses/update'
+            '?api-version=2026-09-01')
+        resource = {
+            'id': resource_url.split('?')[0], 'name': 'mycache', 'location': 'eastus',
+            'properties': {'accountKind': 'Regional', 'description': 'updated'},
+            'identity': {'type': 'SystemAssigned', 'principalId': SUBSCRIPTION, 'tenantId': SUBSCRIPTION}
+        }
+        if command_type is container.Update:
+            resource = {
+                'id': resource_path, 'name': 'mycontainer',
+                'properties': {
+                    'modelName': 'gpt-4o', 'provider': 'OpenAI', 'timeToLive': 30, 'description': 'updated'
+                }
+            }
+            operation_type = command_type.ContextCacheContainersUpdate
+        else:
+            operation_type = command_type.ContextCachesUpdate
+        operation = self._operation(command_type, operation_type, no_wait=no_wait)
+        if command_type in (identity.Assign, identity.Remove):
+            command_type.ContextCachesGet(operation.ctx).on_200(
+                SimpleNamespace(context={ContentDecodePolicy.CONTEXT_NAME: resource}))
+            command_type.SubresourceSelector(ctx=operation.ctx, name='subresource')
+
+        requests = []
+
+        def send(request, **kwargs):
+            request.headers['x-ms-client-request-id'] = SUBSCRIPTION
+            requests.append((request.method, request.url))
+            if request.method == 'PATCH':
+                status_code, body = 202, None
+                headers = {'Azure-AsyncOperation': status_url, 'Location': status_url, 'Retry-After': '0'}
+            elif request.url == status_url:
+                status_code = 200
+                body = {'status': 'Failed' if failed else 'Succeeded', 'properties': None}
+                if failed:
+                    body['error'] = {'code': 'UpdateFailed', 'message': 'Resource update failed'}
+                headers = {}
+            else:
+                self.assertEqual(resource_url, request.url)
+                status_code, body, headers = 200, resource, {}
+            response = Mock(
+                status_code=status_code, headers=CaseInsensitiveDict(headers), request=request, reason='OK')
+            content = json.dumps(body) if body is not None else ''
+            response.text.return_value = content
+            response.body.return_value = content.encode()
+            context = PipelineContext(None, stream=False)
+            context[ContentDecodePolicy.CONTEXT_NAME] = body
+            return PipelineResponse(request, response, context)
+
+        with patch.object(operation.client._pipeline, 'run', side_effect=send), \
+                patch.object(AAZBasePolling, '_sleep'):
+            polling = operation()
+            if failed:
+                with self.assertRaisesRegex(HttpResponseError, 'UpdateFailed'):
+                    polling.run()
+            else:
+                polling.run()
+                polling.resource()
+
+        if no_wait:
+            self.assertIsInstance(polling, AAZNoPolling)
+            self.assertEqual([('PATCH', resource_url)], requests)
+        elif failed:
+            self.assertEqual([('PATCH', resource_url), ('GET', status_url)], requests)
+        else:
+            self.assertEqual(
+                [('PATCH', resource_url), ('GET', status_url), ('GET', resource_url)], requests)
+            self.assertEqual(resource, command_type.deserialize_output(
+                operation.ctx.vars.instance, client_flatten=True))
+
+    def test_cache_patch_polls_then_gets_original_resource(self):
+        for command_type in (cache.Update, container.Update, identity.Assign, identity.Remove):
+            for no_wait in (False, True):
+                with self.subTest(command=command_type.AZ_NAME, no_wait=no_wait):
+                    self._resource_patch_polling(command_type, no_wait=no_wait)
+
+    def test_cache_patch_polling_failure_does_not_get_resource(self):
+        for command_type in (cache.Update, container.Update, identity.Assign, identity.Remove):
+            with self.subTest(command=command_type.AZ_NAME):
+                self._resource_patch_polling(command_type, failed=True)
 
     def test_cache_create_public_system_identity_argument_serializes(self):
         result, requests, output = self._cli_request(
@@ -473,7 +469,6 @@ class StorageResourceAazTest(unittest.TestCase):
 
     def test_documented_polymorphic_cli_examples_build_requests(self):
         for command_type, operation_type in (
-                (connector.Create, connector.Create.ConnectorsCreate),
                 (bap.Create, bap.Create.BlobAccessPointConfigurationsCreate),
                 (bap.TestProposedConnection, bap.TestProposedConnection.BlobAccessPointConnectionTestsTestProposedConnection)):
             with self.subTest(command=command_type.AZ_NAME):
@@ -482,8 +477,6 @@ class StorageResourceAazTest(unittest.TestCase):
                 args = ['-g', 'myrg', '--account-name', 'mystorage', '--source', json.dumps(source)]
                 if command_type is not bap.TestProposedConnection:
                     args += ['-n', 'myresource', '-l', 'eastus']
-                if command_type is connector.Create:
-                    args += ['--data-source-type', 'Azure_DataShare']
                 result, requests, output = self._cli_request(command_type, operation_type, args)
                 self.assertEqual(0, result, output)
                 body = json.loads(requests[0].body)

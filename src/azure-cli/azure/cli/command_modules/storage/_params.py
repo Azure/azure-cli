@@ -585,22 +585,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE) as c:
             c.argument('enable_extended_groups', arg_type=get_three_state_flag(), is_preview=True,
                        help='Enable extended group support with local users feature, if set to true.')
-            for service in ['blob', 'file', 'table', 'queue']:
-                c.argument('allow_shared_key_access_for_{}'.format(service), arg_type=get_three_state_flag(),
-                           options_list=['--allow-shared-key-access-for-{}'.format(service),
-                                         '--{}-shared-key'.format(service)],
-                           arg_group='Shared Key Access',
-                           help='Allow or disallow Shared Key authorization for the {} service.'.format(service))
-            c.argument('allow_storage_connectors', arg_type=get_three_state_flag(), arg_group='Data Collaboration',
-                       options_list=['--allow-storage-connectors', '--allow-connectors'],
-                       help='Allow storage connectors to be created or managed on the storage account.')
-            c.argument('allow_storage_data_shares', arg_type=get_three_state_flag(), arg_group='Data Collaboration',
-                       options_list=['--allow-storage-data-shares', '--allow-data-shares'],
-                       help='Allow native storage data shares to be created or managed on the storage account.')
-            c.argument('allow_cross_tenant_data_sharing', arg_type=get_three_state_flag(),
-                       arg_group='Data Collaboration',
-                       options_list=['--allow-cross-tenant-data-sharing', '--cross-tenant-sharing'],
-                       help='Allow data sharing across Microsoft Entra tenants.')
+            c.argument('allow_shared_key_access_for_blob', arg_type=get_three_state_flag(),
+                       options_list=['--allow-shared-key-access-for-blob', '--blob-shared-key'],
+                       arg_group='Shared Key Access',
+                       help='Allow or disallow Shared Key authorization for the blob service.')
+            c.argument('allow_shared_key_access_for_file', arg_type=get_three_state_flag(),
+                       options_list=['--allow-shared-key-access-for-file', '--file-shared-key'],
+                       arg_group='Shared Key Access',
+                       help='Allow or disallow Shared Key authorization for the file service.')
+            c.argument('allow_shared_key_access_for_table', arg_type=get_three_state_flag(),
+                       options_list=['--allow-shared-key-access-for-table', '--table-shared-key'],
+                       arg_group='Shared Key Access',
+                       help='Allow or disallow Shared Key authorization for the table service.')
+            c.argument('allow_shared_key_access_for_queue', arg_type=get_three_state_flag(),
+                       options_list=['--allow-shared-key-access-for-queue', '--queue-shared-key'],
+                       arg_group='Shared Key Access',
+                       help='Allow or disallow Shared Key authorization for the queue service.')
             c.argument('allow_blob_access_points', arg_type=get_three_state_flag(), arg_group='Data Collaboration',
                        options_list=['--allow-blob-access-points', '--allow-access-points'],
                        help='Allow Blob Access Point configurations to be created or managed on the storage account.')

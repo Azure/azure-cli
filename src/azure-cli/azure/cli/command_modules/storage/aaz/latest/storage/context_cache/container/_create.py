@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create a container in a Context Cache.
 
     :example: Create a Context Cache Container
-        az storage context-cache container create --resource-group testrg --context-cache-name testaccount --context-cache-container-name gpt4-prompts --description Container for GPT-4 prompt caching --model-name gpt-4 --provider OpenAI --time-to-live 7
+        az storage context-cache container create --resource-group testrg --context-cache-name testaccount --context-cache-container-name gpt4-prompts --description 'Container for GPT-4 prompt caching' --model-name gpt-4 --provider OpenAI --time-to-live 7
     """
 
     _aaz_info = {
