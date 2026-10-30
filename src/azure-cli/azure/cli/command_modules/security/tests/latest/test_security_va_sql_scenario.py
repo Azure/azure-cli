@@ -9,6 +9,7 @@ import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, JMESPathCheck
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 
 
 class SecurityVaSqlScenarioTest(ScenarioTest):
@@ -44,6 +45,7 @@ class SecurityVaSqlScenarioTest(ScenarioTest):
           16. scans list
           17. settings delete
         """
+        self.name_replacer.register_name_pair(self.get_subscription_id(), MOCKED_SUBSCRIPTION_ID)
         self.kwargs.update({
             'srv': self.create_random_name('vasqlsrv', 20),
             'db': self.create_random_name('vasqldb', 20),
@@ -291,6 +293,8 @@ class SecurityVaSqlScenarioTest(ScenarioTest):
             'srv': self.create_random_name('vasqlsrv', 20),
             'db': self.create_random_name('vasqldb', 20),
         })
+
+        self.name_replacer.register_name_pair(self.get_subscription_id(), MOCKED_SUBSCRIPTION_ID)
 
         # ---- Resource setup (mirrors test_security_va_sql_paas_lifecycle) ----------
         admin = self.cmd('ad signed-in-user show').get_output_in_json()
