@@ -292,13 +292,6 @@ class Update(AAZCommand):
             help="If enabled (true) the snapshot the volume was created from will be automatically deleted after the volume create operation has finished.  Defaults to false",
             nullable=True,
         )
-        _args_schema.enable_subvolumes = AAZStrArg(
-            options=["--enable-subvolumes"],
-            arg_group="Properties",
-            help="Flag indicating whether subvolume operations are enabled on the volume",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
         _args_schema.placement_rules = AAZListArg(
             options=["--placement-rules"],
             arg_group="Properties",
@@ -714,7 +707,6 @@ class Update(AAZCommand):
                 properties.set_prop("coolnessPeriod", AAZIntType, ".coolness_period")
                 properties.set_prop("dataProtection", AAZObjectType)
                 properties.set_prop("deleteBaseSnapshot", AAZBoolType, ".delete_base_snapshot")
-                properties.set_prop("enableSubvolumes", AAZStrType, ".enable_subvolumes")
                 properties.set_prop("encryptionKeySource", AAZStrType, ".encryption_key_source")
                 properties.set_prop("exportPolicy", AAZObjectType)
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
