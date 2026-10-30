@@ -13,7 +13,7 @@ from ._arg import AAZArgumentsSchema, AAZArgEnum, AAZStrArg, AAZIntArg, AAZObjec
     AAZFreeFormDictArg, AAZFloatArg, AAZBaseArg, AAZBoolArg, AAZListArg, AAZResourceGroupNameArg, \
     AAZResourceLocationArg, AAZResourceIdArg, AAZSubscriptionIdArg, AAZUuidArg, AAZDateArg, AAZTimeArg, \
     AAZDateTimeArg, AAZDurationArg, AAZFileArg, AAZPasswordArg, AAZPaginationTokenArg, AAZPaginationLimitArg, \
-    AAZAnyTypeArg
+    AAZAnyTypeArg, AAZFileUploadArg
 from ._arg_fmt import AAZStrArgFormat, AAZIntArgFormat, AAZFloatArgFormat, AAZBoolArgFormat, AAZObjectArgFormat, \
     AAZDictArgFormat, AAZFreeFormDictArgFormat, AAZListArgFormat, AAZResourceLocationArgFormat, \
     AAZResourceIdArgFormat, AAZSubscriptionIdArgFormat, AAZUuidFormat, AAZDateFormat, AAZTimeFormat, \
@@ -24,7 +24,7 @@ from ._command import AAZCommand, AAZWaitCommand, AAZCommandGroup, \
     register_callback, register_command, register_command_group, load_aaz_command_table, \
     load_aaz_command_table_args_guided, link_helper
 from ._field_type import AAZIntType, AAZFloatType, AAZStrType, AAZBoolType, AAZDictType, AAZFreeFormDictType, \
-    AAZListType, AAZObjectType, AAZIdentityObjectType, AAZAnyType
+    AAZListType, AAZObjectType, AAZIdentityObjectType, AAZAnyType, AAZFileUploadType
 from ._operation import AAZHttpOperation, AAZJsonInstanceUpdateOperation, AAZGenericInstanceUpdateOperation, \
     AAZJsonInstanceDeleteOperation, AAZJsonInstanceCreateOperation
 from ._prompt import AAZPromptInput, AAZPromptPasswordInput
