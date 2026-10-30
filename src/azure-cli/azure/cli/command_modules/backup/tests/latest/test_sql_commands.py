@@ -5,6 +5,9 @@
 
 import time
 import unittest
+from io import BytesIO
+
+from vcr.request import Request
 
 from azure.cli.testsdk import ScenarioTest, record_only
 import json
@@ -13,6 +16,13 @@ import re
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.scenario_tests.recording_processors import RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
+
+
+class SqlBackupScenarioTest(ScenarioTest):
+    def _process_request_recording(self, request):
+        if not self.disable_recording and isinstance(request.body, BytesIO):
+            request = Request(request.method, request.uri, request.body.getvalue(), request.headers)
+        return super()._process_request_recording(request)
 
 
 class CrossRegionRestoreAccessTokenReplacer(RecordingProcessor):
@@ -69,7 +79,7 @@ item_id_sql_utk = (
 )
 
 
-class BackupTests(ScenarioTest, unittest.TestCase):
+class BackupTests(SqlBackupScenarioTest, unittest.TestCase):
     # SQL workload tests start here
     # Please make sure you have the following setup in place before running the tests -
 

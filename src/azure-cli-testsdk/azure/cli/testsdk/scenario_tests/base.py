@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from io import BytesIO
 import os
 import inspect
 import tempfile
@@ -12,7 +11,6 @@ import shutil
 import logging
 import threading
 import vcr
-from vcr.request import Request
 
 from .config import TestConfig
 from .const import ENV_TEST_DIAGNOSE
@@ -179,10 +177,6 @@ class ReplayableTest(IntegrationTestBase):  # pylint: disable=too-many-instance-
     def _process_request_recording(self, request):
         if self.disable_recording:
             return None
-
-        body = request.body
-        if isinstance(body, BytesIO):
-            request = Request(request.method, request.uri, body.getvalue(), request.headers)
 
         if self.in_recording:
             for processor in self.recording_processors + self.recording_post_processors:
