@@ -3,7 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import base64
+from datetime import datetime, timedelta, timezone
+import json
 import unittest
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import NameOID
 from knack.util import CLIError
 from azure.cli.core.azclierror import ValidationError
 from azure.core.exceptions import HttpResponseError
@@ -18,6 +25,7 @@ ADLOCATION = "northeurope"
 
 
 class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_account(self):
         self.kwargs.update({

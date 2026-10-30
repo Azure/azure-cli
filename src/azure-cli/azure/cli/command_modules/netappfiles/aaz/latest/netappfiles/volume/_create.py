@@ -30,9 +30,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-05-01",
+        "version": "2026-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2026-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2026-08-01"],
         ]
     }
 
@@ -306,13 +306,6 @@ class Create(AAZCommand):
             options=["--delete-base-snapshot"],
             arg_group="Properties",
             help="If enabled (true) the snapshot the volume was created from will be automatically deleted after the volume create operation has finished.  Defaults to false",
-        )
-        _args_schema.enable_subvolumes = AAZStrArg(
-            options=["--enable-subvolumes"],
-            arg_group="Properties",
-            help="Flag indicating whether subvolume operations are enabled on the volume",
-            default="Disabled",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.is_large_volume = AAZBoolArg(
             options=["--is-large-volume"],
@@ -625,7 +618,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-05-01",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }
@@ -669,7 +662,6 @@ class Create(AAZCommand):
                 properties.set_prop("creationToken", AAZStrType, ".creation_token", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("dataProtection", AAZObjectType)
                 properties.set_prop("deleteBaseSnapshot", AAZBoolType, ".delete_base_snapshot")
-                properties.set_prop("enableSubvolumes", AAZStrType, ".enable_subvolumes")
                 properties.set_prop("encryptionKeySource", AAZStrType, ".encryption_key_source")
                 properties.set_prop("exportPolicy", AAZObjectType)
                 properties.set_prop("isLargeVolume", AAZBoolType, ".is_large_volume")
