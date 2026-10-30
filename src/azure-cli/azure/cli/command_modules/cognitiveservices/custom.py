@@ -22,7 +22,7 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
     AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
     Identity, ResourceIdentityType as IdentityType, UserAssignedIdentity, \
-    ManagedClusterAgentHostingConfiguration, NetworkInjection, ScenarioType, \
+    ManagedClusterAgentHostingConfiguration, \
     Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
     CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod, \
     ConnectionPropertiesV2BasicResource, ConnectionUpdateContent, \
@@ -172,19 +172,6 @@ def _build_agent_hosting_models(
     return [hosting_configuration], user_assigned_identities
 
 
-def _build_network_injections(subnet):
-    if subnet is None:
-        return None
-
-    return [
-        NetworkInjection(
-            scenario=ScenarioType.AGENT,
-            subnet_arm_id=subnet,
-            use_microsoft_managed_network=False,
-        )
-    ]
-
-
 def create(  # pylint: disable=too-many-locals
     cmd,
     client,
@@ -205,7 +192,6 @@ def create(  # pylint: disable=too-many-locals
     agent_hosting_storage=None,
     agent_hosting_management_identity=None,
     agent_hosting_workload_identity=None,
-    subnet=None,
 ):  # pylint: disable=unused-argument
     """
     Create an Azure Cognitive Services account.
@@ -236,15 +222,14 @@ def create(  # pylint: disable=too-many-locals
     validate_resource_ids(
         cluster=agent_hosting_cluster, storage=agent_hosting_storage,
         management_identity=agent_hosting_management_identity,
-        workload_identity=agent_hosting_workload_identity, subnet=subnet)
-    network_injections = _build_network_injections(subnet)
+        workload_identity=agent_hosting_workload_identity)
     if agent_hosting_cluster is not None:
         resolved = prepare_agent_hosting(
             cmd, resource_group_name, account_name, location, tags,
             kind=kind, custom_domain=custom_domain,
             cluster=agent_hosting_cluster, storage=agent_hosting_storage,
             management_identity=agent_hosting_management_identity,
-            workload_identity=agent_hosting_workload_identity, subnet=subnet)
+            workload_identity=agent_hosting_workload_identity)
         agent_hosting_storage = resolved['storage']
         agent_hosting_management_identity = resolved['management_identity']
         agent_hosting_workload_identity = resolved['workload_identity']
@@ -257,8 +242,6 @@ def create(  # pylint: disable=too-many-locals
     )
     if hosting_configurations is not None:
         properties.agent_hosting_configurations = hosting_configurations
-    if network_injections is not None:
-        properties.network_injections = network_injections
 
     properties.allow_project_management = allow_project_management
     params = CognitiveServicesAccount(sku=sku, kind=kind, location=location,

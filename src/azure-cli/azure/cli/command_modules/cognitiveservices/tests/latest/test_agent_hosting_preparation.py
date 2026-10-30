@@ -33,9 +33,6 @@ _CLUSTER = _RG + '/providers/Microsoft.ContainerService/managedClusters/cluster'
 _STORAGE = _RG + '/providers/Microsoft.Storage/storageAccounts/storage'
 _MANAGEMENT = _RG + '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/management'
 _WORKLOAD = _RG + '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/workload'
-_VNET = _RG + '/providers/Microsoft.Network/virtualNetworks/vnet'
-_NODE_SUBNET = _VNET + '/subnets/nodes'
-_AGENT_SUBNET = _VNET + '/subnets/agents'
 _PREFIX = 'azure.cli.command_modules.cognitiveservices._agent_hosting.'
 _PREFLIGHT_PREFIX = 'azure.cli.command_modules.cognitiveservices._agent_hosting_preflight.'
 
@@ -75,7 +72,6 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 'workloadRuntime': 'KataVmIsolation', 'nodeImageVersion': 'AKSAzureLinux-V3katagen2-202608.14.0',
                 'nodeLabels': {'agents.ai.azure.com/sandbox-node': 'true'},
                 'securityProfile': {'sshAccess': 'Disabled'}, 'provisioningState': 'Succeeded',
-                'vnetSubnetID': _NODE_SUBNET,
             }},
         ]
         self.storage = {
@@ -200,11 +196,11 @@ class AgentHostingPreparationTests(unittest.TestCase):
             return StorageAccount(self.storage)
         raise ResourceNotFoundError('Not found')
 
-    def _prepare(self, management=True, workload=True, storage=True, subnet=None):
+    def _prepare(self, management=True, workload=True, storage=True):
         preparation = build_request(
             SimpleNamespace(cli_ctx=self.cli_ctx), 'rg', 'foundry', 'westus',
             cluster=_CLUSTER, management_identity=_MANAGEMENT if management else None,
-            workload_identity=_WORKLOAD if workload else None, storage=_STORAGE if storage else None, subnet=subnet)
+            workload_identity=_WORKLOAD if workload else None, storage=_STORAGE if storage else None)
         assignments = [
             self._assignment('management-principal', 'Reader', _CLUSTER),
             self._assignment('management-principal', 'Kubernetes Extension Contributor', _CLUSTER),
@@ -393,13 +389,13 @@ class AgentHostingPreparationTests(unittest.TestCase):
         client = mock.Mock()
         with mock.patch(_PREFLIGHT_PREFIX + 'validate_resource_ids', wraps=validate_resource_ids) as validate:
             result = create(SimpleNamespace(cli_ctx=self.cli_ctx), client, 'rg', 'foundry', 'S0', 'AIServices', 'westus',
-                            custom_domain='actual-domain', agent_hosting_cluster=_CLUSTER, subnet=_AGENT_SUBNET)
+                            custom_domain='actual-domain', agent_hosting_cluster=_CLUSTER)
         validate.assert_called_once()
         self.assertIs(result, client.begin_create.return_value)
         self.assertEqual(self.cognitive.check_domain_availability.call_args.args[0].kind, 'AIServices')
         payload = client.begin_create.call_args.args[2].as_dict()
         self.assertEqual(payload['properties']['customSubDomainName'], 'actual-domain')
-        self.assertEqual(payload['properties']['networkInjections'][0]['subnetArmId'], _AGENT_SUBNET)
+        self.assertNotIn('networkInjections', payload['properties'])
         self.clients['resource'].resource_groups.create_or_update.assert_not_called()
         self.clients['resource'].resources.get_by_id.assert_not_called()
 
@@ -719,47 +715,17 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 self.assertTrue(any('Preflight check failed: Network policy' in line for line in logs.output))
                 self._assert_no_writes()
 
-    def test_network_policy_is_required_for_pod_subnet_networking(self):
-        self.cluster['properties']['networkProfile'].update(
-            networkPluginMode=None, networkPolicy='none', networkDataplane='azure')
-        for pool in self.pools:
-            pool['properties']['podSubnetID'] = _VNET + '/subnets/pods'
+    def test_kubenet_is_rejected_even_with_overlay(self):
+        self.cluster['properties']['networkProfile']['networkPlugin'] = 'kubenet'
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, self._prepare())
         self._assert_no_writes()
-
-    def test_pod_subnet_networking_uses_child_pool_evidence(self):
-        self.cluster['properties']['networkProfile']['networkPluginMode'] = None
-        for pool in self.pools:
-            pool['properties']['podSubnetID'] = _VNET + '/subnets/pods'
-        preflight(self.cli_ctx, self._prepare())
-
-    def test_pod_subnet_missing_on_any_pool_is_rejected(self):
-        self.cluster['properties']['networkProfile']['networkPluginMode'] = None
-        for missing in range(len(self.pools)):
-            with self.subTest(pool=self.pools[missing]['name']):
-                for index, pool in enumerate(self.pools):
-                    pool['properties']['podSubnetID'] = None if index == missing else _VNET + '/subnets/pods'
-                with self.assertRaises(ValidationError):
-                    preflight(self.cli_ctx, self._prepare())
-                self._assert_no_writes()
-
-    def test_kubenet_is_rejected_even_with_overlay_or_pod_subnets(self):
-        self.cluster['properties']['networkProfile']['networkPlugin'] = 'kubenet'
-        for mode in ('overlay', None):
-            with self.subTest(mode=mode):
-                self.cluster['properties']['networkProfile']['networkPluginMode'] = mode
-                for pool in self.pools:
-                    pool['properties']['podSubnetID'] = _VNET + '/subnets/pods'
-                with self.assertRaises(ValidationError):
-                    preflight(self.cli_ctx, self._prepare())
-                self._assert_no_writes()
 
     def test_explicit_azure_linux_3_os_sku_is_accepted(self):
         self.pools[1]['properties']['osSKU'] = 'AzureLinux3'
         preflight(self.cli_ctx, self._prepare())
 
-    def test_node_subnet_only_networking_is_rejected(self):
+    def test_non_overlay_networking_is_rejected(self):
         self.cluster['properties']['networkProfile']['networkPluginMode'] = None
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, self._prepare())
@@ -828,20 +794,6 @@ class AgentHostingPreparationTests(unittest.TestCase):
         preparation = replace(preparation, management_identity=_resolve_resources(preparation).workload_identity)
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, preparation)
-        self._assert_no_writes()
-
-    def test_managed_overlay_does_not_require_node_subnet_or_vnet_permission(self):
-        self.pools[1]['properties']['vnetSubnetID'] = None
-        self.roles['Owner']['permissions'][0]['notActions'] = ['Microsoft.Network/*']
-        for subnet in (None, _AGENT_SUBNET, _AGENT_SUBNET.replace(_SUB, '11111111-1111-1111-1111-111111111111')):
-            with self.subTest(subnet=subnet):
-                checked = preflight(self.cli_ctx, self._prepare(subnet=subnet))
-                self.assertEqual(checked.resources.subnet, subnet)
-                self.clients['resource'].resources.get_by_id.assert_not_called()
-                self.assertTrue(all(call.args[0] == _SUB
-                                    for call in self.clients['subscription'].subscriptions.get.call_args_list))
-                self.assertFalse(any('Microsoft.Network/' in str(check['expected']) for check in checked.checks))
-                self._assert_no_writes()
         self._assert_no_writes()
 
     def test_unreadable_resources_are_unverified_not_absent(self):
@@ -1084,7 +1036,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
 
 class AgentHostingValueTests(unittest.TestCase):
     def test_resource_type_validation(self):
-        for key in ('cluster', 'storage', 'management_identity', 'workload_identity', 'subnet'):
+        for key in ('cluster', 'storage', 'management_identity', 'workload_identity'):
             with self.subTest(key=key):
                 with self.assertRaises(InvalidArgumentValueError):
                     validate_resource_ids(**{

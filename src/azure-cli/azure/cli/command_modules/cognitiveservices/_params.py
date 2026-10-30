@@ -308,12 +308,6 @@ def load_arguments(self, _):
         )
 
     with self.argument_context(
-        "cognitiveservices account create", arg_group="Network"
-    ) as c:
-        c.argument("subnet", options_list=["--agent-subnet"],
-                   help="ARM resource ID of the subnet for agent network injection.")
-
-    with self.argument_context(
         "cognitiveservices account update", arg_group="AI Services"
     ) as c:
         c.argument(

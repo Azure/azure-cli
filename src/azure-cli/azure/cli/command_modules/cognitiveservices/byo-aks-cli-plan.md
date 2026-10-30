@@ -10,8 +10,8 @@ Based on [Azure/azure-rest-api-specs#45245](https://github.com/Azure/azure-rest-
 
 ### User Scenario
 
-1. Prepare a supported AKS cluster and an agent subnet.
-2. Create the Account with `--agent-hosting-cluster` and, when needed, `--agent-subnet`. Omit the Storage and identity arguments to let the CLI create and configure them automatically.
+1. Prepare a supported AKS cluster.
+2. Create the Account with `--agent-hosting-cluster`. Omit the Storage and identity arguments to let the CLI create and configure them automatically.
 3. Create the Project with `az cognitiveservices account project create`.
 4. Prepare a model deployment and an ACR for the Hosted Agent. Grant `AcrPull` to the Project identity and the AKS kubelet identity, then create the Project's Container Registry connection. Configure Application Insights separately when telemetry is needed.
 5. Configure azd with the Project endpoint, model name, ACR, and BYO AKS resource IDs, then deploy and invoke the Hosted Agent.
@@ -22,7 +22,7 @@ The Account command prepares the Account-level BYO AKS dependencies. Project, mo
 
 ## 2. API Specification
 
-The service API represents agent hosting configuration, network injection, and account identity as separate properties. The selected CLI design accepts flattened arguments for one hosting configuration and wraps it in a one-item array for the API, with the optional subnet supplied through `--agent-subnet`.
+The service API represents agent hosting configuration and account identity as separate properties. The selected CLI design accepts flattened arguments for one hosting configuration and wraps it in a one-item array for the API.
 
 ### 2.1 Agent Hosting Configuration
 
@@ -37,21 +37,9 @@ The service API represents agent hosting configuration, network injection, and a
 | `clusterResourceId` | `arm-id` | Yes | Customer-owned AKS managed cluster (`Microsoft.ContainerService/managedClusters`). |
 | `storageAccountResourceId` | `arm-id` | Yes | Customer-owned storage account (`Microsoft.Storage/storageAccounts`). |
 
-### 2.2 Network Injection
-
-Network injection is configured on `AccountProperties.network_injections`:
-
-* `scenario`: `"agent"` (`ScenarioType.AGENT`)
-* `subnet_arm_id`: Subnet ARM resource ID (`Microsoft.Network/virtualNetworks/subnets`)
-* `use_microsoft_managed_network`: `False`
-
-The optional `--agent-subnet` maps to REST `networkInjections[0].subnetArmId` / SDK `network_injections[0].subnet_arm_id`. When omitted, the CLI does not send `networkInjections`.
-
----
-
 ## 3. CLI Argument Options
 
-Target command: `az cognitiveservices account create` (hosting arguments are marked `is_preview=True`; `--agent-subnet` is not).
+Target command: `az cognitiveservices account create` (hosting arguments are marked `is_preview=True`).
 
 ### 3.1 Option A: JSON Array (Not Selected)
 
@@ -60,7 +48,6 @@ Alternative preserving the `AgentHostingConfiguration[]` shape through an inline
 | CLI Option | Python Argument | Mapped SDK Target | Requirement | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `--agent-hosting` | `agent_hosting` | `properties.agent_hosting_configurations` & `identity.user_assigned_identities` | Required when BYO AKS is used | JSON array (or `@<file>`) containing one object: required `clusterResourceId` and optional Storage/identity IDs. CLI supplies `name` and `hostingType` internally. |
-| `--agent-subnet` | `subnet` | `properties.network_injections[0].subnet_arm_id` | Optional | Subnet ARM resource ID. |
 
 #### Example (Option A)
 
@@ -72,7 +59,6 @@ az cognitiveservices account create \
     --sku S0 \
     -l westus \
     --custom-domain foundrybyocaccount \
-    --agent-subnet "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1" \
     --agent-hosting '[
       {
         "clusterResourceId": "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1",
@@ -95,7 +81,6 @@ Selected for the single-configuration scope, following the repository guideline 
 | `--agent-hosting-storage` | `agent_hosting_storage` | `agent_hosting_configurations[0].storage_account_resource_id` | Optional; create if omitted, otherwise check/reuse |
 | `--agent-hosting-management-identity` | `agent_hosting_management_identity` | `agent_hosting_configurations[0].hosting_management_identity_resource_id` & `identity.user_assigned_identities` | Optional; create if omitted, otherwise reuse (automatically attached to account identity) |
 | `--agent-hosting-workload-identity` | `agent_hosting_workload_identity` | `agent_hosting_configurations[0].workload_identity_resource_id` | Optional; create if omitted, otherwise reuse (not attached to account identity) |
-| `--agent-subnet` | `subnet` | `network_injections[0].subnet_arm_id` | Optional |
 
 #### Example (Option B, Full Arguments)
 
@@ -110,13 +95,12 @@ az cognitiveservices account create \
     --agent-hosting-cluster "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1" \
     --agent-hosting-storage "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/storage1" \
     --agent-hosting-management-identity "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/account-control-plane" \
-    --agent-hosting-workload-identity "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aks-workload" \
-    --agent-subnet "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"
+    --agent-hosting-workload-identity "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aks-workload"
 ```
 
 #### Example (Option B, Minimal BYO AKS Arguments)
 
-Only the cluster ID is supplied for BYO AKS; Storage and both identities are created automatically. No network injection is configured without `--agent-subnet`.
+Only the cluster ID is supplied for BYO AKS; Storage and both identities are created automatically.
 
 ```bash
 az cognitiveservices account create \
@@ -135,12 +119,11 @@ az cognitiveservices account create \
 ## 4. Implementation Notes
 
 1. **Trigger & Argument Validation**:
-   * Register the four `--agent-hosting-*` resource ID arguments in `_params.py`, defaulting to `None`. Expose the network argument as `--agent-subnet` (Python argument `subnet`).
-   * If all hosting arguments and `--agent-subnet` are `None` (not provided): preserve existing behavior (do not send empty `agentHostingConfigurations` or `networkInjections` arrays).
+   * Register the four `--agent-hosting-*` resource ID arguments in `_params.py`, defaulting to `None`.
+   * If all hosting arguments are `None` (not provided): preserve existing behavior (do not send an empty `agentHostingConfigurations` array).
    * When `--agent-hosting-cluster` is supplied, `account create` runs preflight, creates/reuses dependencies and configures prerequisite grants, then creates the account. No additional switch is required.
    * Require the cluster ID for BYO AKS and resolve optional fields before constructing the request. Resolve each identity independently: create if omitted, otherwise reuse. Reject empty/non-string values and validate supplied ARM IDs once before model construction.
    * Build one `ManagedClusterAgentHostingConfiguration` with internal values `name="default"` and `hostingType="ManagedCluster"`, and wrap it in a one-item list for the API.
-   * Handle `--agent-subnet` separately from the hosting model builder, then construct `NetworkInjection` as in Section 2.2. Hosting and subnet inputs are independent; omit each property when its corresponding inputs are not provided.
 2. **Account Identity Construction (`custom.py`)**:
    * Keep existing `has_system_identity = bool(assign_identity or allow_project_management)` logic in `create()`.
    * Add the resolved hosting-management identity to `user_assigned_identities` (do not attach the workload identity to the account identity).
@@ -150,7 +133,7 @@ az cognitiveservices account create \
      * `SystemAssigned` when `has_system_identity` is present without BYO AKS (unchanged existing behavior).
 3. **Validation Boundary & Isolation**:
    * **CLI**: Checks hosting inputs, non-empty strings, and `is_valid_resource_id()` syntax. When `--agent-hosting-cluster` is supplied, perform the read-only preflight checks below before Azure writes.
-   * **Zero Impact on Existing Commands**: All new arguments are scoped to `cognitiveservices account create`, with `--agent-hosting-*` under `Agent Hosting` and `--agent-subnet` under `Network`. Shared helpers in `_utils.py` are not modified, and all new `create()` parameters default to `None`.
+   * **Zero Impact on Existing Commands**: All new arguments are scoped to `cognitiveservices account create`, with `--agent-hosting-*` under `Agent Hosting`. Shared helpers in `_utils.py` are not modified, and all new `create()` parameters default to `None`.
    * **REST Service (Vienna RP)**: Validates configuration shape, resource types, distinct identities, Hosting UAMI attachment and Account/AKS/Storage subscription alignment. Provisioning checks AKS region, OIDC/Workload Identity, CNI, Kata/labels and Workload client/tenant IDs. ARM authorization failures are not static RBAC validation.
 
 ### 4.1 Preflight Checks
@@ -158,11 +141,10 @@ az cognitiveservices account create \
 Preflight is read-only and completes before any Azure writes. Report each check's name, resource/scope, observed/expected state, missing evidence, and remediation with `PASS`, `FAIL`, `UNVERIFIED`, or `NOT_APPLICABLE`. Mandatory `FAIL`/`UNVERIFIED` stops provisioning.
 
 1. **Inputs and resources**: Validate resource IDs once in `custom.create()`; distinguish malformed, absent and unreadable resources. The target RG must exist; missing RG fails before writes, and read/authentication errors are not treated as absence. Account, AKS and Storage must share a subscription and region; UAMIs may differ, but referenced hosting resources must share a tenant. Require non-empty `principalId` on both UAMIs and `clientId`/`tenantId` on Workload UAMI; check reused identities during preflight and new identities after creation. For planned resources, check request properties and permissions at the existing RG, not GETs on future resources.
-2. **AKS cluster**: Require Standard AKS (no pricing-tier restriction), Kubernetes >= 1.31, managed identity, readable OIDC issuer, Workload Identity, and `Succeeded` state; reject Automatic/Arc. Require `networkPlugin=azure` and either `networkPluginMode=overlay` or a non-empty pool list with `podSubnetID` on every pool, matching Vienna. Reject kubenet/Node Subnet; check network policy separately under A11. Do not modify the cluster.
+2. **AKS cluster**: Require Standard AKS (no pricing-tier restriction), Kubernetes >= 1.31, managed identity, readable OIDC issuer, Workload Identity, and `Succeeded` state; reject Automatic/Arc. Require `networkPlugin=azure` and `networkPluginMode=overlay`. Reject kubenet and non-Overlay networking; check network policy separately under A11. Do not modify the cluster.
 3. **Node pools**: Require a `Succeeded` System pool with >= 4 vCPU / 16 GiB. One User pool must simultaneously satisfy Azure Linux, `KataVmIsolation`, >= 1 current node, >= 8 vCPU / 32 GiB, image `AKSAzureLinux-V3katagen2-202608.14.0` or later in the same series, case-sensitive label `agents.ai.azure.com/sandbox-node=true`, disabled SSH, and `Succeeded` state. Autoscaling capacity does not replace the current-node requirement. Read AgentPool child resources; never combine different pools' partial results. Recommended VM SKU names are not hard requirements.
 4. **Supplied Storage**: Require the Account region, StorageV2/Hot, HNS disabled, HTTPS only, TLS >= 1.2, shared keys and anonymous Blob disabled, and a valid HTTPS Blob endpoint. Missing/unknown zone redundancy only warns. The public-network baseline requires `publicNetworkAccess=Enabled` and firewall `defaultAction=Allow`; private/restricted Storage is `NOT_APPLICABLE` for this check, with an unverified-network warning, and may continue. API/read/endpoint failures still block.
-5. **Agent subnet**: Keep input-format validation and `NetworkInjection` mapping only, including subnet-only calls. Do not read the Agent subnet, VNet or Node subnet, perform subnet preflight, or query subscriptions solely because of `--agent-subnet`. Missing `vnetSubnetID` on a managed Overlay pool is not a failure; CNI Pod Subnet checks remain separate.
-6. **Permissions**: Check required reads, Account creation, Hosting UAMI assign/action and omitted UAMI/Storage creation. Determine creation permissions from omitted inputs, not failed reads; use each target ARM ID's RG when the resource is absent and deduplicate the shared UAMI creation check. Workload UAMI needs no operator assign/action; G02 covers its FIC-management grant. Require `roleAssignments/write` at the actual resource or target RG only for Assignment branches below. Retain `Microsoft.ContainerService/managedClusters/write` at the AKS parent RG; remove RG-creation and VNet-write checks.
+5. **Permissions**: Check required reads, Account creation, Hosting UAMI assign/action and omitted UAMI/Storage creation. Determine creation permissions from omitted inputs, not failed reads; use each target ARM ID's RG when the resource is absent and deduplicate the shared UAMI creation check. Workload UAMI needs no operator assign/action; G02 covers its FIC-management grant. Require `roleAssignments/write` at the actual resource or target RG only for Assignment branches below. Retain `Microsoft.ContainerService/managedClusters/write` at the AKS parent RG; remove RG-creation and VNet-write checks.
 
 Use ARM `permissions.list_for_resource_group` / `list_for_resource` for operator permissions, matching concrete Actions case-insensitively after each Permission's NotActions. Do not decode login tokens or resolve operator groups locally. These APIs describe the caller, not UAMIs: preserve MI validation using actual principal IDs, inherited assignments, role definitions, Actions/NotActions and DataActions/NotDataActions. G03 Blob access cannot be inferred from management-plane permissions. Exclusions are local to each grant. Missing/unverifiable permission blocks writes; Validation branches never repair grants. Require unconditional grants without claiming full evaluation of conditions, deny assignments, tenant policy or RBAC propagation.
 
@@ -184,7 +166,7 @@ Unlike the reference's single ARM deployment, az uses sequential SDK calls. Afte
 Read-only preflight: validate supplied access and operator authority
     -> SDK: create omitted UAMIs/Storage in the existing RG; reference supplied resources
     -> SDK: ensure Assignment grants G01-G03; wait for completion
-    -> SDK: client.begin_create(...) with resolved hosting/network/identity models
+    -> SDK: client.begin_create(...) with resolved hosting and identity models
 ```
 
 If both identities and Storage are supplied with all Validation checks passed, skip dependency writes.
@@ -267,22 +249,22 @@ Keep deterministic `uuid.uuid5` assignment names. A 409 is successful only for `
 
 | File Path | Planned Change |
 | :--- | :--- |
-| `src/azure-cli/azure/cli/command_modules/cognitiveservices/_params.py` | Register the four `--agent-hosting-*` resource ID arguments (preview) and `--agent-subnet`; do not expose hosting `name` or `hostingType`. Apply the required/default rules in Section 3.2. |
-| `src/azure-cli/azure/cli/command_modules/cognitiveservices/custom.py` | Run preflight and SDK dependency preparation before the existing Account model construction and `client.begin_create(...)`; preserve hosting, network injection, and identity mappings. |
+| `src/azure-cli/azure/cli/command_modules/cognitiveservices/_params.py` | Register the four `--agent-hosting-*` resource ID arguments (preview); do not expose hosting `name` or `hostingType`. Apply the required/default rules in Section 3.2. |
+| `src/azure-cli/azure/cli/command_modules/cognitiveservices/custom.py` | Run preflight and SDK dependency preparation before the existing Account model construction and `client.begin_create(...)`; preserve hosting and identity mappings. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/_help.py` | Add a BYO AKS account creation example. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/_agent_hosting.py` | Prepare dependencies/grants from immutable preflight results; log progress/errors without a local journal or ARM deployment. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/_agent_hosting_preflight.py` | Implement Section 4.1; return resolved IDs, resources, check results and pending grants. Keep SDK/RBAC caches local; no Azure/filesystem writes. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/_client_factory.py` | Create subscription-scoped BYO AKS SDK clients. |
-| `src/azure-cli/azure/cli/command_modules/cognitiveservices/tests/latest/test_agent_hosting.py` | Use focused `ScenarioTest` coverage for CLI argument binding and unit tests for validation, serialized wire payload (`agentHostingConfigurations`, `networkInjections`, `identity`), hosting/subnet combinations, and non-BYO regression. |
+| `src/azure-cli/azure/cli/command_modules/cognitiveservices/tests/latest/test_agent_hosting.py` | Use focused `ScenarioTest` coverage for CLI argument binding and unit tests for validation, serialized wire payload (`agentHostingConfigurations`, `identity`), and non-BYO regression. |
 | `src/azure-cli/azure/cli/command_modules/cognitiveservices/tests/latest/test_agent_hosting_preparation.py` | Test Section 4.1, all eight dependency/grant combinations, reuse, permission semantics and partial failures without live Azure writes. |
 
 ### Verification Checklist
 
 * **Pre-request Validation**: Invalid Account names, missing RG, missing cluster, empty/non-string inputs and invalid ARM IDs fail before Azure writes. Check new/changed and unavailable domains, and preservation of non-404 Account read errors.
-* **Wire Serialization**: Verify the serialized body passed to `client.begin_create` contains 1 `agentHostingConfigurations` item (`name="default"`, `hostingType="ManagedCluster"`), expected `identity` (`SystemAssigned, UserAssigned` default for `AIServices`, or `UserAssigned` when system identity is disabled, with only `hostingManagementIdentityResourceId` in `userAssignedIdentities`), and either 1 `networkInjections` item (`scenario="agent"`, `subnetArmId`, `useMicrosoftManagedNetwork=False`) when `--agent-subnet` is provided or no `networkInjections` field when it is omitted.
-* **Non-BYO & Update Regression**: Non-BYO `account create` sends no `agentHostingConfigurations`; `--agent-subnet` alone adds network injection without changing identity or triggering BYO-AKS preflight. With no new arguments, the existing payload is unchanged. `account update` omits `agentHostingConfigurations`.
+* **Wire Serialization**: Verify the serialized body passed to `client.begin_create` contains 1 `agentHostingConfigurations` item (`name="default"`, `hostingType="ManagedCluster"`) and expected `identity` (`SystemAssigned, UserAssigned` default for `AIServices`, or `UserAssigned` when system identity is disabled, with only `hostingManagementIdentityResourceId` in `userAssignedIdentities`). The request does not contain `networkInjections`.
+* **Non-BYO & Update Regression**: Non-BYO `account create` sends no `agentHostingConfigurations`. With no new arguments, the existing payload is unchanged. `account update` omits `agentHostingConfigurations`.
 * **Live Account Verification**: Creating a new BYO AKS account via `az cognitiveservices account create` reaches `Succeeded` and `account show` returns the expected bindings.
-* **Preflight**: Mandatory FAIL/UNVERIFIED causes zero Azure writes. Preserve pool, image, label, SSH, identity, region, CNI and network-policy thresholds, including count >= 1 with autoscaling. Managed Overlay without a Node subnet ID must pass; subnet inputs add no network-resource or tenant reads. Telemetry remains deferred; no Kubernetes operations or traffic tests.
+* **Preflight**: Mandatory FAIL/UNVERIFIED causes zero Azure writes. Preserve pool, image, label, SSH, identity, region, Azure CNI Overlay and network-policy thresholds, including count >= 1 with autoscaling. Telemetry remains deferred; no Kubernetes operations or traffic tests.
 * **Permissions**: Cover all eight dependency combinations, ARM caller permission scopes/errors and MI wildcard/DataAction semantics. Verify compatible 409 recovery and propagation of all other conflicts.
 * **Storage Configuration**: Verify all auto-created Storage fields, user-tag propagation, ZRS preference with LRS fallback, and supplied Storage region validation; supplied Storage causes no Storage create/update.
 * **Provisioning**: Verify SDK resource/grant completion and actual IDs before Account submission, no deployment submission, and no dependency writes when all supplied resources pass Validation and the RG exists. Project creation stays separate and performs no ACR operations.

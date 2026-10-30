@@ -33,14 +33,13 @@ _RESOURCE_TYPES = {
     'storage': 'Microsoft.Storage/storageAccounts',
     'management_identity': 'Microsoft.ManagedIdentity/userAssignedIdentities',
     'workload_identity': 'Microsoft.ManagedIdentity/userAssignedIdentities',
-    'subnet': 'Microsoft.Network/virtualNetworks/subnets',
 }
 
 
 _OPTION_NAMES = {
     'cluster': '--agent-hosting-cluster', 'storage': '--agent-hosting-storage',
     'management_identity': '--agent-hosting-management-identity',
-    'workload_identity': '--agent-hosting-workload-identity', 'subnet': '--agent-subnet',
+    'workload_identity': '--agent-hosting-workload-identity',
 }
 
 
@@ -52,7 +51,6 @@ class HostingRequest:
     storage: Optional[str] = None
     management_identity: Optional[str] = None
     workload_identity: Optional[str] = None
-    subnet: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -585,11 +583,8 @@ def _check_pools(aks, compute, cluster, scope, location, checks):
             'One User pool satisfying all sandbox requirements', 'Prepare one qualifying User pool.')
     network = cluster.properties.network_profile if cluster.properties else None
     mode = network.network_plugin_mode if network else None
-    pod_subnets = {pool.name: pool.properties.pod_subnet_id if pool.properties else None for pool in pools}
-    uses_pod_subnets = bool(pools) and all(pod_subnets.values())
-    _report(checks, 'CNI mode', scope, mode == 'overlay' or uses_pod_subnets,
-            f'{mode}; pool pod subnets={pod_subnets}', 'Azure CNI Overlay or Pod Subnet on every node pool',
-            'Use Azure CNI Overlay or configure a Pod subnet on every node pool.')
+    _report(checks, 'CNI mode', scope, mode == 'overlay', mode, 'Azure CNI Overlay',
+            'Use Azure CNI Overlay.')
     return selected
 
 
