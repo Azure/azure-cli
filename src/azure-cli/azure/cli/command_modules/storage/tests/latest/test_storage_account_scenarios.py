@@ -617,6 +617,72 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  checks=[JMESPathCheck('sasPolicy.sasExpirationPeriod', '03.04:05:06'),
                          JMESPathCheck('sasPolicy.expirationAction', 'Block')])
 
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_policies')
+    def test_storage_account_service_keys_and_collaboration_policy(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'sa': self.create_random_name('policy', 24),
+            'location': resource_group_location
+        })
+        self.cmd('storage account create -g {rg} -n {sa} -l {location} --kind StorageV2 --sku Standard_LRS '
+                 '--blob-shared-key false --file-shared-key true --table-shared-key true --queue-shared-key true '
+                 '--allow-access-points true', checks=[
+                     self.check('allowSharedKeyAccessForServices.blob.enabled', False),
+                     self.check('allowSharedKeyAccessForServices.file.enabled', True),
+                     self.check('allowSharedKeyAccessForServices.table.enabled', True),
+                     self.check('allowSharedKeyAccessForServices.queue.enabled', True),
+                     self.check('dataCollaborationPolicyProperties.allowBlobAccessPoints', True)
+                 ])
+        self.cmd('storage account update -g {rg} -n {sa} --blob-shared-key true --file-shared-key false '
+                 '--allow-access-points false')
+        checks = [
+            self.check('allowSharedKeyAccessForServices.blob.enabled', True),
+            self.check('allowSharedKeyAccessForServices.file.enabled', False),
+            self.check('allowSharedKeyAccessForServices.table.enabled', True),
+            self.check('allowSharedKeyAccessForServices.queue.enabled', True),
+            self.check('dataCollaborationPolicyProperties.allowBlobAccessPoints', False)
+        ]
+        self.cmd('storage account show -g {rg} -n {sa}', checks=checks)
+        self.cmd('storage account update -g {rg} -n {sa} --tags purpose=policy-preservation', checks=checks)
+
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_user_bound_sas')
+    def test_storage_account_user_bound_sas_policy(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'sa': self.create_random_name('saspolicy', 24),
+            'location': resource_group_location
+        })
+        self.cmd('storage account create -g {rg} -n {sa} -l {location} --kind StorageV2 --sku Standard_LRS '
+                 '--sas-expiration-period 1.00:00:00 --sas-expiration-action Block '
+                 '--user-bound-sas true --user-bound-action Block --cross-tenant-sas false', checks=[
+                     self.check('sasPolicy.requireUserBoundUserDelegationSas', True),
+                     self.check('sasPolicy.requireUserBoundUserDelegationSasAction', 'Block'),
+                     self.check('allowCrossTenantDelegationSas', False)
+                 ])
+        self.cmd('storage account update -g {rg} -n {sa} --user-bound-sas false --user-bound-action Log')
+        checks = [
+            self.check('sasPolicy.sasExpirationPeriod', '2.00:00:00'),
+            self.check('sasPolicy.expirationAction', 'Block'),
+            self.check('sasPolicy.requireUserBoundUserDelegationSas', False),
+            self.check('sasPolicy.requireUserBoundUserDelegationSasAction', 'Log'),
+            self.check('allowCrossTenantDelegationSas', False)
+        ]
+        self.cmd('storage account update -g {rg} -n {sa} --sas-expiration-period 2.00:00:00', checks=checks)
+        self.cmd('storage account show -g {rg} -n {sa}', checks=checks)
+
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='cli_storage_turbo_tier')
+    def test_storage_account_turbo_tier(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'sa': self.create_random_name('turbo', 24),
+            'location': resource_group_location
+        })
+        self.cmd('storage account create -g {rg} -n {sa} -l {location} --kind StorageV2 --sku Standard_LRS '
+                 '--access-tier Hot --turbo-tier-status Enabled --turbo-tier-target 10', checks=[
+                     self.check('turboTier.status', 'Enabled'),
+                     self.check('turboTier.targetPercent', 10)
+                 ])
+        checks = [self.check('turboTier.status', 'Disabled')]
+        self.cmd('storage account update -g {rg} -n {sa} --turbo-tier-status Disabled', checks=checks)
+        self.cmd('storage account show -g {rg} -n {sa}', checks=checks)
+
     @ResourceGroupPreparer()
     def test_storage_account_with_default_share_permission(self, resource_group):
         self.kwargs = {

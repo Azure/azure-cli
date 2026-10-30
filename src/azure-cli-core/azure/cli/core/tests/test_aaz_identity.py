@@ -150,3 +150,18 @@ class TestAAZIdentity(unittest.TestCase):
         }
         result = self.identity._build_identity(data, result)
         self.assertTrue(result == {})
+
+    def test_removing_one_user_identity_preserves_unselected_identities(self):
+        for system_assigned in (False, True):
+            for selected in ("b", "missing"):
+                with self.subTest(system_assigned=system_assigned, selected=selected):
+                    result = {
+                        "type": "SystemAssigned,UserAssigned" if system_assigned else "UserAssigned",
+                        "userAssignedIdentities": {"a": {}, "b": {}},
+                    }
+                    data = {"userAssigned": [selected], "action": "remove"}
+                    expected = {
+                        "type": result["type"],
+                        "userAssignedIdentities": {"a": {}} if selected == "b" else {"a": {}, "b": {}},
+                    }
+                    self.assertEqual(expected, self.identity._build_identity(data, result))

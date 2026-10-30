@@ -205,6 +205,25 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
              "do not adhere to the sas policy expiration period. The default action is 'Log'."
     )
 
+    require_user_bound_user_delegation_sas_type = CLIArgumentType(
+        arg_type=get_three_state_flag(),
+        options_list=['--require-user-bound-user-delegation-sas', '--user-bound-sas'],
+        help='Require user delegation SAS tokens to be bound to a specific user.'
+    )
+
+    t_policy_violation_action = self.get_models('PolicyViolationAction', resource_type=ResourceType.MGMT_STORAGE)
+    require_user_bound_user_delegation_sas_action_type = CLIArgumentType(
+        arg_type=get_enum_type(t_policy_violation_action),
+        options_list=['--require-user-bound-user-delegation-sas-action', '--user-bound-action'],
+        help='The action to perform when a user delegation SAS token is not bound to a user as required.'
+    )
+
+    allow_cross_tenant_delegation_sas_type = CLIArgumentType(
+        arg_type=get_three_state_flag(),
+        options_list=['--allow-cross-tenant-delegation-sas', '--cross-tenant-sas'],
+        help='Allow or disallow cross-tenant user delegation SAS.'
+    )
+
     key_expiration_period_in_days_type = CLIArgumentType(
         options_list=['--key-expiration-period-in-days', '--key-exp-days'], type=int,
         help='Expiration period in days of the Key Policy assigned to the storage account'
@@ -397,6 +416,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
         c.argument('sas_expiration_period', sas_expiration_period_type)
         c.argument('sas_expiration_action', sas_expiration_action_type)
+        c.argument('require_user_bound_user_delegation_sas', require_user_bound_user_delegation_sas_type)
+        c.argument('require_user_bound_user_delegation_sas_action',
+                   require_user_bound_user_delegation_sas_action_type)
+        c.argument('allow_cross_tenant_delegation_sas', allow_cross_tenant_delegation_sas_type)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(),
@@ -517,6 +540,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
         c.argument('sas_expiration_period', sas_expiration_period_type)
         c.argument('sas_expiration_action', sas_expiration_action_type)
+        c.argument('require_user_bound_user_delegation_sas', require_user_bound_user_delegation_sas_type)
+        c.argument('require_user_bound_user_delegation_sas_action',
+                   require_user_bound_user_delegation_sas_action_type)
+        c.argument('allow_cross_tenant_delegation_sas', allow_cross_tenant_delegation_sas_type)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('immutability_period_since_creation_in_days',
@@ -553,6 +580,37 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('allowed_copy_scope', arg_type=get_enum_type(t_allowed_copy_scope),
                    help='Restrict copy to and from Storage Accounts within an AAD tenant or with Private Links to the '
                         'same VNet.')
+
+    for scope in ['storage account create', 'storage account update']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE) as c:
+            c.argument('enable_extended_groups', arg_type=get_three_state_flag(), is_preview=True,
+                       help='Enable extended group support with local users feature, if set to true.')
+            c.argument('allow_shared_key_access_for_blob', arg_type=get_three_state_flag(),
+                       options_list=['--allow-shared-key-access-for-blob', '--blob-shared-key'],
+                       arg_group='Shared Key Access',
+                       help='Allow or disallow Shared Key authorization for the blob service.')
+            c.argument('allow_shared_key_access_for_file', arg_type=get_three_state_flag(),
+                       options_list=['--allow-shared-key-access-for-file', '--file-shared-key'],
+                       arg_group='Shared Key Access',
+                       help='Allow or disallow Shared Key authorization for the file service.')
+            c.argument('allow_shared_key_access_for_table', arg_type=get_three_state_flag(),
+                       options_list=['--allow-shared-key-access-for-table', '--table-shared-key'],
+                       arg_group='Shared Key Access',
+                       help='Allow or disallow Shared Key authorization for the table service.')
+            c.argument('allow_shared_key_access_for_queue', arg_type=get_three_state_flag(),
+                       options_list=['--allow-shared-key-access-for-queue', '--queue-shared-key'],
+                       arg_group='Shared Key Access',
+                       help='Allow or disallow Shared Key authorization for the queue service.')
+            c.argument('allow_blob_access_points', arg_type=get_three_state_flag(), arg_group='Data Collaboration',
+                       options_list=['--allow-blob-access-points', '--allow-access-points'],
+                       help='Allow Blob Access Point configurations to be created or managed on the storage account.')
+            t_turbo_tier_status = self.get_models('TurboTierStatus', resource_type=ResourceType.MGMT_STORAGE)
+            c.argument('turbo_tier_status', arg_type=get_enum_type(t_turbo_tier_status), arg_group='Turbo Tier',
+                       help='Enable or disable Turbo Tier.')
+            c.argument('turbo_tier_target_percent', type=int, arg_group='Turbo Tier',
+                       options_list=['--turbo-tier-target-percent', '--turbo-tier-target'],
+                       help='Target fill percentage for Turbo Tier, from 10 to 100. When enabling Turbo Tier, '
+                            'the service defaults to 20 if no target percentage is supplied.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',
@@ -1822,6 +1880,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container-rm create', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
+        c.argument('blob_access_point_configuration_name', arg_group='Blob Access Point',
+                   options_list=['--blob-access-point-configuration-name', '--access-point-config'],
+                   help='Name of the Blob Access Point configuration to attach when creating the container.')
+        c.argument('blob_access_point_configuration_unique_id', arg_group='Blob Access Point',
+                   options_list=['--blob-access-point-configuration-unique-id', '--access-point-uid'],
+                   help='Unique ID of the Blob Access Point configuration. Requires its name. '
+                        'If omitted, the service looks up and persists the current unique ID.')
         c.argument('enable_vlw', arg_type=get_three_state_flag(), is_preview=True,
                    help='The object level immutability property of the container. The property is immutable and can '
                    'only be set to true at the container creation time. Existing containers must undergo a migration '
