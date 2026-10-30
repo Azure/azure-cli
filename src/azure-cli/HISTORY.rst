@@ -207,6 +207,7 @@ Release History
 
 **App Config**
 
+* `az appconfig enhanced-feature-flag`: Add command group to set, show, list, delete, enable, and disable enhanced feature flags (#34290)
 * Sanitize resource group name in data-plane test recordings (#33906)
 
 **App Service**
