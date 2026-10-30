@@ -29,7 +29,7 @@ from ._constants import get_managed_sku
 from ._constants import ACR_AUDIENCE_RESOURCE_NAME
 from ._utils import get_registry_by_name, ResourceNotFound
 from ._format import add_timestamp
-from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
+from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR, CONNECTIVITY_UNTRUSTED_REALM_ERROR
 
 
 logger = get_logger(__name__)
@@ -147,7 +147,6 @@ def _handle_challenge_phase(login_server,
         raise CLIError(error.format_error_message(login_server).get_error_message())
 
     if not _is_trusted_realm(token_params['realm'], login_server):
-        from ._errors import CONNECTIVITY_UNTRUSTED_REALM_ERROR
         logger.debug("Rejected the authentication challenge realm '%s'. It must use HTTPS and match the registry "
                      "login server '%s'.", token_params['realm'], login_server)
         if is_diagnostics_context:
@@ -506,6 +505,8 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                                                             permission)
         except CLIError as e:
             raise_toomanyrequests_error(str(e))
+            if CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title in str(e):
+                raise
             logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)

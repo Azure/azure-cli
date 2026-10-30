@@ -1310,14 +1310,13 @@ class AcrMockCommandsTests(unittest.TestCase):
                 self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get, mock_requests_post,
                                                 test_login_server, realm=realm)
 
-                # AAD path: no AAD token is requested and nothing is posted to any token endpoint
-                with self.assertLogs('cli.azure.cli.command_modules.acr._docker_utils', level='WARNING') as logs:
-                    with self.assertRaises(CLIError):
-                        get_access_credentials(cmd, test_registry, repository=TEST_REPOSITORY,
-                                               permission=RepoAccessTokenPermission.METADATA_READ.value)
-                self.assertTrue(any(CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title in m for m in logs.output))
+                # AAD path: no AAD token is requested, nothing is posted, and there is no credential prompt
+                with self.assertRaisesRegex(AzureResponseError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
+                    get_access_credentials(cmd, test_registry, repository=TEST_REPOSITORY,
+                                           permission=RepoAccessTokenPermission.METADATA_READ.value)
                 mock_get_raw_token.assert_not_called()
                 mock_requests_post.assert_not_called()
+                mock_prompt.assert_not_called()
 
                 # Username and password path: the password is not posted to any token endpoint
                 with self.assertRaisesRegex(AzureResponseError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
@@ -1325,6 +1324,44 @@ class AcrMockCommandsTests(unittest.TestCase):
                                            repository=TEST_REPOSITORY,
                                            permission=RepoAccessTokenPermission.METADATA_READ.value)
                 mock_requests_post.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.prompt', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.cf_acr_registries', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription_id', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    def test_get_docker_credentials_untrusted_realm_skips_fallbacks(self, mock_get_raw_token, mock_requests_get,
+                                                                   mock_requests_post, mock_get_registry_by_name,
+                                                                   mock_get_subscription, mock_cf_acr_registries,
+                                                                   mock_prompt):
+        from azure.mgmt.containerregistry.models import Registry, Sku
+
+        cmd = self._setup_cmd()
+        test_registry = 'testregistry'
+        test_login_server = '{}.azurecr.io'.format(test_registry)
+        registry = Registry(location='westus', sku=Sku(name='Standard'))
+        registry.login_server = test_login_server
+        registry.admin_user_enabled = True
+        mock_get_registry_by_name.return_value = registry, None
+        mock_get_subscription.return_value = TEST_SUBSCRIPTION
+        self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get, mock_requests_post, test_login_server,
+                                        realm='https://evil.example/oauth2/token')
+
+        # az acr login: the admin password must not be fetched and handed to docker
+        with self.assertRaisesRegex(AzureResponseError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
+            get_login_credentials(cmd, test_registry)
+
+        # Data plane commands, for example az acr repository list
+        with self.assertRaisesRegex(AzureResponseError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
+            get_access_credentials(cmd, test_registry, repository=TEST_REPOSITORY,
+                                   permission=RepoAccessTokenPermission.METADATA_READ.value)
+
+        mock_cf_acr_registries.assert_not_called()
+        mock_prompt.assert_not_called()
+        mock_get_raw_token.assert_not_called()
+        mock_requests_post.assert_not_called()
 
     @mock.patch('azure.cli.core._profile.Profile.get_subscription_id', autospec=True)
     @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
