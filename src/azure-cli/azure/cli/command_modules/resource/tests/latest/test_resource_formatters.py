@@ -112,6 +112,16 @@ class TestFormatJson(unittest.TestCase):
 
 
 class TestFormatWhatIfOperationResult(unittest.TestCase):
+    def test_noise_notice(self):
+        expected = (
+            "Note: The result may contain false positive predictions (noise). "
+            "For what-if with noise reduction, consider Deployment Stacks (https://aka.ms/stackswhatifGA)"
+        )
+
+        result = format_what_if_operation_result(WhatIfOperationResult(changes=[]), False)
+
+        self.assertTrue(result.startswith(expected))
+
     def test_change_type_legend(self):
         changes = [
             WhatIfChange(
