@@ -2821,16 +2821,14 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
 
 class VMFlexProfileScenarioTests(ScenarioTest):
 
-    # add live_only: Currently only enabled in canary region where BAMI sub is not accessible
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_main_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_main_', location='eastasia')
     def test_vm_flex_profile_create_and_update(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('flowvm', 15),
             'loc': resource_group_location,
             'image': 'Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest',
-            'preferred_size': 'Standard_D2s_v3',
-            'updated_preferred_size': 'Standard_D4s_v3',
+            'preferred_size': 'Standard_D2s_v6',
+            'updated_preferred_size': 'Standard_D4s_v6',
             'ssh_key': TEST_SSH_KEY_PUB,
         })
 
@@ -2865,25 +2863,23 @@ class VMFlexProfileScenarioTests(ScenarioTest):
             self.check("[?name=='{vm}'].hardwareProfile.vmSize | [0]", '{deployed_size}'),
         ])
 
-    # add live_only: Currently only enabled in canary region where BAMI sub is not accessible
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_edge_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_edge_', location='eastasia')
     def test_vm_flex_profile_opt_in_opt_out(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('fixedvm', 15),
             'loc': resource_group_location,
             'image': 'Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest',
-            'preferred_size': 'Standard_D2s_v3',
+            'preferred_size': 'Standard_D2s_v6',
             'ssh_key': TEST_SSH_KEY_PUB,
         })
 
         self.cmd(
             'vm create -g {rg} -n {vm} --location {loc} --image {image} '
-            '--size Standard_D2s_v3 --admin-username clitest --ssh-key-values "{ssh_key}" '
+            '--size {preferred_size} --admin-username clitest --ssh-key-values "{ssh_key}" '
             '--security-type Standard --nsg-rule NONE --public-ip-address ""')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('flexProfile', None),
-            self.check('hardwareProfile.vmSize', 'Standard_D2s_v3'),
+            self.check('hardwareProfile.vmSize', '{preferred_size}'),
         ])
 
         self.cmd('vm update -g {rg} -n {vm} --preferred-size {preferred_size}')
@@ -2894,7 +2890,7 @@ class VMFlexProfileScenarioTests(ScenarioTest):
         deployed_size = vm['hardwareProfile']['vmSize']
         self.kwargs.update({
             'deployed_size': deployed_size,
-            'different_size': 'Standard_D4s_v3' if deployed_size != 'Standard_D4s_v3' else 'Standard_D2s_v3',
+            'different_size': 'Standard_D4s_v6' if deployed_size != 'Standard_D4s_v6' else 'Standard_D2s_v6',
         })
 
         self.cmd('vm update -g {rg} -n {vm} --size {deployed_size}')
