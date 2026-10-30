@@ -43,7 +43,6 @@ SOURCE_TYPES = {
 }
 
 
-# pylint: disable=protected-access
 class StorageResourceAazTest(unittest.TestCase):
 
     def setUp(self):

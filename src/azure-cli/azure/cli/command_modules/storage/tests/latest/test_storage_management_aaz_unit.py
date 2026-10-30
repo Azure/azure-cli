@@ -15,7 +15,6 @@ from azure.cli.command_modules.storage.aaz.latest.storage.account.network_securi
 from azure.cli.command_modules.storage.operations.account import FileServiceUsage
 
 
-# pylint: disable=protected-access
 class StorageManagementAazResponseTest(unittest.TestCase):
 
     def setUp(self):
