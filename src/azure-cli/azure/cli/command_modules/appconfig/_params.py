@@ -54,7 +54,7 @@ def load_arguments(self, _):
         nargs='+',
         help='Customize output fields for Enhanced Feature Flags.',
         validator=validate_enhanced_feature_query_fields,
-        arg_type=get_enum_type(['name', 'enabled', 'label', 'description', 'conditions', 'variants', 'allocation', 'tags', 'last_modified'])
+        arg_type=get_enum_type(['name', 'enabled', 'label', 'description', 'conditions', 'variants', 'allocation', 'telemetry', 'tags', 'last_modified'])
     )
     snapshot_fields_arg_type = CLIArgumentType(
         nargs='+',

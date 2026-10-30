@@ -149,7 +149,7 @@ def load_command_table(self, _):
 
     # Enhanced FeatureManagement Commands
     with self.command_group('appconfig enhanced-feature-flag',
-                            custom_command_type=configstore_enhanced_featureflag_util) as g:
+                            custom_command_type=configstore_enhanced_featureflag_util, is_preview=True) as g:
         g.custom_command('set', 'set_feature')
         g.custom_command('delete', 'delete_feature')
         g.custom_show_command('show', 'show_feature')
