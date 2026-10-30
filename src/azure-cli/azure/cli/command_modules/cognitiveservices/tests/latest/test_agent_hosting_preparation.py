@@ -426,7 +426,9 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.roles['Owner']['permissions'][0]['notActions'] = ['Microsoft.Authorization/roleAssignments/write']
         preparation = self._prepare()
         checked = preflight(self.cli_ctx, preparation)
-        provision(self.cli_ctx, checked, self.tags)
+        with mock.patch(_PREFIX + 'logger.warning') as warning:
+            provision(self.cli_ctx, checked, self.tags, request=preparation)
+        warning.assert_not_called()
         self._assert_no_writes()
 
     def test_operator_requirements_follow_request_intent_and_target_scope(self):
@@ -552,7 +554,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 with self.assertLogs('cli.' + _PREFLIGHT_PREFIX.rstrip('.'), level='WARNING') as logs:
                     with self.assertRaises(ValidationError):
                         preflight(self.cli_ctx, self._prepare())
-                self.assertTrue(any(f'FAIL {check}' in line for line in logs.output))
+                self.assertTrue(any(f'Preflight check failed: {check}' in line for line in logs.output))
                 self._assert_no_writes()
 
     def test_mixed_vm_sizes_pass_when_every_size_meets_capacity(self):
@@ -590,7 +592,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 with self.assertLogs('cli.' + _PREFLIGHT_PREFIX.rstrip('.'), level='WARNING') as logs:
                     with self.assertRaises(ValidationError):
                         preflight(self.cli_ctx, self._prepare())
-                self.assertTrue(any(f'UNVERIFIED {check}' in line for line in logs.output))
+                self.assertTrue(any(f'Preflight check failed: {check}' in line for line in logs.output))
                 self._assert_no_writes()
 
     def test_sandbox_label_requires_exact_lowercase_true(self):
@@ -631,7 +633,9 @@ class AgentHostingPreparationTests(unittest.TestCase):
         }
         self.assignments.append(self._assignment('management-principal', 'Extension Writer', _CLUSTER))
         checked = preflight(self.cli_ctx, request)
-        self.assertTrue(all(check['status'] == 'PASS' for check in checked.checks if check['name'] == 'G01 Validation'))
+        statuses = {check['name']: check['status'] for check in checked.checks}
+        self.assertEqual(statuses['Reader validation'], 'PASS')
+        self.assertEqual(statuses['Kubernetes Extension Contributor validation'], 'PASS')
         self._assert_no_writes()
 
     def test_blob_validation_does_not_infer_data_access_from_owner(self):
@@ -698,8 +702,8 @@ class AgentHostingPreparationTests(unittest.TestCase):
         with self.assertLogs('cli.' + _PREFLIGHT_PREFIX.rstrip('.'), level='WARNING') as logs:
             with self.assertRaises(ValidationError):
                 preflight(self.cli_ctx, self._prepare())
-        self.assertTrue(any('FAIL Network policy' in line for line in logs.output))
-        self.assertFalse(any('PASS ' in line for line in logs.output))
+        self.assertTrue(any('Preflight check failed: Network policy' in line for line in logs.output))
+        self.assertFalse(any('Validated ' in line for line in logs.output))
         self.clients['aks'].managed_clusters.get.assert_called_once()
         self._assert_no_writes()
 
@@ -712,7 +716,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 with self.assertLogs('cli.' + _PREFLIGHT_PREFIX.rstrip('.'), level='WARNING') as logs:
                     with self.assertRaises(ValidationError):
                         preflight(self.cli_ctx, self._prepare())
-                self.assertTrue(any('UNVERIFIED Network policy' in line for line in logs.output))
+                self.assertTrue(any('Preflight check failed: Network policy' in line for line in logs.output))
                 self._assert_no_writes()
 
     def test_network_policy_is_required_for_pod_subnet_networking(self):
@@ -773,14 +777,19 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 self.cluster['properties'][key] = original
                 self._assert_no_writes()
 
-    def test_restricted_storage_warns_without_blocking(self):
+    def test_restricted_storage_and_lrs_do_not_warn_or_block(self):
         self.storage['properties']['publicNetworkAccess'] = 'Disabled'
         self.storage['sku']['name'] = 'Standard_LRS'
         preparation = self._prepare()
-        checked = preflight(self.cli_ctx, preparation)
-        checks = {check['name']: check['status'] for check in checked.checks}
-        self.assertEqual(checks['Storage public-network baseline'], 'NOT_APPLICABLE')
-        self.assertEqual(checks['Storage redundancy'], 'UNVERIFIED')
+        with mock.patch(_PREFLIGHT_PREFIX + 'logger.warning') as warning:
+            checked = preflight(self.cli_ctx, preparation)
+        warning.assert_not_called()
+        checks = {check['name']: check for check in checked.checks}
+        self.assertEqual(checks['Storage public-network baseline']['status'], 'NOT_APPLICABLE')
+        self.assertEqual(checks['Storage redundancy']['status'], 'PASS')
+        self.assertEqual(checks['Storage redundancy']['observed'], 'Standard_LRS')
+        self.assertEqual(
+            checks['Storage redundancy']['remediation'], 'Use ZRS or GZRS when available.')
 
     def test_invalid_storage_configuration_blocks(self):
         for key, value in (('isHnsEnabled', True), ('allowSharedKeyAccess', True),
@@ -841,7 +850,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
         with self.assertLogs('cli.' + _PREFLIGHT_PREFIX.rstrip('.'), level='WARNING') as logs:
             with self.assertRaises(ValidationError):
                 preflight(self.cli_ctx, preparation)
-        self.assertTrue(any('UNVERIFIED' in line for line in logs.output))
+        self.assertTrue(any('Preflight check failed: Identity' in line for line in logs.output))
         self._assert_no_writes()
 
     def test_preflight_returns_results_without_mutating_request(self):
@@ -946,7 +955,15 @@ class AgentHostingPreparationTests(unittest.TestCase):
             lambda group, name: self._create_identity(group, name, None))
         self.clients['storage'].storage_accounts.get_properties.side_effect = lambda *args: StorageAccount(self.storage)
         checked = preflight(self.cli_ctx, preparation)
-        provision(self.cli_ctx, checked, self.tags)
+        with self.assertLogs('cli.' + _PREFIX.rstrip('.'), level='WARNING') as logs:
+            provision(self.cli_ctx, checked, self.tags, request=preparation)
+        output = '\n'.join(logs.output)
+        self.assertIn('Using existing automatically generated BYO AKS dependencies:', output)
+        for name, arm_id in (
+                ('Hosting-management identity', checked.resources.management_identity),
+                ('Workload identity', checked.resources.workload_identity),
+                ('Storage account', checked.resources.storage)):
+            self.assertIn(f'  {name}: {arm_id}', output)
         self.clients['identity'].user_assigned_identities.create_or_update.assert_not_called()
         self.clients['storage'].storage_accounts.begin_create.assert_not_called()
 
@@ -962,10 +979,24 @@ class AgentHostingPreparationTests(unittest.TestCase):
         second = [call.args[1] for call in self.clients['authorization'].role_assignments.create.call_args_list]
         self.assertEqual(first, second)
 
+    def test_dependency_creation_logs_are_descriptive(self):
+        checked = preflight(self.cli_ctx, self._prepare(False, False, False))
+        with self.assertLogs('cli.' + _PREFIX.rstrip('.'), level='WARNING') as logs:
+            provision(self.cli_ctx, checked, self.tags)
+        output = '\n'.join(logs.output)
+        self.assertIn('Creating hosting-management identity:', output)
+        self.assertIn('Creating workload identity:', output)
+        self.assertIn('Creating Storage account:', output)
+        for role_name in (
+                'Reader', 'Kubernetes Extension Contributor',
+                'Managed Identity Federated Identity Credential Contributor', 'Storage Blob Data Contributor'):
+            self.assertIn(f"Assigning role '{role_name}'", output)
+        self.assertNotRegex(output, r'\bG0[123]\b')
+
     def test_compatible_existing_grant_is_not_recreated(self):
         self._prepare()
         role = self._sdk_role(self.roles['Reader'])
-        _ensure_grant(self.clients['authorization'], Grant('G01', _MANAGEMENT, _CLUSTER, role.id),
+        _ensure_grant(self.clients['authorization'], Grant('Reader', _MANAGEMENT, _CLUSTER, role.id),
                       'management-principal')
         self.clients['authorization'].role_assignments.create.assert_not_called()
 
@@ -978,7 +1009,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
 
     def test_role_assignment_race_reuses_only_verified_identical_assignment(self):
         self._prepare()
-        grant = Grant('G01', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id'])
+        grant = Grant('Reader', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id'])
         assignment = RoleAssignment({
             'id': _CLUSTER + '/providers/Microsoft.Authorization/roleAssignments/existing',
             'properties': {'principalId': 'MANAGEMENT-PRINCIPAL',
@@ -992,7 +1023,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
         client.role_assignments.create.assert_called_once()
 
     def test_role_assignment_conflict_must_match_principal_role_scope_and_condition(self):
-        grant = Grant('G01', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id'])
+        grant = Grant('Reader', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id'])
         base = {'principalId': 'management-principal', 'roleDefinitionId': grant.role_id, 'scope': _CLUSTER}
         cases = [
             {'principalId': 'another-principal'}, {'roleDefinitionId': 'another-role'}, {'scope': _RG},
@@ -1011,7 +1042,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
 
     def test_unverified_role_assignment_conflict_preserves_original_error(self):
         client = self.clients['authorization']
-        grant = Grant('G01', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id'])
+        grant = Grant('Reader', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id'])
         for second_read in ([], HttpResponseError('Read forbidden')):
             with self.subTest(second_read=second_read):
                 error = self._conflict()
@@ -1023,7 +1054,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
 
     def test_other_role_assignment_errors_are_not_ignored(self):
         client = self.clients['authorization']
-        grant = Grant('G01', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id'])
+        grant = Grant('Reader', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id'])
         for code, status in (('RoleAssignmentUpdateNotPermitted', 409), ('RoleAssignmentExists', 403)):
             with self.subTest(code=code, status=status):
                 client.reset_mock()
@@ -1047,7 +1078,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
         for arm_id in (_resolve_resources(preparation).management_identity,
                        _resolve_resources(preparation).workload_identity, _resolve_resources(preparation).storage):
             self.assertTrue(any(arm_id in line for line in logs.output))
-        self.assertTrue(any('not automatically deleted' in line for line in logs.output))
+        self.assertTrue(any('were not deleted' in line for line in logs.output))
         self.assertEqual(self.clients['identity'].user_assigned_identities.create_or_update.call_count, 2)
 
 

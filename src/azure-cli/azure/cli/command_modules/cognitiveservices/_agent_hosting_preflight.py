@@ -135,8 +135,7 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
         grants = _check_permissions(cli_ctx, clients, request, checked, checks)
     if any(check['mandatory'] and check['status'] in ('FAIL', 'UNVERIFIED') for check in checks):
         raise ValidationError('BYO AKS preflight failed. No Azure resources were written. '
-                              'Resolve the reported FAIL/UNVERIFIED checks and retry.')
-    logger.warning('Preflight does not verify live routing, DNS, connectivity, telemetry egress or RBAC propagation.')
+                              'Resolve the reported checks and retry.')
     return replace(checked, grants=tuple(grants), checks=tuple(checks))
 
 
@@ -291,9 +290,19 @@ def _report(checks, name, scope, passed, observed, expected, remediation, mandat
     status = passed if isinstance(passed, str) else ('PASS' if passed else 'FAIL')
     checks.append({'name': name, 'scope': scope, 'status': status, 'mandatory': mandatory,
                    'observed': observed, 'expected': expected, 'remediation': remediation})
-    log = logger.warning if status in ('FAIL', 'UNVERIFIED') else logger.info
-    log('%s %s [%s]: observed=%s; expected=%s; remediation=%s',
-        status, name, scope, observed, expected, remediation)
+    if isinstance(observed, (list, tuple)):
+        observed = '\n    ' + '\n    '.join(str(item) for item in observed)
+    elif isinstance(observed, dict):
+        observed = '\n    ' + '\n    '.join(f'{key}: {value}' for key, value in observed.items())
+    if status in ('FAIL', 'UNVERIFIED'):
+        logger.warning('Preflight check failed: %s\n  Scope: %s\n  Details: %s\n  Requirement: %s\n  Action: %s',
+                       name, scope, observed, expected, remediation)
+    elif status == 'NOT_APPLICABLE':
+        logger.info('Not applicable: %s [%s]: observed=%s; note=%s', name, scope, observed, remediation)
+    else:
+        recommendation = '' if remediation == 'None' else f'; recommendation={remediation}'
+        logger.info('Validated %s [%s]: observed=%s; expected=%s%s',
+                    name, scope, observed, expected, recommendation)
 
 
 @contextmanager
@@ -625,9 +634,11 @@ def _check_storage(storage, scope, location, checks):
     ]
     for name, passed, observed, expected in requirements:
         _report(checks, name, scope, passed, observed, expected, 'Supply Storage with the required configuration.')
-    sku = storage.sku.name if storage.sku else ''
-    _report(checks, 'Storage redundancy', scope, 'PASS' if sku and sku.endswith(('ZRS', 'GZRS')) else 'UNVERIFIED',
-            sku, 'Zone redundancy recommended', 'Consider zone-redundant Storage.', mandatory=False)
+    sku = str(_enum_value(storage.sku.name)) if storage.sku and storage.sku.name else ''
+    zone_redundant = sku.endswith(('ZRS', 'GZRS'))
+    _report(checks, 'Storage redundancy', scope, 'PASS' if sku else 'UNVERIFIED',
+            sku or 'Missing SKU', 'Readable redundancy; ZRS or GZRS recommended',
+            'None' if zone_redundant else 'Use ZRS or GZRS when available.', mandatory=False)
     public = properties.public_network_access
     action = properties.network_rule_set.default_action if properties.network_rule_set else None
     restricted = public in ('Disabled', 'SecuredByPerimeter') or action == 'Deny'
@@ -754,8 +765,6 @@ def _operator_permissions(cli_ctx, clients, scope, cache):
 
 
 def _check_permissions(cli_ctx, clients, request, checked, checks):
-    logger.warning('Permission checks verify unconditional RBAC allows only; deny assignments, conditions, '
-                   'tenant policy and RBAC propagation are not fully evaluated.')
     required = _operator_requirements(request, checked)
     definitions, operator_permissions = {}, {}
     for scope, action in required:
@@ -778,26 +787,26 @@ def _required_role(client, scope, name):
 def _check_grants(cli_ctx, clients, request, checked, operator_permissions, definitions, checks):
     resources = checked.resources
     grants = [
-        ('G01', resources.management_identity, checked.management_identity, resources.cluster, True,
+        (resources.management_identity, checked.management_identity, resources.cluster, True,
          'Reader', request.management_identity is not None),
-        ('G01', resources.management_identity, checked.management_identity, resources.cluster, True,
+        (resources.management_identity, checked.management_identity, resources.cluster, True,
          'Kubernetes Extension Contributor', request.management_identity is not None),
-        ('G02', resources.management_identity, checked.management_identity, resources.workload_identity,
+        (resources.management_identity, checked.management_identity, resources.workload_identity,
          checked.workload_identity is not None, 'Managed Identity Federated Identity Credential Contributor',
          request.management_identity is not None and request.workload_identity is not None),
-        ('G03', resources.workload_identity, checked.workload_identity, resources.storage,
+        (resources.workload_identity, checked.workload_identity, resources.storage,
          checked.storage is not None, 'Storage Blob Data Contributor',
          request.workload_identity is not None and request.storage is not None),
     ]
     assignments = []
-    for name, identity_id, identity, scope, exists, role_name, validation in grants:
+    for identity_id, identity, scope, exists, role_name, validation in grants:
         client = _clients(cli_ctx, scope, clients).authorization
         role = _required_role(client, scope, role_name)
         if validation:
             principal = identity.principal_id if identity else None
             permissions = list(_permissions(client, scope, [principal], definitions)) if principal else []
             allowed = bool(principal and _validate_grant(permissions, role))
-            _report(checks, f'{name} Validation', scope, allowed, f'{principal}: {role_name}',
+            _report(checks, f'{role_name} validation', scope, allowed, f'{principal}: {role_name}',
                     'Existing effective permission; no grant writes',
                     'Have an administrator grant missing permissions.')
         else:
@@ -805,7 +814,7 @@ def _check_grants(cli_ctx, clients, request, checked, operator_permissions, defi
             permissions = _operator_permissions(cli_ctx, clients, parent, operator_permissions)
             allowed = any(_permission_allows(permission, 'Microsoft.Authorization/roleAssignments/write')
                           for permission in permissions)
-            _report(checks, f'{name} Assignment authority', parent, allowed, role_name,
+            _report(checks, f'{role_name} assignment authority', parent, allowed, role_name,
                     'Unconditional roleAssignments/write', 'Have an administrator grant role-assignment authority.')
-            assignments.append(Grant(name, identity_id, scope, role.id))
+            assignments.append(Grant(role_name, identity_id, scope, role.id))
     return assignments
