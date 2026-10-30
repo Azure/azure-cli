@@ -226,7 +226,8 @@ def _get_registry_status(login_server, registry_name, ignore_errors):
 def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, repository, ignore_errors):
     from ._errors import CONNECTIVITY_CHALLENGE_ERROR, CONNECTIVITY_AAD_LOGIN_ERROR, \
         CONNECTIVITY_REFRESH_TOKEN_ERROR, CONNECTIVITY_ACCESS_TOKEN_ERROR, \
-        CONNECTIVITY_TOOMANYREQUESTS_ERROR, CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
+        CONNECTIVITY_TOOMANYREQUESTS_ERROR, CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR, \
+        CONNECTIVITY_UNTRUSTED_REALM_ERROR
 
     # Check user's allowed permissions to the repository if the repository name is specified
     checked_permissions = None
@@ -255,6 +256,7 @@ def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, rep
 
         if result_from_token.error_title in [
                 CONNECTIVITY_AAD_LOGIN_ERROR.error_title,
+                CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title,
                 CONNECTIVITY_REFRESH_TOKEN_ERROR.error_title,
                 CONNECTIVITY_TOOMANYREQUESTS_ERROR.error_title]:
             _handle_error(result_from_token, ignore_errors)

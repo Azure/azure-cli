@@ -44,14 +44,20 @@ from azure.cli.command_modules.acr._docker_utils import (
     get_access_credentials,
     get_authorization_header,
     get_manifest_authorization_header,
+    _get_aad_token,
+    _is_trusted_realm,
     _resolve_acr_scope,
     RepoAccessTokenPermission,
     HelmAccessTokenPermission,
     EMPTY_GUID
 )
 from azure.cli.command_modules.acr._docker_utils import ResourceNotFound
+from azure.cli.command_modules.acr._errors import ErrorClass, CONNECTIVITY_UNTRUSTED_REALM_ERROR
 from azure.cli.command_modules.acr._constants import ACR_AUDIENCE_RESOURCE_NAME
+from azure.cli.core.azclierror import AzureResponseError
 from azure.cli.core.mock import DummyCli
+from knack.prompting import NoTTYException
+from knack.util import CLIError
 
 
 TEST_TENANT = 'testtenant'
@@ -1219,14 +1225,18 @@ class AcrMockCommandsTests(unittest.TestCase):
         get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission=HelmAccessTokenPermission.PULL.value)
         self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'artifact-repository:{}:{}'.format(TEST_REPOSITORY, HelmAccessTokenPermission.PULL.value))
 
-    def _setup_mock_token_requests(self, mock_get_aad_token, mock_requests_get, mock_requests_post, login_server):
+    def _setup_mock_token_requests(self, mock_get_aad_token, mock_requests_get, mock_requests_post, login_server,
+                                   realm=None):
         # Set up AAD token with only access token
         mock_get_aad_token.return_value = ('Bearer', TEST_AAD_ACCESS_TOKEN, {}), TEST_SUBSCRIPTION, TEST_TENANT
+
+        if realm is None:
+            realm = 'https://{}/oauth2/token'.format(login_server)
 
         # Set up challenge response
         challenge_response = mock.MagicMock()
         challenge_response.headers = {
-            'WWW-Authenticate': 'Bearer realm="https://{}/oauth2/token",service="{}"'.format(login_server, login_server)
+            'WWW-Authenticate': 'Bearer realm="{}",service="{}"'.format(realm, login_server)
         }
         challenge_response.status_code = 401
         mock_requests_get.return_value = challenge_response
@@ -1267,6 +1277,154 @@ class AcrMockCommandsTests(unittest.TestCase):
             }),
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
             verify=mock.ANY)
+
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.prompt', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription_id', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    def test_get_docker_credentials_untrusted_realm(self, mock_get_raw_token, mock_requests_get, mock_requests_post,
+                                                    mock_get_registry_by_name, mock_get_subscription, mock_prompt):
+        from azure.mgmt.containerregistry.models import Registry, Sku
+
+        cmd = self._setup_cmd()
+        test_registry = 'testregistry'
+        test_login_server = '{}.azurecr.io'.format(test_registry)
+        registry = Registry(location='westus', sku=Sku(name='Standard'))
+        registry.login_server = test_login_server
+        mock_get_registry_by_name.return_value = registry, None
+        mock_get_subscription.return_value = TEST_SUBSCRIPTION
+        mock_prompt.side_effect = NoTTYException
+
+        untrusted_realms = [
+            'http://{}/oauth2/token'.format(test_login_server),
+            'https://evil.example/oauth2/token',
+            'https://{}.evil.example/oauth2/token'.format(test_login_server),
+            'https://evil.example\\@{}/oauth2/token'.format(test_login_server),
+        ]
+        for realm in untrusted_realms:
+            with self.subTest(realm=realm):
+                mock_get_raw_token.reset_mock()
+                mock_requests_post.reset_mock()
+                self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get, mock_requests_post,
+                                                test_login_server, realm=realm)
+
+                # AAD path: no AAD token is requested, nothing is posted, and there is no credential prompt
+                with self.assertRaisesRegex(AzureResponseError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
+                    get_access_credentials(cmd, test_registry, repository=TEST_REPOSITORY,
+                                           permission=RepoAccessTokenPermission.METADATA_READ.value)
+                mock_get_raw_token.assert_not_called()
+                mock_requests_post.assert_not_called()
+                mock_prompt.assert_not_called()
+
+                # Username and password path: the password is not posted to any token endpoint
+                with self.assertRaisesRegex(AzureResponseError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
+                    get_access_credentials(cmd, test_registry, username='testuser', password='testpassword',
+                                           repository=TEST_REPOSITORY,
+                                           permission=RepoAccessTokenPermission.METADATA_READ.value)
+                mock_requests_post.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.prompt', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.cf_acr_registries', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription_id', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    def test_get_docker_credentials_untrusted_realm_skips_fallbacks(self, mock_get_raw_token, mock_requests_get,
+                                                                   mock_requests_post, mock_get_registry_by_name,
+                                                                   mock_get_subscription, mock_cf_acr_registries,
+                                                                   mock_prompt):
+        from azure.mgmt.containerregistry.models import Registry, Sku
+
+        cmd = self._setup_cmd()
+        test_registry = 'testregistry'
+        test_login_server = '{}.azurecr.io'.format(test_registry)
+        registry = Registry(location='westus', sku=Sku(name='Standard'))
+        registry.login_server = test_login_server
+        registry.admin_user_enabled = True
+        mock_get_registry_by_name.return_value = registry, None
+        mock_get_subscription.return_value = TEST_SUBSCRIPTION
+        self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get, mock_requests_post, test_login_server,
+                                        realm='https://evil.example/oauth2/token')
+
+        # az acr login: the admin password must not be fetched and handed to docker
+        with self.assertRaisesRegex(AzureResponseError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
+            get_login_credentials(cmd, test_registry)
+
+        # Data plane commands, for example az acr repository list
+        with self.assertRaisesRegex(AzureResponseError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
+            get_access_credentials(cmd, test_registry, repository=TEST_REPOSITORY,
+                                   permission=RepoAccessTokenPermission.METADATA_READ.value)
+
+        mock_cf_acr_registries.assert_not_called()
+        mock_prompt.assert_not_called()
+        mock_get_raw_token.assert_not_called()
+        mock_requests_post.assert_not_called()
+
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription_id', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    def test_get_docker_credentials_realm_case_and_default_port(self, mock_get_raw_token, mock_requests_get,
+                                                                mock_requests_post, mock_get_registry_by_name,
+                                                                mock_get_subscription):
+        from azure.mgmt.containerregistry.models import Registry, Sku
+
+        cmd = self._setup_cmd()
+        test_registry = 'testregistry'
+        test_login_server = '{}.azurecr.io'.format(test_registry)
+        registry = Registry(location='westus', sku=Sku(name='Standard'))
+        registry.login_server = test_login_server
+        mock_get_registry_by_name.return_value = registry, None
+        mock_get_subscription.return_value = TEST_SUBSCRIPTION
+
+        self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get, mock_requests_post, test_login_server,
+                                        realm='https://TestRegistry.AzureCR.io:443/oauth2/token')
+
+        get_login_credentials(cmd, test_registry)
+        self._validate_refresh_token_request(mock_requests_get, mock_requests_post, test_login_server)
+
+        get_access_credentials(cmd, test_registry, repository=TEST_REPOSITORY,
+                               permission=RepoAccessTokenPermission.METADATA_READ.value)
+        self._validate_access_token_request(mock_requests_get, mock_requests_post, test_login_server,
+                                            'repository:{}:{}'.format(
+                                                TEST_REPOSITORY, RepoAccessTokenPermission.METADATA_READ.value))
+
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    def test_get_aad_token_untrusted_realm_diagnostics(self, mock_get_raw_token, mock_requests_get,
+                                                       mock_requests_post):
+        cmd = self._setup_cmd()
+        test_login_server = 'testregistry.azurecr.io'
+        self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get, mock_requests_post, test_login_server,
+                                        realm='https://evil.example/oauth2/token')
+
+        result = _get_aad_token(cmd.cli_ctx, test_login_server, False, is_diagnostics_context=True)
+
+        self.assertIsInstance(result, ErrorClass)
+        self.assertEqual(result.error_title, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title)
+        mock_get_raw_token.assert_not_called()
+        mock_requests_post.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.acr.check_health.print_pass', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr.check_health._get_aad_token', autospec=True)
+    def test_check_health_reports_untrusted_realm(self, mock_get_aad_token, mock_print_pass):
+        from azure.cli.command_modules.acr.check_health import _get_endpoint_and_token_status
+
+        cmd = self._setup_cmd()
+        test_login_server = 'testregistry.azurecr.io'
+        mock_get_aad_token.return_value = CONNECTIVITY_UNTRUSTED_REALM_ERROR.format_error_message(test_login_server)
+
+        with self.assertRaisesRegex(CLIError, CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title):
+            _get_endpoint_and_token_status(cmd, test_login_server, False, None, ignore_errors=False)
+
+        passed_checks = [c.args[0] for c in mock_print_pass.call_args_list]
+        self.assertFalse(any('Fetch refresh token' in check for check in passed_checks))
+        self.assertFalse(any('Fetch access token' in check for check in passed_checks))
 
     @mock.patch('azure.cli.command_modules.acr.helm.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
@@ -1488,3 +1646,48 @@ class ResolveAcrScopeTests(unittest.TestCase):
             _resolve_acr_scope(cli_ctx),
             "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME),
         )
+
+
+class TrustedRealmTests(unittest.TestCase):
+    """Unit tests for _docker_utils._is_trusted_realm.
+
+    Credentials are only sent when the WWW-Authenticate realm uses HTTPS and points to the registry login server.
+    """
+
+    LOGIN_SERVER = 'myregistry.azurecr.io'
+
+    def test_trusted_realms(self):
+        for realm in [
+            'https://myregistry.azurecr.io/oauth2/token',
+            'https://myregistry.azurecr.io',
+            'https://MyRegistry.AzureCR.io/oauth2/token',
+            'HTTPS://myregistry.azurecr.io/oauth2/token',
+            'https://myregistry.azurecr.io:443/oauth2/token',
+        ]:
+            with self.subTest(realm=realm):
+                self.assertTrue(_is_trusted_realm(realm, self.LOGIN_SERVER))
+
+    def test_untrusted_realms(self):
+        for realm in [
+            'http://myregistry.azurecr.io/oauth2/token',
+            'https://evil.example/oauth2/token',
+            'https://myregistry.azurecr.io.evil.example/oauth2/token',
+            'https://evilmyregistry.azurecr.io/oauth2/token',
+            'https://myregistry.azurecr.io./oauth2/token',
+            'https://myregistry.azurecr.io@evil.example/oauth2/token',
+            'https://evil.example@myregistry.azurecr.io/oauth2/token',
+            'https://evil.example\\@myregistry.azurecr.io/oauth2/token',
+            'https://myregistry.azurecr.io:8443/oauth2/token',
+            'https://myregistry.azurecr.io:abc/oauth2/token',
+            'https://[::1/oauth2/token',
+            '//myregistry.azurecr.io/oauth2/token',
+            'myregistry.azurecr.io/oauth2/token',
+            'https:///oauth2/token',
+            '',
+        ]:
+            with self.subTest(realm=realm):
+                self.assertFalse(_is_trusted_realm(realm, self.LOGIN_SERVER))
+
+    def test_login_server_with_port(self):
+        self.assertTrue(_is_trusted_realm('https://localhost:5000/oauth2/token', 'localhost:5000'))
+        self.assertFalse(_is_trusted_realm('https://localhost/oauth2/token', 'localhost:5000'))
