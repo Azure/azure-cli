@@ -786,6 +786,16 @@ helps['storage blob copy start'] = """
 type: command
 short-summary: Copy a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
 parameters:
+  - name: --source-auth-mode
+    type: string
+    short-summary: Use Entra login for a named source blob without generating a SAS.
+    long-summary: >
+        Requires --auth-mode login and --requires-sync true. Specify the source using
+        --source-account-name, --source-container, and --source-blob. If the source account
+        name is omitted, the destination account is used. Source URI, source key/SAS,
+        file sources, and destination blob type conversion are not supported in this mode.
+        The signed-in identity needs blob read access to the source and write access to
+        the destination. Synchronous copy is subject to the service's size limits.
   - name: --source-uri -u
     type: string
     short-summary: >
@@ -835,6 +845,9 @@ parameters:
         Specify this conditional header to copy the blob only if the source blob
         has not been modified since the specified date/time.
 examples:
+  - name: Copy a blob synchronously between accounts using Entra login without a SAS.
+    text: |
+        az storage blob copy start --account-name destinationaccount --destination-container destinationcontainer --destination-blob example.txt --source-account-name sourceaccount --source-container sourcecontainer --source-blob example.txt --auth-mode login --source-auth-mode login --requires-sync true
   - name: Copy a blob asynchronously. Use `az storage blob show` to check the status of the blobs.
     text: |
         az storage blob copy start --account-key 00000000 --account-name MyAccount --destination-blob MyDestinationBlob --destination-container MyDestinationContainer --source-uri https://storage.blob.core.windows.net/photos
