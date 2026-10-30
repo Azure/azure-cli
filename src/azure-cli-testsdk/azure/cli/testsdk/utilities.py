@@ -242,6 +242,96 @@ class EmailAddressReplacer(RecordingProcessor):
         return response
 
 
+class MSGraphUserProfileReplacer(RecordingProcessor):
+    """Remove personal profile data of Microsoft Graph user objects from JSON responses.
+
+    - Contact fields (phones, job title, office location, address) are cleared on every Graph user object.
+    - The signed-in user is learned from the `/me` response of any built-in cloud's Graph endpoint. Its name fields
+      are replaced with mock values, and so is any later JSON string value that exactly equals one of its names.
+
+    Only decoded JSON values are changed; keys, other values and non-JSON bodies are left untouched.
+    """
+
+    MOCKED_DISPLAY_NAME = 'Test User'
+    MOCKED_GIVEN_NAME = 'Test'
+    MOCKED_SURNAME = 'User'
+    _NAME_FIELDS = (('displayName', MOCKED_DISPLAY_NAME), ('givenName', MOCKED_GIVEN_NAME),
+                    ('surname', MOCKED_SURNAME))
+    _CLEARED_FIELDS = {'businessPhones': [], 'mobilePhone': None, 'faxNumber': None, 'jobTitle': None,
+                       'officeLocation': None, 'department': None, 'companyName': None, 'streetAddress': None,
+                       'city': None, 'state': None, 'postalCode': None, 'country': None}
+    # Hosts of `microsoft_graph_resource_id` for the built-in clouds in azure.cli.core.cloud
+    GRAPH_HOSTS = ('graph.microsoft.com', 'graph.microsoft.us', 'dod-graph.microsoft.us',
+                   'microsoftgraph.chinacloudapi.cn', 'graph.microsoft.de', 'graph.svc.sovcloud.fr')
+
+    def __init__(self):
+        self._is_me_request = False
+        self._me_id = None
+        self._names = {}
+
+    def reset(self):
+        self._is_me_request = False
+        self._me_id = None
+        self._names = {}
+
+    def process_request(self, request):
+        from urllib.parse import urlparse
+        url = urlparse(request.uri)
+        self._is_me_request = ((url.hostname or '').lower() in self.GRAPH_HOSTS and
+                               url.path.rstrip('/').lower().endswith('/me') and request.method.upper() == 'GET')
+        return request
+
+    def _learn_me(self, me):
+        if not isinstance(me, dict):
+            return
+        if isinstance(me.get('id'), str):
+            self._me_id = me['id']
+        for key, mock in self._NAME_FIELDS:
+            if isinstance(me.get(key), str) and me[key]:
+                self._names[me[key]] = mock
+
+    def _scrub(self, obj):
+        if isinstance(obj, list):
+            return [self._scrub(item) for item in obj]
+        if isinstance(obj, dict):
+            result = {key: self._scrub(value) for key, value in obj.items()}
+            if 'userPrincipalName' in obj:
+                for key, value in self._CLEARED_FIELDS.items():
+                    if key in result:
+                        result[key] = value
+                if self._me_id is not None and obj.get('id') == self._me_id:
+                    for key, mock in self._NAME_FIELDS:
+                        if result.get(key):
+                            result[key] = mock
+            return result
+        if isinstance(obj, str):
+            return self._names.get(obj, obj)
+        return obj
+
+    def process_response(self, response):
+        import json
+
+        is_me_response, self._is_me_request = self._is_me_request, False
+        body = response['body']['string']
+        if not body:
+            return response
+        try:
+            body = _byte_to_str(body)
+            data = json.loads(body)
+        except (UnicodeDecodeError, ValueError):
+            return response
+
+        if is_me_response:
+            self._learn_me(data)
+        if not self._names and '"userPrincipalName"' not in body:
+            return response
+
+        scrubbed = self._scrub(data)
+        if scrubbed != data:
+            response['body']['string'] = json.dumps(scrubbed)
+        return response
+
+
 class AADAuthRequestFilter(RecordingProcessor):
     """Remove oauth authentication requests and responses from recording.
     This is derived from OAuthRequestResponsesFilter.

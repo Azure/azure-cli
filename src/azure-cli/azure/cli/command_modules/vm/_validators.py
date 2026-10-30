@@ -130,7 +130,9 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.core.tools import parse_resource_id
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+    # vaults.list() calls ARM's /resources API, which only accepts 2015-11-01. azure-mgmt-keyvault 14.1.0
+    # sends the client's api-version on next-link pages, so pin the client to 2015-11-01 for this call.
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT, api_version='2015-11-01').vaults
     for vault in client.list():
         id_comps = parse_resource_id(vault.id)
         if id_comps['name'] == vault_name:

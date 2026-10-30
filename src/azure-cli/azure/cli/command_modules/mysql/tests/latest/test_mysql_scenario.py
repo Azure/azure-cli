@@ -41,6 +41,9 @@ SERVER_NAME_PREFIX = 'azuredbclitest-'
 SERVER_NAME_MAX_LENGTH = 20
 DEFAULT_LOCATION = "northeurope"
 DEFAULT_PAIRED_LOCATION = "westeurope"
+# BYOK test needs Standard_D2ds_v4 with geo-redundant backup in both regions of the pair
+BYOK_LOCATION = "westus2"
+BYOK_PAIRED_LOCATION = "westcentralus"
 DEFAULT_GENERAL_PURPOSE_SKU = "Standard_D2ds_v4"
 DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E4ads_v5"
 RESOURCE_RANDOM_NAME = "clirecording"
@@ -133,11 +136,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._test_flexible_server_gtid_reset('mysql', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=DEFAULT_PAIRED_LOCATION, additional_params='--enable-purge-protection true --retention-days 90 --enable-rbac-authorization false')
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=DEFAULT_LOCATION, additional_params='--enable-purge-protection true --retention-days 90 --enable-rbac-authorization false')
+    @ResourceGroupPreparer(location=BYOK_LOCATION)
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=BYOK_PAIRED_LOCATION, additional_params='--enable-purge-protection true --retention-days 90 --enable-rbac-authorization false')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=BYOK_LOCATION, additional_params='--enable-purge-protection true --retention-days 90 --enable-rbac-authorization false')
     def test_mysql_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
-        self._test_flexible_server_byok_mgmt('mysql', resource_group, vault_name, backup_vault_name)
+        self._test_flexible_server_byok_mgmt('mysql', resource_group, vault_name, backup_vault_name,
+                                             location=BYOK_LOCATION, backup_location=BYOK_PAIRED_LOCATION)
 
 
     def _test_flexible_server_mgmt(self, database_engine, resource_group):
@@ -724,7 +728,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, target_server))
 
 
-    def _test_flexible_server_byok_mgmt(self, database_engine, resource_group, vault_name, backup_vault_name=None):
+    def _test_flexible_server_byok_mgmt(self, database_engine, resource_group, vault_name, backup_vault_name=None,
+                                        location=DEFAULT_LOCATION, backup_location=DEFAULT_PAIRED_LOCATION):
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -735,8 +740,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
         sku_name = DEFAULT_GENERAL_PURPOSE_SKU
-        location = DEFAULT_LOCATION
-        backup_location = DEFAULT_PAIRED_LOCATION
         replication_role = 'Replica'
 
         try:
