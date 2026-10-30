@@ -22,9 +22,9 @@ class Exists(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2017-04-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.relay/checknameavailability", "2017-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.relay/checknameavailability", "2026-07-01-preview"],
         ]
     }
 
@@ -92,7 +92,7 @@ class Exists(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -108,7 +108,7 @@ class Exists(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
