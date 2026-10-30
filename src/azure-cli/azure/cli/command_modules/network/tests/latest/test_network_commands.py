@@ -4038,6 +4038,50 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, 'Please provide a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
 
+    @live_only()  # live_only as MultiCloud circuits need a real partner cloud account, contact service team for one
+    @unittest.skipUnless(
+        os.environ.get('AZURE_TEST_EXPRESS_ROUTE_PARTNER_ACCOUNT_ID') and
+        os.environ.get('AZURE_TEST_EXPRESS_ROUTE_ACTIVATION_KEY'),
+        'Set AZURE_TEST_EXPRESS_ROUTE_PARTNER_ACCOUNT_ID and AZURE_TEST_EXPRESS_ROUTE_ACTIVATION_KEY for live tests.')
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_multicloud', location='eastus2')
+    def test_network_express_route_multicloud(self, resource_group):
+        workflows = [
+            ('account', '--partner-account-id', 'partnerAccountId',
+             os.environ['AZURE_TEST_EXPRESS_ROUTE_PARTNER_ACCOUNT_ID']),
+            ('activation', '--activation-key', 'activationKey',
+             os.environ['AZURE_TEST_EXPRESS_ROUTE_ACTIVATION_KEY']),
+        ]
+        for workflow, parameter, field, value in workflows:
+            with self.subTest(workflow=workflow):
+                self.kwargs.update({
+                    'rg': resource_group,
+                    'er': 'mccircuit-' + workflow,
+                    'parameter': parameter,
+                    'provisioning_value': value,
+                })
+                checks = [
+                    self.check('sku.name', 'MultiCloud_MeteredData'),
+                    self.check('sku.tier', 'MultiCloud'),
+                    self.check('sku.family', 'MeteredData'),
+                    self.check(field, '{provisioning_value}'),
+                    self.check("contains(['Standard', 'High', 'Maximum'], resiliencyLevel)", True),
+                ]
+                self.cmd('network express-route create -g {rg} -n {er} --bandwidth 200 --provider AWS --peering-location uswest2 '
+                         '--sku-tier MultiCloud --sku-family MeteredData {parameter} "{provisioning_value}"',
+                         checks=checks)
+                self.cmd('network express-route update -g {rg} -n {er} {parameter} "{provisioning_value}" '
+                         '--tags purpose=multicloud-cli-test',
+                         checks=checks + [self.check('tags.purpose', 'multicloud-cli-test')])
+                self.cmd('network express-route show -g {rg} -n {er}', checks=checks)
+                self.cmd('network express-route list -g {rg}', checks=[
+                    self.check('length(@)', 1),
+                    self.check('[0].sku.name', 'MultiCloud_MeteredData'),
+                    self.check('[0].' + field, '{provisioning_value}'),
+                    self.check("contains(['Standard', 'High', 'Maximum'], [0].resiliencyLevel)", True),
+                ])
+                self.cmd('network express-route delete -g {rg} -n {er}')
+                self.cmd('network express-route list -g {rg}', checks=self.is_empty())
+
     @unittest.skip('Test is wrong, please fix. rg not found')
     @ResourceGroupPreparer(name_prefix='cli_test_express_route')
     def test_network_express_route_connection_routing_configuration(self, resource_group):

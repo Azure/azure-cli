@@ -5,6 +5,7 @@
 
 import unittest
 
+from copy import deepcopy
 from unittest import mock
 
 from knack.util import CLIError
@@ -88,6 +89,133 @@ class TestNetworkUnitTests(unittest.TestCase):
         result = parent_with_empty_collection.collection
         self.assertEqual(len(result), 2)
         self.assertEqual(result[1].value, 'noodle')
+
+
+class TestExpressRouteMultiCloud(unittest.TestCase):
+    def setUp(self):
+        self.resource = {
+            'name': 'circuit',
+            'location': 'eastus2',
+            'sku': {'name': 'MultiCloud_MeteredData', 'tier': 'MultiCloud', 'family': 'MeteredData'},
+            'properties': {
+                'partnerAccountId': 'original-account',
+                'activationKey': 'original-key',
+                'resiliencyLevel': 'Maximum',
+                'serviceProviderProvisioningState': 'DeProvisioned',
+                'serviceProviderProperties': {
+                    'serviceProviderName': 'AWS', 'peeringLocation': 'uswest2', 'bandwidthInMbps': 200,
+                },
+            },
+        }
+
+    def _command(self, command_type, **arguments):
+        from azure.cli.core import AzCli
+        from azure.cli.core.aaz._command_ctx import AAZCommandCtx
+
+        cli = mock.MagicMock(spec=AzCli)
+        cli.data = {}
+        cli.cloud = mock.MagicMock()
+        command = command_type(cli_ctx=cli)
+        command.ctx = AAZCommandCtx(cli, command.get_arguments_schema(), {
+            'name': 'circuit', 'resource_group': 'rg',
+            'subscription': '00000000-0000-0000-0000-000000000000',
+            **arguments,
+        })
+        command.ctx.get_http_client = mock.Mock()
+        command.ctx.format_args()
+        return command
+
+    def test_create_multicloud_provisioning(self):
+        from azure.cli.command_modules.network.custom import ExpressRouteCreate
+
+        for argument, field in [('partner_account_id', 'partnerAccountId'), ('activation_key', 'activationKey')]:
+            with self.subTest(argument=argument):
+                command = self._command(
+                    ExpressRouteCreate, location='eastus2', bandwidth=['200'], provider='AWS',
+                    peering_location='uswest2', sku_tier='MultiCloud', sku_family='MeteredData',
+                    **{argument: 'test-value+/='})
+                command.pre_operations()
+                operation = command.ExpressRouteCircuitsCreateOrUpdate(command.ctx)
+                self.assertEqual(operation.query_parameters['api-version'], '2025-09-01')
+                self.assertEqual(operation.content, {
+                    'location': 'eastus2',
+                    'sku': self.resource['sku'],
+                    'properties': {
+                        field: 'test-value+/=',
+                        'serviceProviderProperties': self.resource['properties']['serviceProviderProperties'],
+                    },
+                })
+
+    def test_update_multicloud_provisioning(self):
+        from azure.cli.command_modules.network.custom import ExpressRouteUpdate
+
+        cases = [
+            {'partner_account_id': 'updated-account'},
+            {'activation_key': 'updated-key'},
+            {'partner_account_id': ''},
+            {'activation_key': ''},
+            {'partner_account_id': None},
+            {'activation_key': None},
+            {'tags': {'purpose': 'test'}},
+            {'sku_tier': 'MultiCloud', 'sku_family': 'MeteredData'},
+        ]
+        for arguments in cases:
+            with self.subTest(arguments=arguments):
+                command = self._command(ExpressRouteUpdate, **arguments)
+                command.pre_operations()
+                command.ctx.set_var(
+                    'instance', deepcopy(self.resource), command.ExpressRouteCircuitsGet._build_schema_on_200)
+                command.InstanceUpdateByJson(command.ctx)()
+                command.post_instance_update(command.ctx.vars.instance)
+                operation = command.ExpressRouteCircuitsCreateOrUpdate(command.ctx)
+                body = operation.content
+                self.assertEqual(operation.query_parameters['api-version'], '2025-09-01')
+                self.assertEqual(body['sku'], self.resource['sku'])
+                for argument, field in [('partner_account_id', 'partnerAccountId'), ('activation_key', 'activationKey')]:
+                    if argument in arguments and arguments[argument] is None:
+                        self.assertNotIn(field, body['properties'])
+                    else:
+                        self.assertEqual(
+                            body['properties'][field], arguments.get(argument, self.resource['properties'][field]))
+                self.assertEqual(
+                    body['properties']['serviceProviderProperties'],
+                    self.resource['properties']['serviceProviderProperties'])
+                self.assertNotIn('resiliencyLevel', body['properties'])
+                if 'tags' in arguments:
+                    self.assertEqual(body['tags'], arguments['tags'])
+
+    def test_multicloud_output_and_read_only_resiliency(self):
+        from azure.cli.core.aaz import AAZCommand
+        from azure.cli.command_modules.network.custom import ExpressRouteCreate, ExpressRouteUpdate
+        from azure.cli.command_modules.network.aaz.latest.network.express_route import List, Show, Wait
+
+        operations = [
+            (ExpressRouteCreate.ExpressRouteCircuitsCreateOrUpdate._build_schema_on_200_201, False),
+            (ExpressRouteUpdate.ExpressRouteCircuitsGet._build_schema_on_200, False),
+            (ExpressRouteUpdate.ExpressRouteCircuitsCreateOrUpdate._build_schema_on_200_201, False),
+            (Show.ExpressRouteCircuitsGet._build_schema_on_200, False),
+            (List.ExpressRouteCircuitsList._build_schema_on_200, True),
+            (List.ExpressRouteCircuitsListAll._build_schema_on_200, True),
+            (Wait.ExpressRouteCircuitsGet._build_schema_on_200, False),
+        ]
+        for schema_builder, is_list in operations:
+            for level in ['Standard', 'High', 'Maximum']:
+                with self.subTest(operation=schema_builder.__qualname__, resiliency=level):
+                    resource = deepcopy(self.resource)
+                    resource['properties']['resiliencyLevel'] = level
+                    schema = schema_builder()
+                    data = {'value': [resource]} if is_list else resource
+                    value = schema._ValueCls(schema=schema, data=schema.process_data(data))
+                    output = AAZCommand.deserialize_output(value)
+                    if is_list:
+                        output = output['value'][0]
+                    for field in ['partnerAccountId', 'activationKey', 'resiliencyLevel',
+                                  'serviceProviderProvisioningState']:
+                        self.assertEqual(output[field], resource['properties'][field])
+
+        for command_type in [ExpressRouteCreate, ExpressRouteUpdate]:
+            command = self._command(command_type, location='eastus2')
+            self.assertNotIn('resiliency_level', dict(command._cli_arguments_loader()))
 
 
 class TestVpnConnectionCertAuthNoSharedKey(unittest.TestCase):
