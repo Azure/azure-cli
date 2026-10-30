@@ -3749,8 +3749,11 @@ def containerapp_up_logic(cmd, resource_group_name, name, managed_env, image, en
     containerapp_def = None
     try:
         containerapp_def = ContainerAppClient.show(cmd=cmd, resource_group_name=resource_group_name, name=name)
-    except:
-        pass
+    except Exception as e:  # pylint: disable=broad-except
+        # Only fall through to create when the app does not exist. Any other failure (throttling,
+        # transient or network errors) must not be treated as "missing", because the create PUT
+        # would replace the existing app's configuration (identity, ingress, secrets, ...).
+        handle_non_resource_not_found_exception(e)
 
     if containerapp_def:
         return update_containerapp_logic(cmd=cmd, name=name, resource_group_name=resource_group_name, image=image, replace_env_vars=env_vars, ingress=ingress, target_port=target_port,
