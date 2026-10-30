@@ -94,13 +94,16 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
             'The Account, AKS cluster and Storage account must be in the same subscription.')
     checks, clients = [], {}
     account = parse_resource_id(request.account_id)
+    cognitive_client = get_cognitiveservices_management_client(cli_ctx)
+    existing_account = _read_account(cognitive_client, account)
+    _check_account_hosting(existing_account, resources)
     account_clients = _clients(cli_ctx, request.account_id, clients)
     if not account_clients.resource.resource_groups.check_existence(account['resource_group']):
         raise ValidationError(
             f"Resource group '{account['resource_group']}' does not exist. Create it before retrying.")
     _report(checks, 'Resource group', request.account_id, True, 'Exists', 'Existing resource group', 'None')
     if custom_domain:
-        _check_domain(get_cognitiveservices_management_client(cli_ctx), account, custom_domain, kind)
+        _check_domain(cognitive_client, existing_account, custom_domain, kind)
     with _read_check(checks, 'Tenants', request.account_id):
         _check_tenants(cli_ctx, clients, resources, checks)
     _report(checks, 'Distinct identities', request.account_id,
@@ -137,12 +140,79 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
     return replace(checked, grants=tuple(grants), checks=tuple(checks))
 
 
-def _check_domain(client, account, custom_domain, kind):
-    from azure.mgmt.cognitiveservices.models import CheckDomainAvailabilityParameter
+def _read_account(client, account):
     try:
-        existing = client.accounts.get(account['resource_group'], account['name'])
+        return client.accounts.get(account['resource_group'], account['name'])
     except ResourceNotFoundError:
-        existing = None
+        return None
+
+
+def _check_account_hosting(existing, resources):
+    if existing is None:
+        return
+    properties = getattr(existing, 'properties', None)
+    if properties is None:
+        raise ValidationError(
+            f'Existing Account {resources.account_id} returned no readable properties. '
+            'Inspect the Account before retrying, or use a different Account.')
+    configurations = getattr(properties, 'agent_hosting_configurations', None)
+    if configurations is None:
+        return
+    if not isinstance(configurations, (list, tuple)):
+        raise ValidationError(
+            f'Existing Account {resources.account_id} returned an ambiguous agent hosting configuration. '
+            'Inspect the Account before retrying, or use a different Account.')
+    if len(configurations) == 0:
+        return
+    if len(configurations) != 1 or configurations[0] is None:
+        raise ValidationError(
+            f'Existing Account {resources.account_id} returned an ambiguous agent hosting configuration. '
+            'Inspect the Account before retrying, or use a different Account.')
+
+    expected = {
+        'name': 'default',
+        'hosting_type': 'ManagedCluster',
+        'cluster_resource_id': resources.cluster,
+        'hosting_management_identity_resource_id': resources.management_identity,
+        'workload_identity_resource_id': resources.workload_identity,
+        'storage_account_resource_id': resources.storage,
+    }
+    configuration = configurations[0]
+    fields = (
+        ('name', 'name', False),
+        ('hosting_type', 'hostingType', False),
+        ('cluster_resource_id', 'clusterResourceId', True),
+        ('hosting_management_identity_resource_id', 'hostingManagementIdentityResourceId', True),
+        ('workload_identity_resource_id', 'workloadIdentityResourceId', True),
+        ('storage_account_resource_id', 'storageAccountResourceId', True),
+    )
+    mismatches = []
+    for attribute, display_name, arm_id in fields:
+        actual = getattr(configuration, attribute, None)
+        expected_value = expected[attribute]
+        if not isinstance(actual, str) or not actual.strip():
+            raise ValidationError(
+                f'Existing Account {resources.account_id} has an incomplete agent hosting configuration '
+                f'(missing {display_name}). Inspect the Account before retrying, or use a different Account.')
+        if arm_id:
+            matches = _normalize_arm_id(actual) == _normalize_arm_id(expected_value)
+        else:
+            matches = actual == expected_value
+        if not matches:
+            mismatches.append(display_name)
+    if mismatches:
+        raise ValidationError(
+            f'Existing Account {resources.account_id} has an incompatible agent hosting configuration '
+            f'({", ".join(mismatches)}). Updating or removing agentHostingConfigurations is not supported. '
+            'Use the existing configuration or create a different Account.')
+
+
+def _normalize_arm_id(value):
+    return value.strip().rstrip('/').lower()
+
+
+def _check_domain(client, existing, custom_domain, kind):
+    from azure.mgmt.cognitiveservices.models import CheckDomainAvailabilityParameter
     current = existing.properties.custom_sub_domain_name if existing and existing.properties else None
     if current and current.lower() == custom_domain.lower():
         return

@@ -222,6 +222,42 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.clients['storage'].storage_accounts.begin_create.assert_not_called()
         self.clients['authorization'].role_assignments.create.assert_not_called()
 
+    def _assert_no_dependency_queries(self):
+        self.client_factory.assert_not_called()
+        self.clients['aks'].managed_clusters.get.assert_not_called()
+        self.clients['aks'].agent_pools.list.assert_not_called()
+        self.clients['identity'].user_assigned_identities.get.assert_not_called()
+        self.clients['storage'].storage_accounts.get_properties.assert_not_called()
+        self.clients['storage'].storage_accounts.check_name_availability.assert_not_called()
+        self.clients['authorization'].permissions.list_for_resource_group.assert_not_called()
+        self.clients['authorization'].permissions.list_for_resource.assert_not_called()
+        self.clients['authorization'].role_assignments.list_for_scope.assert_not_called()
+        self._assert_no_writes()
+
+    @staticmethod
+    def _account_configuration(**changes):
+        configuration = {
+            'name': 'default',
+            'hostingType': 'ManagedCluster',
+            'clusterResourceId': _CLUSTER,
+            'hostingManagementIdentityResourceId': _MANAGEMENT,
+            'workloadIdentityResourceId': _WORKLOAD,
+            'storageAccountResourceId': _STORAGE,
+        }
+        configuration.update(changes)
+        return Account({'properties': {'agentHostingConfigurations': [configuration]}})
+
+    def _assert_account_hosting_conflict(self, account, message=None):
+        self.cognitive.accounts.get.side_effect = None
+        self.cognitive.accounts.get.return_value = account
+        with self.assertRaises(ValidationError) as caught:
+            preflight(self.cli_ctx, self._prepare())
+        if message:
+            self.assertIn(message, str(caught.exception))
+        self._assert_no_dependency_queries()
+        self.cognitive.accounts.get.reset_mock()
+        self.client_factory.reset_mock()
+
     def test_account_name_validation_precedes_dependency_queries(self):
         for name in ('a', 'a' * 65, 'bad.name', '-bad'):
             with self.subTest(name=name):
@@ -242,16 +278,86 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.assertEqual(parameters.kind, 'AIServices')
         self._assert_no_writes()
 
+    def test_new_account_allows_hosting_configuration(self):
+        checked = preflight(self.cli_ctx, self._prepare())
+        self.assertEqual(checked.resources.cluster, _CLUSTER)
+        self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
+        self._assert_no_writes()
+
+    def test_existing_account_without_hosting_configuration_allows_first_add(self):
+        self.cognitive.accounts.get.side_effect = None
+        for properties in ({}, {'agentHostingConfigurations': []}):
+            with self.subTest(properties=properties):
+                self.cognitive.accounts.get.reset_mock()
+                self.cognitive.accounts.get.return_value = Account({'properties': properties})
+                preflight(self.cli_ctx, self._prepare())
+                self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
+                self._assert_no_writes()
+
+    def test_equivalent_existing_hosting_configuration_allows_retry(self):
+        self.cognitive.accounts.get.side_effect = None
+        self.cognitive.accounts.get.return_value = self._account_configuration(
+            clusterResourceId='  ' + _CLUSTER.upper() + '/',
+            hostingManagementIdentityResourceId=_MANAGEMENT.upper() + '///',
+            workloadIdentityResourceId=' ' + _WORKLOAD.upper() + '/ ',
+            storageAccountResourceId=_STORAGE.upper() + '/',
+        )
+        preflight(self.cli_ctx, self._prepare())
+        self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
+        self._assert_no_writes()
+
+    def test_incompatible_existing_hosting_resource_fails_before_dependency_queries(self):
+        for field in (
+                'clusterResourceId',
+                'hostingManagementIdentityResourceId',
+                'workloadIdentityResourceId',
+                'storageAccountResourceId'):
+            with self.subTest(field=field):
+                self._assert_account_hosting_conflict(
+                    self._account_configuration(**{
+                        field: _RG + '/providers/Example.Provider/resources/different'}),
+                    field)
+
+    def test_incompatible_or_malformed_existing_hosting_configuration_fails_early(self):
+        cases = {
+            'name': self._account_configuration(name='other'),
+            'hostingType': SimpleNamespace(properties=SimpleNamespace(agent_hosting_configurations=[
+                SimpleNamespace(
+                    name='default', hosting_type='Other', cluster_resource_id=_CLUSTER,
+                    hosting_management_identity_resource_id=_MANAGEMENT,
+                    workload_identity_resource_id=_WORKLOAD, storage_account_resource_id=_STORAGE)])),
+            'missing clusterResourceId': self._account_configuration(clusterResourceId=None),
+            'multiple configurations': Account({'properties': {'agentHostingConfigurations': [
+                self._account_configuration().properties.agent_hosting_configurations[0],
+                self._account_configuration().properties.agent_hosting_configurations[0],
+            ]}}),
+            'missing properties': Account(),
+        }
+        for case, account in cases.items():
+            with self.subTest(case=case):
+                self._assert_account_hosting_conflict(account)
+
     def test_existing_account_checks_new_or_previously_absent_custom_domain(self):
         self.cognitive.accounts.get.side_effect = None
         for previous in ('old-domain', None):
             with self.subTest(previous=previous):
+                self.cognitive.accounts.get.reset_mock()
                 self.cognitive.check_domain_availability.reset_mock()
                 self.cognitive.accounts.get.return_value = Account({'properties': {'customSubDomainName': previous}})
                 preflight(self.cli_ctx, self._prepare(), kind='AIServices', custom_domain='new-domain')
+                self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
                 self.assertEqual(
                     self.cognitive.check_domain_availability.call_args.args[0].subdomain_name, 'new-domain')
                 self._assert_no_writes()
+
+    def test_existing_account_reuses_matching_custom_domain_with_single_get(self):
+        self.cognitive.accounts.get.side_effect = None
+        self.cognitive.accounts.get.return_value = Account({
+            'properties': {'customSubDomainName': 'existing-domain'}})
+        preflight(self.cli_ctx, self._prepare(), kind='AIServices', custom_domain='EXISTING-DOMAIN')
+        self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
+        self.cognitive.check_domain_availability.assert_not_called()
+        self._assert_no_writes()
 
     def test_unavailable_or_unverified_domain_blocks_dependency_creation(self):
         for available in (False, None):
@@ -271,7 +377,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
             preflight(self.cli_ctx, self._prepare(), kind='AIServices', custom_domain='new-domain')
         self.assertIs(caught.exception, error)
         self.cognitive.check_domain_availability.assert_not_called()
-        self._assert_no_writes()
+        self._assert_no_dependency_queries()
 
     def test_domain_api_error_is_preserved(self):
         error = HttpResponseError('Domain check forbidden')
@@ -423,6 +529,13 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.pools[0]['properties']['provisioningState'] = 'Updating'
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, self._prepare())
+        self._assert_no_writes()
+
+    def test_top_level_vm_size_capacity_still_passes(self):
+        checked = preflight(self.cli_ctx, self._prepare())
+        statuses = {check['name']: check['status'] for check in checked.checks}
+        self.assertEqual(statuses['System node pool'], 'PASS')
+        self.assertEqual(statuses['Agent node pool'], 'PASS')
         self._assert_no_writes()
 
     def test_smaller_manual_or_actual_vm_size_fails_pool_capacity(self):
