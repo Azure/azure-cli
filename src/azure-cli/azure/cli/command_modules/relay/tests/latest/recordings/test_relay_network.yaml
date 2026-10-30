@@ -1,0 +1,1695 @@
+interactions:
+- request:
+    body: '{"name": "relay-nwcli000002"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace exists
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '29'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/checkNameAvailability?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"nameAvailable":true,"reason":"None","message":"Namespace name available"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '75'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 07:59:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 6bcc0960-aee1-412f-9a06-3d6cb35ace69
+      x-ms-messaging-routing-id:
+      - PROD|AUSTRALIACENTRAL|AUSTRALIACENTRAL|G2|2026-10-09T07:59:49
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/jioindiacentral/d92f3d2e-a1e4-49c6-8bb1-af3cbade94a4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 3E569BD5BABD4684B1EB7054E634A080 Ref B: PNQ241100402023 Ref C: 2026-10-09T07:59:47Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2", "properties": {"publicNetworkAccess": "Enabled"},
+      "tags": {"tag1": "value1"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '101'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002","name":"relay-nwcli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Creating","status":"Creating","createdAt":"2026-10-09T07:59:59.1003314Z","updatedAt":"2026-10-09T07:59:59.1003314Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nwcli000002","serviceBusEndpoint":"https://relay-nwcli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=true&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271296003253003&c=MIIIJjCCBw6gAwIBAgIQb2qmfO_DC0moMTy1B-w-kzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIxNDYzMVoXDTI2MTIxMzAzNDYzMVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDBToa7cnDwXvKUyj5e4vSBSlYGxyPkYA2aIAtIXrpzbSO4j8i97D18tY3qhWpmsdmSdv0rK-lBy37I6vz21WypgG8nNTtTxz1pmSSLun1twUt2ZfOkiAxyWczEitHE4mhRRJeo37BCaermYRNBTZNVQc0pSC0CJCZ9WuIl2OZWEw_gg49SMJ-drVqAROg4doBPHBP6YLpnZfgwScnRpd1ZG9eCaElgbbjQZXY891kEw79oDmUKYKlS9yot5WC9zkKtHQoT00u-GcsE4IBygmTJsRhTmIulTltnfa9tzDt1yn0C7fEkeLacVvdDaLOVGqNMl-N9lXz_WVa474Y68WfRAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBT_Ehdpc3aOyiA6AmwPCbk7jORu-zAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzkyL2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAD7NePzsP7SmVrhKzOCfNfqa0tTFTRPQefuLSDiZHSAxFTjDklSunq5PecGvEThEOQRiSjn90yZpqo2gvQrNGXifpPRqmOnNv8YoCPj8Af9rvfemNnWcQFYeOmzKPB4wWgDH4d9svbRdoP5GnuKxOZG8uzkD4IN2NtcKCqtNIFNnLQwJ8gLyv75npl7xesaYNYnZxi3j1dHls6w6bW1SiUha3xsEsFEmREYUVlpBT5WHX-CpXwdlce3L6NjDvaKO1d8m8LveljhPUKtYTNYK86U8ODPATKC3erEpogc5Vp1KtlHo6GcgJGK4rsRBjieBizNcUj_exEqhlNob9hZLSVI&s=XFNGKvQoQeqYPUH5v7isoc77mxJI_P3-3butd2wwtas8k02mhNHfjYFnDY6Zt6ML_NJr6P3_FnDjOvbvQ3Ryk1SURfMYZnu5uqZNI67bUbfytussuWuZ2Y4kbekOlkEkmh9FBoyReH69rc-dEztF9dQIXCD6S7qyKSdo4M4alTU7F-Ujdig-LAovQlxc_0cZjDPAKuRGA4lwcZWBt-zXsMfQGVru-MRgOpN78Bfxzc2EuyB_3jVVqu7kwGz9Dn6bnJKoHKCvLqFjiJ__3Y9PPHqFcGfXx3xhl870XVrFtWFvILoXX7De9EYJL311V1uR5D0W0LLz1YMCyvHzAbEJ0A&h=Ke6OMEJgSF944843iUebLECVKLmrZ_3eFpLMdEDCkoE
+      cache-control:
+      - no-cache
+      content-length:
+      - '679'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:00 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=false&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271296003409266&c=MIIIJjCCBw6gAwIBAgIQb2qmfO_DC0moMTy1B-w-kzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIxNDYzMVoXDTI2MTIxMzAzNDYzMVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDBToa7cnDwXvKUyj5e4vSBSlYGxyPkYA2aIAtIXrpzbSO4j8i97D18tY3qhWpmsdmSdv0rK-lBy37I6vz21WypgG8nNTtTxz1pmSSLun1twUt2ZfOkiAxyWczEitHE4mhRRJeo37BCaermYRNBTZNVQc0pSC0CJCZ9WuIl2OZWEw_gg49SMJ-drVqAROg4doBPHBP6YLpnZfgwScnRpd1ZG9eCaElgbbjQZXY891kEw79oDmUKYKlS9yot5WC9zkKtHQoT00u-GcsE4IBygmTJsRhTmIulTltnfa9tzDt1yn0C7fEkeLacVvdDaLOVGqNMl-N9lXz_WVa474Y68WfRAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBT_Ehdpc3aOyiA6AmwPCbk7jORu-zAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzkyL2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAD7NePzsP7SmVrhKzOCfNfqa0tTFTRPQefuLSDiZHSAxFTjDklSunq5PecGvEThEOQRiSjn90yZpqo2gvQrNGXifpPRqmOnNv8YoCPj8Af9rvfemNnWcQFYeOmzKPB4wWgDH4d9svbRdoP5GnuKxOZG8uzkD4IN2NtcKCqtNIFNnLQwJ8gLyv75npl7xesaYNYnZxi3j1dHls6w6bW1SiUha3xsEsFEmREYUVlpBT5WHX-CpXwdlce3L6NjDvaKO1d8m8LveljhPUKtYTNYK86U8ODPATKC3erEpogc5Vp1KtlHo6GcgJGK4rsRBjieBizNcUj_exEqhlNob9hZLSVI&s=VRdMl-i-SCeaXY7gZ_RQbr6I3-dHn8hkwp0ok4FWiJcRp3ZMAS1hhqj0fAC65VzBe8QLSIT98S1BT2ZKlFYGunsXeQRwVxp9MKrtXl5FZXP0raVM5YLIUgA21go60jkh8-Lb-Con8NW312RB-MtFV73yojUX-M9qJYkPsA48RfZvBcR0J4bwAMKQ-Ifran_Ke7quRm4IVyXjKdsHAQBAjOjT8h8kY-11zHvb2GRCqW_Ag6Kko2Hak2Pwm67AADuqrp4q2Rw00j8V71UTkJ5iEZJcEoeI2h8evt73YiaxL2LrvyAiiXrHB9nKClHEWHDTKMaAl8Dy_OTTZ3o7ZSutyQ&h=raPC7Zwd0XcGbSbOrGbX_aPfVbrsAMJkRVsEODcaKFQ
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - ecae5dc9-a1c1-4709-bf39-3f3e736efce3
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G6|2026-10-09T07:59:59
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/centralindia/1f1315e9-00c6-4cd9-abfd-19f00e8912f7
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: A5E3ED5CA5F24FC886AD677B3FFD1E3A Ref B: PNQ241100404042 Ref C: 2026-10-09T07:59:50Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=true&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271296003253003&c=MIIIJjCCBw6gAwIBAgIQb2qmfO_DC0moMTy1B-w-kzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIxNDYzMVoXDTI2MTIxMzAzNDYzMVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDBToa7cnDwXvKUyj5e4vSBSlYGxyPkYA2aIAtIXrpzbSO4j8i97D18tY3qhWpmsdmSdv0rK-lBy37I6vz21WypgG8nNTtTxz1pmSSLun1twUt2ZfOkiAxyWczEitHE4mhRRJeo37BCaermYRNBTZNVQc0pSC0CJCZ9WuIl2OZWEw_gg49SMJ-drVqAROg4doBPHBP6YLpnZfgwScnRpd1ZG9eCaElgbbjQZXY891kEw79oDmUKYKlS9yot5WC9zkKtHQoT00u-GcsE4IBygmTJsRhTmIulTltnfa9tzDt1yn0C7fEkeLacVvdDaLOVGqNMl-N9lXz_WVa474Y68WfRAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBT_Ehdpc3aOyiA6AmwPCbk7jORu-zAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzkyL2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAD7NePzsP7SmVrhKzOCfNfqa0tTFTRPQefuLSDiZHSAxFTjDklSunq5PecGvEThEOQRiSjn90yZpqo2gvQrNGXifpPRqmOnNv8YoCPj8Af9rvfemNnWcQFYeOmzKPB4wWgDH4d9svbRdoP5GnuKxOZG8uzkD4IN2NtcKCqtNIFNnLQwJ8gLyv75npl7xesaYNYnZxi3j1dHls6w6bW1SiUha3xsEsFEmREYUVlpBT5WHX-CpXwdlce3L6NjDvaKO1d8m8LveljhPUKtYTNYK86U8ODPATKC3erEpogc5Vp1KtlHo6GcgJGK4rsRBjieBizNcUj_exEqhlNob9hZLSVI&s=XFNGKvQoQeqYPUH5v7isoc77mxJI_P3-3butd2wwtas8k02mhNHfjYFnDY6Zt6ML_NJr6P3_FnDjOvbvQ3Ryk1SURfMYZnu5uqZNI67bUbfytussuWuZ2Y4kbekOlkEkmh9FBoyReH69rc-dEztF9dQIXCD6S7qyKSdo4M4alTU7F-Ujdig-LAovQlxc_0cZjDPAKuRGA4lwcZWBt-zXsMfQGVru-MRgOpN78Bfxzc2EuyB_3jVVqu7kwGz9Dn6bnJKoHKCvLqFjiJ__3Y9PPHqFcGfXx3xhl870XVrFtWFvILoXX7De9EYJL311V1uR5D0W0LLz1YMCyvHzAbEJ0A&h=Ke6OMEJgSF944843iUebLECVKLmrZ_3eFpLMdEDCkoE
+  response:
+    body:
+      string: '{"name":"4b3dfabf-cde5-447c-8acc-4fd209af0db8","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 5fd3bccf-42a0-4395-af39-62e1df893776
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G3|2026-10-09T08:00:02
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westindia/ddd78b02-86e0-4e88-87f9-8e3bfc8325ec
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 2CD964A341CF4FABA608D791A9B668FD Ref B: PNQ241100403031 Ref C: 2026-10-09T08:00:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=true&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271296003253003&c=MIIIJjCCBw6gAwIBAgIQb2qmfO_DC0moMTy1B-w-kzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIxNDYzMVoXDTI2MTIxMzAzNDYzMVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDBToa7cnDwXvKUyj5e4vSBSlYGxyPkYA2aIAtIXrpzbSO4j8i97D18tY3qhWpmsdmSdv0rK-lBy37I6vz21WypgG8nNTtTxz1pmSSLun1twUt2ZfOkiAxyWczEitHE4mhRRJeo37BCaermYRNBTZNVQc0pSC0CJCZ9WuIl2OZWEw_gg49SMJ-drVqAROg4doBPHBP6YLpnZfgwScnRpd1ZG9eCaElgbbjQZXY891kEw79oDmUKYKlS9yot5WC9zkKtHQoT00u-GcsE4IBygmTJsRhTmIulTltnfa9tzDt1yn0C7fEkeLacVvdDaLOVGqNMl-N9lXz_WVa474Y68WfRAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBT_Ehdpc3aOyiA6AmwPCbk7jORu-zAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzkyL2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAD7NePzsP7SmVrhKzOCfNfqa0tTFTRPQefuLSDiZHSAxFTjDklSunq5PecGvEThEOQRiSjn90yZpqo2gvQrNGXifpPRqmOnNv8YoCPj8Af9rvfemNnWcQFYeOmzKPB4wWgDH4d9svbRdoP5GnuKxOZG8uzkD4IN2NtcKCqtNIFNnLQwJ8gLyv75npl7xesaYNYnZxi3j1dHls6w6bW1SiUha3xsEsFEmREYUVlpBT5WHX-CpXwdlce3L6NjDvaKO1d8m8LveljhPUKtYTNYK86U8ODPATKC3erEpogc5Vp1KtlHo6GcgJGK4rsRBjieBizNcUj_exEqhlNob9hZLSVI&s=XFNGKvQoQeqYPUH5v7isoc77mxJI_P3-3butd2wwtas8k02mhNHfjYFnDY6Zt6ML_NJr6P3_FnDjOvbvQ3Ryk1SURfMYZnu5uqZNI67bUbfytussuWuZ2Y4kbekOlkEkmh9FBoyReH69rc-dEztF9dQIXCD6S7qyKSdo4M4alTU7F-Ujdig-LAovQlxc_0cZjDPAKuRGA4lwcZWBt-zXsMfQGVru-MRgOpN78Bfxzc2EuyB_3jVVqu7kwGz9Dn6bnJKoHKCvLqFjiJ__3Y9PPHqFcGfXx3xhl870XVrFtWFvILoXX7De9EYJL311V1uR5D0W0LLz1YMCyvHzAbEJ0A&h=Ke6OMEJgSF944843iUebLECVKLmrZ_3eFpLMdEDCkoE
+  response:
+    body:
+      string: '{"name":"4b3dfabf-cde5-447c-8acc-4fd209af0db8","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '68'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 55750ef8-782d-41ba-a54d-5fb48412c775
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G14|2026-10-09T08:00:36
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/jioindiawest/9ccfaf11-34ba-445a-8306-db98a4a99bd7
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A03ECE0D13004B79B6C21C859702EE0D Ref B: PNQ241100401054 Ref C: 2026-10-09T08:00:33Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=false&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271296003409266&c=MIIIJjCCBw6gAwIBAgIQb2qmfO_DC0moMTy1B-w-kzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIxNDYzMVoXDTI2MTIxMzAzNDYzMVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDBToa7cnDwXvKUyj5e4vSBSlYGxyPkYA2aIAtIXrpzbSO4j8i97D18tY3qhWpmsdmSdv0rK-lBy37I6vz21WypgG8nNTtTxz1pmSSLun1twUt2ZfOkiAxyWczEitHE4mhRRJeo37BCaermYRNBTZNVQc0pSC0CJCZ9WuIl2OZWEw_gg49SMJ-drVqAROg4doBPHBP6YLpnZfgwScnRpd1ZG9eCaElgbbjQZXY891kEw79oDmUKYKlS9yot5WC9zkKtHQoT00u-GcsE4IBygmTJsRhTmIulTltnfa9tzDt1yn0C7fEkeLacVvdDaLOVGqNMl-N9lXz_WVa474Y68WfRAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBT_Ehdpc3aOyiA6AmwPCbk7jORu-zAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzkyL2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAD7NePzsP7SmVrhKzOCfNfqa0tTFTRPQefuLSDiZHSAxFTjDklSunq5PecGvEThEOQRiSjn90yZpqo2gvQrNGXifpPRqmOnNv8YoCPj8Af9rvfemNnWcQFYeOmzKPB4wWgDH4d9svbRdoP5GnuKxOZG8uzkD4IN2NtcKCqtNIFNnLQwJ8gLyv75npl7xesaYNYnZxi3j1dHls6w6bW1SiUha3xsEsFEmREYUVlpBT5WHX-CpXwdlce3L6NjDvaKO1d8m8LveljhPUKtYTNYK86U8ODPATKC3erEpogc5Vp1KtlHo6GcgJGK4rsRBjieBizNcUj_exEqhlNob9hZLSVI&s=VRdMl-i-SCeaXY7gZ_RQbr6I3-dHn8hkwp0ok4FWiJcRp3ZMAS1hhqj0fAC65VzBe8QLSIT98S1BT2ZKlFYGunsXeQRwVxp9MKrtXl5FZXP0raVM5YLIUgA21go60jkh8-Lb-Con8NW312RB-MtFV73yojUX-M9qJYkPsA48RfZvBcR0J4bwAMKQ-Ifran_Ke7quRm4IVyXjKdsHAQBAjOjT8h8kY-11zHvb2GRCqW_Ag6Kko2Hak2Pwm67AADuqrp4q2Rw00j8V71UTkJ5iEZJcEoeI2h8evt73YiaxL2LrvyAiiXrHB9nKClHEWHDTKMaAl8Dy_OTTZ3o7ZSutyQ&h=raPC7Zwd0XcGbSbOrGbX_aPfVbrsAMJkRVsEODcaKFQ
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002","name":"relay-nwcli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-09T07:59:59.1003314Z","updatedAt":"2026-10-09T07:59:59.1003314Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nwcli000002","serviceBusEndpoint":"https://relay-nwcli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '678'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:37 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/microsoft.relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=false&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Active&t=639271296385214550&c=MIIIJjCCBw6gAwIBAgIQb2qmfO_DC0moMTy1B-w-kzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXQ1VTIENBIDAxMB4XDTI2MDkxNzIxNDYzMVoXDTI2MTIxMzAzNDYzMVowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDBToa7cnDwXvKUyj5e4vSBSlYGxyPkYA2aIAtIXrpzbSO4j8i97D18tY3qhWpmsdmSdv0rK-lBy37I6vz21WypgG8nNTtTxz1pmSSLun1twUt2ZfOkiAxyWczEitHE4mhRRJeo37BCaermYRNBTZNVQc0pSC0CJCZ9WuIl2OZWEw_gg49SMJ-drVqAROg4doBPHBP6YLpnZfgwScnRpd1ZG9eCaElgbbjQZXY891kEw79oDmUKYKlS9yot5WC9zkKtHQoT00u-GcsE4IBygmTJsRhTmIulTltnfa9tzDt1yn0C7fEkeLacVvdDaLOVGqNMl-N9lXz_WVa474Y68WfRAgMBAAGjggUkMIIFIDCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBT_Ehdpc3aOyiA6AmwPCbk7jORu-zAfBgNVHSMEGDAWgBQU0jfg9tZ9ft2NurplqwSUJeCWHTCCAfsGA1UdHwSCAfIwggHuMHugeaB3hnVodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwfaB7oHmGd2h0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzkyL2N1cnJlbnQuY3JsMGygaqBohmZodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdGNlbnRyYWx1cy9jcmxzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwgYGgf6B9hntodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvOTIvY3VycmVudC5jcmwwggIABggrBgEFBQcBAQSCAfIwggHuMH4GCCsGAQUFBzAChnJodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwgYAGCCsGAQUFBzAChnRodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBvBggrBgEFBQcwAoZjaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHgGCCsGAQUFBzAChmxodHRwOi8vY2NtZXdlc3RjZW50cmFsdXNwa2kud2VzdGNlbnRyYWx1cy5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAD7NePzsP7SmVrhKzOCfNfqa0tTFTRPQefuLSDiZHSAxFTjDklSunq5PecGvEThEOQRiSjn90yZpqo2gvQrNGXifpPRqmOnNv8YoCPj8Af9rvfemNnWcQFYeOmzKPB4wWgDH4d9svbRdoP5GnuKxOZG8uzkD4IN2NtcKCqtNIFNnLQwJ8gLyv75npl7xesaYNYnZxi3j1dHls6w6bW1SiUha3xsEsFEmREYUVlpBT5WHX-CpXwdlce3L6NjDvaKO1d8m8LveljhPUKtYTNYK86U8ODPATKC3erEpogc5Vp1KtlHo6GcgJGK4rsRBjieBizNcUj_exEqhlNob9hZLSVI&s=o0v1CA3Rwt6SzHxy9C5oRweGWtJxF_9FwcLTIUIvsLR37xQ5KOpkqpM8lglO71Hk9AQ7t0D1n1jLM26tx5LWHwak-AxAnuzXBTygq25sF8y0-rcWV93iYgxKzd8ALmTBtrswJkAs9-Te-PaQQpMD8K-1V2VkA8sZAxIaRKNDTJbNRbsm2AbVq3LgzTVTTc1jlfm1om7O_oubhA-7Fa2TAxxzI1NY-Y755jDHRrJv90eEw5xXo935Q8uB1_LjqPZLdzrbcJGjHfGBzFcyqOaUjGy6C6qDcrIjNOEt759csWRNFZC7lyHcX2Dr-1Ahvr-lckNAVND3bSb-iwoQtAW_hQ&h=x5ZYnNRguv9WZj2VdMjmdP6k-NGwRZ3PBAAneDjMlKg
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - e4764173-b957-4921-9cfe-d153bca2b35c
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G13|2026-10-09T08:00:38
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/centralindia/777ee02e-4345-4066-a237-5fa89bac5da9
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: F994A5DE48BF4990B70AF704DF44A038 Ref B: PNQ241100403060 Ref C: 2026-10-09T08:00:37Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002","name":"relay-nwcli000002","type":"Microsoft.Relay/Namespaces","location":"westus2","tags":{"tag1":"value1"},"properties":{"minimumTlsVersion":"1.2","errors":[],"publicNetworkAccess":"Enabled","provisioningState":"Succeeded","status":"Active","createdAt":"2026-10-09T07:59:59.1003314Z","updatedAt":"2026-10-09T07:59:59.1003314Z","metricId":"326100e2-f69d-4268-8503-075374f62b6e:relay-nwcli000002","serviceBusEndpoint":"https://relay-nwcli000002.servicebus.windows.net:443/"},"sku":{"name":"Standard","tier":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '678'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - f72dde4a-2c8b-472d-9e16-53b221efe492
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G1|2026-10-09T08:00:41
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16498'
+      x-msedge-ref:
+      - 'Ref A: 6EDB25AA2E074156AEE279672BE6708E Ref B: PNQ241100403062 Ref C: 2026-10-09T08:00:39Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '418'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 03b85772-4339-46a0-b4cd-a6a22eeb8d22
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G1|2026-10-09T08:00:43
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/b59b2477-2b87-48cb-8e6e-ffaf0437b0bc
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 675C776CAC654276AB3B323C5A3E860A Ref B: PNQ241100402040 Ref C: 2026-10-09T08:00:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set ip-rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --ip-rule --ip-rule
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '418'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - d9b88b89-29ce-42bc-a6cc-b65fdf3989bb
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G13|2026-10-09T08:00:44
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/e66ad5c2-bb31-46e7-9dd7-f7475b5ea17e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 142A980C79824335AD25C421A7425C74 Ref B: PNQ241100401034 Ref C: 2026-10-09T08:00:44Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set ip-rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --ip-rule --ip-rule
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '418'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 4a84ea63-0509-4634-a09b-c7bcbdd3715e
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G6|2026-10-09T08:00:46
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/5b77e875-0e34-4a2b-8b52-44f3f23a1a79
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E997F6FD27824ECF8272ABC5BBD70E77 Ref B: PNQ241100403029 Ref C: 2026-10-09T08:00:46Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}, {"action": "Allow", "ipMask": "2.2.2.2"}], "publicNetworkAccess":
+      "Enabled", "trustedServiceAccessEnabled": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set ip-rule add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --ip-rule --ip-rule
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '493'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 63cd794c-42e8-40ce-a24d-6c1f534ef8e5
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G12|2026-10-09T08:00:55
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westindia/9db1b379-e7b9-4b71-b025-1543a0fbf267
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '12000'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '800'
+      x-msedge-ref:
+      - 'Ref A: E692C490C6FC4FFD8142BA641238A452 Ref B: PNQ231110909029 Ref C: 2026-10-09T08:00:47Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '493'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - f50d446c-2c64-4263-8c36-ebd0b55086b1
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G13|2026-10-09T08:00:57
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/9ea9b591-936b-49be-af41-ad717fbef31d
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: C0E8E32356144DFBBE7C9C11CF07C738 Ref B: PNQ241100402034 Ref C: 2026-10-09T08:00:57Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set ip-rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --ip-rule
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '493'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:00:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 82c9e417-a984-4f67-960a-fe44a9f7fed5
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G12|2026-10-09T08:00:59
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westindia/c5c49ad4-5bf8-4cb5-9cbf-4ed60f60cf7f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 83EBF08F761B4104A514DD927B4A116A Ref B: PNQ241100402052 Ref C: 2026-10-09T08:00:58Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set ip-rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --ip-rule
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '493'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - b5e6396f-c126-4333-8562-21d7bfeb34a7
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G8|2026-10-09T08:01:01
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/8f2038f1-c948-457d-9bcf-5fe09cd587ae
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: D9810D4902D34DAD85B42B59C7573F1C Ref B: PNQ241100401023 Ref C: 2026-10-09T08:01:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set ip-rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --ip-rule
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"},{"ipMask":"2.2.2.2","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '493'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 74dcf87f-565f-45c1-8b21-ba32228bcdfd
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G9|2026-10-09T08:01:02
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/a97d597e-7871-4701-b683-2f30d1ceee80
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 2BC6982D481B4B5FABF3F530E0AABAA8 Ref B: PNQ231110909029 Ref C: 2026-10-09T08:01:02Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "trustedServiceAccessEnabled":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set ip-rule remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '169'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --ip-rule
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - afabb70a-44c8-4603-a0e5-be9494e1b070
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G13|2026-10-09T08:01:09
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/aba677fa-cbe4-4428-b01e-895a45694ed5
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 48B7621CAC6740658941A55394F7F4CA Ref B: PNQ241100402040 Ref C: 2026-10-09T08:01:03Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --public-network-access
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 2a0eac71-29e4-4771-ad2d-8f6b4df445bc
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G1|2026-10-09T08:01:11
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/99ffcec4-2ce5-4a31-b3dc-b69cd7e2a927
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: EC87E5AC4E854222B9CFB94C6E68E1A7 Ref B: PNQ231110906040 Ref C: 2026-10-09T08:01:10Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Disabled", "trustedServiceAccessEnabled":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '170'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --public-network-access
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Disabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '456'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - a36d7c68-09e8-492f-b2ae-cc97315476d0
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G9|2026-10-09T08:01:18
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/b33d6c95-16cb-4063-b037-dfea6be43b89
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 1356CDEF4E1D426791DCC5B682044970 Ref B: PNQ241100402062 Ref C: 2026-10-09T08:01:12Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --public-network-access
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Disabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '456'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 1f1a8381-95f0-4730-a7dc-c3cf5d559fee
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G2|2026-10-09T08:01:20
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/7a0d65d5-60e0-4f74-8799-0e8b3dabfb4a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 1A12C276B3864D49AE3F9DADCDD65313 Ref B: PNQ241100405062 Ref C: 2026-10-09T08:01:19Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "trustedServiceAccessEnabled":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '169'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --public-network-access
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:26 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - b15761dc-caa2-4dd5-9fe2-999058a4a3a5
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G10|2026-10-09T08:01:27
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/d87b7b89-18ec-4a4c-9016-7329fa428dc8
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: E1237814BF194F10A7E67D357E232133 Ref B: PNQ231110909054 Ref C: 2026-10-09T08:01:21Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --default-action
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - b1131a3f-3c0a-42fc-8aca-1049a9b7b777
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G13|2026-10-09T08:01:28
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/9970b1bd-8015-4db0-924d-a13c2462af16
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 6E8482853B2D4C66A13B5FE67C80C989 Ref B: PNQ231110908036 Ref C: 2026-10-09T08:01:28Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Deny", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "trustedServiceAccessEnabled":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '168'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --default-action
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - f74f08b6-b9b6-4481-88fd-494394702c3d
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G10|2026-10-09T08:01:36
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/569b0836-9de5-43d2-853f-d3e8de4a11eb
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: D0280436FE8E4730BB8B72FC25C422DC Ref B: PNQ231110907031 Ref C: 2026-10-09T08:01:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --default-action
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Deny","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 2704d807-10d0-460c-a5be-1f4a2f9a59dc
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G5|2026-10-09T08:01:37
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/908f517e-3ad5-46e3-8a51-77eed2c94fc0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: C8881B93641B49239FA87CFEAE805391 Ref B: PNQ241100403023 Ref C: 2026-10-09T08:01:37Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "trustedServiceAccessEnabled":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '169'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --default-action
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 5d37e7ae-cd23-4252-8ff5-5065fd874b52
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G5|2026-10-09T08:01:44
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/0d5165a9-c2b5-4e95-8305-5c17a3f3d41c
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 8832FC7BCF254988825083C8C2FA0DAD Ref B: PNQ241100406060 Ref C: 2026-10-09T08:01:38Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --trusted-service-access-enabled
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 87caf7bb-a7b2-4256-9d94-a9ff5f273a13
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G7|2026-10-09T08:01:46
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/f3d8c0fe-fd8e-41d9-813b-45ab7b49f159
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: BE1F00E277B44025B351A429EE0FEFCC Ref B: PNQ241100405054 Ref C: 2026-10-09T08:01:45Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "trustedServiceAccessEnabled":
+      true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '168'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --trusted-service-access-enabled
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 85f33e04-c594-45ea-bb77-b40869508e22
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G11|2026-10-09T08:01:53
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/31952a5c-5a99-48a6-9e47-bdac200d4452
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: A76372A3164948BABABB1CF0E2CCC7FA Ref B: PNQ241100401036 Ref C: 2026-10-09T08:01:47Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --namespace-name --trusted-service-access-enabled
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkrulesets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":true}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '454'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:01:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 5e18395d-e8ec-49e7-be0f-c8c7a4783280
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G9|2026-10-09T08:01:55
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/7f31dc13-95dd-435a-8a5f-24fc5eec2da4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 4A90FAD5730744868682A83F89008039 Ref B: PNQ241100404036 Ref C: 2026-10-09T08:01:54Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"defaultAction": "Allow", "ipRules": [{"action": "Allow",
+      "ipMask": "1.1.1.1"}], "publicNetworkAccess": "Enabled", "trustedServiceAccessEnabled":
+      false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace network-rule-set update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '169'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --namespace-name --trusted-service-access-enabled
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default?api-version=2026-07-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002/networkRuleSets/default","name":"default","type":"Microsoft.Relay/Namespaces/NetworkRuleSets","location":"westus2","properties":{"publicNetworkAccess":"Enabled","defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}],"trustedServiceAccessEnabled":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '455'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:02:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 19cc239e-b7be-4709-976a-23011c7aa638
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G1|2026-10-09T08:02:02
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/cef5f382-5aab-446b-a257-5b7b0453e849
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 2F3A91F55043416AA1E9CA62DADAA1A5 Ref B: PNQ231110909025 Ref C: 2026-10-09T08:01:56Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_relay_network000001/providers/Microsoft.Relay/namespaces/relay-nwcli000002?api-version=2026-07-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=true&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271297248868329&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=Pyq_Hi96yzHjO30p9CV0__LdZuDzWfKddkefcczoODcekHpB_HhO4QiUH95ix9d2oy7DDTrNGH4xcaqsp3sW9VyAOtxIOQ3-hjJoOySFP-hylF8CXOBBxGmzjzj4Ulcv6PPBtD3NcdP33d2i-6u890DXoXcQdrUTXns7lqWhhRG75o47brjsJABNtYNaExlWw7ToAbo7ITBSTwqdmVf2zUM88pJTaTpkhqD-phm3qPrrE79DF51kGfrXrDrNtg9RKpyz0Nfr1e8jTpJyvEJ7e6thrGqRc3SrZDaDL8aqwkuzKc95yW68JVSEOo3KzofQhMeAXVGqxXRdaDS_iCMIng&h=DDy7dHoQEqJoCQggXgGfHz_YNe6A-LKNVl4AU6DO0Ho
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 09 Oct 2026 08:02:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=false&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271297249024568&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=OH3XezjHqk2DH8TGWfBOrFYfCqvwRhyZREkRJuBV6COKoHAT9N6ZQlbB-OMslbyZV7Tt0NlcQ0iA8OVmYXL0OWmwHgbgs2M8sz3A4OaycsDr7vCNXPEQF8a_Yy2XJsaMCdGZBbKVXaYG5XkIFYSLHnHheP39XjGg4VOs5dYYFZLwF0QptRtrL5-kRlXAeRm7VPiycRn-klVi6oQML62Z3IrGMj3eWsVHobs78wviz9vxJO3DHZhMELm375IGGI8pNPj6sgW-XGtY5tAX9qnz3VDbPVfOayIjmBgBEoGcnl3AAbUAn-wcaF727CI3Y-JVxICLOjKwZEWfdey8JeR1gg&h=Cj3627IOnd0N6kTuFwhQq8lRcj4M6HSW7frfSnIbx9k
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 00000001-0000-0000-0002-000000004180
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G10|2026-10-09T08:02:04
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westus/4beb6526-b267-4e1a-b3f7-dafb95227067
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 3B3CAAAA0EDE49F6BCD8B902CBF5F8FB Ref B: PNQ231110906060 Ref C: 2026-10-09T08:02:03Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=true&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271297248868329&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=Pyq_Hi96yzHjO30p9CV0__LdZuDzWfKddkefcczoODcekHpB_HhO4QiUH95ix9d2oy7DDTrNGH4xcaqsp3sW9VyAOtxIOQ3-hjJoOySFP-hylF8CXOBBxGmzjzj4Ulcv6PPBtD3NcdP33d2i-6u890DXoXcQdrUTXns7lqWhhRG75o47brjsJABNtYNaExlWw7ToAbo7ITBSTwqdmVf2zUM88pJTaTpkhqD-phm3qPrrE79DF51kGfrXrDrNtg9RKpyz0Nfr1e8jTpJyvEJ7e6thrGqRc3SrZDaDL8aqwkuzKc95yW68JVSEOo3KzofQhMeAXVGqxXRdaDS_iCMIng&h=DDy7dHoQEqJoCQggXgGfHz_YNe6A-LKNVl4AU6DO0Ho
+  response:
+    body:
+      string: '{"name":"4b3dfabf-cde5-447c-8acc-4fd209af0db8","status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '66'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:02:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 88eb58bc-c802-4889-bac3-a4edc57ea078
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G14|2026-10-09T08:02:07
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/centralindia/07397b18-086e-4839-8f0c-7d1c3283e731
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 146C9131D4C54658ADA87CF9929577F9 Ref B: PNQ241100403029 Ref C: 2026-10-09T08:02:05Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=true&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271297248868329&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=Pyq_Hi96yzHjO30p9CV0__LdZuDzWfKddkefcczoODcekHpB_HhO4QiUH95ix9d2oy7DDTrNGH4xcaqsp3sW9VyAOtxIOQ3-hjJoOySFP-hylF8CXOBBxGmzjzj4Ulcv6PPBtD3NcdP33d2i-6u890DXoXcQdrUTXns7lqWhhRG75o47brjsJABNtYNaExlWw7ToAbo7ITBSTwqdmVf2zUM88pJTaTpkhqD-phm3qPrrE79DF51kGfrXrDrNtg9RKpyz0Nfr1e8jTpJyvEJ7e6thrGqRc3SrZDaDL8aqwkuzKc95yW68JVSEOo3KzofQhMeAXVGqxXRdaDS_iCMIng&h=DDy7dHoQEqJoCQggXgGfHz_YNe6A-LKNVl4AU6DO0Ho
+  response:
+    body:
+      string: '{"name":"4b3dfabf-cde5-447c-8acc-4fd209af0db8","status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '68'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 09 Oct 2026 08:02:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 0588a6da-e4b2-4b52-9da9-b0d76bb6fabc
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G12|2026-10-09T08:02:39
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/centralindia/4da04647-ba7d-4e75-b0a7-788dbc19b14d
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 49645B8A23444D89A20B3DE43DE9ADCD Ref B: PNQ231110907029 Ref C: 2026-10-09T08:02:38Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - relay namespace delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.13.15 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=false&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271297249024568&c=MIIHwzCCBqugAwIBAgIQO9vjerLJyzCAZGOG8qnuujANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYwOTE3MTkyNzU0WhcNMjYxMjEzMDEyNzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOH7XcOFB9oBlttbwx8AirjT-trX0XvGg-qTsZnfCNKSBKRmEGUNPWfYKFgDpx0AZwfOinDzB58zssD8uZb2jeDqfJuiR1vqsOBWntnOkwx0IgWzw_pbET-L7lO_ZYW2-ec3c5ZewHiy0Jr51TL2zNtCadpjfB2g2RkKJY_5Zgyqgccwx0LvPgj81bdByhSFWtd49llL8NuFYWjo3Fk7HmsitrM-T8Z3xgac37X6nC2PTsQFiO6h917Etzgh-KBeYYfZiOTF9hHnetiX5px_9XecvBma56vHFyzqoF4VpkESo5tWkT_beymCu5gy2ngynn3SNDYyVgZXGrEn4V_OKM0CAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFLXKU9erjRhgRqjwHfGKduIH8QgZMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvODEvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS84MS9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzgxL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAEdUznjVdYbUtxHD93flzOpv9itmdLU-P-i-amvvUBn1ESE_kJadN1MNgEM7wepiASPBur_kdjFJFZ5QdmL9EfoQmFlXLFS-v1qgMBh2uK-7Kx5nCPVe7MfrPZyaDtWWZoKQ1ku_7opeRh0t5mG0O3vQdmu-gxm9jX2bOhHTHW_uA9yYnskYrIv0kyqah1mv5zf85_XKMRSd592hVfIL4O9kUoKFjYKYWROv0MDSHRzOr2h9LjtoXGtDVpaGhgXaw6SQLRfR9piqIFxVYxpsgwP30Cdlvv9Vz-bZEpoPLRZc4_cpvPp6ZaWJSQgQNnoHo1QDfwAPoEEjmUxvRB06lrI&s=OH3XezjHqk2DH8TGWfBOrFYfCqvwRhyZREkRJuBV6COKoHAT9N6ZQlbB-OMslbyZV7Tt0NlcQ0iA8OVmYXL0OWmwHgbgs2M8sz3A4OaycsDr7vCNXPEQF8a_Yy2XJsaMCdGZBbKVXaYG5XkIFYSLHnHheP39XjGg4VOs5dYYFZLwF0QptRtrL5-kRlXAeRm7VPiycRn-klVi6oQML62Z3IrGMj3eWsVHobs78wviz9vxJO3DHZhMELm375IGGI8pNPj6sgW-XGtY5tAX9qnz3VDbPVfOayIjmBgBEoGcnl3AAbUAn-wcaF727CI3Y-JVxICLOjKwZEWfdey8JeR1gg&h=Cj3627IOnd0N6kTuFwhQq8lRcj4M6HSW7frfSnIbx9k
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      date:
+      - Fri, 09 Oct 2026 08:02:42 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Relay/locations/westus2/namespaceOperationResults/4b3dfabf-cde5-447c-8acc-4fd209af0db8?isAsyncHeader=false&resourceName=relay-nwcli000002&resourceType=namespace&api-version=2026-07-01-preview&operationType=Deleted&t=639271297624271472&c=MIIIJzCCBw-gAwIBAgIRAIj-jhYgLbfUUbx2jC_SNIowDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjA5MjMwNTA1MjdaFw0yNjEyMTgxMTA1MjdaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyeA8ekCN9dx_H_hpaGg0NqW7Rpf7WElPTivJEXFiEUUmlDxXmilSjXjGSNwDU0ErGMVo0Chf6Fmy72cNUM_kQuAJ3NolMdTWbVSxzJ0bLkgC1JhpgihlZ7PTw21un2NfJugcLOiZe7Kj4RKErCelQjBHkTD6U7w-ceLspcQ6mCRX6luV9c8WVX31YmRIb8GZPdRP_V9JDXRW7c_yDsOqMreuRXF6cf4xlPIvaO7P34tP2C1k1rv1J8qH9if8Mn5WsckL0oLpC0ocM9YaA6z-85bY5baDtaCriWIXdPlrZ890yWcz2NnQ_2rw4WifBW1WvMk321JJpfzXuNkkYpOA9QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUVpuFQHfLHlrFfGMCLWc2_DZNu1cwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzYxL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS82MS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzYxL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzYxL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBJa_KUCNG-f7XUiiUuDBrvYZS2Z8FofSyp6uKYLKfF9mxmD4Zy0ksWftADl_qfVGCbq-dpyuVfUjgpc2tr6XAn80Z4GKb2k0wYYO4voOJXoWOqPEpYw8SLA6tzu7AhC3bAAVZM3m-LhotavMCbONvJphXH30312kxl4AvbUBnY3wVpwm-kbibwU1os1qVnTsOCPQT_zhENQC_xt5NIu63Vv2qZzhXb7rH10GKhkqHyYSBF99cYRho7mW4CGR-b_vV4wYatAQm1AdLWZ0WH6UMh8HMgnuEVnJ1HOdWVxuk6BK5g016SXjAJk66KjOH36fAl01_LmtwI5nli8nTadkb3&s=UNDGrYmtCdL-ScZaIDYrzkx92CNKuexe22Yy5fkLvcHvd7xX7FIazyNB-DALWNKst0AAwjJysvPD_otT1eyVvY8gkmw8bcnZlnQlVITemmH6qjZJVOwfyEU9QvXMHlvH1wodC_dnNahI7tN0QljqRiLXB9yjOMej35uXoghsudw7IBsp7RUPnkM_YklVH_ukBHPEeMpx4lnIQK31isylv9UN2ECa7Fistfyusc7LKYNTouRe2T46_62JRjkzcCE_AuuHEYigft21xSTG5hW2nNljJjqUQ1nZnhI6QAhntGeYzDsldmc9uwCGGLLab8FDwh1rDhnqSSVsHJKcec3xmA&h=R9Q9F9GRNLWgXYKfDqq1mBM7pmUu_aY8UgxhgEnIVNM
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 00000001-0000-0000-0002-000000005592
+      x-ms-messaging-routing-id:
+      - PROD|WESTUS2|WESTUS2|G4|2026-10-09T08:02:42
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=eea76376-6cf2-4f48-a713-64382d4b9625/westindia/e3f2e345-72e9-4061-9d1d-07685a414f74
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: D6A7B8C6E2354AB2A70F1FF37FA76738 Ref B: PNQ241100401036 Ref C: 2026-10-09T08:02:40Z'
+    status:
+      code: 204
+      message: No Content
+version: 1
