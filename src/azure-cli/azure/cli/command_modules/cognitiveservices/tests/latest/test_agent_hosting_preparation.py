@@ -114,7 +114,9 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.clients['compute'].resource_skus.list.return_value = [
             ResourceSku.deserialize({'name': name, 'resourceType': 'virtualMachines', 'capabilities': [
                 {'name': 'vCPUs', 'value': str(cores)}, {'name': 'MemoryGB', 'value': str(memory)}]})
-            for name, cores, memory in (('Standard_D4s_v5', 4, 16), ('Standard_D8s_v5', 8, 32))]
+            for name, cores, memory in (
+                ('Standard_D2s_v5', 2, 8), ('Standard_D4s_v5', 4, 16),
+                ('Standard_D8s_v5', 8, 32), ('Standard_D16s_v5', 16, 64))]
         self.clients['identity'].user_assigned_identities.get.side_effect = self._get_identity
         self.clients['identity'].user_assigned_identities.create_or_update.side_effect = self._create_identity
         self.clients['storage'].storage_accounts.get_properties.side_effect = self._get_storage
@@ -422,6 +424,61 @@ class AgentHostingPreparationTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, self._prepare())
         self._assert_no_writes()
+
+    def test_smaller_manual_or_actual_vm_size_fails_pool_capacity(self):
+        original = copy.deepcopy(self.pools)
+        for index, field, value, check in (
+                (0, 'virtualMachinesProfile', {
+                    'scale': {'manual': [{'count': 1, 'size': 'Standard_D2s_v5'}]}}, 'System node pool'),
+                (1, 'virtualMachinesProfile', {
+                    'scale': {'manual': [{'count': 1, 'size': 'Standard_D4s_v5'}]}}, 'Agent node pool'),
+                (1, 'virtualMachineNodesStatus', [{'size': 'Standard_D4s_v5'}], 'Agent node pool')):
+            with self.subTest(field=field, check=check):
+                self.pools = copy.deepcopy(original)
+                self.pools[index]['properties'][field] = value
+                with self.assertLogs('cli.' + _PREFLIGHT_PREFIX.rstrip('.'), level='WARNING') as logs:
+                    with self.assertRaises(ValidationError):
+                        preflight(self.cli_ctx, self._prepare())
+                self.assertTrue(any(f'FAIL {check}' in line for line in logs.output))
+                self._assert_no_writes()
+
+    def test_mixed_vm_sizes_pass_when_every_size_meets_capacity(self):
+        self.pools[0]['properties']['virtualMachinesProfile'] = {
+            'scale': {'manual': [{'count': 1, 'size': 'Standard_D8s_v5'}]}}
+        self.pools[1]['properties']['virtualMachinesProfile'] = {
+            'scale': {'manual': [{'count': 1, 'size': 'Standard_D16s_v5'}]}}
+        self.pools[1]['properties']['virtualMachineNodesStatus'] = [{'size': 'Standard_D8s_v5'}]
+        checked = preflight(self.cli_ctx, self._prepare())
+        statuses = {check['name']: check['status'] for check in checked.checks}
+        self.assertEqual(statuses['System node pool'], 'PASS')
+        self.assertEqual(statuses['Agent node pool'], 'PASS')
+        self._assert_no_writes()
+
+    def test_missing_vm_size_sku_or_capacity_is_unverified(self):
+        original_pools = copy.deepcopy(self.pools)
+        original_skus = self.clients['compute'].resource_skus.list.return_value
+        incomplete = ResourceSku.deserialize({
+            'name': 'Standard_Incomplete', 'resourceType': 'virtualMachines',
+            'capabilities': [{'name': 'vCPUs', 'value': '8'}]})
+        for reason, index, check in (
+                ('size', 1, 'Agent node pool'),
+                ('sku', 0, 'System node pool'),
+                ('capability', 1, 'Agent node pool')):
+            with self.subTest(reason=reason):
+                self.pools = copy.deepcopy(original_pools)
+                self.clients['compute'].resource_skus.list.return_value = original_skus
+                if reason == 'size':
+                    self.pools[index]['properties'].pop('vmSize')
+                elif reason == 'sku':
+                    self.pools[index]['properties']['vmSize'] = 'Standard_Missing'
+                else:
+                    self.pools[index]['properties']['vmSize'] = 'Standard_Incomplete'
+                    self.clients['compute'].resource_skus.list.return_value = original_skus + [incomplete]
+                with self.assertLogs('cli.' + _PREFLIGHT_PREFIX.rstrip('.'), level='WARNING') as logs:
+                    with self.assertRaises(ValidationError):
+                        preflight(self.cli_ctx, self._prepare())
+                self.assertTrue(any(f'UNVERIFIED {check}' in line for line in logs.output))
+                self._assert_no_writes()
 
     def test_sandbox_label_requires_exact_lowercase_true(self):
         for value in ('True', None):
@@ -879,6 +936,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
             self.assertTrue(any(arm_id in line for line in logs.output))
         self.assertTrue(any('not automatically deleted' in line for line in logs.output))
         self.assertEqual(self.clients['identity'].user_assigned_identities.create_or_update.call_count, 2)
+
 
 class AgentHostingValueTests(unittest.TestCase):
     def test_resource_type_validation(self):

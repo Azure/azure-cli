@@ -393,42 +393,105 @@ def _check_network_policy(network, scope, checks):
             remediation)
 
 
+def _pool_vm_sizes(properties):
+    sizes, seen = [], set()
+
+    def add(value):
+        if value is None or not str(value).strip():
+            return
+        size = str(value).strip()
+        key = size.lower()
+        if key not in seen:
+            seen.add(key)
+            sizes.append(size)
+
+    add(properties.vm_size)
+    virtual_machines = properties.virtual_machines_profile
+    scale = virtual_machines.scale if virtual_machines else None
+    for profile in scale.manual or [] if scale else []:
+        add(profile.size)
+    for node in properties.virtual_machine_nodes_status or []:
+        add(node.size)
+    return tuple(sizes)
+
+
+def _pool_capacity_status(sizes, capacity, minimum_cpu, minimum_memory):
+    if not sizes:
+        return 'UNVERIFIED', ['No VM size evidence']
+    status, evidence = 'PASS', []
+    for size in sizes:
+        key = size.lower()
+        if key not in capacity:
+            status = 'UNVERIFIED' if status == 'PASS' else status
+            evidence.append(f'{size}: SKU not found')
+            continue
+        available = capacity[key]
+        if available is None:
+            status = 'UNVERIFIED' if status == 'PASS' else status
+            evidence.append(f'{size}: missing vCPU or MemoryGB capability')
+            continue
+        cpu, memory = available
+        if cpu < minimum_cpu or memory < minimum_memory:
+            status = 'FAIL'
+        evidence.append(f'{size}: {cpu:g} vCPU/{memory:g} GiB')
+    return status, evidence
+
+
 def _check_pools(aks, compute, cluster, scope, location, checks):
     parts = parse_resource_id(scope)
     pools = list(aks.agent_pools.list(parts['resource_group'], parts['name']))
     capacity = {}
     for sku in compute.resource_skus.list(filter=f"location eq '{location}'"):
-        if sku.resource_type == 'virtualMachines':
-            capabilities = {value.name: value.value for value in sku.capabilities or []}
-            cores = capabilities.get('vCPUsAvailable') or capabilities.get('vCPUs')
-            memory = capabilities.get('MemoryGB')
+        if sku.resource_type != 'virtualMachines' or not sku.name:
+            continue
+        key = sku.name.lower()
+        capacity.setdefault(key, None)
+        capabilities = {value.name.lower(): value.value for value in sku.capabilities or [] if value.name}
+        cores = capabilities.get('vcpusavailable') or capabilities.get('vcpus')
+        memory = capabilities.get('memorygb')
+        try:
             if cores is not None and memory is not None:
-                capacity[sku.name.lower()] = float(cores), float(memory)
-    system, selected, details = False, None, []
+                capacity[key] = float(cores), float(memory)
+        except (TypeError, ValueError):
+            pass
+    system, system_unverified, selected, agent_unverified, details = False, False, None, False, []
     for pool in pools:
         properties = pool.properties
         if properties is None:
             details.append(f'{pool.name}: missing properties')
             continue
-        cpu, memory = capacity.get((properties.vm_size or '').lower(), (0, 0))
-        if (properties.mode == 'System' and cpu >= 4 and memory >= 16 and
-                properties.provisioning_state == 'Succeeded'):
-            system = True
+        sizes = _pool_vm_sizes(properties)
+        system_capacity, system_evidence = _pool_capacity_status(sizes, capacity, 4, 16)
+        if properties.mode == 'System' and properties.provisioning_state == 'Succeeded':
+            if system_capacity == 'PASS':
+                system = True
+            elif system_capacity == 'UNVERIFIED':
+                system_unverified = True
+        agent_capacity, agent_evidence = _pool_capacity_status(sizes, capacity, 8, 32)
         requirements = {
             'User': properties.mode == 'User', 'AzureLinux': properties.os_sku in ('AzureLinux', 'AzureLinux3'),
             'KataVmIsolation': properties.workload_runtime == 'KataVmIsolation',
-            'count>=1': (properties.count or 0) >= 1, 'vCPU>=8/MemoryGB>=32': cpu >= 8 and memory >= 32,
+            'count>=1': (properties.count or 0) >= 1,
             'image': _image_supported(properties.node_image_version),
             'label': (properties.node_labels or {}).get('agents.ai.azure.com/sandbox-node') == 'true',
             'SSH disabled': bool(properties.security_profile and properties.security_profile.ssh_access == 'Disabled'),
             'Succeeded': properties.provisioning_state == 'Succeeded',
         }
-        details.append(f'{pool.name}: missing={[key for key, passed in requirements.items() if not passed]}')
-        if all(requirements.values()) and selected is None:
-            selected = pool
-    _report(checks, 'System node pool', scope, system, details, 'One Succeeded System pool >=4 vCPU/16 GiB',
+        details.append(
+            f'{pool.name}: vmSizes={list(sizes)}; '
+            f'systemCapacity={system_capacity} {system_evidence}; '
+            f'agentCapacity={agent_capacity} {agent_evidence}; '
+            f'missing={[key for key, passed in requirements.items() if not passed]}')
+        if all(requirements.values()):
+            if agent_capacity == 'PASS' and selected is None:
+                selected = pool
+            elif agent_capacity == 'UNVERIFIED':
+                agent_unverified = True
+    system_status = 'PASS' if system else ('UNVERIFIED' if system_unverified else 'FAIL')
+    agent_status = 'PASS' if selected is not None else ('UNVERIFIED' if agent_unverified else 'FAIL')
+    _report(checks, 'System node pool', scope, system_status, details, 'One Succeeded System pool >=4 vCPU/16 GiB',
             'Prepare a qualifying System pool.')
-    _report(checks, 'Agent node pool', scope, selected is not None, details,
+    _report(checks, 'Agent node pool', scope, agent_status, details,
             'One User pool satisfying all sandbox requirements', 'Prepare one qualifying User pool.')
     network = cluster.properties.network_profile if cluster.properties else None
     mode = network.network_plugin_mode if network else None

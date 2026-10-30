@@ -10,11 +10,13 @@ Based on [Azure/azure-rest-api-specs#45245](https://github.com/Azure/azure-rest-
 
 ### User Scenario
 
-1. Prepare a supported AKS cluster and operator permissions, then run `az cognitiveservices account create` with the AKS ID for preflight, dependency preparation, and Account creation.
-2. Create the Project separately with the existing `az cognitiveservices account project create` command.
-3. Configure a downstream tool or SDK with the actual Project endpoint and Entra ID authentication with the required Project permissions. Prepare application-specific model/image settings there; application build, deployment, and monitoring are outside this change.
+1. Prepare a supported AKS cluster and an agent subnet.
+2. Create the Account with `--agent-hosting-cluster` and, when needed, `--agent-subnet`. Omit the Storage and identity arguments to let the CLI create and configure them automatically.
+3. Create the Project with `az cognitiveservices account project create`.
+4. Prepare a model deployment and an ACR for the Hosted Agent. Grant `AcrPull` to the Project identity and the AKS kubelet identity, then create the Project's Container Registry connection. Configure Application Insights separately when telemetry is needed.
+5. Configure azd with the Project endpoint, model name, ACR, and BYO AKS resource IDs, then deploy and invoke the Hosted Agent.
 
-**Configuration reminder**: Project connections are workflow-specific. The sample's Application Insights monitoring additionally requires an Application Insights resource/Project connection and `APPLICATIONINSIGHTS_CONNECTION_STRING`; this is telemetry configuration, not a Project endpoint or a universal Account prerequisite. Verify existing Account/Project reuse before handing off to azd.
+The Account command prepares the Account-level BYO AKS dependencies. Project, model, ACR, connections, agent deployment, and telemetry remain separate downstream steps.
 
 ---
 
@@ -70,7 +72,6 @@ az cognitiveservices account create \
     --sku S0 \
     -l westus \
     --custom-domain foundrybyocaccount \
-    --yes \
     --agent-subnet "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1" \
     --agent-hosting '[
       {
@@ -106,7 +107,6 @@ az cognitiveservices account create \
     --sku S0 \
     -l westus \
     --custom-domain foundrybyocaccount \
-    --yes \
     --agent-hosting-cluster "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1" \
     --agent-hosting-storage "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/storage1" \
     --agent-hosting-management-identity "/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/account-control-plane" \
