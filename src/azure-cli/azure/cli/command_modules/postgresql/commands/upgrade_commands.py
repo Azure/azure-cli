@@ -17,9 +17,9 @@ logger = get_logger(__name__)
 
 def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, validate=None, yes=None):
     validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     if validate:
+        validate_citus_cluster(cmd, resource_group_name, server_name)
         return _flexible_server_version_upgrade_validate(cmd, client, resource_group_name, server_name, version)
 
     if not yes:
