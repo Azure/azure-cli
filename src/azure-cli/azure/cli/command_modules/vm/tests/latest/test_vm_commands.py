@@ -10925,7 +10925,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'appDisplayName': self.create_random_name(prefix='test-des-app-', length=20)
         })
 
-        federated_client_id = self.cmd('ad app create --display-name {appDisplayName}').get_output_in_json()['appId']
+        federated_client_id = self.cmd('ad app create --display-name {appDisplayName} --service-management-reference 092c677a-6386-4fa8-a485-991d3f9aa010').get_output_in_json()['appId']
 
         vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software') \
