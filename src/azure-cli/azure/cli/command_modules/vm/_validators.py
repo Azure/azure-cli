@@ -387,6 +387,8 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 
 # pylint: disable=too-many-branches, too-many-statements, too-many-locals
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
+    from azure.core.exceptions import HttpResponseError
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     from azure.mgmt.core.tools import parse_resource_id
 
     _validate_vm_vmss_create_ephemeral_placement(namespace)
@@ -451,9 +453,12 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             forbidden.append('os_disk_name')
 
     elif namespace.storage_profile == StorageProfile.ManagedCustomImage:
+        res = parse_resource_id(namespace.image)
         required = ['image']
         forbidden = ['os_type', 'attach_os_disk', 'storage_account',
                      'storage_container_name', 'use_unmanaged_disk']
+        if res['type'].lower() == 'galleries':
+            forbidden.remove('os_type')
         if for_scale_set:
             forbidden.append('os_disk_name')
 
@@ -514,7 +519,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     image_data_disks = []
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
-        res = parse_resource_id(namespace.image)
         namespace.aux_subscriptions = [res['subscription']]
         if res['type'].lower() == 'images':
             from .aaz.latest.image import Show as ImageShow
@@ -537,8 +541,22 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 'resource_group': res['resource_group'],
                 'subscription': res['subscription']
             }
-            image_info = SigImageDefinitionShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-            namespace.os_type = image_info.get('osType')
+            try:
+                image_info = SigImageDefinitionShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+            except HttpResponseError as ex:
+                if ex.status_code != 403:
+                    raise
+                if not namespace.os_type:
+                    raise RequiredArgumentMissingError(
+                        "Unable to determine the image OS type because the gallery image definition cannot be read. "
+                        "Specify --os-type linux or windows."
+                    ) from ex
+            else:
+                if namespace.os_type and namespace.os_type.lower() != image_info.get('osType', '').lower():
+                    raise InvalidArgumentValueError(
+                        "The specified --os-type '{}' does not match the gallery image OS type '{}'."
+                        .format(namespace.os_type, image_info.get('osType')))
+                namespace.os_type = image_info.get('osType')
 
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
