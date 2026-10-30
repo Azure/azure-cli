@@ -507,9 +507,7 @@ def _pool_capacity_status(sizes, capacity, minimum_cpu, minimum_memory):
     return status, evidence
 
 
-def _check_pools(aks, compute, cluster, scope, location, checks):
-    parts = parse_resource_id(scope)
-    pools = list(aks.agent_pools.list(parts['resource_group'], parts['name']))
+def _vm_size_capacity(compute, location):
     capacity = {}
     for sku in compute.resource_skus.list(filter=f"location eq '{location}'"):
         if sku.resource_type != 'virtualMachines' or not sku.name:
@@ -524,41 +522,54 @@ def _check_pools(aks, compute, cluster, scope, location, checks):
                 capacity[key] = float(cores), float(memory)
         except (TypeError, ValueError):
             pass
-    system, system_unverified, selected, agent_unverified, details = False, False, None, False, []
+    return capacity
+
+
+def _evaluate_pool(pool, capacity):
+    properties = pool.properties
+    if properties is None:
+        return None, None, f'{pool.name}: missing properties'
+    sizes = _pool_vm_sizes(properties)
+    system_capacity, system_evidence = _pool_capacity_status(sizes, capacity, 4, 16)
+    agent_capacity, agent_evidence = _pool_capacity_status(sizes, capacity, 8, 32)
+    requirements = {
+        'User': properties.mode == 'User', 'AzureLinux': properties.os_sku in ('AzureLinux', 'AzureLinux3'),
+        'KataVmIsolation': properties.workload_runtime == 'KataVmIsolation',
+        'count>=1': (properties.count or 0) >= 1,
+        'image': _image_supported(properties.node_image_version),
+        'label': (properties.node_labels or {}).get('agents.ai.azure.com/sandbox-node') == 'true',
+        'SSH disabled': bool(properties.security_profile and properties.security_profile.ssh_access == 'Disabled'),
+        'Succeeded': properties.provisioning_state == 'Succeeded',
+    }
+    detail = (
+        f'{pool.name}: vmSizes={list(sizes)}; '
+        f'systemCapacity={system_capacity} {system_evidence}; '
+        f'agentCapacity={agent_capacity} {agent_evidence}; '
+        f'missing={[key for key, passed in requirements.items() if not passed]}')
+    system_status = system_capacity if (
+        properties.mode == 'System' and properties.provisioning_state == 'Succeeded') else None
+    return system_status, agent_capacity if all(requirements.values()) else None, detail
+
+
+def _check_pools(aks, compute, cluster, scope, location, checks):
+    parts = parse_resource_id(scope)
+    pools = list(aks.agent_pools.list(parts['resource_group'], parts['name']))
+    capacity = _vm_size_capacity(compute, location)
+    system_statuses, agent_statuses, details = [], [], []
+    selected = None
     for pool in pools:
-        properties = pool.properties
-        if properties is None:
-            details.append(f'{pool.name}: missing properties')
-            continue
-        sizes = _pool_vm_sizes(properties)
-        system_capacity, system_evidence = _pool_capacity_status(sizes, capacity, 4, 16)
-        if properties.mode == 'System' and properties.provisioning_state == 'Succeeded':
-            if system_capacity == 'PASS':
-                system = True
-            elif system_capacity == 'UNVERIFIED':
-                system_unverified = True
-        agent_capacity, agent_evidence = _pool_capacity_status(sizes, capacity, 8, 32)
-        requirements = {
-            'User': properties.mode == 'User', 'AzureLinux': properties.os_sku in ('AzureLinux', 'AzureLinux3'),
-            'KataVmIsolation': properties.workload_runtime == 'KataVmIsolation',
-            'count>=1': (properties.count or 0) >= 1,
-            'image': _image_supported(properties.node_image_version),
-            'label': (properties.node_labels or {}).get('agents.ai.azure.com/sandbox-node') == 'true',
-            'SSH disabled': bool(properties.security_profile and properties.security_profile.ssh_access == 'Disabled'),
-            'Succeeded': properties.provisioning_state == 'Succeeded',
-        }
-        details.append(
-            f'{pool.name}: vmSizes={list(sizes)}; '
-            f'systemCapacity={system_capacity} {system_evidence}; '
-            f'agentCapacity={agent_capacity} {agent_evidence}; '
-            f'missing={[key for key, passed in requirements.items() if not passed]}')
-        if all(requirements.values()):
-            if agent_capacity == 'PASS' and selected is None:
+        system_status, agent_status, detail = _evaluate_pool(pool, capacity)
+        details.append(detail)
+        if system_status:
+            system_statuses.append(system_status)
+        if agent_status:
+            agent_statuses.append(agent_status)
+            if agent_status == 'PASS' and selected is None:
                 selected = pool
-            elif agent_capacity == 'UNVERIFIED':
-                agent_unverified = True
-    system_status = 'PASS' if system else ('UNVERIFIED' if system_unverified else 'FAIL')
-    agent_status = 'PASS' if selected is not None else ('UNVERIFIED' if agent_unverified else 'FAIL')
+    system_status = 'PASS' if 'PASS' in system_statuses else (
+        'UNVERIFIED' if 'UNVERIFIED' in system_statuses else 'FAIL')
+    agent_status = 'PASS' if 'PASS' in agent_statuses else (
+        'UNVERIFIED' if 'UNVERIFIED' in agent_statuses else 'FAIL')
     _report(checks, 'System node pool', scope, system_status, details, 'One Succeeded System pool >=4 vCPU/16 GiB',
             'Prepare a qualifying System pool.')
     _report(checks, 'Agent node pool', scope, agent_status, details,
