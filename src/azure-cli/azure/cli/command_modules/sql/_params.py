@@ -199,7 +199,8 @@ min_capacity_param_type = CLIArgumentType(
 max_size_bytes_param_type = CLIArgumentType(
     options_list=['--max-size'],
     type=SizeWithUnitConverter('B', result_type=int),
-    help='The max storage size. If no unit is specified, defaults to bytes (B).')
+    help='The max storage size. If no unit is specified, defaults to bytes (B). '
+    'Valid units are B, kB, MB, GB, TB, e.g. 102400MB.')
 
 zone_redundant_param_type = CLIArgumentType(
     options_list=['--zone-redundant', '-z'],
