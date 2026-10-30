@@ -21,7 +21,8 @@ import azure.core.rest
 from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku, \
     VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
     AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
-    Identity, ResourceIdentityType as IdentityType, \
+    Identity, ResourceIdentityType as IdentityType, UserAssignedIdentity, \
+    ManagedClusterAgentHostingConfiguration, \
     Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
     CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod, \
     ConnectionPropertiesV2BasicResource, ConnectionUpdateContent, \
@@ -149,7 +150,30 @@ def _kind_uses_project_management(kind):
     return kind in ["AIServices"]
 
 
-def create(
+def _build_agent_hosting_models(
+    agent_hosting_cluster,
+    agent_hosting_storage,
+    agent_hosting_management_identity,
+    agent_hosting_workload_identity,
+):
+    if agent_hosting_cluster is None:
+        return None, None
+
+    hosting_configuration = ManagedClusterAgentHostingConfiguration(
+        name="default",
+        hosting_management_identity_resource_id=agent_hosting_management_identity,
+        workload_identity_resource_id=agent_hosting_workload_identity,
+        cluster_resource_id=agent_hosting_cluster,
+        storage_account_resource_id=agent_hosting_storage,
+    )
+    user_assigned_identities = {
+        agent_hosting_management_identity: UserAssignedIdentity()
+    }
+    return [hosting_configuration], user_assigned_identities
+
+
+def create(  # pylint: disable=too-many-locals
+    cmd,
     client,
     resource_group_name,
     account_name,
@@ -164,6 +188,10 @@ def create(
     encryption=None,
     allow_project_management=None,
     yes=None,
+    agent_hosting_cluster=None,
+    agent_hosting_storage=None,
+    agent_hosting_management_identity=None,
+    agent_hosting_workload_identity=None,
 ):  # pylint: disable=unused-argument
     """
     Create an Azure Cognitive Services account.
@@ -189,11 +217,47 @@ def create(
     if encryption is not None:
         properties.encryption = json.loads(encryption)
 
+    from ._agent_hosting import prepare_agent_hosting
+    from ._agent_hosting_preflight import validate_resource_ids
+    validate_resource_ids(
+        cluster=agent_hosting_cluster, storage=agent_hosting_storage,
+        management_identity=agent_hosting_management_identity,
+        workload_identity=agent_hosting_workload_identity)
+    if agent_hosting_cluster is not None:
+        resolved = prepare_agent_hosting(
+            cmd, resource_group_name, account_name, location, tags,
+            kind=kind, custom_domain=custom_domain,
+            cluster=agent_hosting_cluster, storage=agent_hosting_storage,
+            management_identity=agent_hosting_management_identity,
+            workload_identity=agent_hosting_workload_identity)
+        agent_hosting_storage = resolved['storage']
+        agent_hosting_management_identity = resolved['management_identity']
+        agent_hosting_workload_identity = resolved['workload_identity']
+
+    hosting_configurations, user_assigned_identities = _build_agent_hosting_models(
+        agent_hosting_cluster,
+        agent_hosting_storage,
+        agent_hosting_management_identity,
+        agent_hosting_workload_identity,
+    )
+    if hosting_configurations is not None:
+        properties.agent_hosting_configurations = hosting_configurations
+
     properties.allow_project_management = allow_project_management
     params = CognitiveServicesAccount(sku=sku, kind=kind, location=location,
                                       properties=properties, tags=tags)
-    if assign_identity or allow_project_management:
-        params.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
+    has_system_identity = bool(assign_identity or allow_project_management)
+    if has_system_identity or user_assigned_identities:
+        if has_system_identity and user_assigned_identities:
+            identity_type = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+        elif user_assigned_identities:
+            identity_type = IdentityType.USER_ASSIGNED
+        else:
+            identity_type = IdentityType.SYSTEM_ASSIGNED
+        params.identity = Identity(
+            type=identity_type,
+            user_assigned_identities=user_assigned_identities,
+        )
 
     return client.begin_create(resource_group_name, account_name, params)
 

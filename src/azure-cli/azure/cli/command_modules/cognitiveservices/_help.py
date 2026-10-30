@@ -62,6 +62,14 @@ examples:
                 "keyVaultUri": "https://issue23056kv.vault.azure.net/"
               }
             }'
+  - name: Create an AI Services account with customer-owned AKS, automatically creating Storage and managed identities.
+    text: |
+        az cognitiveservices account create \\
+            --name foundryByocAccount \\
+            --resource-group myResourceGroup \\
+            --kind AIServices --sku S0 --location westus \\
+            --custom-domain foundrybyocaccount \\
+            --agent-hosting-cluster "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1"
 """
 
 helps[
