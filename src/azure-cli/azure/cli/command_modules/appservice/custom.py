@@ -94,7 +94,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
-                         DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, LINUX_OS_NAME,
+                         DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, NODE_RUNTIME_NAME,
+                         LINUX_OS_NAME,
                          WINDOWS_OS_NAME, LINUX_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
                          WINDOWS_FUNCTIONAPP_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, DEFAULT_CENTAURI_IMAGE,
                          VERSION_2022_09_01, FLEX_SUBNET_DELEGATION,
@@ -9119,8 +9120,9 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return cls.DEFAULT_DELIMETER.join(filter(None, runtime))
 
     def resolve(self, display_name, linux=False):
-        display_name = self.standardize_node_runtime_name(display_name).lower()
-        stack = next((s for s in self.stacks if s.linux == linux and s.display_name.lower() == display_name), None)
+        display_name = self.standardize_runtime_name(display_name).lower()
+        stack = next((s for s in self.stacks if s.linux == linux and
+                      self.standardize_runtime_name(s.display_name).lower() == display_name), None)
         if stack is None:  # help convert previously acceptable stack names into correct ones if runtime not found
             old_to_new_windows = {
                 "node|12-lts": "node|12lts",
@@ -9213,6 +9215,25 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         match = re.fullmatch(r'node\|(\d+)(?:-?lts)?', runtime_name, re.IGNORECASE)
         if match and int(match.group(1)) >= 26:
             return "NODE|{}".format(match.group(1))
+        return runtime_name
+
+    @staticmethod
+    def standardize_dotnet_runtime_name(runtime_name):
+        match = re.fullmatch(r'dotnet(?:core)?\|(\d+)(?:\.0)?', runtime_name, re.IGNORECASE)
+        if match and int(match.group(1)) >= 11:
+            return "dotnet|{}".format(match.group(1))
+        return runtime_name
+
+    @classmethod
+    def standardize_runtime_name(cls, runtime_name):
+        if not runtime_name:
+            return runtime_name
+
+        runtime_family = runtime_name.split(cls.DEFAULT_DELIMETER, 1)[0].lower()
+        if runtime_family == NODE_RUNTIME_NAME:
+            return cls.standardize_node_runtime_name(runtime_name)
+        if runtime_family in (DOTNET_RUNTIME_NAME, NETCORE_RUNTIME_NAME):
+            return cls.standardize_dotnet_runtime_name(runtime_name)
         return runtime_name
 
     @classmethod
@@ -13411,7 +13432,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
                        branch='master', login_with_github=False, force=False):
     runtime = _StackRuntimeHelper(cmd).remove_delimiters(runtime)  # normalize "runtime:version"
     if runtime:
-        runtime = _StackRuntimeHelper.standardize_node_runtime_name(runtime)
+        runtime = _StackRuntimeHelper.standardize_runtime_name(runtime)
     if not token and not login_with_github:
         raise_missing_token_suggestion()
     elif not token:
@@ -14116,6 +14137,8 @@ def _get_template_file_path(runtime_string, is_linux):
 
     runtime_string = runtime_string.lower()
     runtime_stack = runtime_string.split('|')[0]
+    if runtime_stack == DOTNET_RUNTIME_NAME:
+        runtime_stack = NETCORE_RUNTIME_NAME
     template_file_path = None
 
     if is_linux:
