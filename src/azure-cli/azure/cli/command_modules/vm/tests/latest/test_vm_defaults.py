@@ -11,6 +11,8 @@ from unittest import mock
 
 from knack.util import CLIError
 
+from azure.core.exceptions import HttpResponseError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_vnet,
@@ -377,6 +379,47 @@ class TestVMSSDefaults(unittest.TestCase):
     @classmethod
     def _set_up_ns(cls, ns):
         ns.zones, ns.platform_fault_domain_count = None, None
+
+    @mock.patch('azure.cli.command_modules.vm.aaz.latest.sig.image_version.Show')
+    @mock.patch('azure.cli.command_modules.vm.aaz.latest.sig.image_definition.Show')
+    def test_vmss_create_gallery_image_os_type_validation(self, definition_show, version_show):
+        definition = definition_show.return_value
+        version_show.return_value.return_value = {}
+        namespace = argparse.Namespace(
+            image='/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/'
+                  'providers/Microsoft.Compute/galleries/gallery/images/image/versions/1.0.0',
+            os_disk_name=None,
+            storage_container_name=None,
+            use_unmanaged_disk=False,
+            storage_sku=None,
+            ultra_ssd_enabled=None,
+            vm_sku='Standard_D2s_v3',
+            data_disk_sizes_gb=None,
+            os_caching=None,
+            data_caching=None,
+        )
+        cmd = _get_test_cmd()
+
+        for os_type, mismatched in [('Linux', 'windows'), ('Windows', 'linux')]:
+            with self.subTest(os_type=os_type):
+                definition.return_value = {'osType': os_type}
+                namespace.os_type = os_type.swapcase()
+                _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
+                self.assertEqual(namespace.os_type, os_type)
+
+                namespace.os_type = mismatched
+                with self.assertRaises(InvalidArgumentValueError):
+                    _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
+
+        for status_code in (404, 500):
+            with self.subTest(status_code=status_code):
+                error = HttpResponseError(message='Definition lookup failed')
+                error.status_code = status_code
+                definition.side_effect = error
+                namespace.os_type = 'linux'
+                with self.assertRaises(HttpResponseError) as raised:
+                    _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
+                self.assertIs(raised.exception, error)
 
     def test_vmss_default_std_lb(self):
         cmd = mock.MagicMock()
