@@ -892,9 +892,10 @@ def _get_acr_from_image(cmd, app):
         registry_server = app.image.split("/", 1)[0]
         if not is_acr_url(registry_server):
             return
-        registry_name = get_acr_name(registry_server).lower()
+        registry_name = get_acr_name(registry_server)
         if not registry_name.isascii() or not registry_name.isalnum():
             return
+        registry_name = registry_name.lower()
         app.registry_server = registry_server
         if app.registry_user is None or app.registry_pass is None:
             logger.info(
