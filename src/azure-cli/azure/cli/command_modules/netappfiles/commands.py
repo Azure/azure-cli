@@ -6,6 +6,10 @@
 # pylint: disable=line-too-long
 
 def load_command_table(self, _):
+    with self.command_group('netappfiles account'):
+        from .custom import AccountRefreshLdapBindPassword
+        self.command_table["netappfiles account refresh-ldap-bind-password"] = AccountRefreshLdapBindPassword(loader=self)
+
     # with self.command_group('netappfiles account'):
     #     from .custom import AccountCreate, AccountUpdate
     #     self.command_table["netappfiles account create"] = AccountCreate(loader=self)

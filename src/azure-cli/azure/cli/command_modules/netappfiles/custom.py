@@ -9,9 +9,11 @@ from enum import Enum
 
 from knack.log import get_logger
 from azure.cli.core.azclierror import ValidationError, MutuallyExclusiveArgumentError
-from azure.cli.core.aaz import has_value, AAZJsonSelector
+from azure.cli.core.aaz import has_value, AAZJsonSelector, register_client
+from azure.cli.core.aaz._client import AAZMgmtClient
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from .aaz.latest.netappfiles import UpdateNetworkSiblingSet as _UpdateNetworkSiblingSet
+from .aaz.latest.netappfiles.account import RefreshLdapBindPassword as _RefreshLdapBindPassword
 # from .aaz.latest.netappfiles.account import Create as _AccountCreate, Update as _AccountUpdate
 from .aaz.latest.netappfiles.account.ad import Add as _ActiveDirectoryAdd, List as _ActiveDirectoryList, Update as _ActiveDirectoryUpdate
 from .aaz.latest.netappfiles.volume import Create as _VolumeCreate, Update as _VolumeUpdate, BreakFileLocks as _BreakFileLocks
@@ -59,6 +61,28 @@ class UpdateNetworkSiblingSet(_UpdateNetworkSiblingSet):
 
 
 # region account
+@register_client("NetAppFilesRefreshLdapBindPasswordClient")
+class NetAppFilesRefreshLdapBindPasswordClient(AAZMgmtClient):
+    def build_lro_polling(self, no_wait, initial_session, deserialization_callback, error_callback,
+                          lro_options=None, path_format_arguments=None):
+        if deserialization_callback is None:
+            deserialization_callback = self._discard_response
+        return super().build_lro_polling(
+            no_wait, initial_session, deserialization_callback, error_callback,
+            lro_options=lro_options, path_format_arguments=path_format_arguments,
+        )
+
+    @staticmethod
+    def _discard_response(_response):
+        """The password refresh operation has no resource to deserialize."""
+        return None
+
+
+class AccountRefreshLdapBindPassword(_RefreshLdapBindPassword):
+    class NetAppAccountsRefreshLdapBindPassword(_RefreshLdapBindPassword.NetAppAccountsRefreshLdapBindPassword):
+        CLIENT_TYPE = "NetAppFilesRefreshLdapBindPasswordClient"
+
+
 # class AccountCreate(_AccountCreate):
 #     @classmethod
 #     def _build_arguments_schema(cls, *args, **kwargs):
