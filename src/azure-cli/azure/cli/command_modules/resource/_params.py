@@ -128,6 +128,7 @@ def load_arguments(self, _):
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
     bicep_no_restore_type = CLIArgumentType(options_list=['--no-restore'], action='store_true')
+    bicep_config_type = CLIArgumentType(options_list=['--config'], completer=FilesCompleter(), type=file_type, help="The path to a Bicep configuration file to use instead of discovering bicepconfig.json files. The file applies to all Bicep files loaded by the command and is merged over the built-in configuration. Requires Bicep CLI v0.49.0 or later.")
     bicep_outdir_type = CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(), help="When set, saves the output file at the specified directory. Only the given file is output; for bicepparam files, the referenced template is not included.")
     bicep_outfile_type = CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(), help="When set, saves the output as the specified file path. Only the given file is output; for bicepparam files, the referenced template is not included.")
     bicep_stdout_type = CLIArgumentType(options_list=['--stdout'], action='store_true', help="When set, prints all output to stdout instead of corresponding files. For bicepparam files that reference a template, both the parameters and the referenced Bicep template are included in the output.")
@@ -702,6 +703,7 @@ def load_arguments(self, _):
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the bicep file without restoring external modules.")
+        c.argument('config', arg_type=bicep_config_type)
 
     with self.argument_context('bicep build-params') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the .bicepparam file to build in the file system.")
@@ -709,6 +711,7 @@ def load_arguments(self, _):
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the .bicepparam file without restoring external modules.")
+        c.argument('config', arg_type=bicep_config_type)
 
     with self.argument_context('bicep format') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to format in the file system.")
@@ -720,6 +723,7 @@ def load_arguments(self, _):
         c.argument('insert_final_newline', arg_type=bicep_insert_final_newline_type)
         c.argument('newline', arg_type=bicep_newline_type, deprecate_info=c.deprecate(target='--newline', redirect='--newline-kind'))
         c.argument('newline_kind', arg_type=bicep_newline_kind_type)
+        c.argument('config', arg_type=bicep_config_type)
 
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the ARM template to decompile in the file system.")
@@ -736,6 +740,7 @@ def load_arguments(self, _):
     with self.argument_context('bicep restore') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to restore external modules for.")
         c.argument('force', arg_type=bicep_force_type, help="Allows overwriting the cached external modules.")
+        c.argument('config', arg_type=bicep_config_type)
 
     with self.argument_context('bicep publish') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to publish in the file system.")
@@ -744,6 +749,7 @@ def load_arguments(self, _):
         c.argument('documentation_uri', arg_type=CLIArgumentType(options_list=['--documentation-uri', '-d'], help="The documentation uri of the Bicep module."))
         c.argument('with_source', options_list=['--with-source'], action='store_true', help="Publish source code with the module.")
         c.argument('force', arg_type=bicep_force_type, help="Allow overwriting an existing Bicep module version.")
+        c.argument('config', arg_type=bicep_config_type)
 
     with self.argument_context('bicep install') as c:
         c.argument('version', options_list=['--version', '-v'], help='The version of Bicep CLI to be installed. Default to the latest if not specified.')
@@ -760,11 +766,13 @@ def load_arguments(self, _):
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
         c.argument('output_format', help="Set output format. Valid values are ( json | bicepparam ).")
         c.argument('include_params', help="Set include params. Valid values are ( all | RequiredOnly ).")
+        c.argument('config', arg_type=bicep_config_type)
 
     with self.argument_context('bicep lint') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to lint in the file system.")
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
         c.argument('diagnostics_format', arg_type=get_enum_type(['default', 'sarif']), help="Set diagnostics format.")
+        c.argument('config', arg_type=bicep_config_type)
 
     with self.argument_context('bicep snapshot') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the .bicepparam file to capture a snapshot for.")
@@ -782,6 +790,7 @@ def load_arguments(self, _):
                    help="Resource group name forwarded to the Bicep CLI as the deployment context used to resolve `existing` references when capturing the snapshot.")
         c.argument('deployment_name', options_list=['--deployment-name'],
                    help="Deployment name forwarded to the Bicep CLI as the deployment context used to resolve `existing` references when capturing the snapshot.")
+        c.argument('config', arg_type=bicep_config_type)
 
     with self.argument_context('bicep run') as c:
         c.argument('command_string', options_list=['--command', '-c'],
