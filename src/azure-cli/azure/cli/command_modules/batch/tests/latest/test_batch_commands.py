@@ -52,8 +52,8 @@ class TestBatchValidators(unittest.TestCase):
         with self.assertRaises(ValueError):
             _validators.metadata_item_format("test")
 
-        with self.assertRaises(ValueError):
-            _validators.metadata_item_format("name=value=other")
+        meta = _validators.metadata_item_format("name=value=other")
+        self.assertEqual(meta, {'name': 'name', 'value': 'value=other'})
 
     def test_batch_environment_setting_format(self):
         env = _validators.environment_setting_format("name=value")
@@ -62,8 +62,21 @@ class TestBatchValidators(unittest.TestCase):
         with self.assertRaises(ValueError):
             _validators.environment_setting_format("test")
 
+        env = _validators.environment_setting_format("CONN=Server=tcp:x;Database=y")
+        self.assertEqual(env, {'name': 'CONN', 'value': 'Server=tcp:x;Database=y'})
+
+        env = _validators.environment_setting_format("TOKEN=YWJj==")
+        self.assertEqual(env, {'name': 'TOKEN', 'value': 'YWJj=='})
+
+    def test_batch_string_dictionary_format(self):
+        result = _validators.string_dictionary_format("a=b c=d=e")
+        self.assertEqual(result, {'a': 'b', 'c': 'd=e'})
+
         with self.assertRaises(ValueError):
-            _validators.environment_setting_format("name=value=other")
+            _validators.string_dictionary_format("a=b test")
+
+        with self.assertRaises(ValueError):
+            _validators.string_dictionary_format("")
 
     def test_batch_application_package_reference_format(self):
         ref = _validators.batch_application_package_reference_format("app_1")
