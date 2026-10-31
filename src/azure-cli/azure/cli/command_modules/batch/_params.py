@@ -84,7 +84,7 @@ def load_arguments(self, _):
         c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.", arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault', arg_type=get_enum_type(KeySource))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. '
-                                                     'Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
+                                                     'Full path to the versioned secret. Example: `https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053`.')
         c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType), deprecate_info=c.deprecate(hide=True))
         c.argument('mi_user_assigned', help='Resource ID of the user assigned identity for the batch services account.', arg_group='Identity')
         c.argument('mi_system_assigned', help='Set the system managed identity on the batch services account.', arg_group='Identity')
@@ -95,7 +95,7 @@ def load_arguments(self, _):
         c.argument('storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault')
         c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.", arg_type=get_enum_type(PublicNetworkAccessType))
-        c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
+        c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. Full path to the versioned secret. Example: `https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053`.')
         c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType), deprecate_info=c.deprecate(hide=True))
 
     with self.argument_context('batch account identity assign') as c:
@@ -418,7 +418,7 @@ def load_arguments(self, _):
                 arg_group="Pool: Virtual Machine Configuration",
                 help='A space separated list of DiskEncryptionTargets. current possible values include OsDisk and TemporaryDisk.', type=disk_encryption_configuration_format)
         c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
-                help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
+                help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or the ARM resource identifier of an Azure Compute Gallery image of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/galleries/{galleryName}/images/{imageDefinitionName}[/versions/{versionId}]'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'canonical:ubuntu-24_04-lts:server'")
         c.argument('mode', options_list=['--upgrade-policy-mode'], help='The mode of the pool OS upgrade.')
         c.argument('enable_cross_zone_upgrade', arg_type=get_three_state_flag())
         c.argument('prioritize_unhealthy_instances', arg_type=get_three_state_flag())
