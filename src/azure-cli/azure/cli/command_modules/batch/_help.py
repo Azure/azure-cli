@@ -533,11 +533,14 @@ short-summary: Manage automatic scaling of Batch pools.
 
 helps['batch pool create'] = """
 type: command
-short-summary: Create a Batch pool in an account. When creating a pool, choose arguments from either Cloud Services Configuration or Virtual Machine Configuration.
+short-summary: Create a Batch pool in an account.
 examples:
-  - name: Create a Batch pool in an account. When creating a pool, choose arguments from either Cloud Services Configuration or Virtual Machine Configuration.
+  - name: Create a Batch pool from a JSON file.
     text: >
         az batch pool create --json-file batch-pool-create.json --account-name clibatch --account-key BatchAccountKey
+  - name: Create a Batch pool of two Ubuntu 24.04 compute nodes.
+    text: >
+        az batch pool create --id mypool --vm-size Standard_D4ds_v5 --target-dedicated-nodes 2 --image canonical:ubuntu-24_04-lts:server --node-agent-sku-id "batch.node.ubuntu 24.04" --account-name clibatch --account-key BatchAccountKey
 """
 
 helps['batch pool node-counts'] = """
@@ -568,6 +571,14 @@ short-summary: Query information on VM images supported by Azure Batch service.
 helps['batch pool supported-images list'] = """
 type: command
 short-summary: Lists all Virtual Machine Images supported by the Azure Batch service.
+long-summary: This command needs a Batch account. Select one with 'az batch account login', or pass --account-name and --account-endpoint (and --account-key for Shared Key authentication).
+examples:
+  - name: List the images supported by the Batch account selected with 'az batch account login'.
+    text: >
+        az batch pool supported-images list
+  - name: List the images supported by a Batch account, using your 'az login' credentials (Microsoft Entra ID).
+    text: >
+        az batch pool supported-images list --account-name mybatchaccount --account-endpoint https://mybatchaccount.eastus.batch.azure.com
 """
 
 helps['batch pool usage-metrics'] = """
