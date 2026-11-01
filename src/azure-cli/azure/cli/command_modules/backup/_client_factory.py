@@ -6,10 +6,11 @@
 # Base Client Factories
 
 
-def _resource_client_factory(cli_ctx, **_):
+def _resource_client_factory(cli_ctx, subscription_id=None, **_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    return get_mgmt_service_client(
+        cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription_id)
 
 
 def _common_client_factory(cli_ctx, **_):
@@ -33,24 +34,24 @@ def _backup_passive_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupPassiveClient)
 
 
-def _storage_client_factory(cli_ctx, **_):
+def _storage_client_factory(cli_ctx, subscription_id=None, **_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE, subscription_id=subscription_id)
 
 
 # External Deps Client Factories
-def resources_cf(cli_ctx, *_):
-    return _resource_client_factory(cli_ctx).resources
+def resources_cf(cli_ctx, *_, subscription_id=None):
+    return _resource_client_factory(cli_ctx, subscription_id=subscription_id).resources
 
 
 def resource_groups_cf(cli_ctx, *_):
     return _resource_client_factory(cli_ctx).resource_groups
 
 
-def file_shares_cf(cli_ctx, *_):
-    return _storage_client_factory(cli_ctx).file_shares
+def file_shares_cf(cli_ctx, *_, subscription_id=None):
+    return _storage_client_factory(cli_ctx, subscription_id=subscription_id).file_shares
 
 
 # Internal Deps Client Factories

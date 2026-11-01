@@ -7,11 +7,20 @@ from collections import OrderedDict
 
 
 def transform_container(result):
-    return OrderedDict([('Name', result['name']),
-                        ('Friendly Name', result['properties']['friendlyName']),
-                        ('Resource Group', result['resourceGroup']),
-                        ('Type', result['properties']['backupManagementType']),
-                        ('Registration Status', result['properties']['registrationStatus'])])
+    columns = [('Name', result['name']),
+               ('Friendly Name', result['properties']['friendlyName']),
+               ('Resource Group', result['resourceGroup']),
+               ('Type', result['properties']['backupManagementType']),
+               ('Registration Status', result['properties']['registrationStatus'])]
+    access_type = result['properties'].get('accessType')
+    if access_type:
+        columns.append(('Access Type', access_type))
+        identity_info = result['properties'].get('identityInfo')
+        if identity_info:
+            identity = ('SystemAssigned' if identity_info.get('isSystemAssignedIdentity')
+                        else identity_info.get('managedIdentityResourceId'))
+            columns.append(('Managed Identity', identity))
+    return OrderedDict(columns)
 
 
 def transform_item(result):

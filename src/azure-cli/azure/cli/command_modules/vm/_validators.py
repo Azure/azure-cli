@@ -677,7 +677,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     from ._vm_utils import normalize_disk_info
     # attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
-    vm_size = (getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
+    vm_size = (getattr(namespace, 'preferred_size', None) or
+               getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
 
     # pylint: disable=line-too-long
     namespace.disk_info = normalize_disk_info(size=vm_size,
@@ -953,7 +954,8 @@ def _subnet_capacity_check(subnet_mask, vmss_instance_count, over_provision):
 
 def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
     if namespace.accelerated_networking is None:
-        size = getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None)
+        size = (getattr(namespace, 'preferred_size', None) or
+                getattr(namespace, 'size', None) or getattr(namespace, 'vm_sku', None))
         size = size.lower()
 
         # Use the following code to refresh the list
@@ -1654,9 +1656,25 @@ def _resolve_role_id(cli_ctx, role, scope):
     return role_id
 
 
+def _validate_vm_size_options(namespace):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    preferred_size = getattr(namespace, 'preferred_size', None)
+    size = getattr(namespace, 'size', None)
+
+    if size is not None and preferred_size is not None:
+        raise MutuallyExclusiveArgumentError("Specify either --size or --preferred-size, not both.")
+    if preferred_size is not None and not preferred_size.strip():
+        raise InvalidArgumentValueError("--preferred-size must not be empty or whitespace.")
+
+
 def process_vm_create_namespace(cmd, namespace):
+    _validate_vm_size_options(namespace)
+    preferred_size = getattr(namespace, 'preferred_size', None)
+    if namespace.size is None and preferred_size is None:
+        namespace.size = 'Standard_D2s_v5'
     validate_tags(namespace)
-    _validate_location(cmd, namespace, namespace.zone, namespace.size)
+    _validate_location(cmd, namespace, namespace.zone, preferred_size or namespace.size)
 
     # Currently, only `az vm create` supports this feature, so it is temporarily placed in process_vm_create_namespace()
     from ._vm_utils import display_region_recommendation
@@ -1700,6 +1718,7 @@ def process_vm_create_namespace(cmd, namespace):
 
 
 def process_vm_update_namespace(cmd, namespace):
+    _validate_vm_size_options(namespace)
     _validate_vm_create_dedicated_host(cmd, namespace)
     _validate_capacity_reservation_group(cmd, namespace)
     _validate_vm_vmss_update_ephemeral_placement(cmd, namespace)

@@ -17,6 +17,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
     CONST_DEFAULT_VMS_VM_SIZE,
     CONST_DEFAULT_WINDOWS_VMS_VM_SIZE,
+    CONST_GPU_DRIVER_INSTALL,
+    CONST_GPU_MANAGEMENT_MODE_MANAGED,
     CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
@@ -1880,6 +1882,16 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_gpu_driver()
 
+    def get_enable_managed_gpu(self) -> Union[bool, None]:
+        """Obtain enable_managed_gpu, preserving the value on an attached create model."""
+        enable_managed_gpu = self.raw_param.get("enable_managed_gpu")
+        if self.decorator_mode == DecoratorMode.CREATE and self.agentpool:
+            gpu_profile = self.agentpool.gpu_profile
+            nvidia = getattr(gpu_profile, "nvidia", None)
+            if nvidia is not None and nvidia.management_mode is not None:
+                enable_managed_gpu = nvidia.management_mode == CONST_GPU_MANAGEMENT_MODE_MANAGED
+        return enable_managed_gpu
+
     def get_gateway_prefix_size(self) -> Union[int, None]:
         """Obtain the value of gateway_prefix_size.
 
@@ -2410,11 +2422,16 @@ class AKSAgentPoolAddDecorator:
         self._ensure_agentpool(agentpool)
 
         gpu_driver = self.context.get_gpu_driver()
+        enable_managed_gpu = self.context.get_enable_managed_gpu()
 
-        # Construct AgentPoolGPUProfile if one of the fields has been set
-        if gpu_driver:
-            agentpool.gpu_profile = self.models.GPUProfile()
-            agentpool.gpu_profile.driver = gpu_driver
+        if gpu_driver or enable_managed_gpu:
+            if agentpool.gpu_profile is None:
+                agentpool.gpu_profile = self.models.GPUProfile()
+            agentpool.gpu_profile.driver = CONST_GPU_DRIVER_INSTALL if enable_managed_gpu else gpu_driver
+            if enable_managed_gpu:
+                if agentpool.gpu_profile.nvidia is None:
+                    agentpool.gpu_profile.nvidia = self.models.NvidiaGPUProfile()
+                agentpool.gpu_profile.nvidia.management_mode = CONST_GPU_MANAGEMENT_MODE_MANAGED
 
         return agentpool
 

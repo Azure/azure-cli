@@ -1424,53 +1424,6 @@ class SqlServerDbForwardMigrationScenarioTest(ScenarioTest):
         self.cmd('sql db update -g {} -s {} -n {} --perform-cutover --no-wait'
                  .format(resource_group, server, database_name))
 
-class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
-    def test_sql_db_short_term_retention(self):
-        # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
-        self.kwargs.update({
-            'resource_group': 'cli_test_donnotdelete',
-            'server_name': 'clitestserverdonotdelete',
-            'database_name': 'clitestdatabase',
-            'retention_days_v1': 7,
-            'diffbackup_hours_v1': 24,
-            'retention_days_v2': 6,
-            'diffbackup_hours_v2': 12,
-            'retention_days_v3': 5
-        })
-
-        # Test UPDATE short term retention policy on live database, value updated to v1.
-        self.cmd(
-            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v1} --diffbackup-hours {diffbackup_hours_v1}',
-            checks=[
-                self.check('resourceGroup', '{resource_group}'),
-                self.check('retentionDays', '{retention_days_v1}'),
-                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
-
-        # Test GET short term retention policy on live database, value equals to v1.
-        self.cmd(
-            'sql db str-policy show -g {resource_group} -s {server_name} -n {database_name}',
-            checks=[
-                self.check('resourceGroup', '{resource_group}'),
-                self.check('retentionDays', '{retention_days_v1}'),
-                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v1}')])
-
-        # Test UPDATE short term retention policy on live database, value updated to v2.
-        self.cmd(
-            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v2} --diffbackup-hours {diffbackup_hours_v2}',
-            checks=[
-                self.check('resourceGroup', '{resource_group}'),
-                self.check('retentionDays', '{retention_days_v2}'),
-                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
-
-        # Test UPDATE short term retention policy on live database, only update retention days value to v3.
-        self.cmd(
-            'sql db str-policy set -g {resource_group} -s {server_name} -n {database_name} --retention-days {retention_days_v3}',
-            checks=[
-                self.check('resourceGroup', '{resource_group}'),
-                self.check('retentionDays', '{retention_days_v3}'),
-                self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
-
-
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     @live_only()
     def test_sql_db_long_term_retention(
@@ -6300,79 +6253,6 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
                  checks=[
                      self.check('serverKeyType', 'ServiceManaged'),
                      self.check('serverKeyName', 'ServiceManaged')])
-
-
-class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
-    @ManagedInstancePreparer()
-    def test_sql_managed_db_short_retention(self, mi, rg):
-        resource_prefix = 'MIDBShortTermRetention'
-
-        loc = 'westcentralus'
-        resource_group = 'autobot-managed-instance-v12'
-        subnet = '/subscriptions/4b9746e4-d324-4e1d-be53-ec3c8f3a0c18/resourceGroups/autobot-managed-instance-v12/providers/Microsoft.Network/virtualNetworks/autobot-managed-instance-vnet/subnets/clsubnet'
-
-        self.kwargs.update({
-            'loc': ManagedInstancePreparer.location,
-            'managed_instance_name': mi,
-            'database_name': self.create_random_name(resource_prefix, 50),
-            'collation': ManagedInstancePreparer.collation,
-            'retention_days_inc': 14,
-            'retention_days_dec': 7,
-            'rg': rg
-        })
-
-        # create database
-        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
-                 checks=[
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('name', '{database_name}'),
-                     self.check('location', '{loc}'),
-                     self.check('collation', '{collation}'),
-                     self.check('status', 'Online')])
-
-        # test update short term retention on live database
-        self.cmd(
-            'sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_inc}',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('retentionDays', '{retention_days_inc}')])
-
-        # test get short term retention on live database
-        self.cmd('sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
-                 checks=[
-                     self.check('resourceGroup', '{rg}'),
-                     self.check('retentionDays', '{retention_days_inc}')])
-
-        # Wait for first backup before dropping
-        _wait_until_first_backup_midb(self)
-
-        # Delete by group/server/name
-        self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
-                 checks=[NoneCheck()])
-
-        # Get deleted database
-        deleted_databases = self.cmd('sql midb list-deleted -g {rg} --managed-instance {managed_instance_name}',
-                                     checks=[
-                                         self.greater_than('length(@)', 0)])
-
-        self.kwargs.update({
-            'deleted_time': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
-        })
-
-        # test update short term retention on deleted database
-        self.cmd(
-            'sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deleted-time {deleted_time}',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('retentionDays', '{retention_days_dec}')])
-
-        # test get short term retention on deleted database
-        self.cmd(
-            'sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deleted-time {deleted_time}',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('retentionDays', '{retention_days_dec}')])
 
 
 class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):

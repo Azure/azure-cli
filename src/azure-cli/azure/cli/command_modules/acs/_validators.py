@@ -184,21 +184,21 @@ def validate_k8s_version(namespace):
 
 
 def _validate_nodepool_name(nodepool_name):
-    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    """Validates a nodepool name to be at most 39 characters, alphanumeric only."""
     if nodepool_name != "":
-        if len(nodepool_name) > 12:
-            raise InvalidArgumentValueError('--nodepool-name can contain at most 12 characters')
+        if len(nodepool_name) > 39:
+            raise InvalidArgumentValueError('--nodepool-name can contain at most 39 characters')
         if not nodepool_name.isalnum():
             raise InvalidArgumentValueError('--nodepool-name should contain only alphanumeric characters')
 
 
 def validate_nodepool_name(namespace):
-    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    """Validates a nodepool name to be at most 39 characters, alphanumeric only."""
     _validate_nodepool_name(namespace.nodepool_name)
 
 
 def validate_agent_pool_name(namespace):
-    """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
+    """Validates a nodepool name to be at most 39 characters, alphanumeric only."""
     _validate_nodepool_name(namespace.agent_pool_name)
 
 

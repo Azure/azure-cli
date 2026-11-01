@@ -496,6 +496,7 @@ def load_arguments(self, _):
 
     for scope in ['vm create', 'vm update']:
         with self.argument_context(scope) as c:
+            c.argument('preferred_size', completer=get_vm_size_completion_list, is_preview=True, help='Preferred VM size for Flow VMs. Azure may deploy a compatible alternative size. Cannot be used with --size.')
             c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
             c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), help='The configuration parameter used while publishing scheduled events additional publishing targets.')
             c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
