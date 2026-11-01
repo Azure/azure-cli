@@ -80,7 +80,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
                            enable_smb_oauth=None, zones=None, zone_placement_policy=None,
                            enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None,
-                           allowed_copy_scope=None):
+                           allowed_copy_scope=None, allow_shared_key_access_for_blob=None,
+                           allow_shared_key_access_for_file=None, allow_shared_key_access_for_table=None,
+                           allow_shared_key_access_for_queue=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -270,6 +272,21 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if allow_shared_key_access is not None:
         params.allow_shared_key_access = allow_shared_key_access
 
+    StorageAccountSharedKeyAccessProperties = cmd.get_models('StorageAccountSharedKeyAccessProperties')
+    params.allow_shared_key_access_for_services = StorageAccountSharedKeyAccessProperties()
+
+    if allow_shared_key_access_for_blob is not None:
+        params.allow_shared_key_access_for_services.blob = {'enabled': allow_shared_key_access_for_blob}
+
+    if allow_shared_key_access_for_file is not None:
+        params.allow_shared_key_access_for_services.file = {'enabled': allow_shared_key_access_for_file}
+
+    if allow_shared_key_access_for_table is not None:
+        params.allow_shared_key_access_for_services.table = {'enabled': allow_shared_key_access_for_table}
+
+    if allow_shared_key_access_for_queue is not None:
+        params.allow_shared_key_access_for_services.queue = {'enabled': allow_shared_key_access_for_queue}
+
     if edge_zone is not None:
         ExtendedLocation, ExtendedLocationTypes = cmd.get_models('ExtendedLocation', 'ExtendedLocationTypes')
         params.extended_location = ExtendedLocation(name=edge_zone,
@@ -434,7 +451,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
                            yes=None, enable_smb_oauth=None, zones=None, zone_placement_policy=None,
                            enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None,
-                           allowed_copy_scope=None):
+                           allowed_copy_scope=None, allow_shared_key_access_for_blob=None,
+                           allow_shared_key_access_for_file=None, allow_shared_key_access_for_table=None,
+                           allow_shared_key_access_for_queue=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
@@ -697,6 +716,23 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_shared_key_access is not None:
         params.allow_shared_key_access = allow_shared_key_access
+
+    params.allow_shared_key_access_for_services = instance.allow_shared_key_access_for_services
+    if params.allow_shared_key_access_for_services is None:
+        StorageAccountSharedKeyAccessProperties = cmd.get_models('StorageAccountSharedKeyAccessProperties')
+        params.allow_shared_key_access_for_services = StorageAccountSharedKeyAccessProperties()
+
+    if allow_shared_key_access_for_blob is not None:
+        params.allow_shared_key_access_for_services.blob = {'enabled': allow_shared_key_access_for_blob}
+
+    if allow_shared_key_access_for_file is not None:
+        params.allow_shared_key_access_for_services.file = {'enabled': allow_shared_key_access_for_file}
+
+    if allow_shared_key_access_for_table is not None:
+        params.allow_shared_key_access_for_services.table = {'enabled': allow_shared_key_access_for_table}
+
+    if allow_shared_key_access_for_queue is not None:
+        params.allow_shared_key_access_for_services.queue = {'enabled': allow_shared_key_access_for_queue}
 
     if key_expiration_period_in_days is not None:
         KeyPolicy = cmd.get_models('KeyPolicy')

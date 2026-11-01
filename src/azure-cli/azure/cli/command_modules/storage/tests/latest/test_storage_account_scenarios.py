@@ -554,6 +554,33 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update -n {} --allow-shared-key-access true'.format(name),
                  checks=[JMESPathCheck('allowSharedKeyAccess', True)])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
+    def test_storage_account_with_shared_key_access_for_service(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {} --allow-shared-key-access --allow-shared-key-access-for-blob '
+                 '--allow-shared-key-access-for-file true --allow-shared-key-access-for-table false '
+                 '--allow-shared-key-access-for-queue false'.format(name, resource_group),
+                 checks=[JMESPathCheck('allowSharedKeyAccess', True),
+                         JMESPathCheck('allowSharedKeyAccessForServices.blob.enabled', True),
+                         JMESPathCheck('allowSharedKeyAccessForServices.file.enabled', True),
+                         JMESPathCheck('allowSharedKeyAccessForServices.table.enabled', False),
+                         JMESPathCheck('allowSharedKeyAccessForServices.queue.enabled', False)])
+
+        self.cmd('az storage account update -n {} -g {} --allow-shared-key-access-for-table true '
+                 '--allow-shared-key-access-for-queue true'.format(name, resource_group),
+                 checks=[JMESPathCheck('allowSharedKeyAccessForServices.blob.enabled', True),
+                         JMESPathCheck('allowSharedKeyAccessForServices.file.enabled', True),
+                         JMESPathCheck('allowSharedKeyAccessForServices.table.enabled', True),
+                         JMESPathCheck('allowSharedKeyAccessForServices.queue.enabled', True)])
+
+        self.cmd('az storage account update -n {} -g {} --allow-shared-key-access-for-blob false '
+                 '--allow-shared-key-access-for-file false'.format(name, resource_group),
+                 checks=[JMESPathCheck('allowSharedKeyAccessForServices.blob.enabled', False),
+                         JMESPathCheck('allowSharedKeyAccessForServices.file.enabled', False),
+                         JMESPathCheck('allowSharedKeyAccessForServices.table.enabled', True),
+                         JMESPathCheck('allowSharedKeyAccessForServices.queue.enabled', True)])
+
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     def test_storage_account_with_key_and_sas_policy(self, resource_group):
         name = self.create_random_name(prefix='cli', length=24)
