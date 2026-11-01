@@ -23,7 +23,7 @@ class SecurityCenterSecurityAutomationsTests(ScenarioTest):
 
         # Create Automation rule set
         security_automation_rule_set = self.cmd("az security automation-rule-set create").get_output_in_json()
-        assert security_automation_rule_set["rules"] == None
+        assert security_automation_rule_set["rules"] is None
 
         # Create Automation source
         security_automation_source = self.cmd("az security automation-source create --event-source 'Assessments'").get_output_in_json()

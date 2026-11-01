@@ -78,12 +78,12 @@ class ManagedCassandraScenarioTest(ScenarioTest):
         # Deallocate cluster
         self.cmd('az managed-cassandra cluster deallocate -c {c} -g {rg}')
         cluster = self.cmd('az managed-cassandra cluster show -c {c} -g {rg}').get_output_in_json()
-        assert cluster['properties']['deallocated'] == True
+        assert cluster['properties']['deallocated'] is True
 
         # Start cluster
         self.cmd('az managed-cassandra cluster start -c {c} -g {rg}')
         cluster = self.cmd('az managed-cassandra cluster show -c {c} -g {rg}').get_output_in_json()
-        assert cluster['properties']['deallocated'] == False
+        assert cluster['properties']['deallocated'] is False
 
         # invoke-command
         self.kwargs.update({
@@ -95,7 +95,7 @@ class ManagedCassandraScenarioTest(ScenarioTest):
 
         # status command
         status = self.cmd('az managed-cassandra cluster status -c {c} -g {rg}').get_output_in_json()
-        assert status["reaperStatus"]["Healthy"] == True
+        assert status["reaperStatus"]["Healthy"] is True
 
         # Delete Cluster
         try:
