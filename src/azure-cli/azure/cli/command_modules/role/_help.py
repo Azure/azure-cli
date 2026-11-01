@@ -793,11 +793,19 @@ helps['role assignment list'] = """
 type: command
 short-summary: List role assignments.
 long-summary: >-
-    By default, only assignments scoped to subscription will be displayed.
-    To view assignments scoped by resource or group, use `--all`.
+    By default, the scope is the current subscription. Specifying the scope with `--scope` is recommended.
+
+
+    By default, only role assignments exactly at the scope are included, not including role assignments at
+    parent scopes or sub-scopes. For example, when `--scope` is a subscription, role assignments at management
+    groups or resource groups are not included.
+    To include role assignments at parent scopes, use `--include-inherited`.
+    To include role assignments at parent scopes and sub-scopes, use `--at-scope false`.
 examples:
-  - name: List role assignments at the subscription scope.
+  - name: List role assignments exactly at the subscription scope.
     text: az role assignment list --scope /subscriptions/00000000-0000-0000-0000-000000000000
+  - name: List role assignments at the subscription scope, including parent scopes and sub-scopes.
+    text: az role assignment list --scope /subscriptions/00000000-0000-0000-0000-000000000000 --at-scope false
   - name: List role assignments at the subscription scope, without filling roleDefinitionName property.
     text: az role assignment list --scope /subscriptions/00000000-0000-0000-0000-000000000000 --fill-role-definition-name false
   - name: List role assignments with "Reader" role at the subscription scope.
