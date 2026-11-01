@@ -71,6 +71,37 @@ def transform_local_gateway_table_output(result):
     return final_result
 
 
+def transform_vnet_available_cidrs_table_output(result):
+    rows = []
+    for entry in result:
+        address_prefix = entry['addressPrefixes']
+        for cidr in entry.get('availableCIDRs', []):
+            item = OrderedDict()
+            item['AddressPrefix'] = address_prefix
+            item['CIDRAddress'] = cidr['cidrAddress']
+            item['StartingAddress'] = cidr['startingAddress']
+            item['EndingAddress'] = cidr['endingAddress']
+            item['UsableIPs'] = cidr['usableIPs']
+            rows.append(item)
+    return rows
+
+
+def transform_vnet_used_cidrs_table_output(result):
+    rows = []
+    for entry in result:
+        address_prefix = entry['addressPrefixes']
+        for cidr in entry.get('usedCIDRs', []):
+            item = OrderedDict()
+            item['AddressPrefix'] = address_prefix
+            item['CIDRAddress'] = cidr['cidrAddress']
+            item['StartingAddress'] = cidr['startingAddress']
+            item['EndingAddress'] = cidr['endingAddress']
+            item['SubnetName'] = cidr['subnetName']
+            item['UsableIPs'] = cidr['usableIPs']
+            rows.append(item)
+    return rows
+
+
 def transform_vnet_table_output(result):
 
     def _transform(result):
