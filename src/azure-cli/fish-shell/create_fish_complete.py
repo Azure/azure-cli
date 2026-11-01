@@ -1,0 +1,134 @@
+# -------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for
+# license information.
+# --------------------------------------------------------------------------
+
+import subprocess
+import re
+
+
+def fix_strings(text: str):
+    return text.replace("*", "").replace("'", "").replace('"', "")
+
+
+# Write to local az.fish
+with open("az.fish", "w") as f:
+    subcommands = [['az']]
+
+    # Match on lines that we care about (lines that are tabbed and :)
+    command_lines_re = re.compile(r'^\s{4}(?!az)\w+(\w|-)+.*')
+    # Match linescontaing a flag
+    flag_lines_re = re.compile(r'^\s{4}--(\w|-)+.*')
+    # Parse out commands (eg az --help will parse out account, acr, etc)
+    command_re = re.compile(r'\w+(\w|-)+(?=\s+:)')
+    # Parse out command flags (eg --help)
+    flag_re = re.compile(r'--(\w|-)+(?=\s+:)')
+    # Parse out descriptions (anything after :)
+    description_re = re.compile(r'(?<=:\s).*$')
+
+    output = []
+    did_write = False
+
+    # Create a function to match on a specific command
+    f.write('''
+function __get_cmd
+    for x in $argv
+        if string match -v -q -- '-*' $x
+            echo $x
+        else
+            break
+        end
+    end
+end
+
+function __is_az_subcommand
+    set -l cmd (commandline -poc)
+    set -l cmds (__get_cmd $cmd[2..])
+    set -l args (string join -- ' ' $argv)
+    set -l sub (string join -- ' ' $cmds)
+    if [ "$sub" = "$args" ]
+        return 0
+    end
+    return 1
+end
+
+''')
+
+    is_az = True
+
+    while len(subcommands) != 0:
+
+        # Grab last item in queue (DFS)
+        command = subcommands.pop()
+        # Query back help page
+        response = subprocess.run(command + ['--help'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+
+        lines = response.split('\n')
+
+        condition = ""
+        # if its a root command
+        if is_az:
+            condition = '-n "__fish_az_no_subcommand"'
+        else:
+            condition = '-A -n "__is_az_subcommand \'' + " ".join(command[1:]) + '\'"'
+
+        root_cmds = []
+        did_write = False
+        print(command)
+
+        f.write(f'# {command}\n')
+
+        for line in lines:
+            command_match = command_lines_re.match(line)
+            flag_match = flag_lines_re.match(line)
+
+            # this contains a subcommand, parse out command and description
+            if command_match is not None:
+                sub_cmd = command_re.search(line)
+                desc = description_re.search(line)
+
+                if sub_cmd is not None and desc is not None:
+                    matched_sub_cmd = sub_cmd.group()
+                    if is_az:
+                        root_cmds.append(matched_sub_cmd)
+                    # Add new found command to parsing queue
+                    subcommands.append(command + [matched_sub_cmd])
+                    desc_text = fix_strings(desc.group())
+                    # Write complete command to file
+                    f.write(f'complete -c az -d "{desc_text}" {condition} -f -a "{matched_sub_cmd}"\n')
+                    did_write = True
+
+            # This contains a flag
+            if flag_match is not None:
+                flag = flag_re.search(line)
+                desc = description_re.search(line)
+
+                if flag is not None and desc is not None:
+                    matched_flag = flag.group()
+                    matched_flag = matched_flag[2:]
+                    desc_text = fix_strings(desc.group())
+                    # Write complete with long flag option
+                    f.write(f'complete -c az -d "{desc_text}" {condition} -f -l "{matched_flag}"\n')
+                    did_write = True
+
+        if is_az:
+            # Function to test if root command
+            f.write('''
+function __fish_az_no_subcommand
+    for i in (commandline -opc)
+        if contains -- $i ''')
+            f.write(" ".join(root_cmds))
+            f.write('''
+            return 1
+        end
+    end
+    return 0
+end
+''')
+
+            # toggle off after parsing root commands
+        is_az = False
+
+        if did_write:
+            f.write('\n')
