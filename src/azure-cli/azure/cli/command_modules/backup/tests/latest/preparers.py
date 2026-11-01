@@ -106,27 +106,61 @@ class ResourceGroupPreparer(_CliResourceGroupPreparer):
 
         sub = ' --subscription {}'.format(self.subscription) if self.subscription else ''
         for attempt in range(self._MAX_DELETE_ATTEMPTS):
-            self._remove_locks(name, sub)
+            self._remove_locks(name, sub, include_resource_locks=attempt > 0)
             try:
                 self.live_only_execute(self.cli_ctx, 'az group delete --name {} --yes --no-wait{}'.format(name, sub))
                 return
             except HttpResponseError as ex:
-                if 'ScopeLocked' not in str(ex) or attempt == self._MAX_DELETE_ATTEMPTS - 1:
+                if 'ScopeLocked' not in str(ex):
+                    raise
+                logger.warning('Resource group %s is still locked after delete attempt %s/%s: %s',
+                               name, attempt + 1, self._MAX_DELETE_ATTEMPTS, ex)
+                if attempt == self._MAX_DELETE_ATTEMPTS - 1:
                     raise
                 time.sleep(self._DELETE_RETRY_WAIT)
 
-    def _remove_locks(self, name, sub):
+    def _remove_locks(self, name, sub, include_resource_locks=False):
         from azure.core.exceptions import HttpResponseError
+
+        locks = []
         try:
             result = self.live_only_execute(self.cli_ctx, 'az lock list -g {}{} -o json'.format(name, sub))
-            locks = result.get_output_in_json() if result else []
-        except (HttpResponseError, AttributeError):
-            return
-        for lock in locks or []:
+            locks.extend((result.get_output_in_json() if result else []) or [])
+        except (HttpResponseError, AttributeError) as ex:
+            logger.warning('Unable to list locks in resource group %s: %s', name, ex)
+
+        # Re-query resource scopes only after a locked delete, not on every teardown.
+        if include_resource_locks:
             try:
-                self.live_only_execute(self.cli_ctx, 'az lock delete --ids {}'.format(lock['id']))
-            except (HttpResponseError, AttributeError):
-                pass
+                result = self.live_only_execute(self.cli_ctx, 'az resource list -g {}{} -o json'.format(name, sub))
+                resources = result.get_output_in_json() if result else []
+            except (HttpResponseError, AttributeError) as ex:
+                logger.warning('Unable to list resources in resource group %s: %s', name, ex)
+                resources = []
+
+            for resource in resources or []:
+                resource_id = resource.get('id')
+                if not resource_id:
+                    continue
+                try:
+                    result = self.live_only_execute(
+                        self.cli_ctx, 'az lock list --resource {}{} -o json'.format(resource_id, sub))
+                    locks.extend((result.get_output_in_json() if result else []) or [])
+                except (HttpResponseError, AttributeError) as ex:
+                    logger.warning('Unable to list locks for resource %s: %s', resource_id, ex)
+
+        # Never remove a lock scoped outside this test resource group.
+        group_scope = '/resourcegroups/{}/'.format(name).casefold()
+        removed_lock_ids = set()
+        for lock in locks or []:
+            lock_id = lock.get('id')
+            if not lock_id or group_scope not in lock_id.casefold() or lock_id.casefold() in removed_lock_ids:
+                continue
+            removed_lock_ids.add(lock_id.casefold())
+            try:
+                self.live_only_execute(self.cli_ctx, 'az lock delete --ids {}{}'.format(lock_id, sub))
+            except (HttpResponseError, AttributeError) as ex:
+                logger.warning('Unable to delete lock %s: %s', lock_id, ex)
 
 
 class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=too-many-instance-attributes
