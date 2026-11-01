@@ -44,7 +44,7 @@ def aad_error_handler(error, tenant=None, scopes=None, claims_challenge=None):
     recommendation = None
     if error_codes and 7000215 in error_codes:
         recommendation = PASSWORD_CERTIFICATE_WARNING
-    else:
+    elif tenant or scopes or claims_challenge:
         login_command = _generate_login_command(tenant=tenant, scopes=scopes, claims_challenge=claims_challenge)
         login_message = ('Run the command below to authenticate interactively; '
                          'additional arguments may be added as needed:\n'
