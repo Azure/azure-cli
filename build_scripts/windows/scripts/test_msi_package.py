@@ -10,7 +10,8 @@ import os
 import sys
 import subprocess 
 
-base_dir = 'C:\\Program Files (x86)\\Microsoft SDKs\\Azure\\CLI2\\Lib\\site-packages\\azure\\cli'
+install_dir = os.environ.get('AZURE_CLI_INSTALL_DIR', 'C:\\Program Files (x86)\\Microsoft SDKs\\Azure\\CLI2')
+base_dir = '{}\\Lib\\site-packages\\azure\\cli'.format(install_dir)
 root_dir = '{}\\command_modules'.format(base_dir)
 mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
 

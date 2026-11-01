@@ -21,6 +21,7 @@ az --version
 # - Microsoft Azure CLI          --deprecated
 # - Microsoft Azure CLI (32-bit)
 # - Microsoft Azure CLI (64-bit)
+# - Microsoft Azure CLI (ARM64)
 $cli_package = Get-Package -Provider Programs -IncludeWindowsInstaller -Name "Microsoft Azure CLI*"
 $cli_package | Format-List
 Uninstall-Package -Name $cli_package.Name
@@ -52,10 +53,10 @@ Get-Package -Provider Programs -IncludeWindowsInstaller -Name "Microsoft Azure C
 
 # We can't restart the current shell in CI to refresh PATH, so use absolute path.
 # If we can find a way to refresh PATH in the same shell session, we can directly call az.
-if ($env:PLATFORM -eq 'x64')  {
-    $az_full_path = "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
+if ($env:PLATFORM -eq 'x86')  {
+    $az_full_path = "${env:ProgramFiles(x86)}\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
 } else {
-    $az_full_path = "C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
+    $az_full_path = "$env:ProgramFiles\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
 }
 
 & $az_full_path --version

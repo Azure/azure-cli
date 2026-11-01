@@ -1,3 +1,8 @@
+param(
+    [ValidateSet('x86', 'x64', 'arm64')]
+    [string]$Platform = 'x86'
+)
+
 # Prerequisites:
 # 1. Install the MSI built with current branch
 # 2. Run bash azure-cli\scripts\ci\build.sh with Git Bash first to generate artifacts under azure-cli\artifacts\build so we can use the testsdk and fulltest wheels.
@@ -9,13 +14,17 @@ If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     Start-Process powershell -Verb runAs -ArgumentList $arguments
 }
 
-& 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' -m pip install pytest
-& 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' -m pip install pytest-xdist
+$program_files = if ($Platform -eq 'x86') { ${env:ProgramFiles(x86)} } else { $env:ProgramFiles }
+$env:AZURE_CLI_INSTALL_DIR = Join-Path $program_files 'Microsoft SDKs\Azure\CLI2'
+$python = Join-Path $env:AZURE_CLI_INSTALL_DIR 'python.exe'
+
+& $python -m pip install pytest
+& $python -m pip install pytest-xdist
 
 $testsdk = Get-ChildItem -Path $PSScriptRoot\..\..\..\artifacts\build\azure_cli_testsdk*.whl | Select-Object Name
-& 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' -m pip install $PSScriptRoot\..\..\..\artifacts\build\$($testsdk.Name)
+& $python -m pip install $PSScriptRoot\..\..\..\artifacts\build\$($testsdk.Name)
 
 $fulltest = Get-ChildItem -Path $PSScriptRoot\..\..\..\artifacts\build\azure_cli_fulltest*.whl | Select-Object Name
-& 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' -m pip install --no-deps $PSScriptRoot\..\..\..\artifacts\build\$($fulltest.Name)
+& $python -m pip install --no-deps $PSScriptRoot\..\..\..\artifacts\build\$($fulltest.Name)
 
-& 'C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\python.exe' $PSScriptRoot\test_msi_package.py
+& $python $PSScriptRoot\test_msi_package.py
