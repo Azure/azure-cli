@@ -10,7 +10,7 @@ from knack.log import get_logger
 from azure.cli.core.aaz import AAZStrType
 from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes, Patch as _VMPatch,
                              Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate,
-                             ListUsage as _VMListUsage)
+                             ListUsage as _VMListUsage, Delete as _VMDelete)
 from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
@@ -263,6 +263,22 @@ class VMListUsage(_VMListUsage):
             item['localName'] = item['name']['localizedValue']
 
         return result, next_link
+
+
+class VMDelete(_VMDelete):
+    def pre_operations(self):
+        from azure.core.exceptions import ResourceNotFoundError as AzureResourceNotFoundError
+        from azure.cli.core.azclierror import ResourceNotFoundError
+
+        args = self.ctx.args
+        try:
+            VMShow(cli_ctx=self.cli_ctx)(command_args={
+                "resource_group": str(args.resource_group),
+                "vm_name": str(args.name),
+                "subscription": self.ctx.subscription_id,
+            })
+        except AzureResourceNotFoundError as ex:
+            raise ResourceNotFoundError(str(ex)) from ex
 
 
 def convert_show_result_to_snake_case(result):
