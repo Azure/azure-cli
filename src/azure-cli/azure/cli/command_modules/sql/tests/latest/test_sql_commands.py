@@ -935,7 +935,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
-    @ResourceGroupPreparer(name_prefix='perdbcmktest', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='perdbcmktest', location='westus2')
     def test_sql_per_db_cmk(self, resource_group, resource_group_location):
         # Creating a dynamic UMI, Key vault, and server for test setup
         # Create a umi
@@ -4578,7 +4578,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, sn, db_name),
                  checks=[JMESPathCheck('state', 'Enabled')])
 
-    @ResourceGroupPreparer(name_prefix='sqlserverbyoktest', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='sqlserverbyoktest', location='westus2')
     def test_sql_tdebyok(self, resource_group, resource_group_location):
         # Create a umi
         umi_name = "testcliumi"
