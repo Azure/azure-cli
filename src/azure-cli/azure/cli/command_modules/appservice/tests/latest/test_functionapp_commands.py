@@ -2856,17 +2856,17 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('linuxFxVersion', 'Node|22')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_on_linux_version_consumption(self, resource_group, storage_account):
         functionapp = self.create_random_name(
             prefix='functionapp-linux', length=24)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.10 --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
                  .format(resource_group, functionapp, LINUX_ASP_LOCATION_FUNCTIONAPP, storage_account), checks=[
                      JMESPathCheck('name', functionapp)
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Python|3.10')])
+            JMESPathCheck('linuxFxVersion', 'Python|3.11')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
