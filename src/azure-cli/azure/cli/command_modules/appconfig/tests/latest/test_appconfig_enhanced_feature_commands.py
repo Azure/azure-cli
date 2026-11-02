@@ -5,9 +5,13 @@
 
 import json
 import os
+from io import BytesIO
 from unittest.mock import Mock, call, patch
 
-from azure.appconfiguration import FeatureFlag
+from requests import Response
+from urllib3.response import HTTPResponse
+
+from azure.appconfiguration import FeatureFlag, FeatureFlagClient
 from azure.core import MatchConditions
 from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, ResourceNotFoundError as SDKResourceNotFoundError
 from azure.core.paging import ItemPaged
@@ -162,6 +166,43 @@ class AppConfigEnhancedFeatureSetTests(ScenarioTest):
 
 class AppConfigEnhancedFeatureConcurrencyTests(ScenarioTest):
 
+    def test_enhanced_feature_conditional_request_headers(self):
+        for operation, exists, arguments, expected_match, expected_none_match in (
+                ('set', False, '--description created', None, '*'),
+                ('set', True, '--description updated', '"original-etag"', None),
+                ('enable', True, '', '"original-etag"', None),
+                ('disable', True, '', '"original-etag"', None),
+                ('set', True, '--flag "{name:Beta,enabled:true,etag:stale-etag}"', None, None)):
+            with self.subTest(operation=operation, exists=exists, arguments=arguments):
+                requests = []
+
+                def send(method, url, **kwargs):
+                    requests.append((method, kwargs['headers']))
+                    response = Response()
+                    response.status_code = 404 if method == 'GET' and not exists else 200
+                    response.headers['Content-Type'] = 'application/json'
+                    response.headers['ETag'] = '"original-etag"'
+                    body = {'name': 'Beta', 'enabled': True, 'etag': 'original-etag'}
+                    if method == 'PUT':
+                        body.update(json.loads(kwargs['data']))
+                    response._content = json.dumps(body).encode('utf-8')
+                    response.raw = HTTPResponse(body=BytesIO(response.content), preload_content=False)
+                    return response
+
+                with patch('requests.Session.request', side_effect=send), FeatureFlagClient.from_connection_string(
+                        'Endpoint=https://example.azconfig.io;Id=test;Secret=c2VjcmV0') as client:
+                    with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client',
+                               return_value=client):
+                        self.kwargs.update({'operation': operation, 'arguments': arguments})
+                        self.cmd('appconfig enhanced-feature-flag {operation} --endpoint https://example.azconfig.io '
+                                 '--auth-mode login --feature-name Beta -y {arguments}')
+
+                self.assertEqual([method for method, _ in requests],
+                                 ['PUT'] if '--flag' in arguments else ['GET', 'PUT'])
+                write_headers = requests[-1][1]
+                self.assertEqual(write_headers.get('If-Match'), expected_match)
+                self.assertEqual(write_headers.get('If-None-Match'), expected_none_match)
+
     def test_enhanced_feature_conditional_writes(self):
         for operation, exists, expected_condition in (
                 ('set', False, MatchConditions.IfMissing),
@@ -288,11 +329,19 @@ class AppConfigEnhancedFeatureListTests(ScenarioTest):
 
 class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
 
+    @staticmethod
+    def _conditional_headers_matcher(recorded, actual):
+        for header in ('If-Match', 'If-None-Match'):
+            assert recorded.headers.get(header) == actual.headers.get(header), \
+                '{} differs from the recorded request'.format(header)
+
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
         register_appconfig_recording_processors(self)
+        self.vcr.register_matcher('conditional_headers', self._conditional_headers_matcher)
+        self.vcr.match_on = (*self.vcr.match_on, 'conditional_headers')
 
     @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
