@@ -104,6 +104,35 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self.assertEqual(configuration['enabled'], enabled)
         return configuration
 
+    def _assert_cannot_enable_empty_configuration(self):
+        from azure.cli.core import util as cli_util
+        from azure.cli.core.aaz._client import AAZBaseClient
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+
+        before = self._configuration()
+        self.assertFalse(before.get('connections'))
+        error = (
+            'Cannot enable egress without a connection. Add a connection using '
+            '`az webapp config egress connection add`, then retry.')
+        for arguments in ['--enabled true', '--enabled']:
+            with patch.object(
+                    AAZBaseClient, 'send_request', autospec=True,
+                    side_effect=AAZBaseClient.send_request) as send_request, \
+                    patch.object(cli_util, 'handle_exception', wraps=cli_util.handle_exception) as handle_exception:
+                result = self._egress('set ' + arguments, expect_failure=True)
+            self.assertEqual(result.exit_code, 1)
+            handle_exception.assert_called_once()
+            exception = handle_exception.call_args.args[0]
+            self.assertIsInstance(exception, InvalidArgumentValueError)
+            self.assertEqual(str(exception), error)
+            send_request.assert_called_once()
+            request = send_request.call_args.kwargs['request']
+            self.assertEqual(request.method, 'GET')
+            slot_path = '/slots/staging' if self.kwargs['slot'] else ''
+            self.assertTrue(request.url.split('?', 1)[0].endswith(
+                '/sites/' + self.kwargs['app'] + slot_path + '/config/egress'))
+            self.assertEqual(self._configuration(), before)
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(
         name_prefix='clitest-egress-api08-', random_name_length=40, location='eastus2euap',
@@ -173,9 +202,10 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         sql_arguments = (
             ' --protocol Tds --auth ManagedIdentity --source ConnectionStrings --value-setting OrdersDb '
             '--identity-scope https://database.windows.net/.default')
-        self.assertFalse(self._configuration().get('connections'))
+        self._assert_cannot_enable_empty_configuration()
 
         self.assertEqual(self._egress(api_arguments).get_output_in_json(), api)
+        self._assert_configuration({'api': api}, 'Disabled')
         result = self._egress('set --enabled true').get_output_in_json()
         self.assertEqual(result['properties']['connections'], {'api': api})
         self._assert_configuration({'api': api}, 'Enabled')
@@ -214,12 +244,14 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self._egress('set')
         self.assertEqual(self._configuration(), disabled)
         self._egress('connection remove --connection-name API')
-        self.assertFalse(self._configuration().get('connections'))
+        self.assertEqual(self._configuration(), {})
 
         self.assertEqual(self._egress(
             'connection add --connection-name orders-db' + sql_arguments +
             ' --identity-resource-id {identity_id}').get_output_in_json(), sql)
+        self._assert_configuration({'orders-db': sql}, 'Disabled')
         self._egress('set --enabled true')
         self._assert_configuration({'orders-db': sql}, 'Enabled')
         self._egress('connection remove --connection-name ORDERS-DB')
-        self.assertFalse(self._configuration().get('connections'))
+        self.assertEqual(self._configuration(), {})
+        self._assert_cannot_enable_empty_configuration()

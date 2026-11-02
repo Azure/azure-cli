@@ -140,6 +140,16 @@ class EgressCommandTests(unittest.TestCase):
                     with self.subTest(slot=slot, configuration=configuration, enabled=enabled):
                         self.requests.clear()
                         self.config = copy.deepcopy(configuration)
+                        if enabled is True:
+                            with self.assertRaisesRegex(
+                                    InvalidArgumentValueError,
+                                    'Cannot enable egress without a connection.*'
+                                    'az webapp config egress connection add.*then retry'):
+                                custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
+                            self.assertEqual(len(self.requests), 1)
+                            self._assert_request(0, 'GET', slot)
+                            self.assertEqual(self.config, configuration)
+                            continue
                         result = custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
                         expected = {'connections': {}}
                         expected_enabled = (configuration or {}).get('enabled') if enabled is None else backend_enabled
@@ -150,6 +160,69 @@ class EgressCommandTests(unittest.TestCase):
                         self._assert_request(1, 'PUT', slot)
                         self.assertEqual(self.requests[1]['body'], {'properties': expected})
                         self.assertEqual(result['properties'], expected)
+
+    def test_webapp_egress_set_cannot_enable_without_connections_cli(self):
+        error = (
+            'Cannot enable egress without a connection. Add a connection using '
+            '`az webapp config egress connection add`, then retry.')
+        for slot in [None, 'staging']:
+            for configuration in [None, {}, {'connections': None}, {'connections': {}}, {'enabled': 'Enabled'},
+                                  {'connections': {}, 'enabled': 'Disabled'}]:
+                for arguments in [['--enabled', 'true'], ['--enabled', 'TrUe'], ['--enabled']]:
+                    with self.subTest(slot=slot, configuration=configuration, arguments=arguments):
+                        self.requests.clear()
+                        self.config = copy.deepcopy(configuration)
+                        with self.assertLogs(level='ERROR') as logs:
+                            self._invoke(
+                                ['webapp', 'config', 'egress', 'set', '-g', 'MyRG', '-n', 'MyApp'] +
+                                arguments + (['--slot', slot] if slot else []), expected_code=1)
+                        self.assertTrue(any(error in entry for entry in logs.output))
+                        self.assertEqual(len(self.requests), 1)
+                        self._assert_request(0, 'GET', slot)
+                        self.assertEqual(self.config, configuration)
+
+    def test_webapp_egress_set_missing_properties(self):
+        def respond_without_properties(request, **kwargs):
+            response = self._send_request(request, **kwargs)
+            if request['method'] == 'GET':
+                del response.context[ContentDecodePolicy.CONTEXT_NAME]['properties']
+            return response
+
+        self.client.send_request.side_effect = respond_without_properties
+        for slot in [None, 'staging']:
+            for enabled in [True, False, None]:
+                with self.subTest(slot=slot, enabled=enabled):
+                    self.requests.clear()
+                    self.config = {}
+                    if enabled is True:
+                        with self.assertRaisesRegex(
+                                InvalidArgumentValueError, 'Cannot enable egress without a connection'):
+                            custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
+                        self.assertEqual(len(self.requests), 1)
+                        self.assertEqual(self.config, {})
+                    else:
+                        result = custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
+                        expected = {'connections': {}}
+                        if enabled is False:
+                            expected['enabled'] = 'Disabled'
+                        self.assertEqual(result['properties'], expected)
+                        self.assertEqual(len(self.requests), 2)
+                        self._assert_request(1, 'PUT', slot)
+                    self._assert_request(0, 'GET', slot)
+
+        for slot in [None, 'staging']:
+            for arguments in [['--enabled', 'true'], ['--enabled']]:
+                with self.subTest(slot=slot, arguments=arguments):
+                    self.requests.clear()
+                    self.config = {}
+                    with self.assertLogs(level='ERROR') as logs:
+                        self._invoke(
+                            ['webapp', 'config', 'egress', 'set', '-g', 'MyRG', '-n', 'MyApp'] +
+                            arguments + (['--slot', slot] if slot else []), expected_code=1)
+                    self.assertTrue(any('Cannot enable egress without a connection' in entry for entry in logs.output))
+                    self.assertEqual(len(self.requests), 1)
+                    self._assert_request(0, 'GET', slot)
+                    self.assertEqual(self.config, {})
 
     def test_webapp_egress_set_rejects_connection_arguments(self):
         for slot in [None, 'staging']:
@@ -197,10 +270,12 @@ class EgressCommandTests(unittest.TestCase):
                     custom.add_egress_connection(
                         self.cmd, 'MyRG', 'MyApp', 'cache', 'Redis', 'Credential',
                         value_setting='Redis', slot=slot)
-                    self.assertEqual(self.requests[1]['body']['properties'].get('enabled'), enabled)
+                    expected_enabled = 'Disabled' if enabled is None else enabled
+                    original['enabled'] = expected_enabled
+                    self.assertEqual(self.requests[1]['body']['properties']['enabled'], expected_enabled)
                     self.assertEqual(self.config['connections']['keep'], original['connections']['keep'])
                     custom.remove_egress_connection(self.cmd, 'MyRG', 'MyApp', 'CACHE', slot=slot)
-                    self.assertEqual(self.requests[3]['body']['properties'].get('enabled'), enabled)
+                    self.assertEqual(self.requests[3]['body']['properties']['enabled'], expected_enabled)
                     self.assertEqual(self.config, original)
                     self.assertEqual(len(self.requests), 4)
                     for index, method in enumerate(['GET', 'PUT', 'GET', 'PUT']):
@@ -280,11 +355,32 @@ class EgressCommandTests(unittest.TestCase):
         self._assert_request(-1, 'PUT', 'staging')
 
     def test_webapp_egress_remove_last_connection(self):
-        self.config['connections'] = {
-            'cache': {'protocol': 'Redis', 'auth': 'Credential', 'settings': {'Redis': {'role': 'Value'}}},
-        }
-        self.assertIsNone(custom.remove_egress_connection(self.cmd, 'MyRG', 'MyApp', 'CACHE'))
-        self.assertEqual(self.requests[-1]['body']['properties'], {'enabled': 'Disabled', 'connections': {}})
+        for slot in [None, 'staging']:
+            for state in [{}, {'enabled': None}, {'enabled': 'Enabled'}, {'enabled': 'Disabled'}]:
+                for use_cli in [False, True]:
+                    with self.subTest(slot=slot, state=state, use_cli=use_cli):
+                        self.requests.clear()
+                        self.config = {
+                            **state, 'connections': {
+                                'cache': {'protocol': 'Redis', 'auth': 'Credential',
+                                          'settings': {'Redis': {'role': 'Value'}}},
+                            },
+                        }
+                        if use_cli:
+                            result = self._invoke(
+                                ['webapp', 'config', 'egress', 'connection', 'remove', '-g', 'MyRG', '-n', 'MyApp',
+                                 '--connection-name', 'CACHE'] + (['--slot', slot] if slot else []))
+                        else:
+                            result = custom.remove_egress_connection(self.cmd, 'MyRG', 'MyApp', 'CACHE', slot=slot)
+                        self.assertIsNone(result)
+                        self.assertEqual(len(self.requests), 2)
+                        self._assert_request(0, 'GET', slot)
+                        self._assert_request(1, 'PUT', slot)
+                        self.assertEqual(self.requests[1]['body'], {'properties': {}})
+                        self.assertEqual(self.config, {})
+                        shown = custom.show_egress_config(self.cmd, 'MyRG', 'MyApp', slot=slot)
+                        self.assertEqual(shown['properties'], {})
+                        self._assert_request(2, 'GET', slot)
 
     def test_webapp_egress_missing_connection_does_not_write(self):
         for connections in [None, {}]:
@@ -296,11 +392,24 @@ class EgressCommandTests(unittest.TestCase):
         self.assertTrue(all(request['method'] == 'GET' for request in self.requests))
 
     def test_webapp_egress_add_to_empty_configuration(self):
-        self.config = {}
-        result = custom.add_egress_connection(
-            self.cmd, 'MyRG', 'MyApp', 'cache', 'Redis', 'Credential', value_setting='Redis')
-        self.assertEqual(result['source'], 'AppSettings')
-        self.assertNotIn('enabled', self.requests[-1]['body']['properties'])
+        for slot in [None, 'staging']:
+            for configuration in [None, {}, {'connections': None}, {'connections': {}}, {'enabled': None},
+                                  {'connections': {}, 'enabled': None}]:
+                with self.subTest(slot=slot, configuration=configuration):
+                    self.requests.clear()
+                    self.config = copy.deepcopy(configuration)
+                    result = custom.add_egress_connection(
+                        self.cmd, 'MyRG', 'MyApp', 'cache', 'Redis', 'Credential', value_setting='Redis', slot=slot)
+                    self.assertEqual(result['source'], 'AppSettings')
+                    self.assertEqual(len(self.requests), 2)
+                    self._assert_request(0, 'GET', slot)
+                    self._assert_request(1, 'PUT', slot)
+                    self.assertEqual(
+                        self.requests[1]['body']['properties'],
+                        {'connections': {'cache': result}, 'enabled': 'Disabled'})
+                    shown = custom.show_egress_config(self.cmd, 'MyRG', 'MyApp', slot=slot)
+                    self.assertEqual(shown['properties'], {'connections': {'cache': result}, 'enabled': 'Disabled'})
+                    self._assert_request(2, 'GET', slot)
 
     def test_webapp_egress_invalid_definitions_do_not_call_service(self):
         valid = {'connection_name': 'cache', 'protocol': 'Redis', 'auth': 'Credential', 'value_setting': 'Redis'}
@@ -338,6 +447,10 @@ class EgressCommandTests(unittest.TestCase):
             return self._send_request(request)
 
         self.client.send_request.side_effect = fail_on_put
+        self.config['connections']['cache'] = {
+            'protocol': 'Redis', 'auth': 'Credential', 'source': 'AppSettings',
+            'settings': {'Redis': {'role': 'Value'}},
+        }
         original = copy.deepcopy(self.config)
         for slot in [None, 'staging']:
             with self.subTest(slot=slot):

@@ -4059,14 +4059,35 @@ def show_egress_config(cmd, resource_group_name, name, slot=None):
     return command(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def _put_egress_config(cmd, resource_group_name, name, connections, enabled=None, slot=None):
-    args = {'resource_group': resource_group_name, 'name': name, 'connections': connections}
+# Generated serialization omits the empty properties container needed to clear the configuration.
+class _EgressConfigClear(EgressConfigCreate):
+    class EgressConfigsCreateOrUpdateEgressConfig(
+            EgressConfigCreate.EgressConfigsCreateOrUpdateEgressConfig):
+        @property
+        def content(self):
+            return {'properties': {}}
+
+
+class _SlotEgressConfigClear(SlotEgressConfigCreate):
+    class EgressConfigSlotConfigsCreateOrUpdateEgressConfigSlot(
+            SlotEgressConfigCreate.EgressConfigSlotConfigsCreateOrUpdateEgressConfigSlot):
+        @property
+        def content(self):
+            return {'properties': {}}
+
+
+def _put_egress_config(cmd, resource_group_name, name, connections=None, enabled=None, slot=None):
+    args = {'resource_group': resource_group_name, 'name': name}
+    if connections is not None:
+        args['connections'] = connections
     if enabled is not None:
         args['enabled'] = enabled
     command = EgressConfigCreate
     if slot:
         args['slot'] = slot
         command = SlotEgressConfigCreate
+    if connections is None and enabled is None:
+        command = _SlotEgressConfigClear if slot else _EgressConfigClear
     return command(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
@@ -4076,9 +4097,14 @@ def set_egress_config(cmd, resource_group_name, name, enabled=None, slot=None):
             raise InvalidArgumentValueError("Specify true or false for --enabled.")
         enabled = 'Enabled' if enabled else 'Disabled'
     config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    connections = config.get('connections') or {}
+    if enabled == 'Enabled' and not connections:
+        raise InvalidArgumentValueError(
+            "Cannot enable egress without a connection. Add a connection using "
+            "`az webapp config egress connection add`, then retry.")
     if enabled is None:
         enabled = config.get('enabled')
-    return _put_egress_config(cmd, resource_group_name, name, config.get('connections') or {}, enabled, slot)
+    return _put_egress_config(cmd, resource_group_name, name, connections, enabled, slot)
 
 
 def _find_egress_connection(connections, connection_name):
@@ -4100,7 +4126,10 @@ def add_egress_connection(cmd, resource_group_name, name, connection_name, proto
     connections = dict(config.get('connections') or {})
     key = next((key for key in connections if key.lower() == connection_name.lower()), connection_name)
     connections[key] = connection
-    result = _put_egress_config(cmd, resource_group_name, name, connections, config.get('enabled'), slot)
+    enabled = config.get('enabled')
+    if enabled is None:
+        enabled = 'Disabled'
+    result = _put_egress_config(cmd, resource_group_name, name, connections, enabled, slot)
     result_connections = (result.get('properties') or {}).get('connections') or {}
     return result_connections[_find_egress_connection(result_connections, connection_name)]
 
@@ -4109,7 +4138,8 @@ def remove_egress_connection(cmd, resource_group_name, name, connection_name, sl
     config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
     connections = dict(config.get('connections') or {})
     del connections[_find_egress_connection(connections, connection_name)]
-    _put_egress_config(cmd, resource_group_name, name, connections, config.get('enabled'), slot)
+    enabled = config.get('enabled') if connections else None
+    _put_egress_config(cmd, resource_group_name, name, connections or None, enabled, slot)
 
 
 def show_egress_connection(cmd, resource_group_name, name, connection_name, slot=None):

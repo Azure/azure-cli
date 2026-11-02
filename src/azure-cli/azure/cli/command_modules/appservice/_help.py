@@ -1460,6 +1460,7 @@ long-summary: |
   Read the existing egress configuration, update its enabled state, and write it back while
   preserving all connections and their settings, identities, and credential injection configuration.
   Use --enabled true to enable virtual connections or --enabled false to disable them.
+  Add at least one connection with "az webapp config egress connection add" before enabling egress.
   If --enabled is omitted, write back the existing configuration without changing its enabled state.
   Manage individual connections with "az webapp config egress connection add" and
   "az webapp config egress connection remove".
@@ -1493,6 +1494,8 @@ short-summary: Add or replace a named egress connection.
 long-summary: |
   Preserve other connections and the enabled state. An existing connection with the same name
   is replaced, regardless of casing. Only the supplied connection is returned.
+  If the enabled state is missing, initialize it to Disabled. Use "az webapp config egress set
+  --enabled true" to enable virtual connections after adding a connection.
   Setting arguments accept existing setting names, not their values. The platform validates
   protocol and authentication combinations. Managed identities must already be assigned to the app.
 examples:
@@ -1522,7 +1525,7 @@ examples:
 helps['webapp config egress connection remove'] = """
 type: command
 short-summary: Remove a named egress connection.
-long-summary: Preserve other connections and the enabled state. Removing the last connection clears the egress configuration.
+long-summary: Preserve other connections and the enabled state unless the last connection is removed. Removing the last connection clears the entire egress configuration, including its enabled state.
 examples:
   - name: Remove the orders database connection.
     text: az webapp config egress connection remove --resource-group MyRG --name MyApp --connection-name orders-db
