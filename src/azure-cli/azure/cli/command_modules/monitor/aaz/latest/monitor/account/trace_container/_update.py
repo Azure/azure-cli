@@ -78,7 +78,7 @@ class Update(AAZCommand):
         _args_schema.trace_metrics = AAZStrArg(
             options=["--trace-metrics"],
             arg_group="Properties",
-            help="Controls trace-derived metrics. New containers default to Enabled. Metrics are billed.",
+            help="Controls trace-derived metrics. New containers default to Enabled.",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.retention_days = AAZIntArg(

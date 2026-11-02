@@ -346,6 +346,6 @@ def load_arguments(self, _):
         c.argument('trace_retention_days', type=int,
                    help='Days to keep traces, from 4 to 730, if the workspace has no trace container yet. Default: 30.')
         c.argument('trace_metrics', arg_type=get_enum_type(['Enabled', 'Disabled']),
-                   help='Trace-derived metrics, which are billed, if the workspace has no trace container yet. '
+                   help='Trace-derived metrics if the workspace has no trace container yet. '
                         'Default: Enabled.')
     # endregion
