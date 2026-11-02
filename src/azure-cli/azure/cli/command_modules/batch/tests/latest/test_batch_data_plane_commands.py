@@ -552,6 +552,13 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            '--image Canonical:UbuntuServer:18.04-LTS '
                            '--node-agent-sku-id "batch.node.ubuntu 18.04" '
                            '--target-communication classic')
+
+        # test that removed --resource-tags argument causes argparse error
+        with self.assertRaises(SystemExit):
+            self.batch_cmd('batch pool create --id test-deprecated-arg --vm-size Standard_DS1_v2 '
+                           '--image Canonical:UbuntuServer:18.04-LTS '
+                           '--node-agent-sku-id "batch.node.ubuntu 18.04" '
+                           '--resource-tags key=value')
         
         # test that the deprecated targetNodeCommunicationMode property is not included in pool show output
         pool_result = self.batch_cmd('batch pool show --pool-id {pool_i}').get_output_in_json()
