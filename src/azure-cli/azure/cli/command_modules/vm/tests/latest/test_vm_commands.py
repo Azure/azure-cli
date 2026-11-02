@@ -15,11 +15,11 @@ from unittest import mock
 import uuid
 
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError as AzureResourceNotFoundError
 from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only, live_only
 from azure.cli.core.azclierror import ArgumentUsageError, RequiredArgumentMissingError, \
-    MutuallyExclusiveArgumentError, InvalidArgumentValueError
+    MutuallyExclusiveArgumentError, InvalidArgumentValueError, ResourceNotFoundError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
@@ -64,6 +64,31 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
         self.assertEqual(result[-1]['publisher'], 'Canonical')
         self.assertTrue('lts' in result[-1]['sku'])
         self.assertEqual(result[-1]['architecture'], 'x64')
+
+
+class VMDeleteScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_delete_missing_', location='westus2')
+    def test_vm_delete_nonexistent_vm(self, resource_group):
+        self.kwargs['vm'] = self.create_random_name('missingvm', 20)
+
+        with self.assertRaises((AzureResourceNotFoundError, ResourceNotFoundError)) as error:
+            self.cmd('vm delete --resource-group {rg} --name {vm} --yes')
+
+        self.assertIn(self.kwargs['vm'], str(error.exception))
+        self.assertIn(resource_group, str(error.exception))
+
+    def test_vm_delete_nonexistent_resource_group(self):
+        self.kwargs.update({
+            'rg': self.create_random_name('missingrg', 24),
+            'vm': self.create_random_name('missingvm', 20),
+        })
+        self.cmd('group exists --name {rg}', checks=self.check('@', False))
+
+        with self.assertRaises((AzureResourceNotFoundError, ResourceNotFoundError)) as error:
+            self.cmd('vm delete --resource-group {rg} --name {vm} --yes')
+
+        self.assertIn(self.kwargs['rg'], str(error.exception))
 
 
 class VmReimageTest(ScenarioTest):
