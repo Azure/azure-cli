@@ -43,6 +43,11 @@ examples:
           --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
           --tags "key=value" --version 19 --zonal-resiliency Enabled --zone 1 \\
           --standby-zone 3
+  - name: Create a PostgreSQL flexible server with immutable backups retained for 25 days.
+    text: >
+      az postgres flexible-server create --resource-group testgroup --name testserver --location testlocation \\
+        --sku-name Standard_D2s_v3 --tier GeneralPurpose --storage-size 64 --version 16 \\
+        --backup-retention 25 --immutable-backup Enabled
   - name: >
       Create server with high availability feature enabled that allows primary and standby in the same zone when multi-zone capacity is unavailable.
     text: >
