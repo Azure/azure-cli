@@ -922,19 +922,20 @@ class VMCreateFromUnmanagedDiskTest(ScenarioTest):
 class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_with_specialized_unmanaged_disk')
-    def test_vm_create_with_specialized_unmanaged_disk(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_with_specialized_unmanaged_disk', location='eastus')
+    @StorageAccountPreparer(kind='StorageV2', location='eastus')
+    def test_vm_create_with_specialized_unmanaged_disk(self, resource_group, storage_account, resource_group_location):
 
         self.kwargs.update({
-            'loc': 'westus',
+            'loc': resource_group_location,
             'subnet': 'subnet1',
             'vnet': 'vnet1',
         })
 
         # create a vm with unmanaged os disk
-        self.cmd('vm create -g {rg} -n vm1 --image Debian:debian-10:10:latest --use-unmanaged-disk '
+        self.cmd('vm create -g {rg} -n vm1 --location {loc} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --use-unmanaged-disk --storage-account {sa} '
                  '--admin-username ubuntu --admin-password testPassword0 --authentication-type password '
-                 '--subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
+                 '--subnet {subnet} --vnet-name {vnet} --size Standard_E2bds_v5 --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -946,15 +947,17 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         self.cmd('vm delete -g {rg} -n vm1 -y')
 
         # create a vm by attaching the OS disk from the deleted VM
-        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk '
-                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3',
+        self.cmd('vm create -g {rg} -n vm2 --location {loc} --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_E2bds_v5',
                  checks=self.check('powerState', 'VM running'))
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_with_specialized_unmanaged_disk')
-    def test_vm_create_with_unmanaged_data_disks(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_with_specialized_unmanaged_disk', location='eastus')
+    @StorageAccountPreparer(kind='StorageV2', location='eastus')
+    def test_vm_create_with_unmanaged_data_disks(self, resource_group, storage_account, resource_group_location):
 
         self.kwargs.update({
+            'loc': resource_group_location,
             'vm': 'vm1',
             'vm2': 'vm2',
             'subnet': 'subnet1',
@@ -962,8 +965,8 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         })
 
         # create an unmanaged bm with 2 unmanaged disks
-        vm_create_cmd = ('vm create -g {rg} -n vm1 --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 '
-                         '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+        vm_create_cmd = ('vm create -g {rg} -n vm1 --location {loc} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --use-unmanaged-disk --storage-account {sa} --admin-username ubuntu --admin-password testPassword0 '
+                         '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_E2bds_v5 --nsg-rule NONE')
 
         self.cmd(vm_create_cmd)
         # Disable default outbound access
@@ -981,7 +984,7 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         self.cmd('vm delete -g {rg} -n vm1 -y')
 
         # create a vm by attaching the OS disk from the deleted VM
-        vm_create_cmd = ('vm create -g {rg} -n {vm2} --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk --size Standard_B2ms '
+        vm_create_cmd = ('vm create -g {rg} -n {vm2} --location {loc} --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk --size Standard_E2bds_v5 '
                          '--attach-data-disks {data_disk} {data_disk2} --data-disk-caching 0=ReadWrite 1=ReadOnly --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd(vm_create_cmd)
         self.cmd('vm show -g {rg} -n {vm2} -d', checks=[
@@ -1160,16 +1163,18 @@ class VMAttachDisksOnCreate(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer()
-    def test_vm_create_by_attach_unmanaged_os_and_data_disks(self, resource_group):
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(kind='StorageV2', location='eastus')
+    def test_vm_create_by_attach_unmanaged_os_and_data_disks(self, resource_group, storage_account, resource_group_location):
         self.kwargs.update({
+            'loc': resource_group_location,
             'subnet': 'subnet1',
             'vnet': 'vnet1',
         })
 
         # creating a vm
-        self.cmd('vm create -g {rg} -n vm1 --use-unmanaged-disk --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin '
-                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm1 --location {loc} --use-unmanaged-disk --storage-account {sa} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --admin-username centosadmin '
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_E2bds_v5 --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -1185,8 +1190,8 @@ class VMAttachDisksOnCreate(ScenarioTest):
         self.cmd('vm delete -g {rg} -n vm1 -y')
 
         # rebuild a new vm
-        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {os_disk_vhd} --attach-data-disks {data_disk_vhd} '
-                 '--os-type linux --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE',
+        self.cmd('vm create -g {rg} -n vm2 --location {loc} --attach-os-disk {os_disk_vhd} --attach-data-disks {data_disk_vhd} '
+                 '--os-type linux --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --size Standard_E2bds_v5 --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
     @unittest.skip('NotRegisteredForFeature')
@@ -13313,8 +13318,9 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_vm_vmss_extension_autoupgrade_', location='eastus')
-    def test_vm_vmss_extension_autoupgrade(self, resource_group):
+    def test_vm_vmss_extension_autoupgrade(self, resource_group, resource_group_location):
         self.kwargs.update({
+            'loc': resource_group_location,
             'vm1': self.create_random_name('vm1', 10),
             'vm2': self.create_random_name('vm2', 10),
             'vmss1': self.create_random_name('vmss1', 10),
@@ -13325,7 +13331,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
                  '--security-type TrustedLaunch --subnet {subnet} --vnet-name {vnet} -g {rg} -n {vm1} '
                  '--enable-secure-boot --enable-vtpm --enable-integrity-monitoring --admin-username azureuser '
-                 '--admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE --size Standard_D2s_v3')
+                 '--admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE --size Standard_D2s_v6 --location {loc}')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -13342,7 +13348,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
                  '--security-type TrustedLaunch --subnet {subnet} --vnet-name {vnet} -g {rg} -n {vm2} '
                  '--enable-secure-boot --enable-vtpm --enable-integrity-monitoring '
                  '--disable-integrity-monitoring-autoupgrade --admin-username azureuser '
-                 '--admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE --size Standard_D2s_v3')
+                 '--admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE --size Standard_D2s_v6 --location {loc}')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('resources[0].name', 'GuestAttestation'),
             self.check('resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
@@ -13356,7 +13362,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
                  '--orchestration-mode Flexible --admin-username azureuser --security-type TrustedLaunch '
                  '--enable-secure-boot --enable-vtpm --enable-integrity-monitoring --generate-ssh-keys '
-                 '--vm-sku Standard_D2s_v3')
+                 '--vm-sku Standard_D2s_v6 --location {loc}')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].name', 'GuestAttestation'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].publisher',
@@ -13369,7 +13375,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
                  '--admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm '
                  '--enable-integrity-monitoring --disable-integrity-monitoring-autoupgrade --generate-ssh-keys '
-                 '--orchestration-mode Flexible --vm-sku Standard_D2s_v3')
+                 '--orchestration-mode Flexible --vm-sku Standard_D2s_v6 --location {loc}')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].name', 'GuestAttestation'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].publisher',
