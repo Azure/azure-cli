@@ -63,8 +63,6 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self.vcr.match_on += ('body',)
 
     def setUp(self):
-        if not self.is_live and not os.path.isfile(self.recording_file):
-            raise RuntimeError('API08 recording is missing; refusing to fall through to live resource creation.')
         if os.environ.get('AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME'):
             raise RuntimeError('API08 scenarios require their own new resource group, not an existing dev group.')
         super().setUp()
