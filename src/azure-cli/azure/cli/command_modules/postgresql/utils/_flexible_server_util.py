@@ -6,17 +6,18 @@
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
 import datetime as dt
 from datetime import datetime
+import errno
 import os
 import random
 import subprocess
 import secrets
-import shlex
 import string
+import sys
 import yaml
 from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
 from azure.mgmt.core.tools import parse_resource_id
-from azure.cli.core.util import CLIError, run_cmd
+from azure.cli.core.util import CLIError, get_safe_executable_path, run_cmd as core_run_cmd
 from azure.cli.core.azclierror import AuthenticationError
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
@@ -253,8 +254,26 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
         .format(resource_type))
 
 
+def resolve_executable(executable):
+    """Bind Windows tool launches to installed executables without changing Unix lookup."""
+    if sys.platform != 'win32' or os.path.dirname(executable):
+        return executable
+    name = executable if os.path.splitext(executable)[1] else executable + '.exe'
+    resolved = get_safe_executable_path(name)
+    if resolved is None:
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), executable)
+    return resolved
+
+
+def run_cmd(args, **kwargs):
+    if isinstance(args, list) and args:
+        args = [resolve_executable(args[0]), *args[1:]]
+    return core_run_cmd(args, **kwargs)
+
+
 def run_subprocess(command, stdout_show=None):
-    commands = shlex.split(command)
+    commands = list(command)
+    commands[0] = resolve_executable(commands[0])
     if stdout_show:
         process = subprocess.Popen(commands)
     else:
@@ -285,14 +304,14 @@ def register_credential_secrets(cmd, database_engine, server, repository):
     credential_file = "./temp_app_credential.txt"
     with open(credential_file, "w") as f:
         f.write(app_json)
-    run_subprocess('gh secret set {} --repo {} < {}'.format(AZURE_CREDENTIALS, repository, credential_file))
+    run_subprocess(['gh', 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository, '<', credential_file])
     os.remove(credential_file)
 
 
 def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name):
     logger.warning("Added secret %s to github repository", connection_string_name)
     connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-    run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
+    run_subprocess(['gh', 'secret', 'set', connection_string_name, '--repo', repository, '-b', connection_string])
 
 
 def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):

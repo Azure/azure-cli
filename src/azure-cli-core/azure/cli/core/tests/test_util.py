@@ -788,6 +788,66 @@ class TestSafeExecutablePath(unittest.TestCase):
             with mock.patch('os.getcwd', side_effect=OSError):
                 self.assertIsNone(self._resolve(path_dir))
 
+    def test_executable_link_target_is_checked(self):
+        with tempfile.TemporaryDirectory() as path_dir, tempfile.TemporaryDirectory() as other_dir:
+            target = self._make_exe(path_dir)
+            realpath = os.path.realpath
+            for destination in (self.cwd, other_dir):
+                with self.subTest(destination=destination):
+                    def link_target(path):
+                        if path == target:
+                            return os.path.join(destination, self.EXE)
+                        return realpath(path)
+
+                    with mock.patch('os.path.realpath', side_effect=link_target):
+                        resolved = self._resolve(path_dir)
+                    self.assertEqual(resolved, None if destination == self.cwd else target)
+
+    def test_unverifiable_path_is_skipped(self):
+        with tempfile.TemporaryDirectory() as unavailable, tempfile.TemporaryDirectory() as trusted:
+            self._make_exe(unavailable)
+            target = self._make_exe(trusted)
+            samefile = os.path.samefile
+            for error_type in (PermissionError, ValueError):
+                for failed_check in (1, 2):
+                    with self.subTest(error_type=error_type, failed_check=failed_check):
+                        checks = []
+
+                        def directory_identity(first, second):
+                            if os.path.normcase(first) == os.path.normcase(unavailable):
+                                checks.append(first)
+                                if len(checks) == failed_check:
+                                    raise error_type('Cannot verify directory identity')
+                            return samefile(first, second)
+
+                        with mock.patch('os.path.samefile', side_effect=directory_identity):
+                            self.assertEqual(self._resolve(unavailable, trusted), target)
+
+    @unittest.skipUnless(platform.system() == 'Windows', 'Windows only')
+    def test_explicit_extension_does_not_depend_on_pathext(self):
+        with tempfile.TemporaryDirectory() as path_dir:
+            target = self._make_exe(path_dir)
+            with open(target + '.BAT', 'w'):
+                pass
+            for extensions in (None, '', '.BAT;.CMD'):
+                with self.subTest(extensions=extensions), mock.patch.dict(os.environ):
+                    if extensions is None:
+                        os.environ.pop('PATHEXT', None)
+                    else:
+                        os.environ['PATHEXT'] = extensions
+                    self.assertEqual(self._resolve(path_dir), target)
+            os.remove(target)
+            with mock.patch.dict(os.environ, {'PATHEXT': '.BAT;.CMD'}):
+                self.assertIsNone(self._resolve(path_dir))
+
+    @unittest.skipUnless(platform.system() == 'Windows', 'Windows only')
+    def test_root_relative_path_entries_are_skipped(self):
+        with tempfile.TemporaryDirectory() as relative_dir, tempfile.TemporaryDirectory() as trusted:
+            self._make_exe(relative_dir)
+            target = self._make_exe(trusted)
+            root_relative = os.path.splitdrive(relative_dir)[1]
+            self.assertEqual(self._resolve(root_relative, trusted), target)
+
     @unittest.skipUnless(platform.system() == 'Windows', 'Windows only')
     def test_cmd_exe_resolves_to_system32(self):
         resolved = get_safe_executable_path('cmd.exe')
