@@ -17,11 +17,9 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 LOCATION = 'westus2'
 ACCOUNT_NAME_PREFIX = 'cli-ldap-'
 ACCOUNT_NAME_LENGTH = 24
-IDENTITY_ID_TEMPLATE = (
-    '/subscriptions/{}/resourceGroups/sdk-py-test-rg/providers/'
-    'Microsoft.ManagedIdentity/userAssignedIdentities/dap-bind-uksouth-identity'
-)
-KEY_VAULT_URI = 'https://ldapbind-uksouth-kv-1.vault.azure.net'
+IDENTITY_NAME_PREFIX = 'cli-ldap-mi-'
+KEY_VAULT_NAME_PREFIX = 'cli-ldap-kv-'
+RESOURCE_NAME_LENGTH = 24
 SECRET_NAME = 'ldapuser-password'
 DOMAIN = 'contoso.com'
 LDAP_SERVER = '10.0.2.4'
@@ -65,8 +63,8 @@ class AzureNetAppFilesAccountLdapConfigurationScenarioTest(ScenarioTest):
         )
         return base64.b64encode(certificate.public_bytes(serialization.Encoding.PEM)).decode('ascii')
 
-    # Live prerequisites: the identity below must have access to the existing
-    # Key Vault secret. The generated CA tests configuration, not LDAP connectivity.
+    # All Azure resources are created in the prepared resource group.
+    # The generated CA and password test configuration, not LDAP connectivity.
     # Record with: azdev test test_account_ldap_configuration --live
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_ldap_', location=LOCATION,
                            additional_tags={'owner': 'cli_test'})
@@ -74,9 +72,10 @@ class AzureNetAppFilesAccountLdapConfigurationScenarioTest(ScenarioTest):
         self.kwargs.update({
             'loc': LOCATION,
             'acc_name': self.create_random_name(prefix=ACCOUNT_NAME_PREFIX, length=ACCOUNT_NAME_LENGTH),
-            'identity_id': IDENTITY_ID_TEMPLATE.format(self.get_subscription_id()),
-            'key_vault_uri': KEY_VAULT_URI,
+            'identity_name': self.create_random_name(prefix=IDENTITY_NAME_PREFIX, length=RESOURCE_NAME_LENGTH),
+            'key_vault_name': self.create_random_name(prefix=KEY_VAULT_NAME_PREFIX, length=RESOURCE_NAME_LENGTH),
             'secret_name': SECRET_NAME,
+            'secret_value': self.create_random_name(prefix='ldap-password-', length=32),
             'domain': DOMAIN,
             'ldap_server': LDAP_SERVER,
             'ldap_port': LDAP_PORT,
@@ -88,6 +87,27 @@ class AzureNetAppFilesAccountLdapConfigurationScenarioTest(ScenarioTest):
             'group_dn': GROUP_DN,
             'server_ca_certificate': self._generate_ldap_ca_certificate(),
         })
+
+        identity = self.cmd(
+            'az identity create -g {rg} -n {identity_name} -l {loc}'
+        ).get_output_in_json()
+        self.kwargs.update({
+            'identity_id': identity['id'],
+            'identity_principal_id': identity['principalId'],
+        })
+
+        key_vault = self.cmd(
+            'az keyvault create -g {rg} -n {key_vault_name} -l {loc} '
+            '--enable-rbac-authorization false --retention-days 7'
+        ).get_output_in_json()
+        self.kwargs['key_vault_uri'] = key_vault['properties']['vaultUri']
+        self.cmd(
+            'az keyvault set-policy -g {rg} -n {key_vault_name} '
+            '--object-id {identity_principal_id} --secret-permissions get')
+        self.cmd(
+            'az keyvault secret set --vault-name {key_vault_name} '
+            '--name {secret_name} --value "{secret_value}"',
+            checks=[self.check('name', '{secret_name}')])
 
         self.cmd(
             'az netappfiles account create -g {rg} -a {acc_name} -l {loc} '
