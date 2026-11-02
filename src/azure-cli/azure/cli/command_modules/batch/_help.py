@@ -537,10 +537,10 @@ short-summary: Create a Batch pool in an account.
 examples:
   - name: Create a Batch pool from a JSON file.
     text: >
-        az batch pool create --json-file batch-pool-create.json --account-name clibatch --account-key BatchAccountKey
+        az batch pool create --json-file batch-pool-create.json --account-name clibatch --account-key BatchAccountKey --account-endpoint https://clibatch.eastus.batch.azure.com
   - name: Create a Batch pool of two Ubuntu 24.04 compute nodes.
     text: >
-        az batch pool create --id mypool --vm-size Standard_D4ds_v5 --target-dedicated-nodes 2 --image canonical:ubuntu-24_04-lts:server --node-agent-sku-id "batch.node.ubuntu 24.04" --account-name clibatch --account-key BatchAccountKey
+        az batch pool create --id mypool --vm-size Standard_D4ds_v5 --target-dedicated-nodes 2 --image canonical:ubuntu-24_04-lts:server --node-agent-sku-id "batch.node.ubuntu 24.04" --account-name clibatch --account-key BatchAccountKey --account-endpoint https://clibatch.eastus.batch.azure.com
 """
 
 helps['batch pool node-counts'] = """
