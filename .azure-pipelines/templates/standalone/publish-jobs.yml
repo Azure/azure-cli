@@ -34,10 +34,14 @@ parameters:
     default: true
   - name: GitHubRepo
     type: string
-    default: ''
+    default: 'Azure/homebrew-azure-cli'
+    values:
+      - 'Azure/homebrew-azure-cli'
   - name: HomebrewTapRepo
     type: string
-    default: ''
+    default: 'Azure/homebrew-azure-cli'
+    values:
+      - 'Azure/homebrew-azure-cli'
   - name: MacosArm64Image
     type: string
     default: 'macos-15-arm64'
@@ -156,38 +160,36 @@ jobs:
     - bash: |
         set -euo pipefail
 
-        release_tag='$(ReleaseTag)'
-        repository='${{ parameters.GitHubRepo }}'
-        notes_file='$(Agent.TempDirectory)/release-notes.md'
+        notes_file="$RELEASE_TEMP_DIRECTORY/release-notes.md"
 
-        cat > "$notes_file" <<'EOF'
-        ## Azure CLI $(AzureCliVersion) - Homebrew Cask
+        printf '## Azure CLI %s - Homebrew Cask\n\n' "$RELEASE_VERSION" > "$notes_file"
+        printf '### Available Architectures\n' >> "$notes_file"
+        printf -- '- **%s**: azure-cli-%s-%s.tar.gz\n' \
+          'Apple Silicon (arm64)' "$RELEASE_VERSION" 'macos-arm64' \
+          'Intel (x86_64)' "$RELEASE_VERSION" 'macos-x86_64' \
+          'Linux ARM64' "$RELEASE_VERSION" 'linux-arm64' \
+          'Linux x86_64' "$RELEASE_VERSION" 'linux-x86_64' >> "$notes_file"
+        printf '\n### Requirements\n- Homebrew Python %s on macOS or Linux\n' \
+          "$RELEASE_PYTHON_VERSION" >> "$notes_file"
+        printf '\n### Installation via Homebrew Cask\n```bash\nbrew tap %s\nbrew install --cask azure-cli\n```\n' \
+          "$RELEASE_HOMEBREW_TAP" >> "$notes_file"
 
-        ### Available Architectures
-        - **Apple Silicon (arm64)**: azure-cli-$(AzureCliVersion)-macos-arm64.tar.gz
-        - **Intel (x86_64)**: azure-cli-$(AzureCliVersion)-macos-x86_64.tar.gz
-        - **Linux ARM64**: azure-cli-$(AzureCliVersion)-linux-arm64.tar.gz
-        - **Linux x86_64**: azure-cli-$(AzureCliVersion)-linux-x86_64.tar.gz
-
-        ### Requirements
-        - Homebrew Python ${{ parameters.PythonVersion }} on macOS or Linux
-
-        ### Installation via Homebrew Cask
-        ```bash
-        brew tap ${{ parameters.HomebrewTapRepo }}
-        brew install --cask azure-cli
-        ```
-        EOF
-
-        gh release delete "$release_tag" --repo "$repository" --yes || true
-        gh release create "$release_tag" "$(Build.ArtifactStagingDirectory)/release/"* \
-          --repo "$repository" \
+        gh release delete "$RELEASE_TAG" --repo "$RELEASE_GITHUB_REPO" --yes || true
+        gh release create "$RELEASE_TAG" "$RELEASE_DIRECTORY/"* \
+          --repo "$RELEASE_GITHUB_REPO" \
           --target main \
-          --title "Azure CLI $(AzureCliVersion) - Homebrew Cask" \
+          --title "Azure CLI $RELEASE_VERSION - Homebrew Cask" \
           --notes-file "$notes_file"
       displayName: 'Create GitHub Release with PAT'
       env:
         GH_TOKEN: $(GH_TOKEN)
+        RELEASE_TAG: $(ReleaseTag)
+        RELEASE_VERSION: $(AzureCliVersion)
+        RELEASE_TEMP_DIRECTORY: $(Agent.TempDirectory)
+        RELEASE_DIRECTORY: $(Build.ArtifactStagingDirectory)/release
+        RELEASE_GITHUB_REPO: ${{ parameters.GitHubRepo }}
+        RELEASE_HOMEBREW_TAP: ${{ parameters.HomebrewTapRepo }}
+        RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}
 
 # ============================================================================
 # JOB: UPDATE HOMEBREW CASK
@@ -204,13 +206,31 @@ jobs:
       vmImage: 'ubuntu-latest'
     
     steps:
-    - checkout: homebrewtap
-      persistCredentials: true
-      path: homebrew-tap
+    - checkout: self
+      fetchDepth: 1
+      path: azure-cli
     
     - download: current
       artifact: 'cask-definition'
       displayName: 'Download cask definition'
+
+    - bash: |
+        set -euo pipefail
+        python3 "$RELEASE_SOURCE_DIRECTORY/scripts/release/standalone/cask_generate.py" \
+          --validate "$CASK_PATH" \
+          --github-repo "$RELEASE_GITHUB_REPO" \
+          --python-version "$RELEASE_PYTHON_VERSION" \
+          --template "$RELEASE_SOURCE_DIRECTORY/scripts/release/standalone/templates/azure-cli.rb.in"
+      displayName: 'Validate unchanged publication cask before tap checkout'
+      env:
+        RELEASE_SOURCE_DIRECTORY: $(Pipeline.Workspace)/azure-cli
+        CASK_PATH: $(Pipeline.Workspace)/cask-definition/azure-cli.rb
+        RELEASE_GITHUB_REPO: ${{ parameters.GitHubRepo }}
+        RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}
+
+    - checkout: homebrewtap
+      persistCredentials: true
+      path: homebrew-tap
     
     - bash: |
         set -e
@@ -228,7 +248,8 @@ jobs:
         mkdir -p "$CASK_DIR"
         
         # Copy the pre-generated cask from artifact
-        cp $(Pipeline.Workspace)/cask-definition/azure-cli.rb "$CASK_DIR/azure-cli.rb"
+        cp "$(Pipeline.Workspace)/cask-definition/azure-cli.rb" "$CASK_DIR/azure-cli.rb"
+        cmp "$(Pipeline.Workspace)/cask-definition/azure-cli.rb" "$CASK_DIR/azure-cli.rb"
         
         echo "=== Cask Definition ==="
         cat "$CASK_DIR/azure-cli.rb"
@@ -291,13 +312,16 @@ jobs:
         
         echo "=== Testing Published Homebrew Cask ($(Architecture)) ==="
         
-        if ! brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
-          echo "Installing Python ${{ parameters.PythonVersion }}..."
-          brew install python@${{ parameters.PythonVersion }}
+        if ! brew list "python@$RELEASE_PYTHON_VERSION" &>/dev/null; then
+          echo "Installing Python $RELEASE_PYTHON_VERSION..."
+          brew install "python@$RELEASE_PYTHON_VERSION"
         fi
         
-        brew tap ${{ parameters.HomebrewTapRepo }}
-        brew install --cask azure-cli
+        brew tap "$RELEASE_HOMEBREW_TAP"
+        tap_owner="${RELEASE_HOMEBREW_TAP%%/*}"
+        tap_repository="${RELEASE_HOMEBREW_TAP#*/}"
+        published_cask="$tap_owner/${tap_repository#homebrew-}/azure-cli"
+        brew install --cask "$published_cask"
         
         which az
         az version
@@ -308,8 +332,11 @@ jobs:
         echo "Installed version: $INSTALLED_VERSION"
         echo "Published cask installation successful ($(Architecture))"
         
-        brew uninstall --cask azure-cli
+        brew uninstall --cask "$published_cask"
       displayName: 'Test published cask install'
+      env:
+        RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}
+        RELEASE_HOMEBREW_TAP: ${{ parameters.HomebrewTapRepo }}
 
   - job: TestPublishedLinuxCask
     displayName: 'Linux | Test Published Cask'
@@ -336,12 +363,18 @@ jobs:
 
         brew uninstall azure-cli 2>/dev/null || true
         brew uninstall --cask azure-cli 2>/dev/null || true
-        brew install python@${{ parameters.PythonVersion }}
-        brew tap ${{ parameters.HomebrewTapRepo }}
-        brew install --cask azure-cli
+        brew install "python@$RELEASE_PYTHON_VERSION"
+        brew tap "$RELEASE_HOMEBREW_TAP"
+        tap_owner="${RELEASE_HOMEBREW_TAP%%/*}"
+        tap_repository="${RELEASE_HOMEBREW_TAP#*/}"
+        published_cask="$tap_owner/${tap_repository#homebrew-}/azure-cli"
+        brew install --cask "$published_cask"
         az version
-        brew uninstall --cask azure-cli
+        brew uninstall --cask "$published_cask"
       displayName: 'Test published Linux cask install'
+      env:
+        RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}
+        RELEASE_HOMEBREW_TAP: ${{ parameters.HomebrewTapRepo }}
 
 # ============================================================================
 # JOB: PRINT SUMMARY
