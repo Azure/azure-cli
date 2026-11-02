@@ -160,7 +160,7 @@ class Create(AAZCommand):
             options=["type"],
             help="The grouping kind. Only `TagKey` is supported.",
             required=True,
-            enum={"TagKey": "TagKey"},
+            enum={"AdditionalInfoKey": "AdditionalInfoKey"},
         )
 
         notifications = cls._args_schema.notifications
@@ -258,13 +258,17 @@ class Create(AAZCommand):
     @classmethod
     def _build_args_cost_control_filter_create(cls, _schema):
         if cls._args_cost_control_filter_create is not None:
+            _schema.additional_info = cls._args_cost_control_filter_create.additional_info
             _schema.and_ = cls._args_cost_control_filter_create.and_
-            _schema.tags = cls._args_cost_control_filter_create.tags
             return
 
         cls._args_cost_control_filter_create = AAZObjectArg()
 
         cost_control_filter_create = cls._args_cost_control_filter_create
+        cost_control_filter_create.additional_info = AAZObjectArg(
+            options=["additional-info"],
+            help="A single additional-info condition. Must not be combined with `and` on the same filter object.",
+        )
         cost_control_filter_create.and_ = AAZListArg(
             options=["and"],
             help="A conjunction of at least two conditions. Must not be combined with tags on the same filter object.",
@@ -272,46 +276,42 @@ class Create(AAZCommand):
                 min_length=2,
             ),
         )
-        cost_control_filter_create.tags = AAZObjectArg(
-            options=["tags"],
-            help="A single tag condition. Must not be combined with and on the same filter object.",
-        )
 
-        and_ = cls._args_cost_control_filter_create.and_
-        and_.Element = AAZObjectArg()
-        cls._build_args_cost_control_filter_create(and_.Element)
-
-        tags = cls._args_cost_control_filter_create.tags
-        tags.name = AAZStrArg(
+        additional_info = cls._args_cost_control_filter_create.additional_info
+        additional_info.name = AAZStrArg(
             options=["name"],
             help="The built-in attribute: agent, identityObjectId, sessionId, project, deployment, or tokenType. Resource selectors use owner-scoped short names, not Azure resource IDs. Agent selections require an explicit project filter selecting exactly one project; multiple agents in that project are supported. A project-owned control can select only its owning project. Project, agent, and deployment values must be plain names of 1-64 characters without leading or trailing whitespace, control characters, path/query/fragment separators, percent signs, or . and .. path segments. tokenType accepts input, output, or both for a Tokens budget; omission measures overall tokens.",
             required=True,
             enum={"agent": "agent", "deployment": "deployment", "identityObjectId": "identityObjectId", "project": "project", "sessionId": "sessionId", "tokenType": "tokenType"},
         )
-        tags.operator = AAZStrArg(
+        additional_info.operator = AAZStrArg(
             options=["operator"],
             help="The comparison operator.`In` is supported.",
             required=True,
             enum={"In": "In"},
         )
-        tags.values = AAZListArg(
+        additional_info.values = AAZListArg(
             options=["values"],
-            help="One or more nonempty, non-whitespace strings to match. There is no per-tag value-count limit; the serialized cost-control definition must not exceed 32 KiB.",
+            help="One or more nonempty, non-whitespace strings to match. There is no per-condition value-count limit; the serialized cost-control definition must not exceed 32 KiB.",
             required=True,
             fmt=AAZListArgFormat(
                 min_length=1,
             ),
         )
 
-        values = cls._args_cost_control_filter_create.tags.values
+        values = cls._args_cost_control_filter_create.additional_info.values
         values.Element = AAZStrArg(
             fmt=AAZStrArgFormat(
                 min_length=1,
             ),
         )
 
+        and_ = cls._args_cost_control_filter_create.and_
+        and_.Element = AAZObjectArg()
+        cls._build_args_cost_control_filter_create(and_.Element)
+
+        _schema.additional_info = cls._args_cost_control_filter_create.additional_info
         _schema.and_ = cls._args_cost_control_filter_create.and_
-        _schema.tags = cls._args_cost_control_filter_create.tags
 
     def _execute_operations(self):
         self.pre_operations()
@@ -628,58 +628,60 @@ class _CreateHelper:
     def _build_schema_cost_control_filter_create(cls, _builder):
         if _builder is None:
             return
+        _builder.set_prop("additionalInfo", AAZObjectType, ".additional_info")
         _builder.set_prop("and", AAZListType, ".and_")
-        _builder.set_prop("tags", AAZObjectType, ".tags")
+
+        additional_info = _builder.get(".additionalInfo")
+        if additional_info is not None:
+            additional_info.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+            additional_info.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
+            additional_info.set_prop("values", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
+
+        values = _builder.get(".additionalInfo.values")
+        if values is not None:
+            values.set_elements(AAZStrType, ".")
 
         and_ = _builder.get(".and")
         if and_ is not None:
             cls._build_schema_cost_control_filter_create(and_.set_elements(AAZObjectType, "."))
-
-        tags = _builder.get(".tags")
-        if tags is not None:
-            tags.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
-            tags.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
-            tags.set_prop("values", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
-
-        values = _builder.get(".tags.values")
-        if values is not None:
-            values.set_elements(AAZStrType, ".")
 
     _schema_cost_control_filter_read = None
 
     @classmethod
     def _build_schema_cost_control_filter_read(cls, _schema):
         if cls._schema_cost_control_filter_read is not None:
+            _schema.additional_info = cls._schema_cost_control_filter_read.additional_info
             _schema["and"] = cls._schema_cost_control_filter_read["and"]
-            _schema.tags = cls._schema_cost_control_filter_read.tags
             return
 
         cls._schema_cost_control_filter_read = _schema_cost_control_filter_read = AAZObjectType()
 
         cost_control_filter_read = _schema_cost_control_filter_read
+        cost_control_filter_read.additional_info = AAZObjectType(
+            serialized_name="additionalInfo",
+        )
         cost_control_filter_read["and"] = AAZListType()
-        cost_control_filter_read.tags = AAZObjectType()
+
+        additional_info = _schema_cost_control_filter_read.additional_info
+        additional_info.name = AAZStrType(
+            flags={"required": True},
+        )
+        additional_info.operator = AAZStrType(
+            flags={"required": True},
+        )
+        additional_info.values = AAZListType(
+            flags={"required": True},
+        )
+
+        values = _schema_cost_control_filter_read.additional_info.values
+        values.Element = AAZStrType()
 
         and_ = _schema_cost_control_filter_read["and"]
         and_.Element = AAZObjectType()
         cls._build_schema_cost_control_filter_read(and_.Element)
 
-        tags = _schema_cost_control_filter_read.tags
-        tags.name = AAZStrType(
-            flags={"required": True},
-        )
-        tags.operator = AAZStrType(
-            flags={"required": True},
-        )
-        tags.values = AAZListType(
-            flags={"required": True},
-        )
-
-        values = _schema_cost_control_filter_read.tags.values
-        values.Element = AAZStrType()
-
+        _schema.additional_info = cls._schema_cost_control_filter_read.additional_info
         _schema["and"] = cls._schema_cost_control_filter_read["and"]
-        _schema.tags = cls._schema_cost_control_filter_read.tags
 
 
 __all__ = ["Create"]

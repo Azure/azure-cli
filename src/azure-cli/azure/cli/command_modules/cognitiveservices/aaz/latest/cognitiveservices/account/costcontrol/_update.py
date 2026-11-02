@@ -23,9 +23,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-09-15-preview",
+        "version": "2026-11-15-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cognitiveservices/accounts/{}/costcontrols/{}", "2026-09-15-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cognitiveservices/accounts/{}/costcontrols/{}", "2026-11-15-preview"],
         ]
     }
 
@@ -72,7 +72,9 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+                pattern="^(?:[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}|[_-][a-zA-Z0-9_-]{0,62})$",
+                max_length=64,
+                min_length=1,
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -82,191 +84,241 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.display_name = AAZStrArg(
-            options=["--display-name"],
+        _args_schema.amount = AAZFloatArg(
+            options=["--amount"],
             arg_group="Properties",
-            help="An optional human-readable name for the cost control.",
-            nullable=True,
-            fmt=AAZStrArgFormat(
-                max_length=128,
-            ),
-        )
-        _args_schema.rules = AAZListArg(
-            options=["--rules"],
-            arg_group="Properties",
-            help="The rules enforced by the cost control.",
-            fmt=AAZListArgFormat(
-                max_length=50,
-                min_length=1,
-            ),
-        )
-
-        rules = cls._args_schema.rules
-        rules.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.rules.Element
-        _element.amount = AAZFloatArg(
-            options=["amount"],
-            help="The maximum consumption allowed by this rule, expressed in the selected unit.",
+            help="The positive budget amount, in United States dollars for Cost or tokens for Tokens. Token amounts must be whole numbers no greater than 9223372036854775807.",
             fmt=AAZFloatArgFormat(
                 minimum=0.0,
                 exclusive_minimum=True,
             ),
         )
-        _element.counter_key = AAZObjectArg(
-            options=["counter-key"],
-            help="The built-in dimension used to partition consumption. The initial preview supports exactly one dimension.",
+        _args_schema.category = AAZStrArg(
+            options=["--category"],
+            arg_group="Properties",
+            help="Whether the budget measures estimated cost in United States dollars or token consumption. This category cannot be changed after creation.",
+            enum={"Cost": "Cost", "Tokens": "Tokens"},
         )
-        _element.match = AAZObjectArg(
-            options=["match"],
-            help="Trusted request attributes and allowed values used to select matching requests.",
+        _args_schema.filter = AAZObjectArg(
+            options=["--filter"],
+            arg_group="Properties",
+            help="Optional traffic selection. Omission selects all eligible traffic within the owner's scope.",
             nullable=True,
         )
+        cls._build_args_cost_control_filter_update(_args_schema.filter)
+        _args_schema.grouping = AAZListArg(
+            options=["--grouping"],
+            arg_group="Properties",
+            help="Optional additional partitioning of consumption. Omission or an empty array uses one counter for the owning account or Foundry project. Responses omit owner-default grouping. A project-owned control cannot explicitly group by project.",
+            nullable=True,
+            fmt=AAZListArgFormat(
+                max_length=1,
+            ),
+        )
+        _args_schema.notifications = AAZDictArg(
+            options=["--notifications"],
+            arg_group="Properties",
+            help="Alert notifications keyed by nonempty, case-insensitively unique names. Each notification supplies its own Event Grid connection. Notifications and provider actions together are limited to ten entries. Omission creates no notifications.",
+            nullable=True,
+        )
+        _args_schema.provider = AAZStrArg(
+            options=["--provider"],
+            arg_group="Properties",
+            help="The resource provider for this budget. Omission selects Microsoft.CognitiveServices; responses return that value.",
+            nullable=True,
+            enum={"Microsoft.CognitiveServices": "Microsoft.CognitiveServices"},
+        )
+        _args_schema.provider_properties = AAZObjectArg(
+            options=["--provider-properties"],
+            arg_group="Properties",
+            help="Optional provider-specific enforcement settings. Omission creates no blocking actions.",
+            nullable=True,
+        )
+        _args_schema.time_grain = AAZStrArg(
+            options=["--time-grain"],
+            arg_group="Properties",
+            help="The calendar-aligned UTC interval at which consumption counters renew within the validity window.",
+            enum={"Daily": "Daily", "Monthly": "Monthly", "Weekly": "Weekly"},
+        )
+        _args_schema.time_period = AAZObjectArg(
+            options=["--time-period"],
+            arg_group="Properties",
+            help="The finite UTC validity window during which the control applies.",
+        )
+
+        grouping = cls._args_schema.grouping
+        grouping.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.grouping.Element
         _element.name = AAZStrArg(
             options=["name"],
-            help="The stable rule identifier, unique within the cost control without regard to case.",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
-                max_length=64,
-            ),
-        )
-        _element.period = AAZStrArg(
-            options=["period"],
-            help="The calendar-aligned UTC renewal period. This property is required for recurring rules and omitted for non-recurring rules.",
-            nullable=True,
-            enum={"Day": "Day", "Hour": "Hour", "Minute": "Minute", "Month": "Month", "Week": "Week", "Year": "Year"},
-        )
-        _element.recurring = AAZBoolArg(
-            options=["recurring"],
-            help="Whether the cost control renews. The default is true.",
-            nullable=True,
-        )
-        _element.thresholds = AAZListArg(
-            options=["thresholds"],
-            help="The actions evaluated as consumption approaches the configured amount.",
-            nullable=True,
-            fmt=AAZListArgFormat(
-                max_length=10,
-            ),
-        )
-        _element.unit = AAZStrArg(
-            options=["unit"],
-            help="The unit used for the cost control amount and absolute thresholds.",
-            enum={"Usd": "Usd"},
-        )
-
-        counter_key = cls._args_schema.rules.Element.counter_key
-        counter_key.type = AAZStrArg(
-            options=["type"],
-            help="The kind of request dimension.",
-            enum={"Account": "Account", "Agent": "Agent", "Custom": "Custom", "Identity": "Identity", "Project": "Project", "Session": "Session"},
-        )
-
-        match = cls._args_schema.rules.Element.match
-        match.agent_resource_ids = AAZListArg(
-            options=["agent-resource-ids"],
-            help="Agent resource IDs use /subscriptions/{subscription_guid}/accounts/{account-name}/project/{project-name}/agent/{agent_name}.",
-            nullable=True,
-            fmt=AAZListArgFormat(
-                max_length=20,
-                min_length=1,
-            ),
-        )
-        match.identity_object_ids = AAZListArg(
-            options=["identity-object-ids"],
-            help="The authenticated principal object IDs to match.",
-            nullable=True,
-            fmt=AAZListArgFormat(
-                max_length=20,
-                min_length=1,
-            ),
-        )
-        match.project_ids = AAZListArg(
-            options=["project-ids"],
-            help="The Foundry project resource IDs to match.",
-            nullable=True,
-            fmt=AAZListArgFormat(
-                max_length=20,
-                min_length=1,
-            ),
-        )
-        match.session_ids = AAZListArg(
-            options=["session-ids"],
-            help="The Foundry session IDs to match.",
-            nullable=True,
-            fmt=AAZListArgFormat(
-                max_length=20,
-                min_length=1,
-            ),
-        )
-
-        agent_resource_ids = cls._args_schema.rules.Element.match.agent_resource_ids
-        agent_resource_ids.Element = AAZStrArg(
-            nullable=True,
-            fmt=AAZStrArgFormat(
-                min_length=1,
-            ),
-        )
-
-        identity_object_ids = cls._args_schema.rules.Element.match.identity_object_ids
-        identity_object_ids.Element = AAZStrArg(
-            nullable=True,
-            fmt=AAZStrArgFormat(
-                min_length=1,
-            ),
-        )
-
-        project_ids = cls._args_schema.rules.Element.match.project_ids
-        project_ids.Element = AAZResourceIdArg(
-            nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.CognitiveServices/accounts/projects/{}",
-            ),
-        )
-
-        session_ids = cls._args_schema.rules.Element.match.session_ids
-        session_ids.Element = AAZStrArg(
-            nullable=True,
-            fmt=AAZStrArgFormat(
-                min_length=1,
-            ),
-        )
-
-        thresholds = cls._args_schema.rules.Element.thresholds
-        thresholds.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.rules.Element.thresholds.Element
-        _element.action = AAZStrArg(
-            options=["action"],
-            help="The action taken when the threshold is reached. The default is audit.",
-            enum={"Alert": "Alert", "Audit": "Audit", "Block": "Block"},
+            help="The built-in attribute to group by. project is available only for account-owned controls.",
+            enum={"agent": "agent", "identityObjectId": "identityObjectId", "project": "project", "sessionId": "sessionId"},
         )
         _element.type = AAZStrArg(
             options=["type"],
-            help="How the threshold value is interpreted.",
-            enum={"Absolute": "Absolute", "Percentage": "Percentage"},
+            help="The grouping kind. Only `TagKey` is supported.",
+            enum={"AdditionalInfoKey": "AdditionalInfoKey"},
         )
-        _element.value = AAZFloatArg(
-            options=["value"],
-            help="The threshold value. Percentage values range from 0 through 100, and absolute values cannot exceed the rule amount.",
+
+        notifications = cls._args_schema.notifications
+        notifications.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.notifications.Element
+        _element.enabled = AAZBoolArg(
+            options=["enabled"],
+            help="Whether this notification is enabled. Disabled notifications remain configured but do not publish alerts.",
+        )
+        _element.event_grid_connection_id = AAZResourceIdArg(
+            options=["event-grid-connection-id"],
+            help="The full resource ID of the Cognitive Services Event Grid connection used to publish this notification.",
+            fmt=AAZResourceIdArgFormat(
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.CognitiveServices/accounts/connections/{}",
+            ),
+        )
+        _element.operator = AAZStrArg(
+            options=["operator"],
+            help="The threshold comparison. Only `GreaterThanOrEqualTo` is supported.",
+            enum={"GreaterThanOrEqualTo": "GreaterThanOrEqualTo"},
+        )
+        _element.threshold = AAZFloatArg(
+            options=["threshold"],
+            help="The positive threshold. Percentages cannot exceed 100; absolute thresholds cannot exceed amount and must be whole numbers for Tokens budgets.",
             fmt=AAZFloatArgFormat(
                 minimum=0.0,
+                exclusive_minimum=True,
             ),
+        )
+        _element.threshold_type = AAZStrArg(
+            options=["threshold-type"],
+            help="Whether threshold is a percentage of amount or an absolute value in the budget's unit.",
+            enum={"Absolute": "Absolute", "Percentage": "Percentage"},
+        )
+
+        provider_properties = cls._args_schema.provider_properties
+        provider_properties.actions = AAZDictArg(
+            options=["actions"],
+            help="Blocking actions keyed by nonempty, case-insensitively unique names. Actions and notifications together are limited to ten entries.",
+            nullable=True,
+        )
+
+        actions = cls._args_schema.provider_properties.actions
+        actions.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.provider_properties.actions.Element
+        _element.operator = AAZStrArg(
+            options=["operator"],
+            help="The threshold comparison. Only `GreaterThanOrEqualTo` is supported.",
+            enum={"GreaterThanOrEqualTo": "GreaterThanOrEqualTo"},
+        )
+        _element.threshold = AAZFloatArg(
+            options=["threshold"],
+            help="The positive threshold. Percentages cannot exceed 100; absolute thresholds cannot exceed amount and must be whole numbers for Tokens budgets.",
+            fmt=AAZFloatArgFormat(
+                minimum=0.0,
+                exclusive_minimum=True,
+            ),
+        )
+        _element.threshold_type = AAZStrArg(
+            options=["threshold-type"],
+            help="Whether threshold is a percentage of amount or an absolute value in the budget's unit.",
+            enum={"Absolute": "Absolute", "Percentage": "Percentage"},
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="The enforcement action. Only `Block` is supported.",
+            enum={"Block": "Block"},
+        )
+
+        time_period = cls._args_schema.time_period
+        time_period.end_date = AAZDateTimeArg(
+            options=["end-date"],
+            help="The exclusive UTC end, later than startDate, encoded as an ISO 8601 timestamp ending in Z with up to seven fractional digits.",
+        )
+        time_period.start_date = AAZDateTimeArg(
+            options=["start-date"],
+            help="The inclusive UTC start, encoded as an ISO 8601 timestamp ending in Z with up to seven fractional digits.",
         )
         return cls._args_schema
 
+    _args_cost_control_filter_update = None
+
+    @classmethod
+    def _build_args_cost_control_filter_update(cls, _schema):
+        if cls._args_cost_control_filter_update is not None:
+            _schema.additional_info = cls._args_cost_control_filter_update.additional_info
+            _schema.and_ = cls._args_cost_control_filter_update.and_
+            return
+
+        cls._args_cost_control_filter_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        cost_control_filter_update = cls._args_cost_control_filter_update
+        cost_control_filter_update.additional_info = AAZObjectArg(
+            options=["additional-info"],
+            help="A single additional-info condition. Must not be combined with `and` on the same filter object.",
+            nullable=True,
+        )
+        cost_control_filter_update.and_ = AAZListArg(
+            options=["and"],
+            help="A conjunction of at least two conditions. Must not be combined with tags on the same filter object.",
+            nullable=True,
+            fmt=AAZListArgFormat(
+                min_length=2,
+            ),
+        )
+
+        additional_info = cls._args_cost_control_filter_update.additional_info
+        additional_info.name = AAZStrArg(
+            options=["name"],
+            help="The built-in attribute: agent, identityObjectId, sessionId, project, deployment, or tokenType. Resource selectors use owner-scoped short names, not Azure resource IDs. Agent selections require an explicit project filter selecting exactly one project; multiple agents in that project are supported. A project-owned control can select only its owning project. Project, agent, and deployment values must be plain names of 1-64 characters without leading or trailing whitespace, control characters, path/query/fragment separators, percent signs, or . and .. path segments. tokenType accepts input, output, or both for a Tokens budget; omission measures overall tokens.",
+            enum={"agent": "agent", "deployment": "deployment", "identityObjectId": "identityObjectId", "project": "project", "sessionId": "sessionId", "tokenType": "tokenType"},
+        )
+        additional_info.operator = AAZStrArg(
+            options=["operator"],
+            help="The comparison operator.`In` is supported.",
+            enum={"In": "In"},
+        )
+        additional_info.values = AAZListArg(
+            options=["values"],
+            help="One or more nonempty, non-whitespace strings to match. There is no per-condition value-count limit; the serialized cost-control definition must not exceed 32 KiB.",
+            fmt=AAZListArgFormat(
+                min_length=1,
+            ),
+        )
+
+        values = cls._args_cost_control_filter_update.additional_info.values
+        values.Element = AAZStrArg(
+            nullable=True,
+            fmt=AAZStrArgFormat(
+                min_length=1,
+            ),
+        )
+
+        and_ = cls._args_cost_control_filter_update.and_
+        and_.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_cost_control_filter_update(and_.Element)
+
+        _schema.additional_info = cls._args_cost_control_filter_update.additional_info
+        _schema.and_ = cls._args_cost_control_filter_update.and_
+
     def _execute_operations(self):
         self.pre_operations()
-        self.CostControlsGet(ctx=self.ctx)()
+        self.AccountCostControlsGet(ctx=self.ctx)()
         self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
         self.post_instance_update(self.ctx.vars.instance)
-        self.CostControlsCreateOrUpdate(ctx=self.ctx)()
+        self.AccountCostControlsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -289,7 +341,7 @@ class Update(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class CostControlsGet(AAZHttpOperation):
+    class AccountCostControlsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -341,7 +393,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-09-15-preview",
+                    "api-version", "2026-11-15-preview",
                     required=True,
                 ),
             }
@@ -393,82 +445,90 @@ class Update(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
-            properties.display_name = AAZStrType(
-                serialized_name="displayName",
+            properties.amount = AAZFloatType(
+                flags={"required": True},
             )
-            properties.rules = AAZListType(
+            properties.category = AAZStrType(
+                flags={"required": True},
+            )
+            properties.filter = AAZObjectType()
+            _UpdateHelper._build_schema_cost_control_filter_read(properties.filter)
+            properties.grouping = AAZListType()
+            properties.notifications = AAZDictType()
+            properties.provider = AAZStrType()
+            properties.provider_properties = AAZObjectType(
+                serialized_name="providerProperties",
+            )
+            properties.time_grain = AAZStrType(
+                serialized_name="timeGrain",
+                flags={"required": True},
+            )
+            properties.time_period = AAZObjectType(
+                serialized_name="timePeriod",
                 flags={"required": True},
             )
 
-            rules = cls._schema_on_200.properties.rules
-            rules.Element = AAZObjectType()
+            grouping = cls._schema_on_200.properties.grouping
+            grouping.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.rules.Element
-            _element.amount = AAZFloatType(
-                flags={"required": True},
-            )
-            _element.counter_key = AAZObjectType(
-                serialized_name="counterKey",
-                flags={"required": True},
-            )
-            _element.match = AAZObjectType()
+            _element = cls._schema_on_200.properties.grouping.Element
             _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.period = AAZStrType()
-            _element.recurring = AAZBoolType()
-            _element.thresholds = AAZListType(
-                nullable=True,
-            )
-            _element.unit = AAZStrType(
-                flags={"required": True},
-            )
-
-            counter_key = cls._schema_on_200.properties.rules.Element.counter_key
-            counter_key.attribute = AAZStrType(
-                flags={"read_only": True},
-            )
-            counter_key.type = AAZStrType(
-                flags={"required": True},
-            )
-
-            match = cls._schema_on_200.properties.rules.Element.match
-            match.agent_resource_ids = AAZListType(
-                serialized_name="agentResourceIds",
-            )
-            match.identity_object_ids = AAZListType(
-                serialized_name="identityObjectIds",
-            )
-            match.project_ids = AAZListType(
-                serialized_name="projectIds",
-            )
-            match.session_ids = AAZListType(
-                serialized_name="sessionIds",
-            )
-
-            agent_resource_ids = cls._schema_on_200.properties.rules.Element.match.agent_resource_ids
-            agent_resource_ids.Element = AAZStrType()
-
-            identity_object_ids = cls._schema_on_200.properties.rules.Element.match.identity_object_ids
-            identity_object_ids.Element = AAZStrType()
-
-            project_ids = cls._schema_on_200.properties.rules.Element.match.project_ids
-            project_ids.Element = AAZStrType()
-
-            session_ids = cls._schema_on_200.properties.rules.Element.match.session_ids
-            session_ids.Element = AAZStrType()
-
-            thresholds = cls._schema_on_200.properties.rules.Element.thresholds
-            thresholds.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.rules.Element.thresholds.Element
-            _element.action = AAZStrType(
                 flags={"required": True},
             )
             _element.type = AAZStrType(
                 flags={"required": True},
             )
-            _element.value = AAZFloatType(
+
+            notifications = cls._schema_on_200.properties.notifications
+            notifications.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.notifications.Element
+            _element.enabled = AAZBoolType(
+                flags={"required": True},
+            )
+            _element.event_grid_connection_id = AAZStrType(
+                serialized_name="eventGridConnectionId",
+                flags={"required": True},
+            )
+            _element.operator = AAZStrType(
+                flags={"required": True},
+            )
+            _element.threshold = AAZFloatType(
+                flags={"required": True},
+            )
+            _element.threshold_type = AAZStrType(
+                serialized_name="thresholdType",
+                flags={"required": True},
+            )
+
+            provider_properties = cls._schema_on_200.properties.provider_properties
+            provider_properties.actions = AAZDictType()
+
+            actions = cls._schema_on_200.properties.provider_properties.actions
+            actions.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.provider_properties.actions.Element
+            _element.operator = AAZStrType(
+                flags={"required": True},
+            )
+            _element.threshold = AAZFloatType(
+                flags={"required": True},
+            )
+            _element.threshold_type = AAZStrType(
+                serialized_name="thresholdType",
+                flags={"required": True},
+            )
+            _element.type = AAZStrType(
+                flags={"required": True},
+            )
+
+            time_period = cls._schema_on_200.properties.time_period
+            time_period.end_date = AAZStrType(
+                serialized_name="endDate",
+                flags={"required": True},
+            )
+            time_period.start_date = AAZStrType(
+                serialized_name="startDate",
                 flags={"required": True},
             )
 
@@ -494,7 +554,7 @@ class Update(AAZCommand):
 
             return cls._schema_on_200
 
-    class CostControlsCreateOrUpdate(AAZHttpOperation):
+    class AccountCostControlsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -546,7 +606,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-09-15-preview",
+                    "api-version", "2026-11-15-preview",
                     required=True,
                 ),
             }
@@ -616,82 +676,90 @@ class Update(AAZCommand):
             )
 
             properties = cls._schema_on_200_201.properties
-            properties.display_name = AAZStrType(
-                serialized_name="displayName",
+            properties.amount = AAZFloatType(
+                flags={"required": True},
             )
-            properties.rules = AAZListType(
+            properties.category = AAZStrType(
+                flags={"required": True},
+            )
+            properties.filter = AAZObjectType()
+            _UpdateHelper._build_schema_cost_control_filter_read(properties.filter)
+            properties.grouping = AAZListType()
+            properties.notifications = AAZDictType()
+            properties.provider = AAZStrType()
+            properties.provider_properties = AAZObjectType(
+                serialized_name="providerProperties",
+            )
+            properties.time_grain = AAZStrType(
+                serialized_name="timeGrain",
+                flags={"required": True},
+            )
+            properties.time_period = AAZObjectType(
+                serialized_name="timePeriod",
                 flags={"required": True},
             )
 
-            rules = cls._schema_on_200_201.properties.rules
-            rules.Element = AAZObjectType()
+            grouping = cls._schema_on_200_201.properties.grouping
+            grouping.Element = AAZObjectType()
 
-            _element = cls._schema_on_200_201.properties.rules.Element
-            _element.amount = AAZFloatType(
-                flags={"required": True},
-            )
-            _element.counter_key = AAZObjectType(
-                serialized_name="counterKey",
-                flags={"required": True},
-            )
-            _element.match = AAZObjectType()
+            _element = cls._schema_on_200_201.properties.grouping.Element
             _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.period = AAZStrType()
-            _element.recurring = AAZBoolType()
-            _element.thresholds = AAZListType(
-                nullable=True,
-            )
-            _element.unit = AAZStrType(
-                flags={"required": True},
-            )
-
-            counter_key = cls._schema_on_200_201.properties.rules.Element.counter_key
-            counter_key.attribute = AAZStrType(
-                flags={"read_only": True},
-            )
-            counter_key.type = AAZStrType(
-                flags={"required": True},
-            )
-
-            match = cls._schema_on_200_201.properties.rules.Element.match
-            match.agent_resource_ids = AAZListType(
-                serialized_name="agentResourceIds",
-            )
-            match.identity_object_ids = AAZListType(
-                serialized_name="identityObjectIds",
-            )
-            match.project_ids = AAZListType(
-                serialized_name="projectIds",
-            )
-            match.session_ids = AAZListType(
-                serialized_name="sessionIds",
-            )
-
-            agent_resource_ids = cls._schema_on_200_201.properties.rules.Element.match.agent_resource_ids
-            agent_resource_ids.Element = AAZStrType()
-
-            identity_object_ids = cls._schema_on_200_201.properties.rules.Element.match.identity_object_ids
-            identity_object_ids.Element = AAZStrType()
-
-            project_ids = cls._schema_on_200_201.properties.rules.Element.match.project_ids
-            project_ids.Element = AAZStrType()
-
-            session_ids = cls._schema_on_200_201.properties.rules.Element.match.session_ids
-            session_ids.Element = AAZStrType()
-
-            thresholds = cls._schema_on_200_201.properties.rules.Element.thresholds
-            thresholds.Element = AAZObjectType()
-
-            _element = cls._schema_on_200_201.properties.rules.Element.thresholds.Element
-            _element.action = AAZStrType(
                 flags={"required": True},
             )
             _element.type = AAZStrType(
                 flags={"required": True},
             )
-            _element.value = AAZFloatType(
+
+            notifications = cls._schema_on_200_201.properties.notifications
+            notifications.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.notifications.Element
+            _element.enabled = AAZBoolType(
+                flags={"required": True},
+            )
+            _element.event_grid_connection_id = AAZStrType(
+                serialized_name="eventGridConnectionId",
+                flags={"required": True},
+            )
+            _element.operator = AAZStrType(
+                flags={"required": True},
+            )
+            _element.threshold = AAZFloatType(
+                flags={"required": True},
+            )
+            _element.threshold_type = AAZStrType(
+                serialized_name="thresholdType",
+                flags={"required": True},
+            )
+
+            provider_properties = cls._schema_on_200_201.properties.provider_properties
+            provider_properties.actions = AAZDictType()
+
+            actions = cls._schema_on_200_201.properties.provider_properties.actions
+            actions.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.provider_properties.actions.Element
+            _element.operator = AAZStrType(
+                flags={"required": True},
+            )
+            _element.threshold = AAZFloatType(
+                flags={"required": True},
+            )
+            _element.threshold_type = AAZStrType(
+                serialized_name="thresholdType",
+                flags={"required": True},
+            )
+            _element.type = AAZStrType(
+                flags={"required": True},
+            )
+
+            time_period = cls._schema_on_200_201.properties.time_period
+            time_period.end_date = AAZStrType(
+                serialized_name="endDate",
+                flags={"required": True},
+            )
+            time_period.start_date = AAZStrType(
+                serialized_name="startDate",
                 flags={"required": True},
             )
 
@@ -732,60 +800,56 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("displayName", AAZStrType, ".display_name")
-                properties.set_prop("rules", AAZListType, ".rules", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("amount", AAZFloatType, ".amount", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("category", AAZStrType, ".category", typ_kwargs={"flags": {"required": True}})
+                _UpdateHelper._build_schema_cost_control_filter_update(properties.set_prop("filter", AAZObjectType, ".filter"))
+                properties.set_prop("grouping", AAZListType, ".grouping")
+                properties.set_prop("notifications", AAZDictType, ".notifications")
+                properties.set_prop("provider", AAZStrType, ".provider")
+                properties.set_prop("providerProperties", AAZObjectType, ".provider_properties")
+                properties.set_prop("timeGrain", AAZStrType, ".time_grain", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("timePeriod", AAZObjectType, ".time_period", typ_kwargs={"flags": {"required": True}})
 
-            rules = _builder.get(".properties.rules")
-            if rules is not None:
-                rules.set_elements(AAZObjectType, ".")
+            grouping = _builder.get(".properties.grouping")
+            if grouping is not None:
+                grouping.set_elements(AAZObjectType, ".")
 
-            _elements = _builder.get(".properties.rules[]")
+            _elements = _builder.get(".properties.grouping[]")
             if _elements is not None:
-                _elements.set_prop("amount", AAZFloatType, ".amount", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("counterKey", AAZObjectType, ".counter_key", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("match", AAZObjectType, ".match")
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("period", AAZStrType, ".period")
-                _elements.set_prop("recurring", AAZBoolType, ".recurring")
-                _elements.set_prop("thresholds", AAZListType, ".thresholds", typ_kwargs={"nullable": True})
-                _elements.set_prop("unit", AAZStrType, ".unit", typ_kwargs={"flags": {"required": True}})
-
-            counter_key = _builder.get(".properties.rules[].counterKey")
-            if counter_key is not None:
-                counter_key.set_prop("type", AAZStrType, ".type", typ_kwargs={"flags": {"required": True}})
-
-            match = _builder.get(".properties.rules[].match")
-            if match is not None:
-                match.set_prop("agentResourceIds", AAZListType, ".agent_resource_ids")
-                match.set_prop("identityObjectIds", AAZListType, ".identity_object_ids")
-                match.set_prop("projectIds", AAZListType, ".project_ids")
-                match.set_prop("sessionIds", AAZListType, ".session_ids")
-
-            agent_resource_ids = _builder.get(".properties.rules[].match.agentResourceIds")
-            if agent_resource_ids is not None:
-                agent_resource_ids.set_elements(AAZStrType, ".")
-
-            identity_object_ids = _builder.get(".properties.rules[].match.identityObjectIds")
-            if identity_object_ids is not None:
-                identity_object_ids.set_elements(AAZStrType, ".")
-
-            project_ids = _builder.get(".properties.rules[].match.projectIds")
-            if project_ids is not None:
-                project_ids.set_elements(AAZStrType, ".")
-
-            session_ids = _builder.get(".properties.rules[].match.sessionIds")
-            if session_ids is not None:
-                session_ids.set_elements(AAZStrType, ".")
-
-            thresholds = _builder.get(".properties.rules[].thresholds")
-            if thresholds is not None:
-                thresholds.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.rules[].thresholds[]")
-            if _elements is not None:
-                _elements.set_prop("action", AAZStrType, ".action", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("type", AAZStrType, ".type", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("value", AAZFloatType, ".value", typ_kwargs={"flags": {"required": True}})
+
+            notifications = _builder.get(".properties.notifications")
+            if notifications is not None:
+                notifications.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.notifications{}")
+            if _elements is not None:
+                _elements.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("eventGridConnectionId", AAZStrType, ".event_grid_connection_id", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("threshold", AAZFloatType, ".threshold", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("thresholdType", AAZStrType, ".threshold_type", typ_kwargs={"flags": {"required": True}})
+
+            provider_properties = _builder.get(".properties.providerProperties")
+            if provider_properties is not None:
+                provider_properties.set_prop("actions", AAZDictType, ".actions")
+
+            actions = _builder.get(".properties.providerProperties.actions")
+            if actions is not None:
+                actions.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.providerProperties.actions{}")
+            if _elements is not None:
+                _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("threshold", AAZFloatType, ".threshold", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("thresholdType", AAZStrType, ".threshold_type", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("type", AAZStrType, ".type", typ_kwargs={"flags": {"required": True}})
+
+            time_period = _builder.get(".properties.timePeriod")
+            if time_period is not None:
+                time_period.set_prop("endDate", AAZStrType, ".end_date", typ_kwargs={"flags": {"required": True}})
+                time_period.set_prop("startDate", AAZStrType, ".start_date", typ_kwargs={"flags": {"required": True}})
 
             return _instance_value
 
@@ -800,6 +864,65 @@ class Update(AAZCommand):
 
 class _UpdateHelper:
     """Helper class for Update"""
+
+    @classmethod
+    def _build_schema_cost_control_filter_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("additionalInfo", AAZObjectType, ".additional_info")
+        _builder.set_prop("and", AAZListType, ".and_")
+
+        additional_info = _builder.get(".additionalInfo")
+        if additional_info is not None:
+            additional_info.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+            additional_info.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
+            additional_info.set_prop("values", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
+
+        values = _builder.get(".additionalInfo.values")
+        if values is not None:
+            values.set_elements(AAZStrType, ".")
+
+        and_ = _builder.get(".and")
+        if and_ is not None:
+            cls._build_schema_cost_control_filter_update(and_.set_elements(AAZObjectType, "."))
+
+    _schema_cost_control_filter_read = None
+
+    @classmethod
+    def _build_schema_cost_control_filter_read(cls, _schema):
+        if cls._schema_cost_control_filter_read is not None:
+            _schema.additional_info = cls._schema_cost_control_filter_read.additional_info
+            _schema["and"] = cls._schema_cost_control_filter_read["and"]
+            return
+
+        cls._schema_cost_control_filter_read = _schema_cost_control_filter_read = AAZObjectType()
+
+        cost_control_filter_read = _schema_cost_control_filter_read
+        cost_control_filter_read.additional_info = AAZObjectType(
+            serialized_name="additionalInfo",
+        )
+        cost_control_filter_read["and"] = AAZListType()
+
+        additional_info = _schema_cost_control_filter_read.additional_info
+        additional_info.name = AAZStrType(
+            flags={"required": True},
+        )
+        additional_info.operator = AAZStrType(
+            flags={"required": True},
+        )
+        additional_info.values = AAZListType(
+            flags={"required": True},
+        )
+
+        values = _schema_cost_control_filter_read.additional_info.values
+        values.Element = AAZStrType()
+
+        and_ = _schema_cost_control_filter_read["and"]
+        and_.Element = AAZObjectType()
+        cls._build_schema_cost_control_filter_read(and_.Element)
+
+        _schema.additional_info = cls._schema_cost_control_filter_read.additional_info
+        _schema["and"] = cls._schema_cost_control_filter_read["and"]
 
 
 __all__ = ["Update"]

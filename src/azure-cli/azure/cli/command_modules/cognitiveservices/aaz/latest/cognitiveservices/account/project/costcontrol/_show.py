@@ -323,36 +323,38 @@ class _ShowHelper:
     @classmethod
     def _build_schema_cost_control_filter_read(cls, _schema):
         if cls._schema_cost_control_filter_read is not None:
+            _schema.additional_info = cls._schema_cost_control_filter_read.additional_info
             _schema["and"] = cls._schema_cost_control_filter_read["and"]
-            _schema.tags = cls._schema_cost_control_filter_read.tags
             return
 
         cls._schema_cost_control_filter_read = _schema_cost_control_filter_read = AAZObjectType()
 
         cost_control_filter_read = _schema_cost_control_filter_read
+        cost_control_filter_read.additional_info = AAZObjectType(
+            serialized_name="additionalInfo",
+        )
         cost_control_filter_read["and"] = AAZListType()
-        cost_control_filter_read.tags = AAZObjectType()
+
+        additional_info = _schema_cost_control_filter_read.additional_info
+        additional_info.name = AAZStrType(
+            flags={"required": True},
+        )
+        additional_info.operator = AAZStrType(
+            flags={"required": True},
+        )
+        additional_info.values = AAZListType(
+            flags={"required": True},
+        )
+
+        values = _schema_cost_control_filter_read.additional_info.values
+        values.Element = AAZStrType()
 
         and_ = _schema_cost_control_filter_read["and"]
         and_.Element = AAZObjectType()
         cls._build_schema_cost_control_filter_read(and_.Element)
 
-        tags = _schema_cost_control_filter_read.tags
-        tags.name = AAZStrType(
-            flags={"required": True},
-        )
-        tags.operator = AAZStrType(
-            flags={"required": True},
-        )
-        tags.values = AAZListType(
-            flags={"required": True},
-        )
-
-        values = _schema_cost_control_filter_read.tags.values
-        values.Element = AAZStrType()
-
+        _schema.additional_info = cls._schema_cost_control_filter_read.additional_info
         _schema["and"] = cls._schema_cost_control_filter_read["and"]
-        _schema.tags = cls._schema_cost_control_filter_read.tags
 
 
 __all__ = ["Show"]

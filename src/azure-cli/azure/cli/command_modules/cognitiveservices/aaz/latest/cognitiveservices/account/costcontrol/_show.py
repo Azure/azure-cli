@@ -23,9 +23,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-09-15-preview",
+        "version": "2026-11-15-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cognitiveservices/accounts/{}/costcontrols/{}", "2026-09-15-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cognitiveservices/accounts/{}/costcontrols/{}", "2026-11-15-preview"],
         ]
     }
 
@@ -62,7 +62,9 @@ class Show(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+                pattern="^(?:[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}|[_-][a-zA-Z0-9_-]{0,62})$",
+                max_length=64,
+                min_length=1,
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -72,7 +74,7 @@ class Show(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.CostControlsGet(ctx=self.ctx)()
+        self.AccountCostControlsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -87,7 +89,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class CostControlsGet(AAZHttpOperation):
+    class AccountCostControlsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -139,7 +141,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-09-15-preview",
+                    "api-version", "2026-11-15-preview",
                     required=True,
                 ),
             }
@@ -191,82 +193,90 @@ class Show(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
-            properties.display_name = AAZStrType(
-                serialized_name="displayName",
+            properties.amount = AAZFloatType(
+                flags={"required": True},
             )
-            properties.rules = AAZListType(
+            properties.category = AAZStrType(
+                flags={"required": True},
+            )
+            properties.filter = AAZObjectType()
+            _ShowHelper._build_schema_cost_control_filter_read(properties.filter)
+            properties.grouping = AAZListType()
+            properties.notifications = AAZDictType()
+            properties.provider = AAZStrType()
+            properties.provider_properties = AAZObjectType(
+                serialized_name="providerProperties",
+            )
+            properties.time_grain = AAZStrType(
+                serialized_name="timeGrain",
+                flags={"required": True},
+            )
+            properties.time_period = AAZObjectType(
+                serialized_name="timePeriod",
                 flags={"required": True},
             )
 
-            rules = cls._schema_on_200.properties.rules
-            rules.Element = AAZObjectType()
+            grouping = cls._schema_on_200.properties.grouping
+            grouping.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.rules.Element
-            _element.amount = AAZFloatType(
-                flags={"required": True},
-            )
-            _element.counter_key = AAZObjectType(
-                serialized_name="counterKey",
-                flags={"required": True},
-            )
-            _element.match = AAZObjectType()
+            _element = cls._schema_on_200.properties.grouping.Element
             _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.period = AAZStrType()
-            _element.recurring = AAZBoolType()
-            _element.thresholds = AAZListType(
-                nullable=True,
-            )
-            _element.unit = AAZStrType(
-                flags={"required": True},
-            )
-
-            counter_key = cls._schema_on_200.properties.rules.Element.counter_key
-            counter_key.attribute = AAZStrType(
-                flags={"read_only": True},
-            )
-            counter_key.type = AAZStrType(
-                flags={"required": True},
-            )
-
-            match = cls._schema_on_200.properties.rules.Element.match
-            match.agent_resource_ids = AAZListType(
-                serialized_name="agentResourceIds",
-            )
-            match.identity_object_ids = AAZListType(
-                serialized_name="identityObjectIds",
-            )
-            match.project_ids = AAZListType(
-                serialized_name="projectIds",
-            )
-            match.session_ids = AAZListType(
-                serialized_name="sessionIds",
-            )
-
-            agent_resource_ids = cls._schema_on_200.properties.rules.Element.match.agent_resource_ids
-            agent_resource_ids.Element = AAZStrType()
-
-            identity_object_ids = cls._schema_on_200.properties.rules.Element.match.identity_object_ids
-            identity_object_ids.Element = AAZStrType()
-
-            project_ids = cls._schema_on_200.properties.rules.Element.match.project_ids
-            project_ids.Element = AAZStrType()
-
-            session_ids = cls._schema_on_200.properties.rules.Element.match.session_ids
-            session_ids.Element = AAZStrType()
-
-            thresholds = cls._schema_on_200.properties.rules.Element.thresholds
-            thresholds.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.rules.Element.thresholds.Element
-            _element.action = AAZStrType(
                 flags={"required": True},
             )
             _element.type = AAZStrType(
                 flags={"required": True},
             )
-            _element.value = AAZFloatType(
+
+            notifications = cls._schema_on_200.properties.notifications
+            notifications.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.notifications.Element
+            _element.enabled = AAZBoolType(
+                flags={"required": True},
+            )
+            _element.event_grid_connection_id = AAZStrType(
+                serialized_name="eventGridConnectionId",
+                flags={"required": True},
+            )
+            _element.operator = AAZStrType(
+                flags={"required": True},
+            )
+            _element.threshold = AAZFloatType(
+                flags={"required": True},
+            )
+            _element.threshold_type = AAZStrType(
+                serialized_name="thresholdType",
+                flags={"required": True},
+            )
+
+            provider_properties = cls._schema_on_200.properties.provider_properties
+            provider_properties.actions = AAZDictType()
+
+            actions = cls._schema_on_200.properties.provider_properties.actions
+            actions.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.provider_properties.actions.Element
+            _element.operator = AAZStrType(
+                flags={"required": True},
+            )
+            _element.threshold = AAZFloatType(
+                flags={"required": True},
+            )
+            _element.threshold_type = AAZStrType(
+                serialized_name="thresholdType",
+                flags={"required": True},
+            )
+            _element.type = AAZStrType(
+                flags={"required": True},
+            )
+
+            time_period = cls._schema_on_200.properties.time_period
+            time_period.end_date = AAZStrType(
+                serialized_name="endDate",
+                flags={"required": True},
+            )
+            time_period.start_date = AAZStrType(
+                serialized_name="startDate",
                 flags={"required": True},
             )
 
@@ -295,6 +305,44 @@ class Show(AAZCommand):
 
 class _ShowHelper:
     """Helper class for Show"""
+
+    _schema_cost_control_filter_read = None
+
+    @classmethod
+    def _build_schema_cost_control_filter_read(cls, _schema):
+        if cls._schema_cost_control_filter_read is not None:
+            _schema.additional_info = cls._schema_cost_control_filter_read.additional_info
+            _schema["and"] = cls._schema_cost_control_filter_read["and"]
+            return
+
+        cls._schema_cost_control_filter_read = _schema_cost_control_filter_read = AAZObjectType()
+
+        cost_control_filter_read = _schema_cost_control_filter_read
+        cost_control_filter_read.additional_info = AAZObjectType(
+            serialized_name="additionalInfo",
+        )
+        cost_control_filter_read["and"] = AAZListType()
+
+        additional_info = _schema_cost_control_filter_read.additional_info
+        additional_info.name = AAZStrType(
+            flags={"required": True},
+        )
+        additional_info.operator = AAZStrType(
+            flags={"required": True},
+        )
+        additional_info.values = AAZListType(
+            flags={"required": True},
+        )
+
+        values = _schema_cost_control_filter_read.additional_info.values
+        values.Element = AAZStrType()
+
+        and_ = _schema_cost_control_filter_read["and"]
+        and_.Element = AAZObjectType()
+        cls._build_schema_cost_control_filter_read(and_.Element)
+
+        _schema.additional_info = cls._schema_cost_control_filter_read.additional_info
+        _schema["and"] = cls._schema_cost_control_filter_read["and"]
 
 
 __all__ = ["Show"]

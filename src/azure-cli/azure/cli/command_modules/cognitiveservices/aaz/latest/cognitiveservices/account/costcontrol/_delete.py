@@ -24,9 +24,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-09-15-preview",
+        "version": "2026-11-15-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cognitiveservices/accounts/{}/costcontrols/{}", "2026-09-15-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cognitiveservices/accounts/{}/costcontrols/{}", "2026-11-15-preview"],
         ]
     }
 
@@ -67,7 +67,9 @@ class Delete(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+                pattern="^(?:[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}|[_-][a-zA-Z0-9_-]{0,62})$",
+                max_length=64,
+                min_length=1,
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -77,7 +79,7 @@ class Delete(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.CostControlsDelete(ctx=self.ctx)()
+        self.AccountCostControlsDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -88,7 +90,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class CostControlsDelete(AAZHttpOperation):
+    class AccountCostControlsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -142,7 +144,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-09-15-preview",
+                    "api-version", "2026-11-15-preview",
                     required=True,
                 ),
             }
