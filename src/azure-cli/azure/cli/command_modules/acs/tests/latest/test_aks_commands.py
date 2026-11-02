@@ -17453,16 +17453,30 @@ spec:
             self.check('provisioningState', 'Succeeded'),
         ])
 
-        # add a VMSS user node pool
+        # add a VMSS user node pool; the service may report it as Updating while it settles, so wait for it
         self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} '
                  '--name={nodepool_name} --node-count=1 --node-vm-size=Standard_D2s_v5', checks=[
-                     self.check('provisioningState', 'Succeeded'),
                      self.check('vmSize', 'Standard_D2s_v5'),
                  ])
+        wait_cmd = 'aks nodepool wait --resource-group={resource_group} --cluster-name={name} ' \
+                   '--name={nodepool_name} --custom "provisioningState==\'Succeeded\'" --interval 30 --timeout 3600'
+        self.cmd(wait_cmd, checks=[self.is_empty()])
 
-        # resize the node pool
-        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} '
-                 '--name={nodepool_name} --node-vm-size=Standard_D4s_v5 --yes', checks=[
+        # resize the node pool; right after a node pool is added, AKS may still run cluster-level operations
+        # (e.g. addon reconciliation) that reject a new PUT, so retry on those conflicts
+        resize_cmd = 'aks nodepool update --resource-group={resource_group} --cluster-name={name} ' \
+                     '--name={nodepool_name} --node-vm-size=Standard_D4s_v5 --yes'
+        for attempt in range(5):
+            try:
+                self.cmd(resize_cmd, checks=[self.check('vmSize', 'Standard_D4s_v5')])
+                break
+            except Exception as ex:  # pylint: disable=broad-except
+                if attempt == 4 or not any(code in str(ex) for code in ('OperationNotAllowed', 'EtagMismatch')):
+                    raise
+                time.sleep(60)
+        self.cmd(wait_cmd, checks=[self.is_empty()])
+        self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} '
+                 '--name={nodepool_name}', checks=[
                      self.check('provisioningState', 'Succeeded'),
                      self.check('vmSize', 'Standard_D4s_v5'),
                  ])
