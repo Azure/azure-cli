@@ -6,8 +6,14 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 
+from azure.cli.core.commands import CliCommandType
+
 
 def load_command_table(self, _):
+
+    relay_network_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.relay.operations.network_rule_set#{}'
+    )
 
     # Namespace Region
     with self.command_group('relay namespace authorization-rule'):
@@ -33,3 +39,8 @@ def load_command_table(self, _):
         from azure.cli.command_modules.relay.custom import HycoAuthoCreate, HycoAuthoUpdate
         self.command_table['relay hyco authorization-rule create'] = HycoAuthoCreate(loader=self)
         self.command_table['relay hyco authorization-rule update'] = HycoAuthoUpdate(loader=self)
+
+    # NetworkRuleSet Region
+    with self.command_group('relay namespace network-rule-set ip-rule', custom_command_type=relay_network_custom) as g:
+        g.custom_command('add', 'add_network_rule_set_ip_rule')
+        g.custom_command('remove', 'remove_network_rule_set_ip_rule')

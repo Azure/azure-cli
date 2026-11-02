@@ -261,10 +261,10 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
-def get_raw_functionapp(cli_ctx, resource_group_name, name):
+def get_raw_functionapp(cli_ctx, resource_group_name, name, api_version='2023-12-01'):
     site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
     subscription_id = get_subscription_id(cli_ctx)
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, api_version)
     request_url = cli_ctx.cloud.endpoints.resource_manager + site_url
     response = send_raw_request(cli_ctx, "GET", request_url)
     return response.json()
