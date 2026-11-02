@@ -21,6 +21,10 @@ def prepare_agent_hosting(cmd, resource_group_name, account_name, location, tags
                           kind=None, custom_domain=None, **inputs):
     request = build_request(cmd, resource_group_name, account_name, location, **inputs)
     checked = preflight(cmd.cli_ctx, request, kind=kind, custom_domain=custom_domain)
+    if checked.existing_account:
+        resources = checked.resources
+        return {'storage': resources.storage, 'management_identity': resources.management_identity,
+                'workload_identity': resources.workload_identity}
     try:
         return provision(cmd.cli_ctx, checked, tags, request=request)
     except (AzureError, ValidationError):

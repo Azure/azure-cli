@@ -231,28 +231,20 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self._assert_no_writes()
 
     @staticmethod
-    def _account_configuration(**changes):
+    def _account_with_hosting(**changes):
         configuration = {
             'name': 'default',
             'hostingType': 'ManagedCluster',
             'clusterResourceId': _CLUSTER,
+            'storageAccountResourceId': _STORAGE,
             'hostingManagementIdentityResourceId': _MANAGEMENT,
             'workloadIdentityResourceId': _WORKLOAD,
-            'storageAccountResourceId': _STORAGE,
         }
         configuration.update(changes)
-        return Account({'properties': {'agentHostingConfigurations': [configuration]}})
-
-    def _assert_account_hosting_conflict(self, account, message=None):
-        self.cognitive.accounts.get.side_effect = None
-        self.cognitive.accounts.get.return_value = account
-        with self.assertRaises(ValidationError) as caught:
-            preflight(self.cli_ctx, self._prepare())
-        if message:
-            self.assertIn(message, str(caught.exception))
-        self._assert_no_dependency_queries()
-        self.cognitive.accounts.get.reset_mock()
-        self.client_factory.reset_mock()
+        return Account({
+            'location': 'westus',
+            'properties': {'agentHostingConfigurations': [configuration]},
+        })
 
     def test_account_name_validation_precedes_dependency_queries(self):
         for name in ('a', 'a' * 65, 'bad.name', '-bad'):
@@ -280,80 +272,81 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
         self._assert_no_writes()
 
-    def test_existing_account_without_hosting_configuration_allows_first_add(self):
+    def test_existing_account_without_hosting_is_rejected_before_dependency_queries(self):
         self.cognitive.accounts.get.side_effect = None
         for properties in ({}, {'agentHostingConfigurations': []}):
             with self.subTest(properties=properties):
                 self.cognitive.accounts.get.reset_mock()
+                self.client_factory.reset_mock()
                 self.cognitive.accounts.get.return_value = Account({'properties': properties})
-                preflight(self.cli_ctx, self._prepare())
+                with self.assertRaisesRegex(ValidationError, 'already exists'):
+                    preflight(self.cli_ctx, self._prepare())
                 self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
-                self._assert_no_writes()
+                self.cognitive.check_domain_availability.assert_not_called()
+                self._assert_no_dependency_queries()
 
-    def test_equivalent_existing_hosting_configuration_allows_retry(self):
+    def test_existing_account_with_hosting_skips_dependency_preparation(self):
+        from azure.cli.command_modules.cognitiveservices.custom import create
         self.cognitive.accounts.get.side_effect = None
-        self.cognitive.accounts.get.return_value = self._account_configuration(
-            clusterResourceId='  ' + _CLUSTER.upper() + '/',
+        account = self._account_with_hosting(
+            clusterResourceId=' ' + _CLUSTER.upper() + '/',
+            storageAccountResourceId=_STORAGE.upper() + '/',
             hostingManagementIdentityResourceId=_MANAGEMENT.upper() + '///',
             workloadIdentityResourceId=' ' + _WORKLOAD.upper() + '/ ',
-            storageAccountResourceId=_STORAGE.upper() + '/',
         )
-        preflight(self.cli_ctx, self._prepare())
-        self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
-        self._assert_no_writes()
-
-    def test_incompatible_existing_hosting_resource_fails_before_dependency_queries(self):
-        for field in (
-                'clusterResourceId',
-                'hostingManagementIdentityResourceId',
-                'workloadIdentityResourceId',
-                'storageAccountResourceId'):
-            with self.subTest(field=field):
-                self._assert_account_hosting_conflict(
-                    self._account_configuration(**{
-                        field: _RG + '/providers/Example.Provider/resources/different'}),
-                    field)
-
-    def test_incompatible_or_malformed_existing_hosting_configuration_fails_early(self):
-        cases = {
-            'name': self._account_configuration(name='other'),
-            'hostingType': SimpleNamespace(properties=SimpleNamespace(agent_hosting_configurations=[
-                SimpleNamespace(
-                    name='default', hosting_type='Other', cluster_resource_id=_CLUSTER,
-                    hosting_management_identity_resource_id=_MANAGEMENT,
-                    workload_identity_resource_id=_WORKLOAD, storage_account_resource_id=_STORAGE)])),
-            'missing clusterResourceId': self._account_configuration(clusterResourceId=None),
-            'multiple configurations': Account({'properties': {'agentHostingConfigurations': [
-                self._account_configuration().properties.agent_hosting_configurations[0],
-                self._account_configuration().properties.agent_hosting_configurations[0],
-            ]}}),
-            'missing properties': Account(),
-        }
-        for case, account in cases.items():
-            with self.subTest(case=case):
-                self._assert_account_hosting_conflict(account)
-
-    def test_existing_account_checks_new_or_previously_absent_custom_domain(self):
-        self.cognitive.accounts.get.side_effect = None
-        for previous in ('old-domain', None):
-            with self.subTest(previous=previous):
-                self.cognitive.accounts.get.reset_mock()
-                self.cognitive.check_domain_availability.reset_mock()
-                self.cognitive.accounts.get.return_value = Account({'properties': {'customSubDomainName': previous}})
-                preflight(self.cli_ctx, self._prepare(), kind='AIServices', custom_domain='new-domain')
-                self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
-                self.assertEqual(
-                    self.cognitive.check_domain_availability.call_args.args[0].subdomain_name, 'new-domain')
-                self._assert_no_writes()
-
-    def test_existing_account_reuses_matching_custom_domain_with_single_get(self):
-        self.cognitive.accounts.get.side_effect = None
-        self.cognitive.accounts.get.return_value = Account({
-            'properties': {'customSubDomainName': 'existing-domain'}})
-        preflight(self.cli_ctx, self._prepare(), kind='AIServices', custom_domain='EXISTING-DOMAIN')
+        account.location = 'West US'
+        account.properties.custom_sub_domain_name = 'existing-domain'
+        self.cognitive.accounts.get.return_value = account
+        client = mock.Mock()
+        result = create(
+            SimpleNamespace(cli_ctx=self.cli_ctx), client, 'rg', 'foundry', 'S0', 'AIServices', 'westus',
+            custom_domain='EXISTING-DOMAIN', agent_hosting_cluster=_CLUSTER,
+            agent_hosting_storage=_STORAGE, agent_hosting_management_identity=_MANAGEMENT,
+            agent_hosting_workload_identity=_WORKLOAD)
+        self.assertIs(result, client.begin_create.return_value)
         self.cognitive.accounts.get.assert_called_once_with('rg', 'foundry')
         self.cognitive.check_domain_availability.assert_not_called()
-        self._assert_no_writes()
+        payload = client.begin_create.call_args.args[2].as_dict()
+        self.assertEqual(payload['properties']['agentHostingConfigurations'][0]['clusterResourceId'], _CLUSTER)
+        self._assert_no_dependency_queries()
+
+    def test_existing_account_location_mismatch_fails_before_dependency_queries(self):
+        self.cognitive.accounts.get.side_effect = None
+        account = self._account_with_hosting()
+        account.location = 'eastus'
+        self.cognitive.accounts.get.return_value = account
+        with self.assertRaisesRegex(ValidationError, 'existing location'):
+            preflight(self.cli_ctx, self._prepare())
+        self._assert_no_dependency_queries()
+
+    def test_existing_account_checks_changed_custom_domain(self):
+        self.cognitive.accounts.get.side_effect = None
+        account = self._account_with_hosting()
+        account.properties.custom_sub_domain_name = 'old-domain'
+        self.cognitive.accounts.get.return_value = account
+        preflight(self.cli_ctx, self._prepare(), kind='AIServices', custom_domain='new-domain')
+        self.cognitive.check_domain_availability.assert_called_once()
+        parameters = self.cognitive.check_domain_availability.call_args.args[0]
+        self.assertEqual(parameters.subdomain_name, 'new-domain')
+        self._assert_no_dependency_queries()
+
+    def test_existing_account_hosting_mismatch_fails_before_dependency_queries(self):
+        cases = {
+            'name': {'name': 'other'},
+            'hosting_type': {'hostingType': 'Other'},
+            'cluster': {'clusterResourceId': _CLUSTER + '-other'},
+            'storage': {'storageAccountResourceId': _STORAGE + 'other'},
+            'management_identity': {'hostingManagementIdentityResourceId': _MANAGEMENT + '-other'},
+            'workload_identity': {'workloadIdentityResourceId': _WORKLOAD + '-other'},
+        }
+        for case, changes in cases.items():
+            with self.subTest(case=case):
+                self.cognitive.accounts.get.side_effect = None
+                self.cognitive.accounts.get.return_value = self._account_with_hosting(**changes)
+                self.client_factory.reset_mock()
+                with self.assertRaisesRegex(ValidationError, 'incompatible agent hosting configuration'):
+                    preflight(self.cli_ctx, self._prepare())
+                self._assert_no_dependency_queries()
 
     def test_unavailable_or_unverified_domain_blocks_dependency_creation(self):
         for available in (False, None):
@@ -434,6 +427,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
         required = _operator_requirements(request, checked)
         self.assertEqual(required.count(
             (_RG, 'Microsoft.ManagedIdentity/userAssignedIdentities/write')), 1)
+        self.assertIn((_CLUSTER, 'Microsoft.ContainerService/managedClusters/write'), required)
 
         other = '11111111-1111-1111-1111-111111111111'
         management = _MANAGEMENT.replace(_SUB, other).replace('/resourceGroups/rg/', '/resourceGroups/identity-rg/')

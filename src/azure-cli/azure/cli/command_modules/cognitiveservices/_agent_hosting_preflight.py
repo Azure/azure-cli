@@ -61,8 +61,9 @@ class Grant:
     role_id: str
 
 
+# Keep the existing-account fast path explicit instead of inferring it from empty evidence fields.
 @dataclass(frozen=True)
-class PreflightResult:
+class PreflightResult:  # pylint: disable=too-many-instance-attributes
     resources: HostingRequest
     management_identity: Optional['Identity']
     workload_identity: Optional['Identity']
@@ -70,6 +71,7 @@ class PreflightResult:
     storage_sku: Optional[str] = None
     grants: tuple[Grant, ...] = ()
     checks: tuple = ()
+    existing_account: bool = False
 
 
 def build_request(cmd, resource_group_name, account_name, location, **inputs):
@@ -94,14 +96,18 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
     account = parse_resource_id(request.account_id)
     cognitive_client = get_cognitiveservices_management_client(cli_ctx)
     existing_account = _read_account(cognitive_client, account)
-    _check_account_hosting(existing_account, resources)
+    if existing_account is not None:
+        _validate_existing_account(existing_account, request, resources)
+        if custom_domain:
+            _check_domain(cognitive_client, existing_account, custom_domain, kind)
+        return PreflightResult(resources, None, None, None, existing_account=True)
     account_clients = _clients(cli_ctx, request.account_id, clients)
     if not account_clients.resource.resource_groups.check_existence(account['resource_group']):
         raise ValidationError(
             f"Resource group '{account['resource_group']}' does not exist. Create it before retrying.")
     _report(checks, 'Resource group', request.account_id, True, 'Exists', 'Existing resource group', 'None')
     if custom_domain:
-        _check_domain(cognitive_client, existing_account, custom_domain, kind)
+        _check_domain(cognitive_client, None, custom_domain, kind)
     with _read_check(checks, 'Tenants', request.account_id):
         _check_tenants(cli_ctx, clients, resources, checks)
     _report(checks, 'Distinct identities', request.account_id,
@@ -144,67 +150,56 @@ def _read_account(client, account):
         return None
 
 
-def _check_account_hosting(existing, resources):
-    if existing is None:
-        return
+def _validate_existing_account(existing, request, resources):
     properties = getattr(existing, 'properties', None)
-    if properties is None:
+    configurations = getattr(properties, 'agent_hosting_configurations', None) if properties else None
+    if not configurations:
         raise ValidationError(
-            f'Existing Account {resources.account_id} returned no readable properties. '
-            'Inspect the Account before retrying, or use a different Account.')
-    configurations = getattr(properties, 'agent_hosting_configurations', None)
-    if configurations is None:
-        return
-    if not isinstance(configurations, (list, tuple)):
+            f'Account {request.account_id} already exists without agent hosting. '
+            'Agent hosting can only be configured when the Account is created.')
+    if _normalize_location(getattr(existing, 'location', None)) != _normalize_location(request.location):
         raise ValidationError(
-            f'Existing Account {resources.account_id} returned an ambiguous agent hosting configuration. '
-            'Inspect the Account before retrying, or use a different Account.')
-    if len(configurations) == 0:
-        return
-    if len(configurations) != 1 or configurations[0] is None:
+            f'Account {request.account_id} already exists in location {getattr(existing, "location", None)}. '
+            f'Use the existing location instead of {request.location}.')
+    if not isinstance(configurations, (list, tuple)) or len(configurations) != 1 or configurations[0] is None:
         raise ValidationError(
-            f'Existing Account {resources.account_id} returned an ambiguous agent hosting configuration. '
-            'Inspect the Account before retrying, or use a different Account.')
+            f'Account {request.account_id} has an incompatible agent hosting configuration. '
+            'Updating or removing agentHostingConfigurations is not supported.')
 
     expected = {
         'name': 'default',
         'hosting_type': 'ManagedCluster',
         'cluster_resource_id': resources.cluster,
+        'storage_account_resource_id': resources.storage,
         'hosting_management_identity_resource_id': resources.management_identity,
         'workload_identity_resource_id': resources.workload_identity,
-        'storage_account_resource_id': resources.storage,
     }
     configuration = configurations[0]
-    fields = (
-        ('name', 'name', False),
-        ('hosting_type', 'hostingType', False),
-        ('cluster_resource_id', 'clusterResourceId', True),
-        ('hosting_management_identity_resource_id', 'hostingManagementIdentityResourceId', True),
-        ('workload_identity_resource_id', 'workloadIdentityResourceId', True),
-        ('storage_account_resource_id', 'storageAccountResourceId', True),
-    )
+    resource_ids = {
+        'cluster_resource_id',
+        'storage_account_resource_id',
+        'hosting_management_identity_resource_id',
+        'workload_identity_resource_id',
+    }
     mismatches = []
-    for attribute, display_name, arm_id in fields:
-        actual = getattr(configuration, attribute, None)
-        expected_value = expected[attribute]
-        if not isinstance(actual, str) or not actual.strip():
-            raise ValidationError(
-                f'Existing Account {resources.account_id} has an incomplete agent hosting configuration '
-                f'(missing {display_name}). Inspect the Account before retrying, or use a different Account.')
-        if arm_id:
-            matches = _normalize_arm_id(actual) == _normalize_arm_id(expected_value)
+    for field, expected_value in expected.items():
+        actual = getattr(configuration, field, None)
+        if field in resource_ids:
+            matches = (
+                isinstance(actual, str) and
+                _normalize_resource_id(actual) == _normalize_resource_id(expected_value)
+            )
         else:
             matches = actual == expected_value
         if not matches:
-            mismatches.append(display_name)
+            mismatches.append(field)
     if mismatches:
         raise ValidationError(
-            f'Existing Account {resources.account_id} has an incompatible agent hosting configuration '
-            f'({", ".join(mismatches)}). Updating or removing agentHostingConfigurations is not supported. '
-            'Use the existing configuration or create a different Account.')
+            f'Account {request.account_id} has an incompatible agent hosting configuration '
+            f'({", ".join(mismatches)}). Updating or removing agentHostingConfigurations is not supported.')
 
 
-def _normalize_arm_id(value):
+def _normalize_resource_id(value):
     return value.strip().rstrip('/').lower()
 
 
@@ -739,9 +734,7 @@ def _operator_requirements(request, checked):
         required.append((parent, 'Microsoft.Storage/storageAccounts/write'))
     identity_scope = _existing_scope(resources.management_identity, checked.management_identity is not None)
     required.append((identity_scope, 'Microsoft.ManagedIdentity/userAssignedIdentities/assign/action'))
-    cluster = parse_resource_id(resources.cluster)
-    required.append((f'/subscriptions/{cluster["subscription"]}/resourceGroups/{cluster["resource_group"]}',
-                     'Microsoft.ContainerService/managedClusters/write'))
+    required.append((resources.cluster, 'Microsoft.ContainerService/managedClusters/write'))
     return required
 
 
