@@ -6,7 +6,7 @@
 import configparser
 from knack.log import get_logger
 
-from msrest.exceptions import DeserializationError
+from azure.core.exceptions import DeserializationError
 
 from azure.mgmt.batch import BatchManagementClient
 from azure.core import MatchConditions
