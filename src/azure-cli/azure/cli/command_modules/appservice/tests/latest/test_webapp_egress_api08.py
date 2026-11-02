@@ -104,7 +104,7 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self.assertEqual(configuration['enabled'], enabled)
         return configuration
 
-    def _assert_cannot_enable_empty_configuration(self):
+    def _assert_cannot_update_empty_configuration(self):
         from azure.cli.core import util as cli_util
         from azure.cli.core.aaz._client import AAZBaseClient
         from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -112,9 +112,9 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         before = self._configuration()
         self.assertFalse(before.get('connections'))
         error = (
-            'Cannot enable egress without a connection. Add a connection using '
+            'Cannot update the egress enabled state without a connection. Add a connection using '
             '`az webapp config egress connection add`, then retry.')
-        for arguments in ['--enabled true', '--enabled']:
+        for arguments in ['--enabled true', '--enabled false', '--enabled']:
             with patch.object(
                     AAZBaseClient, 'send_request', autospec=True,
                     side_effect=AAZBaseClient.send_request) as send_request, \
@@ -202,7 +202,7 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         sql_arguments = (
             ' --protocol Tds --auth ManagedIdentity --source ConnectionStrings --value-setting OrdersDb '
             '--identity-scope https://database.windows.net/.default')
-        self._assert_cannot_enable_empty_configuration()
+        self._assert_cannot_update_empty_configuration()
 
         self.assertEqual(self._egress(api_arguments).get_output_in_json(), api)
         self._assert_configuration({'api': api}, 'Disabled')
@@ -254,4 +254,4 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self._assert_configuration({'orders-db': sql}, 'Enabled')
         self._egress('connection remove --connection-name ORDERS-DB')
         self.assertEqual(self._configuration(), {})
-        self._assert_cannot_enable_empty_configuration()
+        self._assert_cannot_update_empty_configuration()

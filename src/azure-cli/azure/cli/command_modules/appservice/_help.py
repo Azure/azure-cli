@@ -1460,7 +1460,7 @@ long-summary: |
   Read the existing egress configuration, update its enabled state, and write it back while
   preserving all connections and their settings, identities, and credential injection configuration.
   Use --enabled true to enable virtual connections or --enabled false to disable them.
-  Add at least one connection with "az webapp config egress connection add" before enabling egress.
+  Add at least one connection with "az webapp config egress connection add" before enabling or disabling egress.
   If --enabled is omitted, write back the existing configuration without changing its enabled state.
   Manage individual connections with "az webapp config egress connection add" and
   "az webapp config egress connection remove".

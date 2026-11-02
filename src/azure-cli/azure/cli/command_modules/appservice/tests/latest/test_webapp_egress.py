@@ -134,16 +134,16 @@ class EgressCommandTests(unittest.TestCase):
 
     def test_webapp_egress_set_enabled_boolean_handler(self):
         for slot in [None, 'staging']:
-            for configuration in [None, {}, {'connections': None}, {'connections': {}}, {'enabled': 'Enabled'},
-                                  {'connections': {}, 'enabled': 'Disabled'}]:
+            for configuration in [None, {}, {'connections': None}, {'connections': {}}, {'enabled': None},
+                                  {'enabled': 'Enabled'}, {'connections': {}, 'enabled': 'Disabled'}]:
                 for enabled, backend_enabled in [(True, 'Enabled'), (False, 'Disabled'), (None, None)]:
                     with self.subTest(slot=slot, configuration=configuration, enabled=enabled):
                         self.requests.clear()
                         self.config = copy.deepcopy(configuration)
-                        if enabled is True:
+                        if enabled is not None:
                             with self.assertRaisesRegex(
                                     InvalidArgumentValueError,
-                                    'Cannot enable egress without a connection.*'
+                                    'Cannot update the egress enabled state without a connection.*'
                                     'az webapp config egress connection add.*then retry'):
                                 custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
                             self.assertEqual(len(self.requests), 1)
@@ -161,14 +161,15 @@ class EgressCommandTests(unittest.TestCase):
                         self.assertEqual(self.requests[1]['body'], {'properties': expected})
                         self.assertEqual(result['properties'], expected)
 
-    def test_webapp_egress_set_cannot_enable_without_connections_cli(self):
+    def test_webapp_egress_set_cannot_update_state_without_connections_cli(self):
         error = (
-            'Cannot enable egress without a connection. Add a connection using '
+            'Cannot update the egress enabled state without a connection. Add a connection using '
             '`az webapp config egress connection add`, then retry.')
         for slot in [None, 'staging']:
-            for configuration in [None, {}, {'connections': None}, {'connections': {}}, {'enabled': 'Enabled'},
-                                  {'connections': {}, 'enabled': 'Disabled'}]:
-                for arguments in [['--enabled', 'true'], ['--enabled', 'TrUe'], ['--enabled']]:
+            for configuration in [None, {}, {'connections': None}, {'connections': {}}, {'enabled': None},
+                                  {'enabled': 'Enabled'}, {'connections': {}, 'enabled': 'Disabled'}]:
+                for arguments in [['--enabled', 'true'], ['--enabled', 'TrUe'],
+                                  ['--enabled', 'false'], ['--enabled', 'FaLsE'], ['--enabled']]:
                     with self.subTest(slot=slot, configuration=configuration, arguments=arguments):
                         self.requests.clear()
                         self.config = copy.deepcopy(configuration)
@@ -194,24 +195,23 @@ class EgressCommandTests(unittest.TestCase):
                 with self.subTest(slot=slot, enabled=enabled):
                     self.requests.clear()
                     self.config = {}
-                    if enabled is True:
+                    if enabled is not None:
                         with self.assertRaisesRegex(
-                                InvalidArgumentValueError, 'Cannot enable egress without a connection'):
+                                InvalidArgumentValueError,
+                                'Cannot update the egress enabled state without a connection'):
                             custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
                         self.assertEqual(len(self.requests), 1)
                         self.assertEqual(self.config, {})
                     else:
                         result = custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
                         expected = {'connections': {}}
-                        if enabled is False:
-                            expected['enabled'] = 'Disabled'
                         self.assertEqual(result['properties'], expected)
                         self.assertEqual(len(self.requests), 2)
                         self._assert_request(1, 'PUT', slot)
                     self._assert_request(0, 'GET', slot)
 
         for slot in [None, 'staging']:
-            for arguments in [['--enabled', 'true'], ['--enabled']]:
+            for arguments in [['--enabled', 'true'], ['--enabled', 'false'], ['--enabled']]:
                 with self.subTest(slot=slot, arguments=arguments):
                     self.requests.clear()
                     self.config = {}
@@ -219,7 +219,9 @@ class EgressCommandTests(unittest.TestCase):
                         self._invoke(
                             ['webapp', 'config', 'egress', 'set', '-g', 'MyRG', '-n', 'MyApp'] +
                             arguments + (['--slot', slot] if slot else []), expected_code=1)
-                    self.assertTrue(any('Cannot enable egress without a connection' in entry for entry in logs.output))
+                    self.assertTrue(any(
+                        'Cannot update the egress enabled state without a connection' in entry
+                        for entry in logs.output))
                     self.assertEqual(len(self.requests), 1)
                     self._assert_request(0, 'GET', slot)
                     self.assertEqual(self.config, {})

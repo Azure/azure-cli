@@ -4098,9 +4098,9 @@ def set_egress_config(cmd, resource_group_name, name, enabled=None, slot=None):
         enabled = 'Enabled' if enabled else 'Disabled'
     config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
     connections = config.get('connections') or {}
-    if enabled == 'Enabled' and not connections:
+    if enabled is not None and not connections:
         raise InvalidArgumentValueError(
-            "Cannot enable egress without a connection. Add a connection using "
+            "Cannot update the egress enabled state without a connection. Add a connection using "
             "`az webapp config egress connection add`, then retry.")
     if enabled is None:
         enabled = config.get('enabled')
