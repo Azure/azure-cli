@@ -3030,6 +3030,49 @@ class AKSAgentPoolUpdateDecorator:
             agentpool.security_profile.ssh_access = ssh_access
         return agentpool
 
+    def update_vm_size(self, agentpool: AgentPool) -> AgentPool:
+        """Update the VM size of a VirtualMachineScaleSets based AgentPool object.
+
+        Changing the VM size triggers a rolling replacement: AKS surges nodes with the new size, then cordons,
+        drains and deletes the old nodes according to the node pool's upgrade settings.
+
+        VirtualMachines node pools manage VM sizes through scale profiles, so they are skipped here unless the
+        cluster autoscaler is being enabled or disabled (see update_auto_scaler_properties_vms).
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        node_vm_size = self.context.raw_param.get("node_vm_size")
+        if not node_vm_size:
+            return agentpool
+
+        if self.context.get_vm_set_type() == CONST_VIRTUAL_MACHINES:
+            if not (
+                self.context.raw_param.get("enable_cluster_autoscaler") or
+                self.context.raw_param.get("disable_cluster_autoscaler")
+            ):
+                raise InvalidArgumentValueError(
+                    "--node-vm-size can only be used with --enable-cluster-autoscaler or "
+                    "--disable-cluster-autoscaler for VirtualMachines node pools. "
+                    'Please use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" '
+                    "to change the VM size of a VirtualMachines node pool."
+                )
+            return agentpool
+
+        # already set to the same value, directly return
+        if agentpool.vm_size and agentpool.vm_size.lower() == node_vm_size.lower():
+            return agentpool
+
+        msg = (
+            f"You're going to resize agentpool {agentpool.name} from '{agentpool.vm_size}' to '{node_vm_size}'. "
+            "All nodes in the node pool will be replaced with nodes of the new size. Proceed?"
+        )
+        if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+            raise DecoratorEarlyExitException()
+        agentpool.vm_size = node_vm_size
+        return agentpool
+
     def update_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -3091,6 +3134,8 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_secure_boot(agentpool)
         # update ssh access
         agentpool = self.update_ssh_access(agentpool)
+        # update vm size
+        agentpool = self.update_vm_size(agentpool)
         # update local DNS profile
         agentpool = self.update_localdns_profile(agentpool)
         # update gpu profile

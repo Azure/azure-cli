@@ -17430,3 +17430,43 @@ spec:
                 self.is_empty(),
             ],
         )
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_nodepool_update_vm_size(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'nodepool_name': 'nodepool2',
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --node-vm-size=Standard_D2s_v5 --ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # add a VMSS user node pool
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} '
+                 '--name={nodepool_name} --node-count=1 --node-vm-size=Standard_D2s_v5', checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('vmSize', 'Standard_D2s_v5'),
+                 ])
+
+        # resize the node pool
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} '
+                 '--name={nodepool_name} --node-vm-size=Standard_D4s_v5 --yes', checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('vmSize', 'Standard_D4s_v5'),
+                 ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])

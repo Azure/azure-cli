@@ -4021,6 +4021,127 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         ), self.assertRaises(DecoratorEarlyExitException):
             dec_4.update_ssh_access(agentpool_4)
 
+    def _set_vms_pool_type(self, agentpool):
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool.type = CONST_VIRTUAL_MACHINES
+        else:
+            if agentpool.properties is None:
+                agentpool.properties = self.models.AgentPoolManagedClusterAgentPoolProfileProperties()
+            agentpool.properties.type_properties_type = CONST_VIRTUAL_MACHINES
+        return agentpool
+
+    def common_update_vm_size(self):
+        # set a new value with --yes, no prompt
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"node_vm_size": "Standard_D4s_v5", "yes": True},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_vm_size(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(vm_size="Standard_D2s_v5")
+        dec_1.context.attach_agentpool(agentpool_1)
+        with patch("azure.cli.command_modules.acs.agentpool_decorator.prompt_y_n") as mock_prompt:
+            dec_agentpool_1 = dec_1.update_vm_size(agentpool_1)
+        mock_prompt.assert_not_called()
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(vm_size="Standard_D4s_v5")
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
+
+        # None, no change
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"node_vm_size": None},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_2 = self.create_initialized_agentpool_instance(vm_size="Standard_D2s_v5")
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.update_vm_size(agentpool_2)
+        ground_truth_agentpool_2 = self.create_initialized_agentpool_instance(vm_size="Standard_D2s_v5")
+        self.assertEqual(dec_agentpool_2, ground_truth_agentpool_2)
+
+        # already set to the same value (case-insensitive), no prompt needed, directly return
+        dec_3 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"node_vm_size": "standard_d2s_v5"},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_3 = self.create_initialized_agentpool_instance(vm_size="Standard_D2s_v5")
+        dec_3.context.attach_agentpool(agentpool_3)
+        with patch("azure.cli.command_modules.acs.agentpool_decorator.prompt_y_n") as mock_prompt:
+            dec_agentpool_3 = dec_3.update_vm_size(agentpool_3)
+        mock_prompt.assert_not_called()
+        ground_truth_agentpool_3 = self.create_initialized_agentpool_instance(vm_size="Standard_D2s_v5")
+        self.assertEqual(dec_agentpool_3, ground_truth_agentpool_3)
+
+        # prompt accepted
+        dec_4 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"node_vm_size": "Standard_D4s_v5", "yes": False},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_4 = self.create_initialized_agentpool_instance(vm_size="Standard_D2s_v5")
+        dec_4.context.attach_agentpool(agentpool_4)
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.prompt_y_n",
+            return_value=True,
+        ) as mock_prompt:
+            dec_agentpool_4 = dec_4.update_vm_size(agentpool_4)
+        mock_prompt.assert_called_once()
+        self.assertEqual(dec_agentpool_4.vm_size, "Standard_D4s_v5")
+
+        # prompt rejected, early exit
+        dec_5 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"node_vm_size": "Standard_D4s_v5", "yes": False},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_5 = self.create_initialized_agentpool_instance(vm_size="Standard_D2s_v5")
+        dec_5.context.attach_agentpool(agentpool_5)
+        with patch(
+            "azure.cli.command_modules.acs.agentpool_decorator.prompt_y_n",
+            return_value=False,
+        ), self.assertRaises(DecoratorEarlyExitException):
+            dec_5.update_vm_size(agentpool_5)
+
+        # VirtualMachines pool without autoscaler change, raise error
+        dec_6 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"node_vm_size": "Standard_D4s_v5", "yes": True},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_6 = self._set_vms_pool_type(self.create_initialized_agentpool_instance())
+        dec_6.context.attach_agentpool(agentpool_6)
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_6.update_vm_size(agentpool_6)
+
+        # VirtualMachines pool with autoscaler change, handled by update_auto_scaler_properties_vms, no-op here
+        dec_7 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"node_vm_size": "Standard_D4s_v5", "enable_cluster_autoscaler": True},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_7 = self._set_vms_pool_type(self.create_initialized_agentpool_instance())
+        dec_7.context.attach_agentpool(agentpool_7)
+        with patch("azure.cli.command_modules.acs.agentpool_decorator.prompt_y_n") as mock_prompt:
+            dec_agentpool_7 = dec_7.update_vm_size(agentpool_7)
+        mock_prompt.assert_not_called()
+        self.assertIsNone(dec_agentpool_7.vm_size)
+
     def common_update_managed_dranet(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
             self.cmd,
@@ -4322,6 +4443,9 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
     def test_update_ssh_access(self):
         self.common_update_ssh_access()
 
+    def test_update_vm_size(self):
+        self.common_update_vm_size()
+
     def test_update_agentpool_profile_default(self):
         import inspect
 
@@ -4508,6 +4632,9 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
 
     def test_update_ssh_access(self):
         self.common_update_ssh_access()
+
+    def test_update_vm_size(self):
+        self.common_update_vm_size()
 
     def test_update_agentpool_profile_default(self):
         import inspect
