@@ -1107,6 +1107,9 @@ class _UpdateHelper:
         properties.ldap_enabled = AAZBoolType(
             serialized_name="ldapEnabled",
         )
+        properties.ldap_server_type = AAZStrType(
+            serialized_name="ldapServerType",
+        )
         properties.maximum_number_of_files = AAZIntType(
             serialized_name="maximumNumberOfFiles",
             flags={"read_only": True},
