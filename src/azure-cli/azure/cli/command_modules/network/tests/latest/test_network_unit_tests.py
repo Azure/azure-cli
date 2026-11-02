@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import unittest
 
 from unittest import mock
@@ -88,6 +89,121 @@ class TestNetworkUnitTests(unittest.TestCase):
         result = parent_with_empty_collection.collection
         self.assertEqual(len(result), 2)
         self.assertEqual(result[1].value, 'noodle')
+
+
+class TestDataReplicationPrivateEndpoint(unittest.TestCase):
+    def setUp(self):
+        from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections import custom
+
+        self.custom = custom
+        mapping_patch = mock.patch.dict(custom.TYPE_CLIENT_MAPPING, clear=True)
+        mapping_patch.start()
+        self.addCleanup(mapping_patch.stop)
+        custom.register_providers()
+        self.cmd = mock.Mock()
+        self.resource_provider = 'Microsoft.DataReplication/replicationVaults'
+        self.resource_url = (
+            '/subscriptions/{subscriptionId}/resourceGroups/test-rg/'
+            'providers/Microsoft.DataReplication/replicationVaults/test-vault'
+        )
+        self.connections_url = self.resource_url + '/privateEndpointConnections?api-version=2026-05-01'
+        self.connection_url = self.resource_url + '/privateEndpointConnections/test-connection?api-version=2026-05-01'
+        self.connection = {
+            'name': 'test-connection',
+            'properties': {
+                'provisioningState': 'Succeeded',
+                'privateEndpoint': {'id': '/subscriptions/test/privateEndpoints/test-endpoint'},
+                'privateLinkServiceConnectionState': {'status': 'Pending', 'description': ''},
+            },
+        }
+        request_patch = mock.patch(
+            'azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.'
+            'resource_providers.send_raw_request'
+        )
+        self.send_request = request_patch.start()
+        self.addCleanup(request_patch.stop)
+        self.send_request.return_value.json.return_value = self.connection
+
+    def test_network_datareplication_provider(self):
+        from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.resource_providers import (
+            GeneralPrivateEndpointClient,
+        )
+
+        for resource_provider in (self.resource_provider, self.resource_provider.lower()):
+            with self.subTest(resource_provider=resource_provider):
+                client = self.custom._get_client(self.custom.TYPE_CLIENT_MAPPING, resource_provider)
+                self.assertIsInstance(client, GeneralPrivateEndpointClient)
+                self.assertEqual(client.rp, self.resource_provider)
+                self.assertEqual(client.api_version, '2026-05-01')
+                self.assertEqual(client.resource_get_api_version, '2026-05-01')
+                self.assertTrue(client.support_list)
+
+    def test_network_datareplication_private_link_resource_list(self):
+        resources = [{'name': 'test-link', 'properties': {'groupId': 'test-group'}}]
+        self.send_request.return_value.json.return_value = {'value': resources}
+
+        result = self.custom.list_private_link_resource(
+            self.cmd, 'test-rg', 'test-vault', self.resource_provider
+        )
+
+        self.assertEqual(result, resources)
+        self.send_request.assert_called_once_with(
+            self.cmd.cli_ctx, 'get', self.resource_url + '/privateLinkResources?api-version=2026-05-01'
+        )
+
+    def test_network_datareplication_private_endpoint_connection_list(self):
+        self.send_request.return_value.json.return_value = {'value': [self.connection]}
+
+        result = self.custom.list_private_endpoint_connection(
+            self.cmd, 'test-rg', 'test-vault', self.resource_provider
+        )
+
+        self.assertEqual(result, [self.connection])
+        self.send_request.assert_called_once_with(self.cmd.cli_ctx, 'get', self.connections_url)
+
+    def test_network_datareplication_private_endpoint_connection_show(self):
+        result = self.custom.show_private_endpoint_connection(
+            self.cmd, 'test-rg', 'test-vault', self.resource_provider, 'test-connection'
+        )
+
+        self.assertEqual(result, self.connection)
+        self.send_request.assert_called_once_with(self.cmd.cli_ctx, 'get', self.connection_url)
+
+    def test_network_datareplication_private_endpoint_connection_approve_and_reject(self):
+        for handler, status in (
+            (self.custom.approve_private_endpoint_connection, 'Approved'),
+            (self.custom.reject_private_endpoint_connection, 'Rejected'),
+        ):
+            with self.subTest(status=status):
+                self.send_request.reset_mock()
+                with mock.patch(
+                    'azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.'
+                    'resource_providers.time.sleep'
+                ):
+                    result = handler(
+                        self.cmd, 'test-rg', 'test-vault', self.resource_provider,
+                        'test-connection', 'Test description'
+                    )
+
+                self.assertEqual(result, self.connection)
+                self.assertEqual(result['properties']['privateLinkServiceConnectionState'], {
+                    'status': status, 'description': 'Test description'
+                })
+                self.assertEqual(self.send_request.call_args_list, [
+                    mock.call(self.cmd.cli_ctx, 'get', self.connection_url),
+                    mock.call(self.cmd.cli_ctx, 'put', self.connection_url, body=json.dumps(self.connection)),
+                    mock.call(self.cmd.cli_ctx, 'get', self.connection_url),
+                ])
+
+    def test_network_datareplication_private_endpoint_connection_delete(self):
+        self.send_request.return_value.status_code = 200
+
+        result = self.custom.remove_private_endpoint_connection(
+            self.cmd, 'test-rg', 'test-vault', self.resource_provider, 'test-connection'
+        )
+
+        self.assertIsNone(result)
+        self.send_request.assert_called_once_with(self.cmd.cli_ctx, 'delete', self.connection_url)
 
 
 class TestVpnConnectionCertAuthNoSharedKey(unittest.TestCase):
