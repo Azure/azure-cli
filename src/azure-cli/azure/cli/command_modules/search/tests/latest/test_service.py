@@ -146,7 +146,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('sku.name', '{sku_name}'),
                     self.check('identity.type', '{identity_type}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westus')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_update(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -234,7 +234,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
         self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 0)
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westus')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_update_private_endpoint(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
@@ -266,7 +266,7 @@ class AzureSearchServicesTests(ScenarioTest):
             checks=[self.check('name', '{name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_update_msi(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
