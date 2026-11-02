@@ -4092,18 +4092,17 @@ def _put_egress_config(cmd, resource_group_name, name, connections=None, enabled
 
 
 def set_egress_config(cmd, resource_group_name, name, enabled=None, slot=None):
-    if enabled is not None:
-        if not isinstance(enabled, bool):
-            raise InvalidArgumentValueError("Specify true or false for --enabled.")
-        enabled = 'Enabled' if enabled else 'Disabled'
+    if enabled is None:
+        raise RequiredArgumentMissingError("Specify --enabled true or --enabled false.")
+    if not isinstance(enabled, bool):
+        raise InvalidArgumentValueError("Specify true or false for --enabled.")
+    enabled = 'Enabled' if enabled else 'Disabled'
     config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
     connections = config.get('connections') or {}
-    if enabled is not None and not connections:
+    if not connections:
         raise InvalidArgumentValueError(
             "Cannot update the egress enabled state without a connection. Add a connection using "
             "`az webapp config egress connection add`, then retry.")
-    if enabled is None:
-        enabled = config.get('enabled')
     return _put_egress_config(cmd, resource_group_name, name, connections, enabled, slot)
 
 
@@ -4134,10 +4133,16 @@ def add_egress_connection(cmd, resource_group_name, name, connection_name, proto
     return result_connections[_find_egress_connection(result_connections, connection_name)]
 
 
-def remove_egress_connection(cmd, resource_group_name, name, connection_name, slot=None):
+def remove_egress_connection(cmd, resource_group_name, name, connection_name, slot=None, yes=False):
     config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
     connections = dict(config.get('connections') or {})
     del connections[_find_egress_connection(connections, connection_name)]
+    if not connections:
+        from azure.cli.core.util import user_confirmation
+
+        logger.warning("Removing the last connection clears the entire egress configuration, "
+                       "including its enabled state.")
+        user_confirmation("Are you sure you want to remove the last egress connection?", yes=yes)
     enabled = config.get('enabled') if connections else None
     _put_egress_config(cmd, resource_group_name, name, connections or None, enabled, slot)
 

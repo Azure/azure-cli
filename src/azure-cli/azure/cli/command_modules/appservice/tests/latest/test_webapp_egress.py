@@ -5,6 +5,7 @@
 
 import copy
 import io
+import logging
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from types import SimpleNamespace
@@ -18,6 +19,8 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.mock import DummyCli
 from azure.cli.command_modules.appservice import AppserviceCommandsLoader
 from azure.cli.command_modules.appservice import custom
+from knack.prompting import NoTTYException
+from knack.util import CLIError
 
 
 SUBSCRIPTION = '00000000-0000-0000-0000-000000000000'
@@ -102,7 +105,6 @@ class EgressCommandTests(unittest.TestCase):
             (['--enabled', 'TrUe'], 'Enabled'),
             (['--enabled', 'FaLsE'], 'Disabled'),
             (['--enabled'], 'Enabled'),
-            ([], None),
         ]
         for slot in [None, 'staging']:
             for existing_enabled in ['Enabled', 'Disabled', None]:
@@ -116,10 +118,7 @@ class EgressCommandTests(unittest.TestCase):
                             'webapp', 'config', 'egress', 'set', '-g', 'MyRG', '-n', 'MyApp',
                         ] + arguments + (['--slot', slot] if slot else [])
                         result = self._invoke(command)
-                        expected = {'connections': connections}
-                        expected_enabled = existing_enabled if enabled is None else enabled
-                        if expected_enabled is not None:
-                            expected['enabled'] = expected_enabled
+                        expected = {'connections': connections, 'enabled': enabled}
                         self.assertEqual(len(self.requests), 2)
                         self._assert_request(0, 'GET', slot)
                         self._assert_request(1, 'PUT', slot)
@@ -136,30 +135,57 @@ class EgressCommandTests(unittest.TestCase):
         for slot in [None, 'staging']:
             for configuration in [None, {}, {'connections': None}, {'connections': {}}, {'enabled': None},
                                   {'enabled': 'Enabled'}, {'connections': {}, 'enabled': 'Disabled'}]:
-                for enabled, backend_enabled in [(True, 'Enabled'), (False, 'Disabled'), (None, None)]:
+                for enabled in [True, False]:
                     with self.subTest(slot=slot, configuration=configuration, enabled=enabled):
                         self.requests.clear()
                         self.config = copy.deepcopy(configuration)
-                        if enabled is not None:
-                            with self.assertRaisesRegex(
-                                    InvalidArgumentValueError,
-                                    'Cannot update the egress enabled state without a connection.*'
-                                    'az webapp config egress connection add.*then retry'):
-                                custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
-                            self.assertEqual(len(self.requests), 1)
-                            self._assert_request(0, 'GET', slot)
-                            self.assertEqual(self.config, configuration)
-                            continue
-                        result = custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
-                        expected = {'connections': {}}
-                        expected_enabled = (configuration or {}).get('enabled') if enabled is None else backend_enabled
-                        if expected_enabled is not None:
-                            expected['enabled'] = expected_enabled
-                        self.assertEqual(len(self.requests), 2)
+                        with self.assertRaisesRegex(
+                                InvalidArgumentValueError,
+                                'Cannot update the egress enabled state without a connection.*'
+                                'az webapp config egress connection add.*then retry'):
+                            custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
+                        self.assertEqual(len(self.requests), 1)
                         self._assert_request(0, 'GET', slot)
-                        self._assert_request(1, 'PUT', slot)
-                        self.assertEqual(self.requests[1]['body'], {'properties': expected})
-                        self.assertEqual(result['properties'], expected)
+                        self.assertEqual(self.config, configuration)
+
+    def test_webapp_egress_set_requires_enabled_cli(self):
+        for slot in [None, 'staging']:
+            for configuration in [None, {}, {'connections': {}}, {
+                    'enabled': 'Enabled', 'connections': {
+                        'cache': {'protocol': 'Redis', 'auth': 'Credential',
+                                  'settings': {'Redis': {'role': 'Value'}}},
+                    }}]:
+                with self.subTest(slot=slot, configuration=configuration):
+                    self.requests.clear()
+                    self.client.send_request.reset_mock()
+                    self.config = copy.deepcopy(configuration)
+                    with self.assertLogs(level='ERROR') as errors:
+                        self._invoke(
+                            ['webapp', 'config', 'egress', 'set', '-g', 'MyRG', '-n', 'MyApp'] +
+                            (['--slot', slot] if slot else []), expected_code=2)
+                    self.assertTrue(any('--enabled' in entry for entry in errors.output))
+                    self.client.send_request.assert_not_called()
+                    self.assertEqual(self.requests, [])
+                    self.assertEqual(self.config, configuration)
+
+    def test_webapp_egress_set_requires_enabled_handler(self):
+        for slot in [None, 'staging']:
+            for enabled_arguments in [{}, {'enabled': None}]:
+                for configuration in [None, {}, {'connections': {}}, {
+                        'enabled': 'Disabled', 'connections': {
+                            'cache': {'protocol': 'Redis', 'auth': 'Credential',
+                                      'settings': {'Redis': {'role': 'Value'}}},
+                        }}]:
+                    with self.subTest(slot=slot, enabled_arguments=enabled_arguments, configuration=configuration):
+                        self.requests.clear()
+                        self.client.send_request.reset_mock()
+                        self.config = copy.deepcopy(configuration)
+                        with self.assertRaisesRegex(
+                                RequiredArgumentMissingError, 'Specify --enabled true or --enabled false'):
+                            custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', slot=slot, **enabled_arguments)
+                        self.client.send_request.assert_not_called()
+                        self.assertEqual(self.requests, [])
+                        self.assertEqual(self.config, configuration)
 
     def test_webapp_egress_set_cannot_update_state_without_connections_cli(self):
         error = (
@@ -203,12 +229,12 @@ class EgressCommandTests(unittest.TestCase):
                         self.assertEqual(len(self.requests), 1)
                         self.assertEqual(self.config, {})
                     else:
-                        result = custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=enabled, slot=slot)
-                        expected = {'connections': {}}
-                        self.assertEqual(result['properties'], expected)
-                        self.assertEqual(len(self.requests), 2)
-                        self._assert_request(1, 'PUT', slot)
-                    self._assert_request(0, 'GET', slot)
+                        with self.assertRaisesRegex(
+                                RequiredArgumentMissingError, 'Specify --enabled true or --enabled false'):
+                            custom.set_egress_config(self.cmd, 'MyRG', 'MyApp', enabled=None, slot=slot)
+                        self.assertEqual(self.requests, [])
+                    if enabled is not None:
+                        self._assert_request(0, 'GET', slot)
 
         for slot in [None, 'staging']:
             for arguments in [['--enabled', 'true'], ['--enabled', 'false'], ['--enabled']]:
@@ -371,9 +397,10 @@ class EgressCommandTests(unittest.TestCase):
                         if use_cli:
                             result = self._invoke(
                                 ['webapp', 'config', 'egress', 'connection', 'remove', '-g', 'MyRG', '-n', 'MyApp',
-                                 '--connection-name', 'CACHE'] + (['--slot', slot] if slot else []))
+                                 '--connection-name', 'CACHE', '--yes'] + (['--slot', slot] if slot else []))
                         else:
-                            result = custom.remove_egress_connection(self.cmd, 'MyRG', 'MyApp', 'CACHE', slot=slot)
+                            result = custom.remove_egress_connection(
+                                self.cmd, 'MyRG', 'MyApp', 'CACHE', slot=slot, yes=True)
                         self.assertIsNone(result)
                         self.assertEqual(len(self.requests), 2)
                         self._assert_request(0, 'GET', slot)
@@ -383,6 +410,140 @@ class EgressCommandTests(unittest.TestCase):
                         shown = custom.show_egress_config(self.cmd, 'MyRG', 'MyApp', slot=slot)
                         self.assertEqual(shown['properties'], {})
                         self._assert_request(2, 'GET', slot)
+
+    def test_webapp_egress_remove_last_connection_confirmed(self):
+        for slot in [None, 'staging']:
+            for use_cli in [False, True]:
+                with self.subTest(slot=slot, use_cli=use_cli):
+                    self.requests.clear()
+                    self.config = {'enabled': 'Enabled', 'connections': {
+                        'cache': {'protocol': 'Redis', 'auth': 'Credential',
+                                  'settings': {'Redis': {'role': 'Value'}}},
+                    }}
+                    with mock.patch('knack.prompting.prompt_y_n', return_value=True) as prompt, \
+                            self.assertLogs(custom.logger, level='WARNING') as warnings:
+                        if use_cli:
+                            result = self._invoke(
+                                ['webapp', 'config', 'egress', 'connection', 'remove', '-g', 'MyRG', '-n', 'MyApp',
+                                 '--connection-name', 'CACHE'] + (['--slot', slot] if slot else []))
+                        else:
+                            result = custom.remove_egress_connection(self.cmd, 'MyRG', 'MyApp', 'CACHE', slot=slot)
+                    prompt.assert_called_once_with("Are you sure you want to remove the last egress connection?")
+                    self.assertTrue(any(
+                        'Removing the last connection clears the entire egress configuration, '
+                        'including its enabled state.'
+                        in entry for entry in warnings.output))
+                    self.assertIsNone(result)
+                    self.assertEqual(len(self.requests), 2)
+                    self._assert_request(0, 'GET', slot)
+                    self._assert_request(1, 'PUT', slot)
+                    self.assertEqual(self.requests[1]['body'], {'properties': {}})
+
+    def test_webapp_egress_remove_last_connection_cancelled_or_no_tty(self):
+        for slot in [None, 'staging']:
+            for use_cli in [False, True]:
+                for no_tty in [False, True]:
+                    with self.subTest(slot=slot, use_cli=use_cli, no_tty=no_tty):
+                        self.requests.clear()
+                        self.config = {'enabled': 'Disabled', 'connections': {
+                            'cache': {'protocol': 'Redis', 'auth': 'Credential',
+                                      'settings': {'Redis': {'role': 'Value'}}},
+                        }}
+                        before = copy.deepcopy(self.config)
+                        message = 'Unable to prompt for confirmation as no tty available. Use --yes.' if no_tty else \
+                            'Operation cancelled.'
+                        with mock.patch('knack.prompting.prompt_y_n', return_value=False,
+                                        side_effect=NoTTYException() if no_tty else None) as prompt, \
+                                self.assertLogs(custom.logger, level='WARNING') as warnings:
+                            if use_cli:
+                                with self.assertLogs(level='ERROR') as errors:
+                                    self._invoke(
+                                        ['webapp', 'config', 'egress', 'connection', 'remove',
+                                         '-g', 'MyRG', '-n', 'MyApp', '--connection-name', 'cache'] +
+                                        (['--slot', slot] if slot else []), expected_code=1)
+                                self.assertTrue(any(message in entry for entry in errors.output))
+                            else:
+                                with self.assertRaises(CLIError) as caught:
+                                    custom.remove_egress_connection(self.cmd, 'MyRG', 'MyApp', 'cache', slot=slot)
+                                self.assertEqual(str(caught.exception), message)
+                        prompt.assert_called_once()
+                        self.assertTrue(any('including its enabled state' in entry for entry in warnings.output))
+                        self.assertEqual(len(self.requests), 1)
+                        self._assert_request(0, 'GET', slot)
+                        self.assertEqual(self.config, before)
+
+    def test_webapp_egress_remove_last_connection_yes_warning_on_stderr(self):
+        warning = 'Removing the last connection clears the entire egress configuration, including its enabled state.'
+        for slot in [None, 'staging']:
+            for option in ['--yes', '-y']:
+                with self.subTest(slot=slot, option=option):
+                    self.requests.clear()
+                    self.config = {'enabled': 'Enabled', 'connections': {
+                        'cache': {'protocol': 'Redis', 'auth': 'Credential',
+                                  'settings': {'Redis': {'role': 'Value'}}},
+                    }}
+                    stdout, stderr = io.StringIO(), io.StringIO()
+                    handler = logging.StreamHandler(stderr)
+                    with mock.patch('knack.prompting.prompt_y_n') as prompt, \
+                            mock.patch.object(custom.logger, 'handlers', [handler]), \
+                            mock.patch.object(custom.logger, 'propagate', False), \
+                            mock.patch.object(custom.logger, 'level', logging.WARNING):
+                        with redirect_stdout(stdout):
+                            result = self._invoke(
+                                ['webapp', 'config', 'egress', 'connection', 'remove',
+                                 '-g', 'MyRG', '-n', 'MyApp', '--connection-name', 'cache', option] +
+                                (['--slot', slot] if slot else []))
+                    prompt.assert_not_called()
+                    self.assertIsNone(result)
+                    self.assertIn(warning, stderr.getvalue())
+                    self.assertNotIn(warning, stdout.getvalue())
+                    self.assertEqual(len(self.requests), 2)
+                    self._assert_request(0, 'GET', slot)
+                    self._assert_request(1, 'PUT', slot)
+                    self.assertEqual(self.requests[1]['body'], {'properties': {}})
+
+    def test_webapp_egress_remove_non_last_does_not_warn_or_prompt(self):
+        for slot in [None, 'staging']:
+            for option in [[], ['--yes'], ['-y']]:
+                with self.subTest(slot=slot, option=option):
+                    self.requests.clear()
+                    connection = {'protocol': 'Redis', 'auth': 'Credential',
+                                  'settings': {'Redis': {'role': 'Value'}}}
+                    self.config = {'enabled': 'Enabled', 'connections': {'cache': connection, 'keep': connection}}
+                    with mock.patch('knack.prompting.prompt_y_n') as prompt, \
+                            mock.patch.object(custom.logger, 'warning') as warning:
+                        result = self._invoke(
+                            ['webapp', 'config', 'egress', 'connection', 'remove',
+                             '-g', 'MyRG', '-n', 'MyApp', '--connection-name', 'CACHE'] +
+                            option + (['--slot', slot] if slot else []))
+                    prompt.assert_not_called()
+                    warning.assert_not_called()
+                    self.assertIsNone(result)
+                    self.assertEqual(self.config, {'enabled': 'Enabled', 'connections': {'keep': connection}})
+                    self.assertEqual(len(self.requests), 2)
+                    self._assert_request(0, 'GET', slot)
+                    self._assert_request(1, 'PUT', slot)
+
+    def test_webapp_egress_remove_missing_does_not_warn_or_prompt(self):
+        for slot in [None, 'staging']:
+            for yes in [False, True]:
+                with self.subTest(slot=slot, yes=yes):
+                    self.requests.clear()
+                    self.config = {'enabled': 'Disabled', 'connections': {
+                        'keep': {'protocol': 'Redis', 'auth': 'Credential',
+                                 'settings': {'Redis': {'role': 'Value'}}},
+                    }}
+                    before = copy.deepcopy(self.config)
+                    with mock.patch('knack.prompting.prompt_y_n') as prompt, \
+                            mock.patch.object(custom.logger, 'warning') as warning:
+                        with self.assertRaises(ResourceNotFoundError):
+                            custom.remove_egress_connection(
+                                self.cmd, 'MyRG', 'MyApp', 'missing', slot=slot, yes=yes)
+                    prompt.assert_not_called()
+                    warning.assert_not_called()
+                    self.assertEqual(self.config, before)
+                    self.assertEqual(len(self.requests), 1)
+                    self._assert_request(0, 'GET', slot)
 
     def test_webapp_egress_missing_connection_does_not_write(self):
         for connections in [None, {}]:

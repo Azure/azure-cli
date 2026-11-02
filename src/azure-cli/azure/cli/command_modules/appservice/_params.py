@@ -930,11 +930,15 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('setting_names', nargs='+', help="space-separated {} names".format(scope))
 
     with self.argument_context('webapp config egress set') as c:
-        c.argument('enabled', arg_type=get_three_state_flag(),
+        c.argument('enabled', arg_type=get_three_state_flag(), required=True,
                    help='Enable virtual connections with true or disable them with false.')
 
     with self.argument_context('webapp config egress connection') as c:
         c.argument('connection_name', help='Name of the egress connection. Names are case-insensitive.')
+
+    with self.argument_context('webapp config egress connection remove') as c:
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true',
+                   help='Do not prompt for confirmation when removing the last connection.')
 
     with self.argument_context('webapp config egress connection add') as c:
         c.argument('protocol', arg_type=get_enum_type(EGRESS_PROTOCOLS), help='Backend protocol.')

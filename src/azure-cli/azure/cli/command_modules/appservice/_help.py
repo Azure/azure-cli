@@ -1459,9 +1459,8 @@ short-summary: Set the enabled state of a web app's egress configuration.
 long-summary: |
   Read the existing egress configuration, update its enabled state, and write it back while
   preserving all connections and their settings, identities, and credential injection configuration.
-  Use --enabled true to enable virtual connections or --enabled false to disable them.
+  --enabled is required. Use --enabled true to enable virtual connections or --enabled false to disable them.
   Add at least one connection with "az webapp config egress connection add" before enabling or disabling egress.
-  If --enabled is omitted, write back the existing configuration without changing its enabled state.
   Manage individual connections with "az webapp config egress connection add" and
   "az webapp config egress connection remove".
 examples:
@@ -1469,8 +1468,8 @@ examples:
     text: az webapp config egress set --resource-group MyRG --name MyApp --enabled true
   - name: Disable virtual connections for a deployment slot while preserving its connections.
     text: az webapp config egress set --resource-group MyRG --name MyApp --slot staging --enabled false
-  - name: Write back the existing configuration without changing its enabled state or connections.
-    text: az webapp config egress set --resource-group MyRG --name MyApp
+  - name: Enable virtual connections using the flag without a value.
+    text: az webapp config egress set --resource-group MyRG --name MyApp --enabled
 """
 
 helps['webapp config egress show'] = """
@@ -1525,12 +1524,18 @@ examples:
 helps['webapp config egress connection remove'] = """
 type: command
 short-summary: Remove a named egress connection.
-long-summary: Preserve other connections and the enabled state unless the last connection is removed. Removing the last connection clears the entire egress configuration, including its enabled state.
+long-summary: |
+  Preserve other connections and the enabled state unless the last connection is removed.
+  Removing the last connection clears the entire egress configuration, including its enabled state.
+  A warning is shown and confirmation is required only when removing the last connection.
+  Use --yes or -y to skip confirmation for automation; the warning is still shown.
 examples:
   - name: Remove the orders database connection.
     text: az webapp config egress connection remove --resource-group MyRG --name MyApp --connection-name orders-db
   - name: Remove a connection from a deployment slot.
     text: az webapp config egress connection remove --resource-group MyRG --name MyApp --slot staging --connection-name cache
+  - name: Remove the last connection without prompting for confirmation.
+    text: az webapp config egress connection remove --resource-group MyRG --name MyApp --connection-name cache --yes
 """
 
 helps['webapp config egress connection show'] = """

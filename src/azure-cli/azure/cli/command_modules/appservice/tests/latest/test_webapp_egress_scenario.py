@@ -3,15 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""Local API08 configuration-management verification, not API09 release validation.
+"""Native API09 egress configuration-management recording through BrazilUS ARM.
 
-Uses synthetic setting values and real assigned identities, without outbound workloads,
-SQL/Storage resources, grants, or firewall changes. Re-record with API09 before shipping.
+Resources are created in East US 2 EUAP; the transport endpoint is independent of location.
+Uses synthetic setting values and real assigned identities, without outbound workloads or
+SQL/Storage resources, grants, or firewall changes. Production cloud settings are unchanged.
 """
 
 import os
 import re
-from contextlib import ExitStack
 from unittest.mock import patch
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
@@ -47,51 +47,27 @@ class EgressRecordingSanitizer(RecordingProcessor):
         return response
 
 
-def _api08_query_parameters(original):
-    def query_parameters(operation):
-        parameters = original.fget(operation)
-        if parameters.get('api-version') != '2026-09-01':
-            raise RuntimeError('Expected API09 generated egress helpers; review the local API08 override.')
-        return {**parameters, 'api-version': '2026-08-01'}
-
-    return property(query_parameters)
-
-
-class WebappEgressApi08ScenarioTest(ScenarioTest):
+class WebappEgressScenarioTest(ScenarioTest):
     def __init__(self, method_name):
         super().__init__(method_name, recording_processors=[EgressRecordingSanitizer()])
         self.vcr.match_on += ('body',)
 
     def setUp(self):
         if os.environ.get('AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME'):
-            raise RuntimeError('API08 scenarios require their own new resource group, not an existing dev group.')
+            raise RuntimeError('Egress scenarios require their own new resource group, not an existing dev group.')
         super().setUp()
+        self.assertEqual(
+            self.cli_ctx.cloud.endpoints.active_directory_resource_id, 'https://management.core.windows.net/')
         self.kwargs['subscription'] = self.get_subscription_id()
         if self.in_recording:
             self.assertEqual(self.kwargs['subscription'], os.environ['AZURE_EGRESS_TEST_SUBSCRIPTION_ID'])
 
-        from azure.cli.command_modules.appservice.aaz.latest.web.site.config.egress import (
-            Create as AppCreate, Show as AppShow,
-        )
-        from azure.cli.command_modules.appservice.aaz.latest.web.site.slot.config.egress import (
-            Create as SlotCreate, Show as SlotShow,
-        )
-
-        # Scope the same local API08 override to recording AND playback; leave production helpers untouched.
-        stack = ExitStack()
-        self.addCleanup(stack.close)
-        for operation in (
-                AppShow.EgressConfigsGetEgressConfig,
-                AppCreate.EgressConfigsCreateOrUpdateEgressConfig,
-                SlotShow.EgressConfigSlotConfigsGetEgressConfigSlot,
-                SlotCreate.EgressConfigSlotConfigsCreateOrUpdateEgressConfigSlot):
-            stack.enter_context(patch.object(
-                operation, 'query_parameters', _api08_query_parameters(operation.query_parameters)))
-
     def _egress(self, command='', expect_failure=False):
-        return self.cmd(
-            'webapp config egress ' + command +
-            ' -g {rg} -n {app} --subscription {subscription} {slot}', expect_failure=expect_failure)
+        # Global fixture APIs use the normal host; only egress requests target regional ARM.
+        with patch.object(self.cli_ctx.cloud.endpoints, 'resource_manager', 'https://brazilus.management.azure.com/'):
+            return self.cmd(
+                'webapp config egress ' + command +
+                ' -g {rg} -n {app} --subscription {subscription} {slot}', expect_failure=expect_failure)
 
     def _configuration(self):
         return self._egress('show').get_output_in_json()['properties']
@@ -101,6 +77,19 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self.assertEqual(configuration['connections'], connections)
         self.assertEqual(configuration['enabled'], enabled)
         return configuration
+
+    def _assert_enabled_is_required(self):
+        from azure.cli.core.aaz._client import AAZBaseClient
+
+        before = self._configuration()
+        with patch.object(
+                AAZBaseClient, 'send_request', autospec=True,
+                side_effect=AAZBaseClient.send_request) as send_request:
+            with self.assertRaises(SystemExit) as error:
+                self._egress('set', expect_failure=True)
+        self.assertEqual(error.exception.code, 2)
+        send_request.assert_not_called()
+        self.assertEqual(self._configuration(), before)
 
     def _assert_cannot_update_empty_configuration(self):
         from azure.cli.core import util as cli_util
@@ -133,14 +122,14 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(
-        name_prefix='clitest-egress-api08-', random_name_length=40, location='eastus2euap',
+        name_prefix='clitest-egress-', random_name_length=40, location='eastus2euap',
         subscription=os.environ.get('AZURE_EGRESS_TEST_SUBSCRIPTION_ID'))
-    def test_webapp_egress_api08_app_and_slot(self, resource_group):
-        print('API08 temporary resource group: ' + resource_group)
+    def test_webapp_egress_app_and_slot(self, resource_group):
+        print('Egress temporary resource group: ' + resource_group)
         self.kwargs.update({
-            'app': self.create_random_name('egressapi08', 24),
-            'plan': self.create_random_name('egressplan08', 24),
-            'identity': self.create_random_name('egressid08', 24),
+            'app': self.create_random_name('egressapp', 24),
+            'plan': self.create_random_name('egressplan', 24),
+            'identity': self.create_random_name('egressid', 24),
             'slot': '',
         })
         self.cmd(
@@ -176,7 +165,7 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self.assertTrue(assigned['principalId'])
         self.cmd(
             'webapp config appsettings set --settings '
-            'API_HOST=https://example.com API_TOKEN=non-secret-api08-fixture' + target)
+            'API_HOST=https://example.com API_TOKEN=non-secret-egress-fixture' + target)
         self.cmd(
             'webapp config connection-string set --connection-string-type SQLAzure --settings '
             '"OrdersDb=Server=tcp:egress-fixture.database.windows.net,1433;Database=Orders;'
@@ -200,6 +189,7 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         sql_arguments = (
             ' --protocol Tds --auth ManagedIdentity --source ConnectionStrings --value-setting OrdersDb '
             '--identity-scope https://database.windows.net/.default')
+        self._assert_enabled_is_required()
         self._assert_cannot_update_empty_configuration()
 
         self.assertEqual(self._egress(api_arguments).get_output_in_json(), api)
@@ -222,7 +212,8 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self.assertEqual(
             self._egress('connection show --connection-name OrDeRs-Db').get_output_in_json(), sql)
 
-        self._egress('set')
+        self._assert_enabled_is_required()
+        self._egress('set --enabled true')
         self.assertEqual(self._configuration(), before)
         self._egress('set --enabled false')
         self._assert_configuration({'api': api, 'orders-db': sql}, 'Disabled')
@@ -239,9 +230,9 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
 
         self._egress('set --enabled false')
         disabled = self._assert_configuration({'api': api}, 'Disabled')
-        self._egress('set')
+        self._egress('set --enabled false')
         self.assertEqual(self._configuration(), disabled)
-        self._egress('connection remove --connection-name API')
+        self._egress('connection remove --connection-name API --yes')
         self.assertEqual(self._configuration(), {})
 
         self.assertEqual(self._egress(
@@ -250,6 +241,6 @@ class WebappEgressApi08ScenarioTest(ScenarioTest):
         self._assert_configuration({'orders-db': sql}, 'Disabled')
         self._egress('set --enabled true')
         self._assert_configuration({'orders-db': sql}, 'Enabled')
-        self._egress('connection remove --connection-name ORDERS-DB')
+        self._egress('connection remove --connection-name ORDERS-DB --yes')
         self.assertEqual(self._configuration(), {})
         self._assert_cannot_update_empty_configuration()
