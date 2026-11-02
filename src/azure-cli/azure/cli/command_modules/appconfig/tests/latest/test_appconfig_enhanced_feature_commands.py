@@ -26,6 +26,99 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class AppConfigEnhancedFeatureSetTests(ScenarioTest):
 
+    def test_enhanced_feature_set_flag_request_and_output(self):
+        conditions = {
+            'requirement_type': 'All',
+            'filters': [{'name': 'Microsoft.TimeWindow',
+                         'parameters': {'Start': 'Wed, 01 Jan 2025 00:00:00 GMT'}}]
+        }
+        variants = [
+            {'name': 'Blue', 'value': 'blue', 'content_type': 'text/plain', 'status_override': 'Enabled'},
+            {'name': 'Off', 'value': 'off', 'content_type': 'text/plain', 'status_override': 'Disabled'}
+        ]
+        allocation = {
+            'default_when_disabled': 'Off',
+            'default_when_enabled': 'Blue',
+            'percentile': [{'variant': 'Blue', 'percentile_from': 0, 'percentile_to': 100}],
+            'user': [{'variant': 'Blue', 'users': ['alice']}],
+            'group': [{'variant': 'Blue', 'groups': ['team']}],
+            'seed': 'test-seed'
+        }
+        full_flag = {
+            'name': 'Beta', 'enabled': True, 'description': 'Full flag',
+            'conditions': conditions, 'variants': variants, 'allocation': allocation,
+            'telemetry': {'enabled': True, 'metadata': {'source': 'cli'}},
+            'tags': {'previous': 'value'}
+        }
+        shorthand = (
+            "{name:Beta,enabled:true,description:'Full flag',"
+            "conditions:{requirement_type:All,filters:[{name:Microsoft.TimeWindow,"
+            "parameters:{Start:'Wed, 01 Jan 2025 00:00:00 GMT'}}]},"
+            "variants:[{name:Blue,value:blue,content_type:text/plain,status_override:Enabled},"
+            "{name:Off,value:off,content_type:text/plain,status_override:Disabled}],"
+            "allocation:{default_when_disabled:Off,default_when_enabled:Blue,"
+            "percentile:[{variant:Blue,percentile_from:0,percentile_to:100}],"
+            "user:[{variant:Blue,users:[alice]}],group:[{variant:Blue,groups:[team]}],seed:test-seed},"
+            "telemetry:{enabled:true,metadata:{source:cli}},tags:{previous:value}}"
+        )
+        expected_request = {key: value for key, value in full_flag.items() if key != 'name'}
+        expected_request['allocation'] = dict(
+            allocation, percentile=[{'variant': 'Blue', 'from': 0, 'to': 100}])
+        empty_flag = {
+            'name': 'Beta', 'enabled': False, 'label': None, 'description': None,
+            'conditions': None, 'variants': [], 'allocation': None,
+            'telemetry': None, 'tags': {}, 'last_modified': None
+        }
+
+        for syntax, full_argument, replacement_argument in (
+                ('JSON', "'{}'".format(json.dumps(full_flag)), '\'{"name":"Beta","enabled":false}\''),
+                ('shorthand', '"{}"'.format(shorthand), '"{name:Beta,enabled:false}"')):
+            with self.subTest(syntax=syntax):
+                requests = []
+                stored_flag = dict(empty_flag)
+
+                def send(method, url, **kwargs):
+                    body = json.loads(kwargs['data']) if method == 'PUT' else None
+                    requests.append((method, body))
+                    if method == 'PUT':
+                        stored_flag.clear()
+                        stored_flag.update(empty_flag)
+                        stored_flag.update(body)
+                    response = Response()
+                    response.status_code = 200
+                    response.headers['Content-Type'] = 'application/json'
+                    response._content = json.dumps(stored_flag).encode('utf-8')
+                    response.raw = HTTPResponse(body=BytesIO(response.content), preload_content=False)
+                    return response
+
+                with patch('requests.Session.request', side_effect=send), FeatureFlagClient.from_connection_string(
+                        'Endpoint=https://example.azconfig.io;Id=test;Secret=c2VjcmV0') as client:
+                    with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client',
+                               return_value=client):
+                        self.kwargs['flag_argument'] = full_argument
+                        populated = self.cmd(
+                            'appconfig enhanced-feature-flag set --endpoint https://example.azconfig.io '
+                            '--auth-mode login --flag {flag_argument} -y').get_output_in_json()
+                        self.assertEqual(requests, [('PUT', expected_request)])
+                        expected_output = dict(full_flag, label=None, last_modified=None)
+                        self.assertEqual(populated, expected_output)
+                        shown = self.cmd(
+                            'appconfig enhanced-feature-flag show --endpoint https://example.azconfig.io '
+                            '--auth-mode login --feature-name Beta').get_output_in_json()
+                        self.assertEqual(shown, expected_output)
+
+                        self.kwargs['flag_argument'] = replacement_argument
+                        replaced = self.cmd(
+                            'appconfig enhanced-feature-flag set --endpoint https://example.azconfig.io '
+                            '--auth-mode login --flag {flag_argument} -y').get_output_in_json()
+                        self.assertEqual(requests[-1], ('PUT', {'enabled': False, 'tags': {}}))
+                        self.assertEqual(replaced, empty_flag)
+                        shown = self.cmd(
+                            'appconfig enhanced-feature-flag show --endpoint https://example.azconfig.io '
+                            '--auth-mode login --feature-name Beta').get_output_in_json()
+                        self.assertEqual(shown, empty_flag)
+                        self.assertEqual([method for method, _ in requests], ['PUT', 'GET', 'PUT', 'GET'])
+
     def test_enhanced_feature_set_requires_name(self):
         for arguments in ('', '--flag "{}"', '--flag "{name:null,enabled:false}"'):
             with self.subTest(arguments=arguments):
@@ -327,21 +420,55 @@ class AppConfigEnhancedFeatureListTests(ScenarioTest):
                                      [call(None)] + [call(str(index)) for index in range(1, expected_pages)])
 
 
+class AppConfigEnhancedFeatureProjectionTests(ScenarioTest):
+
+    def test_enhanced_feature_field_projection(self):
+        flags = [
+            {'name': 'Beta', 'enabled': True, 'description': 'First flag', 'tags': {'source': 'first'}},
+            {'name': 'Gamma', 'enabled': False, 'description': 'Second flag', 'tags': {'source': 'second'}}
+        ]
+        for operation in ('show', 'list'):
+            for fields in (['name', 'enabled'], ['description', 'tags']):
+                with self.subTest(operation=operation, fields=fields):
+                    with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:
+                        client = get_client.return_value
+                        client.get_feature_flag.return_value = FeatureFlag.from_dict(flags[0])
+                        client.list_feature_flags.return_value = [FeatureFlag.from_dict(flag) for flag in flags]
+                        self.kwargs.update({
+                            'operation': operation,
+                            'fields': ' '.join(fields),
+                            'selector': '--feature-name Beta' if operation == 'show' else ''
+                        })
+                        output = self.cmd(
+                            'appconfig enhanced-feature-flag {operation} --endpoint https://example.azconfig.io '
+                            '--auth-mode login {selector} --fields {fields}').get_output_in_json()
+                        items = [output] if operation == 'show' else output
+                        expected_flags = flags[:1] if operation == 'show' else flags
+                        self.assertEqual(len(items), len(expected_flags))
+                        for item, flag in zip(items, expected_flags):
+                            self.assertEqual(set(item), set(fields))
+                            self.assertEqual(item, {field: flag[field] for field in fields})
+
+
 class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
 
     @staticmethod
-    def _conditional_headers_matcher(recorded, actual):
+    def _feature_flag_request_matcher(recorded, actual):
         for header in ('If-Match', 'If-None-Match'):
             assert recorded.headers.get(header) == actual.headers.get(header), \
                 '{} differs from the recorded request'.format(header)
+        if (recorded.method == actual.method == 'PUT'
+                and recorded.path.startswith('/ff/') and actual.path.startswith('/ff/')):
+            assert json.loads(recorded.body) == json.loads(actual.body), \
+                'Feature flag body differs from the recorded request'
 
     def __init__(self, *args, **kwargs):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
         register_appconfig_query_matcher(self)
         register_appconfig_recording_processors(self)
-        self.vcr.register_matcher('conditional_headers', self._conditional_headers_matcher)
-        self.vcr.match_on = (*self.vcr.match_on, 'conditional_headers')
+        self.vcr.register_matcher('feature_flag_request', self._feature_flag_request_matcher)
+        self.vcr.match_on = (*self.vcr.match_on, 'feature_flag_request')
 
     @AppConfigResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse()
@@ -398,7 +525,8 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
         # Show with field filters
         self.cmd('appconfig enhanced-feature-flag show --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} --fields name enabled',
                  checks=[self.check('name', entry_feature),
-                         self.check('enabled', False)])
+                         self.check('enabled', False),
+                         self.check('sort(keys(@))', ['enabled', 'name'])])
 
         # Enable the enhanced feature flag
         self.cmd('appconfig enhanced-feature-flag enable --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y',
@@ -421,7 +549,10 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
                          self.check('enabled', True),
                          self.check('description', 'Set via --flag JSON'),
                          self.check('conditions.requirement_type', 'All'),
-                         self.check('conditions.filters[0].name', 'Microsoft.TimeWindow')])
+                         self.check('conditions.filters[0].name', 'Microsoft.TimeWindow'),
+                         self.check('conditions.filters[0].parameters.Start', 'Wed, 01 Jan 2025 00:00:00 GMT'),
+                         self.check('telemetry', None),
+                         self.check('tags', {})])
 
         # Overwrite the same flag with shorthand syntax - full replace drops the previous conditions
         self.kwargs['flag_shorthand'] = "{name:Beta,enabled:true,description:'Set via --flag shorthand'}"
@@ -429,7 +560,9 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
                  checks=[self.check('name', entry_feature),
                          self.check('enabled', True),
                          self.check('description', 'Set via --flag shorthand'),
-                         self.check('conditions', None)])
+                         self.check('conditions', None),
+                         self.check('telemetry', None),
+                         self.check('tags', {})])
 
         # --flag is mutually exclusive with content arguments (validated before any request)
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "--flag cannot be combined with --description"):
@@ -446,8 +579,8 @@ class AppConfigEnhancedFeatureScenarioTest(ScenarioTest):
                          self.check('enabled', False)])
 
         # List enhanced feature flags
-        self.cmd('appconfig enhanced-feature-flag list --endpoint {endpoint} --auth-mode login',
-                 checks=[self.check('[0].name', entry_feature)])
+        self.cmd('appconfig enhanced-feature-flag list --endpoint {endpoint} --auth-mode login --fields name enabled',
+                 checks=[self.check('@', [{'name': entry_feature, 'enabled': False}])])
 
         # Delete the enhanced feature flag
         self.cmd('appconfig enhanced-feature-flag delete --endpoint {endpoint} --auth-mode login --feature-name {feature_name} --label {label} -y',
