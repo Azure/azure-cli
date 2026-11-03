@@ -15,6 +15,7 @@ from azure.cli.core.aaz import (
     AAZListArg,
     AAZObjectArg,
     AAZStrArg,
+    AAZUndefined,
     has_value,
 )
 from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -22,8 +23,10 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resou
 from knack.log import get_logger
 
 from ..aaz.latest.aro.hcp.cluster._create import Create as _ClusterCreate
+from ..aaz.latest.aro.hcp.cluster._show import Show as _ClusterShow
 from ..aaz.latest.aro.hcp.cluster._update import Update as _ClusterUpdate
 from ..aaz.latest.aro.hcp.cluster._request_credential import RequestCredential as _RequestCredential
+from ..aaz.latest.aro.hcp.cluster.nodepool._create import Create as _NodepoolCreate
 from ..aaz.latest.aro.hcp._get_versions import GetVersions as _GetVersions
 
 logger = get_logger(__name__)
@@ -173,10 +176,12 @@ class ClusterCreate(_ClusterCreate):
         if hasattr(args_schema, "assign_control_plane_operator_identity"):
             return args_schema
 
-        # Remove once platform managed etcd encryption has been implemented and
-        # key management mode can safely default to PlatformManaged
-        args_schema.key_management_mode._default = None  # pylint: disable=protected-access
+        args_schema.key_management_mode._default = AAZUndefined  # pylint: disable=protected-access
         args_schema.key_management_mode._required = True  # pylint: disable=protected-access
+        args_schema.nsg._required = True  # pylint: disable=protected-access
+        args_schema.version._required = True  # pylint: disable=protected-access
+        args_schema.subnet_id._required = True  # pylint: disable=protected-access
+        args_schema.vnet_integration_subnet_id._required = True  # pylint: disable=protected-access
 
         args_schema.user_assigned_identities._registered = False  # pylint: disable=protected-access
         args_schema.operators_authentication._registered = False  # pylint: disable=protected-access
@@ -259,6 +264,46 @@ class ClusterCreate(_ClusterCreate):
             elif _content:
                 _content["identity"] = {"type": "UserAssigned"}
             return _content
+
+
+class NodepoolCreate(_NodepoolCreate):
+    AZ_HELP = {
+        **_NodepoolCreate.AZ_HELP,
+        "examples": [
+            {
+                "name": "Create a node pool",
+                "text": "az aro hcp cluster nodepool create --resource-group MyResourceGroup "
+                        "--cluster-name MyCluster --name MyNodePool --replicas 3 "
+                        "--vm-size Standard_D8s_v3 --version 4.19.0 --channel-group stable",
+            },
+            {
+                "name": "Create an autoscaling node pool with labels, taints and disk config",
+                "text": "az aro hcp cluster nodepool create --resource-group MyResourceGroup "
+                        "--cluster-name MyCluster --name MyNodePool --vm-size Standard_D8s_v3 "
+                        "--version 4.19.0 --channel-group stable --min-replicas 1 --max-replicas 5 "
+                        "--disk-size 128 --disk-storage-account-type Premium_LRS --auto-repair true "
+                        "--labels \"[{key:tier,value:frontend}]\" "
+                        "--taints \"[{key:dedicated,value:gpu,effect:NoSchedule}]\"",
+            },
+        ],
+    }
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.vm_size._required = True  # pylint: disable=protected-access
+        args_schema.version._required = True  # pylint: disable=protected-access
+        args_schema.location._registered = False  # pylint: disable=protected-access
+        args_schema.location._required = False  # pylint: disable=protected-access
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        cluster = _ClusterShow(cli_ctx=self.cli_ctx)(command_args={
+            "resource_group": args.resource_group.to_serialized_data(),
+            "name": args.cluster_name.to_serialized_data(),
+        })
+        args.location = cluster["location"]
 
 
 class ClusterUpdate(_ClusterUpdate):
@@ -391,7 +436,7 @@ class GetVersions(_GetVersions):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.control_plane = AAZBoolArg(
             options=["--control-plane"],
-            help="List the distinct Major.Minor (X.Y) versions available for the control plane. "
+            help="List the distinct Major.Minor (X.Y) versions per channel group available for the control plane. "
                  "Use one of these with 'cluster create --version', which takes an X.Y version.",
             default=False,
         )
@@ -431,10 +476,11 @@ class GetVersions(_GetVersions):
             seen = set()
             for v in enabled:
                 xy = _major_minor(v.get('name', ''))
-                if not xy or xy in seen:
-                    continue
-                seen.add(xy)
                 row = _version_row(v)
+                version_channel = (xy, row['ChannelGroup'])
+                if not xy or version_channel in seen:
+                    continue
+                seen.add(version_channel)
                 row['Name'] = xy
                 rows.append(row)
         else:

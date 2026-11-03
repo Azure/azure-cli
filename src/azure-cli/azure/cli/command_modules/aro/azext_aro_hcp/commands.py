@@ -24,9 +24,11 @@ def load_command_table(self, _):  # pylint: disable=unused-argument
         self.command_table["aro hcp cluster show"] = Show(loader=self, table_transformer=cluster_show_table_format)
 
     with self.command_group("aro hcp cluster nodepool"):
+        from .custom import NodepoolCreate
         from ..aaz.latest.aro.hcp.cluster.nodepool._list import List as NodepoolList
         from ..aaz.latest.aro.hcp.cluster.nodepool._show import Show as NodepoolShow
         from ._format import nodepool_list_table_format, nodepool_show_table_format
+        self.command_table["aro hcp cluster nodepool create"] = NodepoolCreate(loader=self)
         self.command_table["aro hcp cluster nodepool list"] = NodepoolList(loader=self, table_transformer=nodepool_list_table_format)  # pylint: disable=line-too-long
         self.command_table["aro hcp cluster nodepool show"] = NodepoolShow(loader=self, table_transformer=nodepool_show_table_format)  # pylint: disable=line-too-long
 

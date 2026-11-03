@@ -370,7 +370,7 @@ class AroHcpScenario(ScenarioTest):
 
             self.cmd(
                 'aro hcp cluster nodepool create -g {rg} --cluster-name {cluster} '
-                '-n {nodepool} --location uksouth --replicas 1 '
+                '-n {nodepool} --replicas 1 '
                 '--vm-size Standard_D8s_v3 --version 4.22.11 '
                 '--channel-group stable',
                 checks=[

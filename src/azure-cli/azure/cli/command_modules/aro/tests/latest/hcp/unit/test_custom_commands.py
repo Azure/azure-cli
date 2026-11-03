@@ -8,10 +8,11 @@ import types
 import unittest
 from unittest import mock
 
+from azure.cli.core.aaz import AAZUndefined
 from azure.cli.core.aaz._field_value import AAZObject
 from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 
-from azure.cli.command_modules.aro.azext_aro_hcp.custom import ClusterCreate, ClusterUpdate, GetVersions, RequestCredential
+from azure.cli.command_modules.aro.azext_aro_hcp.custom import ClusterCreate, ClusterUpdate, GetVersions, NodepoolCreate, RequestCredential
 
 
 SUBNET_ID = ("/subscriptions/000/resourceGroups/network-rg/providers/Microsoft.Network/"
@@ -42,6 +43,25 @@ class _OperatorIdentity:
 
 class ClusterCreateTest(unittest.TestCase):
 
+    def test_required_create_arguments_are_marked_required_in_help(self):
+        schema = ClusterCreate._build_arguments_schema()
+
+        for name in (
+            "name",
+            "resource_group",
+            "version",
+            "key_management_mode",
+            "subnet_id",
+            "vnet_integration_subnet_id",
+            "nsg",
+            "assign_control_plane_operator_identity",
+            "assign_data_plane_operator_identity",
+            "assign_service_managed_identity",
+        ):
+            with self.subTest(argument=name):
+                command_arg = getattr(schema, name).to_cmd_arg(name)
+                self.assertTrue(command_arg.type.settings["required"])
+
     def test_help_examples_use_custom_identity_arguments(self):
         example_text = " ".join(example["text"] for example in ClusterCreate.AZ_HELP["examples"])
 
@@ -59,7 +79,29 @@ class ClusterCreateTest(unittest.TestCase):
         schema = ClusterCreate._build_arguments_schema()
 
         self.assertTrue(schema.key_management_mode._required)
-        self.assertIsNone(schema.key_management_mode._default)
+        self.assertIs(schema.key_management_mode._default, AAZUndefined)
+
+        command_arg = schema.key_management_mode.to_cmd_arg("key_management_mode")
+        settings = command_arg.type.settings
+        self.assertTrue(settings["required"])
+        self.assertIs(settings["default"], AAZUndefined)
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            *command_arg.options_list,
+            required=settings["required"],
+            default=settings["default"],
+            action=settings["action"],
+            choices=settings["choices"],
+        )
+        with mock.patch("sys.stderr") as stderr, self.assertRaises(SystemExit) as error:
+            parser.parse_args([])
+        self.assertEqual(error.exception.code, 2)
+        self.assertIn("--key-management-mode", "".join(call.args[0] for call in stderr.write.call_args_list))
+
+        args = parser.parse_args(["--key-management-mode", "CustomerManaged"])
+        self.assertIsNotNone(args.key_management_mode)
+
 
     @staticmethod
     def _identity_parser():
@@ -238,6 +280,58 @@ class ClusterCreateTest(unittest.TestCase):
                 return_value=content):
             self.assertEqual("UserAssigned", operation.content["identity"]["type"])
             self.assertEqual({}, operation.content["identity"]["userAssignedIdentities"])
+
+
+class NodepoolCreateTest(unittest.TestCase):
+
+    def test_vm_size_and_version_are_required_in_help(self):
+        schema = NodepoolCreate._build_arguments_schema()
+
+        for name in ("vm_size", "version"):
+            with self.subTest(argument=name):
+                command_arg = getattr(schema, name).to_cmd_arg(name)
+                self.assertTrue(command_arg.type.settings["required"])
+
+    def test_location_is_not_registered_or_required(self):
+        schema = NodepoolCreate._build_arguments_schema()
+
+        self.assertFalse(schema.location._registered)
+        self.assertFalse(schema.location._required)
+
+    def test_help_examples_omit_location(self):
+        for example in NodepoolCreate.AZ_HELP["examples"]:
+            self.assertNotIn("--location", example["text"])
+
+    @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp.custom._ClusterShow")
+    def test_content_uses_parent_cluster_location(self, cluster_show):
+        for location in ("eastus", "westus"):
+            with self.subTest(location=location):
+                cluster_show.reset_mock()
+                cluster_show.return_value.return_value = {"location": location}
+                args = NodepoolCreate._build_arguments_schema()()
+                args.resource_group = "cluster-rg"
+                args.cluster_name = "parent-cluster"
+                args.vm_size = "Standard_D8s_v3"
+                args.version = "4.19.0"
+                args.location = "centralus"
+                command = object.__new__(NodepoolCreate)
+                command.cli_ctx = mock.Mock()
+                command.ctx = types.SimpleNamespace(args=args)
+
+                command.pre_operations()
+
+                cluster_show.assert_called_once_with(cli_ctx=command.cli_ctx)
+                cluster_show.return_value.assert_called_once_with(command_args={
+                    "resource_group": "cluster-rg",
+                    "name": "parent-cluster",
+                })
+                operation = object.__new__(NodepoolCreate.NodePoolsCreateOrUpdate)
+                operation.ctx = command.ctx
+                content = operation.content
+
+                self.assertEqual(location, content["location"])
+                self.assertEqual("Standard_D8s_v3", content["properties"]["platform"]["vmSize"])
+                self.assertEqual("4.19.0", content["properties"]["version"]["id"])
 
 
 class ClusterUpdateTest(unittest.TestCase):
@@ -462,18 +556,21 @@ class GetVersionsTest(unittest.TestCase):
 
     @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp.custom.has_value", return_value=True)
     @mock.patch.object(GetVersions.__mro__[1], "_output")
-    def test_control_plane_output_deduplicates_major_minor(self, base_output, _):
+    def test_control_plane_output_deduplicates_major_minor_per_channel(self, base_output, _):
         base_output.return_value = ([
             {"name": "4.20.2", "properties": {"channelGroup": "stable"}},
             {"name": "4.19.3", "properties": {"channelGroup": "stable"}},
             {"name": "4.20.1", "properties": {"channelGroup": "candidate"}},
+            {"name": "4.20.3", "properties": {"channelGroup": "stable"}},
+            {"name": "4.20.4", "properties": {"channelGroup": "candidate"}},
+            {"name": "4.20.5", "properties": {"channelGroup": "fast", "enabled": False}},
             {"name": "invalid", "properties": {}},
         ], None)
 
         result, _ = self._command(control_plane=True)._output()
 
-        self.assertEqual(["4.19", "4.20"], [row["Name"] for row in result])
-        self.assertEqual(["stable", "candidate"], [row["ChannelGroup"] for row in result])
+        self.assertEqual(["4.19", "4.20", "4.20"], [row["Name"] for row in result])
+        self.assertEqual(["stable", "candidate", "stable"], [row["ChannelGroup"] for row in result])
 
     @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp.custom.has_value", return_value=True)
     @mock.patch.object(GetVersions.__mro__[1], "_output", return_value=([], None))

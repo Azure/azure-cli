@@ -22,6 +22,7 @@ class _Loader:
 
 class CommandTableTest(unittest.TestCase):
 
+    @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp.custom.NodepoolCreate", autospec=True)
     @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp.custom.GetVersions", autospec=True)
     @mock.patch("azure.cli.command_modules.aro.aaz.latest.aro.hcp.cluster.nodepool._show.Show", autospec=True)
     @mock.patch("azure.cli.command_modules.aro.aaz.latest.aro.hcp.cluster.nodepool._list.List", autospec=True)
@@ -32,7 +33,7 @@ class CommandTableTest(unittest.TestCase):
     @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp.custom.ClusterCreate", autospec=True)
     def test_load_command_table_registers_custom_commands_and_transformers(
             self, cluster_create, cluster_update, request_credential, cluster_list, cluster_show,
-            nodepool_list, nodepool_show, get_versions):
+            nodepool_list, nodepool_show, get_versions, nodepool_create):
         loader = _Loader()
 
         load_command_table(loader, None)
@@ -48,6 +49,7 @@ class CommandTableTest(unittest.TestCase):
                 "aro hcp cluster request-credential",
                 "aro hcp cluster list",
                 "aro hcp cluster show",
+                "aro hcp cluster nodepool create",
                 "aro hcp cluster nodepool list",
                 "aro hcp cluster nodepool show",
                 "aro hcp get-versions",
@@ -59,6 +61,7 @@ class CommandTableTest(unittest.TestCase):
         request_credential.assert_called_once_with(loader=loader)
         cluster_list.assert_called_once()
         cluster_show.assert_called_once()
+        nodepool_create.assert_called_once_with(loader=loader)
         nodepool_list.assert_called_once()
         nodepool_show.assert_called_once()
         get_versions.assert_called_once_with(loader=loader)
