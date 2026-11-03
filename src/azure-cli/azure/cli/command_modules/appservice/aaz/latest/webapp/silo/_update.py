@@ -16,10 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class Update(AAZCommand):
-    """Update a silo for a Web App.
+    """Update a silo for a Web App. Returns 202 with polling headers when background work is queued, or 200 when no update is needed.
 
     :example: Enable the endpoint and follow the last known good revision.
-        az webapp silo update --resource-group MyGroup --name MyApp --silo WestApp --endpoint-status Enabled --follow-last-known-good true --location westus2 --primary-location eastus --primary-site-name MyApp --networking-override "{vnet-integration-override:/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/NetworkGroup/providers/Microsoft.Network/virtualNetworks/WestNet/subnets/integration}"
+        az webapp silo update --resource-group MyGroup --name MyApp --silo WestApp --endpoint-status Enabled --follow-last-known-good true --tags environment=preview
 
     :example: Update the revision policy by resource ID.
         az webapp silo update  --ids /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/MyGroup/providers/Microsoft.Web/sites/MyApp/silos/WestApp --set properties.followLastKnownGood=false --no-wait
@@ -102,10 +102,10 @@ class Update(AAZCommand):
             help="Name of the primary site.",
             nullable=True,
         )
-        _args_schema.location = AAZStrArg(
-            options=["-l", "--location"],
+        _args_schema.silo_location = AAZStrArg(
+            options=["--silo-location"],
             arg_group="Properties",
-            help="ARM location of the site silo.",
+            help="Azure region of the site silo, retained for compatibility. When supplied, it must identify the same region as the required root location.",
             nullable=True,
         )
 
@@ -113,6 +113,21 @@ class Update(AAZCommand):
         networking_override.vnet_integration_override = AAZStrArg(
             options=["vnet-integration-override"],
             help="Virtual network subnet resource ID override for the silo.",
+            nullable=True,
+        )
+
+        # define Arg Group "Resource"
+
+        _args_schema = cls._args_schema
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Resource",
+            help="Resource tags.",
+            nullable=True,
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg(
             nullable=True,
         )
         return cls._args_schema
@@ -244,16 +259,16 @@ class Update(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -329,25 +344,25 @@ class Update(AAZCommand):
 
             return self.serialize_content(_content_value)
 
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_site_silo_read(cls._schema_on_200_201)
+            cls._schema_on_200 = AAZObjectType()
+            _UpdateHelper._build_schema_site_silo_read(cls._schema_on_200)
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
@@ -361,6 +376,7 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("properties", AAZObjectType)
+            _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -369,11 +385,15 @@ class Update(AAZCommand):
                 properties.set_prop("networkingOverride", AAZObjectType, ".networking_override")
                 properties.set_prop("primaryLocation", AAZStrType, ".primary_location", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("primarySiteName", AAZStrType, ".primary_site_name")
-                properties.set_prop("siloLocation", AAZStrType, ".location")
+                properties.set_prop("siloLocation", AAZStrType, ".silo_location")
 
             networking_override = _builder.get(".properties.networkingOverride")
             if networking_override is not None:
                 networking_override.set_prop("vnetIntegrationOverride", AAZStrType, ".vnet_integration_override")
+
+            tags = _builder.get(".tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
 
             return _instance_value
 
@@ -395,9 +415,11 @@ class _UpdateHelper:
     def _build_schema_site_silo_read(cls, _schema):
         if cls._schema_site_silo_read is not None:
             _schema.id = cls._schema_site_silo_read.id
+            _schema.location = cls._schema_site_silo_read.location
             _schema.name = cls._schema_site_silo_read.name
             _schema.properties = cls._schema_site_silo_read.properties
             _schema.system_data = cls._schema_site_silo_read.system_data
+            _schema.tags = cls._schema_site_silo_read.tags
             _schema.type = cls._schema_site_silo_read.type
             return
 
@@ -407,6 +429,9 @@ class _UpdateHelper:
         site_silo_read.id = AAZStrType(
             flags={"read_only": True},
         )
+        site_silo_read.location = AAZStrType(
+            flags={"required": True},
+        )
         site_silo_read.name = AAZStrType(
             flags={"read_only": True},
         )
@@ -415,6 +440,7 @@ class _UpdateHelper:
             serialized_name="systemData",
             flags={"read_only": True},
         )
+        site_silo_read.tags = AAZDictType()
         site_silo_read.type = AAZStrType(
             flags={"read_only": True},
         )
@@ -507,6 +533,9 @@ class _UpdateHelper:
         properties.silo_location = AAZStrType(
             serialized_name="siloLocation",
         )
+        properties.traffic_mode = AAZStrType(
+            serialized_name="trafficMode",
+        )
 
         networking_override = _schema_site_silo_read.properties.networking_override
         networking_override.vnet_integration_override = AAZStrType(
@@ -533,10 +562,15 @@ class _UpdateHelper:
             serialized_name="lastModifiedByType",
         )
 
+        tags = _schema_site_silo_read.tags
+        tags.Element = AAZStrType()
+
         _schema.id = cls._schema_site_silo_read.id
+        _schema.location = cls._schema_site_silo_read.location
         _schema.name = cls._schema_site_silo_read.name
         _schema.properties = cls._schema_site_silo_read.properties
         _schema.system_data = cls._schema_site_silo_read.system_data
+        _schema.tags = cls._schema_site_silo_read.tags
         _schema.type = cls._schema_site_silo_read.type
 
 

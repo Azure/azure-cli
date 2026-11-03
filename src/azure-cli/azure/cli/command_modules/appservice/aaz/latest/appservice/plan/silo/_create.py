@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class Create(AAZCommand):
-    """Create a silo for an App Service plan.
+    """Create a silo for an App Service plan. Returns 202 with polling headers when background work is queued, or 200 when no update is needed.
 
     :example: Create a secondary plan silo.
         az appservice plan silo create --resource-group MyGroup --name MyPlan --silo WestPlan --location westus2 --primary-location eastus --number-of-workers 1
@@ -81,21 +81,40 @@ class Create(AAZCommand):
             required=True,
         )
         _args_schema.primary_server_farm_name = AAZStrArg(
-            options=["--primary-server-farm-name"],
+            options=["--primary-plan-name", "--primary-server-farm-name"],
             arg_group="Properties",
             help="Name of the primary App Service plan.",
         )
-        _args_schema.location = AAZStrArg(
-            options=["-l", "--location"],
+        _args_schema.silo_location = AAZStrArg(
+            options=["--silo-location"],
             arg_group="Properties",
-            help="ARM location of the App Service plan silo.",
-            required=True,
+            help="Azure region of the App Service plan silo, retained for compatibility. When supplied, it must identify the same region as the required root location.",
         )
         _args_schema.zone_redundant = AAZBoolArg(
             options=["--zone-redundant"],
             arg_group="Properties",
             help="Zone redundancy override for the silo.",
         )
+
+        # define Arg Group "Resource"
+
+        _args_schema = cls._args_schema
+        _args_schema.location = AAZResourceLocationArg(
+            arg_group="Resource",
+            help="The geo-location where the resource lives",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Resource",
+            help="Resource tags.",
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
@@ -125,16 +144,16 @@ class Create(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -208,114 +227,152 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
+            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType)
+            _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("instanceNumberOverride", AAZIntType, ".number_of_workers")
                 properties.set_prop("primaryLocation", AAZStrType, ".primary_location", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("primaryServerFarmName", AAZStrType, ".primary_server_farm_name")
-                properties.set_prop("siloLocation", AAZStrType, ".location")
+                properties.set_prop("siloLocation", AAZStrType, ".silo_location")
                 properties.set_prop("zoneRedundantOverride", AAZBoolType, ".zone_redundant")
+
+            tags = _builder.get(".tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
 
             return self.serialize_content(_content_value)
 
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
+            cls._schema_on_200 = AAZObjectType()
+            _CreateHelper._build_schema_server_farm_silo_read(cls._schema_on_200)
 
-            _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.properties = AAZObjectType()
-            _schema_on_200_201.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200_201.properties
-            properties.created_time = AAZStrType(
-                serialized_name="createdTime",
-                flags={"read_only": True},
-            )
-            properties.error_code = AAZStrType(
-                serialized_name="errorCode",
-                flags={"read_only": True},
-            )
-            properties.instance_number_override = AAZIntType(
-                serialized_name="instanceNumberOverride",
-            )
-            properties.last_modified_time = AAZStrType(
-                serialized_name="lastModifiedTime",
-                flags={"read_only": True},
-            )
-            properties.primary_location = AAZStrType(
-                serialized_name="primaryLocation",
-                flags={"required": True},
-            )
-            properties.primary_server_farm_name = AAZStrType(
-                serialized_name="primaryServerFarmName",
-            )
-            properties.provisioning_details = AAZStrType(
-                serialized_name="provisioningDetails",
-                flags={"read_only": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.silo_location = AAZStrType(
-                serialized_name="siloLocation",
-            )
-            properties.zone_redundant_override = AAZBoolType(
-                serialized_name="zoneRedundantOverride",
-            )
-
-            system_data = cls._schema_on_200_201.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
-
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
 
 class _CreateHelper:
     """Helper class for Create"""
+
+    _schema_server_farm_silo_read = None
+
+    @classmethod
+    def _build_schema_server_farm_silo_read(cls, _schema):
+        if cls._schema_server_farm_silo_read is not None:
+            _schema.id = cls._schema_server_farm_silo_read.id
+            _schema.location = cls._schema_server_farm_silo_read.location
+            _schema.name = cls._schema_server_farm_silo_read.name
+            _schema.properties = cls._schema_server_farm_silo_read.properties
+            _schema.system_data = cls._schema_server_farm_silo_read.system_data
+            _schema.tags = cls._schema_server_farm_silo_read.tags
+            _schema.type = cls._schema_server_farm_silo_read.type
+            return
+
+        cls._schema_server_farm_silo_read = _schema_server_farm_silo_read = AAZObjectType()
+
+        server_farm_silo_read = _schema_server_farm_silo_read
+        server_farm_silo_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        server_farm_silo_read.location = AAZStrType(
+            flags={"required": True},
+        )
+        server_farm_silo_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        server_farm_silo_read.properties = AAZObjectType()
+        server_farm_silo_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        server_farm_silo_read.tags = AAZDictType()
+        server_farm_silo_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        properties = _schema_server_farm_silo_read.properties
+        properties.created_time = AAZStrType(
+            serialized_name="createdTime",
+            flags={"read_only": True},
+        )
+        properties.error_code = AAZStrType(
+            serialized_name="errorCode",
+            flags={"read_only": True},
+        )
+        properties.instance_number_override = AAZIntType(
+            serialized_name="instanceNumberOverride",
+        )
+        properties.last_modified_time = AAZStrType(
+            serialized_name="lastModifiedTime",
+            flags={"read_only": True},
+        )
+        properties.primary_location = AAZStrType(
+            serialized_name="primaryLocation",
+            flags={"required": True},
+        )
+        properties.primary_server_farm_name = AAZStrType(
+            serialized_name="primaryServerFarmName",
+        )
+        properties.provisioning_details = AAZStrType(
+            serialized_name="provisioningDetails",
+            flags={"read_only": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.silo_location = AAZStrType(
+            serialized_name="siloLocation",
+        )
+        properties.zone_redundant_override = AAZBoolType(
+            serialized_name="zoneRedundantOverride",
+        )
+
+        system_data = _schema_server_farm_silo_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        tags = _schema_server_farm_silo_read.tags
+        tags.Element = AAZStrType()
+
+        _schema.id = cls._schema_server_farm_silo_read.id
+        _schema.location = cls._schema_server_farm_silo_read.location
+        _schema.name = cls._schema_server_farm_silo_read.name
+        _schema.properties = cls._schema_server_farm_silo_read.properties
+        _schema.system_data = cls._schema_server_farm_silo_read.system_data
+        _schema.tags = cls._schema_server_farm_silo_read.tags
+        _schema.type = cls._schema_server_farm_silo_read.type
 
 
 __all__ = ["Create"]

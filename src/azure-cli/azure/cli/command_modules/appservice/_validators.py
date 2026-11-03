@@ -41,10 +41,10 @@ def validate_active_backup_ids(cmd, namespace):
         if not is_valid_resource_id(value) or not all(parts.get(key) for key in required):
             raise InvalidArgumentValueError(
                 "Provide a Microsoft.Web/{} resource ID with --ids.".format(resource_type))
-        parameters = dict(
-            subscription=parts['subscription'], resource_group=parts['resource_group'],
-            namespace='Microsoft.Web', type=parent_type, name=parts['name'],
-        )
+        parameters = {
+            'subscription': parts['subscription'], 'resource_group': parts['resource_group'],
+            'namespace': 'Microsoft.Web', 'type': parent_type, 'name': parts['name'],
+        }
         if not parent_only:
             parameters.update(child_type_1='silos', child_name_1=parts['child_name_1'])
         expected = [resource_id(**parameters).lower()]

@@ -47,8 +47,10 @@ class ActiveBackupLiveTests(LiveScenarioTest):
                      checks=[self.check('properties.provisioningState', 'Succeeded')])
             self.cmd('webapp silo list -g {rg} -n {app}')
             self.cmd('appservice plan silo list -g {rg} -n {plan}')
-            self.cmd('appservice plan silo update -g {rg} -n {plan} --silo backup-plan --number-of-workers 2')
-            self.cmd('webapp silo update -g {rg} -n {app} --silo backup-app --follow-last-known-good false')
+            self.cmd('appservice plan silo update -g {rg} -n {plan} --silo backup-plan '
+                     '--number-of-workers 2 --tags environment=preview')
+            self.cmd('webapp silo update -g {rg} -n {app} --silo backup-app '
+                     '--follow-last-known-good false --tags environment=preview')
             self.cmd('webapp managed-traffic update -g {rg} -n {app} --traffic-mode Passive')
             self.cmd('webapp managed-traffic list -g {rg} -n {app} --expand endpoints')
             self.cmd('webapp managed-traffic show -g {rg} -n {app}')
@@ -66,6 +68,7 @@ class ActiveBackupLiveTests(LiveScenarioTest):
             self.cmd('webapp silo vnet-integration add -g {rg} -n {app} --silo backup-app --subnet {subnet}')
             try:
                 self.cmd('webapp silo vnet-integration show -g {rg} -n {app} --silo backup-app')
+                self.cmd('webapp silo vnet-integration list -g {rg} -n {app} --silo backup-app')
                 self.cmd('webapp silo vnet-integration update -g {rg} -n {app} --silo backup-app --subnet {subnet}')
                 self.cmd('appservice plan silo vnet-integration list -g {rg} -n {plan} --silo backup-plan')
             finally:

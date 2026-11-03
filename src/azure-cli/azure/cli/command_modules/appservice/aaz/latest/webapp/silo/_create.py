@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class Create(AAZCommand):
-    """Create a silo for a Web App.
+    """Create a silo for a Web App. Returns 202 with polling headers when background work is queued, or 200 when no update is needed.
 
     :example: Create a site silo with active traffic routing.
         az webapp silo create --resource-group MyGroup --name MyApp --silo WestApp --location westus2 --primary-location eastus --traffic-mode Active --follow-last-known-good false
@@ -95,11 +95,10 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Name of the primary site.",
         )
-        _args_schema.location = AAZStrArg(
-            options=["-l", "--location"],
+        _args_schema.silo_location = AAZStrArg(
+            options=["--silo-location"],
             arg_group="Properties",
-            help="ARM location of the site silo.",
-            required=True,
+            help="Azure region of the site silo, retained for compatibility. When supplied, it must identify the same region as the required root location.",
         )
         _args_schema.traffic_mode = AAZStrArg(
             options=["--traffic-mode"],
@@ -113,6 +112,26 @@ class Create(AAZCommand):
             options=["vnet-integration-override"],
             help="Virtual network subnet resource ID override for the silo.",
         )
+
+        # define Arg Group "Resource"
+
+        _args_schema = cls._args_schema
+        _args_schema.location = AAZResourceLocationArg(
+            arg_group="Resource",
+            help="The geo-location where the resource lives",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Resource",
+            help="Resource tags.",
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
@@ -142,16 +161,16 @@ class Create(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -225,7 +244,9 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
+            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType)
+            _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -234,167 +255,206 @@ class Create(AAZCommand):
                 properties.set_prop("networkingOverride", AAZObjectType, ".networking_override")
                 properties.set_prop("primaryLocation", AAZStrType, ".primary_location", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("primarySiteName", AAZStrType, ".primary_site_name")
-                properties.set_prop("siloLocation", AAZStrType, ".location")
+                properties.set_prop("siloLocation", AAZStrType, ".silo_location")
                 properties.set_prop("trafficMode", AAZStrType, ".traffic_mode")
 
             networking_override = _builder.get(".properties.networkingOverride")
             if networking_override is not None:
                 networking_override.set_prop("vnetIntegrationOverride", AAZStrType, ".vnet_integration_override")
 
+            tags = _builder.get(".tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
             return self.serialize_content(_content_value)
 
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
+            cls._schema_on_200 = AAZObjectType()
+            _CreateHelper._build_schema_site_silo_read(cls._schema_on_200)
 
-            _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.properties = AAZObjectType()
-            _schema_on_200_201.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200_201.properties
-            properties.created_time = AAZStrType(
-                serialized_name="createdTime",
-                flags={"read_only": True},
-            )
-            properties.default_host_name = AAZStrType(
-                serialized_name="defaultHostName",
-                flags={"read_only": True},
-            )
-            properties.endpoint_status = AAZStrType(
-                serialized_name="endpointStatus",
-            )
-            properties.error_code = AAZStrType(
-                serialized_name="errorCode",
-                flags={"read_only": True},
-            )
-            properties.follow_last_known_good = AAZBoolType(
-                serialized_name="followLastKnownGood",
-            )
-            properties.global_host_name = AAZStrType(
-                serialized_name="globalHostName",
-                flags={"read_only": True},
-            )
-            properties.inbound_ip_address = AAZStrType(
-                serialized_name="inboundIpAddress",
-                flags={"read_only": True},
-            )
-            properties.inbound_ipv6_address = AAZStrType(
-                serialized_name="inboundIpv6Address",
-                flags={"read_only": True},
-            )
-            properties.last_modified_time = AAZStrType(
-                serialized_name="lastModifiedTime",
-                flags={"read_only": True},
-            )
-            properties.monitor_status = AAZStrType(
-                serialized_name="monitorStatus",
-                flags={"read_only": True},
-            )
-            properties.networking_override = AAZObjectType(
-                serialized_name="networkingOverride",
-            )
-            properties.outbound_ip_addresses = AAZStrType(
-                serialized_name="outboundIpAddresses",
-                flags={"read_only": True},
-            )
-            properties.outbound_ipv6_addresses = AAZStrType(
-                serialized_name="outboundIpv6Addresses",
-                flags={"read_only": True},
-            )
-            properties.possible_inbound_ip_addresses = AAZStrType(
-                serialized_name="possibleInboundIpAddresses",
-                flags={"read_only": True},
-            )
-            properties.possible_inbound_ipv6_addresses = AAZStrType(
-                serialized_name="possibleInboundIpv6Addresses",
-                flags={"read_only": True},
-            )
-            properties.possible_outbound_ip_addresses = AAZStrType(
-                serialized_name="possibleOutboundIpAddresses",
-                flags={"read_only": True},
-            )
-            properties.possible_outbound_ipv6_addresses = AAZStrType(
-                serialized_name="possibleOutboundIpv6Addresses",
-                flags={"read_only": True},
-            )
-            properties.primary_location = AAZStrType(
-                serialized_name="primaryLocation",
-                flags={"required": True},
-            )
-            properties.primary_site_name = AAZStrType(
-                serialized_name="primarySiteName",
-            )
-            properties.provisioning_details = AAZStrType(
-                serialized_name="provisioningDetails",
-                flags={"read_only": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.revision_number = AAZIntType(
-                serialized_name="revisionNumber",
-                flags={"read_only": True},
-            )
-            properties.silo_location = AAZStrType(
-                serialized_name="siloLocation",
-            )
-
-            networking_override = cls._schema_on_200_201.properties.networking_override
-            networking_override.vnet_integration_override = AAZStrType(
-                serialized_name="vnetIntegrationOverride",
-            )
-
-            system_data = cls._schema_on_200_201.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
-
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
 
 class _CreateHelper:
     """Helper class for Create"""
+
+    _schema_site_silo_read = None
+
+    @classmethod
+    def _build_schema_site_silo_read(cls, _schema):
+        if cls._schema_site_silo_read is not None:
+            _schema.id = cls._schema_site_silo_read.id
+            _schema.location = cls._schema_site_silo_read.location
+            _schema.name = cls._schema_site_silo_read.name
+            _schema.properties = cls._schema_site_silo_read.properties
+            _schema.system_data = cls._schema_site_silo_read.system_data
+            _schema.tags = cls._schema_site_silo_read.tags
+            _schema.type = cls._schema_site_silo_read.type
+            return
+
+        cls._schema_site_silo_read = _schema_site_silo_read = AAZObjectType()
+
+        site_silo_read = _schema_site_silo_read
+        site_silo_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        site_silo_read.location = AAZStrType(
+            flags={"required": True},
+        )
+        site_silo_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        site_silo_read.properties = AAZObjectType()
+        site_silo_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        site_silo_read.tags = AAZDictType()
+        site_silo_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        properties = _schema_site_silo_read.properties
+        properties.created_time = AAZStrType(
+            serialized_name="createdTime",
+            flags={"read_only": True},
+        )
+        properties.default_host_name = AAZStrType(
+            serialized_name="defaultHostName",
+            flags={"read_only": True},
+        )
+        properties.endpoint_status = AAZStrType(
+            serialized_name="endpointStatus",
+        )
+        properties.error_code = AAZStrType(
+            serialized_name="errorCode",
+            flags={"read_only": True},
+        )
+        properties.follow_last_known_good = AAZBoolType(
+            serialized_name="followLastKnownGood",
+        )
+        properties.global_host_name = AAZStrType(
+            serialized_name="globalHostName",
+            flags={"read_only": True},
+        )
+        properties.inbound_ip_address = AAZStrType(
+            serialized_name="inboundIpAddress",
+            flags={"read_only": True},
+        )
+        properties.inbound_ipv6_address = AAZStrType(
+            serialized_name="inboundIpv6Address",
+            flags={"read_only": True},
+        )
+        properties.last_modified_time = AAZStrType(
+            serialized_name="lastModifiedTime",
+            flags={"read_only": True},
+        )
+        properties.monitor_status = AAZStrType(
+            serialized_name="monitorStatus",
+            flags={"read_only": True},
+        )
+        properties.networking_override = AAZObjectType(
+            serialized_name="networkingOverride",
+        )
+        properties.outbound_ip_addresses = AAZStrType(
+            serialized_name="outboundIpAddresses",
+            flags={"read_only": True},
+        )
+        properties.outbound_ipv6_addresses = AAZStrType(
+            serialized_name="outboundIpv6Addresses",
+            flags={"read_only": True},
+        )
+        properties.possible_inbound_ip_addresses = AAZStrType(
+            serialized_name="possibleInboundIpAddresses",
+            flags={"read_only": True},
+        )
+        properties.possible_inbound_ipv6_addresses = AAZStrType(
+            serialized_name="possibleInboundIpv6Addresses",
+            flags={"read_only": True},
+        )
+        properties.possible_outbound_ip_addresses = AAZStrType(
+            serialized_name="possibleOutboundIpAddresses",
+            flags={"read_only": True},
+        )
+        properties.possible_outbound_ipv6_addresses = AAZStrType(
+            serialized_name="possibleOutboundIpv6Addresses",
+            flags={"read_only": True},
+        )
+        properties.primary_location = AAZStrType(
+            serialized_name="primaryLocation",
+            flags={"required": True},
+        )
+        properties.primary_site_name = AAZStrType(
+            serialized_name="primarySiteName",
+        )
+        properties.provisioning_details = AAZStrType(
+            serialized_name="provisioningDetails",
+            flags={"read_only": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.revision_number = AAZIntType(
+            serialized_name="revisionNumber",
+            flags={"read_only": True},
+        )
+        properties.silo_location = AAZStrType(
+            serialized_name="siloLocation",
+        )
+        properties.traffic_mode = AAZStrType(
+            serialized_name="trafficMode",
+        )
+
+        networking_override = _schema_site_silo_read.properties.networking_override
+        networking_override.vnet_integration_override = AAZStrType(
+            serialized_name="vnetIntegrationOverride",
+        )
+
+        system_data = _schema_site_silo_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        tags = _schema_site_silo_read.tags
+        tags.Element = AAZStrType()
+
+        _schema.id = cls._schema_site_silo_read.id
+        _schema.location = cls._schema_site_silo_read.location
+        _schema.name = cls._schema_site_silo_read.name
+        _schema.properties = cls._schema_site_silo_read.properties
+        _schema.system_data = cls._schema_site_silo_read.system_data
+        _schema.tags = cls._schema_site_silo_read.tags
+        _schema.type = cls._schema_site_silo_read.type
 
 
 __all__ = ["Create"]

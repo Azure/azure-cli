@@ -172,6 +172,9 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.location = AAZStrType(
+                flags={"required": True},
+            )
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
@@ -180,6 +183,7 @@ class List(AAZCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
+            _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -272,6 +276,9 @@ class List(AAZCommand):
             properties.silo_location = AAZStrType(
                 serialized_name="siloLocation",
             )
+            properties.traffic_mode = AAZStrType(
+                serialized_name="trafficMode",
+            )
 
             networking_override = cls._schema_on_200.value.Element.properties.networking_override
             networking_override.vnet_integration_override = AAZStrType(
@@ -297,6 +304,9 @@ class List(AAZCommand):
             system_data.last_modified_by_type = AAZStrType(
                 serialized_name="lastModifiedByType",
             )
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 

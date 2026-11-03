@@ -174,6 +174,9 @@ class Wait(AAZWaitCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.location = AAZStrType(
+                flags={"required": True},
+            )
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
@@ -182,6 +185,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
+            _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -274,6 +278,9 @@ class Wait(AAZWaitCommand):
             properties.silo_location = AAZStrType(
                 serialized_name="siloLocation",
             )
+            properties.traffic_mode = AAZStrType(
+                serialized_name="trafficMode",
+            )
 
             networking_override = cls._schema_on_200.properties.networking_override
             networking_override.vnet_integration_override = AAZStrType(
@@ -299,6 +306,9 @@ class Wait(AAZWaitCommand):
             system_data.last_modified_by_type = AAZStrType(
                 serialized_name="lastModifiedByType",
             )
+
+            tags = cls._schema_on_200.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 

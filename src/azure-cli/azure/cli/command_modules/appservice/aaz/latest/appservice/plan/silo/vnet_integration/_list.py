@@ -18,11 +18,11 @@ from azure.cli.core.aaz import *
 class List(AAZCommand):
     """Get the virtual network integrations associated with an App Service plan silo.
 
-    :example: List virtual network integrations on the plan silo.
+    :example: Inspect subnet integrations and allocation metadata.
         az appservice plan silo vnet-integration list --resource-group MyGroup --name MyPlan --silo WestPlan
 
     :example: List subnet resource IDs.
-        az appservice plan silo vnet-integration list --resource-group MyGroup --name MyPlan --silo WestPlan --query "[].subnetResourceId"
+        az appservice plan silo vnet-integration list --resource-group MyGroup --name MyPlan --silo WestPlan --query "properties[].subnetResourceId"
     """
 
     _aaz_info = {
@@ -165,56 +165,66 @@ class List(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZListType()
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.Element
-            _element.id = AAZStrType(
+            _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.kind = AAZStrType()
-            _element.name = AAZStrType(
+            _schema_on_200.location = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.system_data = AAZObjectType(
-                serialized_name="systemData",
+            _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.type = AAZStrType(
+            _schema_on_200.properties = AAZListType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.Element.properties
-            properties.subnet_resource_id = AAZStrType(
+            properties = cls._schema_on_200.properties
+            properties.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.Element
+            _element.resource_allocation = AAZObjectType(
+                serialized_name="resourceAllocation",
+                flags={"read_only": True},
+            )
+            _element.subnet_ip_allocation = AAZObjectType(
+                serialized_name="subnetIpAllocation",
+                flags={"read_only": True},
+            )
+            _element.subnet_resource_id = AAZStrType(
                 serialized_name="subnetResourceId",
-            )
-            properties.swift_supported = AAZBoolType(
-                serialized_name="swiftSupported",
+                flags={"read_only": True},
             )
 
-            system_data = cls._schema_on_200.Element.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
+            resource_allocation = cls._schema_on_200.properties.Element.resource_allocation
+            resource_allocation.connected_server_farms_id = AAZListType(
+                serialized_name="connectedServerFarmsId",
+                flags={"read_only": True},
             )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
+            resource_allocation.connected_sites_id = AAZListType(
+                serialized_name="connectedSitesId",
+                flags={"read_only": True},
             )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
+
+            connected_server_farms_id = cls._schema_on_200.properties.Element.resource_allocation.connected_server_farms_id
+            connected_server_farms_id.Element = AAZStrType()
+
+            connected_sites_id = cls._schema_on_200.properties.Element.resource_allocation.connected_sites_id
+            connected_sites_id.Element = AAZStrType()
+
+            subnet_ip_allocation = cls._schema_on_200.properties.Element.subnet_ip_allocation
+            subnet_ip_allocation.subnet_ip_addresses_available = AAZIntType(
+                serialized_name="subnetIpAddressesAvailable",
+                flags={"read_only": True},
             )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
+            subnet_ip_allocation.subnet_ip_addresses_used = AAZIntType(
+                serialized_name="subnetIpAddressesUsed",
+                flags={"read_only": True},
             )
 
             return cls._schema_on_200

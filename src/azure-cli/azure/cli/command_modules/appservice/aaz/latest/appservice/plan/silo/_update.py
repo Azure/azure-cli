@@ -16,10 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class Update(AAZCommand):
-    """Update a silo for an App Service plan.
+    """Update a silo for an App Service plan. Returns 202 with polling headers when background work is queued, or 200 when no update is needed.
 
-    :example: Change the secondary worker override and retain explicit routing fields.
-        az appservice plan silo update --resource-group MyGroup --name MyPlan --silo WestPlan --number-of-workers 2 --zone-redundant false --location westus2 --primary-location eastus --primary-server-farm-name MyPlan
+    :example: Change worker and zone redundancy overrides.
+        az appservice plan silo update --resource-group MyGroup --name MyPlan --silo WestPlan --number-of-workers 2 --zone-redundant false --tags environment=preview
 
     :example: Update a plan silo by resource ID.
         az appservice plan silo update  --ids /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/MyGroup/providers/Microsoft.Web/serverfarms/MyPlan/silos/WestPlan --set properties.instanceNumberOverride=1 --no-wait
@@ -85,21 +85,36 @@ class Update(AAZCommand):
             help="Region of the primary App Service plan.",
         )
         _args_schema.primary_server_farm_name = AAZStrArg(
-            options=["--primary-server-farm-name"],
+            options=["--primary-plan-name", "--primary-server-farm-name"],
             arg_group="Properties",
             help="Name of the primary App Service plan.",
             nullable=True,
         )
-        _args_schema.location = AAZStrArg(
-            options=["-l", "--location"],
+        _args_schema.silo_location = AAZStrArg(
+            options=["--silo-location"],
             arg_group="Properties",
-            help="ARM location of the App Service plan silo.",
+            help="Azure region of the App Service plan silo, retained for compatibility. When supplied, it must identify the same region as the required root location.",
             nullable=True,
         )
         _args_schema.zone_redundant = AAZBoolArg(
             options=["--zone-redundant"],
             arg_group="Properties",
             help="Zone redundancy override for the silo.",
+            nullable=True,
+        )
+
+        # define Arg Group "Resource"
+
+        _args_schema = cls._args_schema
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Resource",
+            help="Resource tags.",
+            nullable=True,
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg(
             nullable=True,
         )
         return cls._args_schema
@@ -231,16 +246,16 @@ class Update(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -316,25 +331,25 @@ class Update(AAZCommand):
 
             return self.serialize_content(_content_value)
 
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_server_farm_silo_read(cls._schema_on_200_201)
+            cls._schema_on_200 = AAZObjectType()
+            _UpdateHelper._build_schema_server_farm_silo_read(cls._schema_on_200)
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
@@ -348,14 +363,19 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("properties", AAZObjectType)
+            _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("instanceNumberOverride", AAZIntType, ".number_of_workers")
                 properties.set_prop("primaryLocation", AAZStrType, ".primary_location", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("primaryServerFarmName", AAZStrType, ".primary_server_farm_name")
-                properties.set_prop("siloLocation", AAZStrType, ".location")
+                properties.set_prop("siloLocation", AAZStrType, ".silo_location")
                 properties.set_prop("zoneRedundantOverride", AAZBoolType, ".zone_redundant")
+
+            tags = _builder.get(".tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
 
             return _instance_value
 
@@ -377,9 +397,11 @@ class _UpdateHelper:
     def _build_schema_server_farm_silo_read(cls, _schema):
         if cls._schema_server_farm_silo_read is not None:
             _schema.id = cls._schema_server_farm_silo_read.id
+            _schema.location = cls._schema_server_farm_silo_read.location
             _schema.name = cls._schema_server_farm_silo_read.name
             _schema.properties = cls._schema_server_farm_silo_read.properties
             _schema.system_data = cls._schema_server_farm_silo_read.system_data
+            _schema.tags = cls._schema_server_farm_silo_read.tags
             _schema.type = cls._schema_server_farm_silo_read.type
             return
 
@@ -389,6 +411,9 @@ class _UpdateHelper:
         server_farm_silo_read.id = AAZStrType(
             flags={"read_only": True},
         )
+        server_farm_silo_read.location = AAZStrType(
+            flags={"required": True},
+        )
         server_farm_silo_read.name = AAZStrType(
             flags={"read_only": True},
         )
@@ -397,6 +422,7 @@ class _UpdateHelper:
             serialized_name="systemData",
             flags={"read_only": True},
         )
+        server_farm_silo_read.tags = AAZDictType()
         server_farm_silo_read.type = AAZStrType(
             flags={"read_only": True},
         )
@@ -459,10 +485,15 @@ class _UpdateHelper:
             serialized_name="lastModifiedByType",
         )
 
+        tags = _schema_server_farm_silo_read.tags
+        tags.Element = AAZStrType()
+
         _schema.id = cls._schema_server_farm_silo_read.id
+        _schema.location = cls._schema_server_farm_silo_read.location
         _schema.name = cls._schema_server_farm_silo_read.name
         _schema.properties = cls._schema_server_farm_silo_read.properties
         _schema.system_data = cls._schema_server_farm_silo_read.system_data
+        _schema.tags = cls._schema_server_farm_silo_read.tags
         _schema.type = cls._schema_server_farm_silo_read.type
 
 
