@@ -9197,54 +9197,98 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
         self.cmd('identity delete -g {rg} -n {managed_instance_name}-admin')
 
 class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
-    # Own the MI lifecycle rather than depending on a shared instance; this is test isolation, not an SDK fix.
     @AllowLargeResponse()
-    @ManagedInstancePreparer(v_core=8, family='Gen8IM', storage=256,
-                             otherParams='--gpv2 true --memory 64 --iops 1000')
-    @live_only()
-    def test_sql_mi_memorysizeingb_create(self, mi, rg):
+    @live_only() # The test requires live Azure resources and seems to fail in live run for unavailability of resources in the subscription.
+    def test_sql_mi_memorysizeingb_create(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
         self.kwargs.update({
-            'rg': rg,
-            'managed_instance_name': mi
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'memory_size_in_gb': '64',
+            'storage_size_in_gb': '256',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
         })
 
-        self.cmd('sql mi show -g {rg} -n {managed_instance_name}',
-                 checks=[
-                     self.check('name', mi),
-                     self.check('resourceGroup', rg),
-                     self.check('administratorLogin', 'admin123'),
-                     self.check('isGeneralPurposeV2', True),
-                     self.check('vCores', 8),
-                     self.check('memorySizeInGb', 64),
-                     self.check('storageSizeInGb', 256),
-                     self.check('storageIops', 1000),
-                     self.check('licenseType', 'LicenseIncluded'),
-                     self.check('sku.tier', 'GeneralPurpose'),
-                     self.check('sku.family', 'Gen8IM'),
-                     self.check('sku.capacity', 8)])
+        # Create MI
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} '
+                                    '--memory {memory_size_in_gb}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('memorySizeInGb', '{memory_size_in_gb}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('storageIops', '{storage_iops}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}')])
+
+        # Get the managed instance and check memory size in gb
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['memorySizeInGb'], 64)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
 
 class SqlManagedInstanceMemorySizeInGBUpdateScenarioTest(ScenarioTest):
-    # Gen8IM needs 8 vCores for 64 GB; create a valid 56 GB source instead of updating a shared 4-core MI.
     @AllowLargeResponse()
-    @ManagedInstancePreparer(v_core=8, family='Gen8IM', storage=128,
-                             otherParams='--gpv2 true --memory 56 --iops 1000')
-    @live_only()
-    def test_sql_mi_memorysizeingb_update(self, mi, rg):
+    @live_only() # The test requires live Azure resources and seems to fail in live run for unavailability of resources in the subscription.
+    def test_sql_mi_memorysizeingb_update(self):
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
         self.kwargs.update({
-            'rg': rg,
-            'managed_instance_name': mi,
-            'memory_size_in_gb': 64
+            'rg': group,
+            'managed_instance_name': 'uroskrstic-flexi-test-azpowershell',
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'memory_size_in_gb': '64',
+            'storage_size_in_gb': '128',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
         })
 
-        self.cmd('sql mi show -g {rg} -n {managed_instance_name}',
-                 checks=[self.check('memorySizeInGb', 56)])
-
-        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 true --memory {memory_size_in_gb}',
-                 checks=[self.check('memorySizeInGb', 64)])
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --memory {memory_size_in_gb}',
+                 checks=[self.check('memorySizeInGb', '{memory_size_in_gb}')])
 
         # Get the managed instance and check memory size in GB
         managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
         self.assertEqual(managed_instance['memorySizeInGb'], int(self.kwargs['memory_size_in_gb']))
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
 
 class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
     @AllowLargeResponse()
