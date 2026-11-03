@@ -14,14 +14,16 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
+from argcomplete.completers import FilesCompleter
 from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants, ARMAuthenticationMode
+from ._featuremodels import parse_feature_flag_input
 
 from ._validators import (validate_appservice_name_or_id, validate_aks_cluster_name_or_id,
                           validate_sku, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
-                          validate_feature_query_fields, validate_filter_parameters,
+                          validate_feature_query_fields, validate_enhanced_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
                           validate_key, validate_feature, validate_feature_key,
                           validate_identity, validate_auth_mode, validate_snapshot_reference,
@@ -29,7 +31,8 @@ from ._validators import (validate_appservice_name_or_id, validate_aks_cluster_n
                           validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
                           validate_snapshot_export, validate_snapshot_import, validate_tag_filters,
                           validate_import_tag_filters, validate_dry_run, validate_kv_revision_retention_period,
-                          validate_public_network_args)
+                          validate_public_network_args,
+                          validate_enhanced_feature_flag, validate_enhanced_feature_flag_input)
 
 
 def load_arguments(self, _):
@@ -46,6 +49,12 @@ def load_arguments(self, _):
         help='Customize output fields for Feature Flags.',
         validator=validate_feature_query_fields,
         arg_type=get_enum_type(['name', 'key', 'label', 'locked', 'last_modified', 'state', 'description', 'conditions'])
+    )
+    enhanced_feature_fields_arg_type = CLIArgumentType(
+        nargs='+',
+        help='Customize output fields for Enhanced Feature Flags.',
+        validator=validate_enhanced_feature_query_fields,
+        arg_type=get_enum_type(['name', 'enabled', 'label', 'description', 'conditions', 'variants', 'allocation', 'tags', 'last_modified'])
     )
     snapshot_fields_arg_type = CLIArgumentType(
         nargs='+',
@@ -463,6 +472,41 @@ def load_arguments(self, _):
         c.argument('feature', help='Name of the feature whose filters you want to be displayed. If the feature flag key is different from the default key, provide the `--key` argument instead.')
         c.argument('label', help="If no label specified, display filters from the feature flag with null label by default.")
         c.argument('all_', help="List all filters associated with a feature flag.")
+
+    with self.argument_context('appconfig enhanced-feature-flag') as c:
+        c.argument('name', arg_type=data_plane_name_arg_type)
+        c.argument('feature_name', validator=validate_enhanced_feature_flag, help="Name of the enhanced feature flag. Enhanced feature flag name cannot contain the '%' or ':' characters.")
+        c.argument('label', help="If no label specified, uses the null label.")
+
+    with self.argument_context('appconfig enhanced-feature-flag set') as c:
+        c.argument('description', help='Description of the enhanced feature flag to be set.')
+        c.argument('requirement_type', arg_type=get_enum_type([FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY]),
+                   help='Requirement type determines if filters should use "Any" or "All" logic when evaluating the state of an enhanced feature flag.')
+        c.argument('telemetry_enabled', arg_type=get_three_state_flag(), help='Enable or disable telemetry for the enhanced feature flag.')
+        c.argument('tags', arg_type=tags_type)
+        c.argument('flag', options_list=['--flag'], type=parse_feature_flag_input,
+                   completer=FilesCompleter(), validator=validate_enhanced_feature_flag_input,
+                   help="The entire enhanced feature flag, using the same property names, casing and types as the "
+                        "data-plane API and 'az appconfig enhanced-feature-flag show' (name, enabled, description, "
+                        "conditions, allocation, variants, telemetry, tags). Accepts a JSON object, a shorthand-syntax "
+                        "object, a file path with @ prefix (e.g. @flag.json), or @- to read from stdin. Providing --flag "
+                        "replaces the entire feature flag and cannot be combined with --description, "
+                        "--requirement-type or --telemetry-enabled.")
+
+    with self.argument_context('appconfig enhanced-feature-flag show') as c:
+        c.argument('fields', arg_type=enhanced_feature_fields_arg_type)
+
+    with self.argument_context('appconfig enhanced-feature-flag delete') as c:
+        c.argument('feature_name', validator=validate_enhanced_feature_flag, help='Name of the enhanced feature flag to be deleted. Support star sign as filters, for instance * means all enhanced feature flags and abc* means enhanced feature flags with abc as prefix. If no feature name specified, delete all enhanced feature flags that match the specified label and tags.')
+        c.argument('label', help="If no label specified, delete the enhanced feature flag with null label. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix.")
+        c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, delete all enhanced feature flags with any tags that match the specified feature and label. Support space-separated tags: key[=value] [key[=value] ...].")
+
+    with self.argument_context('appconfig enhanced-feature-flag list') as c:
+        c.argument('feature_name', validator=validate_enhanced_feature_flag, help='Name of the enhanced feature flag to be listed. Support star sign as filters, for instance * means all enhanced feature flags and abc* means enhanced feature flags with abc as prefix.')
+        c.argument('label', help="If no label specified, list all labels. Support star sign as filters, for instance * means all labels and abc* means labels with abc as prefix.")
+        c.argument('fields', arg_type=enhanced_feature_fields_arg_type)
+        c.argument('all_', help="List all enhanced feature flags.")
+        c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, list all enhanced feature flags with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
 
     with self.argument_context('appconfig replica') as c:
         c.argument('store_name', arg_type=store_name_arg_type)

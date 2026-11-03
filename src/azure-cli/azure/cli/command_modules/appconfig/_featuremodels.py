@@ -19,6 +19,23 @@ from ._constants import FeatureFlagConstants
 
 logger = get_logger(__name__)
 
+
+def parse_feature_flag_input(value):
+    """Parse the --flag value as AAZ shorthand syntax, falling back to JSON.
+
+    Mirrors AAZAnyTypeArgAction.decode_str: shorthand is tried first and, because the shorthand
+    parser rejects double-quoted JSON, valid JSON falls through to shell_safe_json_parse. The
+    @file/@- convention is expanded to file content by the CLI core before this runs.
+    """
+    from azure.cli.core.aaz._utils import AAZShortHandSyntaxParser
+    from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError
+
+    try:
+        return AAZShortHandSyntaxParser()(value)
+    except AAZInvalidShorthandSyntaxError:
+        return shell_safe_json_parse(value, preserve_order=True)
+
+
 # Feature Flag Models #
 
 
