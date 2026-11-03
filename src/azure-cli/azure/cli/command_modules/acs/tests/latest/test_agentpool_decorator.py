@@ -4114,33 +4114,20 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         ), self.assertRaises(DecoratorEarlyExitException):
             dec_5.update_vm_size(agentpool_5)
 
-        # VirtualMachines pool without autoscaler change, raise error
-        dec_6 = AKSAgentPoolUpdateDecorator(
-            self.cmd,
-            self.client,
-            {"node_vm_size": "Standard_D4s_v5", "yes": True},
-            self.resource_type,
-            self.agentpool_decorator_mode,
-        )
-        agentpool_6 = self._set_vms_pool_type(self.create_initialized_agentpool_instance())
-        dec_6.context.attach_agentpool(agentpool_6)
-        with self.assertRaises(InvalidArgumentValueError):
-            dec_6.update_vm_size(agentpool_6)
-
-        # VirtualMachines pool with autoscaler change, handled by update_auto_scaler_properties_vms, no-op here
-        dec_7 = AKSAgentPoolUpdateDecorator(
-            self.cmd,
-            self.client,
-            {"node_vm_size": "Standard_D4s_v5", "enable_cluster_autoscaler": True},
-            self.resource_type,
-            self.agentpool_decorator_mode,
-        )
-        agentpool_7 = self._set_vms_pool_type(self.create_initialized_agentpool_instance())
-        dec_7.context.attach_agentpool(agentpool_7)
-        with patch("azure.cli.command_modules.acs.agentpool_decorator.prompt_y_n") as mock_prompt:
-            dec_agentpool_7 = dec_7.update_vm_size(agentpool_7)
-        mock_prompt.assert_not_called()
-        self.assertIsNone(dec_agentpool_7.vm_size)
+        # VirtualMachines pool, raise error rather than silently ignoring the size, with or without an
+        # autoscaler transition (the transition copies the existing scale profile sizes)
+        for extra_params in ({}, {"enable_cluster_autoscaler": True}, {"disable_cluster_autoscaler": True}):
+            dec_6 = AKSAgentPoolUpdateDecorator(
+                self.cmd,
+                self.client,
+                {"node_vm_size": "Standard_D4s_v5", "yes": True, **extra_params},
+                self.resource_type,
+                self.agentpool_decorator_mode,
+            )
+            agentpool_6 = self._set_vms_pool_type(self.create_initialized_agentpool_instance())
+            dec_6.context.attach_agentpool(agentpool_6)
+            with self.subTest(extra_params=extra_params), self.assertRaises(InvalidArgumentValueError):
+                dec_6.update_vm_size(agentpool_6)
 
     def common_update_managed_dranet(self):
         dec_1 = AKSAgentPoolUpdateDecorator(

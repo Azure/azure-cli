@@ -3036,8 +3036,8 @@ class AKSAgentPoolUpdateDecorator:
         Changing the VM size triggers a rolling replacement: AKS surges nodes with the new size, then cordons,
         drains and deletes the old nodes according to the node pool's upgrade settings.
 
-        VirtualMachines node pools manage VM sizes through scale profiles, so they are skipped here unless the
-        cluster autoscaler is being enabled or disabled (see update_auto_scaler_properties_vms).
+        VirtualMachines node pools manage VM sizes through their scale profiles, so --node-vm-size is rejected
+        for them instead of being silently ignored.
 
         :return: the AgentPool object
         """
@@ -3048,17 +3048,11 @@ class AKSAgentPoolUpdateDecorator:
             return agentpool
 
         if self.context.get_vm_set_type() == CONST_VIRTUAL_MACHINES:
-            if not (
-                self.context.raw_param.get("enable_cluster_autoscaler") or
-                self.context.raw_param.get("disable_cluster_autoscaler")
-            ):
-                raise InvalidArgumentValueError(
-                    "--node-vm-size can only be used with --enable-cluster-autoscaler or "
-                    "--disable-cluster-autoscaler for VirtualMachines node pools. "
-                    'Please use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" '
-                    "to change the VM size of a VirtualMachines node pool."
-                )
-            return agentpool
+            raise InvalidArgumentValueError(
+                "--node-vm-size is not supported for VirtualMachines node pools. "
+                'Please use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" '
+                "to change the VM size of a VirtualMachines node pool."
+            )
 
         # already set to the same value, directly return
         if agentpool.vm_size and agentpool.vm_size.lower() == node_vm_size.lower():
