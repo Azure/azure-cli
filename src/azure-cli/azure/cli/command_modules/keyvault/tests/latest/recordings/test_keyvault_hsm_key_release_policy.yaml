@@ -5,7 +5,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - keyvault key create
       Connection:
@@ -17,7 +17,7 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --policy --hsm-name
       User-Agent:
-      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.13.15 (macOS-26.6-arm64-arm-64bit-Mach-O)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26300-SP0)
     method: POST
     uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/create?api-version=7.6-preview.2
   response:
@@ -35,14 +35,14 @@ interactions:
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       www-authenticate:
-      - Bearer authorization="https://login.microsoftonline.com/4f00b3b6-2940-4f2c-b037-94637c180d30",
+      - Bearer authorization="https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
         resource="https://managedhsm.azure.net"
       x-content-type-options:
       - nosniff
       x-frame-options:
       - SAMEORIGIN
       x-ms-server-latency:
-      - '0'
+      - '1'
     status:
       code: 401
       message: Unauthorized
@@ -53,7 +53,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - keyvault key create
       Connection:
@@ -65,12 +65,12 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --policy --hsm-name
       User-Agent:
-      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.13.15 (macOS-26.6-arm64-arm-64bit-Mach-O)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26300-SP0)
     method: POST
     uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/create?api-version=7.6-preview.2
   response:
     body:
-      string: '{"attributes":{"created":1786635263,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1786635263},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/a98622774e0b4daea53fef9828658f67","kty":"EC-HSM","x":"6ztsFxRHw6AoZo-I5yW_DDk-StymX-_3pkx3ap-cp5o","y":"UWRxkq0YvD_D5y_R7a5l4MaS7LtxYKwY1S1qhmoTGw8"},"release_policy":{"contentType":"application/json;
+      string: '{"attributes":{"created":1792606383,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1792606383},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/b99b3fe460c7427d908dcb0288318b12","kty":"EC-HSM","x":"5MRFkXHbf4ndfzGbqNDy4ZGKSjE8N4NU7OcNyz4U81U","y":"VAUUenaO3ndjh7OSeA0OftZgUCyybCUkBZkxw9psXbo"},"release_policy":{"contentType":"application/json;
         charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":false}}'
     headers:
       cache-control:
@@ -88,11 +88,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=106.70.191.220;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=0.0.0.0;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - uksouth
       x-ms-server-latency:
-      - '137'
+      - '127'
     status:
       code: 200
       message: OK
@@ -102,7 +102,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - keyvault key create
       Connection:
@@ -110,12 +110,12 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --default-cvm-policy --hsm-name
       User-Agent:
-      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.13.15 (macOS-26.6-arm64-arm-64bit-Mach-O)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/managedHSMs?api-version=2026-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/managedHSMs?api-version=2026-05-15
   response:
     body:
-      string: '{"value":[{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_krp000001/providers/Microsoft.KeyVault/managedHSMs/clitesthsmkrp000002","name":"clitesthsmkrp000002","type":"Microsoft.KeyVault/managedHSMs","location":"uksouth","tags":{},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-08-13T15:13:26.364Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-08-13T15:13:26.364Z"},"properties":{"tenantId":"4f00b3b6-2940-4f2c-b037-94637c180d30","hsmUri":"https://clitesthsmkrp000002.managedhsm.azure.net/","initialAdminObjectIds":["bb83257d-f1d0-412f-85a2-22c2b259e928"],"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":false,"provisioningState":"Succeeded","statusMessage":"The
+      string: '{"value":[{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_krp000001/providers/Microsoft.KeyVault/managedHSMs/clitesthsmkrp000002","name":"clitesthsmkrp000002","type":"Microsoft.KeyVault/managedHSMs","location":"uksouth","tags":{},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-10-21T17:58:58.86Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-10-21T17:58:58.86Z"},"properties":{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","hsmUri":"https://clitesthsmkrp000002.managedhsm.azure.net/","initialAdminObjectIds":["00000000-0000-0000-0000-000000000001"],"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":false,"provisioningState":"Succeeded","statusMessage":"The
         Managed HSM is provisioned and ready to use.","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[],"serviceTags":[]},"publicNetworkAccess":"Enabled","regions":[],"securityDomainProperties":{"activationStatus":"NotActivated","activationStatusMessage":"Your
         HSM has been provisioned, but cannot be used for cryptographic operations
         until it is activated. To activate the HSM, download the security domain."}}}]}'
@@ -123,29 +123,30 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1312'
+      - '6491'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 13 Aug 2026 15:34:26 GMT
+      - Wed, 21 Oct 2026 18:13:05 GMT
+      expires:
+      - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
       x-cache:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-keyvault-service-version:
-      - 2.2.1020.0
       x-ms-original-request-ids:
-      - 08de3cb8-0d4f-488e-b5bc-07728759007c
+      - 0166a621-7116-4dc2-b4c5-15081eef3206
+      - 2a8c341a-efa7-4c4e-b3ae-318ccc3bf326
+      - 3e4f9650-2884-4bbd-8b12-1d2c0763778a
+      - 4ddfc0f9-aeea-4314-8349-9d1a83190184
       x-ms-ratelimit-remaining-subscription-global-reads:
-      - '3749'
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: 30F1411A114E4E389D304C7F7C141C77 Ref B: PER201000404023 Ref C: 2026-08-13T15:34:24Z'
+      - 'Ref A: 09234895CA664B5D9E363AA6CBB24734 Ref B: DUB241062303052 Ref C: 2026-10-21T18:13:04Z'
     status:
       code: 200
       message: OK
@@ -155,7 +156,7 @@ interactions:
       Accept:
       - '*/*'
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - keyvault key create
       Connection:
@@ -163,7 +164,7 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --default-cvm-policy --hsm-name
       User-Agent:
-      - python/3.13.15 (macOS-26.6-arm64-arm-64bit-Mach-O) AZURECLI/2.89.0
+      - python/3.14.5 (Windows-11-10.0.26300-SP0) AZURECLI/2.91.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Attestation/Locations/uksouth/defaultProvider?api-version=2020-10-01
   response:
@@ -178,7 +179,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 13 Aug 2026 15:34:26 GMT
+      - Wed, 21 Oct 2026 18:13:05 GMT
       expires:
       - '-1'
       pragma:
@@ -190,13 +191,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-maa-service-version:
-      - 1.11.03495.6194
+      - 1.11.03568.6445
       x-ms-operation-identifier:
-      - tenantId=4f00b3b6-2940-4f2c-b037-94637c180d30,objectId=bb83257d-f1d0-412f-85a2-22c2b259e928/australiasoutheast/fbb61964-8c6f-4824-b6ae-1bca1d597f6d
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=00000000-0000-0000-0000-000000000001/northeurope/846af100-9e11-4256-b2f0-3171e99ee7fc
       x-ms-ratelimit-remaining-subscription-global-reads:
-      - '3749'
+      - '16499'
       x-msedge-ref:
-      - 'Ref A: 14D69B493AD34204A37305E89CFF3C9A Ref B: PER201000404060 Ref C: 2026-08-13T15:34:26Z'
+      - 'Ref A: D331878988A144FF90EFAE488442606C Ref B: DUB241062307062 Ref C: 2026-10-21T18:13:06Z'
     status:
       code: 200
       message: OK
@@ -207,7 +208,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - keyvault key create
       Connection:
@@ -219,12 +220,12 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --default-cvm-policy --hsm-name
       User-Agent:
-      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.13.15 (macOS-26.6-arm64-arm-64bit-Mach-O)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26300-SP0)
     method: POST
     uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/create?api-version=7.6-preview.2
   response:
     body:
-      string: '{"attributes":{"created":1786635268,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1786635268},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/731a297c28e248629fb0b9177855e861","kty":"EC-HSM","x":"LiBP4s_3jdH_S2bEwKBHToLkIDEuPVCWzZk5thwypcg","y":"NtC0C-wt1xdfDWwlBHVErcgU3VEm-OXlP9cdcDCX7wc"},"release_policy":{"contentType":"application/json;
+      string: '{"attributes":{"created":1792606387,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1792606387},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/0e6d6285ebd008c2073238df461bf21f","kty":"EC-HSM","x":"Cp22u9597nzdk0PGn5yEH75COdrIRCdxIl_tTKb-Ng8","y":"BDT_MHPV13WWORCLasml94wbAIFR4pzqGWA5p1NiB9k"},"release_policy":{"contentType":"application/json;
         charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkdWtzLnVrcy5hdHRlc3QuYXp1cmUubmV0LyJ9XSwidmVyc2lvbiI6IjEuMC4wIn0","immutable":false}}'
     headers:
       cache-control:
@@ -242,11 +243,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=106.70.191.220;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=0.0.0.0;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - uksouth
       x-ms-server-latency:
-      - '134'
+      - '128'
     status:
       code: 200
       message: OK
@@ -257,7 +258,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - keyvault key set-attributes
       Connection:
@@ -269,12 +270,12 @@ interactions:
       ParameterSetName:
       - --policy --immutable -n --hsm-name
       User-Agent:
-      - AZURECLI/2.89.0 azsdk-python-core/1.39.0 Python/3.13.15 (macOS-26.6-arm64-arm-64bit-Mach-O)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.5 (Windows-11-10.0.26300-SP0)
     method: PATCH
     uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/?api-version=7.6-preview.2
   response:
     body:
-      string: '{"attributes":{"created":1786635268,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1786635270},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/731a297c28e248629fb0b9177855e861","kty":"EC-HSM","x":"LiBP4s_3jdH_S2bEwKBHToLkIDEuPVCWzZk5thwypcg","y":"NtC0C-wt1xdfDWwlBHVErcgU3VEm-OXlP9cdcDCX7wc"},"release_policy":{"contentType":"application/json;
+      string: '{"attributes":{"created":1792606387,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1792606387},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/0e6d6285ebd008c2073238df461bf21f","kty":"EC-HSM","x":"Cp22u9597nzdk0PGn5yEH75COdrIRCdxIl_tTKb-Ng8","y":"BDT_MHPV13WWORCLasml94wbAIFR4pzqGWA5p1NiB9k"},"release_policy":{"contentType":"application/json;
         charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":true}}'
     headers:
       cache-control:
@@ -292,11 +293,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=106.70.191.220;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=0.0.0.0;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - uksouth
       x-ms-server-latency:
-      - '1033'
+      - '1116'
     status:
       code: 200
       message: OK
