@@ -146,6 +146,8 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].os != `null`', True),
             JMESPathCheck('[0].runtime != `null`', True),
             JMESPathCheck('[0].config != `null`', True),
+            JMESPathCheck("length([?contains(config, '|')])", 0),
+            JMESPathCheck("length([?contains(config, ':')]) == length(@)", True),
             JMESPathCheck('[0].support != `null`', True),
         ])
         # Validate OS filter

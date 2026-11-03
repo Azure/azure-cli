@@ -5,6 +5,7 @@
 
 import time
 import os
+import re
 import urllib
 import urllib3
 import certifi
@@ -26,6 +27,26 @@ from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND, ISOLATED
 logger = get_logger(__name__)
 
 REQUESTS_CA_BUNDLE = "REQUESTS_CA_BUNDLE"
+
+
+def get_linux_runtime_list_command(runtime):
+    family = re.split(r'[:|]', runtime or '', maxsplit=1)[0].strip().lower()
+    runtime_filters = {
+        'dotnet': 'dotnet',
+        'dotnetcore': 'dotnet',
+        'aspnet': 'dotnet',
+        'node': 'node',
+        'php': 'php',
+        'python': 'python',
+        'java': 'java',
+        'tomcat': 'java',
+        'jbosseap': 'java',
+    }
+    command = "az webapp list-runtimes --os-type linux"
+    runtime_filter = runtime_filters.get(family)
+    if runtime_filter:
+        command += " --runtime {}".format(runtime_filter)
+    return command
 
 
 # get a RID when the name may be an RID

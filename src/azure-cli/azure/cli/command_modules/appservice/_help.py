@@ -2403,6 +2403,15 @@ short-summary: List all scaled out instances of a web app or web app slot.
 helps['webapp list-runtimes'] = """
 type: command
 short-summary: List available built-in stacks which can be used for web apps.
+long-summary: The config field uses Framework:Version, which can be passed directly to --runtime.
+    Use ':' as the runtime separator in commands. Existing pipe-separated runtime input remains accepted.
+    The --runtime filter selects a family, such as python or dotnet, not a full Framework:Version value.
+    When a Linux web app runtime is rejected, run the suggested list-runtimes command to find supported runtime values.
+examples:
+  - name: List supported Python runtimes for Linux.
+    text: az webapp list-runtimes --os-type linux --runtime python --output table
+  - name: List runtime values that can be passed to --runtime.
+    text: az webapp list-runtimes --os-type linux --runtime dotnet --query "[].config" --output tsv
 """
 
 helps['functionapp list-runtimes'] = """
