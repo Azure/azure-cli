@@ -960,7 +960,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  checks=[JMESPathCheck("[?name=='westus'].displayName | [0]", 'West US')])
 
     @ResourceGroupPreparer(location='southcentralus')
-    @StorageAccountPreparer(location='southcentralus')
+    @StorageAccountPreparer(location='southcentralus', kind='StorageV2', allow_shared_key_access=False)
     @KeyVaultPreparer(location='southcentralus', additional_params='--enable-rbac-authorization false')
     def test_customer_managed_key(self, resource_group, storage_account, key_vault):
         self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': key_vault}

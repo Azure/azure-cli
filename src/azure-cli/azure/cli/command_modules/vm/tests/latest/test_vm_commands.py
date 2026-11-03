@@ -2821,16 +2821,14 @@ class VMCreateEphemeralOsDisk(ScenarioTest):
 
 class VMFlexProfileScenarioTests(ScenarioTest):
 
-    # add live_only: Currently only enabled in canary region where BAMI sub is not accessible
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_main_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_main_', location='eastasia')
     def test_vm_flex_profile_create_and_update(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('flowvm', 15),
             'loc': resource_group_location,
             'image': 'Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest',
-            'preferred_size': 'Standard_D2s_v3',
-            'updated_preferred_size': 'Standard_D4s_v3',
+            'preferred_size': 'Standard_D2s_v6',
+            'updated_preferred_size': 'Standard_D4s_v6',
             'ssh_key': TEST_SSH_KEY_PUB,
         })
 
@@ -2865,25 +2863,23 @@ class VMFlexProfileScenarioTests(ScenarioTest):
             self.check("[?name=='{vm}'].hardwareProfile.vmSize | [0]", '{deployed_size}'),
         ])
 
-    # add live_only: Currently only enabled in canary region where BAMI sub is not accessible
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_edge_', location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_flex_profile_edge_', location='eastasia')
     def test_vm_flex_profile_opt_in_opt_out(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm': self.create_random_name('fixedvm', 15),
             'loc': resource_group_location,
             'image': 'Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest',
-            'preferred_size': 'Standard_D2s_v3',
+            'preferred_size': 'Standard_D2s_v6',
             'ssh_key': TEST_SSH_KEY_PUB,
         })
 
         self.cmd(
             'vm create -g {rg} -n {vm} --location {loc} --image {image} '
-            '--size Standard_D2s_v3 --admin-username clitest --ssh-key-values "{ssh_key}" '
+            '--size {preferred_size} --admin-username clitest --ssh-key-values "{ssh_key}" '
             '--security-type Standard --nsg-rule NONE --public-ip-address ""')
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('flexProfile', None),
-            self.check('hardwareProfile.vmSize', 'Standard_D2s_v3'),
+            self.check('hardwareProfile.vmSize', '{preferred_size}'),
         ])
 
         self.cmd('vm update -g {rg} -n {vm} --preferred-size {preferred_size}')
@@ -2894,7 +2890,7 @@ class VMFlexProfileScenarioTests(ScenarioTest):
         deployed_size = vm['hardwareProfile']['vmSize']
         self.kwargs.update({
             'deployed_size': deployed_size,
-            'different_size': 'Standard_D4s_v3' if deployed_size != 'Standard_D4s_v3' else 'Standard_D2s_v3',
+            'different_size': 'Standard_D4s_v6' if deployed_size != 'Standard_D4s_v6' else 'Standard_D2s_v6',
         })
 
         self.cmd('vm update -g {rg} -n {vm} --size {deployed_size}')
@@ -5979,12 +5975,12 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 
     @ResourceGroupPreparer()
     @KeyVaultPreparer(name_prefix='vmkeyvault', name_len=20, key='vault',
-                      additional_params='--enabled-for-deployment true --enabled-for-template-deployment true')
+                      additional_params='--enabled-for-deployment true --enabled-for-template-deployment true --enable-rbac-authorization false')
     def test_vm_create_windows_secrets(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'admin': 'windowsUser',
             'loc': 'westus',
-            'image': 'Win2012R2Datacenter',
+            'image': 'Win2022Datacenter',
             'vm': 'vm-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}])
         })
@@ -6019,7 +6015,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
-    @KeyVaultPreparer(name_prefix='vmsslinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment true --enabled-for-template-deployment true')
+    @KeyVaultPreparer(name_prefix='vmsslinuxkv', name_len=20, key='vault', additional_params='--enabled-for-deployment true --enabled-for-template-deployment true --enable-rbac-authorization false')
     @AllowLargeResponse()
     def test_vmss_create_linux_secrets(self, resource_group, key_vault):
         self.kwargs.update({
@@ -6039,7 +6035,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
         vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
         self.kwargs['secrets'] = json.dumps(vm_format)
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\'')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-12:12:latest --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\'')
 
         self.cmd('vmss show -n {vmss} -g {rg}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -10929,7 +10925,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'appDisplayName': self.create_random_name(prefix='test-des-app-', length=20)
         })
 
-        federated_client_id = self.cmd('ad app create --display-name {appDisplayName}').get_output_in_json()['appId']
+        federated_client_id = self.cmd('ad app create --display-name {appDisplayName} --service-management-reference 092c677a-6386-4fa8-a485-991d3f9aa010').get_output_in_json()['appId']
 
         vault_id = self.cmd('keyvault show -g {rg} -n {vault}').get_output_in_json()['id']
         kid = self.cmd('keyvault key create -n {key} --vault {vault} --protection software') \
@@ -11155,7 +11151,7 @@ class DiskEncryptionSetTest(ScenarioTest):
         self.kwargs.update({
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
-            'image-reference': 'Debian:debian-11:11-backports-gen2:latest',
+            'image-reference': 'Debian:debian-12:12-gen2:latest',
             'disk': self.create_random_name(prefix='disk-', length=20),
             'disk2': self.create_random_name(prefix='disk-', length=20),
         })
@@ -11328,7 +11324,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             'disk2': self.create_random_name(prefix='d2-', length=20),
             'vm': self.create_random_name(prefix='vm1-', length=20),
             'policy_path': os.path.join(TEST_DIR, 'keyvault', 'policy2.json').replace('\\', '\\\\'),
-            'image': 'MicrosoftWindowsServer:windows-cvm:2022-datacenter-cvm:latest'
+            'image': 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest'
         })
 
         self.cmd('keyvault create --name {vault} -g {rg} --sku Premium --enable-purge-protection true --retention-days 7 --enable-rbac-authorization false')

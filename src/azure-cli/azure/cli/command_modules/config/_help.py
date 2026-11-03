@@ -23,6 +23,10 @@ examples:
     text: az config set core.no_color=true
   - name: Hide warnings and only show errors with `core.only_show_errors`.
     text: az config set core.only_show_errors=true
+  - name: Write LF line endings to stdout in every shell, including cmd and PowerShell (the default under WSL and Git Bash).
+    text: az config set core.output_newline=lf
+  - name: Keep the platform's default line endings (CRLF on Windows), even when called from WSL or Git Bash.
+    text: az config set core.output_newline=native
   - name: Turn on client-side telemetry.
     text: az config set core.collect_telemetry=true
   - name: Turn on file logging and set its location.

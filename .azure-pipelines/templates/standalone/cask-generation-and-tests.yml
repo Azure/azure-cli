@@ -170,13 +170,19 @@ jobs:
         --x86-64-macos-sha "$X86_64_MACOS_SHA256" \
         --arm64-linux-sha "$ARM64_LINUX_SHA256" \
         --x86-64-linux-sha "$X86_64_LINUX_SHA256" \
-        --github-repo "${{ parameters.GitHubRepo }}" \
-        --python-version "${{ parameters.PythonVersion }}" \
+        --github-repo "$CASK_GITHUB_REPO" \
+        --python-version "$CASK_PYTHON_VERSION" \
         --template "$REPO_ROOT/scripts/release/standalone/templates/azure-cli.rb.in" \
         --output "$(Pipeline.Workspace)/cask-definition/azure-cli.rb"
       
       echo "=== Generated Cask (GitHub URLs - for publishing) ==="
       cat $(Pipeline.Workspace)/cask-definition/azure-cli.rb
+
+      python3 "$REPO_ROOT/scripts/release/standalone/cask_generate.py" \
+        --validate "$(Pipeline.Workspace)/cask-definition/azure-cli.rb" \
+        --github-repo "$CASK_GITHUB_REPO" \
+        --python-version "$CASK_PYTHON_VERSION" \
+        --template "$REPO_ROOT/scripts/release/standalone/templates/azure-cli.rb.in"
       
       # Copy to staging and modify for local file:// testing
       mkdir -p $(Pipeline.Workspace)/cask-staging
@@ -194,6 +200,9 @@ jobs:
       cat $(Pipeline.Workspace)/cask-staging/azure-cli.rb
       
     displayName: 'Generate cask definition'
+    env:
+      CASK_GITHUB_REPO: ${{ parameters.GitHubRepo }}
+      CASK_PYTHON_VERSION: ${{ parameters.PythonVersion }}
 
   - bash: |
       set -ev
@@ -241,9 +250,9 @@ jobs:
       hash -r
       
       # Ensure Python is available
-      if ! brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
-        echo "Installing Python ${{ parameters.PythonVersion }}..."
-        brew install python@${{ parameters.PythonVersion }}
+      if ! brew list "python@$CASK_PYTHON_VERSION" &>/dev/null; then
+        echo "Installing Python $CASK_PYTHON_VERSION..."
+        brew install "python@$CASK_PYTHON_VERSION"
       fi
       
       # Install the cask from our temporary tap
@@ -251,8 +260,8 @@ jobs:
       
       # Verify installation
       echo "=== Verifying Installation ==="
-      brew info --cask azure-cli
-      brew info --cask azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
+      brew info --cask test/azure-cli-pipeline-test/azure-cli
+      brew info --cask test/azure-cli-pipeline-test/azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
       which az
       az --version
       
@@ -262,15 +271,24 @@ jobs:
       echo "=== Temporary Tap Cask Test PASSED ($(Architecture)) ==="
       
     displayName: 'Install and test cask'
+    env:
+      CASK_PYTHON_VERSION: ${{ parameters.PythonVersion }}
 
   - bash: |
+      set -euo pipefail
       echo "=== Cleanup ($(Architecture)) ==="
       
       # Uninstall the cask
-      brew uninstall --cask azure-cli 2>/dev/null || true
+      installed_casks=$(brew list --cask --full-name)
+      if grep -Fxq 'test/azure-cli-pipeline-test/azure-cli' <<< "$installed_casks"; then
+        brew uninstall --cask test/azure-cli-pipeline-test/azure-cli
+      fi
       
       # Remove temporary tap
-      brew untap test/azure-cli-pipeline-test 2>/dev/null || true
+      installed_taps=$(brew tap)
+      if grep -Fxq 'test/azure-cli-pipeline-test' <<< "$installed_taps"; then
+        brew untap test/azure-cli-pipeline-test
+      fi
       
       echo "Cleanup complete"
     displayName: 'Cleanup'
@@ -303,7 +321,8 @@ jobs:
     name: $(PoolName)
 
   steps:
-  - checkout: none
+  - checkout: self
+    fetchDepth: 1
 
   - template: ../linux/setup-homebrew.yml
 
@@ -314,6 +333,18 @@ jobs:
   - download: current
     artifact: 'linux-cli-final-$(Architecture)'
     displayName: 'Download Linux tarball'
+
+  - bash: |
+      set -euo pipefail
+      python3 scripts/release/standalone/cask_generate.py \
+        --validate "$CASK_PATH" \
+        --github-repo "$CASK_GITHUB_REPO" \
+        --python-version "$CASK_PYTHON_VERSION"
+    displayName: 'Validate unchanged publication cask'
+    env:
+      CASK_PATH: $(Pipeline.Workspace)/cask-definition/azure-cli.rb
+      CASK_GITHUB_REPO: ${{ parameters.GitHubRepo }}
+      CASK_PYTHON_VERSION: ${{ parameters.PythonVersion }}
 
   - bash: |
       set -euo pipefail
@@ -339,16 +370,25 @@ jobs:
       git add Casks/azure-cli.rb
       git commit -m "Add azure-cli cask for testing"
 
-      brew install python@${{ parameters.PythonVersion }}
+      brew install "python@$CASK_PYTHON_VERSION"
       brew install --cask test/azure-cli-pipeline-test/azure-cli
-      brew info --cask azure-cli
-      brew info --cask azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
+      brew info --cask test/azure-cli-pipeline-test/azure-cli
+      brew info --cask test/azure-cli-pipeline-test/azure-cli | grep -F "github.com/test/homebrew-azure-cli-pipeline-test/blob/HEAD/Casks/azure-cli.rb"
       az version
     displayName: 'Install and test Linux cask'
+    env:
+      CASK_PYTHON_VERSION: ${{ parameters.PythonVersion }}
 
   - bash: |
-      brew uninstall --cask azure-cli 2>/dev/null || true
-      brew untap test/azure-cli-pipeline-test 2>/dev/null || true
+      set -euo pipefail
+      installed_casks=$(brew list --cask --full-name)
+      if grep -Fxq 'test/azure-cli-pipeline-test/azure-cli' <<< "$installed_casks"; then
+        brew uninstall --cask test/azure-cli-pipeline-test/azure-cli
+      fi
+      installed_taps=$(brew tap)
+      if grep -Fxq 'test/azure-cli-pipeline-test' <<< "$installed_taps"; then
+        brew untap test/azure-cli-pipeline-test
+      fi
     displayName: 'Cleanup'
     condition: always()
 
@@ -405,11 +445,11 @@ jobs:
       mkdir -p "$TEST_DIR"
       tar -xzf "$TARBALL" -C "$TEST_DIR"
       
-      if ! brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
-        brew install python@${{ parameters.PythonVersion }}
+      if ! brew list "python@$CASK_PYTHON_VERSION" &>/dev/null; then
+        brew install "python@$CASK_PYTHON_VERSION"
       fi
       
-      AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python"
+      AZ_PYTHON="$(brew --prefix "python@$CASK_PYTHON_VERSION")/libexec/bin/python"
       export AZ_PYTHON
       
       export AZ_DEBUG=1
@@ -423,6 +463,8 @@ jobs:
       
       rm -rf "$TEST_DIR"
     displayName: 'Test offline install'
+    env:
+      CASK_PYTHON_VERSION: ${{ parameters.PythonVersion }}
 
 # ============================================================================
 # JOB: TEST LINUX OFFLINE/TARBALL INSTALLATION (Both Architectures)
@@ -459,8 +501,10 @@ jobs:
       trap 'rm -rf "$TEST_DIR" || true' EXIT
 
       tar -xzf "$TARBALL" -C "$TEST_DIR"
-      brew install python@${{ parameters.PythonVersion }}
-      export AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python"
+      brew install "python@$CASK_PYTHON_VERSION"
+      export AZ_PYTHON="$(brew --prefix "python@$CASK_PYTHON_VERSION")/libexec/bin/python"
       export AZURE_CORE_COLLECT_TELEMETRY=False
       "$TEST_DIR/bin/az" version
     displayName: 'Test Linux offline install'
+    env:
+      CASK_PYTHON_VERSION: ${{ parameters.PythonVersion }}

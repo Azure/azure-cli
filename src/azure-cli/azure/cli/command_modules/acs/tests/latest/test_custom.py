@@ -49,6 +49,7 @@ from azure.cli.command_modules.acs.custom import (
     _select_aks_desktop_asset,
     _update_addons,
     aks_install_desktop,
+    aks_agentpool_add,
     aks_agentpool_auto_scale_add,
     aks_agentpool_auto_scale_delete,
     aks_agentpool_auto_scale_update,
@@ -2938,6 +2939,42 @@ class TestAksEnableAddonsAutoHLSM(unittest.TestCase):
         mock_ensure.assert_called_once()
         _, kwargs = mock_ensure.call_args
         self.assertIsNone(kwargs.get("enable_high_log_scale_mode"))
+
+
+class AksAgentpoolAddManagedGPUTest(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+
+    @mock.patch("azure.cli.command_modules.acs.agentpool_decorator.cf_agent_pools")
+    @mock.patch("azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait")
+    def test_aks_agentpool_add_managed_gpu(self, mock_sdk_no_wait, mock_cf_agent_pools):
+        mock_cf_agent_pools.return_value.list.return_value = []
+        client = mock.Mock()
+        for no_wait in (False, True):
+            with self.subTest(no_wait=no_wait):
+                mock_sdk_no_wait.reset_mock()
+                result = aks_agentpool_add(
+                    self.cmd,
+                    client,
+                    resource_group_name="rg",
+                    cluster_name="cluster",
+                    nodepool_name="gpunp",
+                    node_vm_size="Standard_NC6s_v3",
+                    enable_managed_gpu=True,
+                    no_wait=no_wait,
+                )
+
+                self.assertIs(result, mock_sdk_no_wait.return_value)
+                mock_sdk_no_wait.assert_called_once()
+                args = mock_sdk_no_wait.call_args.args
+                self.assertEqual(
+                    args[:5], (no_wait, client.begin_create_or_update, "rg", "cluster", "gpunp")
+                )
+                self.assertEqual(
+                    args[5].as_dict()["properties"]["gpuProfile"],
+                    {"driver": "Install", "nvidia": {"managementMode": "Managed"}},
+                )
 
 
 class AksAgentpoolUpgradeTest(unittest.TestCase):
