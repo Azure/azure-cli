@@ -4114,20 +4114,52 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         ), self.assertRaises(DecoratorEarlyExitException):
             dec_5.update_vm_size(agentpool_5)
 
-        # VirtualMachines pool, raise error rather than silently ignoring the size, with or without an
-        # autoscaler transition (the transition copies the existing scale profile sizes)
-        for extra_params in ({}, {"enable_cluster_autoscaler": True}, {"disable_cluster_autoscaler": True}):
-            dec_6 = AKSAgentPoolUpdateDecorator(
+        # VirtualMachines pool, raise error rather than silently ignoring the size
+        dec_6 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"node_vm_size": "Standard_D4s_v5", "yes": True},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        agentpool_6 = self._set_vms_pool_type(self.create_initialized_agentpool_instance())
+        dec_6.context.attach_agentpool(agentpool_6)
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_6.update_vm_size(agentpool_6)
+
+        # empty value, raise error on both VMSS and VirtualMachines pools
+        for set_vms_type in (False, True):
+            dec_7 = AKSAgentPoolUpdateDecorator(
                 self.cmd,
                 self.client,
-                {"node_vm_size": "Standard_D4s_v5", "yes": True, **extra_params},
+                {"node_vm_size": "", "yes": True},
                 self.resource_type,
                 self.agentpool_decorator_mode,
             )
-            agentpool_6 = self._set_vms_pool_type(self.create_initialized_agentpool_instance())
-            dec_6.context.attach_agentpool(agentpool_6)
-            with self.subTest(extra_params=extra_params), self.assertRaises(InvalidArgumentValueError):
-                dec_6.update_vm_size(agentpool_6)
+            agentpool_7 = self.create_initialized_agentpool_instance(vm_size="Standard_D2s_v5")
+            if set_vms_type:
+                agentpool_7 = self._set_vms_pool_type(agentpool_7)
+            dec_7.context.attach_agentpool(agentpool_7)
+            with self.subTest(vms=set_vms_type), self.assertRaises(InvalidArgumentValueError):
+                dec_7.update_vm_size(agentpool_7)
+
+        # combined with any cluster autoscaler change, raise error on both VMSS and VirtualMachines pools
+        for autoscaler_param in ("enable_cluster_autoscaler", "disable_cluster_autoscaler", "update_cluster_autoscaler"):
+            for set_vms_type in (False, True):
+                dec_8 = AKSAgentPoolUpdateDecorator(
+                    self.cmd,
+                    self.client,
+                    {"node_vm_size": "Standard_D4s_v5", "yes": True, autoscaler_param: True},
+                    self.resource_type,
+                    self.agentpool_decorator_mode,
+                )
+                agentpool_8 = self.create_initialized_agentpool_instance(vm_size="Standard_D2s_v5")
+                if set_vms_type:
+                    agentpool_8 = self._set_vms_pool_type(agentpool_8)
+                dec_8.context.attach_agentpool(agentpool_8)
+                with self.subTest(param=autoscaler_param, vms=set_vms_type), \
+                        self.assertRaises(MutuallyExclusiveArgumentError):
+                    dec_8.update_vm_size(agentpool_8)
 
     def common_update_managed_dranet(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
@@ -4432,6 +4464,64 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
 
     def test_update_vm_size(self):
         self.common_update_vm_size()
+
+    def _run_aks_agentpool_update(self, existing_agentpool, **kwargs):
+        from azure.cli.command_modules.acs.custom import aks_agentpool_update
+
+        self.client.get = Mock(return_value=existing_agentpool)
+        with patch("azure.cli.command_modules.acs.agentpool_decorator.sdk_no_wait") as put_agentpool:
+            result = aks_agentpool_update(
+                self.cmd,
+                self.client,
+                "test_rg_name",
+                "test_cluster_name",
+                "test_nodepool_name",
+                **kwargs,
+            )
+        return result, put_agentpool
+
+    def test_aks_agentpool_update_vm_size(self):
+        # resize sends a PUT with the new size
+        existing = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_name", vm_size="Standard_D2s_v5"
+        )
+        _, put_agentpool = self._run_aks_agentpool_update(existing, node_vm_size="Standard_D4s_v5", yes=True)
+        put_agentpool.assert_called_once()
+        self.assertEqual(put_agentpool.call_args.args[5].vm_size, "Standard_D4s_v5")
+
+        # an already-satisfied autoscaler state must not swallow the resize: reject before any PUT
+        for autoscaler_param, enable_auto_scaling in (
+            ("enable_cluster_autoscaler", True),
+            ("disable_cluster_autoscaler", False),
+        ):
+            existing = self.create_initialized_agentpool_instance(
+                nodepool_name="test_nodepool_name",
+                vm_size="Standard_D2s_v5",
+                enable_auto_scaling=enable_auto_scaling,
+                min_count=1 if enable_auto_scaling else None,
+                max_count=3 if enable_auto_scaling else None,
+            )
+            with self.subTest(param=autoscaler_param), self.assertRaises(MutuallyExclusiveArgumentError):
+                self._run_aks_agentpool_update(
+                    existing, node_vm_size="Standard_D4s_v5", yes=True, **{autoscaler_param: True},
+                    min_count=1 if autoscaler_param == "enable_cluster_autoscaler" else None,
+                    max_count=3 if autoscaler_param == "enable_cluster_autoscaler" else None,
+                )
+
+        # empty value is rejected before any PUT
+        existing = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_name", vm_size="Standard_D2s_v5"
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            self._run_aks_agentpool_update(existing, node_vm_size="", yes=True)
+
+        # omitting --node-vm-size keeps the existing size
+        existing = self.create_initialized_agentpool_instance(
+            nodepool_name="test_nodepool_name", vm_size="Standard_D2s_v5"
+        )
+        _, put_agentpool = self._run_aks_agentpool_update(existing)
+        put_agentpool.assert_called_once()
+        self.assertEqual(put_agentpool.call_args.args[5].vm_size, "Standard_D2s_v5")
 
     def test_update_agentpool_profile_default(self):
         import inspect

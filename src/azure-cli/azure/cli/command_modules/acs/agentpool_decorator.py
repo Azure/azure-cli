@@ -2022,6 +2022,38 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self.raw_param.get("yes")
 
+    def get_node_vm_size_for_update(self) -> Union[str, None]:
+        """Obtain and validate the value of node_vm_size for `az aks nodepool update`.
+
+        Resizing replaces every node in the node pool, so the option is validated up front: an empty value is
+        rejected, and it cannot be combined with cluster autoscaler changes, whose early exits (e.g. "already
+        enabled") would otherwise return before the resize is applied.
+
+        :return: string or None
+        """
+        node_vm_size = self.raw_param.get("node_vm_size")
+        if node_vm_size is None:
+            return None
+        if not node_vm_size.strip():
+            raise InvalidArgumentValueError("--node-vm-size cannot be empty.")
+        if (
+            self.raw_param.get("enable_cluster_autoscaler") or
+            self.raw_param.get("disable_cluster_autoscaler") or
+            self.raw_param.get("update_cluster_autoscaler")
+        ):
+            raise MutuallyExclusiveArgumentError(
+                "--node-vm-size cannot be used together with --enable-cluster-autoscaler, "
+                "--disable-cluster-autoscaler or --update-cluster-autoscaler. "
+                "Please resize the node pool and update the cluster autoscaler in separate commands."
+            )
+        if self.get_vm_set_type() == CONST_VIRTUAL_MACHINES:
+            raise InvalidArgumentValueError(
+                "--node-vm-size is not supported for VirtualMachines node pools. "
+                'Please use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" '
+                "to change the VM size of a VirtualMachines node pool."
+            )
+        return node_vm_size
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -3037,22 +3069,16 @@ class AKSAgentPoolUpdateDecorator:
         drains and deletes the old nodes according to the node pool's upgrade settings.
 
         VirtualMachines node pools manage VM sizes through their scale profiles, so --node-vm-size is rejected
-        for them instead of being silently ignored.
+        for them instead of being silently ignored. See AKSAgentPoolContext.get_node_vm_size_for_update for
+        the full validation.
 
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
 
-        node_vm_size = self.context.raw_param.get("node_vm_size")
-        if not node_vm_size:
+        node_vm_size = self.context.get_node_vm_size_for_update()
+        if node_vm_size is None:
             return agentpool
-
-        if self.context.get_vm_set_type() == CONST_VIRTUAL_MACHINES:
-            raise InvalidArgumentValueError(
-                "--node-vm-size is not supported for VirtualMachines node pools. "
-                'Please use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" '
-                "to change the VM size of a VirtualMachines node pool."
-            )
 
         # already set to the same value, directly return
         if agentpool.vm_size and agentpool.vm_size.lower() == node_vm_size.lower():
@@ -3106,6 +3132,8 @@ class AKSAgentPoolUpdateDecorator:
         """
         # fetch the Agentpool object
         agentpool = self.fetch_agentpool(agentpools)
+        # validate --node-vm-size before any step that may exit early (e.g. autoscaler already enabled)
+        self.context.get_node_vm_size_for_update()
         # update auto scaler properties
         agentpool = self.update_auto_scaler_properties(agentpool)
         # update auto scaler properties for vms pool
