@@ -84,7 +84,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         self.cmd('keyvault key create -n {key3} --vault-name {kv_name}')
 
         namespace = self.cmd(
-            'eventhubs namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
+            'eventhubs namespace create --resource-group {rg} --name {namespacename} --sku {sku} --location {loc} --disable-local-auth true --mi-system-assigned --mi-user-assigned {id1} {id2}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}' +
             ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
             ' --encryption-config key-name={key3} key-vault-uri={key_uri} user-assigned-identity={id1}'
@@ -147,7 +147,7 @@ class EHNamespaceMSITesting(ScenarioTest):
 
 
         namespace = self.cmd(
-            'eventhubs namespace create --resource-group {rg} --name {namespacename2} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}' +
+            'eventhubs namespace create --resource-group {rg} --name {namespacename2} --sku {sku} --location {loc} --disable-local-auth true --mi-system-assigned --mi-user-assigned {id1} {id2}' +
             ' --encryption-config key-name={key1} key-vault-uri={key_uri} user-assigned-identity={id1}' +
             ' --encryption-config key-name={key2} key-vault-uri={key_uri} user-assigned-identity={id1}' +
             ' --encryption-config key-name={key3} key-vault-uri={key_uri} user-assigned-identity={id1}' +
@@ -190,7 +190,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         assert len(n) == 3
         self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
         namespace = self.cmd(
-            'eventhubs namespace create --resource-group {rg} --name {namespacename3} --sku {sku} --location {loc} --mi-system-assigned --mi-user-assigned {id1} {id2}'
+            'eventhubs namespace create --resource-group {rg} --name {namespacename3} --sku {sku} --location {loc} --disable-local-auth true --mi-system-assigned --mi-user-assigned {id1} {id2}'
         ).get_output_in_json()
 
         self.assertEqual(namespace['identity']['type'], self.kwargs['systemuser'])
@@ -237,7 +237,7 @@ class EHNamespaceMSITesting(ScenarioTest):
         self.assertEqual(True, namespace['encryption']['requireInfrastructureEncryption'])
 
         namespace = self.cmd(
-            'eventhubs namespace create --resource-group {rg} --name {namespacename4} --sku {sku} --location {loc} --mi-system-assigned'
+            'eventhubs namespace create --resource-group {rg} --name {namespacename4} --sku {sku} --location {loc} --disable-local-auth true --mi-system-assigned'
         ).get_output_in_json()
 
         self.kwargs.update({'pId': namespace['identity']['principalId']})
