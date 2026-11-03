@@ -414,6 +414,7 @@ class TestUtils(unittest.TestCase):
 
     def test_send_raw_request_claims_challenge(self):
         import base64
+        import io
         from requests.structures import CaseInsensitiveDict
         from azure.cli.core.azclierror import HTTPError
         from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
@@ -484,6 +485,16 @@ class TestUtils(unittest.TestCase):
             send_mock.side_effect = [_response(401, challenge, history=[_response(303)])]
             with self.assertRaises(HTTPError):
                 send_raw_request(cli_ctx, 'POST', graph_url, body='{}')
+            self.assertEqual(send_mock.call_count, 1)
+            get_raw_token_mock.assert_called_once_with(mock.ANY, graph_resource)
+
+            # A claims challenge for a file-like body is not answered, because the first send consumed it
+            get_raw_token_mock.reset_mock()
+            send_mock.reset_mock()
+            get_raw_token_mock.side_effect = [_token('token')]
+            send_mock.side_effect = [_response(401, challenge)]
+            with self.assertRaises(HTTPError):
+                send_raw_request(cli_ctx, 'PUT', graph_url, body=io.BytesIO(b'content'))
             self.assertEqual(send_mock.call_count, 1)
             get_raw_token_mock.assert_called_once_with(mock.ANY, graph_resource)
 

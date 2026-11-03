@@ -1102,8 +1102,10 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     # CAE rejected the token, for example after a network location change. Answer the claims challenge once
     # with a new token, as ARM requests do in AAZARMChallengeAuthenticationPolicy.
     # Don't answer a challenge after a redirect, because the resend would repeat the original request.
+    # Don't answer it for a file-like or generator body either, because the first send consumed it.
     # https://learn.microsoft.com/entra/identity-platform/claims-challenge
-    if r.status_code == 401 and token_kwargs is not None and not r.history:
+    body_replayable = prepped.body is None or isinstance(prepped.body, (str, bytes))
+    if r.status_code == 401 and token_kwargs is not None and not r.history and body_replayable:
         from .auth.util import parse_claims_challenge
         claims = parse_claims_challenge(r.headers.get('WWW-Authenticate', ''))
         if claims:
