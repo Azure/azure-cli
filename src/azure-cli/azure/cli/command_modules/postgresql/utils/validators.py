@@ -170,7 +170,8 @@ def pg_arguments_validator(db_context, list_location_capability_info,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, cluster_size=None,
                            password_auth=None, microsoft_entra_auth=None,
-                           admin_name=None, admin_id=None, admin_type=None):
+                           admin_name=None, admin_id=None, admin_type=None,
+                           auto_grow_max_threshold_mb=None, auto_grow_increment_percent=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     validate_database_name(database_name)
     sku_info = list_location_capability_info['sku_info']
@@ -186,8 +187,10 @@ def pg_arguments_validator(db_context, list_location_capability_info,
         supported_storageV2_size = sku_info[tier.lower()]["supported_storageV2_size"]
     else:
         supported_storageV2_size = None
-    _pg_storage_type_validator(storage_type, auto_grow, performance_tier,
+    _pg_storage_type_validator(storage_type, performance_tier,
                                tier, supported_storageV2_size, iops, throughput, instance, version)
+    _pg_storage_auto_grow_validator(storage_type, auto_grow, storage_gb,
+                                    auto_grow_max_threshold_mb, auto_grow_increment_percent, instance)
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
                                            tier,
@@ -865,7 +868,7 @@ def validate_identities(cmd, namespace):
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
 
 
-def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
+def _pg_storage_type_validator(storage_type, performance_tier, tier,
                                supported_storageV2_size, iops, throughput, instance, version):
     is_create_ssdv2 = storage_type and storage_type.lower() == 'premiumv2_lrs'
     is_update_ssdv2 = (instance and instance.storage.type and instance.storage.type.lower() == 'premiumv2_lrs')
@@ -882,9 +885,6 @@ def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
                        'set --storage-type to "PremiumV2_LRS".')
 
     if is_create_ssdv2 or is_update_ssdv2:
-        if auto_grow and auto_grow.lower() != 'disabled':
-            raise ValidationError('Invalid value for --storage-auto-grow. "Enabled" is not supported for '
-                                  'servers with --storage-type set to "PremiumV2_LRS".')
         if performance_tier:
             raise ValidationError('Invalid value for --performance-tier. Performance tier is not supported for '
                                   'servers with --storage-type set to "PremiumV2_LRS".')
@@ -898,6 +898,37 @@ def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
         if iops is not None:
             raise CLIError('Invalid value for --iops. Updating storage iops is only supported for '
                            'servers created with --storage-type set to "PremiumV2_LRS".')
+
+
+def _pg_storage_auto_grow_validator(storage_type, auto_grow, storage_gb,
+                                    auto_grow_max_threshold_mb, auto_grow_increment_percent, instance):
+    if auto_grow_max_threshold_mb is None and auto_grow_increment_percent is None:
+        return
+
+    if instance is not None:
+        if (not instance.storage or
+                not instance.storage.type or instance.storage.type.lower() != 'premiumv2_lrs' or
+                not instance.storage.auto_grow or instance.storage.auto_grow.lower() != 'enabled'):
+            raise ValidationError('Storage autogrow options can only be updated on servers with '
+                                  'PremiumV2_LRS storage and storage autogrow already enabled.')
+        storage_type = instance.storage.type
+        if auto_grow is None:
+            auto_grow = instance.storage.auto_grow
+        storage_gb = max(instance.storage.storage_size_gb,
+                         storage_gb if storage_gb is not None else instance.storage.storage_size_gb)
+
+    if not storage_type or storage_type.lower() != 'premiumv2_lrs':
+        raise ValidationError('--storage-auto-grow-max-threshold-mb and --storage-auto-grow-increment-percent '
+                              'require --storage-type PremiumV2_LRS.')
+    if not auto_grow or auto_grow.lower() != 'enabled':
+        raise ValidationError('--storage-auto-grow-max-threshold-mb and --storage-auto-grow-increment-percent '
+                              'require --storage-auto-grow Enabled.')
+
+    if auto_grow_max_threshold_mb is not None and auto_grow_max_threshold_mb < storage_gb * 1024:
+        raise ValidationError('--storage-auto-grow-max-threshold-mb must be at least the current or requested '
+                              'storage size: {} MB (1 GB = 1,024 MB).'.format(storage_gb * 1024))
+    if auto_grow_increment_percent is not None and auto_grow_increment_percent <= 0:
+        raise ValidationError('--storage-auto-grow-increment-percent must be a positive integer.')
 
 
 def pg_restore_validator(compute_tier, **args):
