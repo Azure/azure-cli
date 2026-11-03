@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Head(AAZCommand):
     """Checks whether an account-owned cost control exists without returning its body.
+
+    :example: Check for a budget without returning its body
+        az cognitiveservices account costcontrol head --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents
     """
 
     _aaz_info = {

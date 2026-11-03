@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List account-owned cost controls.
+
+    :example: List budgets owned by an account
+        az cognitiveservices account costcontrol list --resource-group foundry-resource-group --account-name foundry-account
     """
 
     _aaz_info = {

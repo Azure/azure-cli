@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get an account-owned cost control and its representation entity tag.
+
+    :example: Get an account-owned budget
+        az cognitiveservices account costcontrol show --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents
     """
 
     _aaz_info = {

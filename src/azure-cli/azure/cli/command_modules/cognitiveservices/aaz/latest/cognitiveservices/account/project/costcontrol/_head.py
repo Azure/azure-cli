@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Head(AAZCommand):
     """Checks whether a project-owned cost control exists without returning its body.
+
+    :example: Check for a budget without returning its body
+        az cognitiveservices account project costcontrol head --resource-group foundry-resource-group --account-name foundry-account --project-name production --cost-control-name project-token-budget
     """
 
     _aaz_info = {
