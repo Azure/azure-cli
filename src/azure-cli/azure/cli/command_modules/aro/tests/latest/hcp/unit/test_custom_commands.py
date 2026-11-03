@@ -10,7 +10,7 @@ from unittest import mock
 
 from azure.cli.core.aaz import AAZUndefined
 from azure.cli.core.aaz._field_value import AAZObject
-from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import FileOperationError, InvalidArgumentValueError, MutuallyExclusiveArgumentError
 
 from azure.cli.command_modules.aro.azext_aro_hcp.custom import ClusterCreate, ClusterUpdate, GetVersions, NodepoolCreate, RequestCredential
 
@@ -619,6 +619,37 @@ class RequestCredentialTest(unittest.TestCase):
         command = object.__new__(RequestCredential)
         with self.assertRaisesRegex(RuntimeError, "failed"):
             command._handler({"admin": True})
+        self.assertFalse(hasattr(command, "_private_key_pem"))
+
+    @mock.patch(
+        "azure.cli.command_modules.aro.azext_aro_hcp._kubeconfig._generate_admin_credential_request",
+        return_value=(b"private-key", "csr"),
+    )
+    @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp._kubeconfig.print_or_merge_credentials")
+    @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp._kubeconfig._embed_private_key", return_value="embedded")
+    @mock.patch.object(RequestCredential, "deserialize_output", return_value={"kubeconfig": "config"})
+    @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp.custom.has_value", return_value=False)
+    def test_handler_preserves_merge_error_after_output_clears_key(self, _, __, ___, print_or_merge, ____):
+        command = object.__new__(RequestCredential)
+        command.ctx = types.SimpleNamespace(
+            vars=types.SimpleNamespace(instance=object()),
+            args=types.SimpleNamespace(
+                file=_Arg("/tmp/config"),
+                context_name=_Arg(None),
+                name=_Arg("cluster-one"),
+                resource_group=_Arg("group-one"),
+                overwrite_existing=_Arg(False),
+            ),
+        )
+        merge_error = FileOperationError("Failed to merge credentials")
+        print_or_merge.side_effect = merge_error
+
+        with mock.patch.object(
+                RequestCredential.__mro__[1], "_handler", side_effect=lambda command_args: command._output()):
+            with self.assertRaises(FileOperationError) as raised:
+                command._handler({"admin": True})
+
+        self.assertIs(merge_error, raised.exception)
         self.assertFalse(hasattr(command, "_private_key_pem"))
 
     @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp._kubeconfig.print_or_merge_credentials")

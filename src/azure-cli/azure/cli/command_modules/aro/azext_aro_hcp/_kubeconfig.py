@@ -150,6 +150,13 @@ def print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_nam
     """
     # Special case for printing to stdout
     if path == "-":
+        if context_name is not None:
+            config = yaml.safe_load(kubeconfig)
+            config["contexts"][0]["name"] = context_name
+            config["contexts"][0]["context"]["cluster"] = context_name
+            config["clusters"][0]["name"] = context_name
+            config["current-context"] = context_name
+            kubeconfig = yaml.safe_dump(config, default_flow_style=False)
         print(kubeconfig)
         return
 
@@ -173,7 +180,7 @@ def print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_nam
         additional_file.flush()
         merge_kubernetes_configurations(path, temp_path, overwrite_existing, context_name)
     except yaml.YAMLError as ex:
-        logger.warning("Failed to merge credentials to kube config file: %s", ex)
+        raise FileOperationError("Failed to merge credentials to kube config file: {}".format(ex)) from ex
     finally:
         additional_file.close()
         os.remove(temp_path)

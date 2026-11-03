@@ -90,10 +90,11 @@ class CredentialHelperTest(unittest.TestCase):
 class LoadKubernetesConfigurationTest(unittest.TestCase):
 
     def test_loads_yaml(self):
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as stream:
-            yaml.safe_dump(_config(), stream)
-            stream.flush()
-            self.assertEqual(_config(), load_kubernetes_configuration(stream.name))
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "config")
+            with open(path, "w", encoding="utf-8") as stream:
+                yaml.safe_dump(_config(), stream)
+            self.assertEqual(_config(), load_kubernetes_configuration(path))
 
     def test_missing_file_raises_cli_error(self):
         with self.assertRaisesRegex(CLIError, "does not exist"):
@@ -153,7 +154,8 @@ class MergeKubernetesConfigurationsTest(unittest.TestCase):
             self.assertEqual("renamed", merged["current-context"])
             self.assertIn("renamed", [item["name"] for item in merged["clusters"]])
             self.assertIn("renamed", [item["name"] for item in merged["contexts"]])
-            self.assertEqual(0o600, stat.S_IMODE(os.stat(existing_path).st_mode))
+            if os.name != "nt":
+                self.assertEqual(0o600, stat.S_IMODE(os.stat(existing_path).st_mode))
 
     def test_refuses_to_replace_symlink(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -170,6 +172,20 @@ class MergeKubernetesConfigurationsTest(unittest.TestCase):
 
 
 class PrintOrMergeCredentialsTest(unittest.TestCase):
+
+    @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp._kubeconfig.os.remove", wraps=os.remove)
+    @mock.patch("azure.cli.command_modules.aro.azext_aro_hcp._kubeconfig.merge_kubernetes_configurations")
+    def test_merge_yaml_error_is_raised_and_temporary_credentials_are_removed(self, merge, remove):
+        merge_error = yaml.YAMLError("invalid YAML")
+        merge.side_effect = merge_error
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "config")
+            with self.assertRaisesRegex(CLIError, "Failed to merge credentials") as raised:
+                print_or_merge_credentials(path, yaml.safe_dump(_config()), False, None)
+
+            self.assertIs(merge_error, raised.exception.__cause__)
+            remove.assert_called_once_with(merge.call_args.args[1])
+            self.assertFalse(os.path.exists(merge.call_args.args[1]))
 
     def test_merges_credentials_for_two_clusters_without_user_collision(self):
         with tempfile.TemporaryDirectory() as directory:

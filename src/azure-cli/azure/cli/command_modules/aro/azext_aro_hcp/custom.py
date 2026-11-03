@@ -542,7 +542,8 @@ class RequestCredential(_RequestCredential):
         try:
             return super()._handler(command_args)
         except Exception:
-            del self._private_key_pem
+            if hasattr(self, "_private_key_pem"):
+                del self._private_key_pem
             raise
 
     def _output(self, *args, **kwargs):
