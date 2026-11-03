@@ -175,7 +175,7 @@ class TestWebappRuntimeSeparators(unittest.TestCase):
                                          "Windows runtime 'PYTHON|99.99' is not supported."
                                          "Run 'az webapp list-runtimes --os-type windows' to cross check")
 
-    def test_webapp_up_rejection_recommends_filtered_native_command(self):
+    def test_webapp_up_rejection_preserves_existing_guidance(self):
         from azure.cli.command_modules.appservice import custom
         for os_type in ('linux', 'windows'):
             with self.subTest(os=os_type):
@@ -185,14 +185,10 @@ class TestWebappRuntimeSeparators(unittest.TestCase):
                         helper_class.return_value = self._helper()
                         with self.assertRaises(ValidationError) as context:
                             webapp_up(_get_test_cmd(), name='app', os_type=os_type, runtime='PYTHON:99.99')
-                if os_type == 'linux':
-                    self.assertIn("Run 'az webapp list-runtimes --os-type linux --runtime python'",
-                                  str(context.exception))
-                else:
-                    self.assertEqual(str(context.exception),
-                                     "windows runtime 'PYTHON|99.99' is not supported. "
-                                     "Please check supported runtimes with: "
-                                     "'az webapp list-runtimes --os windows'")
+                self.assertEqual(str(context.exception),
+                                 "{} runtime 'PYTHON|99.99' is not supported. "
+                                 "Please check supported runtimes with: "
+                                 "'az webapp list-runtimes --os {}'".format(os_type, os_type))
 
 
 class TestWebappOutputTransformers(unittest.TestCase):

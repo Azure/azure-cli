@@ -11986,10 +11986,6 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     if runtime:
         match = helper.resolve(runtime, _is_linux)
         if not match:
-            if _is_linux:
-                raise ValidationError("{} runtime '{}' is not supported. Run '{}' for supported runtimes."
-                                      .format(os_name, runtime.replace('|', ':'),
-                                              get_linux_runtime_list_command(runtime)))
             raise ValidationError("{0} runtime '{1}' is not supported. Please check supported runtimes with: "
                                   "'az webapp list-runtimes --os {0}'".format(os_name, runtime))
 
