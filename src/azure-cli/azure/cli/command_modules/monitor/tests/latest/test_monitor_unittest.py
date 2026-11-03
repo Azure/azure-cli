@@ -248,6 +248,7 @@ class MonitorTraceTest(unittest.TestCase):
         self.assertEqual(parse_workspace_id(workspace_id), {
             'subscription': self.subscription, 'resource_group': 'rg1', 'azure_monitor_workspace_name': 'amw1'})
         for bad_id in ('amw1', workspace_id + '/traceContainers/default',
+                       workspace_id.replace('/resourceGroups/rg1', ''),
                        workspace_id.replace('Microsoft.Monitor/accounts', 'Microsoft.OperationalInsights/workspaces')):
             with self.assertRaises(InvalidArgumentValueError):
                 parse_workspace_id(bad_id)

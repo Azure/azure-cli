@@ -25,7 +25,8 @@ def parse_workspace_id(workspace_id):
     """Return the trace container command arguments for an Azure Monitor workspace resource ID."""
     from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     parts = parse_resource_id(workspace_id) if is_valid_resource_id(workspace_id or "") else {}
-    is_workspace = (parts.get("namespace", "").lower() == "microsoft.monitor" and
+    is_workspace = (parts.get("resource_group") and
+                    parts.get("namespace", "").lower() == "microsoft.monitor" and
                     parts.get("type", "").lower() == "accounts" and not parts.get("child_name_1"))
     if not is_workspace:
         raise InvalidArgumentValueError(
