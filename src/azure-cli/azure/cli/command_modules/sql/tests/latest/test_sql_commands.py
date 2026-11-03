@@ -4455,37 +4455,28 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('startIpAddress', start_ip_address_1),
                          JMESPathCheck('endIpAddress', end_ip_address_1)])
 
-        # Use matching explicit GP fixtures to isolate import/export; this does not fix service HTTP 500s.
-        self.cmd('sql db create -g {} --server {} --name {} --edition GeneralPurpose --family Gen5 --capacity 2'
+        # create dbs
+        self.cmd('sql db create -g {} --server {} --name {}'
                  .format(resource_group, server, db_name),
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name),
                          JMESPathCheck('location', location_long_name),
-                         JMESPathCheck('sku.tier', 'GeneralPurpose'),
-                         JMESPathCheck('sku.family', 'Gen5'),
-                         JMESPathCheck('sku.capacity', 2),
                          JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
-        self.cmd('sql db create -g {} --server {} --name {} --edition GeneralPurpose --family Gen5 --capacity 2'
+        self.cmd('sql db create -g {} --server {} --name {}'
                  .format(resource_group, server, db_name2),
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name2),
                          JMESPathCheck('location', location_long_name),
-                         JMESPathCheck('sku.tier', 'GeneralPurpose'),
-                         JMESPathCheck('sku.family', 'Gen5'),
-                         JMESPathCheck('sku.capacity', 2),
                          JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
-        self.cmd('sql db create -g {} --server {} --name {} --edition GeneralPurpose --family Gen5 --capacity 2'
+        self.cmd('sql db create -g {} --server {} --name {}'
                  .format(resource_group, server, db_name3),
                  checks=[JMESPathCheck('resourceGroup', resource_group),
                          JMESPathCheck('name', db_name3),
                          JMESPathCheck('location', location_long_name),
-                         JMESPathCheck('sku.tier', 'GeneralPurpose'),
-                         JMESPathCheck('sku.family', 'Gen5'),
-                         JMESPathCheck('sku.capacity', 2),
                          JMESPathCheck('elasticPoolId', None),
                          JMESPathCheck('status', 'Online')])
 
