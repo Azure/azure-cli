@@ -160,13 +160,14 @@ class ManagedIdentityCredential:  # pylint: disable=too-few-public-methods
     """
 
     def __init__(self, client_id=None, resource_id=None, object_id=None):
-        import requests
+        # Use the configured HTTP client that respects certificate settings
+        from azure.cli.core._debug import get_msal_http_client
         if client_id or resource_id or object_id:
             managed_identity = UserAssignedManagedIdentity(
                 client_id=client_id, resource_id=resource_id, object_id=object_id)
         else:
             managed_identity = SystemAssignedManagedIdentity()
-        self._msal_client = ManagedIdentityClient(managed_identity, http_client=requests.Session())
+        self._msal_client = ManagedIdentityClient(managed_identity, http_client=get_msal_http_client())
 
     def acquire_token(self, scopes, **kwargs):
         logger.debug("ManagedIdentityCredential.acquire_token: scopes=%r, kwargs=%r", scopes, kwargs)
