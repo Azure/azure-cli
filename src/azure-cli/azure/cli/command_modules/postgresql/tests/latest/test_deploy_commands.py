@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import os
 import subprocess
 import sys
@@ -65,6 +66,93 @@ class DeploymentRunnerTest(unittest.TestCase):
                 with self.subTest(executable=executable):
                     self.assertEqual(util.resolve_executable(executable), executable)
         find.assert_not_called()
+
+
+class DeploymentSecretsTest(unittest.TestCase):
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix='postgres deploy ')
+        self.addCleanup(temporary.cleanup)
+        self.project = temporary.name
+        self.executable = os.path.join(self.project, 'installed tools', 'gh.exe')
+        self.workflow = self.project + util.GITHUB_ACTION_PATH + 'deploy database.yml'
+        server = SimpleNamespace(
+            id='/subscriptions/test-subscription/resourceGroups/test-rg/'
+               'providers/Microsoft.DBforPostgreSQL/flexibleServers/server',
+            name='server', fully_qualified_domain_name='server.example.invalid',
+            network=SimpleNamespace(public_network_access='Enabled'))
+        self.client = mock.Mock()
+        self.client.get.return_value = server
+        self.credentials = {
+            'clientId': 'test-client-id',
+            'clientSecret': 'fake "secret" \\ with\nnewlines',
+            'tenantId': 'test-tenant-id',
+            'subscriptionId': 'test-subscription',
+        }
+        principal = {
+            'appId': self.credentials['clientId'],
+            'password': self.credentials['clientSecret'],
+            'tenant': self.credentials['tenantId'],
+            'displayName': 'server',
+            'name': 'http://server',
+        }
+        self.upload = mock.Mock(return_value=subprocess.CompletedProcess([], 0, stdout=b'', stderr=b''))
+        self.git = mock.Mock()
+        patches = (
+            (deploy, 'gitcli_check_and_login', mock.Mock()),
+            (deploy, 'get_git_root_dir', mock.Mock(return_value=self.project)),
+            (deploy, 'run_subprocess', self.git),
+            (util, 'get_git_root_dir', mock.Mock(return_value=self.project)),
+            (util, 'get_subscription_id', mock.Mock(return_value='test-subscription')),
+            (util, 'create_service_principal_for_rbac', mock.Mock(return_value=principal)),
+            (util, 'resolve_executable', mock.Mock(return_value=self.executable)),
+            (util, 'run_cmd', mock.Mock(return_value=subprocess.CompletedProcess(
+                [], 0, stdout=b'SERVER_DATABASE_POSTGRESQL_CONNECTION_STRING\n'))),
+            (util.subprocess, 'run', self.upload),
+            (util.subprocess, 'Popen', mock.Mock(return_value=mock.MagicMock(returncode=0))),
+        )
+        for target, attribute, replacement in patches:
+            patcher = mock.patch.object(target, attribute, replacement)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        template = 'jobs:\n  build:\n    steps:\n      - {}\n      - {}\n      - with: {}\n'
+        self.files = mock.mock_open(read_data=template)
+        patcher = mock.patch('builtins.open', self.files)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_setup_uploads_missing_credentials_through_stdin(self):
+        deploy.github_actions_setup(
+            mock.Mock(), self.client, 'test-rg', 'server', 'database', 'admin', 'unused',
+            'schema file.sql', 'owner/repository', action_name='deploy database',
+            branch='feature/database', allow_push=True)
+
+        self.upload.assert_called_once_with(
+            [self.executable, 'secret', 'set', util.AZURE_CREDENTIALS, '--repo', 'owner/repository'],
+            input=mock.ANY, capture_output=True, check=False)
+        self.assertEqual(json.loads(self.upload.call_args.kwargs['input']), self.credentials)
+        self.files.assert_any_call(self.workflow, 'w', encoding='utf8')
+        self.assertEqual(self.git.call_args_list, [
+            mock.call(['git', 'add', self.workflow]),
+            mock.call(['git', 'commit', '-m', 'Add github action file']),
+            mock.call(['git', 'push', 'origin', 'feature/database']),
+        ])
+
+    def test_setup_stops_after_credential_upload_failure(self):
+        self.upload.return_value.returncode = 1
+        self.upload.return_value.stderr = self.credentials['clientSecret'].encode('UTF-8')
+        with self.assertLogs(util.logger.name, level='WARNING') as logs:
+            with self.assertRaisesRegex(ClientRequestError, 'Failed to set the AZURE_CREDENTIALS secret') as error:
+                deploy.github_actions_setup(
+                    mock.Mock(), self.client, 'test-rg', 'server', 'database', 'admin', 'unused',
+                    'schema file.sql', 'owner/repository', action_name='deploy database',
+                    branch='feature/database', allow_push=True)
+
+        self.upload.assert_called_once()
+        self.git.assert_not_called()
+        self.files.assert_not_called()
+        self.assertNotIn(self.credentials['clientSecret'], str(error.exception))
+        self.assertNotIn(self.credentials['clientSecret'], '\n'.join(logs.output))
 
 
 @unittest.skipUnless(sys.platform == 'win32', 'Windows executable search semantics')

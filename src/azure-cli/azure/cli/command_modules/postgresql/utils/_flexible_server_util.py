@@ -7,6 +7,7 @@
 import datetime as dt
 from datetime import datetime
 import errno
+import json
 import os
 import random
 import subprocess
@@ -18,7 +19,7 @@ from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
 from azure.mgmt.core.tools import parse_resource_id
 from azure.cli.core.util import CLIError, get_safe_executable_path, run_cmd as core_run_cmd
-from azure.cli.core.azclierror import AuthenticationError
+from azure.cli.core.azclierror import AuthenticationError, ClientRequestError
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -295,17 +296,14 @@ def register_credential_secrets(cmd, database_engine, server, repository):
     app.pop('displayName')
     app.pop('name')
 
-    app_key_val = []
-    for key, val in app.items():
-        app_key_val.append('"{}": "{}"'.format(key, val))
-
-    app_json = ',\n  '.join(app_key_val)
-    app_json = '{\n  ' + app_json + '\n}'
-    credential_file = "./temp_app_credential.txt"
-    with open(credential_file, "w") as f:
-        f.write(app_json)
-    run_subprocess(['gh', 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository, '<', credential_file])
-    os.remove(credential_file)
+    process = subprocess.run(
+        [resolve_executable('gh'), 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository],
+        input=json.dumps(app).encode('UTF-8'), capture_output=True, check=False)
+    if process.returncode:
+        raise ClientRequestError(
+            'Failed to set the AZURE_CREDENTIALS secret in the GitHub repository (exit code {}).'.format(
+                process.returncode),
+            recommendation='Check your GitHub CLI authentication and repository permissions, then retry.')
 
 
 def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name):
