@@ -24,6 +24,11 @@ class FlexibleServerSSDV2MgmtScenarioTest(ScenarioTest):
     def test_flexible_server_ssdv2_mgmt(self, resource_group):
         self._test_flexible_server_ssdv2_mgmt(resource_group)
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_flexible_server_ssdv2_sag_mgmt(self, resource_group):
+        self._test_flexible_server_ssdv2_sag_mgmt(resource_group)
+
     def _test_flexible_server_ssdv2_mgmt(self, resource_group):
 
         if self.cli_ctx.local_context.is_on:
@@ -75,11 +80,6 @@ class FlexibleServerSSDV2MgmtScenarioTest(ScenarioTest):
         self.cmd('postgres flexible-server update -g {} -n {} --throughput 400'
                  .format(resource_group, server_name),
                  checks=[JMESPathCheck('storage.throughput', 400 )])
-
-        # Test failures
-        self.cmd('postgres flexible-server update -g {} -n {} --storage-auto-grow Enabled'
-                 .format(resource_group, server_name),
-                 expect_failure=True)
         
         # Test restore
         target_server_ssdv2 = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-restore-', 40)
@@ -90,3 +90,39 @@ class FlexibleServerSSDV2MgmtScenarioTest(ScenarioTest):
         # Clean up
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, server_name), checks=NoneCheck())
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, target_server_ssdv2), checks=NoneCheck())
+
+    def _test_flexible_server_ssdv2_sag_mgmt(self, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        self.kwargs.update({
+            'rg': resource_group,
+            'server': server_name,
+            'location': self.postgres_location,
+        })
+
+        self.cmd('postgres flexible-server create -g {rg} -n {server} --location {location} '
+                 '--tier GeneralPurpose --sku-name Standard_D2ds_v4 --version 16 '
+                 '--storage-type PremiumV2_LRS --storage-size 128 --iops 3000 --throughput 125 '
+                 '--storage-auto-grow Enabled --storage-auto-grow-max-threshold-mb 262144 '
+                 '--storage-auto-grow-increment-percent 10 --public-access None --yes')
+        self.cmd('postgres flexible-server show -g {rg} -n {server}', checks=[
+            JMESPathCheck('storage.type', 'PremiumV2_LRS'),
+            JMESPathCheck('storage.autoGrow', 'Enabled'),
+            JMESPathCheck('storage.autoGrowMaxThresholdMb', 262144),
+            JMESPathCheck('storage.autoGrowIncrementPercent', 10),
+        ])
+
+        self.cmd('postgres flexible-server update -g {rg} -n {server} --storage-size 256 '
+                 '--storage-auto-grow-max-threshold-mb 262143 --yes', expect_failure=True)
+        self.cmd('postgres flexible-server update -g {rg} -n {server} --storage-size 256 '
+                 '--storage-auto-grow-max-threshold-mb 262144 '
+                 '--storage-auto-grow-increment-percent 20 --yes', checks=[
+                     JMESPathCheck('storage.storageSizeGb', 256),
+                     JMESPathCheck('storage.autoGrowMaxThresholdMb', 262144),
+                     JMESPathCheck('storage.autoGrowIncrementPercent', 20),
+                 ])
+        self.cmd('postgres flexible-server update -g {rg} -n {server} '
+                 '--storage-auto-grow-increment-percent 10', checks=[
+                     JMESPathCheck('storage.autoGrowMaxThresholdMb', 262144),
+                     JMESPathCheck('storage.autoGrowIncrementPercent', 10),
+                 ])
+        self.cmd('postgres flexible-server delete -g {rg} -n {server} --yes', checks=NoneCheck())

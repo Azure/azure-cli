@@ -248,6 +248,14 @@ examples:
     text: >
       az postgres flexible-server create -g testgroup -n testserver --location testlocation --storage-auto-grow Enabled
 
+  - name: Create a Premium SSD v2 server with autogrow capped at 262144 MB and a 10 percent storage increment.
+    text: >
+      az postgres flexible-server create -g testgroup -n testserver --location testlocation
+        --tier GeneralPurpose --sku-name Standard_D2ds_v4 --version 16
+        --storage-type PremiumV2_LRS --storage-size 128 --iops 3000 --throughput 125
+        --storage-auto-grow Enabled --storage-auto-grow-max-threshold-mb 262144
+        --storage-auto-grow-increment-percent 10
+
   - name: >
       Create elastic cluster with node count of 5.
     text: >
@@ -309,6 +317,10 @@ examples:
     text: az postgres flexible-server update --resource-group testgroup --name testserver --private-dns-zone /subscriptions/{subscriptionId2}/resourceGroups/{resourceGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com
   - name: Update a flexible server's storage to enable / disable storage auto-grow.
     text: az postgres flexible-server update --resource-group testgroup --name testserver --storage-auto-grow Enabled
+  - name: Set an autogrow maximum of 524288 MB and a 20 percent increment on a Premium SSD v2 server with autogrow already enabled.
+    text: >
+      az postgres flexible-server update --resource-group testgroup --name testserver
+        --storage-auto-grow-max-threshold-mb 524288 --storage-auto-grow-increment-percent 20
   - name: Update a flexible server's storage to set custom storage performance tier.
     text: az postgres flexible-server update --resource-group testgroup --name testserver --performance-tier P15
   - name: Update a flexible server's storage to set IOPS (operations/sec). Server must be using Premium SSD v2 Disks.

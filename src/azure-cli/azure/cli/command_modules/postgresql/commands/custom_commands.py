@@ -78,7 +78,8 @@ def flexible_server_create(cmd, client,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, cluster_size=None, database_name=None, yes=False):
+                           storage_type=None, iops=None, throughput=None, cluster_size=None, database_name=None, yes=False,
+                           auto_grow_max_threshold_mb=None, auto_grow_increment_percent=None):
 
     if not check_resource_group(resource_group_name):
         resource_group_name = None
@@ -123,6 +124,8 @@ def flexible_server_create(cmd, client,
                            tier=tier, sku_name=sku_name,
                            storage_gb=storage_gb,
                            auto_grow=auto_grow,
+                           auto_grow_max_threshold_mb=auto_grow_max_threshold_mb,
+                           auto_grow_increment_percent=auto_grow_increment_percent,
                            storage_type=storage_type,
                            iops=iops, throughput=throughput,
                            zonal_resiliency=zonal_resiliency,
@@ -161,7 +164,11 @@ def flexible_server_create(cmd, client,
         subnet=subnet,
         yes=yes)
 
-    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow, tier=performance_tier, type=storage_type, iops=iops, throughput=throughput)
+    storage = postgresql_flexibleservers.models.Storage(
+        storage_size_gb=storage_gb, auto_grow=auto_grow,
+        auto_grow_max_threshold_mb=auto_grow_max_threshold_mb,
+        auto_grow_increment_percent=auto_grow_increment_percent,
+        tier=performance_tier, type=storage_type, iops=iops, throughput=throughput)
 
     backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                       geo_redundant_backup=geo_redundant_backup)
@@ -452,7 +459,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        auto_grow=None,
                                        performance_tier=None,
                                        iops=None, throughput=None,
-                                       cluster_size=None, yes=False):
+                                       cluster_size=None, yes=False,
+                                       auto_grow_max_threshold_mb=None, auto_grow_increment_percent=None):
 
     # validator
     location = ''.join(instance.location.lower().split())
@@ -475,6 +483,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            sku_name=sku_name,
                            storage_gb=storage_gb,
                            auto_grow=auto_grow,
+                           auto_grow_max_threshold_mb=auto_grow_max_threshold_mb,
+                           auto_grow_increment_percent=auto_grow_increment_percent,
                            iops=iops,
                            throughput=throughput,
                            zonal_resiliency=zonal_resiliency,
@@ -520,6 +530,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if auto_grow:
         instance.storage.auto_grow = auto_grow
+
+    if auto_grow_max_threshold_mb is not None:
+        instance.storage.auto_grow_max_threshold_mb = auto_grow_max_threshold_mb
+
+    if auto_grow_increment_percent is not None:
+        instance.storage.auto_grow_increment_percent = auto_grow_increment_percent
 
     instance.storage.tier = performance_tier if performance_tier else None
 
