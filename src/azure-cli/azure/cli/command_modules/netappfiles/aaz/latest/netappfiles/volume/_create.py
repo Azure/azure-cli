@@ -325,12 +325,6 @@ class Create(AAZCommand):
             help="Specifies whether LDAP is enabled or not for a given NFS volume.",
             default=False,
         )
-        _args_schema.ldap_server_type = AAZStrArg(
-            options=["--ldap-server-type"],
-            arg_group="Properties",
-            help="Specifies the type of LDAP server for a given NFS volume.",
-            enum={"ActiveDirectory": "ActiveDirectory", "OpenLDAP": "OpenLDAP"},
-        )
         _args_schema.network_features = AAZStrArg(
             options=["--network-features"],
             arg_group="Properties",
@@ -674,7 +668,6 @@ class Create(AAZCommand):
                 properties.set_prop("kerberosEnabled", AAZBoolType, ".kerberos_enabled")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
                 properties.set_prop("ldapEnabled", AAZBoolType, ".ldap_enabled")
-                properties.set_prop("ldapServerType", AAZStrType, ".ldap_server_type")
                 properties.set_prop("networkFeatures", AAZStrType, ".network_features")
                 properties.set_prop("placementRules", AAZListType, ".placement_rules")
                 properties.set_prop("protocolTypes", AAZListType, ".protocol_types")
@@ -934,9 +927,6 @@ class Create(AAZCommand):
             )
             properties.ldap_enabled = AAZBoolType(
                 serialized_name="ldapEnabled",
-            )
-            properties.ldap_server_type = AAZStrType(
-                serialized_name="ldapServerType",
             )
             properties.maximum_number_of_files = AAZIntType(
                 serialized_name="maximumNumberOfFiles",
