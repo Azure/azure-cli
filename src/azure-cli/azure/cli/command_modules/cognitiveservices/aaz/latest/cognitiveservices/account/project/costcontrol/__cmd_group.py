@@ -16,7 +16,7 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Cost Control
+    """Manage Foundry project-owned cost controls
     """
     pass
 
