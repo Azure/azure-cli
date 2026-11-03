@@ -7903,7 +7903,8 @@ def _parse_startup_summary_body(body, target_machine):
 def _fetch_startup_summaries(cmd, resource_group, name, slot, instance, runtime_items):
     """Call KuduLite /api/startuplogs/summary once for the app. When --instance is set
     and we have a matching runtime item, forward the machine filter so KuduLite only
-    walks that worker's log directory. Returns (startup_by_machine, app_wide_fetch_status)."""
+    walks that worker's log directory. Returns
+    (startup_by_machine, app_wide_fetch_status, startup_summary_url)."""
     import requests
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
     headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
@@ -7912,7 +7913,8 @@ def _fetch_startup_summaries(cmd, resource_group, name, slot, instance, runtime_
     if instance and len(runtime_items) == 1:
         target_machine = runtime_items[0].get('machineName')
 
-    summary_url = '{}/api/startuplogs/summary'.format(scm_url)
+    startup_summary_url = '{}/api/startuplogs/summary'.format(scm_url)
+    summary_url = startup_summary_url
     if target_machine:
         summary_url = '{}?instance={}'.format(summary_url, quote(target_machine, safe=''))
 
@@ -7923,7 +7925,7 @@ def _fetch_startup_summaries(cmd, resource_group, name, slot, instance, runtime_
         logger.warning("Failed to call '%s': %s", summary_url, ex)
         return startup_by_machine, (
             "Failed to reach SCM startup summary endpoint ({}: {}).".format(
-                ex.__class__.__name__, ex))
+                ex.__class__.__name__, ex)), startup_summary_url
 
     if summary_response.status_code != 200:
         # Common non-200s:
@@ -7934,7 +7936,7 @@ def _fetch_startup_summaries(cmd, resource_group, name, slot, instance, runtime_
             "Startup summary is not available for this app. "
             "This feature requires a platform version that has "
             "not rolled out to your app's region yet."
-        )
+        ), startup_summary_url
 
     try:
         body = summary_response.json()
@@ -7945,10 +7947,10 @@ def _fetch_startup_summaries(cmd, resource_group, name, slot, instance, runtime_
         # Plaintext body (e.g. WEBSITE_DISABLE_CONTAINER_STARTUP_LOGS notice) —
         # applies app-wide, hoist to instance-level SummaryFetchStatus later.
         text = (summary_response.text or '').strip()
-        return startup_by_machine, (text or None)
+        return startup_by_machine, (text or None), startup_summary_url
 
     startup_by_machine, notice = _parse_startup_summary_body(body, target_machine)
-    return startup_by_machine, notice
+    return startup_by_machine, notice, startup_summary_url
 
 
 def _correlate_startups_with_runtime(runtime_items, startup_by_machine, app_wide_fetch_status):
@@ -8024,7 +8026,7 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         cmd, subscription_id, resource_group, name, slot_segment,
         arm_instance_id, api_version, instance, id_to_machine)
 
-    startup_by_machine, app_wide_fetch_status = _fetch_startup_summaries(
+    startup_by_machine, app_wide_fetch_status, startup_summary_url = _fetch_startup_summaries(
         cmd, resource_group, name, slot, instance, runtime_items)
 
     orphan_startups = _correlate_startups_with_runtime(
@@ -8038,6 +8040,7 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
     if orphan_startups:
         payload['orphanStartups'] = orphan_startups
     if report:
+        payload['startupSummaryUrl'] = startup_summary_url
         from azure.cli.command_modules.appservice import _troubleshoot_status_report
         _troubleshoot_status_report.render_report(payload)
         return None
