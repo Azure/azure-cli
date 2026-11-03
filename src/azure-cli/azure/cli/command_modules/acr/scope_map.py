@@ -6,6 +6,7 @@
 from enum import Enum
 from azure.cli.core.util import CLIError
 from ._utils import (
+    get_warning_response_hook,
     get_resource_group_name_by_registry_name,
     parse_scope_map_actions
 )
@@ -70,7 +71,12 @@ def acr_scope_map_delete(cmd,
             return None
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    return client.begin_delete(resource_group_name, registry_name, scope_map_name)
+    return client.begin_delete(
+        resource_group_name,
+        registry_name,
+        scope_map_name,
+        raw_response_hook=get_warning_response_hook()
+    )
 
 
 def acr_scope_map_update(cmd,

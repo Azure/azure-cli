@@ -39,6 +39,7 @@ from azure.cli.command_modules.acr.helm import (
     acr_helm_delete,
     acr_helm_push
 )
+from azure.cli.command_modules.acr.scope_map import acr_scope_map_delete
 from azure.cli.command_modules.acr._docker_utils import (
     get_login_credentials,
     get_access_credentials,
@@ -63,6 +64,54 @@ TEST_REPOSITORY = 'testrepository'
 
 
 class AcrMockCommandsTests(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.acr._utils.logger')
+    @mock.patch(
+        'azure.cli.command_modules.acr.scope_map.'
+        'get_resource_group_name_by_registry_name'
+    )
+    def test_scope_map_delete_surfaces_warning_once(
+            self, mock_get_resource_group, mock_logger):
+        mock_get_resource_group.return_value = 'testresourcegroup'
+        client = mock.MagicMock()
+        client.begin_delete.return_value = mock.sentinel.poller
+
+        result = acr_scope_map_delete(
+            self._setup_cmd(),
+            client,
+            'testregistry',
+            'testscopemap',
+            yes=True
+        )
+
+        self.assertIs(result, mock.sentinel.poller)
+        client.begin_delete.assert_called_once_with(
+            'testresourcegroup',
+            'testregistry',
+            'testscopemap',
+            raw_response_hook=mock.ANY
+        )
+
+        response_hook = client.begin_delete.call_args.kwargs[
+            'raw_response_hook'
+        ]
+        response = mock.MagicMock()
+        response.http_response.headers = {}
+        response_hook(response)
+        mock_logger.warning.assert_not_called()
+
+        warning = (
+            "Could not find the authorization entity for token(s): "
+            "'testtoken'."
+        )
+        response.http_response.headers = {
+            'x-ms-warning': warning
+        }
+
+        response_hook(response)
+        response_hook(response)
+
+        mock_logger.warning.assert_called_once_with('%s', warning)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.request', autospec=True)
