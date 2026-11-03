@@ -16,7 +16,6 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[4]
 PIPELINES = ROOT / ".azure-pipelines"
-PUBLISH = PIPELINES / "templates/standalone/publish-jobs.yml"
 GENERATION = PIPELINES / "templates/standalone/cask-generation-and-tests.yml"
 
 
@@ -68,23 +67,12 @@ class TestReleasePipeline(unittest.TestCase):
                     "PATH": str(root) + os.pathsep + os.defpath,
                     "HOME": str(root),
                     "BREW_ARGUMENT_LOG": str(log),
-                    "RELEASE_HOMEBREW_TAP": "Azure/homebrew-azure-cli",
-                    "RELEASE_PYTHON_VERSION": "3.14",
                     **settings,
                 },
                 cwd=root, capture_output=True, text=True, timeout=10, check=False,
             )
             calls = [json.loads(line) for line in log.read_text().splitlines()]
             return result, calls
-
-    def test_published_tests_install_and_remove_the_custom_tap_cask(self):
-        for step in ("Test published cask install", "Test published Linux cask install"):
-            with self.subTest(step=step):
-                result, calls = self.run_with_brew_stub(bash_step(PUBLISH, step))
-                self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertIn(["install", "--cask", "Azure/azure-cli/azure-cli"], calls)
-                self.assertEqual(calls[-1], ["uninstall", "--cask", "Azure/azure-cli/azure-cli"])
-                self.assertNotIn(["install", "--cask", "azure-cli"], calls)
 
     def test_temporary_cleanup_is_specific_and_surfaces_failures(self):
         cleanups = [script for script, label in bash_steps(GENERATION) if label == "displayName: 'Cleanup'"]
@@ -122,7 +110,7 @@ class TestReleasePipeline(unittest.TestCase):
 
     def test_string_parameters_never_enter_bash_source(self):
         paths = (
-            PUBLISH, GENERATION,
+            GENERATION,
             PIPELINES / "templates/macos/macos-build-jobs.yml",
             PIPELINES / "templates/macos/macos-sign-notarize-jobs.yml",
             PIPELINES / "templates/linux/linux-build-jobs.yml",
@@ -138,86 +126,21 @@ class TestReleasePipeline(unittest.TestCase):
                     )
                     self.assertEqual(result.returncode, 0, result.stderr)
                 count += 1
-        self.assertGreater(count, 20)
+        self.assertGreater(count, 15)
 
-    def test_no_free_form_queue_parameters_or_repository_macros(self):
-        text = (PIPELINES / "mac-and-linux-standalone-release.yml").read_text()
-        parameters = text.split("\nparameters:\n", 1)[1].split("\nresources:", 1)[0]
-        self.assertEqual(parameters.count("type: boolean"), 3)
-        self.assertNotIn("type: string", parameters)
-        for field in ("GitHubRepo", "HomebrewTapRepo", "PythonVersion", "BundleId", "ESRPServiceConnection"):
-            self.assertNotIn("${{ parameters." + field + " }}", text)
-            self.assertNotIn("$(" + field + ")", text)
+    def test_production_pipeline_retains_cask_generation(self):
+        text = (ROOT / "azure-pipelines.yml").read_text()
+        self.assertIn("template: .azure-pipelines/templates/standalone/cask-generation-and-tests.yml", text)
+        generation = GENERATION.read_text()
+        self.assertIn("artifactName: 'cask-definition'", generation)
 
-    def test_python_version_is_defined_once_and_shared_at_template_expansion(self):
-        text = (PIPELINES / "mac-and-linux-standalone-release.yml").read_text()
-        self.assertRegex(
-            text,
-            r"- name: standalone_python_version\n    value: '3\.[0-9]+'\n    readonly: true",
-        )
-        self.assertEqual(text.count("- name: standalone_python_version"), 1)
-        self.assertEqual(text.count("PythonVersion:"), 5)
-        self.assertEqual(text.count("PythonVersion: ${{ variables.standalone_python_version }}"), 5)
-        self.assertNotIn("$(standalone_python_version)", text)
-
-    def test_unchanged_artifact_is_checked_before_staging_and_publication(self):
+    def test_unchanged_artifact_is_checked_before_staging(self):
         generation = GENERATION.read_text()
         self.assertLess(generation.index("--validate"), generation.index("# Copy to staging"))
         self.assertLess(
             generation.index("displayName: 'Validate unchanged publication cask'"),
             generation.index('url \\"file://$(Pipeline.Workspace)/linux-cli-final'),
         )
-        publication = PUBLISH.read_text().split("- job: UpdateHomebrewCask", 1)[1]
-        self.assertLess(publication.index("--validate"), publication.index("- checkout: homebrewtap"))
-        self.assertIn('cmp "$(Pipeline.Workspace)/cask-definition/azure-cli.rb"', publication)
-        gate = bash_step(PUBLISH, "Validate unchanged publication cask before tap checkout")
-        self.assertNotIn("PublishToGitHub", gate)
-        self.assertNotIn("GH_TOKEN", gate)
-
-    def test_release_input_stays_data_even_with_shell_and_heredoc_metacharacters(self):
-        with tempfile.TemporaryDirectory(prefix="release data ") as directory:
-            root = Path(directory)
-            tools = root / "tools"
-            tools.mkdir()
-            log = root / "gh.jsonl"
-            gh = tools / "gh"
-            gh.write_text(
-                f"#!{sys.executable}\n"
-                "import json, os, sys\n"
-                "with open(os.environ['GH_ARGUMENT_LOG'], 'a') as log:\n"
-                "    log.write(json.dumps(sys.argv[1:]) + '\\n')\n",
-            )
-            gh.chmod(0o755)
-            (root / "azure-cli-test.tar.gz").write_text("fixture")
-            repository = "Azure/repo'; printf INJECTION_EXECUTED; #"
-            tap = "Azure/tap\nEOF\nprintf INJECTION_EXECUTED\n"
-            python_version = "3.14$(printf INJECTION_EXECUTED)"
-            environment = {
-                **os.environ,
-                "PATH": str(tools),
-                "GH_ARGUMENT_LOG": str(log),
-                "RELEASE_TAG": "azure-cli-2.85.0",
-                "RELEASE_VERSION": "2.85.0",
-                "RELEASE_TEMP_DIRECTORY": str(root),
-                "RELEASE_DIRECTORY": str(root),
-                "RELEASE_GITHUB_REPO": repository,
-                "RELEASE_HOMEBREW_TAP": tap,
-                "RELEASE_PYTHON_VERSION": python_version,
-            }
-            environment.pop("GH_TOKEN", None)
-            result = subprocess.run(
-                ["/bin/bash", "-c", bash_step(PUBLISH, "Create GitHub Release with PAT")],
-                env=environment, capture_output=True, text=True, timeout=10, check=False,
-            )
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(result.stdout, "")
-            calls = [json.loads(line) for line in log.read_text().splitlines()]
-            self.assertEqual(len(calls), 2)
-            for call in calls:
-                self.assertEqual(call[call.index("--repo") + 1], repository)
-            notes = (root / "release-notes.md").read_text()
-            self.assertIn("brew tap " + tap, notes)
-            self.assertIn("Homebrew Python " + python_version, notes)
 
 
 if __name__ == "__main__":
