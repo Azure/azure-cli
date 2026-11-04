@@ -540,16 +540,22 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd('az search service update -n {name} -g {rg} --knowledge-retrieval {knowledge_retrieval}',
-                 checks=[self.check('name', '{name}')])
+                 checks=[self.check('name', '{name}'),
+                         self.check('knowledgeRetrieval', '{knowledge_retrieval}')])
 
         self.cmd('az search service show -n {name} -g {rg}',
-                 checks=[self.check('name', '{name}')])
+                 checks=[self.check('name', '{name}'),
+                         self.check('knowledgeRetrieval', '{knowledge_retrieval}')])
+
+        self.cmd('az search service wait -n {name} -g {rg} --custom "knowledgeRetrieval==\'{knowledge_retrieval}\'"'
+                 ' --timeout 60 --interval 5')
 
         self.cmd(
             'az search service create -n {standard_name} -g {rg} --sku {sku_name}'
             ' --replica-count {replica_count} --partition-count {partition_count}'
             ' --knowledge-retrieval {knowledge_retrieval}',
-            checks=[self.check('name', '{standard_name}')])
+            checks=[self.check('name', '{standard_name}'),
+                    self.check('knowledgeRetrieval', '{knowledge_retrieval}')])
 
 if __name__ == '__main__':
     unittest.main()
