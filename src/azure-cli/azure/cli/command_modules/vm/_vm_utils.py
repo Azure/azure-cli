@@ -680,7 +680,7 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
 def validate_image_trusted_launch(namespace):
     from ._constants import UPGRADE_SECURITY_HINT
 
-    if namespace.security_type and namespace.security_type.lower() != 'trustedlaunch':
+    if namespace.security_type and namespace.security_type.lower() not in ('trustedlaunch', 'confidentialvm'):
         logger.warning(UPGRADE_SECURITY_HINT)
 
 
