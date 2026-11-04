@@ -2871,53 +2871,18 @@ examples:
 
 helps['webapp up'] = """
 type: command
-short-summary: >
-    Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder
-    where the code is present. Current support includes Node, Python, .NET Core and ASP.NET. Node,
-    Python apps are created as Linux apps. .Net Core, ASP.NET, and static HTML apps are created as Windows apps.
-    Append the html flag to deploy as a static HTML app.
-    Each time the command is successfully run, default argument values for resource group, sku, location, plan, and name are saved for the current directory.
-    These defaults are then used for any arguments not provided on subsequent runs of the command in the same directory.  Use 'az configure' to manage defaults.
-    Run this command with the --debug parameter to see the API calls and parameters values being used.
+short-summary: Deprecated command.
 long-summary: |
-    Usage notes:
-    - If the app already exists, the existing SKU is kept. The --sku flag is ignored for existing apps.
-    - Use 'az webapp list-runtimes' to see available runtimes.
+    The 'az webapp up' command is deprecated and no longer supported for Azure web apps.
+    Use 'webapp create and webapp deploy' instead.
+
+    Invocations exit with an error without creating or deploying resources.
+    Legacy arguments are accepted only to report this error and are hidden from help.
 
 examples:
-  - name: View the details of the app that will be created, without actually running the operation
-    text: >
-        az webapp up --dryrun
-  - name: Create a web app with the default configuration, by running the command from the folder where the code to be deployed exists.
+  - name: Show the retirement message. This command exits with an error.
     text: >
         az webapp up
-  - name: Create a web app with a specified name
-    text: >
-        az webapp up -n MyUniqueAppName
-  - name: Deploy a Python app to Linux with explicit runtime and plan name.
-    text: >
-        az webapp up -n MyApp --runtime "PYTHON:3.14" --plan MyPlan --sku P1v3
-  - name: Deploy a .NET app to Linux (must specify --os-type linux).
-    text: >
-        az webapp up -n MyDotnetApp --runtime "DOTNETCORE:10.0" --os-type linux --plan MyPlan
-  - name: Create a web app with a specified name and a Java 11 runtime
-    text: >
-        az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
-  - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
-    text: >
-        az webapp up -l locationName
-  - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
-    text: >
-        az webapp up --logs
-  - name: Create a web app and deploy as a static HTML app.
-    text: >
-        az webapp up --html
-  - name: Create a web app with a specified domain name scope for unique hostname generation
-    text: >
-        az webapp up -n MyUniqueAppName --domain-name-scope TenantReuse
-  - name: Deploy with enriched error diagnostics on failure.
-    text: >
-        az webapp up --enriched-errors true
 """
 
 helps['webapp update'] = """
