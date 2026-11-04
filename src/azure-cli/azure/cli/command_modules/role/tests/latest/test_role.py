@@ -9,7 +9,7 @@ import os
 import sys
 import tempfile
 import time
-import datetime
+import datetime as dt
 from unittest import mock
 import unittest
 
@@ -698,9 +698,9 @@ class RoleAssignmentScenarioTest(RoleScenarioTestBase):
                 self.cmd('role assignment create --assignee {upn} --role reader --scope {rg_id}')
 
                 if self.is_live or self.in_recording:
-                    now = datetime.datetime.utcnow()
-                    start = now - datetime.timedelta(minutes=1)
-                    end = now + datetime.timedelta(minutes=1)
+                    now = dt.datetime.now(dt.UTC)
+                    start = now - dt.timedelta(minutes=1)
+                    end = now + dt.timedelta(minutes=1)
                     start_time = '{}-{}-{}T{}:{}:{}Z'.format(start.year, start.month, start.day, start.hour,
                                                              start.minute, start.second)
                     end_time = '{}-{}-{}T{}:{}:{}Z'.format(end.year, end.month, end.day, end.hour,

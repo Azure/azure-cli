@@ -506,9 +506,9 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
         if valid_blob_source:
             client = cf_blob_service(cmd.cli_ctx, client_kwargs)
 
-        from datetime import datetime, timedelta
-        start = datetime.utcnow()
-        expiry = datetime.utcnow() + timedelta(days=1)
+        import datetime as dt
+        start = dt.datetime.now(dt.UTC)
+        expiry = dt.datetime.now(dt.UTC) + dt.timedelta(days=1)
         source_user_delegation_key = client.get_user_delegation_key(start, expiry)
 
     # Both source account name and either key or sas (or both) are now available
@@ -1278,7 +1278,7 @@ def validate_subnet(cmd, namespace):
 def get_datetime_type(to_string):
     """ Validates UTC datetime. Examples of accepted forms:
     2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
-    from datetime import datetime
+    import datetime as dt
 
     def datetime_type(string):
         """ Validates UTC datetime. Examples of accepted forms:
@@ -1288,9 +1288,9 @@ def get_datetime_type(to_string):
         for form in accepted_date_formats:
             try:
                 if to_string:
-                    return datetime.strptime(string, form).strftime(form)
+                    return dt.datetime.strptime(string, form).strftime(form)
 
-                return datetime.strptime(string, form)
+                return dt.datetime.strptime(string, form)
             except ValueError:
                 continue
         raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
@@ -1300,13 +1300,13 @@ def get_datetime_type(to_string):
 
 def get_api_version_type():
     """ Examples of accepted forms: 2017-12-31 """
-    from datetime import datetime
+    import datetime as dt
 
     def api_version_type(string):
         """ Validates api version format. Examples of accepted form: 2017-12-31 """
         accepted_format = '%Y-%m-%d'
         try:
-            return datetime.strptime(string, accepted_format).strftime(accepted_format)
+            return dt.datetime.strptime(string, accepted_format).strftime(accepted_format)
         except ValueError:
             from azure.cli.core.azclierror import InvalidArgumentValueError
             raise InvalidArgumentValueError("Input '{}' not valid. Valid example: 2008-10-27.".format(string))
@@ -1559,8 +1559,8 @@ def as_user_validator(namespace):
 
         expiry = get_datetime_type(False)(namespace.expiry)
 
-        from datetime import datetime, timedelta
-        if expiry > datetime.utcnow() + timedelta(days=7):
+        import datetime as dt
+        if expiry.replace(tzinfo=dt.UTC) > dt.datetime.now(dt.UTC) + dt.timedelta(days=7):
             raise argparse.ArgumentError(
                 None, 'incorrect usage: --expiry should be within 7 days from now')
 

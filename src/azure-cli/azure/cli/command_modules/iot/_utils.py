@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import datetime
+import datetime as dt
 from os.path import exists, join
 import base64
 from cryptography import x509
@@ -31,9 +31,9 @@ def create_self_signed_certificate(device_id, valid_days, cert_output_dir):
         .issuer_name(subject_name)
         .public_key(key.public_key())
         .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.datetime.utcnow())
+        .not_valid_before(dt.datetime.now(dt.UTC))
         .not_valid_after(
-            datetime.datetime.utcnow() + datetime.timedelta(days=valid_days)
+            dt.datetime.now(dt.UTC) + dt.timedelta(days=valid_days)
         )
         .sign(key, hashes.SHA256())
     )

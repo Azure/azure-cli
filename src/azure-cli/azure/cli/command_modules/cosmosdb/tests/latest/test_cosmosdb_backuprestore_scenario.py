@@ -10,7 +10,7 @@ from unittest import mock
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from datetime import datetime, timedelta
+import datetime as dt
 from dateutil import parser
 
 
@@ -288,7 +288,7 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=4)
         import time
         time.sleep(240)
         restore_ts_string = restore_ts.isoformat()
@@ -364,7 +364,7 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
 
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=4)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=4)
         import time
         time.sleep(240)
         restore_ts_string = restore_ts.isoformat()
@@ -438,7 +438,7 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
         # So, we need to wait one hour in order to get the master backup for a restore to be performed.
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=61)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=61)
         import time
         # Cross region restore does not have a forced master backup during restore, so we need
         # to wait one hour to get the master backup for a restore to be performed. This wait is
@@ -509,7 +509,7 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
         # So, we need to wait one hour in order to get the master backup for a restore to be performed.
         account_creation_time = restorable_database_account['creationTime']
         creation_timestamp_datetime = parser.parse(account_creation_time)
-        restore_ts = creation_timestamp_datetime + timedelta(minutes=61)
+        restore_ts = creation_timestamp_datetime + dt.timedelta(minutes=61)
         import time
         time.sleep(3662)
         restore_ts_string = restore_ts.isoformat()
@@ -792,3 +792,26 @@ class CosmosDBRestoreUnitTests(unittest.TestCase):
             kwargs = mock_params.call_args.kwargs
             # Non-restore path: priority-0 location overrides arm_location.
             self.assertEqual(kwargs.get('location'), "westus2")
+
+    def test_restore_timestamp_is_utc(self):
+        from azure.cli.command_modules.cosmosdb.custom import _convert_to_utc_timestamp
+
+        expected = dt.datetime(2020, 1, 1, tzinfo=dt.UTC)
+        for timestamp in ['2020-01-01T00:00:00', '2020-01-01T00:00:00Z',
+                          '2020-01-01T02:00:00+02:00', '2019-12-31T19:00:00-05:00']:
+            with self.subTest(timestamp=timestamp):
+                result = _convert_to_utc_timestamp(timestamp)
+                self.assertEqual(result, expected)
+                self.assertEqual(result.utcoffset(), dt.timedelta(0))
+
+    @mock.patch('azure.cli.command_modules.cosmosdb.custom._create_database_account')
+    @mock.patch('azure.cli.command_modules.cosmosdb._client_factory.cf_restorable_database_accounts')
+    def test_restore_accepts_timestamp_without_offset(self, get_accounts, create_account):
+        from azure.cli.command_modules.cosmosdb.custom import cli_cosmosdb_restore
+
+        account = mock.Mock(account_name='source', deletion_time=None,
+                            creation_time=dt.datetime(2000, 1, 1, tzinfo=dt.UTC))
+        get_accounts.return_value.list.return_value = [account]
+        cli_cosmosdb_restore(mock.Mock(), mock.Mock(), 'rg', 'source', 'target',
+                             '2020-01-01T00:00:00', 'westus')
+        self.assertEqual(create_account.call_args.kwargs['restore_timestamp'], '2020-01-01T00:00:00+00:00')

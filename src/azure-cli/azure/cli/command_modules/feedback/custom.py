@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import datetime
+import datetime as dt
 import math
 import os
 import platform
@@ -106,8 +106,8 @@ class CommandLogFile:
 
     def __init__(self, log_file_path, time_now=None):
 
-        if (time_now is not None) and (not isinstance(time_now, datetime.datetime)):
-            raise TypeError("Expected type {} for time_now, instead received {}.".format(datetime.datetime, type(time_now)))  # pylint: disable=line-too-long
+        if (time_now is not None) and (not isinstance(time_now, dt.datetime)):
+            raise TypeError("Expected type {} for time_now, instead received {}.".format(dt.datetime, type(time_now)))  # pylint: disable=line-too-long
 
         if not os.path.isfile(log_file_path):
             raise ValueError("File {} is not an existing file.".format(log_file_path))
@@ -116,7 +116,7 @@ class CommandLogFile:
         self._log_file_path = log_file_path
 
         if time_now is None:
-            self._time_now = datetime.datetime.now()
+            self._time_now = dt.datetime.now()
         else:
             self._time_now = time_now
 
@@ -179,7 +179,7 @@ class CommandLogFile:
 
         total_seconds = self.metadata_tup.seconds_ago
 
-        time_delta = datetime.timedelta(seconds=total_seconds)
+        time_delta = dt.timedelta(seconds=total_seconds)
         logger.debug("%s time_delta", time_delta)
 
         if time_delta.days > 0:
@@ -201,12 +201,12 @@ class CommandLogFile:
         if not self._log_file_path:
             return None
 
-        time_now = datetime.datetime.now() if not self._time_now else self._time_now
+        time_now = dt.datetime.now() if not self._time_now else self._time_now
 
         try:
             _, file_name = os.path.split(self._log_file_path)
             poss_date, poss_time, poss_command, poss_pid, _ = file_name.split(".")
-            date_time_stamp = datetime.datetime.strptime("{}-{}".format(poss_date, poss_time), "%Y-%m-%d-%H-%M-%S")
+            date_time_stamp = dt.datetime.strptime("{}-{}".format(poss_date, poss_time), "%Y-%m-%d-%H-%M-%S")
             command = "az " + poss_command.replace("_", " ") if poss_command != _UNKNOWN_COMMAND else self.UNKNOWN_CMD  # pylint: disable=line-too-long
         except ValueError as e:
             logger.debug("Could not load metadata from file name %s.", self._log_file_path)
@@ -490,7 +490,7 @@ def _display_recent_commands(cmd):
             my_str += " "
         return my_str
 
-    time_now = datetime.datetime.now()
+    time_now = dt.datetime.now()
 
     command_log_files = _get_command_log_files(cmd.cli_ctx, time_now)
 
@@ -605,8 +605,9 @@ def handle_survey(cmd):
         with open(GLOBAL_SURVEY_NOTE_PATH, 'r') as f:
             survey_note = json.load(f)
         if survey_note['last_prompt_time']:
-            last_prompt_time = datetime.datetime.strptime(survey_note['last_prompt_time'], '%Y-%m-%dT%H:%M:%S')
-            use_duration = datetime.datetime.utcnow() - last_prompt_time
+            last_prompt_time = dt.datetime.strptime(
+                survey_note['last_prompt_time'], '%Y-%m-%dT%H:%M:%S').replace(tzinfo=dt.UTC)
+            use_duration = dt.datetime.now(dt.UTC) - last_prompt_time
 
     url = _SURVEY_URL.format(installation_id=Profile(cli_ctx=cmd.cli_ctx).get_installation_id(),
                              version=core_version,

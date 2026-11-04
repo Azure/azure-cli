@@ -110,9 +110,11 @@ CLASSIFIERS = [
     'Intended Audience :: Developers',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Programming Language :: Python :: 3.14',
+    'Programming Language :: Python :: 3.15',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -125,6 +127,7 @@ setup(
     name='azure-cli-fulltest',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Full Tests',
+    python_requires='>=3.11.0',
     license='MIT',
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',

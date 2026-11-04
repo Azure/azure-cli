@@ -491,10 +491,10 @@ jobs:
   displayName: Test Python Wheels
   strategy:
     matrix:
-      Python312:
-        python.version: '3.12'
-      Python314:
-        python.version: '3.14'
+      Python311:
+        python.version: '3.11'
+      Python315:
+        python.version: '3.15'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -531,10 +531,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python312:
-        python.version: '3.12'
-      Python314:
-        python.version: '3.14'
+      Python311:
+        python.version: '3.11'
+      Python315:
+        python.version: '3.15'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -548,10 +548,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python310:
-        python.version: '3.10'
-      Python314:
-        python.version: '3.14'
+      Python311:
+        python.version: '3.11'
+      Python315:
+        python.version: '3.15'
   steps:
   - task: UsePythonVersion@0
     inputs:
@@ -570,10 +570,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python312:
-        python.version: '3.12'
-      Python314:
-        python.version: '3.14'
+      Python311:
+        python.version: '3.11'
+      Python315:
+        python.version: '3.15'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -590,10 +590,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python312:
-        python.version: '3.12'
-      Python314:
-        python.version: '3.14'
+      Python311:
+        python.version: '3.11'
+      Python315:
+        python.version: '3.15'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -613,8 +613,8 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python314:
-        python.version: '3.14'
+      Python315:
+        python.version: '3.15'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -1058,10 +1058,10 @@ jobs:
   displayName: "PerformanceCheck"
   strategy:
     matrix:
-      Python312:
-        python.version: '3.12'
-      Python314:
-        python.version: '3.14'
+      Python311:
+        python.version: '3.11'
+      Python315:
+        python.version: '3.15'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:

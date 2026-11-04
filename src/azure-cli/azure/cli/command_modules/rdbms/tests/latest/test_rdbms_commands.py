@@ -4,8 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import time
 
-from datetime import datetime
-from dateutil.tz import tzutc  # pylint: disable=import-error
+import datetime as dt
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import CLIError
@@ -223,12 +222,12 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # Before we do restore we will have to check whether the current time is less than earliest restore time
-        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        current_time = dt.datetime.now(dt.UTC).isoformat()
         earliest_restore_time = result['earliestRestoreDate']
         date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
 
         if current_time < earliest_restore_time:
-            time.sleep((datetime.strptime(earliest_restore_time, date_format) - datetime.strptime(current_time,
+            time.sleep((dt.datetime.strptime(earliest_restore_time, date_format) - dt.datetime.strptime(current_time,
                                                                                              date_format)).total_seconds())
 
         self.cmd('{} server restore -g {} --name {} '

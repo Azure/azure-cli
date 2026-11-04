@@ -7,7 +7,7 @@
 # pylint: disable=too-many-locals
 
 import os
-from datetime import datetime
+import datetime as dt
 
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.profiles import ResourceType
@@ -160,7 +160,7 @@ def generate_sas_file_uri(client, cmd, file_system_name, path, permission=None,
     sas_kwargs = {}
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.utcnow(),
+            get_datetime_from_string(start) if start else dt.datetime.now(dt.UTC),
             get_datetime_from_string(expiry),
             delegated_user_tid=user_delegation_tid)
 

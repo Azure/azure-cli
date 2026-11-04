@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
-from datetime import datetime
+import datetime as dt
 from knack.log import get_logger
 from ._constants import (
     REF_KEY
@@ -530,4 +530,4 @@ def _get_duration(start_time, finish_time):
 
 
 def add_timestamp(message):
-    return "{} {}".format(datetime.utcnow(), message)
+    return "{} {}".format(dt.datetime.now(dt.UTC), message)

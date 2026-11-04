@@ -7,10 +7,9 @@ import time
 import uuid
 import unittest
 
-from datetime import datetime, timedelta
+import datetime as dt
 from time import sleep
 from dateutil import parser
-from dateutil.tz import tzutc
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
@@ -462,7 +461,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
 
         # Wait until snapshot is created
-        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        current_time = dt.datetime.now(dt.UTC).isoformat()
         earliest_restore_time = result['backup']['earliestRestoreDate']
         seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
         os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 180)
@@ -694,7 +693,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                           .format(database_engine, resource_group, source_server),
                           checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')]).get_output_in_json()
 
-        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        current_time = dt.datetime.now(dt.UTC).isoformat()
         earliest_restore_time = result['backup']['earliestRestoreDate']
         seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
         os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 1200)
@@ -939,7 +938,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 expect_failure=True)
 
             # restore backup
-            current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+            current_time = dt.datetime.now(dt.UTC).isoformat()
             earliest_restore_time = result['backup']['earliestRestoreDate']
             seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
             sleep(max(0, seconds_to_wait))
@@ -1522,7 +1521,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         
         restore_server = self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version)).get_output_in_json()
         
-        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        current_time = dt.datetime.now(dt.UTC).isoformat()
         earliest_restore_time = restore_server['properties']['backup']['earliestRestoreDate']
         seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
         time.sleep(max(0, seconds_to_wait) + 180)
@@ -1545,7 +1544,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         
         restore_server = self.cmd('resource show --id {} --api-version {}'.format(result['id'], api_version)).get_output_in_json()
         
-        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        current_time = dt.datetime.now(dt.UTC).isoformat()
         earliest_restore_time = restore_server['properties']['backup']['earliestRestoreDate']
         seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
         print(current_time)
@@ -2411,7 +2410,7 @@ class MySQLExportTest(ScenarioTest):
         # Create the blob container
         container = self.create_container(target_account_info)
 
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         self.kwargs.update({
             'expiry': expiry,

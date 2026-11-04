@@ -415,11 +415,11 @@ def remove_timer_trigger(task_name,
 def add_days_to_now(days):
     if days <= 0:
         raise CLIError('Days must be positive.')
-    from datetime import datetime, timedelta
+    import datetime as dt
     try:
-        return datetime.utcnow() + timedelta(days=days)
+        return dt.datetime.now(dt.UTC) + dt.timedelta(days=days)
     except OverflowError:
-        return datetime.max
+        return dt.datetime.max.replace(tzinfo=dt.UTC)
 
 
 def is_vault_secret(cmd, credential):

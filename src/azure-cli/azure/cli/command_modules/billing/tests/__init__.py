@@ -62,11 +62,11 @@ def try_manual(func):
             test_map[func.__name__]["error_message"] = ""
             test_map[func.__name__]["error_stack"] = ""
             test_map[func.__name__]["error_normalized"] = ""
-            test_map[func.__name__]["start_dt"] = dt.datetime.utcnow()
+            test_map[func.__name__]["start_dt"] = dt.datetime.now(dt.UTC)
             ret = func_to_call(*args, **kwargs)
         except (AssertionError, AzureError, CliTestError, CliExecutionError, SystemExit,
                 JMESPathCheckAssertionError) as e:
-            test_map[func.__name__]["end_dt"] = dt.datetime.utcnow()
+            test_map[func.__name__]["end_dt"] = dt.datetime.now(dt.UTC)
             test_map[func.__name__]["result"] = FAILED
             test_map[func.__name__]["error_message"] = str(e).replace("\r\n", " ").replace("\n", " ")[:500]
             test_map[func.__name__]["error_stack"] = traceback.format_exc().replace(
@@ -78,7 +78,7 @@ def try_manual(func):
             logger.info(traceback.format_exc())
             exceptions.append((func.__name__, sys.exc_info()))
         else:
-            test_map[func.__name__]["end_dt"] = dt.datetime.utcnow()
+            test_map[func.__name__]["end_dt"] = dt.datetime.now(dt.UTC)
             return ret
 
     if inspect.isclass(func):

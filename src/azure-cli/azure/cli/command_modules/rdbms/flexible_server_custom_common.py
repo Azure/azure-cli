@@ -6,8 +6,7 @@
 # pylint: disable=unused-argument, line-too-long
 
 import re
-from datetime import datetime, timedelta
-from dateutil.tz import tzutc
+import datetime as dt
 from knack.log import get_logger
 from knack.util import CLIError
 from urllib.request import urlretrieve
@@ -88,7 +87,7 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
         raise CLIError("Incorrect Usage : Need to pass in value for either \'--start-ip-address\' or \'--end-ip-address\'.")
 
     if firewall_rule_name is None:
-        now = datetime.now()
+        now = dt.datetime.now()
         firewall_rule_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
                                                                           now.second)
         if start_ip_address == '0.0.0.0' and end_ip_address == '0.0.0.0':
@@ -228,7 +227,7 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
 
     if file_last_written is None:
         file_last_written = 72
-    time_line = datetime.utcnow().replace(tzinfo=tzutc()) - timedelta(hours=file_last_written)
+    time_line = dt.datetime.now(dt.UTC) - dt.timedelta(hours=file_last_written)
 
     for f in all_files:
         if f.last_modified_time < time_line:

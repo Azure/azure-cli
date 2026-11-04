@@ -103,7 +103,7 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
-import datetime
+import datetime as dt
 from dateutil.parser import parse
 
 
@@ -10556,8 +10556,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_3.context.attach_mc(mc_3)
         dec_mc_3 = dec_3.update_upgrade_settings(mc_3)
         self.assertEqual(dec_mc_3.upgrade_settings.override_settings.force_upgrade, True)
-        self.assertGreater(dec_mc_3.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=2)).timestamp())
-        self.assertLess(dec_mc_3.upgrade_settings.override_settings.until.timestamp(), (datetime.datetime.utcnow() + datetime.timedelta(days=4)).timestamp())
+        self.assertGreater(dec_mc_3.upgrade_settings.override_settings.until.timestamp(), (dt.datetime.now(dt.UTC) + dt.timedelta(days=2)).timestamp())
+        self.assertLess(dec_mc_3.upgrade_settings.override_settings.until.timestamp(), (dt.datetime.now(dt.UTC) + dt.timedelta(days=4)).timestamp())
 
         # Set Until
         dec_4 = AKSManagedClusterUpdateDecorator(

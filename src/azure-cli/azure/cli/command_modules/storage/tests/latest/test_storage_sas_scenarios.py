@@ -13,8 +13,8 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(location='EastUS2')
     def test_storage_file_sas_scenario(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        import datetime as dt
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         account_info = self.get_account_info(resource_group, storage_account)
         share = self.create_share(account_info)
@@ -66,8 +66,8 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_sas_scenario(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        import datetime as dt
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info)
@@ -131,8 +131,8 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='queuesas', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
     def test_storage_queue_sas_scenario(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        import datetime as dt
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         account_info = self.get_account_info(resource_group, storage_account)
         queue = self.create_random_name('queue', 24)
 
@@ -157,8 +157,8 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_account_sas_scenario(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        import datetime as dt
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         connection_str = self.cmd('storage account show-connection-string -n {} -otsv'.format(storage_account)).output
         scope_name = self.create_random_name('scope', 16)
 
@@ -206,8 +206,8 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(hns=True, kind='StorageV2')
     def test_storage_fs_sas_scenario(self, resource_group, storage_account):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        import datetime as dt
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         account_info = self.get_account_info(resource_group, storage_account)
         file_system = self.create_file_system(account_info)
@@ -314,8 +314,8 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(hns=True, kind='StorageV2')
     def test_storage_fs_sas_with_encryption_scope(self, resource_group, storage_account_info):
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        import datetime as dt
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         storage_account, account_key = storage_account_info
         file_system = self.create_file_system(storage_account_info)
@@ -345,8 +345,8 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage table create -n {} --fail-on-exist', account_info, table_name) \
             .assert_with_checks(JMESPathCheck('created', True))
 
-        from datetime import datetime, timedelta
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        import datetime as dt
+        expiry = (dt.datetime.now(dt.UTC) + dt.timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
         sas_token_a = self.storage_cmd('storage table generate-sas -n {} --expiry {} --permissions a', account_info,
                                        table_name, expiry).get_output_in_json()
         account_name = account_info[0]

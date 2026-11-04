@@ -6,7 +6,7 @@
 
 import os
 import sys
-from datetime import datetime
+import datetime as dt
 
 from knack.log import get_logger
 from azure.cli.core.util import open_page_in_browser
@@ -49,10 +49,10 @@ def cache_github_token(cmd, token, repo):
         if isinstance(entry, dict) and entry.get("value") == token:
             if repo not in entry.get("repos", []):
                 entry["repos"] = [*entry.get("repos", []), repo]
-                entry["last_modified_timestamp"] = datetime.utcnow().timestamp()
+                entry["last_modified_timestamp"] = dt.datetime.now(dt.UTC).timestamp()
             break
     else:
-        cache_entry = {"last_modified_timestamp": datetime.utcnow().timestamp(), "value": token, "repos": [repo]}
+        cache_entry = {"last_modified_timestamp": dt.datetime.now(dt.UTC).timestamp(), "value": token, "repos": [repo]}
         cache = [cache_entry, *cache]
 
     secret_store.save(cache)
