@@ -3984,7 +3984,7 @@ class PrivateEndpointUpdate(_PrivateEndpointUpdate):
         args = self.ctx.args
         if has_value(args.approval_reference_id):
             manual_connections = instance.properties.manual_private_link_service_connections
-            if not has_value(manual_connections) or not len(manual_connections):
+            if not has_value(manual_connections) or not manual_connections:
                 raise ArgumentUsageError("--approval-reference-id can only be used with an existing manual connection.")
             manual_connections[0].properties.approval_reference = {
                 'private_endpoint_id': args.approval_reference_id
