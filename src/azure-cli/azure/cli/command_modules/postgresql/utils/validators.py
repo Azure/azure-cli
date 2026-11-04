@@ -894,27 +894,32 @@ def _pg_storage_type_validator(storage_type, performance_tier, tier,
 
 def _pg_storage_auto_grow_validator(storage_type, auto_grow, storage_gb,
                                     auto_grow_max_threshold_mb, auto_grow_increment_percent, instance):
-    if auto_grow_max_threshold_mb is None and auto_grow_increment_percent is None:
+    has_auto_grow_options = auto_grow_max_threshold_mb is not None or auto_grow_increment_percent is not None
+    if not has_auto_grow_options and (instance is None or storage_gb is None):
         return
 
     if instance is not None:
-        if (not instance.storage or
-                not instance.storage.type or instance.storage.type.lower() != 'premiumv2_lrs' or
-                not instance.storage.auto_grow or instance.storage.auto_grow.lower() != 'enabled'):
-            raise ValidationError('Storage autogrow options can only be updated on servers with '
-                                  'PremiumV2_LRS storage and storage autogrow already enabled.')
+        if has_auto_grow_options:
+            if (not instance.storage or
+                    not instance.storage.type or instance.storage.type.lower() != 'premiumv2_lrs' or
+                    not instance.storage.auto_grow or instance.storage.auto_grow.lower() != 'enabled'):
+                raise ValidationError('Storage autogrow options can only be updated on servers with '
+                                      'PremiumV2_LRS storage and storage autogrow already enabled.')
         storage_type = instance.storage.type
         if auto_grow is None:
             auto_grow = instance.storage.auto_grow
         storage_gb = max(instance.storage.storage_size_gb,
                          storage_gb if storage_gb is not None else instance.storage.storage_size_gb)
+        if auto_grow_max_threshold_mb is None:
+            auto_grow_max_threshold_mb = instance.storage.auto_grow_max_threshold_mb
 
-    if not storage_type or storage_type.lower() != 'premiumv2_lrs':
-        raise ValidationError('--storage-auto-grow-max-threshold-mb and --storage-auto-grow-increment-percent '
-                              'require --storage-type PremiumV2_LRS.')
-    if not auto_grow or auto_grow.lower() != 'enabled':
-        raise ValidationError('--storage-auto-grow-max-threshold-mb and --storage-auto-grow-increment-percent '
-                              'require --storage-auto-grow Enabled.')
+    if has_auto_grow_options:
+        if not storage_type or storage_type.lower() != 'premiumv2_lrs':
+            raise ValidationError('--storage-auto-grow-max-threshold-mb and --storage-auto-grow-increment-percent '
+                                  'require --storage-type PremiumV2_LRS.')
+        if not auto_grow or auto_grow.lower() != 'enabled':
+            raise ValidationError('--storage-auto-grow-max-threshold-mb and --storage-auto-grow-increment-percent '
+                                  'require --storage-auto-grow Enabled.')
 
     if auto_grow_max_threshold_mb is not None and auto_grow_max_threshold_mb < storage_gb * 1024:
         raise ValidationError('--storage-auto-grow-max-threshold-mb must be at least the current or requested '
