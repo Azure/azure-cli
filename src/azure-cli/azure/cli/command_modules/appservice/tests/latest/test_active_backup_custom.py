@@ -234,6 +234,24 @@ class ActiveBackupCustomTests(unittest.TestCase):
                 else:
                     self.assertIs(request['body']['properties']['followLastKnownGood'], False)
 
+    def test_silo_updates_without_tags_handle_null_service_tags(self):
+        self.resource['tags'] = None
+        for group, parent, options in (
+                ('appservice plan silo', 'serverfarms', '--number-of-workers 2'),
+                ('webapp silo', 'sites', '--follow-last-known-good false')):
+            with self.subTest(group=group):
+                self.requests.clear()
+                self._invoke(group + ' update -g MyRG -n Primary --silo Backup ' + options)
+                suffix = '/' + parent + '/Primary/silos/Backup'
+                self._assert_request(0, 'GET', suffix)
+                request = self._assert_request(1, 'PUT', suffix)
+                self.assertEqual(len(self.requests), 2)
+                self.assertIsNone(request['body'].get('tags'))
+                if parent == 'serverfarms':
+                    self.assertEqual(request['body']['properties']['instanceNumberOverride'], 2)
+                else:
+                    self.assertIs(request['body']['properties']['followLastKnownGood'], False)
+
     def test_vnet_patch_only_sends_supplied_fields(self):
         for options, expected in (
                 ('--swift-supported false', {'swiftSupported': False}),
@@ -439,14 +457,14 @@ class ActiveBackupHttpTests(unittest.TestCase):
                     self.assertEqual(len(self.calls), 1)
 
     def test_update_get_failure_prevents_put(self):
-        for command, path in (
-                ('appservice plan silo update', '/serverfarms/Primary/silos/Backup'),
-                ('webapp silo update', '/sites/Primary/silos/Backup')):
+        for command, path, options in (
+                ('appservice plan silo update', '/serverfarms/Primary/silos/Backup', '--number-of-workers 2'),
+                ('webapp silo update', '/sites/Primary/silos/Backup', '--follow-last-known-good false')):
             with self.subTest(command=command):
                 self.calls.clear()
                 self._queue('GET', path, 403, {'error': {'code': 'Forbidden', 'message': 'Read denied.'}})
                 with self.assertLogs(level='ERROR'):
-                    self._invoke(command + ' -g MyRG -n Primary --silo Backup --tags env=test', expected_code=1)
+                    self._invoke(command + ' -g MyRG -n Primary --silo Backup ' + options, expected_code=1)
                 self.assertEqual(len(self.calls), 1)
 
     def _silo_command(self, group, parent, verb):
@@ -456,7 +474,7 @@ class ActiveBackupHttpTests(unittest.TestCase):
             command += ' --location westus2 --primary-location eastus'
         elif verb == 'update':
             self._queue('GET', path, payload=self.resource)
-            command += ' --tags environment=preview'
+            command += ' --number-of-workers 2' if parent == 'serverfarms' else ' --follow-last-known-good false'
         else:
             command += ' --yes'
         return command, path

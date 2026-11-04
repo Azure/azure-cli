@@ -73,7 +73,7 @@ class ActiveBackupScenarioTests(ScenarioTest):
             self.check("[?name=='{plan_silo}'] | length(@)", 1),
         ])
         self._run('appservice plan silo update -g {rg} -n {plan} --silo {plan_silo} '
-                  '--number-of-workers 2 --tags environment=preview --no-wait')
+                  '--number-of-workers 2 --no-wait')
         self._run('appservice plan silo wait -g {rg} -n {plan} --silo {plan_silo} '
                   '--updated --interval 10 --timeout 1800')
 
@@ -91,12 +91,11 @@ class ActiveBackupScenarioTests(ScenarioTest):
             self.check("[?name=='{site_silo}'] | length(@)", 1),
         ])
         self._run('webapp silo update -g {rg} -n {app} --silo {site_silo} '
-                  '--follow-last-known-good false --tags environment=preview --no-wait')
+                  '--follow-last-known-good false --no-wait')
         self._run('webapp silo wait -g {rg} -n {app} --silo {site_silo} '
                   '--updated --interval 10 --timeout 1800')
         self._run('webapp silo show -g {rg} -n {app} --silo {site_silo}', checks=[
             self.check('properties.followLastKnownGood', False),
-            self.check('tags.environment', 'preview'),
         ])
 
         self._run('network vnet create -g {rg} -n {vnet} -l {secondary} '
