@@ -83,7 +83,7 @@ class Create(AAZCommand):
         _args_schema.amount = AAZFloatArg(
             options=["--amount"],
             arg_group="Properties",
-            help="The positive budget amount, in United States dollars for Cost or tokens for Tokens. Token amounts must be whole numbers no greater than 9223372036854775807.",
+            help="The positive budget amount, measured in United States dollars for the Cost category or in tokens for the Tokens category. Token amounts must be whole numbers.",
             fmt=AAZFloatArgFormat(
                 minimum=0.0,
                 exclusive_minimum=True,
