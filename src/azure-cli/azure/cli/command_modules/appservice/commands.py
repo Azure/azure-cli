@@ -219,7 +219,7 @@ def transform_troubleshoot_status_output(result):
 
         def _print_hint(app=app_name, rg=resource_group):
             _sys.stderr.write(
-                '\n\u25b6 Hint:\n'
+                '\nHint:\n'
                 '  Check application logs:  az webapp log tail -n {name} -g {rg}\n'
                 '  Check startup logs:      az webapp log startup show -n {name} -g {rg}\n'
                 .format(name=app, rg=rg))
@@ -361,6 +361,15 @@ def load_command_table(self, _):
     with self.command_group('webapp config') as g:
         g.custom_command('set', 'update_site_configs')
         g.custom_show_command('show', 'get_site_configs')
+
+    with self.command_group('webapp config egress', is_preview=True) as g:
+        g.custom_command('set', 'set_egress_config')
+        g.custom_show_command('show', 'show_egress_config')
+
+    with self.command_group('webapp config egress connection', is_preview=True) as g:
+        g.custom_command('add', 'add_egress_connection')
+        g.custom_command('remove', 'remove_egress_connection')
+        g.custom_show_command('show', 'show_egress_connection')
 
     with self.command_group('webapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)

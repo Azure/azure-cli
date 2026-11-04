@@ -4007,6 +4007,71 @@ class NetworkPrivateLinkPrivateLinkServicesScenarioTest(ScenarioTest):
         )
         self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {pls} -n {request1} --type {type} --yes')
 
+
+    @ResourceGroupPreparer(name_prefix='cli_test_approval_reference', location='centralus')
+    def test_private_endpoint_approval_reference(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'vnet': self.create_random_name('cli-approval-vnet-', 30),
+            'endpoint_subnet': self.create_random_name('cli-endpoint-subnet-', 30),
+            'pls_subnet': self.create_random_name('cli-pls-subnet-', 30),
+            'lb': self.create_random_name('cli-approval-lb-', 30),
+            'ip': self.create_random_name('cli-approval-ip-', 30),
+            'pls': self.create_random_name('cli-approval-pls-', 30),
+            'approved_endpoint': self.create_random_name('cli-approved-pe-', 24),
+            'referencing_endpoint': self.create_random_name('cli-reference-pe-', 24),
+            'type': 'Microsoft.Network/privateLinkServices'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {pls_subnet} -l centralus')
+        self.cmd('network vnet subnet update -g {rg} -n {pls_subnet} --vnet-name {vnet} --disable-private-link-service-network-policies')
+        self.cmd('network lb create -g {rg} -n {lb} --public-ip-address {ip} --sku Standard')
+        self.kwargs['pls_id'] = self.cmd(
+            'network private-link-service create -g {rg} -n {pls} --vnet-name {vnet} --subnet {pls_subnet} '
+            '--lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd'
+        ).get_output_in_json()['id']
+        self.cmd('network vnet subnet create -g {rg} -n {endpoint_subnet} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network vnet subnet update -g {rg} -n {endpoint_subnet} --vnet-name {vnet} --disable-private-endpoint-network-policies')
+
+        self.kwargs['approved_endpoint_id'] = self.cmd(
+            'network private-endpoint create -g {rg} -n {approved_endpoint} --vnet-name {vnet} '
+            '--subnet {endpoint_subnet} --private-connection-resource-id {pls_id} --connection-name approved'
+        ).get_output_in_json()['id']
+        self.kwargs['approved_connection'] = self.cmd(
+            'network private-endpoint-connection list -g {rg} -n {pls} --type {type}'
+        ).get_output_in_json()[0]['name']
+        self.cmd(
+            'network private-endpoint-connection approve -n {approved_connection} -g {rg} '
+            '--resource-name {pls} --type {type} --description Approved',
+            checks=self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+        )
+
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {referencing_endpoint} --vnet-name {vnet} '
+            '--subnet {endpoint_subnet} --private-connection-resource-id {pls_id} '
+            '--connection-name referencing --manual-request '
+            '--approval-reference-id {approved_endpoint_id}',
+            checks=[
+                self.check(
+                    'manualPrivateLinkServiceConnections[0].approvalReference.privateEndpointId',
+                    '{approved_endpoint_id}'
+                ),
+                self.check(
+                    'manualPrivateLinkServiceConnections[0].privateLinkServiceConnectionState.status',
+                    'Approved'
+                )
+            ]
+        )
+        self.cmd(
+            'network private-endpoint update -g {rg} -n {referencing_endpoint} '
+            '--approval-reference-id {approved_endpoint_id}',
+            checks=self.check(
+                'manualPrivateLinkServiceConnections[0].approvalReference.privateEndpointId',
+                '{approved_endpoint_id}'
+            )
+        )
+
+
 class NetworkKubernetesConfigurationPrivateLinkScopesTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_kubernetesconfiguration_pe', random_name_length=40)

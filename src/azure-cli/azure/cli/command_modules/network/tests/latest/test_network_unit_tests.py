@@ -3,14 +3,61 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from types import SimpleNamespace
 import unittest
-
 from unittest import mock
 
+from azure.cli.core.aaz import AAZUndefined
+from azure.cli.core.azclierror import ArgumentUsageError
 from knack.util import CLIError
 
 
 class TestNetworkUnitTests(unittest.TestCase):
+    def test_network_private_endpoint_approval_reference_custom_logic(self):
+        from azure.cli.command_modules.network.custom import PrivateEndpointCreate, PrivateEndpointUpdate
+
+        reference_id = ('/subscriptions/00000000-0000-0000-0000-000000000000/'
+                        'resourceGroups/test-rg/providers/Microsoft.Network/privateEndpoints/approved')
+        create = PrivateEndpointCreate.__new__(PrivateEndpointCreate)
+        create.ctx = SimpleNamespace(args=SimpleNamespace(
+            approval_reference_id=reference_id,
+            manual_request=True,
+            connection_name='connection',
+            group_ids=['group'],
+            request_message=AAZUndefined,
+            private_connection_resource_id='/subscriptions/test/resource',
+            manual_private_link_service_connections=AAZUndefined,
+            private_link_service_connections=AAZUndefined,
+            subnet=AAZUndefined,
+            subnet_id=AAZUndefined,
+            edge_zone=AAZUndefined,
+            edge_zone_type=AAZUndefined,
+        ))
+        create.pre_operations()
+        connection = create.ctx.args.manual_private_link_service_connections[0]
+        self.assertEqual(connection['approval_reference']['private_endpoint_id'], reference_id)
+
+        create.ctx.args.manual_request = False
+        with self.assertRaises(ArgumentUsageError):
+            create.pre_operations()
+
+        update = PrivateEndpointUpdate.__new__(PrivateEndpointUpdate)
+        update.ctx = SimpleNamespace(args=SimpleNamespace(
+            approval_reference_id=reference_id,
+            request_message=AAZUndefined,
+        ))
+        instance = mock.MagicMock()
+        manual_connection = mock.MagicMock()
+        instance.properties.manual_private_link_service_connections = [manual_connection]
+        update.pre_instance_update(instance)
+        self.assertEqual(
+            manual_connection.properties.approval_reference,
+            {'private_endpoint_id': reference_id}
+        )
+        instance.properties.manual_private_link_service_connections = []
+        with self.assertRaises(ArgumentUsageError):
+            update.pre_instance_update(instance)
+
     def test_application_gateway_subresource_preserves_hsm_schema(self):
         from azure.cli.command_modules.network.aaz.latest.network.application_gateway.address_pool import Create
 
