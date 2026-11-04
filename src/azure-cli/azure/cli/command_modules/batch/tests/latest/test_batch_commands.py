@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import io
 import os
 import unittest
 import datetime
@@ -15,10 +16,13 @@ import azure.batch
 from azure.core import MatchConditions
 #from azure.batch._client import BatchClientOperationsMixin
 from azure.batch import models, BatchClient
+from azure.batch._operations._patch import BatchClientOperationsMixin
 from azure.core.credentials import AzureNamedKeyCredential
 
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
+from azure.cli.core.mock import DummyCli
+from azure.cli.core.util import rmtree_with_retry
 
 
 class TestObj:  # pylint: disable=too-few-public-methods
@@ -653,3 +657,65 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         # option = [arg for (name, arg) in args if name == 'node_reboot_option'][0]
         # self.assertIsNotNone(option.choices)
         # self.assertFalse([a for a in option.choices if "'" in a])
+
+
+class TestBatchPoolCreate(unittest.TestCase):
+    """Run 'az batch pool create' with the SDK's create_pool mocked, so nothing is sent to the service."""
+
+    # The "two Ubuntu 24.04 compute nodes" example in the 'az batch pool create' help
+    EXAMPLE_ARGS = ['batch', 'pool', 'create', '--id', 'mypool', '--vm-size', 'Standard_D4ds_v5',
+                    '--target-dedicated-nodes', '2', '--image', 'canonical:ubuntu-24_04-lts:server',
+                    '--node-agent-sku-id', 'batch.node.ubuntu 24.04',
+                    '--account-name', 'clibatch', '--account-key', 'BatchAccountKey']
+    ENDPOINT_ARGS = ['--account-endpoint', 'https://clibatch.eastus.batch.azure.com']
+
+    def setUp(self):
+        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config
+        environ = {name: value for name, value in os.environ.items() if not name.startswith('AZURE_BATCH_')}
+        environ_patch = mock.patch.dict(os.environ, environ, clear=True)
+        environ_patch.start()
+        self.addCleanup(environ_patch.stop)
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+
+        # The CLI builds the command's arguments from the SDK method's docstring, so the mock keeps it
+        docstring = BatchClientOperationsMixin.create_pool.__doc__
+        create_pool_patch = mock.patch.object(BatchClientOperationsMixin, 'create_pool', autospec=True,
+                                              return_value=None)
+        self.create_pool = create_pool_patch.start()
+        self.addCleanup(create_pool_patch.stop)
+        self.create_pool.__doc__ = docstring
+
+    def test_batch_pool_create_missing_endpoint(self):
+        with self.assertLogs('cli.azure.cli.core.azclierror', 'ERROR') as logs, \
+                self.assertRaises(SystemExit) as ex:
+            self.cli.invoke(self.EXAMPLE_ARGS, out_file=io.StringIO())
+        self.assertEqual(ex.exception.code, 2)
+        self.assertIn('Specify batch endpoint in command line or environment variable.',
+                      [record.getMessage() for record in logs.records])
+        self.create_pool.assert_not_called()
+
+    def test_batch_pool_create_ubuntu_example(self):
+        self.assertEqual(self.cli.invoke(self.EXAMPLE_ARGS + self.ENDPOINT_ARGS, out_file=io.StringIO()), 0)
+        self.create_pool.assert_called_once()
+        # The CLI passes the --target-dedicated-nodes value on as a string; the service accepts it
+        self.assertEqual(self.create_pool.call_args.kwargs['pool'], {
+            'id': 'mypool',
+            'vmSize': 'Standard_D4ds_v5',
+            'targetDedicatedNodes': '2',
+            'virtualMachineConfiguration': {
+                'imageReference': {'publisher': 'canonical', 'offer': 'ubuntu-24_04-lts', 'sku': 'server'},
+                'nodeAgentSKUId': 'batch.node.ubuntu 24.04'}})
+
+    def test_batch_pool_create_gallery_image(self):
+        image = ('/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myresourcegroup/providers/'
+                 'Microsoft.Compute/galleries/mygallery/images/myimage')
+        for image_id in [image, image + '/versions/1.0.0']:
+            with self.subTest(image_id=image_id):
+                args = self.EXAMPLE_ARGS + self.ENDPOINT_ARGS
+                args[args.index('--image') + 1] = image_id
+                self.assertEqual(self.cli.invoke(args, out_file=io.StringIO()), 0)
+                self.assertEqual(self.create_pool.call_args.kwargs['pool']['virtualMachineConfiguration'], {
+                    'imageReference': {'virtualMachineImageId': image_id},
+                    'nodeAgentSKUId': 'batch.node.ubuntu 24.04'})
