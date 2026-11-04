@@ -125,6 +125,9 @@ class StorageAutoGrowTest(unittest.TestCase):
         for arguments, maximum, increment in [
                 ({}, 262144, 10),
                 ({'auto_grow_increment_percent': 101}, 262144, 101),
+                ({'storage_gb': 256}, 262144, 10),
+                ({'storage_gb': 256, 'auto_grow_increment_percent': 20}, 262144, 20),
+                ({'storage_gb': 512, 'auto_grow_max_threshold_mb': 524288}, 524288, 10),
                 ({'auto_grow_max_threshold_mb': 524288}, 524288, 10)]:
             with self.subTest(arguments=arguments):
                 parameters = custom_commands.flexible_server_update_custom_func(
@@ -151,11 +154,27 @@ class StorageAutoGrowTest(unittest.TestCase):
         for arguments in [
                 {'auto_grow_max_threshold_mb': 131071},
                 {'storage_gb': 256, 'auto_grow_max_threshold_mb': 262143},
+                {'storage_gb': 512},
+                {'storage_gb': 512, 'auto_grow_increment_percent': 20},
+                {'storage_gb': 512, 'auto_grow_max_threshold_mb': 262144},
                 {'auto_grow_increment_percent': 0},
                 {'auto_grow_increment_percent': -1}]:
             with self.subTest(arguments=arguments), self.assertRaises(ValidationError):
                 custom_commands.flexible_server_update_custom_func(
                     self.cmd, self.client, self._server(), **arguments)
+
+    def test_postgresql_storage_size_update_without_autogrow_options(self):
+        for storage_type, auto_grow, maximum, storage_gb in [
+                ('Premium_LRS', 'Enabled', 262144, 256),
+                ('PremiumV2_LRS', 'Disabled', 262144, 256),
+                ('PremiumV2_LRS', 'Enabled', None, 512)]:
+            with self.subTest(storage_type=storage_type, auto_grow=auto_grow, maximum=maximum):
+                server = self._server(storage_type, auto_grow)
+                server.storage.auto_grow_max_threshold_mb = maximum
+                parameters = custom_commands.flexible_server_update_custom_func(
+                    self.cmd, self.client, server, storage_gb=storage_gb)
+                self.assertEqual(parameters.storage.storage_size_gb, storage_gb)
+                self.assertEqual(parameters.storage.auto_grow_max_threshold_mb, maximum)
 
     def test_postgresql_storage_auto_grow_can_be_enabled_without_options(self):
         self._create()
