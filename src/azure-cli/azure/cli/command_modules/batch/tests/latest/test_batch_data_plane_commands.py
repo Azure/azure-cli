@@ -554,11 +554,15 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            '--target-communication classic')
 
         # test that removed --resource-tags argument causes argparse error
-        with self.assertRaises(SystemExit):
+        with self.assertLogs('cli.azure.cli.core.azclierror', 'ERROR') as logs, \
+                self.assertRaises(SystemExit) as ex:
             self.batch_cmd('batch pool create --id test-deprecated-arg --vm-size Standard_DS1_v2 '
                            '--image Canonical:UbuntuServer:18.04-LTS '
                            '--node-agent-sku-id "batch.node.ubuntu 18.04" '
                            '--resource-tags key=value')
+        self.assertEqual(ex.exception.code, 2)
+        self.assertIn('unrecognized arguments: --resource-tags key=value',
+                      [record.getMessage() for record in logs.records])
         
         # test that the deprecated targetNodeCommunicationMode property is not included in pool show output
         pool_result = self.batch_cmd('batch pool show --pool-id {pool_i}').get_output_in_json()
