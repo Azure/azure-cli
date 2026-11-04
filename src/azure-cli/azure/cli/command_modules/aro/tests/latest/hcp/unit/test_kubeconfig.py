@@ -229,7 +229,8 @@ class PrintOrMergeCredentialsTest(unittest.TestCase):
             print_or_merge_credentials(path, yaml.safe_dump(_config()), False, None)
 
             self.assertEqual(_config(), load_kubernetes_configuration(path))
-            self.assertEqual(0o600, stat.S_IMODE(os.stat(path).st_mode))
+            if os.name != "nt":
+                self.assertEqual(0o600, stat.S_IMODE(os.stat(path).st_mode))
 
 
 if __name__ == "__main__":
