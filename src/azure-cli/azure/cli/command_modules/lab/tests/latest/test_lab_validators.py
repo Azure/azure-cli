@@ -110,6 +110,20 @@ class ValidatorsCommandTest(unittest.TestCase):
 
         self.assertEqual('formula-password', args.password.to_serialized_data())
 
+    def test_formula_authentication_prefers_supplied_password_over_legacy_response_password(self):
+        args = self._authentication_args(password='supplied-password')
+        formula = {
+            'formulaContent': {
+                'isAuthenticationWithSshKey': False,
+                'userName': 'formula-user',
+                'password': 'formula-password'
+            }
+        }
+
+        validate_authentication_type(args, formula)
+
+        self.assertEqual('supplied-password', args.password.to_serialized_data())
+
     @staticmethod
     def _authentication_args(password=None):
         args_schema = AAZArgumentsSchema()
