@@ -19,7 +19,8 @@ from azure.mgmt.web.models import (DatabaseType, ConnectionStringType, BuiltInAu
 
 from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
-                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES, ISOLATED_V4_SKUS)
+                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES, ISOLATED_V4_SKUS,
+                         FLEX_REGISTRY_AUTH_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
@@ -869,12 +870,36 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp log startup show') as c:
         c.argument('filename', options_list=['--filename', '-f'], help='Name of a specific startup log file to display. If not specified, shows the latest log (preferring failures).')
 
+    with self.argument_context('webapp troubleshoot config') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Defaults to the production slot if not specified")
+        c.argument('instance', options_list=['--instance'],
+                   help='Filter configuration checks by worker machine name. The runtime error recommendation '
+                        'uses the corresponding ARM instance ID and never falls back to another worker.')
+        c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(),
+                   help='Print a human-readable report instead of the structured payload.')
+
     with self.argument_context('webapp troubleshoot status') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Defaults to the production slot if not specified")
         c.argument('instance', options_list=['--instance'], help="Scope the report to a single worker instance. Accepts either the ARM instanceId or the machine name (e.g. `lw0sdlwk0007AB`). When omitted, returns an overview of every instance seen in the last 24 hours.")
         c.argument('report', options_list=['--report'], arg_type=get_three_state_flag(), help="Print a human-readable, color-coded report to stdout instead of returning the structured payload.")
+
+    with self.argument_context('webapp troubleshoot deployment') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+
+    with self.argument_context('webapp secure-build show') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+        c.argument('rescan', options_list=['--rescan'], action='store_true',
+                   help='Run a fresh dependency analysis instead of using a cached report.')
 
     with self.argument_context('webapp troubleshoot collect network-capture') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -1136,7 +1161,14 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('enriched_errors', options_list=['--enriched-errors'],
                    help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
                    arg_type=get_three_state_flag(), default=True)
-        c.argument('tag', help='Linux only. A friendly name used to identify the deployment.')
+        c.argument(
+            'deployment_tag',
+            options_list=['--deploymentTag', c.deprecate(target='--tag', redirect='--deploymentTag')],
+            help='Linux only. A friendly name used to identify the deployment.')
+        c.argument('show_secure_build', options_list=['--show-secure-build'], action='store_true', default=False,
+                   help='Show a Secure Build summary and full-report link after a local deployment, including when --async '
+                        'true is used. For URL deployments, show the command to run after deployment completes. Supported '
+                        'only for Linux web apps. Secure Build analysis can add several minutes to a local deployment.')
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')
@@ -1198,6 +1230,25 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
                    "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
                    "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.")
+
+    for scope in ['functionapp create', 'functionapp deployment config set']:
+        with self.argument_context(scope, arg_group='Flex Registry Deployment') as c:
+            c.argument('deployment_image', options_list=['--deployment-image'], is_preview=True,
+                       help="Container image for a Flex Consumption app, specified by tag or digest, e.g. "
+                       "`myregistry.azurecr.io/myimage:v1` or `myregistry.azurecr.io/myimage@sha256:<digest>`.")
+            c.argument('deployment_image_auth_type', options_list=['--deployment-image-auth-type', '--diat'],
+                       arg_type=get_enum_type(FLEX_REGISTRY_AUTH_TYPES), is_preview=True,
+                       help="How the platform authenticates to the registry: Anonymous (public image), SystemAssignedIdentity, UserAssignedIdentity (requires --deployment-image-identity), "
+                       "or Basic (requires --deployment-image-username-setting and --deployment-image-password-setting). The CLI doesn't assign identities or grant registry access.")
+            c.argument('deployment_image_identity',
+                       options_list=['--deployment-image-identity', '--dii'], is_preview=True,
+                       help="Resource ID of the user-assigned managed identity used to pull the image. Only valid with UserAssignedIdentity. Saved as provided; the CLI doesn't create, look up, or assign it.")
+            c.argument('deployment_image_username_setting',
+                       options_list=['--deployment-image-username-setting', '--dius'], is_preview=True,
+                       help="Name of the app setting that stores the registry username. Only valid with Basic.")
+            c.argument('deployment_image_password_setting',
+                       options_list=['--deployment-image-password-setting', '--dips'], is_preview=True,
+                       help="Name of the app setting that stores the registry password. Only valid with Basic. Pass the app setting name, not the password.")
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())

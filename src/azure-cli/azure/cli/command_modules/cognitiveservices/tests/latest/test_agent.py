@@ -61,10 +61,79 @@ from azure.cli.command_modules.cognitiveservices.custom import (
     AGENT_API_VERSION_PARAMS,
 )
 from azure.cli.command_modules.cognitiveservices._params import _environment_variables_type
+from azure.cli.command_modules.cognitiveservices._client_factory import (
+    _build_ai_project_endpoint,
+    cf_ai_projects,
+)
 
 
 class CognitiveServicesAgentHelperTests(unittest.TestCase):
     """Unit tests for agent helper functions."""
+
+    def test_build_ai_project_endpoint(self):
+        self.assertEqual(
+            _build_ai_project_endpoint("csclitest_000002", "Project.Name-01"),
+            "https://csclitest_000002.services.ai.azure.com/api/projects/Project.Name-01",
+        )
+
+    def test_build_ai_project_endpoint_rejects_invalid_resource_names(self):
+        invalid_names = [
+            None,
+            "",
+            "a",
+            "-account",
+            "account/name",
+            "account\\name",
+            "account@host",
+            "account:443",
+            "account?query",
+            "account#fragment",
+            "account%2fpath",
+            "account name",
+            "a" * 65,
+        ]
+
+        for invalid_name in invalid_names:
+            with self.subTest(account_name=invalid_name):
+                with self.assertRaises((InvalidArgumentValueError, RequiredArgumentMissingError)):
+                    _build_ai_project_endpoint(invalid_name, "project01")
+
+            with self.subTest(project_name=invalid_name):
+                with self.assertRaises((InvalidArgumentValueError, RequiredArgumentMissingError)):
+                    _build_ai_project_endpoint("account01", invalid_name)
+
+    @mock.patch("azure.cli.core._profile.Profile")
+    def test_cf_ai_projects_rejects_invalid_account(self, profile):
+        profile.return_value.get_login_credentials.return_value = (mock.Mock(), None, None)
+        cli_ctx = mock.Mock()
+        cli_ctx.data = {}
+
+        with self.assertRaises(InvalidArgumentValueError):
+            cf_ai_projects(cli_ctx, {
+                "account_name": "account@attacker.example",
+                "project_name": "project01",
+            })
+
+    @mock.patch("azure.cli.core._profile.Profile")
+    def test_cf_ai_projects_rejects_invalid_project(self, profile):
+        profile.return_value.get_login_credentials.return_value = (mock.Mock(), None, None)
+        cli_ctx = mock.Mock()
+        cli_ctx.data = {}
+
+        with self.assertRaises(InvalidArgumentValueError):
+            cf_ai_projects(cli_ctx, {
+                "account_name": "account01",
+                "project_name": "project/other",
+            })
+
+    @mock.patch("azure.cli.core._profile.Profile")
+    def test_cf_ai_projects_requires_account_name(self, profile):
+        profile.return_value.get_login_credentials.return_value = (mock.Mock(), None, None)
+        cli_ctx = mock.Mock()
+        cli_ctx.data = {}
+
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "--account-name"):
+            cf_ai_projects(cli_ctx, {"project_name": "project01"})
 
     def test_get_agent_container_status_builds_expected_request(self):
         """Test that agent status calls the default container endpoint and returns payload."""

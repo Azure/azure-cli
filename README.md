@@ -152,21 +152,12 @@ You can download the latest builds by following the links below:
 |      Package      | Link                                       |
 |:-----------------:|:-------------------------------------------|
 |        MSI        | https://aka.ms/InstallAzureCliWindowsEdge  |
-| Homebrew Formula  | https://aka.ms/InstallAzureCliHomebrewEdge |
 | Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge   |
 | Ubuntu Focal Deb  | https://aka.ms/InstallAzureCliFocalEdge    |
 | Ubuntu Jammy Deb  | https://aka.ms/InstallAzureCliJammyEdge    |
 |      RPM el8      | https://aka.ms/InstallAzureCliRpmEl8Edge   |
 
 On Windows, you need to uninstall the official version before installing the edge build. (See https://github.com/Azure/azure-cli/issues/25607#issuecomment-1452855212)
-
-You can easily install the latest Homebrew edge build with the following command:
-
-```bash
-# You need to uninstall the stable version with `brew uninstall azure-cli` first
-curl --location --silent --output azure-cli.rb https://aka.ms/InstallAzureCliHomebrewEdge
-brew install --build-from-source azure-cli.rb
-```
 
 You can install the edge build on Ubuntu Jammy with the following command:
 

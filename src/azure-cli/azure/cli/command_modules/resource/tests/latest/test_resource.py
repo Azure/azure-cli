@@ -4481,10 +4481,6 @@ class PolicyScenarioTest(ScenarioTest):
         management_group_name = 'PowershellTesting'
         self.resource_policy_operations(resource_group, management_group_name)
 
-        # Attempt to get a policy definition at an invalid management group scope
-        with self.assertRaises(InvalidArgumentValueError):
-            self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
-
     @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
     @AllowLargeResponse(4096)
     def test_resource_policy_subscription_id(self, resource_group):

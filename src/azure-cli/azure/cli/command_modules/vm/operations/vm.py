@@ -331,6 +331,8 @@ def convert_show_result_to_snake_case(result):
         new_result["eviction_policy"] = result["evictionPolicy"]
     if "extensionsTimeBudget" in result:
         new_result["extensions_time_budget"] = result["extensionsTimeBudget"]
+    if "flexProfile" in result:
+        new_result["flex_profile"] = result["flexProfile"]
     if "hardwareProfile" in result:
         new_result["hardware_profile"] = result["hardwareProfile"]
     if "host" in result:
@@ -416,6 +418,11 @@ def convert_show_result_to_snake_case(result):
     if "storageUri" in boot_diagnostics:
         boot_diagnostics["storage_uri"] = boot_diagnostics["storageUri"]
         boot_diagnostics.pop("storageUri")
+
+    flex_profile = new_result.get("flex_profile", {}) or {}
+    if "preferredVMSize" in flex_profile:
+        flex_profile["preferred_vm_size"] = flex_profile["preferredVMSize"]
+        flex_profile.pop("preferredVMSize")
 
     hardware_profile = new_result.get("hardware_profile", {}) or {}
     if "processorMode" in hardware_profile:

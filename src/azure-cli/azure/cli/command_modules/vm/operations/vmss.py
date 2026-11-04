@@ -70,6 +70,40 @@ class VMSSShow(_VMSSShow):
         return result
 
 
+_VMSS_IP_CONFIG_OPTIONAL_COLLECTIONS = (
+    'applicationGatewayBackendAddressPools',
+    'applicationSecurityGroups',
+    'loadBalancerBackendAddressPools',
+    'loadBalancerInboundNatPools',
+)
+
+
+def _normalize_vmss_generic_update_collections(vmss):
+    # AAZ omits unset optional properties, while generic `--add` needs them present as None.
+    vm_profile = vmss.get('virtualMachineProfile')
+    network_profile = vm_profile.get('networkProfile') if isinstance(vm_profile, dict) else None
+    nic_configs = network_profile.get('networkInterfaceConfigurations') if isinstance(network_profile, dict) else None
+    if not isinstance(nic_configs, list):
+        return vmss
+    for nic_config in nic_configs:
+        ip_configs = nic_config.get('ipConfigurations') if isinstance(nic_config, dict) else None
+        if not isinstance(ip_configs, list):
+            continue
+        for ip_config in ip_configs:
+            if isinstance(ip_config, dict):
+                for collection in _VMSS_IP_CONFIG_OPTIONAL_COLLECTIONS:
+                    ip_config.setdefault(collection, None)
+    return vmss
+
+
+class VMSSShowForUpdate(VMSSShow):
+    """Show a VMSS with optional IP-config collections initialized for generic update."""
+
+    def _output(self, *args, **kwargs):
+        result = super()._output(*args, **kwargs)
+        return _normalize_vmss_generic_update_collections(result)
+
+
 class VMSSPatch(_VMSSPatch):
 
     def _output(self, *args, **kwargs):

@@ -20,6 +20,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from .._transformers import transform_response_with_bytearray
 from ..util import get_datetime_from_string
+from ..storage_url_helpers import same_url_origin as _same_url_origin
 
 logger = get_logger(__name__)
 
@@ -442,6 +443,23 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
     raise ValueError('Fail to find source. Neither blob container nor file share is specified')
 
 
+def _get_blob_download_path(destination, normalized_blob_name, blob_name):
+    """Build the local path for a blob, ensuring it cannot escape the destination directory."""
+    # Blob names are arbitrary server-controlled strings (e.g. '../../.ssh/authorized_keys', or 'C:/x' on Windows).
+    # Only accept names that normalize to a plain relative path (no drive, root or leading '.'/'..'); joining such a
+    # path onto the destination cannot leave it, without relying on case-insensitive path comparisons (Windows
+    # directories can be case-sensitive). Existing symlinks/junctions under the destination are followed on purpose,
+    # preserving user-created layouts.
+    relative_path = os.path.normpath(normalized_blob_name)
+    first_component = relative_path.split(os.path.sep)[0]
+    if os.path.splitdrive(relative_path)[0] or first_component in ('', os.path.curdir, os.path.pardir):
+        raise FileOperationError('Blob "{}" cannot be downloaded because its name resolves to a path outside the '
+                                 'destination directory "{}". Use the `--pattern` parameter to exclude it, or use '
+                                 'the `storage blob download` command to download it to an explicit file path.'
+                                 .format(blob_name, destination))
+    return os.path.join(destination, relative_path)
+
+
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
                                 progress_callback=None, overwrite=False, **kwargs):
@@ -455,11 +473,13 @@ def storage_blob_download_batch(client, source, destination, source_container_na
     for blob_name in source_blobs:
         # remove starting path seperator and normalize
         normalized_blob_name = normalize_blob_file_path(None, blob_name)
+        # validate every blob before downloading any of them, so a malicious name fails the batch up front
+        destination_path = _get_blob_download_path(destination, normalized_blob_name, blob_name)
         if normalized_blob_name in blobs_to_download:
             raise CLIError('Multiple blobs with download path: `{}`. As a solution, use the `--pattern` parameter '
                            'to select for a subset of blobs to download OR utilize the `storage blob download` '
                            'command instead to download individual blobs.'.format(normalized_blob_name))
-        blobs_to_download[normalized_blob_name] = blob_name
+        blobs_to_download[normalized_blob_name] = (blob_name, destination_path)
 
     if dryrun:
         logger.warning('download action: from %s to %s', source, destination)
@@ -477,13 +497,12 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 
     results = []
     for index, blob_normed in enumerate(blobs_to_download):
+        blob_name, destination_path = blobs_to_download[blob_normed]
         # add blob name and number to progress message
         if progress_callback:
             progress_callback.message = '{}/{}: "{}"'.format(
-                index + 1, len(blobs_to_download), blobs_to_download[blob_normed])
-        blob_client = client.get_blob_client(container=source_container_name,
-                                             blob=blobs_to_download[blob_normed])
-        destination_path = os.path.join(destination, os.path.normpath(blob_normed))
+                index + 1, len(blobs_to_download), blob_name)
+        blob_client = client.get_blob_client(container=source_container_name, blob=blob_name)
         destination_folder = os.path.dirname(destination_path)
         # Failed when there is same name for file and folder
         if os.path.isfile(destination_path) and os.path.exists(destination_folder) and not overwrite:
@@ -1085,14 +1104,24 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
     return reader.readall().decode("utf-8")
 
 
+def _account_names_match(first_client, second_client):
+    first_account = first_client.account_name
+    second_account = second_client.account_name
+    return bool(first_account and second_account and first_account.lower() == second_account.lower())
+
+
 def copy_blob(cmd, client, source_url, metadata=None, **kwargs):
     if not kwargs['requires_sync']:
         kwargs.pop('requires_sync')
     blob_type = kwargs.pop('destination_blob_type', None)
+    source_is_validated_same_account = kwargs.pop('source_is_validated_same_account', False)
     src_client = kwargs.pop('source_client', None)
     if src_client is None:
         src_client = client.from_blob_url(source_url)
-        if src_client.account_name == client.account_name:
+        source_matches_destination = _same_url_origin(source_url, client.url) and \
+            _account_names_match(src_client, client)
+        can_reuse_destination_credential = source_is_validated_same_account or source_matches_destination
+        if can_reuse_destination_credential:
             src_client = client.from_blob_url(source_url, credential=client.credential)
     StandardBlobTier = cmd.get_models('_models#StandardBlobTier')
     if blob_type is not None and blob_type != 'Detect':

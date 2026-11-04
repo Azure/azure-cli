@@ -10,7 +10,7 @@ import time
 import sys
 
 from azure.cli.core.azclierror import AzureResponseError, ResourceNotFoundError
-from azure.cli.core.util import send_raw_request
+from azure.cli.core.util import is_same_origin, send_raw_request
 from azure.cli.core.commands.client_factory import get_subscription_id
 from knack.log import get_logger
 
@@ -1055,7 +1055,18 @@ class ContainerAppsJobClient():
             cls.api_version)
 
         r = send_raw_request(cmd.cli_ctx, "GET", request_url)
-        return r.json()
+        response = r.json()
+        page = response
+        while page.get("nextLink"):
+            request_url = page["nextLink"]
+            if not is_same_origin(request_url, management_hostname):
+                raise AzureResponseError(
+                    "Invalid nextLink in job executions response: expected the active cloud's ARM endpoint.")
+            page = send_raw_request(cmd.cli_ctx, "GET", request_url).json()
+            response["value"].extend(page["value"])
+            response["nextLink"] = page.get("nextLink")
+
+        return response
 
     @classmethod
     def get_single_execution(cls, cmd, resource_group_name, name, job_execution_name):

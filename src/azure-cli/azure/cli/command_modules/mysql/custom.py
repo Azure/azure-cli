@@ -17,7 +17,7 @@ from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resou
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.mysql.random.generate import generate_username
-from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation, run_cmd
+from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.mysqlflexibleservers import models
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, InvalidArgumentValueError, ValidationError
@@ -26,9 +26,9 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers, \
     cf_mysql_firewall_rules, get_mysql_flexible_management_client_by_sub
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
-    replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
+    _get_list_from_paged_response, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
     fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
-    ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH
+    ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH, run_cmd
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, mysql_accelerated_logs_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
@@ -47,7 +47,9 @@ def flexible_server_advanced_threat_protection_update(cmd, client, resource_grou
     Updates an advanced threat protection setting. Custom update function to apply parameters to instance.
     '''
     parameters = {
-        'state': state
+        'properties': {
+            'state': state
+        }
     }
     return client.begin_update(resource_group_name, server_name, models.AdvancedThreatProtectionName.DEFAULT.value, parameters)
 
@@ -240,7 +242,11 @@ def github_actions_run(action_name, branch):
 
 
 def gitcli_check_and_login():
-    output = run_cmd(["gh"], capture_output=True)
+    try:
+        output = run_cmd(["gh"], capture_output=True)
+    except FileNotFoundError as ex:
+        # A gh.exe in the project folder does not count as an installed GitHub CLI.
+        raise ClientRequestError('Please install "Github CLI" to run this command.') from ex
     if output.returncode:
         raise ClientRequestError('Please install "Github CLI" to run this command.')
 
@@ -360,9 +366,6 @@ def flexible_server_create(cmd, client,
     # Process parameters
     server_name = server_name.lower()
 
-    # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
-    if tier == 'BusinessCritical':
-        tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
                               server_name=server_name,
                               location=location,
@@ -567,9 +570,6 @@ def flexible_server_import_create(cmd, client,
     # Process parameters
     server_name = server_name.lower()
 
-    # MySQL changed MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
-    if tier == 'BusinessCritical':
-        tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
                               data_source_type=data_source_type,
                               mode=mode,
@@ -1016,9 +1016,6 @@ def flexible_server_update_custom_func(cmd, client, instance, sku_name=None, tie
         cf_availability_without_location=cf_mysql_check_resource_availability_without_location,
         logging_name='MySQL', command_group='mysql', server_client=client, location=instance.location)
 
-    # MySQL chnged MemoryOptimized tier to BusinessCritical (only in client tool not in list-skus return)
-    if tier == 'BusinessCritical':
-        tier = 'MemoryOptimized'
     mysql_arguments_validator(db_context,
                               location=location,
                               tier=tier,
@@ -1467,8 +1464,7 @@ def flexible_server_mysql_get(cmd, resource_group_name, server_name):
 
 
 def flexible_list_skus(cmd, client, location):
-    result = client.list(location)
-    result = replace_memory_optimized_tier(result)
+    result = _get_list_from_paged_response(client.list(location))
     logger.warning('For prices please refer to https://aka.ms/mysql-pricing')
     return result
 

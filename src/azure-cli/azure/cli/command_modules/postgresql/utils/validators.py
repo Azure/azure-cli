@@ -28,9 +28,7 @@ from .._client_factory import cf_postgres_check_resource_availability, cf_postgr
 from .._config_reader import get_cloud_cluster
 from ._flexible_server_location_capabilities_util import (
     get_performance_tiers,
-    get_performance_tiers_for_storage,
-    get_postgres_location_capability_info,
-    get_postgres_server_capability_info)
+    get_performance_tiers_for_storage)
 from ._flexible_server_util import (
     _is_resource_name,
     get_id_components,
@@ -154,7 +152,8 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 
 
 # pylint: disable=too-many-locals
-def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
+def pg_arguments_validator(db_context, list_location_capability_info,
+                           tier, sku_name, storage_gb, server_name=None, database_name=None,
                            zone=None, standby_availability_zone=None,
                            zonal_resiliency=None, allow_same_zone=False, subnet=None,
                            public_access=None, version=None, instance=None, geo_redundant_backup=None,
@@ -166,16 +165,6 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
     validate_database_name(database_name)
-    is_create = not instance
-    if is_create:
-        list_location_capability_info = get_postgres_location_capability_info(
-            db_context.cmd,
-            location)
-    else:
-        list_location_capability_info = get_postgres_server_capability_info(
-            db_context.cmd,
-            resource_group=parse_resource_id(instance.id)["resource_group"],
-            server_name=instance.name)
     sku_info = list_location_capability_info['sku_info']
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
@@ -784,15 +773,12 @@ def validate_vnet_location(vnet, location):
         raise ValidationError('The virtual network must be in the same location as the server.')
 
 
-def validate_postgres_replica(cmd, tier, location, instance, sku_name,
-                              storage_gb, performance_tier=None, list_location_capability_info=None):
+def validate_postgres_replica(tier, instance, sku_name, storage_gb,
+                              list_location_capability_info, performance_tier=None):
     # Tier validation
     if tier == 'Burstable':
         raise ValidationError('Read replica is not supported for the Burstable pricing tier. '
                               'Scale up the source server to General Purpose or Memory Optimized. ')
-
-    if not list_location_capability_info:
-        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
     sku_info = list_location_capability_info['sku_info']
     _pg_tier_validator(tier, sku_info)  # need to be validated first

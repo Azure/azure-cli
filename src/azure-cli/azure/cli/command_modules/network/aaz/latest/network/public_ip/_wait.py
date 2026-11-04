@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipaddresses/{}", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/publicipaddresses/{}", "2025-09-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Wait(AAZWaitCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2025-07-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -266,6 +266,9 @@ class _WaitHelper:
         properties = _schema_common_frontend_ip_configuration_read.properties
         properties.ddos_settings = AAZObjectType(
             serialized_name="ddosSettings",
+        )
+        properties.enable_connection_tracking = AAZBoolType(
+            serialized_name="enableConnectionTracking",
         )
         properties.gateway_load_balancer = AAZObjectType(
             serialized_name="gatewayLoadBalancer",
@@ -1623,6 +1626,10 @@ class _WaitHelper:
             serialized_name="servicePublicIPAddress",
         )
         cls._build_schema_common_public_ip_address_read(properties.service_public_ip_address)
+        properties.upgraded_to_v2 = AAZBoolType(
+            serialized_name="upgradedToV2",
+            flags={"read_only": True},
+        )
 
         ddos_settings = _schema_common_public_ip_address_read.properties.ddos_settings
         ddos_settings.ddos_custom_policy = AAZObjectType(
@@ -1653,6 +1660,9 @@ class _WaitHelper:
         ip_tags.Element = AAZObjectType()
 
         _element = _schema_common_public_ip_address_read.properties.ip_tags.Element
+        _element.first_party_service_tag_id = AAZStrType(
+            serialized_name="firstPartyServiceTagId",
+        )
         _element.ip_tag_type = AAZStrType(
             serialized_name="ipTagType",
         )

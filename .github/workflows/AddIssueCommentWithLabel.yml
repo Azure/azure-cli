@@ -12,12 +12,12 @@ jobs:
     name: Comment on issue
     steps:
       - name: Checkout comment message
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           sparse-checkout: |
             .github/template/non-security-comment.md
       - name: Comment on issue with no security label
-        uses: mshick/add-pr-comment@v2
+        uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2.8.2
         with:
            repo-token: ${{ secrets.GITHUB_TOKEN }}
            message-id: issueNoSecurityCommentBot

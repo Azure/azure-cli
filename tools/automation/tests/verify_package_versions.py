@@ -9,10 +9,9 @@ import argparse
 import subprocess
 
 from ..utilities.path import get_all_module_paths, get_repo_root
+from ..utilities.packaging import get_package_version
 from ..utilities.display import print_heading
 from ..utilities.pypi import is_available_on_pypi
-
-SETUP_PY_NAME = 'setup.py'
 
 
 def is_unreleased_version(mod_name, mod_version):
@@ -67,8 +66,7 @@ def version_in_base_repo(base_repo, mod_path, mod_name, mod_version):
 
 
 def _get_mod_version(mod_path):
-    return subprocess.check_output(['python', 'setup.py', '--version'], cwd=mod_path,
-                                   universal_newlines=True).strip()
+    return get_package_version(mod_path)
 
 
 def check_package_version(mod_name, mod_path, base_repo=None, base_tag=None):

@@ -12,24 +12,28 @@ runs:
       run: |
         echo start azdev env setup
     - name: Checkout CLI repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       with:
         fetch-depth: 0 # checkout all branches
         ref: ${{ github.event.pull_request.head.ref }}
         repository: ${{ github.event.pull_request.head.repo.full_name }}  # checkout pull request branch
     - name: Set up Python 3.12
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@3542bca2639a428e1796aaa6a2ffef0c0f575566 # v3.1.4
       with:
         python-version: "3.12"
     - name: Install azdev
       shell: bash
+      # Temporary immutable candidates; neither package needs a PyPI release.
+      env:
+        AZDEV_PACKAGE: 'azdev @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e'
+        DIFF_TOOL_PACKAGE: 'azure-cli-diff-tool @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e#subdirectory=azure-cli-diff-tool'
       run: | 
         python -m pip install --upgrade pip
         set -ev
         python -m venv env
         chmod +x env/bin/activate
         source ./env/bin/activate
-        pip install azdev
+        python -m pip install "$AZDEV_PACKAGE" "$DIFF_TOOL_PACKAGE"
         azdev --version
         cd ../
         azdev setup -c azure-cli --debug

@@ -5,6 +5,8 @@
 
 import os
 import platform
+import re
+import shutil
 import subprocess
 import datetime
 import stat
@@ -14,7 +16,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.api import get_config_dir
 from knack.log import get_logger
 from knack.util import CLIError
-from packaging.version import parse as parse_version
+from packaging.version import InvalidVersion, parse as parse_version
 
 logger = get_logger(__name__)
 
@@ -27,24 +29,22 @@ AZCOPY_VERSION = '10.13.0'
 class AzCopy:
     def __init__(self, creds=None):
         self.system = platform.system()
-        install_location = _get_default_install_location()
+        install_location = os.path.realpath(_get_default_install_location())
         self.executable = None
         if os.path.isfile(install_location):
             self.executable = install_location
             version = self.check_version()
-            if not version or parse_version(version) < parse_version(AZCOPY_VERSION):
+            if not _is_supported_version(version):
                 self.executable = None
         else:
-            try:
-                import re
-                args = ["azcopy", "--version"]
-                out_bytes = subprocess.check_output(args)
-                out_text = out_bytes.decode('utf-8')
-                version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
-                if version and parse_version(version) >= parse_version(AZCOPY_VERSION):
-                    self.executable = "azcopy"
-            except Exception:  # pylint: disable=broad-except
-                self.executable = None
+            executable_name = "azcopy.exe" if self.system == "Windows" else "azcopy"
+            system_executable = _resolve_system_executable(
+                executable_name, require_exact_name=self.system == "Windows")
+            if system_executable:
+                self.executable = system_executable
+                version = self.check_version()
+                if not _is_supported_version(version):
+                    self.executable = None
         self.creds = creds
         if not self.executable:
             logger.warning("Azcopy not found, installing at %s", install_location)
@@ -93,13 +93,12 @@ class AzCopy:
 
     def check_version(self):
         try:
-            import re
             args = [self.executable] + ["--version"]
             out_bytes = subprocess.check_output(args)
             out_text = out_bytes.decode('utf-8')
-            version = re.findall(r"azcopy version (.+?)\n", out_text)[0]
-            return version
-        except subprocess.CalledProcessError:
+            match = re.search(r"azcopy version (.+?)(?:\r?\n|$)", out_text)
+            return match.group(1) if match else ""
+        except (OSError, subprocess.CalledProcessError, UnicodeError):
             return ""
 
     def run_command(self, args):
@@ -130,6 +129,51 @@ class AzCopy:
         self.run_command(['sync', source, destination] + flags)
 
 
+def _resolve_system_executable(executable, require_exact_name=False):
+    resolved_path = shutil.which(executable)
+    if not resolved_path:
+        return None
+    if (require_exact_name and
+            os.path.normcase(os.path.basename(resolved_path)) != os.path.normcase(executable)):
+        logger.warning("Ignoring %s because PATH resolved it to an unexpected file type.", executable)
+        return None
+    if not os.path.isabs(resolved_path):
+        logger.warning("Ignoring %s because PATH resolved it to a relative path.", executable)
+        return None
+
+    try:
+        cwd = os.path.abspath(os.getcwd())
+        resolved_real_path = os.path.realpath(resolved_path)
+        resolved_dirs = (
+            os.path.dirname(resolved_path),
+            os.path.dirname(resolved_real_path),
+        )
+    except (OSError, ValueError):
+        logger.warning("Ignoring %s because its path could not be validated.", executable)
+        return None
+
+    for resolved_dir in resolved_dirs:
+        try:
+            is_cwd = os.path.samefile(resolved_dir, cwd)
+        except (OSError, ValueError):
+            is_cwd = (os.path.normcase(os.path.normpath(resolved_dir)) ==
+                      os.path.normcase(os.path.normpath(cwd)))
+        if is_cwd:
+            logger.warning("Ignoring %s found in the current working directory.", executable)
+            return None
+
+    return resolved_path
+
+
+def _is_supported_version(version):
+    if not version:
+        return False
+    try:
+        return parse_version(version) >= parse_version(AZCOPY_VERSION)
+    except InvalidVersion:
+        return False
+
+
 class AzCopyCredentials:  # pylint: disable=too-few-public-methods
     def __init__(self, sas_token=None, token_info=None, tenant_id=None):
         self.sas_token = sas_token
@@ -150,20 +194,24 @@ def login_auth_for_azcopy(cmd):
 
 
 def client_auth_for_azcopy(cmd, client):
-    # prefer oauth mode, if account-key is not provided
+    # prefer oauth mode, if account-key/sas-token is not provided
     is_oauth = True
     credential = client.credential
+    sas_indicators = ["sig=", "sv=", "sr=", "se=", "sp="]
     if credential:
         if isinstance(credential, dict) and "account_key" in credential:
             is_oauth = False
         elif hasattr(credential, "account_key"):
             is_oauth = False
         elif isinstance(credential, str):
-            sas_indicators = ["sig=", "sv=", "sr=", "se=", "sp="]
             for indicator in sas_indicators:
                 if indicator in credential:
                     is_oauth = False
                     break
+    elif getattr(client, "url", None):
+        query = urlparse(client.url).query
+        if any(indicator in query for indicator in sas_indicators):
+            is_oauth = False
 
     if is_oauth:
         raw_token = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)

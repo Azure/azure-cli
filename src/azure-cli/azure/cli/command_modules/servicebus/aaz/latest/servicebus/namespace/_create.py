@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.servicebus/namespaces/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -242,7 +242,7 @@ class Create(AAZCommand):
             help="A list of regions where replicas of the namespace are maintained.",
         )
         geo_data_replication.max_replication_lag_duration_in_seconds = AAZIntArg(
-            options=["max-replication-lag-duration-in-seconds", "--max-lag"],
+            options=["max-replication-lag-duration-in-seconds", "max-lag"],
             help="The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas.  When the lag exceeds the configured amount, operations on the primary replica will be failed. The allowed values are 0 and 5 minutes to 1 day.",
         )
 
@@ -389,7 +389,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }

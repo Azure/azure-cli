@@ -97,10 +97,12 @@ def validate_disk_encryption_set(cmd, namespace):
             f"Invalid --disk-encryption-set '{namespace.disk_encryption_set}', has to be a resource ID.")
 
     desid = parse_resource_id(namespace.disk_encryption_set)
-    compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE)
+    from azure.cli.command_modules.vm.aaz.latest.disk_encryption_set import Show
     try:
-        compute_client.disk_encryption_sets.get(resource_group_name=desid['resource_group'],
-                                                disk_encryption_set_name=desid['name'])
+        Show(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': desid['resource_group'],
+            'disk_encryption_set_name': desid['name']
+        })
     except HttpResponseError as err:
         raise InvalidArgumentValueError(
             f"Invalid --disk-encryption-set, error when getting '{namespace.disk_encryption_set}':"

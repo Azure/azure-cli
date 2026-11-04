@@ -37,6 +37,12 @@ def _extract_version(item_id):
     return item_id.split('/')[-1]
 
 
+def _get_vaults_list_client(cli_ctx):
+    # vaults.list() calls ARM's /resources API, which only accepts 2015-11-01. azure-mgmt-keyvault 14.1.0
+    # sends the client's api-version on next-link pages, so pin the client to 2015-11-01 for this call.
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT, api_version='2015-11-01').vaults
+
+
 def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     """
     Fetch resource group from vault name
@@ -48,7 +54,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     from azure.mgmt.core.tools import parse_resource_id
 
     if vault_name:
-        client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
+        client = _get_vaults_list_client(cli_ctx)
         for vault in client.list(filter=f"resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{vault_name}'"):
             id_comps = parse_resource_id(vault.id)
             if id_comps.get('name', None) and id_comps['name'].lower() == vault_name.lower():
@@ -131,14 +137,28 @@ def process_hsm_name(ns):
         ns.hsm_name = ns.identifier
 
 
+def _get_vault_name_options(ns):
+    """Get the option string of the vault name argument registered for the current command,
+    as it can be either --vault-name or --name/-n."""
+    default_options = '--vault-name'
+    cmd = getattr(ns, 'cmd', None)
+    arguments = getattr(cmd, 'arguments', None) or {}
+    argument = arguments.get('vault_name', None)
+    options_list = argument.options_list if argument else None
+    if not options_list:
+        return default_options
+    return '/'.join([str(option) for option in options_list])
+
+
 def validate_vault_name_and_hsm_name(ns):
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
+    vault_name_options = _get_vault_name_options(ns)
     if vault_name and hsm_name:
-        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
+        raise CLIError('{} and --hsm-name are mutually exclusive.'.format(vault_name_options))
 
     if not vault_name and not hsm_name:
-        raise CLIError('Please specify --vault-name or --hsm-name.')
+        raise CLIError('Please specify {} or --hsm-name.'.format(vault_name_options))
 
 # PARAMETER NAMESPACE VALIDATORS
 
@@ -217,7 +237,7 @@ def _fetch_default_release_policy(cli_ctx, vault_url, policy_type='cvm'):
         parsed_vault_url = vault_url.removeprefix('https://').split('.')
         if parsed_vault_url[1] == 'vault':
             vault_name_filter = f"resourceType eq 'Microsoft.KeyVault/vaults' and name eq '{parsed_vault_url[0]}'"
-            for vault in mgmt_client.vaults.list(filter=vault_name_filter):
+            for vault in _get_vaults_list_client(cli_ctx).list(filter=vault_name_filter):
                 location = vault.location
                 break
         elif parsed_vault_url[1] == 'managedhsm':
@@ -426,7 +446,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     hsm_name = getattr(ns, 'hsm_name', None)
 
     if not vault_name and not hsm_name:
-        raise CLIError('Please specify --vault-name or --hsm-name.')
+        raise CLIError('Please specify {} or --hsm-name.'.format(_get_vault_name_options(ns)))
 
     if vault_name:
         resource_name = vault_name

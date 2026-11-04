@@ -596,16 +596,33 @@ short-summary: Manage a function app's deployment configuration.
 helps['functionapp deployment config set'] = """
 type: command
 short-summary: Update an existing function app's deployment configuration.
+long-summary: >
+    Use --deployment-storage-* for a blob container, or --deployment-image and its authentication arguments for a
+    container image on Flex Consumption. Image deployment is separate from `az functionapp config container`. For an
+    existing image deployment, you can update the image or authentication separately. Use a new tag or digest when
+    deploying a newer image.
 examples:
   - name: Set the function app's deployment storage.
     text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-name MyStorageAccount --deployment-storage-container-name MyStorageContainer
   - name: Set the function app's deployment storage authentication method.
     text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value myAssignedId
+  - name: Run a public container image (Anonymous authentication).
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0 --deployment-image-auth-type Anonymous
+  - name: Pull a container image by digest with the app's system-assigned identity.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage@sha256:<digest> --deployment-image-auth-type SystemAssignedIdentity
+  - name: Pull the container image with a user-assigned identity.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type UserAssignedIdentity --deployment-image-identity /subscriptions/<subscription-id>/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+  - name: Pull the container image with a username and password stored in app settings (Basic authentication).
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type Basic --deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD
 """
 
 helps['functionapp deployment config show'] = """
 type: command
 short-summary: Get the details of a function app's deployment configuration.
+long-summary: >
+    For Registry deployment storage, shows the image reference and authentication type, with the user-assigned
+    identity resource ID or the names of the app settings that hold Basic credentials. Credential values aren't
+    retrieved or shown.
 examples:
   - name: Get the details of a function app's deployment configuration.
     text: az functionapp deployment config show --name MyFunctionApp --resource-group MyResourceGroup
@@ -624,6 +641,9 @@ short-summary: Manage a function app's runtime configuration.
 helps['functionapp runtime config set'] = """
 type: command
 short-summary: Update an existing function app's runtime configuration.
+long-summary: >
+    Registry deployment storage has no runtime. Use `az functionapp deployment config set` to update its container
+    image instead. This command updates the runtime for Flex apps using blob container deployment storage.
 examples:
   - name: Set the function app's runtime version.
     text: az functionapp runtime config set --name MyFunctionApp --resource-group MyResourceGroup --runtime-version 3.11
@@ -766,7 +786,9 @@ examples:
 helps['functionapp create'] = """
 type: command
 short-summary: Create a function app.
-long-summary: The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+long-summary: >
+    The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+    Flex Consumption apps created with --deployment-image use the Recreate site update strategy by default.
 examples:
   - name: Create a basic function app.
     text: >
@@ -780,6 +802,9 @@ examples:
   - name: Create a flex consumption function app. See https://aka.ms/flex-http-concurrency for more information on default http concurrency values.
     text: >
         az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --runtime java --instance-memory 2048
+  - name: Create a flex consumption function app from an Azure Container Registry image using a system-assigned identity.
+    text: >
+        az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type SystemAssignedIdentity --assign-identity [system] --role AcrPull --scope /subscriptions/<subscription-id>/resourceGroups/MyResourceGroup/providers/Microsoft.ContainerRegistry/registries/myregistry
 """
 
 helps['functionapp delete'] = """
@@ -2507,6 +2532,44 @@ examples:
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
 """
 
+helps['webapp troubleshoot config'] = """
+type: command
+short-summary: Validate configuration for a Linux web app and surface a recent runtime error.
+long-summary: >
+    Aggregates two data sources into a single report:
+
+    (1) Built-in configuration checks — a set of common
+    Linux App Service settings (linuxFxVersion, port binding, startup
+    command, alwaysOn, health check path, ...) evaluated against the
+    running site's configuration snapshot.
+
+    (2) The site runtime status error reported by App Service for the worker
+    represented by the configuration-check snapshot.
+    Use `--instance` with a worker machine name to retrieve that worker's
+    configuration checks. The instance ID returned by those checks is used
+    to select the matching runtime error. If the configuration snapshot is
+    unavailable, the machine name is resolved through ARM so an error from
+    another worker is not returned.
+    Runtime errors are surfaced only when they occurred within the last
+    15 minutes. Older errors are omitted from both structured output and
+    the `--report` view.
+    For a 24-hour lookback of runtime status and startup attempts, run
+    `az webapp troubleshoot status`.
+
+    By default the command returns a structured payload so the standard
+    `-o json/yaml/tsv/table` formatters handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
+examples:
+  - name: Run the built-in configuration checks and show a recent runtime error, if any (JSON by default)
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Target a deployment slot
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --slot staging
+  - name: Run checks and show a recent runtime error for a specific worker instance
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
+"""
+
 helps['webapp troubleshoot'] = """
 type: group
 short-summary: Diagnose common Linux web app problems.
@@ -3574,4 +3637,35 @@ helps['webapp deploy'] = """
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
     - name: Deploy a zip file with enriched error diagnostics on failure.
       text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
+    - name: Deploy a Python app and show a Secure Build summary and full-report link.
+      text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --show-secure-build
+"""
+
+helps['webapp secure-build'] = """
+    type: group
+    short-summary: Review open source vulnerabilities in a web app's packages.
+"""
+
+helps['webapp secure-build show'] = """
+    type: command
+    short-summary: Show the Secure Build report for the active deployment of a Linux web app.
+    long-summary: "The service uses a cached report when available. Use --rescan to request fresh dependency analysis, which can take several minutes. Output follows the Azure CLI output configuration and is JSON when no format is configured. Use --output table for a human-readable summary and up to 20 findings; when --query is supplied, standard query processing controls the resulting table shape. JSON output and the provided Kudu link contain the full report. Secure Build currently supports Python dependency information produced by supported platform builds."
+    examples:
+    - name: Show a human-readable Secure Build report for the active deployment.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --output table
+    - name: Show the complete Secure Build report as JSON.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --output json
+    - name: Run a fresh analysis for a deployment slot and show critical findings.
+      text: az webapp secure-build show --resource-group ResourceGroup --name AppName --slot staging --rescan --query "findings[?advisory.severity=='CRITICAL']" --output table
+"""
+
+helps['webapp troubleshoot deployment'] = """
+    type: command
+    short-summary: Show the latest deployment state and diagnostic information for a Linux web app.
+    long-summary: Returns a point-in-time snapshot from Kudu and enriches it with platform build and runtime status when available. The command supports Linux web apps and does not wait for deployment completion.
+    examples:
+    - name: Show the latest deployment status for a web app.
+      text: az webapp troubleshoot deployment --resource-group ResourceGroup --name AppName
+    - name: Show the latest deployment status for a deployment slot.
+      text: az webapp troubleshoot deployment --resource-group ResourceGroup --name AppName --slot staging
 """

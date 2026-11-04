@@ -17,6 +17,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
     CONST_DEFAULT_VMS_VM_SIZE,
     CONST_DEFAULT_WINDOWS_VMS_VM_SIZE,
+    CONST_GPU_DRIVER_INSTALL,
+    CONST_GPU_MANAGEMENT_MODE_MANAGED,
     CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
@@ -51,6 +53,7 @@ from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, sdk_no_wait, read_file_content
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 logger = get_logger(__name__)
 
@@ -1482,7 +1485,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
     # Mutable Fips now allows changes after create
     def get_enable_fips_image(self) -> bool:
-        """Obtain the value of enable_fips_image, default value is False.
+        """Obtain enable_fips_image, defaulting to False except for new Windows2025 pools.
         :return: bool
         """
 
@@ -1496,6 +1499,13 @@ class AKSAgentPoolContext(BaseAKSContext):
                 self.agentpool.enable_fips is not None
             ):
                 enable_fips_image = self.agentpool.enable_fips
+            elif self.get_os_sku() == CONST_OS_SKU_WINDOWS2025:
+                if self.get_disable_fips_image():
+                    raise ArgumentUsageError(
+                        '"--disable-fips-image" cannot be used with "--os-sku Windows2025", '
+                        "which requires a FIPS-enabled OS image."
+                    )
+                enable_fips_image = True
 
         # Verify both flags have not been set
         if enable_fips_image and self.get_disable_fips_image():
@@ -1872,6 +1882,16 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self._get_gpu_driver()
 
+    def get_enable_managed_gpu(self) -> Union[bool, None]:
+        """Obtain enable_managed_gpu, preserving the value on an attached create model."""
+        enable_managed_gpu = self.raw_param.get("enable_managed_gpu")
+        if self.decorator_mode == DecoratorMode.CREATE and self.agentpool:
+            gpu_profile = self.agentpool.gpu_profile
+            nvidia = getattr(gpu_profile, "nvidia", None)
+            if nvidia is not None and nvidia.management_mode is not None:
+                enable_managed_gpu = nvidia.management_mode == CONST_GPU_MANAGEMENT_MODE_MANAGED
+        return enable_managed_gpu
+
     def get_gateway_prefix_size(self) -> Union[int, None]:
         """Obtain the value of gateway_prefix_size.
 
@@ -1989,6 +2009,18 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return workload_runtime
+
+    def get_ssh_access(self) -> Union[str, None]:
+        """Obtain the value of ssh_access.
+        """
+        return self.raw_param.get("ssh_access")
+
+    def get_yes(self) -> bool:
+        """Obtain the value of yes.
+
+        :return: bool
+        """
+        return self.raw_param.get("yes")
 
 
 class AKSAgentPoolAddDecorator:
@@ -2328,6 +2360,20 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_ssh_access(self, agentpool: AgentPool) -> AgentPool:
+        """Set up the SSH access property for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        ssh_access = self.context.get_ssh_access()
+        if ssh_access is not None:
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.ssh_access = ssh_access
+        return agentpool
+
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -2376,11 +2422,16 @@ class AKSAgentPoolAddDecorator:
         self._ensure_agentpool(agentpool)
 
         gpu_driver = self.context.get_gpu_driver()
+        enable_managed_gpu = self.context.get_enable_managed_gpu()
 
-        # Construct AgentPoolGPUProfile if one of the fields has been set
-        if gpu_driver:
-            agentpool.gpu_profile = self.models.GPUProfile()
-            agentpool.gpu_profile.driver = gpu_driver
+        if gpu_driver or enable_managed_gpu:
+            if agentpool.gpu_profile is None:
+                agentpool.gpu_profile = self.models.GPUProfile()
+            agentpool.gpu_profile.driver = CONST_GPU_DRIVER_INSTALL if enable_managed_gpu else gpu_driver
+            if enable_managed_gpu:
+                if agentpool.gpu_profile.nvidia is None:
+                    agentpool.gpu_profile.nvidia = self.models.NvidiaGPUProfile()
+                agentpool.gpu_profile.nvidia.management_mode = CONST_GPU_MANAGEMENT_MODE_MANAGED
 
         return agentpool
 
@@ -2538,6 +2589,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_crg_id(agentpool)
         # set up agentpool security profile
         agentpool = self.set_up_agentpool_security_profile(agentpool)
+        # set up agentpool ssh access
+        agentpool = self.set_up_ssh_access(agentpool)
         # set up message of the day
         agentpool = self.set_up_motd(agentpool)
         # set up gpu profile
@@ -2951,6 +3004,32 @@ class AKSAgentPoolUpdateDecorator:
 
         return agentpool
 
+    def update_ssh_access(self, agentpool: AgentPool) -> AgentPool:
+        """Update the SSH access property for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        ssh_access = self.context.get_ssh_access()
+        if ssh_access is not None:
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            current_ssh_access = agentpool.security_profile.ssh_access
+            # already set to the same value, directly return
+            if current_ssh_access is not None and current_ssh_access.lower() == ssh_access.lower():
+                return agentpool
+
+            msg = (
+                f"You're going to update agentpool {agentpool.name} ssh access to '{ssh_access}'. "
+                "For Kubernetes versions below 1.37, this change takes effect after you upgrade the node pool. "
+                "For Kubernetes versions 1.37 and above, this change can trigger node pool reimaging. Proceed?"
+            )
+            if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+                raise DecoratorEarlyExitException()
+            agentpool.security_profile.ssh_access = ssh_access
+        return agentpool
+
     def update_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -3010,6 +3089,8 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_vtpm(agentpool)
         # update secure boot
         agentpool = self.update_secure_boot(agentpool)
+        # update ssh access
+        agentpool = self.update_ssh_access(agentpool)
         # update local DNS profile
         agentpool = self.update_localdns_profile(agentpool)
         # update gpu profile

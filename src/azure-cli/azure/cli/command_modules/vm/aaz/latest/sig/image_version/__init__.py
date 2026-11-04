@@ -14,6 +14,7 @@ from ._delete import *
 from ._list import *
 from ._list_community import *
 from ._list_shared import *
+from ._list_soft_deleted import *
 from ._show import *
 from ._show_community import *
 from ._show_shared import *

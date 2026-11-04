@@ -49,7 +49,7 @@ class SBTopicsCRUDScenarioTest(ScenarioTest):
 
         # Create Namespace
         self.cmd(
-            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku}',
+            'servicebus namespace create --resource-group {rg} --name {namespacename} --tags {tags} --sku {sku} --location eastus ',
             checks=[self.check('sku.name', '{sku}')])
 
         # Get Created Namespace

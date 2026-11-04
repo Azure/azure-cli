@@ -534,6 +534,14 @@ def _validate_pk_paths_in_cep(path, partition_key_path, policyFormatVersion, enc
 
 
 def validate_fleetspace_body(cmd, ns):
+    _validate_fleetspace_body(ns, is_create=False)
+
+
+def validate_fleetspace_create_body(cmd, ns):
+    _validate_fleetspace_body(ns, is_create=True)
+
+
+def _validate_fleetspace_body(ns, is_create):
     from azure.cli.core.util import get_file_json, shell_safe_json_parse
     import os
 
@@ -546,27 +554,32 @@ def validate_fleetspace_body(cmd, ns):
         if not isinstance(body, dict):
             raise InvalidArgumentValueError('Invalid fleetspace body. Must be a JSON object.')
 
-        props = body.get('properties', {})
+        props = body.get('properties')
         if not isinstance(props, dict):
             raise InvalidArgumentValueError('Missing or invalid "properties" field in fleetspace body.')
 
-        tp_config = props.get('throughputPoolConfiguration', {})
-        if not isinstance(tp_config, dict):
+        tp_config = props.get('throughputPoolConfiguration')
+        if is_create and (tp_config is None or tp_config == {}):
+            props.pop('throughputPoolConfiguration', None)
+        elif not isinstance(tp_config, dict) or not tp_config:
             raise InvalidArgumentValueError('Missing or invalid "throughputPoolConfiguration" in properties.')
+        else:
+            for field in ['minThroughput', 'maxThroughput']:
+                if field not in tp_config:
+                    raise InvalidArgumentValueError(f'Missing "{field}" in throughputPoolConfiguration.')
+                if not isinstance(tp_config[field], int) or isinstance(tp_config[field], bool) or tp_config[field] <= 0:
+                    raise InvalidArgumentValueError(f'"{field}" must be a positive integer.')
 
-        # Check for minThroughput and maxThroughput in throughputPoolConfiguration
-        for field in ['minThroughput', 'maxThroughput']:
-            if field not in tp_config:
-                raise InvalidArgumentValueError(f'Missing "{field}" in throughputPoolConfiguration.')
+            if tp_config['maxThroughput'] < tp_config['minThroughput']:
+                raise InvalidArgumentValueError('"maxThroughput" must be greater than or equal to "minThroughput".')
 
-        if not isinstance(tp_config['minThroughput'], int) or tp_config['minThroughput'] <= 0:
-            raise InvalidArgumentValueError('"minThroughput" must be a positive integer.')
-
-        if not isinstance(tp_config['maxThroughput'], int) or tp_config['maxThroughput'] <= 0:
-            raise InvalidArgumentValueError('"maxThroughput" must be a positive integer.')
-
-        # Check for serviceTier and dataRegions at base properties level
-        if 'serviceTier' in props:
+        if is_create:
+            if not isinstance(props.get('serviceTier'), str) or not props['serviceTier'].strip():
+                raise InvalidArgumentValueError('"serviceTier" must be a nonblank string for creation.')
+            regions = props.get('dataRegions')
+            if not isinstance(regions, list) or not regions or not all(isinstance(region, str) and region.strip() for region in regions):
+                raise InvalidArgumentValueError('"dataRegions" must be a nonempty list of nonblank strings for creation.')
+        elif 'serviceTier' in props:
             if not isinstance(props['serviceTier'], str):
                 raise InvalidArgumentValueError('"serviceTier" must be a string.')
 
@@ -575,6 +588,21 @@ def validate_fleetspace_body(cmd, ns):
                 raise InvalidArgumentValueError('"dataRegions" must be a list of strings.')
 
         ns.fleetspace_body = body
+
+
+def _parse_fleetspace_account_resource_id(resource_id):
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
+
+    if not isinstance(resource_id, str) or not is_valid_resource_id(resource_id):
+        raise InvalidArgumentValueError('"resourceId" must be a valid Cosmos DB database account ARM resource ID.')
+
+    parsed = parse_resource_id(resource_id)
+    if (not all(parsed.get(field, '').strip() for field in ['subscription', 'resource_group', 'namespace', 'type', 'name']) or
+            parsed['namespace'].lower() != 'microsoft.documentdb' or
+            parsed['type'].lower() != 'databaseaccounts' or
+            parsed.get('last_child_num')):
+        raise InvalidArgumentValueError('"resourceId" must identify a Microsoft.DocumentDB/databaseAccounts resource, not a child resource.')
+    return parsed
 
 
 def validate_fleetspaceAccount_body(cmd, ns):
@@ -598,11 +626,10 @@ def validate_fleetspaceAccount_body(cmd, ns):
         if not isinstance(gdp, dict):
             raise InvalidArgumentValueError('Missing or invalid "globalDatabaseAccountProperties".')
 
-        if "resourceId" not in gdp or not isinstance(gdp["resourceId"], str) or not gdp["resourceId"].startswith("/subscriptions/"):
-            raise InvalidArgumentValueError('"resourceId" must be a valid ARM resource ID string.')
+        _parse_fleetspace_account_resource_id(gdp.get('resourceId'))
 
-        if "armLocation" not in gdp or not isinstance(gdp["armLocation"], str):
-            raise InvalidArgumentValueError('"armLocation" must be a valid string.')
+        if not isinstance(gdp.get('armLocation'), str) or not gdp['armLocation'].strip():
+            raise InvalidArgumentValueError('"armLocation" must be a nonblank string.')
 
         ns.fleetspace_account_body = body
 

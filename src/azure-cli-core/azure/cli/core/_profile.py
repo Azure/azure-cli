@@ -162,9 +162,11 @@ class Profile:
         if not scopes:
             scopes = self._arm_scope
 
+        # Brokers don't use the loopback redirect, so a fixed redirect port requires the browser flow.
+        disable_broker = False if redirect_port is not None else None
         identity = _create_identity_instance(
             self.cli_ctx, self._authority, tenant_id=tenant,
-            enable_broker_on_windows=False if redirect_port is not None else None)
+            enable_broker_on_windows=disable_broker, enable_broker_on_mac=disable_broker)
 
         user_identity = None
         if interactive:
@@ -968,7 +970,8 @@ def _transform_subscription_for_multiapi(s, s_dict):
             s_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
 
 
-def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None, enable_broker_on_windows=None):
+def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None,
+                              enable_broker_on_windows=None, enable_broker_on_mac=None):
     """Lazily import and create Identity instance to avoid unnecessary imports."""
     from .auth.identity import Identity
     from .util import should_encrypt_token_cache
@@ -980,8 +983,11 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
     # On Windows, use core.enable_broker_on_windows=false to disable broker (WAM) for authentication.
     if enable_broker_on_windows is None:
         enable_broker_on_windows = cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
+    # On macOS, broker authentication is opt-in. Use core.enable_broker_on_mac=true to enable it.
+    if enable_broker_on_mac is None:
+        enable_broker_on_mac = cli_ctx.config.getboolean('core', 'enable_broker_on_mac', fallback=False)
     from .telemetry import set_broker_info
-    set_broker_info(enable_broker_on_windows)
+    set_broker_info(enable_broker_on_windows, enable_broker_on_mac)
 
     # PREVIEW: In Azure Stack environment, use core.instance_discovery=false to disable MSAL's instance discovery.
     instance_discovery = cli_ctx.config.getboolean('core', 'instance_discovery', True)
@@ -990,4 +996,5 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
                     encrypt=encrypt,
                     use_msal_http_cache=use_msal_http_cache,
                     enable_broker_on_windows=enable_broker_on_windows,
+                    enable_broker_on_mac=enable_broker_on_mac,
                     instance_discovery=instance_discovery)
