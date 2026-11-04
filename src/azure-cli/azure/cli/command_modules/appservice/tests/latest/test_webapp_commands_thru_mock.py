@@ -2,11 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import unittest
-from unittest import mock
+import io
 import os
 import sys
 import types
+import unittest
+from unittest import mock
 from collections.abc import Mapping
 
 from azure.core.exceptions import HttpResponseError
@@ -2044,6 +2045,39 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('requests.get')
+    def test_troubleshoot_status_preserves_orphan_startups_in_structured_output(
+            self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
+        send_raw_request_mock.side_effect = [
+            mock.MagicMock(json=mock.MagicMock(return_value=self._instances_payload({}))),
+            mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response([]))),
+        ]
+        requests_get_mock.return_value = self._make_response(200, json_data=[
+            {'InstanceId': 'previous-f', 'Startup': {
+                'Succeeded': 0, 'Failed': 1, 'MostRecentFailure': '2026-10-09T18:00:00Z'}},
+            {'InstanceId': 'previous-a', 'Startup': {
+                'Succeeded': 1, 'Failed': 0, 'MostRecentSuccess': '2026-10-09T12:00:00Z'}},
+            {'InstanceId': 'previous-e', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+            {'InstanceId': 'previous-b', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+            {'InstanceId': 'previous-d', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+            {'InstanceId': 'previous-c', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+        ])
+
+        result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
+
+        self.assertEqual(len(result['orphanStartups']), 6)
+        self.assertEqual(
+            [entry['InstanceId'] for entry in result['orphanStartups']],
+            ['previous-a', 'previous-b', 'previous-c', 'previous-d', 'previous-e', 'previous-f'])
+        self.assertEqual(
+            result['orphanStartups'][-1]['Startup']['MostRecentFailure'],
+            '2026-10-09T18:00:00Z')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('requests.get')
     def test_troubleshoot_status_single_instance(self, requests_get_mock, send_raw_request_mock,
                                                  _scm_url_mock, _headers_mock):
         arm_item = {'instanceId': '7c2d9', 'state': 'Stopped', 'action': 'SiteStopped',
@@ -2276,8 +2310,67 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         rendered_payload = render_mock.call_args.args[0]
         self.assertEqual(rendered_payload['name'], 'myApp')
         self.assertEqual(rendered_payload['instances'][0]['instanceId'], '7c2d9')
+        self.assertEqual(
+            rendered_payload['startupSummaryUrl'],
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary')
 
-    def test_transform_troubleshoot_status_output_renders_error_columns(self):
+    def test_troubleshoot_status_report_supports_legacy_windows_encodings(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'instances': [{
+                'instanceId': '7c2d9',
+                'machineName': 'lw0sdlwk0007AB',
+                'state': 'Failed',
+                'lastError': 'ContainerTimeout',
+                'startup': {'Succeeded': 1, 'Failed': 1},
+            }],
+            'orphanStartups': [{
+                'InstanceId': 'orphan',
+                'Startup': {'Succeeded': 0, 'Failed': 1},
+            }],
+        }
+
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                output = io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors='strict')
+                with mock.patch.object(report_module.sys, 'stdout', output):
+                    report_module.render_report(payload)
+                    output.flush()
+
+    def test_troubleshoot_status_report_limits_orphan_startups(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'startupSummaryUrl': 'https://myapp.scm.azurewebsites.net/api/startuplogs/summary',
+            'orphanStartups': [{
+                'InstanceId': 'orphan-{}'.format(index),
+                'Startup': {'Succeeded': 0, 'Failed': 1},
+            } for index in range(6)],
+        }
+        output = io.StringIO()
+
+        with mock.patch.object(report_module.sys, 'stdout', output):
+            report_module.render_report(payload)
+
+        rendered = output.getvalue()
+        for index in range(5):
+            self.assertIn('Instance orphan-{} Startup Summary'.format(index), rendered)
+        self.assertNotIn('Instance orphan-5 Startup Summary', rendered)
+        self.assertIn(
+            'Below startup records are from instances that no longer host the application '
+            'but occurred within the last 24 hours. Limited to 5 instances.',
+            rendered)
+        self.assertIn(
+            'To review the full 24-hour history, visit '
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary.',
+            rendered)
+
+    @mock.patch('atexit.register')
+    def test_transform_troubleshoot_status_output_renders_error_columns(self, register_mock):
         # Regression: the LastError* columns exercise _format_dt only when
         # any instance has a visible error. A missing import there surfaces
         # as knack's opaque "Table output unavailable" message.
@@ -2308,6 +2401,28 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertEqual(row['LastErrorDetails'], 'boom')
         self.assertEqual(row['Succeeded (last 24h)'], 1)
         self.assertEqual(row['Failed (last 24h)'], 2)
+
+        register_mock.assert_called_once()
+        hint_callback = register_mock.call_args.args[0]
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                buffer = io.BytesIO()
+                output = io.TextIOWrapper(buffer, encoding=encoding, errors='strict')
+                with mock.patch.object(sys, 'stderr', output):
+                    hint_callback()
+                    output.flush()
+                rendered = buffer.getvalue().decode(encoding)
+                self.assertIn('Hint:', rendered)
+                self.assertIn('az webapp log tail -n myApp -g myRG', rendered)
+                self.assertIn('az webapp log startup show -n myApp -g myRG', rendered)
+
+        register_mock.reset_mock()
+        transform_troubleshoot_status_output({
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'instances': [{'instanceId': 'healthy', 'state': 'Started'}],
+        })
+        register_mock.assert_not_called()
 
 
 class TestRuntimeFailedHintMocked(unittest.TestCase):
@@ -3197,6 +3312,34 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertIn('Instance:', printed_text)
         self.assertIn('f5105a099b', printed_text)
 
+    def test_report_supports_legacy_windows_encodings(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_config_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'configCheck': {
+                'Settings': [{
+                    'Setting': 'alwaysOn',
+                    'Value': 'false',
+                    'Details': 'Enable Always On.',
+                    'DetailsLevel': 'warning',
+                }],
+            },
+            'runtimeError': {
+                'instanceId': 'f5105a099b0b07252d1991ca4444a69293f25b3fe8f8d948a2a5d46c82d33e9c5',
+                'state': 'Failed',
+                'lastError': 'ContainerTimeout',
+            },
+        }
+
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                output = io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors='strict')
+                with mock.patch.object(report_module.sys, 'stdout', output):
+                    report_module.render_report(payload)
+                    output.flush()
+
     # ---- _extract_runtime_error ----
 
     def test_extract_runtime_error_picks_latest_timestamp(self):
@@ -3895,6 +4038,142 @@ class _TypespecContainerSettings(Mapping):
         return len(self._data)
 
 
+class TestStackRuntimeDotnetLinux(unittest.TestCase):
+
+    def test_dotnet_github_actions_template_selection(self):
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper, _get_workflow_template
+
+        for is_linux, platform in ((True, 'linux'), (False, 'windows')):
+            for runtime_name in ('dotnet|11', 'DOTNET|11.0', 'DOTNETCORE|11.0', 'DOTNETCORE|10.0'):
+                for normalize in (False, True):
+                    with self.subTest(is_linux=is_linux, runtime_name=runtime_name, normalize=normalize):
+                        runtime = (_StackRuntimeHelper.standardize_runtime_name(runtime_name)
+                                   if normalize else runtime_name)
+                        github = mock.Mock()
+
+                        result = _get_workflow_template(github, runtime, is_linux)
+
+                        github.get_repo.assert_called_once_with('Azure/actions-workflow-templates')
+                        github.get_repo.return_value.get_contents.assert_called_once_with(
+                            'AppService/{}/aspnet-core-webapp-on-azure.yml'.format(platform))
+                        self.assertIs(result, github.get_repo.return_value.get_contents.return_value)
+
+    @staticmethod
+    def _new_helper(runtime_name):
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
+        helper = _StackRuntimeHelper.__new__(_StackRuntimeHelper)
+        helper._include_eol = False
+        helper._stacks = [
+            helper.Runtime(
+                display_name=runtime_name,
+                configs={'linux_fx_version': runtime_name},
+                linux=True)
+        ]
+        return helper
+
+    def test_resolve_legacy_dotnet_11_with_canonical_catalog(self):
+        helper = self._new_helper('dotnet|11')
+
+        runtime = helper.resolve('DOTNETCORE|11.0', linux=True)
+
+        self.assertEqual(runtime.display_name, 'dotnet|11')
+        self.assertEqual(runtime.configs['linux_fx_version'], 'dotnet|11')
+
+    def test_standardize_dotnet_runtime_name(self):
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
+        test_cases = {
+            'DOTNETCORE|11.0': 'dotnet|11',
+            'dotnet|11': 'dotnet|11',
+            'DOTNET|11.0': 'dotnet|11',
+            'DOTNETCORE|12.0': 'dotnet|12',
+            'DOTNETCORE|10.0': 'DOTNETCORE|10.0',
+        }
+
+        for runtime_name, expected in test_cases.items():
+            with self.subTest(runtime_name=runtime_name):
+                self.assertEqual(
+                    _StackRuntimeHelper.standardize_dotnet_runtime_name(runtime_name),
+                    expected)
+
+    def test_standardize_runtime_name_selects_dotnet_standardizer(self):
+        from azure.cli.command_modules.appservice.custom import _StackRuntimeHelper
+
+        with mock.patch.object(
+                _StackRuntimeHelper,
+                'standardize_node_runtime_name',
+                wraps=_StackRuntimeHelper.standardize_node_runtime_name) as node_standardizer:
+            self.assertEqual(
+                _StackRuntimeHelper.standardize_runtime_name('DOTNETCORE|11.0'),
+                'dotnet|11')
+
+        node_standardizer.assert_not_called()
+
+    def test_resolve_canonical_dotnet_11_with_legacy_catalog(self):
+        helper = self._new_helper('DOTNETCORE|11.0')
+
+        runtime = helper.resolve('dotnet|11', linux=True)
+
+        self.assertEqual(runtime.display_name, 'DOTNETCORE|11.0')
+        self.assertEqual(runtime.configs['linux_fx_version'], 'DOTNETCORE|11.0')
+
+    def test_parse_legacy_dotnet_11_catalog_unchanged(self):
+        helper = self._new_helper('placeholder')
+        parsed_results = []
+        github_settings = types.SimpleNamespace(is_supported=True, supported_version='11.x')
+        settings = types.SimpleNamespace(
+            runtime_version='DOTNETCORE|11.0',
+            end_of_life_date=None,
+            git_hub_action_settings=github_settings)
+        minor_version = types.SimpleNamespace(
+            display_text='.NET 11 (STS)',
+            stack_settings=types.SimpleNamespace(linux_runtime_settings=settings))
+
+        with mock.patch.object(helper, '_get_valid_minor_versions', side_effect=[[], [minor_version]]):
+            helper._parse_major_version_linux(
+                types.SimpleNamespace(display_text='.NET 11'),
+                parsed_results,
+                set(),
+                runtime_family='.NET')
+
+        self.assertEqual(parsed_results[0].display_name, 'DOTNETCORE|11.0')
+        self.assertEqual(parsed_results[0].configs['linux_fx_version'], 'DOTNETCORE|11.0')
+        helper._stacks = parsed_results
+        self.assertEqual(
+            [row['config'] for row in helper.get_stacks_as_table()],
+            ['DOTNETCORE|11.0'])
+
+    def test_parse_windows_dotnet_catalog_unchanged(self):
+        for display_text, expected in (
+                ('.NET 11 (STS)', 'dotnet|11'),
+                ('.NET 11.0 (STS)', 'dotnet|11.0')):
+            with self.subTest(display_text=display_text):
+                helper = self._new_helper('placeholder')
+                parsed_results = []
+                settings = types.SimpleNamespace(
+                    runtime_version='v11.0',
+                    end_of_life_date=None,
+                    git_hub_action_settings=types.SimpleNamespace(
+                        is_supported=True, supported_version='11.x'))
+                minor_version = types.SimpleNamespace(
+                    display_text=display_text,
+                    stack_settings=types.SimpleNamespace(windows_runtime_settings=settings))
+
+                with mock.patch.object(helper, '_get_valid_minor_versions', side_effect=[[], [minor_version]]):
+                    helper._parse_major_version_windows(
+                        types.SimpleNamespace(display_text='.NET 11'),
+                        parsed_results,
+                        {'dotnet': 'net_framework_version', 'netcore': 'net_framework_version'},
+                        runtime_family='.NET')
+
+                helper._stacks = parsed_results
+                self.assertEqual(
+                    [row['config'] for row in helper.get_stacks_as_table()],
+                    [expected])
+                runtime = helper.resolve('dotnet|11')
+                self.assertEqual(runtime.display_name, expected)
+                self.assertEqual(runtime.configs['net_framework_version'], 'v11.0')
+
+
 class TestStackRuntimeNodeStandardization(unittest.TestCase):
     @staticmethod
     def _new_helper():
@@ -3962,6 +4241,15 @@ class TestStackRuntimeNodeStandardization(unittest.TestCase):
             'display_name': 'NODE|26',
             'github_actions_version': '26.x',
         })
+
+    def test_node_26_legacy_aliases_resolve_canonical_catalog(self):
+        helper = self._new_helper()
+        helper._parse_raw_stacks([self._node_stack('26', 'Node 26', 'NODE|26')])
+
+        for linux in (True, False):
+            for runtime_name in ('NODE|26', 'NODE|26-lts', 'NODE|26LTS'):
+                with self.subTest(linux=linux, runtime_name=runtime_name):
+                    self.assertEqual(helper.resolve(runtime_name, linux=linux).display_name, 'NODE|26')
 
     def test_older_node_identifiers_remain_unchanged(self):
         helper = self._new_helper()

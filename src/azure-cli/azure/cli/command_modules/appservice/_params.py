@@ -19,7 +19,8 @@ from azure.mgmt.web.models import (DatabaseType, ConnectionStringType, BuiltInAu
 
 from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
-                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES, ISOLATED_V4_SKUS)
+                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES, ISOLATED_V4_SKUS,
+                         EGRESS_PROTOCOLS, EGRESS_AUTH_TYPES, EGRESS_SOURCES, FLEX_REGISTRY_AUTH_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
@@ -928,6 +929,31 @@ subscription than the app service environment, please use the resource ID for --
                            scope))
             c.argument('setting_names', nargs='+', help="space-separated {} names".format(scope))
 
+    with self.argument_context('webapp config egress set') as c:
+        c.argument('enabled', arg_type=get_three_state_flag(), required=True,
+                   help='Enable virtual connections with true or disable them with false.')
+
+    with self.argument_context('webapp config egress connection') as c:
+        c.argument('connection_name', help='Name of the egress connection. Names are case-insensitive.')
+
+    with self.argument_context('webapp config egress connection remove') as c:
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true',
+                   help='Do not prompt for confirmation when removing the last connection.')
+
+    with self.argument_context('webapp config egress connection add') as c:
+        c.argument('protocol', arg_type=get_enum_type(EGRESS_PROTOCOLS), help='Backend protocol.')
+        c.argument('auth', arg_type=get_enum_type(EGRESS_AUTH_TYPES), help='Backend authentication strategy.')
+        c.argument('source', arg_type=get_enum_type(EGRESS_SOURCES),
+                   help='Source of the referenced settings. Defaults to AppSettings.')
+        c.argument('host_setting', help='Name of the setting containing the backend host, not the host value.')
+        c.argument('credential_setting', help='Name of the setting containing the credential, not the credential value.')
+        c.argument('username_setting', help='Name of the setting containing the username, not the username value.')
+        c.argument('value_setting', help='Name of the setting containing the complete connection string or URL.')
+        c.argument('identity_resource_id', help='Resource ID of a user-assigned identity already assigned to the app. By default, use the system-assigned identity.')
+        c.argument('identity_scope', help='Scope used to acquire a managed identity token for the backend connection.')
+        c.argument('credential_header', help='HTTP header used to inject a standalone credential, for example Authorization.')
+        c.argument('credential_format', help='HTTP credential header format, for example "Bearer {value}". Requires --credential-header.')
+
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'],
                    help='connection string type', arg_type=get_enum_type(ConnectionStringType))
@@ -1229,6 +1255,25 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
                    "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
                    "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.")
+
+    for scope in ['functionapp create', 'functionapp deployment config set']:
+        with self.argument_context(scope, arg_group='Flex Registry Deployment') as c:
+            c.argument('deployment_image', options_list=['--deployment-image'], is_preview=True,
+                       help="Container image for a Flex Consumption app, specified by tag or digest, e.g. "
+                       "`myregistry.azurecr.io/myimage:v1` or `myregistry.azurecr.io/myimage@sha256:<digest>`.")
+            c.argument('deployment_image_auth_type', options_list=['--deployment-image-auth-type', '--diat'],
+                       arg_type=get_enum_type(FLEX_REGISTRY_AUTH_TYPES), is_preview=True,
+                       help="How the platform authenticates to the registry: Anonymous (public image), SystemAssignedIdentity, UserAssignedIdentity (requires --deployment-image-identity), "
+                       "or Basic (requires --deployment-image-username-setting and --deployment-image-password-setting). The CLI doesn't assign identities or grant registry access.")
+            c.argument('deployment_image_identity',
+                       options_list=['--deployment-image-identity', '--dii'], is_preview=True,
+                       help="Resource ID of the user-assigned managed identity used to pull the image. Only valid with UserAssignedIdentity. Saved as provided; the CLI doesn't create, look up, or assign it.")
+            c.argument('deployment_image_username_setting',
+                       options_list=['--deployment-image-username-setting', '--dius'], is_preview=True,
+                       help="Name of the app setting that stores the registry username. Only valid with Basic.")
+            c.argument('deployment_image_password_setting',
+                       options_list=['--deployment-image-password-setting', '--dips'], is_preview=True,
+                       help="Name of the app setting that stores the registry password. Only valid with Basic. Pass the app setting name, not the password.")
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
