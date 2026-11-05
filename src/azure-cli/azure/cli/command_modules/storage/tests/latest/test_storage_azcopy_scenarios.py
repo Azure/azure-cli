@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import os
 import shutil
+import tempfile
 from datetime import datetime, timedelta
 from unittest import mock
 from azure.cli.testsdk import (
@@ -38,6 +39,58 @@ class StorageAzcopyEndpointTests(ScenarioTest):
             self.assertEqual(azcopy.return_value.copy.call_args[0],
                              ('./source', 'https://victim.blob.core.windows.net.attacker.example/c'))
             generate.assert_not_called()
+
+    def test_storage_copy_requires_trusted_credential_account(self):
+        with mock.patch('azure.cli.command_modules.storage.operations.azcopy.AzCopy') as azcopy, \
+                mock.patch('azure.cli.command_modules.storage.azcopy.util._generate_sas_token') as generate, \
+                mock.patch('azure.cli.command_modules.storage._validators.get_config_value',
+                           side_effect=lambda cmd, section, key, default: default):
+            for credential in ('--sas-token sig=secret', '--account-key a2V5',
+                               '--source-sas sig=secret', '--source-account-key a2V5'):
+                for destination in ('.', 'https://victim.blob.core.windows.net/c/b?sig=destination'):
+                    with self.subTest(credential=credential, destination=destination):
+                        with self.assertRaisesRegex(InvalidArgumentValueError, 'Provide a storage account name'):
+                            self.cmd(
+                                'storage copy -s https://attacker.blob.core.windows.net/c/b '
+                                '-d {} {}'.format(destination, credential))
+            azcopy.assert_not_called()
+            generate.assert_not_called()
+
+    def test_storage_copy_ambient_credentials_are_account_bound(self):
+        from knack.config import CLIConfig
+
+        with mock.patch('azure.cli.command_modules.storage.operations.azcopy.AzCopy') as azcopy, \
+                mock.patch('azure.cli.command_modules.storage.azcopy.util._generate_sas_token',
+                           return_value='sig=test-signature') as generate:
+            for origin in ('environment', 'config'):
+                for credential, value in (('sas_token', 'sig=ambient'), ('key', 'a2V5')):
+                    for destination in ('.', 'https://victim.blob.core.windows.net/c/b',
+                                        'https://victim.blob.core.windows.net/c/b?sig=destination'):
+                        with self.subTest(origin=origin, credential=credential, destination=destination):
+                            with tempfile.TemporaryDirectory() as config_dir:
+                                config = CLIConfig(config_dir=config_dir, config_env_var_prefix='AZURE')
+                                env = {'AZURE_STORAGE_AUTH_MODE': 'key'}
+                                if origin == 'environment':
+                                    env['AZURE_STORAGE_' + credential.upper()] = value
+                                else:
+                                    config.set_value('storage', credential, value)
+                                with mock.patch.object(self.cli_ctx, 'config', config), \
+                                        mock.patch.dict(os.environ, env, clear=True):
+                                    generate.reset_mock()
+                                    self.cmd(
+                                        'storage copy -s https://attacker.blob.core.windows.net/c/b '
+                                        '-d {} --account-name victim'.format(destination))
+                                expected = destination
+                                if destination.endswith('/b'):
+                                    expected += '?' + (value if credential == 'sas_token' else 'sig=test-signature')
+                                self.assertEqual(
+                                    azcopy.return_value.copy.call_args[0],
+                                    ('https://attacker.blob.core.windows.net/c/b', expected))
+                                if credential == 'key' and destination.endswith('/b'):
+                                    self.assertEqual(generate.call_count, 1)
+                                    self.assertEqual(generate.call_args[0][1:3], ('victim', value))
+                                else:
+                                    generate.assert_not_called()
 
 
 class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):

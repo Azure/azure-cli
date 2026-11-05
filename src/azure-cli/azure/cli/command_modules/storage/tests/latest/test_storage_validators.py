@@ -464,7 +464,7 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
         self.addCleanup(patcher.stop)
         config = mock.patch('azure.cli.command_modules.storage._validators.get_config_value',
                             side_effect=lambda cmd, section, key, default: default)
-        config.start()
+        self.get_config = config.start()
         self.addCleanup(config.stop)
 
     def _add_sas(self, url, **kwargs):
@@ -566,6 +566,184 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
         args.update(kwargs)
         return Namespace(**args)
 
+    def test_copy_requires_trusted_credential_account(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        url = 'https://attacker.blob.core.windows.net/c/b'
+        for side in ('source', 'destination'):
+            for credential, value in (('sas_token', 'sig=secret'), ('account_key', 'a2V5')):
+                for destination in ('.', 'https://victim.blob.core.windows.net/c/b?sig=destination'):
+                    with self.subTest(side=side, credential=credential, destination=destination):
+                        args = {side: url, credential: value}
+                        if side == 'source':
+                            args['destination'] = destination
+                        ns = self._copy_namespace(**args)
+                        with self.assertRaises(InvalidArgumentValueError) as error:
+                            validate_azcopy_credential(self.cmd, ns)
+                        self.assertNotIn(value, str(error.exception))
+                        self.assertEqual(getattr(ns, side), url)
+        self.generate.assert_not_called()
+
+    def test_copy_requires_trusted_source_credential_account(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        for credential, value in (('source_sas', 'sig=secret'), ('source_account_key', 'a2V5')):
+            with self.subTest(credential=credential):
+                ns = self._copy_namespace(
+                    source='https://attacker.blob.core.windows.net/c/b',
+                    account_name='victim', sas_token='sig=destination', **{credential: value})
+                with self.assertRaises(InvalidArgumentValueError):
+                    validate_azcopy_credential(self.cmd, ns)
+                self.assertNotIn('?', ns.source)
+        self.generate.assert_not_called()
+
+    def test_copy_does_not_reload_ambient_source_credentials(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        for credential, value in (('sas_token', 'sig=ambient'), ('key', 'a2V5')):
+            for destination in ('.', 'https://victim.blob.core.windows.net/c/b',
+                                'https://victim.blob.core.windows.net/c/b?sig=destination'):
+                with self.subTest(credential=credential, destination=destination):
+                    self.get_config.side_effect = lambda cmd, section, key, default: (
+                        value if key == credential else default)
+                    ns = self._copy_namespace(
+                        source='https://attacker.blob.core.windows.net/c/b',
+                        destination=destination, account_name='victim')
+                    self.generate.reset_mock()
+                    validate_azcopy_credential(self.cmd, ns)
+                    self.assertEqual(ns.source, 'https://attacker.blob.core.windows.net/c/b')
+                    self.assertEqual(ns.account_name, 'victim')
+                    if destination.endswith('/b'):
+                        self.assertEqual(ns.destination, destination + '?' + (
+                            value if credential == 'sas_token' else 'sig=test-signature'))
+                        if credential == 'key':
+                            self.generate.assert_called_once_with(
+                                self.cmd, 'victim', value, 'blob', resource_types='co', permissions='wac')
+                    else:
+                        self.assertEqual(ns.destination, destination)
+                        self.generate.assert_not_called()
+
+    def test_copy_reuses_credentials_only_for_trusted_source_endpoints(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        for account in ('victim', 'victim-secondary'):
+            for destination in ('.', 'https://victim.blob.core.windows.net/c/b?sig=destination'):
+                with self.subTest(account=account, destination=destination):
+                    url = 'https://{}.blob.core.windows.net/c/b'.format(account)
+                    ns = self._copy_namespace(
+                        source=url, destination=destination, account_name='victim', sas_token='sig=provided')
+                    validate_azcopy_credential(self.cmd, ns)
+                    self.assertEqual(ns.source, url + '?sig=provided')
+                    self.assertEqual(ns.destination, destination)
+                    self.assertEqual(ns.account_name, 'victim')
+        self.generate.assert_not_called()
+
+    def test_copy_preserves_separate_account_credentials(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        ns = self._copy_namespace(
+            source='https://sourceaccount.blob.core.windows.net/c/b',
+            destination='https://victim.blob.core.windows.net/c/b',
+            account_name='victim', sas_token='sig=destination',
+            source_account_name='sourceaccount', source_sas='sig=source')
+        validate_azcopy_credential(self.cmd, ns)
+        self.assertEqual(ns.source, 'https://sourceaccount.blob.core.windows.net/c/b?sig=source')
+        self.assertEqual(ns.destination, 'https://victim.blob.core.windows.net/c/b?sig=destination')
+        self.assertEqual(ns.account_name, 'victim')
+        self.assertEqual(ns.sas_token, 'sig=destination')
+        self.generate.assert_not_called()
+
+    def test_copy_reuses_credentials_for_explicit_same_source_account(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        for account in ('victim', 'victim-secondary'):
+            for credential, value in (('sas_token', 'sig=provided'), ('account_key', 'a2V5')):
+                with self.subTest(account=account, credential=credential):
+                    url = 'https://{}.blob.core.windows.net/c/b'.format(account)
+                    ns = self._copy_namespace(
+                        source=url, account_name='victim', source_account_name=account, **{credential: value})
+                    self.generate.reset_mock()
+                    validate_azcopy_credential(self.cmd, ns)
+                    self.assertEqual(ns.source, url + '?' + (
+                        value if credential == 'sas_token' else 'sig=test-signature'))
+                    if credential == 'account_key':
+                        self.generate.assert_called_once_with(
+                            self.cmd, 'victim', value, 'blob', resource_types='sco', permissions='rl')
+                    else:
+                        self.generate.assert_not_called()
+
+    def test_copy_reuses_trusted_connection_string_for_source(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        for connection in (
+                'AccountName=victim;AccountKey=a2V5;BlobEndpoint=https://configured.example.test',
+                'BlobEndpoint=https://configured.example.test;SharedAccessSignature=sig=provided'):
+            for host in ('configured.example.test', 'attacker.blob.core.windows.net'):
+                with self.subTest(connection=connection, host=host):
+                    url = 'https://{}/c/b'.format(host)
+                    ns = self._copy_namespace(source=url, connection_string=connection)
+                    self.generate.reset_mock()
+                    validate_azcopy_credential(self.cmd, ns)
+                    if host == 'configured.example.test':
+                        self.assertEqual(ns.source, url + '?' + (
+                            'sig=provided' if 'SharedAccessSignature' in connection else 'sig=test-signature'))
+                    else:
+                        self.assertEqual(ns.source, url)
+                        self.generate.assert_not_called()
+                    self.assertEqual(ns.connection_string, connection)
+
+    def test_copy_uses_configured_account_for_local_destination(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        settings = {'account': 'victim', 'sas_token': 'sig=provided'}
+        self.get_config.side_effect = lambda cmd, section, key, default: settings.get(key, default)
+        for account in ('victim', 'attacker'):
+            with self.subTest(account=account):
+                url = 'https://{}.blob.core.windows.net/c/b'.format(account)
+                ns = self._copy_namespace(source=url, destination='.')
+                validate_azcopy_credential(self.cmd, ns)
+                self.assertEqual(ns.source, url + '?sig=provided' if account == 'victim' else url)
+                self.assertEqual(ns.account_name, 'victim')
+        self.generate.assert_not_called()
+
+    def test_copy_login_does_not_attach_sas(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        ns = self._copy_namespace(
+            source='https://sourceaccount.blob.core.windows.net/c/b',
+            destination='https://victim.file.core.windows.net/share/file',
+            account_name='victim', auth_mode='login', _subscription=None)
+        token = mock.Mock()
+        with mock.patch('azure.cli.core._profile.Profile.get_login_credentials',
+                        return_value=(token, None, None)) as login:
+            validate_azcopy_credential(self.cmd, ns)
+        login.assert_called_once_with(subscription_id=None)
+        self.assertEqual(ns.source, 'https://sourceaccount.blob.core.windows.net/c/b')
+        self.assertEqual(ns.destination, 'https://victim.file.core.windows.net/share/file')
+        self.assertIs(ns.token_credential, token)
+        self.assertTrue(ns.enable_file_backup_request_intent)
+        self.generate.assert_not_called()
+
+    def test_copy_does_not_use_ambient_credentials_for_explicit_source_account(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        self.get_config.side_effect = lambda cmd, section, key, default: (
+            'sig=destination' if key == 'sas_token' else default)
+        ns = self._copy_namespace(
+            source='https://sourceaccount.blob.core.windows.net/c/b',
+            account_name='victim', source_account_name='sourceaccount')
+        with mock.patch('azure.cli.command_modules.storage._validators._query_account_key',
+                        return_value='c291cmNl') as query:
+            validate_azcopy_credential(self.cmd, ns)
+        query.assert_called_once_with(self.cli, 'sourceaccount')
+        self.generate.assert_called_once_with(
+            self.cmd, 'sourceaccount', 'c291cmNl', 'blob', resource_types='sco', permissions='rl')
+        self.assertEqual(ns.source, 'https://sourceaccount.blob.core.windows.net/c/b?sig=test-signature')
+
+    def test_copy_unsigned_public_storage_urls_remain_unsigned(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        ns = self._copy_namespace(
+            source='https://sourceaccount.blob.core.windows.net/c/b',
+            destination='https://destinationaccount.blob.core.windows.net/c/b')
+        with mock.patch('azure.cli.command_modules.storage._validators._query_account_key') as query:
+            validate_azcopy_credential(self.cmd, ns)
+        self.assertEqual(ns.source, 'https://sourceaccount.blob.core.windows.net/c/b')
+        self.assertEqual(ns.destination, 'https://destinationaccount.blob.core.windows.net/c/b')
+        query.assert_not_called()
+        self.generate.assert_not_called()
+
     def test_copy_wildcard_paths_with_spaces(self):
         from azure.cli.command_modules.storage._validators import validate_azcopy_credential
         for side in ('source', 'destination'):
@@ -601,11 +779,8 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
                     ns = self._copy_namespace(
                         **{side: url}, account_name='victim', account_key='a2V5', sas_token='sig=secret',
                         source_account_name='victim', source_account_key='a2V5', source_sas='sig=secret')
-                    with mock.patch(
-                            'azure.cli.command_modules.storage._validators.validate_client_parameters') as validate:
-                        validate_azcopy_credential(self.cmd, ns)
+                    validate_azcopy_credential(self.cmd, ns)
                     self.assertEqual(getattr(ns, side), url)
-                    validate.assert_not_called()
         self.generate.assert_not_called()
 
     def test_copy_normalized_account_origins(self):
@@ -616,7 +791,8 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
                         'https://victim.blob.core.windows.net\u3002/c'):
                 with self.subTest(side=side, url=url):
                     ns = self._copy_namespace(
-                        **{side: url}, account_key='a2V5', source_account_key='a2V5')
+                        **{side: url}, account_name='victim', account_key='a2V5',
+                        source_account_name='victim', source_account_key='a2V5')
                     validate_azcopy_credential(self.cmd, ns)
                     self.assertEqual(getattr(ns, side), url + '?sig=test-signature')
 
