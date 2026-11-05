@@ -8,6 +8,7 @@ Keep CLI naming and behavior here so regenerating aaz/latest does not discard th
 """
 
 from azure.cli.core.aaz import AAZCommandGroup, register_command, register_command_group
+from knack.help_files import helps
 
 from .aaz.latest.web.serverfarm import silo as plan_silo
 from .aaz.latest.web.serverfarm.silo.virtual_network_integration import Show as PlanVnetShow
@@ -238,7 +239,7 @@ def load_command_table(loader):
     generated_groups = (
         "web serverfarm silo", "web site silo", "web site managed-traffic-config", "web site last-known-good",
     )
-    for table in (loader.command_table, loader.command_group_table):
+    for table in (loader.command_table, loader.command_group_table, helps):
         for name in list(table):
             if name == "web site refresh-silo" or any(
                     name == group or name.startswith(group + " ") for group in generated_groups):
