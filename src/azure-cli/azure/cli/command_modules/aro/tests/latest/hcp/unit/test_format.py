@@ -10,7 +10,6 @@ from azure.cli.command_modules.aro.azext_aro_hcp._format import (
     _parse_semver,
     cluster_list_table_format,
     cluster_show_table_format,
-    get_versions_table_format,
     nodepool_list_table_format,
     nodepool_show_table_format,
 )
@@ -30,14 +29,6 @@ class FormatTest(unittest.TestCase):
         self.assertEqual("", _major_minor("invalid"))
         self.assertEqual("", _major_minor(None))
 
-    def test_version_table_format(self):
-        self.assertEqual(
-            [{"Name": "4.19.2", "ChannelGroup": "stable"}, {"Name": "", "ChannelGroup": ""}],
-            get_versions_table_format([
-                {"name": "4.19.2", "properties": {"channelGroup": "stable"}},
-                {},
-            ]),
-        )
 
     def test_cluster_table_formats(self):
         cluster = {

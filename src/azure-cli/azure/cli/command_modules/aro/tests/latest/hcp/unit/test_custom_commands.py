@@ -393,7 +393,7 @@ class ClusterUpdateTest(unittest.TestCase):
         }
         return AAZObject(schema, data=schema.process_data(data))
 
-    def test_pre_instance_update_replaces_supplied_category_and_rebuilds_top_level_identities(self):
+    def test_pre_instance_update_merges_supplied_category_and_rebuilds_top_level_identities(self):
         instance = self._instance()
         command = self._command(
             control_plane=[{"name": "new-control", "resource_id": "new-control-identity"}],
@@ -402,35 +402,76 @@ class ClusterUpdateTest(unittest.TestCase):
         command.pre_instance_update(instance)
 
         operator_identities = instance.properties.platform.operators_authentication.user_assigned_identities
-        self.assertEqual({"new-control": _identity_id("new-control-identity")},
-                         operator_identities.control_plane_operators)
+        self.assertEqual({
+            "existing-control": _identity_id("control"),
+            "new-control": _identity_id("new-control-identity"),
+        }, operator_identities.control_plane_operators)
         self.assertEqual({"existing-data": _identity_id("data")}, operator_identities.data_plane_operators)
         self.assertEqual(_identity_id("service"), operator_identities.service_managed_identity)
         self.assertEqual({
+            _identity_id("control"): {},
             _identity_id("new-control-identity"): {},
-            _identity_id("data"): {},
             _identity_id("service"): {},
         }, instance.identity.user_assigned_identities.to_serialized_data())
+
+    def test_pre_instance_update_removes_replaced_identity_from_put_content(self):
+        instance = self._instance()
+        operator_identities = instance.properties.platform.operators_authentication.user_assigned_identities
+        operator_identities.control_plane_operators = {
+            "cluster-api-azure": _identity_id("control"),
+            "other-operator": _identity_id("other-control"),
+        }
+        command = self._command(control_plane=[
+            {"name": "cluster-api-azure", "resource_id": "replacement-control"},
+        ])
+        command.ctx.vars = types.SimpleNamespace(instance=instance)
+
+        command.pre_instance_update(instance)
+        command.InstanceUpdateByJson(ctx=command.ctx)()
+        content = command.HcpOpenShiftClustersCreateOrUpdate(ctx=command.ctx).content
+
+        operators = content["properties"]["platform"]["operatorsAuthentication"]["userAssignedIdentities"]
+        self.assertEqual({
+            "cluster-api-azure": _identity_id("replacement-control"),
+            "other-operator": _identity_id("other-control"),
+        }, operators["controlPlaneOperators"])
+        self.assertNotIn(_identity_id("control"), operators["controlPlaneOperators"].values())
+        self.assertEqual({
+            _identity_id("replacement-control"): {},
+            _identity_id("other-control"): {},
+            _identity_id("service"): {},
+        }, content["identity"]["userAssignedIdentities"])
+        self.assertNotIn(_identity_id("control"), content["identity"]["userAssignedIdentities"])
 
     def test_pre_instance_update_resolves_all_identity_names_from_subnet(self):
         instance = self._instance()
         command = self._command(
-            control_plane=[{"name": "new-control", "resource_id": "control-two"}],
-            data_plane=[{"name": "new-data", "resource_id": "data-two"}],
+            control_plane=[
+                {"name": "existing-control", "resource_id": "control-two"},
+                {"name": "new-control", "resource_id": "control-three"},
+            ],
+            data_plane=[
+                {"name": "existing-data", "resource_id": "data-two"},
+                {"name": "new-data", "resource_id": "data-three"},
+            ],
             service="service-two",
         )
 
         command.pre_instance_update(instance)
 
         operator_identities = instance.properties.platform.operators_authentication.user_assigned_identities
-        self.assertEqual({"new-control": _identity_id("control-two")},
-                         operator_identities.control_plane_operators)
-        self.assertEqual({"new-data": _identity_id("data-two")},
-                         operator_identities.data_plane_operators)
+        self.assertEqual({
+            "existing-control": _identity_id("control-two"),
+            "new-control": _identity_id("control-three"),
+        }, operator_identities.control_plane_operators)
+        self.assertEqual({
+            "existing-data": _identity_id("data-two"),
+            "new-data": _identity_id("data-three"),
+        }, operator_identities.data_plane_operators)
         self.assertEqual(_identity_id("service-two"), operator_identities.service_managed_identity)
         self.assertEqual({
             _identity_id("control-two"): {},
-            _identity_id("data-two"): {},
+            _identity_id("control-three"): {},
             _identity_id("service-two"): {},
         }, instance.identity.user_assigned_identities.to_serialized_data())
 
@@ -502,12 +543,11 @@ class ClusterUpdateTest(unittest.TestCase):
                     if field is None:
                         platform["containerRegistry"]["managedIdentity"] = _identity_id("replacement")
                     else:
-                        operators[field] = (
-                            {"replacement": _identity_id("replacement")}
-                            if flag in ("control_plane", "data_plane") else _identity_id("replacement")
-                        )
+                        if flag in ("control_plane", "data_plane"):
+                            operators[field]["replacement"] = _identity_id("replacement")
+                        else:
+                            operators[field] = _identity_id("replacement")
                         assigned_ids = set(operators["controlPlaneOperators"].values())
-                        assigned_ids.update(operators["dataPlaneOperators"].values())
                         assigned_ids.add(operators["serviceManagedIdentity"])
                         expected["identity"]["userAssignedIdentities"] = {
                             identity_id: {} for identity_id in assigned_ids

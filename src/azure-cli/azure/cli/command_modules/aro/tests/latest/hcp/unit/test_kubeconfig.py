@@ -157,6 +157,7 @@ class MergeKubernetesConfigurationsTest(unittest.TestCase):
             if os.name != "nt":
                 self.assertEqual(0o600, stat.S_IMODE(os.stat(existing_path).st_mode))
 
+    @unittest.skipIf(os.name == "nt", "Symlink test not applicable on Windows")
     def test_refuses_to_replace_symlink(self):
         with tempfile.TemporaryDirectory() as directory:
             target_path = os.path.join(directory, "target")

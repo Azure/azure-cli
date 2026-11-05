@@ -22,10 +22,6 @@ def _major_minor(version_str):
     return ''
 
 
-def get_versions_table_format(results):
-    return [_version_row(r) for r in results]
-
-
 def _version_row(result):
     props = result.get('properties', {})
     return collections.OrderedDict(

@@ -343,7 +343,7 @@ class ClusterUpdate(_ClusterUpdate):
             "Assign user-assigned identities to control plane operators. "
             "Usage: --assign-control-plane-operator-identity OPERATOR_NAME IDENTITY. "
             "IDENTITY is a resource ID or the name of an identity in the cluster subnet's resource group. "
-            "Repeat the argument to assign more identities.",
+            "Repeat the argument to assign more identities. Existing operators not specified are preserved.",
             required=False,
         )
         args_schema.assign_data_plane_operator_identity = _build_operator_identity_arg(
@@ -351,7 +351,7 @@ class ClusterUpdate(_ClusterUpdate):
             "Assign user-assigned identities to data plane operators. "
             "Usage: --assign-data-plane-operator-identity OPERATOR_NAME IDENTITY. "
             "IDENTITY is a resource ID or the name of an identity in the cluster subnet's resource group. "
-            "Repeat the argument to assign more identities.",
+            "Repeat the argument to assign more identities. Existing operators not specified are preserved.",
             required=False,
         )
         args_schema.assign_service_managed_identity = AAZStrArg(
@@ -399,19 +399,21 @@ class ClusterUpdate(_ClusterUpdate):
         operator_identities = platform.operators_authentication.user_assigned_identities
 
         if has_value(control_plane_arg):
-            control_plane = _operator_identities(
+            control_plane = operator_identities.control_plane_operators.to_serialized_data()
+            control_plane.update(_operator_identities(
                 control_plane_arg,
                 "--assign-control-plane-operator-identity",
                 subnet_id,
-            )
+            ))
             operator_identities.control_plane_operators = control_plane
 
         if has_value(data_plane_arg):
-            data_plane = _operator_identities(
+            data_plane = operator_identities.data_plane_operators.to_serialized_data()
+            data_plane.update(_operator_identities(
                 data_plane_arg,
                 "--assign-data-plane-operator-identity",
                 subnet_id,
-            )
+            ))
             operator_identities.data_plane_operators = data_plane
 
         if has_value(service_arg):
@@ -422,7 +424,6 @@ class ClusterUpdate(_ClusterUpdate):
             operator_identities.service_managed_identity = service
 
         assigned_resource_ids = set(operator_identities.control_plane_operators.to_serialized_data().values())
-        assigned_resource_ids.update(operator_identities.data_plane_operators.to_serialized_data().values())
         assigned_resource_ids.add(operator_identities.service_managed_identity.to_serialized_data())
         instance.identity.user_assigned_identities = {
             resource_id: {} for resource_id in assigned_resource_ids
@@ -503,6 +504,7 @@ class RequestCredential(_RequestCredential):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.name._id_part = None  # pylint: disable=protected-access
         args_schema.no_wait = AAZBoolArg(default=False, registered=False)
         args_schema.certificate_signing_request = AAZStrArg(
             options=["--certificate-signing-request"],
