@@ -48,7 +48,7 @@ DISALLOWED_USER_NAMES = [
 
 # AME Storage Account URL for version checking and VM image aliases (Network Isolation)
 # Files are stored as:
-#   - https://azcliprod.blob.core.windows.net/cli/{package}/setup.py (CLI versions)
+#   - https://azcliprod.blob.core.windows.net/cli/{package}/pyproject.toml (CLI versions)
 #   - https://azcliprod.blob.core.windows.net/cli/vm/aliases.json (VM image aliases)
 AME_STORAGE_BASE_URL = "https://azcliprod.blob.core.windows.net/cli"
 
@@ -295,29 +295,26 @@ def get_latest_version_from_ame_storage(package_path='azure-cli'):
     """Get the latest version from AME Storage Account.
 
     This replaces get_latest_from_github() due to network isolation requirements.
-    The setup.py files are uploaded to AME Storage Account during release pipeline.
+    The pyproject.toml files are uploaded to AME Storage Account during release pipeline,
+    with the legacy setup.py files as a fallback.
 
     Args:
         package_path: Package name, e.g., 'azure-cli', 'azure-cli-core', 'azure-cli-telemetry', 'azure-cli-testsdk'
     """
-    try:
-        import requests
-        storage_url = "{}/{}/setup.py".format(AME_STORAGE_BASE_URL, package_path)
-
-        response = requests.get(storage_url, timeout=10)
-        if response.status_code != 200:
-            logger.info("Failed to fetch the latest version from '%s' with status code '%s' and reason '%s'",
-                        storage_url, response.status_code, response.reason)
-            return None
-        for line in response.iter_lines():
-            txt = line.decode('utf-8', errors='ignore')
-            if txt.startswith('VERSION'):
-                match = re.search(r'VERSION = \"(.*)\"$', txt)
-                if match:
-                    return match.group(1)
-    except Exception as ex:  # pylint: disable=broad-except
-        logger.info("Failed to get the latest version from '%s'. %s", storage_url, str(ex))
-        return None
+    import requests
+    for file_name, key in (('pyproject.toml', 'version'), ('setup.py', 'VERSION')):
+        storage_url = "{}/{}/{}".format(AME_STORAGE_BASE_URL, package_path, file_name)
+        try:
+            response = requests.get(storage_url, timeout=10)
+            if response.status_code != 200:
+                logger.info("Failed to fetch '%s' with status code '%s'", storage_url, response.status_code)
+                continue
+            match = re.search(r'^{}\s*=\s*"(.+)"'.format(key), response.text, re.MULTILINE)
+            if match:
+                return match.group(1)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.info("Failed to get the latest version from '%s'. %s", storage_url, str(ex))
+    return None
 
 
 def get_latest_from_github(package_path='azure-cli'):
