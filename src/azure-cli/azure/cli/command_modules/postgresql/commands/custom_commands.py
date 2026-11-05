@@ -78,6 +78,7 @@ def flexible_server_create(cmd, client,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
+                           immutable_backup=None,
                            storage_type=None, iops=None, throughput=None, cluster_size=None, database_name=None, yes=False):
 
     if not check_resource_group(resource_group_name):
@@ -164,7 +165,8 @@ def flexible_server_create(cmd, client,
     storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow, tier=performance_tier, type=storage_type, iops=iops, throughput=throughput)
 
     backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
-                                                      geo_redundant_backup=geo_redundant_backup)
+                                                      geo_redundant_backup=geo_redundant_backup,
+                                                      immutable_backup=immutable_backup)
 
     sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 

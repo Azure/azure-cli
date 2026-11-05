@@ -2409,9 +2409,9 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                             }
                         ],
                         "volumeMounts": [
-                            {"name": "azurejson", "mountPath": "/etc/kubernetes"},
-                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
-                            {"name": "sfcerts", "mountPath": "/etc/pki"},
+                            {"name": "azurejson", "mountPath": "/etc/kubernetes", "readOnly": True},
+                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs", "readOnly": True},
+                            {"name": "sfcerts", "mountPath": "/etc/pki", "readOnly": True},
                         ],
                     }
                 ],

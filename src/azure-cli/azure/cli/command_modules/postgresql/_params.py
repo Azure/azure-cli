@@ -18,7 +18,7 @@ from azure.cli.command_modules.postgresql.utils._util import get_autonomous_tuni
 from azure.cli.command_modules.postgresql.utils.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
     virtual_endpoint_name_validator, postgres_firewall_rule_name_validator, \
-    db_renaming_cluster_validator
+    db_renaming_cluster_validator, immutable_backup_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from .randomname.generate import generate_username
 
@@ -174,6 +174,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
             help='Enable or disable autogrow of the storage. Default value is Disabled.'
+        )
+
+        immutable_backup_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            options_list=['--immutable-backup'],
+            help='Enable or disable immutable backups at server creation. When enabled, backups cannot be changed '
+                 'or deleted during the retention period.',
+            validator=immutable_backup_validator
         )
 
         storage_type_arg_type = CLIArgumentType(
@@ -417,6 +425,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
             c.argument('version', arg_type=version_arg_type)
             c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
+            c.argument('immutable_backup', default=None, arg_type=immutable_backup_arg_type)
             c.argument('microsoft_entra_auth', default='Disabled', arg_type=microsoft_entra_auth_arg_type)
             c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique identifier of the Microsoft Entra administrator.')
             c.argument('admin_name', options_list=['--admin-display-name', '-m'], help='Display name of the Microsoft Entra administrator user or group.')
