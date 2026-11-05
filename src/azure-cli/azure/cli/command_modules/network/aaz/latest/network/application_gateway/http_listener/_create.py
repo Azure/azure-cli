@@ -87,7 +87,7 @@ class Create(AAZCommand):
         _args_schema.frontend_port = AAZStrArg(
             options=["--frontend-port"],
             arg_group="Gateway",
-            help="Name or ID of the frontend port.",
+            help="This is NOT for the port number. Please input the Resource Name or ID of the frontend port, which can be found using 'az network application-gateway frontend-port list'.",
         )
         _args_schema.ssl_cert = AAZStrArg(
             options=["--ssl-cert"],
