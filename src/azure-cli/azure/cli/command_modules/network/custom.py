@@ -2751,6 +2751,9 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint:
         record_data = record_set.get(_type_to_property_name(record_type)[0])
 
         if not record_data:
+            if record_type == 'txt':
+                # Empty TXT recordsets have no resource record to export.
+                continue
             record_data = []
         if not isinstance(record_data, list):
             record_data = [record_data]
