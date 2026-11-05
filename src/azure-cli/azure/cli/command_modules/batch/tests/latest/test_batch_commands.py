@@ -7,6 +7,7 @@ import os
 import unittest
 import datetime
 import isodate
+import tempfile
 from unittest import mock
 
 import importlib
@@ -17,6 +18,7 @@ from azure.core import MatchConditions
 from azure.batch import models, BatchClient
 from azure.core.credentials import AzureNamedKeyCredential
 
+from azure.cli.core.mock import DummyCli
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
 
@@ -143,7 +145,7 @@ class TestBatchValidators(unittest.TestCase):
         self.assertFalse(hasattr(ns, 'destination'))
 
         ns.destination = os.path.dirname(__file__)
-        ns.file_name = "/wd/stdout.txt"
+        ns.file_path = "wd/stdout.txt"
         _validators.validate_file_destination(ns)
         self.assertEqual(ns.destination, os.path.join(os.path.dirname(__file__), 'stdout.txt'))
 
@@ -158,6 +160,55 @@ class TestBatchValidators(unittest.TestCase):
         ns.destination = "X:\\test.txt"
         with self.assertRaises(ValueError):
             _validators.validate_file_destination(ns)
+
+
+class TestBatchFileDownloadCommand(unittest.TestCase):
+
+    commands = ['batch task file download --job-id job1 --task-id task1',
+                'batch node file download --pool-id pool1 --node-id node1']
+
+    @staticmethod
+    def _invoke(command, destination):
+        args = command.split() + [
+            '--file-path', 'wd/path/to/file.txt', '--destination', destination,
+            '--account-name', 'test1', '--account-key', 'ZmFrZV9hY29jdW50X2tleQ==',
+            '--account-endpoint', 'https://test1.westus.batch.azure.com']
+        response = mock.Mock(status_code=200, headers={})
+        response.iter_bytes.return_value = iter([b'file content'])
+        # Mock the HTTP pipeline, so the real arguments, validators and SDK operation run without a Batch account
+        with mock.patch('azure.core.pipeline.Pipeline.run', return_value=mock.Mock(http_response=response)) as run:
+            try:
+                exit_code = DummyCli().invoke(args)
+            except SystemExit as ex:  # argument validation errors exit with code 2
+                exit_code = ex.code
+        return exit_code, run
+
+    def test_batch_file_download_to_folder(self):
+        for command in self.commands:
+            with self.subTest(command=command), tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as folder:
+                exit_code, _ = self._invoke(command, folder)
+
+                self.assertEqual(exit_code, 0)
+                self.assertEqual(os.listdir(folder), ['file.txt'])
+                with open(os.path.join(folder, 'file.txt'), 'rb') as f:
+                    self.assertEqual(f.read(), b'file content')
+
+    def test_batch_file_download_to_file(self):
+        for command in self.commands:
+            with self.subTest(command=command), tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as folder:
+                destination = os.path.join(folder, 'output.txt')
+                exit_code, _ = self._invoke(command, destination)
+
+                self.assertEqual(exit_code, 0)
+                self.assertEqual(os.listdir(folder), ['output.txt'])
+                with open(destination, 'rb') as f:
+                    self.assertEqual(f.read(), b'file content')
+
+                # An existing file is not overwritten, and nothing is downloaded
+                exit_code, run = self._invoke(command, destination)
+
+                self.assertEqual(exit_code, 2)
+                run.assert_not_called()
 
 
 class TestBatchParser(unittest.TestCase):
