@@ -3296,6 +3296,24 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('policySettings.logScrubbing.state', 'Enabled')
                  ])
 
+    @ResourceGroupPreparer(name_prefix="cli_test_ag_waf_policy_managed_rules_")
+    def test_ag_waf_policy_managed_rules(self, resource_group):
+        self.kwargs.update({
+            "rg": resource_group,
+            "policy_name": self.create_random_name('waf', 7)
+        })
+
+        self.cmd(
+            "network application-gateway waf-policy create -g {rg} -n {policy_name} --managed-rules '{{managed-rule-sets:[{{rule-set-type:Microsoft_DefaultRuleSet,rule-set-version:2.1}},{{rule-set-type:Microsoft_BotManagerRuleSet,rule-set-version:1.1}}]}}'",
+            checks=[
+                self.check("name", "{policy_name}"),
+                self.check("managedRules.managedRuleSets[0].ruleSetType", "Microsoft_DefaultRuleSet"),
+                self.check("managedRules.managedRuleSets[0].ruleSetVersion", "2.1"),
+                self.check("managedRules.managedRuleSets[1].ruleSetType", "Microsoft_BotManagerRuleSet"),
+                self.check("managedRules.managedRuleSets[1].ruleSetVersion", "1.1"),
+            ]
+        )
+
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
     def test_network_app_gateway_waf_policy_managed_rules(self, resource_group):
         self.kwargs.update({
