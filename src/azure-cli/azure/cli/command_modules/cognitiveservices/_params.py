@@ -276,6 +276,38 @@ def load_arguments(self, _):
         )
 
     with self.argument_context(
+        "cognitiveservices account create", arg_group="Agent Hosting"
+    ) as c:
+        c.argument(
+            "agent_hosting_cluster",
+            is_preview=True,
+            help="ARM resource ID of the customer-owned AKS cluster. Run preflight, prepare missing Storage "
+                 "and managed identities, and create the account with agent hosting.",
+        )
+        c.argument(
+            "agent_hosting_storage",
+            is_preview=True,
+            help="ARM resource ID of existing Storage to validate and reuse. Create Storage when omitted. "
+                 "Requires --agent-hosting-cluster.",
+        )
+        c.argument(
+            "agent_hosting_management_identity",
+            options_list=["--agent-hosting-management-identity", "--agent-hosting-mi"],
+            is_preview=True,
+            help="ARM resource ID of the hosting-management user-assigned identity. "
+                 "Validate and reuse when supplied; create when omitted. Automatically assigned to the account. "
+                 "Requires --agent-hosting-cluster.",
+        )
+        c.argument(
+            "agent_hosting_workload_identity",
+            options_list=["--agent-hosting-workload-identity", "--agent-hosting-wi"],
+            is_preview=True,
+            help="ARM resource ID of the workload user-assigned identity. "
+                 "Validate and reuse when supplied; create when omitted. Not assigned to the account. "
+                 "Requires --agent-hosting-cluster.",
+        )
+
+    with self.argument_context(
         "cognitiveservices account update", arg_group="AI Services"
     ) as c:
         c.argument(
