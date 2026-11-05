@@ -6,7 +6,7 @@
 import io
 import json
 import unittest
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 from urllib.parse import parse_qs, urlsplit
@@ -111,7 +111,7 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
     def _invoke(self, arguments):
         cli = DummyCli()
         stdout, stderr = io.StringIO(), io.StringIO()
-        with redirect_stderr(stderr):
+        with redirect_stdout(stdout), redirect_stderr(stderr):
             try:
                 exit_code = cli.invoke(
                     ['mysql', 'flexible-server', 'rename'] + arguments, out_file=stdout)
@@ -272,6 +272,13 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
         self._rename()
         self.assertEqual(canonical_id, self.requests[-1][2]['properties']['sourceServerResourceId'])
 
+    def test_mysql_rename_cli_help_is_not_preview(self):
+        code, stdout, stderr = self._invoke(['--help'])
+        self.assertEqual(0, code, stderr)
+        self.assertIn('Submit a request to rename an existing MySQL flexible server.', stdout)
+        self.assertNotIn('preview', (stdout + stderr).lower())
+        self.assertFalse(self.requests)
+
     def test_mysql_rename_cli_default_and_no_wait_return_initial_response(self):
         for no_wait in (False, True):
             with self.subTest(no_wait=no_wait):
@@ -282,6 +289,7 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
                     args.append('--no-wait')
                 code, stdout, stderr = self._invoke(args)
                 self.assertEqual(0, code, stderr)
+                self.assertNotIn('preview', stderr.lower())
                 self.assertEqual({
                     'statusCode': 202,
                     'content': '',

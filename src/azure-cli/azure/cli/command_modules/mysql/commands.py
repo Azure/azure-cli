@@ -133,7 +133,7 @@ def load_command_table(self, _):
         g.custom_command('restart', 'flexible_server_restart')
         g.custom_command('detach-vnet', 'flexible_server_detach_vnet')
         # Register --no-wait explicitly so the command invoker does not discard the initial response.
-        g.custom_command('rename', 'flexible_server_rename', is_preview=True,
+        g.custom_command('rename', 'flexible_server_rename',
                          client_factory=cf_mysql_flexible_servers_rename,
                          confirmation='Renaming changes the server resource ID and endpoint. '
                                       'Update connection strings and resource references after completion. Continue?')
