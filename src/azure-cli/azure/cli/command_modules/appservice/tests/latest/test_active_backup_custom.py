@@ -296,6 +296,19 @@ class ActiveBackupCustomTests(unittest.TestCase):
         result = self.cli.result.result
         self.assertEqual(result['properties'], [{'subnetResourceId': SUBNET}])
 
+    def test_plan_vnet_list_requires_explicit_scope(self):
+        command = 'appservice plan silo vnet-integration list'
+        stdout, _ = self._invoke(command + ' --help')
+        self.assertNotIn('--ids', stdout)
+        for options in (
+                '-n Primary --silo Backup',
+                '-g MyRG --silo Backup',
+                '-g MyRG -n Primary',
+                '--ids ' + ROOT + '/serverfarms/Primary/silos/Backup'):
+            with self.subTest(options=options):
+                self._invoke(command + ' ' + options, expected_code=2)
+        self.assertFalse(self.requests)
+
     def test_managed_traffic_update_preserves_get_put(self):
         self.resource = {'properties': {'trafficMode': 'Active', 'endpoints': [{'region': 'eastus', 'weight': 700}]}}
         self._invoke('webapp managed-traffic update -g MyRG -n Primary --traffic-mode Passive')
@@ -309,6 +322,7 @@ class ActiveBackupCustomTests(unittest.TestCase):
         for custom, generated in (
                 (_active_backup.PlanSiloCreate, _active_backup.plan_silo.Create),
                 (_active_backup.PlanSiloUpdate, _active_backup.plan_silo.Update),
+                (_active_backup.PlanSiloVnetList, _active_backup.PlanVnetShow),
                 (_active_backup.WebappSiloCreate, _active_backup.site_silo.Create),
                 (_active_backup.WebappSiloVnetUpdate, _active_backup.site_vnet.Update)):
             with self.subTest(command=custom.AZ_NAME):
@@ -320,6 +334,9 @@ class ActiveBackupCustomTests(unittest.TestCase):
                 if custom.AZ_NAME.endswith('create'):
                     self.assertFalse(generated_schema.primary_location._required)  # pylint: disable=protected-access
                     self.assertTrue(custom_schema.primary_location._required)  # pylint: disable=protected-access
+                if custom is _active_backup.PlanSiloVnetList:
+                    self.assertIsNone(custom_schema.name._id_part)  # pylint: disable=protected-access
+                    self.assertEqual(generated_schema.name._id_part, 'name')  # pylint: disable=protected-access
         self.assertTrue(_active_backup.site_vnet.Update.AZ_SUPPORT_GENERIC_UPDATE)
         self.assertFalse(_active_backup.WebappSiloVnetUpdate.AZ_SUPPORT_GENERIC_UPDATE)
         patch_schema = _active_backup.WebappSiloVnetUpdate.get_arguments_schema()

@@ -88,6 +88,12 @@ class PlanSiloWait(_ActiveBackupArguments, plan_silo.Wait):
 class PlanSiloVnetList(_ActiveBackupArguments, PlanVnetShow):
     """Show the virtual network integrations of an App Service plan silo."""
 
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        schema = super()._build_arguments_schema(*args, **kwargs)
+        schema.name._id_part = None
+        return schema
+
 
 @register_command("webapp silo create", is_preview=True)
 class WebappSiloCreate(_ActiveBackupArguments, site_silo.Create):
