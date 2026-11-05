@@ -2460,7 +2460,7 @@ parameters:
     type: string
     short-summary: Resize the VMs of a VirtualMachineScaleSets node pool.
     long-summary: |
-        AKS replaces every node in the node pool with a node of the new size. It adds surge nodes of the new size, then cordons, drains and deletes the old nodes, following the node pool's upgrade settings (--max-surge, --max-unavailable, --drain-timeout, --node-soak-duration). The target size must be compatible with the current node pool configuration. Cannot be combined with --enable-cluster-autoscaler, --disable-cluster-autoscaler or --update-cluster-autoscaler. Not supported for VirtualMachines node pools; use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" to change their VM sizes.
+        AKS replaces every node in the node pool with a node of the new size. It adds surge nodes of the new size, then cordons, drains and deletes the old nodes, following the node pool's upgrade settings (--max-surge, --max-unavailable, --drain-timeout, --node-soak-duration). The target size must be compatible with the current node pool configuration. Can be combined with --update-cluster-autoscaler, or with --enable-cluster-autoscaler/--disable-cluster-autoscaler when they change the autoscaler state. Not supported for VirtualMachines node pools; use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" to change their VM sizes.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster

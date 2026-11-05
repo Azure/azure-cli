@@ -2025,9 +2025,7 @@ class AKSAgentPoolContext(BaseAKSContext):
     def get_node_vm_size_for_update(self) -> Union[str, None]:
         """Obtain and validate the value of node_vm_size for `az aks nodepool update`.
 
-        Resizing replaces every node in the node pool, so the option is validated up front: an empty value is
-        rejected, and it cannot be combined with cluster autoscaler changes, whose early exits (e.g. "already
-        enabled") would otherwise return before the resize is applied.
+        An explicit empty value is rejected instead of being treated as omitted.
 
         :return: string or None
         """
@@ -2036,23 +2034,39 @@ class AKSAgentPoolContext(BaseAKSContext):
             return None
         if not node_vm_size.strip():
             raise InvalidArgumentValueError("--node-vm-size cannot be empty.")
-        if (
-            self.raw_param.get("enable_cluster_autoscaler") or
-            self.raw_param.get("disable_cluster_autoscaler") or
-            self.raw_param.get("update_cluster_autoscaler")
-        ):
-            raise MutuallyExclusiveArgumentError(
-                "--node-vm-size cannot be used together with --enable-cluster-autoscaler, "
-                "--disable-cluster-autoscaler or --update-cluster-autoscaler. "
-                "Please resize the node pool and update the cluster autoscaler in separate commands."
-            )
-        if self.get_vm_set_type() == CONST_VIRTUAL_MACHINES:
-            raise InvalidArgumentValueError(
-                "--node-vm-size is not supported for VirtualMachines node pools. "
-                'Please use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" '
-                "to change the VM size of a VirtualMachines node pool."
-            )
         return node_vm_size
+
+    def validate_node_vm_size_with_autoscaler_for_update(self) -> None:
+        """Reject a resize combined with an autoscaler request that would exit early without updating.
+
+        Must be called with the fetched agentpool attached and before the autoscaler properties are updated, since
+        it compares the request with the node pool's current autoscaler state.
+
+        On a VirtualMachineScaleSets pool, --enable-cluster-autoscaler when the autoscaler is already enabled, or
+        --disable-cluster-autoscaler when it is already disabled, is a no-op that exits early, which would silently
+        drop --node-vm-size. Other combinations (e.g. resize with --update-cluster-autoscaler, or with an
+        enable/disable that changes the autoscaler state) are left untouched so existing callers, such as
+        aks-preview, keep working. VirtualMachines pools are handled by update_auto_scaler_properties_vms and
+        update_vm_size, which aks-preview overrides with its own VirtualMachines handling.
+        """
+        if self.get_node_vm_size_for_update() is None:
+            return
+        if self.agentpool is None or self.get_vm_set_type() != CONST_VIRTUAL_MACHINE_SCALE_SETS:
+            return
+        autoscaler_enabled = bool(self.agentpool.enable_auto_scaling)
+        if self.raw_param.get("enable_cluster_autoscaler") and autoscaler_enabled:
+            raise MutuallyExclusiveArgumentError(
+                "Cluster autoscaler is already enabled for this node pool, so --enable-cluster-autoscaler "
+                "would skip the update and --node-vm-size would not be applied. "
+                "Remove --enable-cluster-autoscaler, or use --update-cluster-autoscaler to change "
+                "min-count or max-count."
+            )
+        if self.raw_param.get("disable_cluster_autoscaler") and not autoscaler_enabled:
+            raise MutuallyExclusiveArgumentError(
+                "Cluster autoscaler is already disabled for this node pool, so --disable-cluster-autoscaler "
+                "would skip the update and --node-vm-size would not be applied. "
+                "Remove --disable-cluster-autoscaler."
+            )
 
 
 class AKSAgentPoolAddDecorator:
@@ -3069,8 +3083,8 @@ class AKSAgentPoolUpdateDecorator:
         drains and deletes the old nodes according to the node pool's upgrade settings.
 
         VirtualMachines node pools manage VM sizes through their scale profiles, so --node-vm-size is rejected
-        for them instead of being silently ignored. See AKSAgentPoolContext.get_node_vm_size_for_update for
-        the full validation.
+        for them instead of being silently ignored. Combinations with no-op autoscaler requests are rejected
+        earlier by AKSAgentPoolContext.validate_node_vm_size_with_autoscaler_for_update.
 
         :return: the AgentPool object
         """
@@ -3079,6 +3093,13 @@ class AKSAgentPoolUpdateDecorator:
         node_vm_size = self.context.get_node_vm_size_for_update()
         if node_vm_size is None:
             return agentpool
+
+        if self.context.get_vm_set_type() == CONST_VIRTUAL_MACHINES:
+            raise InvalidArgumentValueError(
+                "--node-vm-size is not supported for VirtualMachines node pools. "
+                'Please use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" '
+                "to change the VM size of a VirtualMachines node pool."
+            )
 
         # already set to the same value, directly return
         if agentpool.vm_size and agentpool.vm_size.lower() == node_vm_size.lower():
@@ -3132,8 +3153,9 @@ class AKSAgentPoolUpdateDecorator:
         """
         # fetch the Agentpool object
         agentpool = self.fetch_agentpool(agentpools)
-        # validate --node-vm-size before any step that may exit early (e.g. autoscaler already enabled)
-        self.context.get_node_vm_size_for_update()
+        # reject a resize combined with a no-op autoscaler request, before update_auto_scaler_properties changes the
+        # autoscaler state or exits early (e.g. autoscaler already enabled) and drops the resize
+        self.context.validate_node_vm_size_with_autoscaler_for_update()
         # update auto scaler properties
         agentpool = self.update_auto_scaler_properties(agentpool)
         # update auto scaler properties for vms pool
