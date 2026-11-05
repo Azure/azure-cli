@@ -18,6 +18,8 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Create an account-owned cost control.
 
+    Create an account-owned cost control. The definition may contain at most one notification, including disabled notifications, and one Block action. Exceeding either limit returns HTTP 400 without persisting the request.
+
     :example: Create or replace an account cost budget
         az cognitiveservices account costcontrol create --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --if-none-match * --grouping "[{name:agent,type:AdditionalInfoKey}]" --category Cost --amount 1000 --time-grain Monthly --time-period "{start-date:'2026-11-15T00:00:00Z',end-date:'2027-11-15T00:00:00Z'}" --filter "{and:[{additionalInfo:{name:project,operator:In,values:[production]}},{additionalInfo:{name:agent,operator:In,values:[customer-support,order-assistant]}},{additionalInfo:{name:deployment,operator:In,values:[customer-support-model]}}]}" --notifications "{usageAlert:{eventGridConnectionId:/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/foundry-resource-group/providers/Microsoft.CognitiveServices/accounts/foundry-account/connections/budget-alerts,thresholdType:Percentage,threshold:80,enabled:True,operator:GreaterThanOrEqualTo}}" --provider-properties "{actions:{stopRequests:{type:Block,thresholdType:Percentage,threshold:100,operator:GreaterThanOrEqualTo}}}"
     """
@@ -65,7 +67,7 @@ class Create(AAZCommand):
         )
         _args_schema.cost_control_name = AAZStrArg(
             options=["-n", "--name", "--cost-control-name"],
-            help="The cost-control name. New names contain 1-63 ASCII letters, numbers, underscores, or hyphens, including a leading underscore or hyphen. Existing dotted or 64-character names remain addressable but cannot be recreated.",
+            help="The cost-control name. Names contain 1-63 ASCII letters, numbers, underscores, or hyphens, including a leading underscore or hyphen.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^(?:[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}|[_-][a-zA-Z0-9_-]{0,62})$",
@@ -112,7 +114,7 @@ class Create(AAZCommand):
         _args_schema.notifications = AAZDictArg(
             options=["--notifications"],
             arg_group="Properties",
-            help="Alert notifications keyed by nonempty, case-insensitively unique names. Each notification supplies its own Event Grid connection. Notifications and provider actions together are limited to ten entries. Omission creates no notifications.",
+            help={"short-summary": "Alert notifications keyed by nonempty, case-insensitively unique names.", "long-summary": "Alert notifications keyed by nonempty, case-insensitively unique names. Each notification supplies its own Event Grid connection. May contain at most one notification, including disabled notifications. Omission on creation creates no notifications."},
         )
         _args_schema.provider = AAZStrArg(
             options=["--provider"],
@@ -196,7 +198,7 @@ class Create(AAZCommand):
         provider_properties = cls._args_schema.provider_properties
         provider_properties.actions = AAZDictArg(
             options=["actions"],
-            help="Blocking actions keyed by nonempty, case-insensitively unique names. Actions and notifications together are limited to ten entries.",
+            help={"short-summary": "Blocking actions keyed by nonempty, case-insensitively unique names.", "long-summary": "Blocking actions keyed by nonempty, case-insensitively unique names. May contain at most one Block action, independently of the notification limit. Omission on creation creates no blocking actions."},
         )
 
         actions = cls._args_schema.provider_properties.actions

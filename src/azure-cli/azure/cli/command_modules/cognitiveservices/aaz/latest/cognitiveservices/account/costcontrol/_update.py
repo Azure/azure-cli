@@ -18,7 +18,7 @@ from azure.cli.core.aaz import *
 class Update(AAZCommand):
     """Update an account-owned cost control.
 
-    Updates an account-owned cost control. Omitting properties preserves all existing cost control properties; setting properties to null or an empty object ({}) clears them all. A non-empty properties object updates selected fields, preserving omitted fields; an unchanged cost control retains its entity tag.
+    Omitting properties preserves all existing cost control properties; setting properties to null or an empty object ({}) clears them all. A non-empty properties object updates selected fields, preserving omitted fields; a successful update that leaves the cost control unchanged retains its entity tag. The complete merged result may contain at most one notification, including disabled notifications, and one Block action. Exceeding either limit returns HTTP 400 without changing the stored definition.
 
     :example: Create or replace an account cost budget
         az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --if-none-match * --grouping "[{name:agent,type:AdditionalInfoKey}]" --category Cost --amount 1000 --time-grain Monthly --time-period "{start-date:'2026-11-15T00:00:00Z',end-date:'2027-11-15T00:00:00Z'}" --filter "{and:[{additionalInfo:{name:project,operator:In,values:[production]}},{additionalInfo:{name:agent,operator:In,values:[customer-support,order-assistant]}},{additionalInfo:{name:deployment,operator:In,values:[customer-support-model]}}]}" --notifications "{usageAlert:{eventGridConnectionId:/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/foundry-resource-group/providers/Microsoft.CognitiveServices/accounts/foundry-account/connections/budget-alerts,thresholdType:Percentage,threshold:80,enabled:True,operator:GreaterThanOrEqualTo}}" --provider-properties "{actions:{stopRequests:{type:Block,thresholdType:Percentage,threshold:100,operator:GreaterThanOrEqualTo}}}"
@@ -70,7 +70,7 @@ class Update(AAZCommand):
         )
         _args_schema.cost_control_name = AAZStrArg(
             options=["-n", "--name", "--cost-control-name"],
-            help="The cost-control name. New names contain 1-63 ASCII letters, numbers, underscores, or hyphens, including a leading underscore or hyphen. Existing dotted or 64-character names remain addressable but cannot be recreated.",
+            help="The cost-control name. Names contain 1-63 ASCII letters, numbers, underscores, or hyphens, including a leading underscore or hyphen.",
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
@@ -120,7 +120,7 @@ class Update(AAZCommand):
         _args_schema.notifications = AAZDictArg(
             options=["--notifications"],
             arg_group="Properties",
-            help="Alert notifications keyed by nonempty, case-insensitively unique names. Each notification supplies its own Event Grid connection. Notifications and provider actions together are limited to ten entries. Omission creates no notifications.",
+            help={"short-summary": "Merges notifications by case-insensitive name, preserving existing name casing.", "long-summary": "Merges notifications by case-insensitive name, preserving existing name casing.  Null entries delete notifications; null clears the collection. Omission or an empty object preserves existing notifications. New entries must supply all required notification fields after merging. The complete merged result may contain at most one notification, including disabled notifications; otherwise the request returns HTTP 400."},
             nullable=True,
         )
         _args_schema.provider = AAZStrArg(
@@ -204,7 +204,7 @@ class Update(AAZCommand):
         provider_properties = cls._args_schema.provider_properties
         provider_properties.actions = AAZDictArg(
             options=["actions"],
-            help="Blocking actions keyed by nonempty, case-insensitively unique names. Actions and notifications together are limited to ten entries.",
+            help={"short-summary": "Merges actions by case-insensitive name, preserving existing name casing.", "long-summary": "Merges actions by case-insensitive name, preserving existing name casing. Null entries delete actions; null clears the collection. Omission or an empty object preserves existing actions. New entries must supply all required action fields after merging. The complete merged result may contain at most one Block action; otherwise the request returns HTTP 400."},
             nullable=True,
         )
 

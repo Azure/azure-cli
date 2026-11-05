@@ -63,7 +63,7 @@ class Delete(AAZCommand):
         )
         _args_schema.cost_control_name = AAZStrArg(
             options=["-n", "--name", "--cost-control-name"],
-            help="The cost-control name. New names contain 1-63 ASCII letters, numbers, underscores, or hyphens, including a leading underscore or hyphen. Existing dotted or 64-character names remain addressable but cannot be recreated.",
+            help="The cost-control name. Names contain 1-63 ASCII letters, numbers, underscores, or hyphens, including a leading underscore or hyphen.",
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(
