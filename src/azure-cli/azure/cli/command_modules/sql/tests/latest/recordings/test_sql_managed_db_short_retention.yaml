@@ -13,9 +13,9 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2026-08-01-preview
   response:
     body:
       string: '{"error": {"code": "ResourceNotFound", "message": "The Resource ''Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001''
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:56:39 GMT
+      - Wed, 28 Oct 2026 11:28:55 GMT
       expires:
       - '-1'
       pragma:
@@ -43,7 +43,7 @@ interactions:
       x-ms-failure-cause:
       - gateway
       x-msedge-ref:
-      - 'Ref A: 201B70B06E3B4DFB9664827C2F46AB24 Ref B: CWL211060613036 Ref C: 2026-10-13T13:56:39Z'
+      - 'Ref A: 5D0230AB30BA430DA6D8BF3F3EFF7B57 Ref B: PNQ231110909029 Ref C: 2026-10-28T11:28:54Z'
     status:
       code: 404
       message: Not Found
@@ -61,41 +61,39 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"identity": {"principalId": "7ca43a09-19a9-44b3-a6d3-7de03bcf3c84",
-        "type": "SystemAssigned", "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"},
-        "sku": {"name": "GP_Gen5", "tier": "GeneralPurpose", "family": "Gen5", "capacity":
-        8}, "properties": {"provisioningState": "Succeeded", "fullyQualifiedDomainName":
-        "strtestmi.dd0928f6836e.database.windows.net", "isGeneralPurposeV2": false,
-        "administratorLogin": "CloudSAd7a79d21", "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Network/virtualNetworks/vnet-brteammi-validation25/subnets/ManagedInstance",
+      string: '{"sku": {"name": "GP_Gen5", "tier": "GeneralPurpose", "family": "Gen5",
+        "capacity": 4}, "properties": {"provisioningState": "Succeeded", "fullyQualifiedDomainName":
+        "strtestmi.beb4e3cd83d8.database.windows.net", "isGeneralPurposeV2": false,
+        "administratorLogin": "admin123", "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance",
         "state": "Ready", "licenseType": "LicenseIncluded", "hybridSecondaryUsage":
-        "Active", "vCores": 8, "storageSizeInGB": 256, "collation": "SQL_Latin1_General_CP1_CI_AS",
-        "dnsZone": "dd0928f6836e", "publicDataEndpointEnabled": true, "proxyOverride":
+        "Active", "vCores": 4, "storageSizeInGB": 32, "collation": "Serbian_Cyrillic_100_CS_AS",
+        "dnsZone": "beb4e3cd83d8", "publicDataEndpointEnabled": true, "proxyOverride":
         "Proxy", "timezoneId": "UTC", "maintenanceConfigurationId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default",
         "privateEndpointConnections": [], "minimalTlsVersion": "1.2", "currentBackupStorageRedundancy":
         "Geo", "requestedBackupStorageRedundancy": "Geo", "zoneRedundant": false,
         "administrators": {"administratorType": "ActiveDirectory", "principalType":
-        "Application", "login": "BRTeamUAMI", "sid": "d1d89547-de28-469f-8e02-0705128e5c66",
+        "Application", "login": "strtestmi-admin", "sid": "139199e9-d1a3-44f4-8268-d89776302903",
         "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "azureADOnlyAuthentication":
-        true}, "virtualClusterId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/virtualClusters/VirtualClusterd7a284bb-2966-4824-b68f-5c861dfc2852",
+        true}, "virtualClusterId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/virtualClusters/VirtualClusterfaa7707c-99da-40c2-a911-8b6a7b07fc98",
         "externalGovernanceStatus": "Disabled", "pricingModel": "Regular", "createTime":
-        "2025-07-24T14:22:46.003Z", "authenticationMetadata": "AzureAD", "databaseFormat":
+        "2026-10-27T17:04:09.463Z", "authenticationMetadata": "AzureAD", "databaseFormat":
         "SQLServer2025", "requestedLogicalAvailabilityZone": "NoPreference"}, "location":
-        "westcentralus", "tags": {}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi",
+        "indiasouthcentral", "tags": {}, "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi",
         "name": "strtestmi", "type": "Microsoft.Sql/managedInstances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2138'
+      - '1979'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:56:43 GMT
+      - Wed, 28 Oct 2026 11:28:55 GMT
       expires:
       - '-1'
       pragma:
@@ -109,12 +107,12 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 459653DF2AFE4FECA67A8FAA290F73A5 Ref B: CWL211060613060 Ref C: 2026-10-13T13:56:40Z'
+      - 'Ref A: BB622E66E0D14898BD84D6FE86451036 Ref B: PNQ241100401031 Ref C: 2026-10-28T11:28:55Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westcentralus"}'
+    body: '{"location": "indiasouthcentral"}'
     headers:
       Accept:
       - application/json
@@ -125,33 +123,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '29'
+      - '33'
       Content-Type:
       - application/json
       ParameterSetName:
       - --subscription -g --mi -n
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation": "CreateManagedDatabase", "startTime": "2026-10-13T13:56:44.523Z"}'
+      string: '{"operation": "CreateManagedDatabase", "startTime": "2026-10-28T11:28:56.71Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/f7e2c103-8f26-4206-a16f-3b77bfef1770?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedDatabaseAzureAsyncOperation/5c6bf7d6-0ff1-454b-b9e7-e688dca87012?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
-      - '79'
+      - '78'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:56:44 GMT
+      - Wed, 28 Oct 2026 11:28:56 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/f7e2c103-8f26-4206-a16f-3b77bfef1770?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedDatabaseOperationResults/5c6bf7d6-0ff1-454b-b9e7-e688dca87012?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -161,13 +159,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/93df15bf-571a-45e3-ab23-921a794a3bf0
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/1054cfc4-a5de-4e47-b8ab-7cfd2750d638
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 70D1D86FC4654449BBD1E4631AC3719B Ref B: CWL211060413029 Ref C: 2026-10-13T13:56:44Z'
+      - 'Ref A: 5952508F22234C8FA4CB81CBEFA88508 Ref B: PNQ231110907031 Ref C: 2026-10-28T11:28:55Z'
     status:
       code: 202
       message: Accepted
@@ -185,62 +183,13 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/f7e2c103-8f26-4206-a16f-3b77bfef1770?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedDatabaseAzureAsyncOperation/5c6bf7d6-0ff1-454b-b9e7-e688dca87012?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"name": "f7e2c103-8f26-4206-a16f-3b77bfef1770", "status": "InProgress",
-        "startTime": "2026-10-13T13:56:44.523Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '113'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 13:56:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/b27bdcc0-bc34-427f-be4c-687068a60673
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: DD5E04CE68A34936950884E7CD2CEE6F Ref B: CWL211060413029 Ref C: 2026-10-13T13:56:44Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - sql midb create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription -g --mi -n
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/f7e2c103-8f26-4206-a16f-3b77bfef1770?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
-  response:
-    body:
-      string: '{"name": "f7e2c103-8f26-4206-a16f-3b77bfef1770", "status": "Succeeded",
-        "startTime": "2026-10-13T13:56:44.523Z"}'
+      string: '{"name": "5c6bf7d6-0ff1-454b-b9e7-e688dca87012", "status": "InProgress",
+        "startTime": "2026-10-28T11:28:56.71Z"}'
     headers:
       cache-control:
       - no-cache
@@ -249,7 +198,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:56:59 GMT
+      - Wed, 28 Oct 2026 11:28:56 GMT
       expires:
       - '-1'
       pragma:
@@ -261,11 +210,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/eb8128d9-5712-4a4d-8d46-6e315c49fe33
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/497b5fc0-c477-4840-8b2d-ebe6c7a68dba
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 2D4688731EF0488080386408708B28CB Ref B: CWL211060613062 Ref C: 2026-10-13T13:57:00Z'
+      - 'Ref A: 46F59616DE1E427F9E842B16BCE34EED Ref B: PNQ241100404042 Ref C: 2026-10-28T11:28:56Z'
     status:
       code: 200
       message: OK
@@ -283,24 +232,123 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedDatabaseAzureAsyncOperation/5c6bf7d6-0ff1-454b-b9e7-e688dca87012?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"name": "5c6bf7d6-0ff1-454b-b9e7-e688dca87012", "status": "InProgress",
+        "startTime": "2026-10-28T11:28:56.71Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '112'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2026 11:29:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/8a40ec5b-546f-4fa2-a8c1-a11df0fd7f7d
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: EA90E60A2CAB4A8B8F8B0D566ECDF3E8 Ref B: PNQ231110907040 Ref C: 2026-10-28T11:29:12Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql midb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g --mi -n
+      User-Agent:
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedDatabaseAzureAsyncOperation/5c6bf7d6-0ff1-454b-b9e7-e688dca87012?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "5c6bf7d6-0ff1-454b-b9e7-e688dca87012", "status": "Succeeded",
+        "startTime": "2026-10-28T11:28:56.71Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '111'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2026 11:29:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/a9c62825-8abc-4be1-a93a-b357b828b63c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: D47994AEF8EC4DC0B64977E6CDD1FE13 Ref B: PNQ241100406025 Ref C: 2026-10-28T11:29:27Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql midb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g --mi -n
+      User-Agent:
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:00 GMT
+      - Wed, 28 Oct 2026 11:29:28 GMT
       expires:
       - '-1'
       pragma:
@@ -314,7 +362,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 9C1FA9BA77D444A8862A4333D6FF50FA Ref B: CWL211060413036 Ref C: 2026-10-13T13:57:00Z'
+      - 'Ref A: C1AFE70E6A57418FB9B58DD317ED1813 Ref B: PNQ241100401042 Ref C: 2026-10-28T11:29:28Z'
     status:
       code: 200
       message: OK
@@ -329,12 +377,10 @@ interactions:
       - sql midb short-term-retention-policy show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json
       ParameterSetName:
       - --subscription -g --mi -n
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
@@ -350,7 +396,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:00 GMT
+      - Wed, 28 Oct 2026 11:29:29 GMT
       expires:
       - '-1'
       pragma:
@@ -362,11 +408,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/4d7ee0e9-e1cd-419c-a319-3cc45b55f142
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/85ce903e-a7fa-4943-9b61-f0afae0e5108
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: AA322FD1896E41DE96016CDAB8FA9CBA Ref B: CWL211060413054 Ref C: 2026-10-13T13:57:01Z'
+      - 'Ref A: 6FCF467D542344D88735FFF69C3F641D Ref B: PNQ241100401060 Ref C: 2026-10-28T11:29:30Z'
     status:
       code: 200
       message: OK
@@ -388,15 +434,15 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-13T13:57:02.22Z"}'
+      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-28T11:29:30.91Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyAzureAsyncOperation/74aecd89-e281-4528-af5b-a8be0ca16420?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/396ff925-6e33-4c55-8c31-bbc5b34e8e45?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
@@ -404,11 +450,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:01 GMT
+      - Wed, 28 Oct 2026 11:29:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyOperationResults/74aecd89-e281-4528-af5b-a8be0ca16420?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyOperationResults/396ff925-6e33-4c55-8c31-bbc5b34e8e45?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -418,13 +464,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/51567c69-cab6-482c-ba6c-7000c2dd37c7
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/7bf478d7-52cd-4ce4-982b-ced924959a39
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: E67113F68E3B401AA7B96E5A46C5D427 Ref B: CWL211060613062 Ref C: 2026-10-13T13:57:01Z'
+      - 'Ref A: C90C466DFC6B429FA3D9E8C5577DA5BC Ref B: PNQ241100405060 Ref C: 2026-10-28T11:29:30Z'
     status:
       code: 202
       message: Accepted
@@ -442,22 +488,22 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyAzureAsyncOperation/74aecd89-e281-4528-af5b-a8be0ca16420?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/396ff925-6e33-4c55-8c31-bbc5b34e8e45?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"name": "74aecd89-e281-4528-af5b-a8be0ca16420", "status": "Succeeded",
-        "startTime": "2026-10-13T13:57:02.22Z"}'
+      string: '{"name": "396ff925-6e33-4c55-8c31-bbc5b34e8e45", "status": "InProgress",
+        "startTime": "2026-10-28T11:29:30.91Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '111'
+      - '112'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:01 GMT
+      - Wed, 28 Oct 2026 11:29:30 GMT
       expires:
       - '-1'
       pragma:
@@ -469,11 +515,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/2b508eb9-0e08-4dd3-91e8-22a5e0d08934
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/36cfaf10-248b-4322-aa96-01ddf8a66c24
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: FF715CD781F54DF8B21144B64287CE06 Ref B: CWL211060413054 Ref C: 2026-10-13T13:57:02Z'
+      - 'Ref A: 4B490DCB112E4F24947E4FC8484B98A5 Ref B: PNQ241100403029 Ref C: 2026-10-28T11:29:31Z'
     status:
       code: 200
       message: OK
@@ -491,7 +537,56 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/396ff925-6e33-4c55-8c31-bbc5b34e8e45?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "396ff925-6e33-4c55-8c31-bbc5b34e8e45", "status": "Succeeded",
+        "startTime": "2026-10-28T11:29:30.91Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '111'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2026 11:29:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/7db3c5b0-e12f-4dc5-815a-65e3db691601
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: DDFEB8FBF32A49C58AE467E850DDABF9 Ref B: PNQ241100406042 Ref C: 2026-10-28T11:29:46Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql midb short-term-retention-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g --mi -n --retention-days
+      User-Agent:
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
@@ -507,7 +602,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:03 GMT
+      - Wed, 28 Oct 2026 11:29:46 GMT
       expires:
       - '-1'
       pragma:
@@ -519,11 +614,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/26ecd5fc-708b-4635-b01d-42a224d4f9ef
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/d97386e6-6807-43db-a1c3-343171a88eba
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 31BD8B2B8932418A99CC624AC6E7799F Ref B: CWL211060413042 Ref C: 2026-10-13T13:57:03Z'
+      - 'Ref A: FB9ABB7A0F8942F9BCFFDD8625E983F8 Ref B: PNQ241100404023 Ref C: 2026-10-28T11:29:46Z'
     status:
       code: 200
       message: OK
@@ -538,12 +633,10 @@ interactions:
       - sql midb short-term-retention-policy show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json
       ParameterSetName:
       - --subscription -g --mi -n
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
@@ -559,7 +652,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:03 GMT
+      - Wed, 28 Oct 2026 11:29:47 GMT
       expires:
       - '-1'
       pragma:
@@ -571,16 +664,16 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/7ff3b0f6-c0f8-42ca-b8ee-1c79cd332235
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/5fd55e0f-ba8f-4c06-939b-eb07bda884a1
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 30780DDB1ECB41E5A9C406E94B48FBA1 Ref B: CWL211060413062 Ref C: 2026-10-13T13:57:03Z'
+      - 'Ref A: 47ADAAD9DBF042EF8F14891F95678339 Ref B: PNQ241100403052 Ref C: 2026-10-28T11:29:47Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"retentionDays": 7, "lockImmutability": false}}'
+    body: '{"properties": {"lockImmutability": false, "retentionDays": 7}}'
     headers:
       Accept:
       - application/json
@@ -597,27 +690,27 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days --lock-immutability
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-13T13:57:04.677Z"}'
+      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-28T11:29:48.5Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyAzureAsyncOperation/ad1812df-cb96-4306-99b8-7caa97cc1c0c?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/9d7cfbb8-cccf-4ee6-bc7d-316bdd23b175?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
-      - '78'
+      - '76'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:04 GMT
+      - Wed, 28 Oct 2026 11:29:48 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyOperationResults/ad1812df-cb96-4306-99b8-7caa97cc1c0c?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyOperationResults/9d7cfbb8-cccf-4ee6-bc7d-316bdd23b175?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -627,13 +720,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/581a9d52-1395-489a-ad03-b9e27697a01f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/89a3627f-481e-49f9-8439-f440e66b4b4d
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: FA37364DC4094B94A640E73A67760373 Ref B: CWL211060613052 Ref C: 2026-10-13T13:57:04Z'
+      - 'Ref A: 6ED21675B79C4C8E880FF08A0729DD74 Ref B: PNQ241100403062 Ref C: 2026-10-28T11:29:48Z'
     status:
       code: 202
       message: Accepted
@@ -651,22 +744,22 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days --lock-immutability
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyAzureAsyncOperation/ad1812df-cb96-4306-99b8-7caa97cc1c0c?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/9d7cfbb8-cccf-4ee6-bc7d-316bdd23b175?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"name": "ad1812df-cb96-4306-99b8-7caa97cc1c0c", "status": "Succeeded",
-        "startTime": "2026-10-13T13:57:04.677Z"}'
+      string: '{"name": "9d7cfbb8-cccf-4ee6-bc7d-316bdd23b175", "status": "InProgress",
+        "startTime": "2026-10-28T11:29:48.5Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '112'
+      - '111'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:05 GMT
+      - Wed, 28 Oct 2026 11:29:48 GMT
       expires:
       - '-1'
       pragma:
@@ -678,11 +771,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/60618b3f-e55e-4fb4-834d-972cd4173445
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/76468db1-e90a-47c8-b830-6752e8b69b7b
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 10EDCAA47BD14115B7BDD2CFBAA47741 Ref B: CWL211060613052 Ref C: 2026-10-13T13:57:05Z'
+      - 'Ref A: 972650BAF4B9496092DE8518FCE60CE9 Ref B: PNQ231110907031 Ref C: 2026-10-28T11:29:48Z'
     status:
       code: 200
       message: OK
@@ -700,7 +793,56 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days --lock-immutability
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/9d7cfbb8-cccf-4ee6-bc7d-316bdd23b175?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+  response:
+    body:
+      string: '{"name": "9d7cfbb8-cccf-4ee6-bc7d-316bdd23b175", "status": "Succeeded",
+        "startTime": "2026-10-28T11:29:48.5Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '110'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2026 11:30:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/83ba9517-025a-4dc3-99d9-a36404fcbc77
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: AD4160563E0847DD90E4B5242FD72449 Ref B: PNQ231110909040 Ref C: 2026-10-28T11:30:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - sql midb short-term-retention-policy set
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription -g --mi -n --retention-days --lock-immutability
+      User-Agent:
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
@@ -716,7 +858,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:04 GMT
+      - Wed, 28 Oct 2026 11:30:03 GMT
       expires:
       - '-1'
       pragma:
@@ -728,11 +870,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/21f3e6b4-0389-45de-a611-dba0b3466be1
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/ce63de3d-5ad2-4527-a744-97eecfc3bc87
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 2E175EF96CBA4CD1BCE47337A71FFF69 Ref B: CWL211060613062 Ref C: 2026-10-13T13:57:05Z'
+      - 'Ref A: 8A78E46768F94AEFB032B6A97EF9DD2E Ref B: PNQ241100405060 Ref C: 2026-10-28T11:30:04Z'
     status:
       code: 200
       message: OK
@@ -747,12 +889,10 @@ interactions:
       - sql midb short-term-retention-policy show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json
       ParameterSetName:
       - --subscription -g --mi -n
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
@@ -768,7 +908,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:05 GMT
+      - Wed, 28 Oct 2026 11:30:05 GMT
       expires:
       - '-1'
       pragma:
@@ -780,11 +920,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/d5009579-84d3-4200-b5c5-7fe4b810089f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/3b657509-7dd2-4683-b2e3-375a1ba5192a
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 31ED3712F3714BCE8F4A29F1B14E70BA Ref B: CWL211060413062 Ref C: 2026-10-13T13:57:06Z'
+      - 'Ref A: 87063367FD7745E5BF853976869240A7 Ref B: PNQ231110907042 Ref C: 2026-10-28T11:30:04Z'
     status:
       code: 200
       message: OK
@@ -806,15 +946,15 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days --no-wait
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-13T13:57:07.127Z"}'
+      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-28T11:30:06.027Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyAzureAsyncOperation/d19f5a7c-6f43-4c04-a848-81a35723162c?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/fa71b0cb-a8cf-41f9-8c8f-326553e79a22?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
@@ -822,11 +962,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:06 GMT
+      - Wed, 28 Oct 2026 11:30:05 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyOperationResults/d19f5a7c-6f43-4c04-a848-81a35723162c?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyOperationResults/fa71b0cb-a8cf-41f9-8c8f-326553e79a22?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -836,13 +976,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/be4857e3-4275-415e-8d0d-c1b5ad79f431
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/b802781e-64ad-4584-b008-ee2df38c1900
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: ED6990B4CF3F4CD1A46DE46CFE965F6B Ref B: CWL211060613062 Ref C: 2026-10-13T13:57:06Z'
+      - 'Ref A: 8913EB735F1F4B22BD60D851E0B4C6B4 Ref B: PNQ231110906042 Ref C: 2026-10-28T11:30:05Z'
     status:
       code: 202
       message: Accepted
@@ -860,7 +1000,7 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --interval --timeout --custom
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
@@ -876,7 +1016,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:07 GMT
+      - Wed, 28 Oct 2026 11:30:05 GMT
       expires:
       - '-1'
       pragma:
@@ -888,11 +1028,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/16f2426a-adfa-42d6-98af-8a09d3c3aadb
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/6e7f16f4-6a4c-45a8-acaa-b2cef0c2628c
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 9B52897C71C34D708E2D074C49CC6569 Ref B: CWL211060413060 Ref C: 2026-10-13T13:57:07Z'
+      - 'Ref A: DB0D696C02204ED288F436DB399B0575 Ref B: PNQ241100402060 Ref C: 2026-10-28T11:30:06Z'
     status:
       code: 200
       message: OK
@@ -907,12 +1047,10 @@ interactions:
       - sql midb short-term-retention-policy show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json
       ParameterSetName:
       - --subscription -g --mi -n
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
@@ -928,7 +1066,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:07 GMT
+      - Wed, 28 Oct 2026 11:30:06 GMT
       expires:
       - '-1'
       pragma:
@@ -940,11 +1078,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/1a841bfd-448e-49f2-8e6d-c59f33f8d7ba
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/da70f864-62fa-4dee-b8b8-19bb750cae7d
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: FF02888FA4EA478DA5C91E75E28D680E Ref B: CWL211060413023 Ref C: 2026-10-13T13:57:08Z'
+      - 'Ref A: BAA1A3FE8ABF4CF88B76A9A0E4F590EA Ref B: PNQ241100402025 Ref C: 2026-10-28T11:30:06Z'
     status:
       code: 200
       message: OK
@@ -962,24 +1100,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:08 GMT
+      - Wed, 28 Oct 2026 11:30:06 GMT
       expires:
       - '-1'
       pragma:
@@ -993,7 +1132,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 1ABAE9AB96084931A259C53A9F4F6049 Ref B: CWL211060613036 Ref C: 2026-10-13T13:57:08Z'
+      - 'Ref A: AA7DD223F38147509BCE723147EEC593 Ref B: PNQ241100401036 Ref C: 2026-10-28T11:30:06Z'
     status:
       code: 200
       message: OK
@@ -1011,24 +1150,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:23 GMT
+      - Wed, 28 Oct 2026 11:30:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1042,7 +1182,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: CACF0D50AC404A168934B21829C86C17 Ref B: CWL211060413034 Ref C: 2026-10-13T13:57:23Z'
+      - 'Ref A: 61218333BFB640DF8E4A3FEB244BE398 Ref B: PNQ241100402031 Ref C: 2026-10-28T11:30:22Z'
     status:
       code: 200
       message: OK
@@ -1060,24 +1200,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:38 GMT
+      - Wed, 28 Oct 2026 11:30:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1091,7 +1232,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: B2B6AC2753E14645BA42859D8E7771B6 Ref B: CWL211060613031 Ref C: 2026-10-13T13:57:39Z'
+      - 'Ref A: E9CA78DE7BD74E44BBC6ED6EBC67FA73 Ref B: PNQ241100403029 Ref C: 2026-10-28T11:30:37Z'
     status:
       code: 200
       message: OK
@@ -1109,24 +1250,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:57:54 GMT
+      - Wed, 28 Oct 2026 11:30:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1140,7 +1282,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 314792C9CD0148A0A50429F35EFC21E4 Ref B: CWL211060413036 Ref C: 2026-10-13T13:57:54Z'
+      - 'Ref A: A33DD5B1F9684D1BBFAA3650E3E8EF7E Ref B: PNQ241100404040 Ref C: 2026-10-28T11:30:53Z'
     status:
       code: 200
       message: OK
@@ -1158,24 +1300,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:58:10 GMT
+      - Wed, 28 Oct 2026 11:31:09 GMT
       expires:
       - '-1'
       pragma:
@@ -1189,7 +1332,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 1F7672A3BCBA4B99B0B179900D2DA6A2 Ref B: CWL211060413031 Ref C: 2026-10-13T13:58:10Z'
+      - 'Ref A: 8F85DF6F0299449A8E7840ADC326EC16 Ref B: PNQ241100401042 Ref C: 2026-10-28T11:31:09Z'
     status:
       code: 200
       message: OK
@@ -1207,24 +1350,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:58:25 GMT
+      - Wed, 28 Oct 2026 11:31:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1238,7 +1382,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 5C570462A0B74CA89D1266D21B54147A Ref B: CWL211060613060 Ref C: 2026-10-13T13:58:25Z'
+      - 'Ref A: 6D4BE86F30EA420FA478B858F42E2175 Ref B: PNQ231110907036 Ref C: 2026-10-28T11:31:24Z'
     status:
       code: 200
       message: OK
@@ -1256,24 +1400,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:58:41 GMT
+      - Wed, 28 Oct 2026 11:31:40 GMT
       expires:
       - '-1'
       pragma:
@@ -1287,7 +1432,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 6F241F3BB1414E86873EBB4B8C0648D5 Ref B: CWL211060613052 Ref C: 2026-10-13T13:58:41Z'
+      - 'Ref A: A52E7275C90B4C15A1C964FEDA3A5998 Ref B: PNQ241100403034 Ref C: 2026-10-28T11:31:39Z'
     status:
       code: 200
       message: OK
@@ -1305,24 +1450,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:58:55 GMT
+      - Wed, 28 Oct 2026 11:31:56 GMT
       expires:
       - '-1'
       pragma:
@@ -1336,7 +1482,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 76D70B0ED9954BD5BE31BDA61AF4286B Ref B: CWL211060613040 Ref C: 2026-10-13T13:58:56Z'
+      - 'Ref A: 98C782422CDF4349AEA59F27FA435CDB Ref B: PNQ231110908023 Ref C: 2026-10-28T11:31:55Z'
     status:
       code: 200
       message: OK
@@ -1354,24 +1500,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:59:11 GMT
+      - Wed, 28 Oct 2026 11:32:11 GMT
       expires:
       - '-1'
       pragma:
@@ -1385,7 +1532,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: A38EEAA3830445A899BCF4FBB17DC38C Ref B: CWL211060613060 Ref C: 2026-10-13T13:59:11Z'
+      - 'Ref A: 9B9CFA1879AA4C848D700417951AF32A Ref B: PNQ241100401042 Ref C: 2026-10-28T11:32:11Z'
     status:
       code: 200
       message: OK
@@ -1403,24 +1550,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:59:26 GMT
+      - Wed, 28 Oct 2026 11:32:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1434,7 +1582,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: D4AABCBA1FDD4BB1929F025C73DAD0B4 Ref B: CWL211060613042 Ref C: 2026-10-13T13:59:27Z'
+      - 'Ref A: BAD934E1F24B463780F296B1DFB931E2 Ref B: PNQ241100401031 Ref C: 2026-10-28T11:32:26Z'
     status:
       code: 200
       message: OK
@@ -1452,24 +1600,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:59:42 GMT
+      - Wed, 28 Oct 2026 11:32:42 GMT
       expires:
       - '-1'
       pragma:
@@ -1483,7 +1632,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: FD116A0F919042529F225B7E6432BC14 Ref B: CWL211060613036 Ref C: 2026-10-13T13:59:42Z'
+      - 'Ref A: 6D42D807953D4F0B9A51D248DCEBDDAF Ref B: PNQ241100404023 Ref C: 2026-10-28T11:32:42Z'
     status:
       code: 200
       message: OK
@@ -1501,24 +1650,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "defaultSecondaryLocation":
+        "centralindia", "isLedgerOn": false}, "location": "indiasouthcentral", "id":
+        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '457'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 13:59:57 GMT
+      - Wed, 28 Oct 2026 11:32:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1532,7 +1682,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 888D395B61F4437A8CCB745E92C28D2A Ref B: CWL211060413060 Ref C: 2026-10-13T13:59:58Z'
+      - 'Ref A: 79B9940FBD4042A1BF4FB86EA7D5499F Ref B: PNQ231110909062 Ref C: 2026-10-28T11:32:57Z'
     status:
       code: 200
       message: OK
@@ -1550,24 +1700,25 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --custom --interval --timeout
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
   response:
     body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
+      string: '{"properties": {"collation": "Serbian_Cyrillic_100_CS_AS", "status":
+        "Online", "creationDate": "2026-10-28T11:28:56.973Z", "earliestRestorePoint":
+        "2026-10-28T11:33:02.24Z", "defaultSecondaryLocation": "centralindia", "isLedgerOn":
+        false}, "location": "indiasouthcentral", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
         "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '450'
+      - '508'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:00:13 GMT
+      - Wed, 28 Oct 2026 11:33:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1581,7 +1732,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 6A59FD740D9C40DABFBF8873AD41D3EF Ref B: CWL211060613060 Ref C: 2026-10-13T14:00:13Z'
+      - 'Ref A: 343D9B74B7334A6EBFDDAFEE3AF95A63 Ref B: PNQ241100403034 Ref C: 2026-10-28T11:33:13Z'
     status:
       code: 200
       message: OK
@@ -1589,106 +1740,7 @@ interactions:
     body: null
     headers:
       Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - resource wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription --ids --api-version --custom --interval --timeout
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
-  response:
-    body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "defaultSecondaryLocation":
-        "westus2", "isLedgerOn": false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
-        "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '450'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 14:00:28 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: 18DFCF68908A436F9EEB53E1845DE0DC Ref B: CWL211060413036 Ref C: 2026-10-13T14:00:28Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - resource wait
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription --ids --api-version --custom --interval --timeout
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2023-08-01
-  response:
-    body:
-      string: '{"properties": {"collation": "SQL_Latin1_General_CP1_CI_AS", "status":
-        "Online", "creationDate": "2026-10-13T13:56:44.773Z", "earliestRestorePoint":
-        "2026-10-13T14:00:38.21Z", "defaultSecondaryLocation": "westus2", "isLedgerOn":
-        false}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001",
-        "name": "clistr000001", "type": "Microsoft.Sql/managedInstances/databases"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '501'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 14:00:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: 0519C6DA8C704D5AAEB05742CA2AAD75 Ref B: CWL211060613052 Ref C: 2026-10-13T14:00:44Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
+      - '*/*'
       Accept-Encoding:
       - gzip, deflate, zstd
       CommandName:
@@ -1700,15 +1752,15 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --yes
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/databases/clistr000001?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation": "DropManagedDatabase", "startTime": "2026-10-13T14:00:45.177Z"}'
+      string: '{"operation": "DropManagedDatabase", "startTime": "2026-10-28T11:33:13.777Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/d619d1b7-faf9-441e-b842-24ff7edd7bd6?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedDatabaseAzureAsyncOperation/bef94891-f149-44df-91e9-8be8fcb4c126?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
@@ -1716,11 +1768,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:00:45 GMT
+      - Wed, 28 Oct 2026 11:33:12 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/d619d1b7-faf9-441e-b842-24ff7edd7bd6?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedDatabaseOperationResults/bef94891-f149-44df-91e9-8be8fcb4c126?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -1730,13 +1782,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/9d28c752-1ccb-4f98-8891-db6c548702bf
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/db1d8ce6-32c1-407a-8285-ada8f269ce4b
       x-ms-ratelimit-remaining-subscription-deletes:
       - '799'
       x-ms-ratelimit-remaining-subscription-global-deletes:
       - '11999'
       x-msedge-ref:
-      - 'Ref A: 2D320F953FCF4FAE8DD4DC6B1A217983 Ref B: CWL211060413054 Ref C: 2026-10-13T14:00:44Z'
+      - 'Ref A: 3FF653FE2EA444ADB21F71192A7C0733 Ref B: PNQ241100406062 Ref C: 2026-10-28T11:33:13Z'
     status:
       code: 202
       message: Accepted
@@ -1754,13 +1806,13 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --yes
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/d619d1b7-faf9-441e-b842-24ff7edd7bd6?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedDatabaseAzureAsyncOperation/bef94891-f149-44df-91e9-8be8fcb4c126?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"name": "d619d1b7-faf9-441e-b842-24ff7edd7bd6", "status": "InProgress",
-        "startTime": "2026-10-13T14:00:45.177Z"}'
+      string: '{"name": "bef94891-f149-44df-91e9-8be8fcb4c126", "status": "InProgress",
+        "startTime": "2026-10-28T11:33:13.777Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1769,7 +1821,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:00:45 GMT
+      - Wed, 28 Oct 2026 11:33:13 GMT
       expires:
       - '-1'
       pragma:
@@ -1781,11 +1833,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/e8bf8f74-e555-4f59-b6e1-0de0f55cd7f8
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/aab1f9bc-092c-40de-830d-0fde2ee10ab1
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: DB3F8BFDD85C43F8959206BD739A8ADA Ref B: CWL211060413060 Ref C: 2026-10-13T14:00:45Z'
+      - 'Ref A: C6B4D5B66986470CAA7B28975392F1C1 Ref B: PNQ231110909042 Ref C: 2026-10-28T11:33:13Z'
     status:
       code: 200
       message: OK
@@ -1803,62 +1855,13 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --yes
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/d619d1b7-faf9-441e-b842-24ff7edd7bd6?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedDatabaseAzureAsyncOperation/bef94891-f149-44df-91e9-8be8fcb4c126?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"name": "d619d1b7-faf9-441e-b842-24ff7edd7bd6", "status": "InProgress",
-        "startTime": "2026-10-13T14:00:45.177Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '113'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 13 Oct 2026 14:01:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/08006d35-d74c-4d17-b8dc-3c2d7293a238
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: 647671743CA04758B70B61374D28AB7C Ref B: CWL211060613052 Ref C: 2026-10-13T14:01:01Z'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate, zstd
-      CommandName:
-      - sql midb delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --subscription -g --mi -n --yes
-      User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/d619d1b7-faf9-441e-b842-24ff7edd7bd6?api-version=2024-11-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
-  response:
-    body:
-      string: '{"name": "d619d1b7-faf9-441e-b842-24ff7edd7bd6", "status": "Succeeded",
-        "startTime": "2026-10-13T14:00:45.177Z"}'
+      string: '{"name": "bef94891-f149-44df-91e9-8be8fcb4c126", "status": "Succeeded",
+        "startTime": "2026-10-28T11:33:13.777Z"}'
     headers:
       cache-control:
       - no-cache
@@ -1867,7 +1870,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:16 GMT
+      - Wed, 28 Oct 2026 11:33:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1879,11 +1882,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/37c59948-4566-4d53-a488-abf4f16d9a17
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/ba40f006-01fd-4847-8d7f-9d524d3f4686
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 4C4A5D21D84E4CD99BEA6946CCD6BF0A Ref B: CWL211060613034 Ref C: 2026-10-13T14:01:16Z'
+      - 'Ref A: 7D2E0282A0D54777A458343FC99AF0F9 Ref B: PNQ241100405040 Ref C: 2026-10-28T11:33:29Z'
     status:
       code: 200
       message: OK
@@ -1901,24 +1904,24 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi --query
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases?api-version=2024-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases?api-version=2026-08-01-preview
   response:
     body:
       string: '{"value": [{"properties": {"databaseName": "clistr000001", "creationDate":
-        "2026-10-13T13:56:44.773Z", "deletionDate": "2026-10-13T14:00:46.037Z", "earliestRestoreDate":
-        "2026-10-13T14:00:38.21Z"}, "location": "westcentralus", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134363736460370000",
-        "name": "clistr000001,134363736460370000", "type": "Microsoft.Sql/managedInstances/restorableDroppedDatabases"}]}'
+        "2026-10-28T11:28:56.973Z", "deletionDate": "2026-10-28T11:33:14.783Z", "earliestRestoreDate":
+        "2026-10-28T11:33:02.24Z"}, "location": "indiasouthcentral", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134376607947830000",
+        "name": "clistr000001,134376607947830000", "type": "Microsoft.Sql/managedInstances/restorableDroppedDatabases"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '536'
+      - '540'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:16 GMT
+      - Wed, 28 Oct 2026 11:33:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1930,11 +1933,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/9b28e14b-77b5-41ca-8263-0d5131ad6df7
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/008e17bd-e373-4d93-ac72-f24e3590e4a6
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: DD6220331CF04DE9A0323E45BBE9644C Ref B: CWL211060413023 Ref C: 2026-10-13T14:01:17Z'
+      - 'Ref A: 8E4937E9329F446CB367B7086518C0A8 Ref B: PNQ241100403029 Ref C: 2026-10-28T11:33:30Z'
     status:
       code: 200
       message: OK
@@ -1949,18 +1952,16 @@ interactions:
       - sql midb short-term-retention-policy show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json
       ParameterSetName:
       - --subscription -g --mi -n --deleted-time
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134363736460370000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134376607947830000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
       string: '{"properties": {"retentionDays": 10, "immutabilityStatus": "Enabled"},
-        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134363736460370000/backupShortTermRetentionPolicies/default",
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134376607947830000/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/managedInstances/restorableDroppedDatabases/backupShortTermRetentionPolicies"}'
     headers:
       cache-control:
@@ -1970,7 +1971,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:17 GMT
+      - Wed, 28 Oct 2026 11:33:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1982,11 +1983,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/d7f603f5-c37f-4149-bb25-b032dc16780f
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/ed0fd5d0-c222-401a-9e21-7a46fef91449
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: E6C805768C024F39ADE6DA93958BAEAD Ref B: CWL211060613040 Ref C: 2026-10-13T14:01:18Z'
+      - 'Ref A: 80ED0D1B1CDF4A64A3460060B6F1279C Ref B: PNQ241100401054 Ref C: 2026-10-28T11:33:30Z'
     status:
       code: 200
       message: OK
@@ -2008,15 +2009,15 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days --deleted-time
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134363736460370000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134376607947830000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-13T14:01:19.283Z"}'
+      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-28T11:33:30.923Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyAzureAsyncOperation/b6d88246-74a1-452c-86c0-82f26350b6fd?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/8faec9ee-1db3-4256-b052-a77866958fdb?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
@@ -2024,11 +2025,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:19 GMT
+      - Wed, 28 Oct 2026 11:33:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyOperationResults/b6d88246-74a1-452c-86c0-82f26350b6fd?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyOperationResults/8faec9ee-1db3-4256-b052-a77866958fdb?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -2038,13 +2039,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/3326dc79-d65a-4c65-a837-55b9b901fd96
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/45ad06b9-27bf-46a8-81b4-8b4b3592e9f7
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 2D6F35D5741C481999D4F578959779EF Ref B: CWL211060613060 Ref C: 2026-10-13T14:01:18Z'
+      - 'Ref A: 7766EB9ACB62480297B37A526341B9CD Ref B: PNQ241100402029 Ref C: 2026-10-28T11:33:30Z'
     status:
       code: 202
       message: Accepted
@@ -2062,13 +2063,13 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days --deleted-time
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyAzureAsyncOperation/b6d88246-74a1-452c-86c0-82f26350b6fd?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/8faec9ee-1db3-4256-b052-a77866958fdb?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
   response:
     body:
-      string: '{"name": "b6d88246-74a1-452c-86c0-82f26350b6fd", "status": "Succeeded",
-        "startTime": "2026-10-13T14:01:19.283Z"}'
+      string: '{"name": "8faec9ee-1db3-4256-b052-a77866958fdb", "status": "Succeeded",
+        "startTime": "2026-10-28T11:33:30.923Z"}'
     headers:
       cache-control:
       - no-cache
@@ -2077,7 +2078,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:19 GMT
+      - Wed, 28 Oct 2026 11:33:31 GMT
       expires:
       - '-1'
       pragma:
@@ -2089,11 +2090,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/77d84229-3ea7-4dc1-b801-6e7e6555ff7d
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/ee04722e-4db0-4e28-a2b4-41bf9bdbfffa
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 6DD6E277AB2946C5A3C391FF9E3EA583 Ref B: CWL211060613062 Ref C: 2026-10-13T14:01:19Z'
+      - 'Ref A: CF1391FC2CB0445B912625A4BFBE252B Ref B: PNQ241100404060 Ref C: 2026-10-28T11:33:31Z'
     status:
       code: 200
       message: OK
@@ -2111,13 +2112,13 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days --deleted-time
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134363736460370000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134376607947830000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
       string: '{"properties": {"retentionDays": 7, "immutabilityStatus": "Enabled"},
-        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134363736460370000/backupShortTermRetentionPolicies/default",
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134376607947830000/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/managedInstances/restorableDroppedDatabases/backupShortTermRetentionPolicies"}'
     headers:
       cache-control:
@@ -2127,7 +2128,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:20 GMT
+      - Wed, 28 Oct 2026 11:33:31 GMT
       expires:
       - '-1'
       pragma:
@@ -2139,11 +2140,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/4ee21ce6-82c9-4f23-acd5-c94eeec943cf
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/f9bdff83-2506-4881-bb4d-1af86202beaa
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 2BA4E5227A384366A57F1623CA313D30 Ref B: CWL211060613023 Ref C: 2026-10-13T14:01:20Z'
+      - 'Ref A: 5B18799CF29047E2AA0CFCE41463C1F1 Ref B: PNQ241100401060 Ref C: 2026-10-28T11:33:31Z'
     status:
       code: 200
       message: OK
@@ -2158,18 +2159,16 @@ interactions:
       - sql midb short-term-retention-policy show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json
       ParameterSetName:
       - --subscription -g --mi -n --deleted-time
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134363736460370000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134376607947830000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
       string: '{"properties": {"retentionDays": 7, "immutabilityStatus": "Enabled"},
-        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134363736460370000/backupShortTermRetentionPolicies/default",
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134376607947830000/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/managedInstances/restorableDroppedDatabases/backupShortTermRetentionPolicies"}'
     headers:
       cache-control:
@@ -2179,7 +2178,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:20 GMT
+      - Wed, 28 Oct 2026 11:33:32 GMT
       expires:
       - '-1'
       pragma:
@@ -2191,11 +2190,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/5c6e78fd-fc7c-4205-8958-9cf0af859e2d
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/4f30f2c8-519a-46ab-9413-6ce4da02060e
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: B72E5752ADA04370AA8E66AC3CCBFF8E Ref B: CWL211060613042 Ref C: 2026-10-13T14:01:21Z'
+      - 'Ref A: 3A7BB3518C884C048FD07D38420ACB1E Ref B: PNQ241100401052 Ref C: 2026-10-28T11:33:33Z'
     status:
       code: 200
       message: OK
@@ -2217,27 +2216,27 @@ interactions:
       ParameterSetName:
       - --subscription -g --mi -n --retention-days --deleted-time --no-wait
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134363736460370000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134376607947830000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-13T14:01:21.937Z"}'
+      string: '{"operation": "AlterManagedDatabase", "startTime": "2026-10-28T11:33:33.81Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyAzureAsyncOperation/7bd92b8e-0213-4312-94ff-065e62ccbb94?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyAzureAsyncOperation/fe0fb5a2-00a7-42eb-9b94-44d669110cf2?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       cache-control:
       - no-cache
       content-length:
-      - '78'
+      - '77'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:22 GMT
+      - Wed, 28 Oct 2026 11:33:33 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/westcentralus/managedShortTermRetentionPolicyOperationResults/7bd92b8e-0213-4312-94ff-065e62ccbb94?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/locations/indiasouthcentral/managedShortTermRetentionPolicyOperationResults/fe0fb5a2-00a7-42eb-9b94-44d669110cf2?api-version=2026-08-01-preview&t=REDACTED&c=REDACTED&s=REDACTED&h=REDACTED
       pragma:
       - no-cache
       strict-transport-security:
@@ -2247,13 +2246,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/b575e158-70b4-423b-89b2-2c05bea9bae9
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/a6affeeb-24ba-46ed-bfa1-84e0d198dd20
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: A9BFEC090B4D494EA36E4F4982F7F4B5 Ref B: CWL211060413034 Ref C: 2026-10-13T14:01:21Z'
+      - 'Ref A: 9D107356BF05464FB4BCA4F2A44BB51D Ref B: PNQ241100401036 Ref C: 2026-10-28T11:33:33Z'
     status:
       code: 202
       message: Accepted
@@ -2271,13 +2270,13 @@ interactions:
       ParameterSetName:
       - --subscription --ids --api-version --interval --timeout --custom
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134363736460370000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134376607947830000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"properties": {"retentionDays": 6, "immutabilityStatus": "Enabled"},
-        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134363736460370000/backupShortTermRetentionPolicies/default",
+      string: '{"properties": {"retentionDays": 7, "immutabilityStatus": "Enabled"},
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134376607947830000/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/managedInstances/restorableDroppedDatabases/backupShortTermRetentionPolicies"}'
     headers:
       cache-control:
@@ -2287,7 +2286,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:21 GMT
+      - Wed, 28 Oct 2026 11:33:33 GMT
       expires:
       - '-1'
       pragma:
@@ -2299,11 +2298,61 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/145b72c5-8c2d-46d9-8270-dd5f4885b41c
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/85b56a19-1754-4b6b-a398-23ec4e45578c
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 920E7863831644CE9AD8CAD81FB013E0 Ref B: CWL211060613042 Ref C: 2026-10-13T14:01:22Z'
+      - 'Ref A: 0F69D53F0A8943E9BE36B2E43D5B466D Ref B: PNQ231110907042 Ref C: 2026-10-28T11:33:33Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - resource wait
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --subscription --ids --api-version --interval --timeout --custom
+      User-Agent:
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134376607947830000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+  response:
+    body:
+      string: '{"properties": {"retentionDays": 6, "immutabilityStatus": "Enabled"},
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134376607947830000/backupShortTermRetentionPolicies/default",
+        "name": "default", "type": "Microsoft.Sql/managedInstances/restorableDroppedDatabases/backupShortTermRetentionPolicies"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '427'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 28 Oct 2026 11:33:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/85ba223d-3949-4aa4-98f6-1250e5f7f12e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8741E7DC227D48F3840B4313DF4E16EF Ref B: PNQ231110909029 Ref C: 2026-10-28T11:33:39Z'
     status:
       code: 200
       message: OK
@@ -2318,18 +2367,16 @@ interactions:
       - sql midb short-term-retention-policy show
       Connection:
       - keep-alive
-      Content-Type:
-      - application/json
       ParameterSetName:
       - --subscription -g --mi -n --deleted-time
       User-Agent:
-      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-2022Server-10.0.20348-SP0)
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134363736460370000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001%2C134376607947830000/backupShortTermRetentionPolicies/default?api-version=2026-08-01-preview
   response:
     body:
       string: '{"properties": {"retentionDays": 6, "immutabilityStatus": "Enabled"},
-        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134363736460370000/backupShortTermRetentionPolicies/default",
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/strtestrg/providers/Microsoft.Sql/managedInstances/strtestmi/restorableDroppedDatabases/clistr000001,134376607947830000/backupShortTermRetentionPolicies/default",
         "name": "default", "type": "Microsoft.Sql/managedInstances/restorableDroppedDatabases/backupShortTermRetentionPolicies"}'
     headers:
       cache-control:
@@ -2339,7 +2386,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 13 Oct 2026 14:01:22 GMT
+      - Wed, 28 Oct 2026 11:33:39 GMT
       expires:
       - '-1'
       pragma:
@@ -2351,11 +2398,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=0d395244-eb50-44bb-82b0-4b93b5de603c/westcentralus/350b027b-42f9-4c39-b02d-b207c6838d6c
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/centralindia/af35d3cc-2575-4166-84cb-87d60fbc061f
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 894D7F5DF17E4EC08AC1D4C248E2A294 Ref B: CWL211060613034 Ref C: 2026-10-13T14:01:22Z'
+      - 'Ref A: 41919B71C75947C4A0E03C43D868A2A2 Ref B: PNQ241100402025 Ref C: 2026-10-28T11:33:39Z'
     status:
       code: 200
       message: OK

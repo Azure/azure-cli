@@ -11,7 +11,8 @@ from requests import get
 from knack.log import get_logger
 from knack.prompting import NoTTYException, prompt_pass
 from knack.util import CLIError
-from azure.cli.core.azclierror import ArgumentUsageError, RequiredArgumentMissingError, ValidationError
+from azure.cli.core.azclierror import (
+    ArgumentUsageError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ValidationError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
@@ -104,6 +105,13 @@ def retention_validator(ns):
         val = ns.backup_retention
         if not 7 <= int(val) <= 35:
             raise CLIError('Invalid value for --backup-retention. Allowed values: 7 to 35 days.')
+
+
+def immutable_backup_validator(ns):
+    if ns.immutable_backup and ns.immutable_backup.lower() == 'enabled' and ns.cluster_size is not None:
+        raise MutuallyExclusiveArgumentError(
+            'Immutable backups are not supported for elastic clusters. '
+            'Do not combine --immutable-backup Enabled with --node-count.')
 
 
 def db_renaming_cluster_validator(ns):
