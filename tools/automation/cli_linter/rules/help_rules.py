@@ -11,10 +11,10 @@ from unittest import mock
 import re
 
 # 'az' space then repeating runs of quoted tokens or non quoted characters
-_az_pattern = 'az\s*' + '(([^\"\'])*|' + '((\"[^\"]*\"\s*)|(\'[^\']*\'\s*))' + ')'
+_az_pattern = r'az\s*' + '(([^\"\'])*|' + '((\"[^\"]*\"\\s*)|(\'[^\']*\'\\s*))' + ')'
 # match the two types of command substitutions
-_CMD_SUB_1 = re.compile("\$\(\s*" + "(" + _az_pattern + ")" + "\)")
-_CMD_SUB_2 = re.compile("`\s*" + "(" + _az_pattern + ")" + "`")
+_CMD_SUB_1 = re.compile(r"\$\(\s*" + "(" + _az_pattern + ")" + r"\)")
+_CMD_SUB_2 = re.compile(r"`\s*" + "(" + _az_pattern + ")" + "`")
 
 from knack.log import get_logger
 logger = get_logger(__name__)
