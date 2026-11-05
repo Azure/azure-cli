@@ -18,7 +18,7 @@ class RequestCredential(AAZCommand):
     """Request a temporary credential for your Azure Red Hat OpenShift with hosted control plane cluster
 
     :example: Request a temporary admin credential
-        az aro hcp cluster request-credential --resource-group MyResourceGroup --name MyCluster
+        az aro hcp cluster request-credential --admin --resource-group MyResourceGroup --name MyCluster
     """
 
     _aaz_info = {
