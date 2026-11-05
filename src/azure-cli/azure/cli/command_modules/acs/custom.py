@@ -2390,7 +2390,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                         "securityContext": {"runAsUser": 0},
                         "name": podName,
                         "image": CONST_CANIPULL_IMAGE,
-                        "args": ["-v6", acr],
+                        # "--" ensures canipull never parses the registry as a flag.
+                        "args": ["-v6", "--", acr],
                         "stdin": True,
                         "stdinOnce": True,
                         # On national/sovereign clouds, node provisioning stamps
@@ -2409,9 +2410,9 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                             }
                         ],
                         "volumeMounts": [
-                            {"name": "azurejson", "mountPath": "/etc/kubernetes"},
-                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
-                            {"name": "sfcerts", "mountPath": "/etc/pki"},
+                            {"name": "azurejson", "mountPath": "/etc/kubernetes", "readOnly": True},
+                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs", "readOnly": True},
+                            {"name": "sfcerts", "mountPath": "/etc/pki", "readOnly": True},
                         ],
                     }
                 ],
