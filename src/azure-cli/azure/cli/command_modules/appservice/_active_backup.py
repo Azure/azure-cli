@@ -19,7 +19,6 @@ from .aaz.latest.web.site.managed_traffic_config import List as ManagedTrafficLi
 from .aaz.latest.web.site.managed_traffic_config.default import (
     Show as ManagedTrafficShow, Update as ManagedTrafficUpdate,
 )
-from .aaz.latest.web.site.silo.virtual_network_connection import List as SiteVnetList
 from .aaz.latest.web.site.silo.virtual_network_connection import virtual_network as site_vnet
 
 
@@ -126,11 +125,6 @@ class WebappSiloWait(_ActiveBackupArguments, site_silo.Wait):
 @register_command("webapp silo refresh", is_preview=True)
 class WebappSiloRefresh(_ActiveBackupArguments, RefreshSilo):
     """Refresh the silos of the primary web app."""
-
-
-@register_command("webapp silo vnet-integration list", is_preview=True)
-class WebappSiloVnetList(_ActiveBackupArguments, SiteVnetList):
-    """List the virtual network connections of a web app silo."""
 
 
 @register_command("webapp silo vnet-integration show", is_preview=True)
@@ -253,7 +247,7 @@ def load_command_table(loader):
     commands = (
         PlanSiloCreate, PlanSiloUpdate, PlanSiloShow, PlanSiloList, PlanSiloDelete, PlanSiloWait, PlanSiloVnetList,
         WebappSiloCreate, WebappSiloUpdate, WebappSiloShow, WebappSiloList, WebappSiloDelete, WebappSiloWait,
-        WebappSiloRefresh, WebappSiloVnetList, WebappSiloVnetShow, WebappSiloVnetAdd, WebappSiloVnetUpdate,
+        WebappSiloRefresh, WebappSiloVnetShow, WebappSiloVnetAdd, WebappSiloVnetUpdate,
         WebappSiloVnetRemove, WebappManagedTrafficList, WebappManagedTrafficShow, WebappManagedTrafficUpdate,
         WebappLastKnownGoodList, WebappLastKnownGoodShow, WebappLastKnownGoodMark,
     )

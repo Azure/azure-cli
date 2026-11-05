@@ -48,8 +48,8 @@ class ActiveBackupScenarioTests(ScenarioTest):
             vnet=self.create_random_name('abvnet', 20),
             plan_silo='backupplan',
             site_silo='backupapp',
-            primary=os.environ.get('AZURE_ACTIVE_BACKUP_PRIMARY_LOCATION', 'eastus'),
-            secondary=os.environ.get('AZURE_ACTIVE_BACKUP_SECONDARY_LOCATION', 'westus2'),
+            primary=os.environ.get('AZURE_ACTIVE_BACKUP_PRIMARY_LOCATION', 'eastasia'),
+            secondary=os.environ.get('AZURE_ACTIVE_BACKUP_SECONDARY_LOCATION', 'westcentralus'),
             linux='true' if linux else 'false',
         )
         self._run('group create -n {rg} -l {primary} --tags purpose=azure-cli-active-backup-test')
@@ -106,9 +106,8 @@ class ActiveBackupScenarioTests(ScenarioTest):
         self.kwargs['subnet'] = subnet['id']
         self._run('webapp silo vnet-integration add -g {rg} -n {app} --silo {site_silo} --subnet {subnet}')
         self._run('webapp silo vnet-integration show -g {rg} -n {app} --silo {site_silo}', checks=[
-            self.check('properties.subnetResourceId', '{subnet}'),
+            self.check('subnetResourceId', '{subnet}'),
         ])
-        self._run('webapp silo vnet-integration list -g {rg} -n {app} --silo {site_silo}')
         self._run('webapp silo vnet-integration update -g {rg} -n {app} --silo {site_silo} --subnet {subnet}')
         self._run('appservice plan silo vnet-integration list -g {rg} -n {plan} --silo {plan_silo}')
         self._run('webapp silo vnet-integration remove -g {rg} -n {app} --silo {site_silo} --yes')

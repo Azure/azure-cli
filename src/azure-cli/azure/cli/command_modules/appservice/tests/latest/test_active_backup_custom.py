@@ -30,7 +30,7 @@ GROUPS = {
     'appservice plan silo': ('create', 'update', 'show', 'list', 'delete', 'wait'),
     'appservice plan silo vnet-integration': ('list',),
     'webapp silo': ('create', 'update', 'show', 'list', 'delete', 'wait', 'refresh'),
-    'webapp silo vnet-integration': ('list', 'show', 'add', 'update', 'remove'),
+    'webapp silo vnet-integration': ('show', 'add', 'update', 'remove'),
     'webapp managed-traffic': ('list', 'show', 'update'),
     'webapp last-known-good': ('list', 'show', 'mark'),
 }
@@ -126,7 +126,9 @@ class ActiveBackupCustomTests(unittest.TestCase):
             if any(name.startswith(group + ' ') for group in GROUPS)
         }
         self.assertEqual(actual, expected)
-        self.assertEqual(len(actual), 25)
+        self.assertEqual(len(actual), 24)
+        self.assertNotIn('webapp silo vnet-integration list', commands)
+        self.assertNotIn('web site silo virtual-network-connection list', commands)
         for name in expected:
             with self.subTest(command=name):
                 command = commands[name]
@@ -251,6 +253,16 @@ class ActiveBackupCustomTests(unittest.TestCase):
                     self.assertEqual(request['body']['properties']['instanceNumberOverride'], 2)
                 else:
                     self.assertIs(request['body']['properties']['followLastKnownGood'], False)
+
+    def test_vnet_show_flattens_response_properties(self):
+        self.resource['properties'] = {'subnetResourceId': SUBNET, 'swiftSupported': True}
+        stdout, _ = self._invoke('webapp silo vnet-integration show -g MyRG -n Primary --silo Backup')
+        result = json.loads(stdout)
+        self.assertEqual(result['subnetResourceId'], SUBNET)
+        self.assertIs(result['swiftSupported'], True)
+        self.assertNotIn('properties', result)
+        self._assert_request(0, 'GET', '/sites/Primary/silos/Backup/virtualNetworkConnections/virtualNetwork')
+        self.assertEqual(len(self.requests), 1)
 
     def test_vnet_patch_only_sends_supplied_fields(self):
         for options, expected in (
@@ -422,8 +434,6 @@ class ActiveBackupHttpTests(unittest.TestCase):
         for command, path, silo_option in (
                 ('appservice plan silo list', '/serverfarms/Primary/silos', ''),
                 ('webapp silo list', '/sites/Primary/silos', ''),
-                ('webapp silo vnet-integration list',
-                 '/sites/Primary/silos/Backup/virtualNetworkConnections', '--silo Backup'),
                 ('webapp managed-traffic list', '/sites/Primary/managedTrafficConfig', ''),
                 ('webapp last-known-good list', '/sites/Primary/lastKnownGood', '')):
             with self.subTest(command=command):
