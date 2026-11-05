@@ -9,7 +9,8 @@ from knack.util import CLIError
 from azure.appconfiguration import AzureAppConfigurationClient, FeatureFlagClient
 from azure.core.exceptions import HttpResponseError
 from azure.core.credentials import AzureKeyCredential
-from azure.cli.core.azclierror import (ValidationError,
+from azure.cli.core.azclierror import (AzCLIError,
+                                       ValidationError,
                                        AzureResponseError,
                                        InvalidArgumentValueError,
                                        ResourceNotFoundError,
@@ -202,8 +203,9 @@ def resolve_login_credential(cmd, name, endpoint):
                 _, endpoint = resolve_store_metadata(cmd, name)
             else:
                 raise RequiredArgumentMissingError("App Configuration endpoint or name should be provided if auth mode is 'login'.")
-        except Exception as ex:
-            raise CLIError(str(ex) + "\nYou may be able to resolve this issue by providing App Configuration endpoint instead of name.")
+        except AzCLIError as ex:
+            ex.set_recommendation("You may be able to resolve this issue by providing App Configuration endpoint with --endpoint instead of name.")
+            raise
 
     from azure.cli.core._profile import Profile
     from azure.cli.core.cloud import get_active_cloud
@@ -285,7 +287,7 @@ def get_appconfig_feature_flag_client(cmd, name, connection_string, auth_mode, e
                                                     user_agent=HttpHeaders.USER_AGENT,
                                                     retry_policy=retry_policy)
     except (ValueError, TypeError) as ex:
-        raise CLIError("Failed to initialize FeatureFlagClient due to an exception: {}".format(str(ex)))
+        raise InvalidArgumentValueError("Failed to initialize FeatureFlagClient due to an exception: {}".format(str(ex)))
 
     return feature_flag_client
 
