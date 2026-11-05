@@ -902,6 +902,38 @@ class TestValidateRegistryName(unittest.TestCase):
             validators.validate_registry_name(cmd, namespace)
             self.assertEqual(namespace.acr, "myacr" + acr_suffix)
 
+    def test_valid_host_names(self):
+        from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+        cmd = Mock(cli_ctx=Mock(cloud=AZURE_PUBLIC_CLOUD))
+        for acr in [
+            "myacr.azurecr.io",
+            "myacr.privatelink.azurecr.io",
+            "my-acr.azurecr.io",
+        ]:
+            namespace = SimpleNamespace(acr=acr)
+            validators.validate_registry_name(cmd, namespace)
+            self.assertEqual(namespace.acr, acr)
+
+    def test_invalid_host_names(self):
+        from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+        cmd = Mock(cli_ctx=Mock(cloud=AZURE_PUBLIC_CLOUD))
+        for acr in [
+            "",
+            'x"], "image": "evil", "zz": ["',
+            "-v9",
+            "--config=/tmp/azure.json",
+            "a..b.azurecr.io",
+            "myacr.azurecr.io.",
+            "-myacr.azurecr.io",
+            "my acr.azurecr.io",
+            "myacr.azurecr.io\n",
+            "myacr.azurecr.io:443",
+            "a" * 254,
+        ]:
+            namespace = SimpleNamespace(acr=acr)
+            with self.assertRaises(InvalidArgumentValueError):
+                validators.validate_registry_name(cmd, namespace)
+
 class TestValidateAllowedHostPorts(unittest.TestCase):
     def test_invalid_allowed_host_ports(self):
         namespace = SimpleNamespace(
