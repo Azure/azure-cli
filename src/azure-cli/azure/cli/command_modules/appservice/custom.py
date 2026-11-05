@@ -198,7 +198,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     is_linux = plan_info.reserved
     helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     location = plan_info.location
-    # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
+    # This is to keep the existing appsetting for a newly created webapp on existing webapp name.
     if auto_generated_domain_name_label_scope:
         name_validation = get_regional_site_availability(cmd,
                                                          location,
