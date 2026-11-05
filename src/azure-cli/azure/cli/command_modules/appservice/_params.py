@@ -1123,7 +1123,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES))
         c.argument('runtime', options_list=['--runtime', '-r'])
         c.argument('dryrun', default=False, action='store_true')
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), type=str)
         c.argument('launch_browser', default=False,
                    action='store_true', options_list=['--launch-browser', '-b'])
         c.argument('logs', default=False, action='store_true')

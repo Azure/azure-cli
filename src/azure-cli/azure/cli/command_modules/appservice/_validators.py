@@ -623,7 +623,7 @@ def _validate_ase_not_ilb(ase):
 
 def validate_webapp_up_disabled():
     raise ValidationError(
-        "The 'az webapp up' command is deprecated and no longer supported for Azure web apps. "
+        "The 'az webapp up' command is deprecated and no longer supported for Azure App Service. "
         "Use 'webapp create and webapp deploy' instead.")
 
 

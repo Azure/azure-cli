@@ -2998,7 +2998,7 @@ helps['webapp up'] = """
 type: command
 short-summary: Deprecated command.
 long-summary: |
-    The 'az webapp up' command is deprecated and no longer supported for Azure web apps.
+    The 'az webapp up' command is deprecated and no longer supported for Azure App Service.
     Use 'webapp create and webapp deploy' instead.
 
     Invocations exit with an error without creating or deploying resources.

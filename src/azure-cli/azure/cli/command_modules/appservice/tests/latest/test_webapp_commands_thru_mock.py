@@ -129,6 +129,8 @@ class TestWebappUpRetirement(unittest.TestCase):
             ['--runtime', 'DOTNETCORE:10.0', '--os-type', 'Windows'],
             ['--runtime', 'DOTNETCORE:10.0', '--os-type', 'Linux'],
             ['--runtime', 'PYTHON:3.14', '--html'],
+            ['--location', 'West US 2'],
+            ['-l', 'West US 2'],
             ['--app-service-environment', 'MyAse', '--plan', 'MyPlan', '--sku', 'I1V2',
              '--name', 'MyApp', '--resource-group', 'MyResourceGroup'],
             ['--name', 'MyApp', '--resource-group', 'MyResourceGroup', '--location', 'westus2',
@@ -146,6 +148,8 @@ class TestWebappUpRetirement(unittest.TestCase):
             mock.patch('azure.cli.command_modules.appservice.custom.webapp_up', autospec=True) as handler,
             mock.patch('azure.cli.command_modules.appservice._validators.web_client_factory') as validator_client,
             mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory') as handler_client,
+            mock.patch('azure.cli.core.commands.parameters.get_subscription_locations',
+                       side_effect=AssertionError('Retired commands must not look up Azure locations')) as locations,
         ):
             for arguments in argument_sets:
                 with self.subTest(arguments=arguments):
@@ -164,11 +168,12 @@ class TestWebappUpRetirement(unittest.TestCase):
                     self.assertEqual(len(errors.records), 1)
                     self.assertEqual(
                         errors.records[0].getMessage(),
-                        "The 'az webapp up' command is deprecated and no longer supported for Azure web apps. "
+                        "The 'az webapp up' command is deprecated and no longer supported for Azure App Service. "
                         "Use 'webapp create and webapp deploy' instead.")
                     handler.assert_not_called()
                     validator_client.assert_not_called()
                     handler_client.assert_not_called()
+                    locations.assert_not_called()
 
     def test_webapp_up_help_explains_deprecation_and_migration_for_both_os_types(self):
         import io
@@ -183,7 +188,7 @@ class TestWebappUpRetirement(unittest.TestCase):
         self.assertEqual(rendered.lower().count("use 'webapp create and webapp deploy' instead."), 1)
         self.assertNotIn('This command has been deprecated', rendered)
         self.assertIn(
-            "The 'az webapp up' command is deprecated and no longer supported for Azure web apps. "
+            "The 'az webapp up' command is deprecated and no longer supported for Azure App Service. "
             "Use 'webapp create and webapp deploy' instead.", rendered)
         self.assertIn('Invocations exit with an error without creating or deploying resources.', rendered)
         self.assertIn('Legacy arguments are accepted only to report this error and are hidden from help.', rendered)
