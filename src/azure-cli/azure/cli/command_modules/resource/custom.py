@@ -4426,7 +4426,24 @@ def upgrade_bicep_cli(cmd, target_platform=None):
     ensure_bicep_installation(cmd.cli_ctx, release_tag=latest_release_tag, target_platform=target_platform)
 
 
-def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
+def _get_bicep_config_args(cli_ctx, command_name, config):
+    if not config:
+        return []
+
+    ensure_bicep_installation(cli_ctx, stdout=False)
+
+    # Fail instead of dropping --config so that bicepconfig.json discovery is never silently used.
+    minimum_supported_version = "0.49.0"
+    if not bicep_version_greater_than_or_equal_to(cli_ctx, minimum_supported_version):
+        raise ValidationError(
+            f"az bicep {command_name} with --config parameter could not be executed with the current version of "
+            f"Bicep CLI. Please upgrade Bicep CLI to v{minimum_supported_version} or later."
+        )
+
+    return ["--config", config]
+
+
+def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None, config=None):
     args = ["build", file]
     if outdir:
         args += ["--outdir", outdir]
@@ -4436,6 +4453,7 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
         args += ["--no-restore"]
     if stdout:
         args += ["--stdout"]
+    args += _get_bicep_config_args(cmd.cli_ctx, "build", config)
 
     output = run_bicep_command(cmd.cli_ctx, args)
 
@@ -4443,7 +4461,7 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
         print(output)
 
 
-def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
+def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None, config=None):
     args = ["build-params", file]
     if outdir:
         args += ["--outdir", outdir]
@@ -4453,6 +4471,7 @@ def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_
         args += ["--no-restore"]
     if stdout:
         args += ["--stdout"]
+    args += _get_bicep_config_args(cmd.cli_ctx, "build-params", config)
 
     output = run_bicep_command(cmd.cli_ctx, args)
 
@@ -4460,7 +4479,7 @@ def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_
         print(output)
 
 
-def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, newline_kind=None, indent_kind=None, indent_size=None, insert_final_newline=None):
+def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, newline_kind=None, indent_kind=None, indent_size=None, insert_final_newline=None, config=None):
     ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.12.1"
@@ -4489,6 +4508,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
             args += ["--indent-size" if use_kebab_case_params else "indentSize", indent_size]
         if insert_final_newline:
             args += ["--insert-final-newline" if use_kebab_case_params else "--insertFinalNewline"]
+        args += _get_bicep_config_args(cmd.cli_ctx, "format", config)
 
         output = run_bicep_command(cmd.cli_ctx, args)
 
@@ -4498,7 +4518,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         logger.error("az bicep format could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def publish_bicep_file(cmd, file, target, documentationUri=None, documentation_uri=None, with_source=None, force=None):
+def publish_bicep_file(cmd, file, target, documentationUri=None, documentation_uri=None, with_source=None, force=None, config=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
@@ -4527,13 +4547,14 @@ def publish_bicep_file(cmd, file, target, documentationUri=None, documentation_u
                 args += ["--force"]
             else:
                 logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
+        args += _get_bicep_config_args(cmd.cli_ctx, "publish", config)
 
         run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def restore_bicep_file(cmd, file, force=None):
+def restore_bicep_file(cmd, file, force=None, config=None):
     ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
@@ -4541,6 +4562,7 @@ def restore_bicep_file(cmd, file, force=None):
         args = ["restore", file]
         if force:
             args += ["--force"]
+        args += _get_bicep_config_args(cmd.cli_ctx, "restore", config)
         run_bicep_command(cmd.cli_ctx, args)
     else:
         logger.error("az bicep restore could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
@@ -4586,7 +4608,7 @@ def list_bicep_cli_versions(cmd):
     return get_bicep_available_release_tags()
 
 
-def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None, output_format=None, include_params=None):
+def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None, output_format=None, include_params=None, config=None):
     ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
@@ -4604,6 +4626,7 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
             args += ["--include-params", include_params]
         if stdout:
             args += ["--stdout"]
+        args += _get_bicep_config_args(cmd.cli_ctx, "generate-params", config)
 
         output = run_bicep_command(cmd.cli_ctx, args)
 
@@ -4613,7 +4636,7 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
         logger.error("az bicep generate-params could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
-def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
+def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None, config=None):
     ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
@@ -4623,6 +4646,7 @@ def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
             args += ["--no-restore"]
         if diagnostics_format:
             args += ["--diagnostics-format", diagnostics_format]
+        args += _get_bicep_config_args(cmd.cli_ctx, "lint", config)
 
         output = run_bicep_command(cmd.cli_ctx, args)
 
@@ -4633,7 +4657,7 @@ def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
 
 def snapshot_bicep_file(cmd, file, mode=None, tenant_id=None, subscription_id=None,
                         management_group_id=None, location=None, resource_group=None,
-                        deployment_name=None):
+                        deployment_name=None, config=None):
     ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.41.2"
@@ -4653,6 +4677,7 @@ def snapshot_bicep_file(cmd, file, mode=None, tenant_id=None, subscription_id=No
             args += ["--resource-group", resource_group]
         if deployment_name:
             args += ["--deployment-name", deployment_name]
+        args += _get_bicep_config_args(cmd.cli_ctx, "snapshot", config)
 
         output = run_bicep_command(cmd.cli_ctx, args)
 

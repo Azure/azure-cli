@@ -21,10 +21,17 @@ from azure.cli.command_modules.resource._bicep import (
     _bicep_version_check_file_path,
 )
 from azure.cli.command_modules.resource.custom import (
+    build_bicep_file,
+    build_bicepparam_file,
+    format_bicep_file,
+    generate_params_file,
+    lint_bicep_file,
+    publish_bicep_file,
+    restore_bicep_file,
     run_bicep_cli_passthrough,
     snapshot_bicep_file,
 )
-from azure.cli.core.azclierror import InvalidArgumentValueError, InvalidTemplateError
+from azure.cli.core.azclierror import InvalidArgumentValueError, InvalidTemplateError, ValidationError
 from azure.cli.core.mock import DummyCli
 
 
@@ -386,6 +393,85 @@ class TestBicepSnapshot(unittest.TestCase):
             snapshot_bicep_file(self.cmd, "main.bicepparam")
 
         run_bicep_command_mock.assert_not_called()
+
+
+class TestBicepConfig(unittest.TestCase):
+    def setUp(self):
+        self.cli_ctx = DummyCli(random_config_dir=True)
+        self.cmd = mock.Mock()
+        self.cmd.cli_ctx = self.cli_ctx
+
+    def _command_cases(self):
+        return [
+            (build_bicep_file, ["build", "main.bicep"], {"file": "main.bicep"}),
+            (build_bicepparam_file, ["build-params", "main.bicepparam"], {"file": "main.bicepparam"}),
+            (format_bicep_file, ["format", "main.bicep", "--newline-kind", "LF"], {"file": "main.bicep", "newline_kind": "LF"}),
+            (generate_params_file, ["generate-params", "main.bicep"], {"file": "main.bicep"}),
+            (lint_bicep_file, ["lint", "main.bicep"], {"file": "main.bicep"}),
+            (publish_bicep_file, ["publish", "main.bicep", "--target", "br:example.azurecr.io/m:v1"],
+             {"file": "main.bicep", "target": "br:example.azurecr.io/m:v1"}),
+            (restore_bicep_file, ["restore", "main.bicep"], {"file": "main.bicep"}),
+            (snapshot_bicep_file, ["snapshot", "main.bicepparam"], {"file": "main.bicepparam"}),
+        ]
+
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to")
+    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
+    def test_config_is_forwarded_to_bicep_cli(
+        self, ensure_bicep_installation_mock, bicep_version_check_mock, run_bicep_command_mock
+    ):
+        bicep_version_check_mock.return_value = True
+        run_bicep_command_mock.return_value = ""
+
+        for func, expected_args, kwargs in self._command_cases():
+            with self.subTest(command=expected_args[0]):
+                bicep_version_check_mock.reset_mock()
+                run_bicep_command_mock.reset_mock()
+
+                func(self.cmd, config="bicepconfig.prod.json", **kwargs)
+
+                bicep_version_check_mock.assert_any_call(self.cli_ctx, "0.49.0")
+                run_bicep_command_mock.assert_called_once_with(
+                    self.cli_ctx, expected_args + ["--config", "bicepconfig.prod.json"]
+                )
+
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to")
+    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
+    def test_config_is_omitted_when_not_specified(
+        self, ensure_bicep_installation_mock, bicep_version_check_mock, run_bicep_command_mock
+    ):
+        bicep_version_check_mock.return_value = True
+        run_bicep_command_mock.return_value = ""
+
+        for func, expected_args, kwargs in self._command_cases():
+            with self.subTest(command=expected_args[0]):
+                bicep_version_check_mock.reset_mock()
+                run_bicep_command_mock.reset_mock()
+
+                func(self.cmd, **kwargs)
+
+                self.assertNotIn(mock.call(self.cli_ctx, "0.49.0"), bicep_version_check_mock.call_args_list)
+                run_bicep_command_mock.assert_called_once_with(self.cli_ctx, expected_args)
+
+    @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
+    @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to")
+    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
+    def test_config_errors_when_bicep_too_old(
+        self, ensure_bicep_installation_mock, bicep_version_check_mock, run_bicep_command_mock
+    ):
+        bicep_version_check_mock.side_effect = lambda _, version: version != "0.49.0"
+
+        for func, expected_args, kwargs in self._command_cases():
+            with self.subTest(command=expected_args[0]):
+                run_bicep_command_mock.reset_mock()
+
+                with self.assertRaisesRegex(
+                    ValidationError, f"az bicep {expected_args[0]} with --config.*0\\.49\\.0"
+                ):
+                    func(self.cmd, config="bicepconfig.prod.json", **kwargs)
+
+                run_bicep_command_mock.assert_not_called()
 
 
 class TestBicepRun(unittest.TestCase):
