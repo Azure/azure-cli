@@ -42,7 +42,8 @@ from azure.cli.command_modules.batch._validators import (
     storage_account_id,
     validate_client_parameters,
     validate_json_file,
-    validate_pool_resize_parameters)
+    validate_pool_resize_parameters,
+    validate_retained_data_option)
 
 
 class NetworkProfile(Enum):
@@ -195,7 +196,7 @@ def load_arguments(self, _):
         c.argument('if_none_match', help='The operation will not be performed only if the resource\'s current ETag exactly matches the specified value.', arg_group='Pre-condition and Query')
         c.argument('pool_id', help='The ID of the pool.')
         c.argument('abort', action='store_true', help='Stop the pool resize operation.', validator=validate_pool_resize_parameters)
-        c.argument('node_deallocation_option', options_list=('--node-deallocation-option',), help='When nodes may be removed from the pool, if the pool size is decreasing.', arg_type=get_enum_type(BatchNodeDeallocationOption))
+        c.argument('node_deallocation_option', options_list=('--node-deallocation-option',), help='When nodes may be removed from the pool, if the pool size is decreasing.', arg_type=get_enum_type(BatchNodeDeallocationOption), validator=validate_retained_data_option)
         c.argument('resize_timeout', type=duration_format, help='The default value is 15 minutes. The minimum value is 5 minutes. '
                                                                 'If you specify a value less than 5 minutes, the Batch service '
                                                                 'returns an error; if you are calling the REST API directly, the '

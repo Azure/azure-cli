@@ -3,14 +3,34 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import register_command_deprecate
+from azure.cli.core.breaking_change import (AzCLIOtherChange, register_command_deprecate,
+                                            register_conditional_breaking_change)
 
-USAGE_METRICS_REMOVAL = 'May 2027'
+# The target version of every pre-announcement in this file. The messages are custom, so they include it too.
+TARGET_VERSION = 'May 2027'
 
 register_command_deprecate(
     'batch pool usage-metrics list',
-    target_version=USAGE_METRICS_REMOVAL,
-    message=f"This command has been deprecated and will be removed in {USAGE_METRICS_REMOVAL}. The Azure Batch "
+    target_version=TARGET_VERSION,
+    message=f"This command has been deprecated and will be removed in {TARGET_VERSION}. The Azure Batch "
             "service retired the pool usage metrics API on September 30, 2024, so this command always returns an "
             "error. For more information, see https://github.com/Azure/Batch/issues/140."
 )
+
+# Printed by validate_retained_data_option only when the value 'retaineddata' is used
+RETAINED_DATA_TAG = 'retaineddata'
+
+
+def _register_retained_data_removal(command, option):
+    register_conditional_breaking_change(RETAINED_DATA_TAG, AzCLIOtherChange(
+        command,
+        f"The value 'retaineddata' of '{option}' has been deprecated and will be removed in {TARGET_VERSION}, "
+        "because Azure Batch API version 2026-10-01 removes it. Upload task data to Azure Storage in your task "
+        "and use 'taskcompletion' instead.",
+        arg=option,
+        target_version=TARGET_VERSION))
+
+
+_register_retained_data_removal('batch pool resize', '--node-deallocation-option')
+_register_retained_data_removal('batch node delete', '--node-deallocation-option')
+_register_retained_data_removal('batch node reboot', '--node-reboot-option')

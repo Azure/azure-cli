@@ -4,9 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from knack.log import get_logger
 from azure.cli.core.util import get_file_json
 from urllib.parse import urlsplit
 from azure.batch.models import (DiskEncryptionTarget)
+
+logger = get_logger(__name__)
 
 # TYPES VALIDATORS
 
@@ -341,3 +344,15 @@ def validate_client_parameters(cmd, namespace):
 
     if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'aad':
         namespace.account_key = None
+
+
+def validate_retained_data_option(namespace, _=None):
+    """Warn that the value 'retaineddata' will be removed, only when it is used (see _breaking_change.py)."""
+    for name in ('node_deallocation_option', 'node_reboot_option'):
+        value = getattr(namespace, name, None)
+        if isinstance(value, str) and value.lower() == 'retaineddata':
+            from azure.cli.core.breaking_change import print_conditional_breaking_change
+            from azure.cli.command_modules.batch._breaking_change import RETAINED_DATA_TAG
+            print_conditional_breaking_change(None, RETAINED_DATA_TAG, command_name=namespace.command,
+                                              custom_logger=logger)
+            return
