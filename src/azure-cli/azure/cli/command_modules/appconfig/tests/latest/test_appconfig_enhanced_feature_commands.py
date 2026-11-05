@@ -13,7 +13,7 @@ from urllib3.response import HTTPResponse
 
 from azure.appconfiguration import FeatureFlag, FeatureFlagClient
 from azure.core import MatchConditions
-from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, ResourceNotFoundError as SDKResourceNotFoundError
+from azure.core.exceptions import HttpResponseError, ResourceExistsError, ResourceModifiedError, ResourceNotFoundError as SDKResourceNotFoundError
 from azure.core.paging import ItemPaged
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.core.azclierror import ResourceNotFoundError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, InvalidArgumentValueError, AzureResponseError
@@ -354,6 +354,47 @@ class AppConfigEnhancedFeatureConcurrencyTests(ScenarioTest):
 
 
 class AppConfigEnhancedFeatureDeleteTests(ScenarioTest):
+
+    def test_enhanced_feature_delete_partial_failure_continues(self):
+        flags = [FeatureFlag(name=name, enabled=False) for name in ('First', 'Second', 'Third', 'Fourth')]
+        with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:
+            client = get_client.return_value
+            client.list_feature_flags.return_value = flags
+            client.delete_feature_flag.side_effect = [
+                flags[0], HttpResponseError('Service unavailable'),
+                ResourceModifiedError('Concurrent update'), flags[3]]
+
+            with patch('azure.cli.command_modules.appconfig.enhanced_feature.logger') as logger:
+                self.cmd('appconfig enhanced-feature-flag delete --endpoint https://example.azconfig.io '
+                         '--auth-mode login --feature-name "*" -y',
+                         checks=[self.check('[].name', ['First', 'Fourth'])])
+
+                logger.error.assert_called_once()
+                errors = json.loads(logger.error.call_args.args[1])
+                self.assertIn('Service unavailable', errors[0])
+                self.assertIn("Failed to delete feature flag 'Third'", errors[1])
+                self.assertIn('conflicting operation', errors[1])
+
+            self.assertEqual(client.delete_feature_flag.call_args_list, [
+                call(name=flag.name, label=flag.label, etag=flag.etag,
+                     match_condition=MatchConditions.IfNotModified) for flag in flags])
+
+    def test_enhanced_feature_delete_all_failures_are_reported(self):
+        flags = [FeatureFlag(name=name, enabled=False) for name in ('First', 'Second')]
+        with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:
+            client = get_client.return_value
+            client.list_feature_flags.return_value = flags
+            client.delete_feature_flag.side_effect = [
+                HttpResponseError('First failure'), HttpResponseError('Second failure')]
+
+            with self.assertRaises(AzureResponseError) as error:
+                self.cmd('appconfig enhanced-feature-flag delete --endpoint https://example.azconfig.io '
+                         '--auth-mode login --feature-name "*" -y')
+
+            self.assertIn('Delete operation failed.', str(error.exception))
+            self.assertIn('First failure', str(error.exception))
+            self.assertIn('Second failure', str(error.exception))
+            self.assertEqual(client.delete_feature_flag.call_count, 2)
 
     def test_enhanced_feature_delete_requires_feature_name(self):
         with patch('azure.cli.command_modules.appconfig.enhanced_feature.get_appconfig_feature_flag_client') as get_client:

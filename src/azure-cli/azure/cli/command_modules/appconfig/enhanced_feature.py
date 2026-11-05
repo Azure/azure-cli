@@ -185,7 +185,6 @@ def delete_feature(cmd,
             exception_messages.append("Failed to delete feature flag '{}' with label '{}' due to a conflicting operation.".format(feature_flag.name, feature_flag.label))
         except HttpResponseError as exception:
             exception_messages.append(str(exception))
-            raise CLIErrors.AzureResponseError('Delete operation failed. The following error(s) occurred:\n' + json.dumps(exception_messages, indent=2, ensure_ascii=False))
 
     # Log errors if partially succeeded
     if exception_messages:
