@@ -59,7 +59,9 @@ class StorageAzcopyEndpointTests(ScenarioTest):
     def test_storage_copy_ambient_credentials_are_account_bound(self):
         from knack.config import CLIConfig
 
-        with mock.patch('azure.cli.command_modules.storage.operations.azcopy.AzCopy') as azcopy, \
+        with tempfile.TemporaryDirectory() as inherited_config_dir, \
+                mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': inherited_config_dir}), \
+                mock.patch('azure.cli.command_modules.storage.operations.azcopy.AzCopy') as azcopy, \
                 mock.patch('azure.cli.command_modules.storage.azcopy.util._generate_sas_token',
                            return_value='sig=test-signature') as generate:
             for origin in ('environment', 'config'):
@@ -68,18 +70,19 @@ class StorageAzcopyEndpointTests(ScenarioTest):
                                         'https://victim.blob.core.windows.net/c/b?sig=destination'):
                         with self.subTest(origin=origin, credential=credential, destination=destination):
                             with tempfile.TemporaryDirectory() as config_dir:
-                                config = CLIConfig(config_dir=config_dir, config_env_var_prefix='AZURE')
-                                env = {'AZURE_STORAGE_AUTH_MODE': 'key'}
+                                env = {'AZURE_STORAGE_AUTH_MODE': 'key', 'AZURE_CONFIG_DIR': config_dir}
                                 if origin == 'environment':
                                     env['AZURE_STORAGE_' + credential.upper()] = value
-                                else:
-                                    config.set_value('storage', credential, value)
-                                with mock.patch.object(self.cli_ctx, 'config', config), \
-                                        mock.patch.dict(os.environ, env, clear=True):
-                                    generate.reset_mock()
-                                    self.cmd(
-                                        'storage copy -s https://attacker.blob.core.windows.net/c/b '
-                                        '-d {} --account-name victim'.format(destination))
+                                with mock.patch.dict(os.environ, env, clear=True):
+                                    config = CLIConfig(config_dir=config_dir, config_env_var_prefix='AZURE')
+                                    self.assertEqual(config.config_dir, config_dir)
+                                    if origin == 'config':
+                                        config.set_value('storage', credential, value)
+                                    with mock.patch.object(self.cli_ctx, 'config', config):
+                                        generate.reset_mock()
+                                        self.cmd(
+                                            'storage copy -s https://attacker.blob.core.windows.net/c/b '
+                                            '-d {} --account-name victim'.format(destination))
                                 expected = destination
                                 if destination.endswith('/b'):
                                     expected += '?' + (value if credential == 'sas_token' else 'sig=test-signature')
@@ -91,6 +94,7 @@ class StorageAzcopyEndpointTests(ScenarioTest):
                                     self.assertEqual(generate.call_args[0][1:3], ('victim', value))
                                 else:
                                     generate.assert_not_called()
+            self.assertFalse(os.path.exists(os.path.join(inherited_config_dir, 'config')))
 
 
 class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
