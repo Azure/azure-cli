@@ -1,0 +1,61 @@
+name: azure-cli
+version: "${CLI_VERSION}"
+title: Azure CLI
+summary: Microsoft Azure Command-Line Interface
+description: |
+  The Azure CLI is a command-line tool for managing Azure resources.
+  It provides a consistent interface across Azure services with features
+  including resource management, scripting support, and cross-platform
+  compatibility.
+
+  Documentation: https://learn.microsoft.com/cli/azure/
+
+license: MIT
+contact: https://github.com/Azure/azure-cli/issues
+issues: https://github.com/Azure/azure-cli/issues
+source-code: https://github.com/Azure/azure-cli
+website: https://learn.microsoft.com/cli/azure/
+
+grade: stable
+confinement: strict
+base: core22
+
+${ARCHITECTURES}
+
+apps:
+  az:
+    command: bin/az-wrapper
+    plugs:
+      - home
+      - network
+      - network-bind
+      - ssh-keys
+      - removable-media
+      - desktop           # Allow opening URLs in browser (for az login)
+      - browser-support   # Browser integration support
+
+parts:
+  wrapper:
+    plugin: dump
+    source: scripts/
+    organize:
+      az-wrapper: bin/az-wrapper
+
+  azure-cli:
+    plugin: python
+    source: wheels/
+    build-packages:
+      - python3-dev
+      - libffi-dev
+      - libssl-dev
+    stage-packages:
+      - python3
+      - python3-pip
+      - libffi8
+      - libssl3
+    override-build: |
+      craftctl default
+      ${CRAFT_PART_INSTALL}/bin/pip3 install --find-links=${CRAFT_PART_SRC} ${CRAFT_PART_SRC}/azure_cli*.whl
+    organize:
+      bin: opt/az/bin
+      lib: opt/az/lib
