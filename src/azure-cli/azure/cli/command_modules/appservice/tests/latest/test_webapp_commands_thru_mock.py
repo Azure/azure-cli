@@ -4140,12 +4140,12 @@ class TestStackRuntimeDotnetLinux(unittest.TestCase):
         helper._stacks = parsed_results
         self.assertEqual(
             [row['config'] for row in helper.get_stacks_as_table()],
-            ['DOTNETCORE|11.0'])
+            ['DOTNETCORE:11.0'])
 
     def test_parse_windows_dotnet_catalog_unchanged(self):
-        for display_text, expected in (
-                ('.NET 11 (STS)', 'dotnet|11'),
-                ('.NET 11.0 (STS)', 'dotnet|11.0')):
+        for display_text, expected_display_name, expected_config in (
+                ('.NET 11 (STS)', 'dotnet|11', 'dotnet:11'),
+                ('.NET 11.0 (STS)', 'dotnet|11.0', 'dotnet:11.0')):
             with self.subTest(display_text=display_text):
                 helper = self._new_helper('placeholder')
                 parsed_results = []
@@ -4168,9 +4168,9 @@ class TestStackRuntimeDotnetLinux(unittest.TestCase):
                 helper._stacks = parsed_results
                 self.assertEqual(
                     [row['config'] for row in helper.get_stacks_as_table()],
-                    [expected])
+                    [expected_config])
                 runtime = helper.resolve('dotnet|11')
-                self.assertEqual(runtime.display_name, expected)
+                self.assertEqual(runtime.display_name, expected_display_name)
                 self.assertEqual(runtime.configs['net_framework_version'], 'v11.0')
 
 
