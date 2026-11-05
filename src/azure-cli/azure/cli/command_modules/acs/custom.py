@@ -2390,8 +2390,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                         "securityContext": {"runAsUser": 0},
                         "name": podName,
                         "image": CONST_CANIPULL_IMAGE,
-                        # "--" ensures canipull never parses the registry as a flag.
-                        "args": ["-v6", "--", acr],
+                        "args": ["-v6", acr],
                         "stdin": True,
                         "stdinOnce": True,
                         # On national/sovereign clouds, node provisioning stamps
