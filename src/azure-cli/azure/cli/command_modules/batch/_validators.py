@@ -5,6 +5,7 @@
 
 import os
 from knack.log import get_logger
+from knack.util import CLIError
 from azure.cli.core.util import get_file_json
 from urllib.parse import urlsplit
 from azure.batch.models import (DiskEncryptionTarget)
@@ -347,9 +348,21 @@ def validate_client_parameters(cmd, namespace):
 
 
 def validate_retained_data_option(namespace, _=None):
-    """Warn that the value 'retaineddata' will be removed, only when it is used (see _breaking_change.py)."""
-    for name in ('node_deallocation_option', 'node_reboot_option'):
-        value = getattr(namespace, name, None)
+    """Warn that the value 'retaineddata' will be removed, only when it is used, as an option or in the
+    --json-file body (see _breaking_change.py)."""
+    body = getattr(namespace, 'json_file', None)
+    if isinstance(body, str):
+        try:
+            body = get_file_json(body)
+        except (OSError, ValueError, CLIError):
+            body = None  # the --json-file handling reports the error
+    if not isinstance(body, dict):
+        body = {}
+    for name, rest_name in (('node_deallocation_option', 'nodeDeallocationOption'),
+                            ('node_reboot_option', 'nodeRebootOption')):
+        if not hasattr(namespace, name):
+            continue
+        value = getattr(namespace, name) or body.get(rest_name)
         if isinstance(value, str) and value.lower() == 'retaineddata':
             from azure.cli.core.breaking_change import print_conditional_breaking_change
             from azure.cli.command_modules.batch._breaking_change import RETAINED_DATA_TAG
