@@ -3917,6 +3917,9 @@ class PrivateEndpointCreate(_PrivateEndpointCreate):
         args_schema.manual_request = AAZBoolArg(
             options=['--manual-request'],
             help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.")
+        args_schema.approval_reference_id = AAZResourceIdArg(
+            options=['--approval-reference-id'],
+            help="The ARM resource ID of an existing approved private endpoint whose approval state is inherited by this manual connection. Only valid with --manual-request.")
         args_schema.vnet_name = AAZStrArg(
             options=['--vnet-name'],
             help="The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).")
@@ -3938,10 +3941,15 @@ class PrivateEndpointCreate(_PrivateEndpointCreate):
 
     def pre_operations(self):
         args = self.ctx.args
+        if has_value(args.approval_reference_id) and not args.manual_request:
+            raise ArgumentUsageError("--approval-reference-id can only be used with --manual-request.")
+
         pls_connection = {'name': args.connection_name,
                           'group_ids': args.group_ids,
                           'request_message': args.request_message,
                           'private_link_service_id': args.private_connection_resource_id}
+        if has_value(args.approval_reference_id):
+            pls_connection['approval_reference'] = {'private_endpoint_id': args.approval_reference_id}
 
         if args.manual_request:
             args.manual_private_link_service_connections = [pls_connection]
@@ -3958,11 +3966,14 @@ class PrivateEndpointCreate(_PrivateEndpointCreate):
 class PrivateEndpointUpdate(_PrivateEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
+        from azure.cli.core.aaz import AAZResourceIdArg, AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.request_message = AAZStrArg(
             options=['--request-message'],
             help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
+        args_schema.approval_reference_id = AAZResourceIdArg(
+            options=['--approval-reference-id'],
+            help="The ARM resource ID of an existing approved private endpoint whose approval state is inherited by this manual connection.")
 
         args_schema.manual_private_link_service_connections._registered = False
         args_schema.private_link_service_connections._registered = False
@@ -3971,6 +3982,14 @@ class PrivateEndpointUpdate(_PrivateEndpointUpdate):
 
     def pre_instance_update(self, instance):
         args = self.ctx.args
+        if has_value(args.approval_reference_id):
+            manual_connections = instance.properties.manual_private_link_service_connections
+            if not has_value(manual_connections) or not manual_connections:
+                raise ArgumentUsageError("--approval-reference-id can only be used with an existing manual connection.")
+            manual_connections[0].properties.approval_reference = {
+                'private_endpoint_id': args.approval_reference_id
+            }
+
         if has_value(args.request_message):
             if has_value(instance.properties.private_link_service_connections):
                 instance.properties.private_link_service_connections[0].properties.request_message = args.request_message

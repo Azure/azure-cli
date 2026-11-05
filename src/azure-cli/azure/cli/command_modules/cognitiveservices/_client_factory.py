@@ -34,6 +34,28 @@ def get_cognitiveservices_management_client(cli_ctx, *_):
     return get_mgmt_service_client(cli_ctx, CognitiveServicesManagementClient)
 
 
+def get_agent_hosting_clients(cli_ctx, subscription_id):
+    from types import SimpleNamespace
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.authorization import AuthorizationManagementClient
+    from azure.mgmt.compute import ComputeManagementClient
+    from azure.mgmt.containerservice import ContainerServiceClient
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    from azure.mgmt.resource import ResourceManagementClient, SubscriptionClient
+    from azure.mgmt.storage import StorageManagementClient
+
+    return SimpleNamespace(
+        aks=get_mgmt_service_client(cli_ctx, ContainerServiceClient, subscription_id=subscription_id),
+        compute=get_mgmt_service_client(cli_ctx, ComputeManagementClient, subscription_id=subscription_id),
+        identity=get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=subscription_id),
+        resource=get_mgmt_service_client(cli_ctx, ResourceManagementClient, subscription_id=subscription_id),
+        storage=get_mgmt_service_client(cli_ctx, StorageManagementClient, subscription_id=subscription_id),
+        authorization=get_mgmt_service_client(cli_ctx, AuthorizationManagementClient, subscription_id=subscription_id),
+        subscription=get_mgmt_service_client(
+            cli_ctx, SubscriptionClient, subscription_id=subscription_id, subscription_bound=False),
+    )
+
+
 def cf_accounts(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).accounts
 

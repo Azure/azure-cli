@@ -70,6 +70,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_MACHINES,
     CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
     CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
+    CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
 )
 from azure.cli.command_modules.acs.agentpool_decorator import AKSAgentPoolContext, AKSAgentPoolParamDict
 from azure.cli.command_modules.acs.managed_cluster_decorator import (
@@ -9854,6 +9855,82 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             ampls_resource_id=None,
             enable_high_log_scale_mode=True,
         )
+
+        # Case 6: Automatic SKU enables monitoring by default without --enable-addons,
+        # so the DCR association must still be created
+        dec_6 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "sku": CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_6 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={},
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_6,
+            },
+        )
+        dec_6.context.attach_mc(mc_6)
+        dec_6.context.set_intermediate("monitoring_addon_enabled", True)
+        mock_profile_6 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_6
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_6:
+            dec_6.postprocessing_after_mc_created(mc_6)
+        mock_ensure_6.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_6,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=False,
+            create_dcra=True,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=None,
+        )
+
+        # Case 7: non-Automatic SKU without --enable-addons or --enable-azure-monitor-logs
+        # skips DCR association
+        dec_7 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(enabled=True, config={}),
+            },
+        )
+        dec_7.context.attach_mc(mc_7)
+        dec_7.context.set_intermediate("monitoring_addon_enabled", True)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_7:
+            dec_7.postprocessing_after_mc_created(mc_7)
+        mock_ensure_7.assert_not_called()
 
     def test_put_mc(self):
         dec_1 = AKSManagedClusterCreateDecorator(
