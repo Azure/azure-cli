@@ -124,6 +124,13 @@ def load_command_table(self, _):
         g.command('set-snapshot-reference', 'set_snapshot_reference')
 
     # FeatureManagement Commands
+    enhanced_feature_transfer_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.enhanced_feature_import_export#{}'
+    )
+    with self.command_group('appconfig enhanced-feature-flag', enhanced_feature_transfer_util) as g:
+        g.command('import', 'import_feature_flags')
+        g.command('export', 'export_feature_flags')
+
     with self.command_group('appconfig feature',
                             custom_command_type=get_custom_sdk('feature',
                                                                cf_configstore_operations,

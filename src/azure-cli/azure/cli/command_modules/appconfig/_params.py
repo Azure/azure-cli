@@ -251,6 +251,43 @@ def load_arguments(self, _):
     with self.argument_context('appconfig credential regenerate') as c:
         c.argument('id_', options_list=['--id'], help='Id of the key to be regenerated. Can be found using az appconfig credential list command.')
 
+    for command in ('import', 'export'):
+        with self.argument_context('appconfig enhanced-feature-flag ' + command) as c:
+            c.argument('name', arg_type=data_plane_name_arg_type)
+            c.argument('path', help='Local file containing feature flags in the selected profile.')
+            c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml']), help='File format. Required for file transfers.')
+            c.argument('profile', arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.FFSET]), validator=None,
+                       help="File transfer profile. When importing, detect the profile embedded in the file if omitted; otherwise default to 'appconfig/default'. Use 'appconfig/ffset' for /ff resources with name, labels and tags in an items array with profile metadata. Both profiles support JSON and YAML.")
+            c.argument('yes', help='Do not prompt for preview or confirmation.')
+            c.argument('dry_run', validator=validate_dry_run, help='Preview changes without writing flags or files.')
+            c.argument('preserve_labels', arg_type=get_three_state_flag(), help='Preserve source labels instead of assigning the destination label. File exports preserve labels only with appconfig/ffset.')
+
+    with self.argument_context('appconfig enhanced-feature-flag import') as c:
+        c.argument('source', options_list=['--source', '-s'], required=True, arg_type=get_enum_type(['file', 'appconfig']), validator=validate_import, help='Source of enhanced feature flags.')
+        c.argument('label', help='Label to assign to imported flags. Defaults to the null label. Cannot be combined with --preserve-labels.')
+        c.argument('tags', nargs='*', validator=None, help='Replace imported tags. If omitted, preserve source tags. Use an empty value to clear tags.')
+        c.argument('import_mode', arg_type=get_enum_type([ImportMode.ALL, ImportMode.IGNORE_MATCH]), help='Write all flags, or only flags whose resource properties differ from the destination.')
+        c.argument('strict', arg_type=get_three_state_flag(), help='File imports only. Delete destination flags absent from the file in the destination label. With --preserve-labels, only labels present in the file are reconciled.')
+        c.argument('src_name', help='Source App Configuration store name.')
+        c.argument('src_connection_string', validator=validate_connection_string, help='Source store connection string.')
+        c.argument('src_endpoint', help='Source store endpoint.')
+        c.argument('src_auth_mode', arg_type=get_enum_type(['key', 'login', 'anonymous']), help='Source store authentication mode.')
+        c.argument('src_feature_name', help='Source flag name filter. Defaults to all names. Supports asterisk filters.')
+        c.argument('src_label', help='Source label filter. Defaults to the null label. Use * for all labels.')
+        c.argument('src_tags', nargs='*', validator=validate_import_tag_filters, help='Space-separated source tag filters: key[=value].')
+
+    with self.argument_context('appconfig enhanced-feature-flag export') as c:
+        c.argument('destination', options_list=['--destination', '-d'], required=True, arg_type=get_enum_type(['file', 'appconfig']), validator=validate_export, help='Destination of enhanced feature flags.')
+        c.argument('feature_name', help='Flag name filter. Defaults to all names. Supports asterisk filters.')
+        c.argument('label', help='Source label filter. Defaults to the null label. Use * for all labels.')
+        c.argument('tags', nargs='*', validator=validate_tag_filters, help='Space-separated source tag filters: key[=value].')
+        c.argument('dest_name', help='Destination App Configuration store name.')
+        c.argument('dest_connection_string', validator=validate_connection_string, help='Destination store connection string.')
+        c.argument('dest_endpoint', help='Destination store endpoint.')
+        c.argument('dest_auth_mode', arg_type=get_enum_type(['key', 'login', 'anonymous']), help='Destination store authentication mode.')
+        c.argument('dest_label', help='Label assigned in the destination store. Defaults to the null label. Cannot be combined with --preserve-labels.')
+        c.argument('dest_tags', nargs='*', validator=None, help='Replace tags in the destination store. If omitted, preserve source tags.')
+
     with self.argument_context('appconfig kv') as c:
         c.argument('name', arg_type=data_plane_name_arg_type)
 
@@ -271,7 +308,7 @@ def load_arguments(self, _):
         c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default if --separator is provided. Not applicable for property files or feature flags.")
         # bypass cli allowed values limitation
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
-        c.argument('profile', validator=validate_import_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Import profile to be used for importing the key-values. Options 'depth', 'separator', 'content-type', 'label', 'skip-features', 'tags' and, 'prefix' are not supported when using '{}' profile.".format(ImportExportProfiles.KVSET))
+        c.argument('profile', validator=validate_import_profile, arg_type=get_enum_type([ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET]), help="Import profile. If omitted, detect the profile embedded in the file, otherwise use appconfig/default. Options 'depth', 'separator', 'content-type', 'label', 'skip-features', 'tags' and, 'prefix' are not supported when using '{}' profile.".format(ImportExportProfiles.KVSET))
         c.argument('strict', validator=validate_strict_import, arg_type=get_three_state_flag(), help="Delete all other key-values in the store with specified prefix and label")
 
     with self.argument_context('appconfig kv import', arg_group='AppConfig') as c:

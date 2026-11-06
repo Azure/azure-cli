@@ -440,6 +440,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             imported_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
+        imported_kvs["profile"] = ImportExportProfiles.KVSET
         assert imported_kvs == exported_kvs
 
         # export kvset with --skip-features option
@@ -499,6 +500,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             expected_kvs = json.load(json_file)
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
+        expected_kvs["profile"] = ImportExportProfiles.KVSET
         assert expected_kvs == exported_kvs
         os.remove(exported_file_path)
 

@@ -131,6 +131,7 @@ class KVSetConstants:
 
 class ImportExportProfiles:
     KVSET = "appconfig/kvset"
+    FFSET = "appconfig/ffset"
     DEFAULT = "appconfig/default"
 
 
