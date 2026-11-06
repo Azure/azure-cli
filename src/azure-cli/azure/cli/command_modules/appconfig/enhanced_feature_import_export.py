@@ -10,11 +10,11 @@ from copy import deepcopy
 from types import SimpleNamespace
 
 import yaml
+from knack.log import get_logger
+
 from azure.appconfiguration import FeatureFlag
 from azure.core import MatchConditions
 from azure.core.exceptions import HttpResponseError
-from knack.log import get_logger
-
 from azure.cli.core.azclierror import (
     AzureResponseError,
     FileOperationError,
@@ -57,6 +57,25 @@ def _validate_profile(profile, mode):
     return profile or ImportExportProfiles.DEFAULT
 
 
+def _convert_percentile_bounds(allocation, bounds):
+    if not isinstance(allocation, dict):
+        return
+    percentiles = allocation.get("percentile", [])
+    if percentiles is None:
+        return
+    if not isinstance(percentiles, list):
+        raise FileOperationError("Feature flag allocation.percentile must be an array.")
+    for percentile in percentiles:
+        if not isinstance(percentile, dict):
+            raise FileOperationError("Feature flag percentile allocations must be objects.")
+        for source, target in bounds:
+            if source in percentile:
+                if target in percentile:
+                    raise FileOperationError(
+                        "Feature flag percentile allocation cannot contain both '{}' and '{}'.".format(source, target))
+                percentile[target] = percentile.pop(source)
+
+
 def _to_feature_management(flag):
     data = _serialize_flag(flag)
     data["id"] = data.pop("name")
@@ -65,6 +84,7 @@ def _to_feature_management(flag):
     conditions = data.get("conditions")
     if conditions is not None and "filters" in conditions:
         conditions["client_filters"] = conditions.pop("filters")
+    _convert_percentile_bounds(data.get("allocation"), (("percentile_from", "from"), ("percentile_to", "to")))
     for variant in data.get("variants", []):
         content_type = variant.pop("content_type", None)
         if "value" in variant:
@@ -92,6 +112,7 @@ def _from_feature_management(entry):
             raise FileOperationError("Default-profile conditions use 'client_filters', not 'filters'.")
         if "client_filters" in conditions:
             conditions["filters"] = conditions.pop("client_filters")
+    _convert_percentile_bounds(resource.get("allocation"), (("from", "percentile_from"), ("to", "percentile_to")))
     variants = resource.get("variants")
     if isinstance(variants, list):
         resource["variants"] = [_from_feature_management_variant(variant) for variant in variants]

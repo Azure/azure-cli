@@ -386,8 +386,11 @@ def validate_import_profile(namespace):
         from azure.cli.core.azclierror import FileOperationError
         try:
             data = __read_with_appropriate_encoding(namespace.path, "json")
-        except (OSError, ValueError) as exception:
-            raise FileOperationError("Failed to read the import file. " + str(exception)) from exception
+        except ValueError as exception:
+            raise FileOperationError(
+                "The input is not a well formatted json file.\nException: {}".format(exception)) from exception
+        except OSError as exception:
+            raise FileOperationError("File is not available.") from exception
         namespace.profile = resolve_import_profile(
             data, None, (ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET))
     if namespace.profile == ImportExportProfiles.KVSET:

@@ -113,6 +113,29 @@ class ImportProfileDetectionTests(TestCase):
         with open(self.path, "w", encoding="utf-8") as target:
             target.write("{")
         with patch.object(keyvalue, "get_appconfig_data_client") as client:
-            with self.assertRaises(FileOperationError):
+            with self.assertRaisesRegex(FileOperationError, "The input is not a well formatted json file"):
+                keyvalue.import_config(None, "file", path=self.path, format_="json")
+            client.assert_not_called()
+
+    def test_profile_detection_preserves_default_scalar_json_error(self):
+        for value in ("invalid plain string", None, True, 42):
+            with self.subTest(value=value):
+                self.data = value
+                self.write_file()
+                errors = []
+                for profile in (None, ImportExportProfiles.DEFAULT):
+                    with patch.object(keyvalue, "get_appconfig_data_client", return_value=Mock()):
+                        with self.assertRaises(FileOperationError) as result:
+                            keyvalue.import_config(None, "file", path=self.path, format_="json", profile=profile)
+                        errors.append(str(result.exception))
+                self.assertEqual(errors[0], errors[1])
+                self.assertEqual(
+                    "The input is not a well formatted json file.\nException: "
+                    "Json object required but type '{}' was given.".format(type(value).__name__),
+                    errors[0])
+
+    def test_profile_detection_preserves_missing_file_error(self):
+        with patch.object(keyvalue, "get_appconfig_data_client") as client:
+            with self.assertRaisesRegex(FileOperationError, "^File is not available\\.$"):
                 keyvalue.import_config(None, "file", path=self.path, format_="json")
             client.assert_not_called()

@@ -87,7 +87,8 @@ class EnhancedFeatureImportExportTests(TestCase):
             ]},
             "variants": [{"name": "Red", "value": '{"color":"red"}',
                           "content_type": "application/json", "status_override": "Enabled"}],
-            "allocation": {"default_when_enabled": "Red", "default_when_disabled": "Red", "seed": "seed"},
+            "allocation": {"default_when_enabled": "Red", "default_when_disabled": "Red", "seed": "seed",
+                           "percentile": [{"variant": "Red", "percentile_from": 0, "percentile_to": 100}]},
             "telemetry": {"enabled": False, "metadata": {"team": "app"}},
             "tags": {"team": "app"},
         }
@@ -100,7 +101,8 @@ class EnhancedFeatureImportExportTests(TestCase):
             ]},
             "variants": [{"name": "Red", "configuration_value": {"color": "red"},
                           "status_override": "Enabled"}],
-            "allocation": self.resource["allocation"],
+            "allocation": {"default_when_enabled": "Red", "default_when_disabled": "Red", "seed": "seed",
+                           "percentile": [{"variant": "Red", "from": 0, "to": 100}]},
             "telemetry": self.resource["telemetry"],
         }
 
@@ -250,6 +252,45 @@ class EnhancedFeatureImportExportTests(TestCase):
         self.assertEqual("Beta", flag.name)
         self.assertFalse(flag.enabled)
         self.assertIsNotNone(flag.enabled)
+
+    def test_default_profile_imports_percentile_bounds_from_existing_fixture(self):
+        path = os.path.join(os.path.dirname(__file__), "import_features_new_fm_schema.json")
+        flags = transfers._read_flags(path, "json", ImportExportProfiles.DEFAULT)
+        with open(path, encoding="utf-8") as source:
+            expected = json.load(source)["feature_management"]["feature_flags"]
+        self.assertEqual(len(expected), len(flags))
+        percentile = transfers._serialize_flag(flags[0])["allocation"]["percentile"]
+        self.assertEqual([{"variant": "Off", "percentile_from": 0, "percentile_to": 100}], percentile)
+        self.assertEqual(expected[0]["allocation"], transfers._to_feature_management(flags[0])["allocation"])
+
+    def test_percentile_conversion_preserves_fractional_bounds_and_source(self):
+        resource = dict(self.resource, allocation={"percentile": [
+            {"variant": "Red", "percentile_from": 0, "percentile_to": 12.5},
+            {"variant": "Red", "percentile_from": 12.5, "percentile_to": 100},
+        ]})
+        flag = FeatureFlag.from_dict(resource)
+        converted = transfers._to_feature_management(flag)
+        self.assertEqual([
+            {"variant": "Red", "from": 0, "to": 12.5},
+            {"variant": "Red", "from": 12.5, "to": 100},
+        ], converted["allocation"]["percentile"])
+        self.assertEqual(resource, transfers._serialize_flag(flag))
+        self.write_file({"feature_management": {"feature_flags": [converted]}})
+        imported = transfers._read_flags(self.path, "json", ImportExportProfiles.DEFAULT)
+        self.assertEqual(resource["allocation"], transfers._serialize_flag(imported[0])["allocation"])
+
+    def test_invalid_percentile_allocations_are_rejected_before_connecting(self):
+        percentiles = [
+            "invalid", [True], [{"variant": "Red", "from": 0, "percentile_from": 10, "to": 100}],
+            [{"variant": "Red", "from": 0, "to": 100, "percentile_to": 90}],
+        ]
+        for percentile in percentiles:
+            with self.subTest(percentile=percentile):
+                entry = dict(self.application_resource, allocation={"percentile": percentile})
+                self.write_file({"feature_management": {"feature_flags": [entry]}})
+                with self.assertRaises(FileOperationError):
+                    transfers.import_feature_flags(None, "file", path=self.path, format_="json", yes=True)
+                self.get_client.assert_not_called()
 
     def test_ffset_profile_export_command_preserves_resource_schema(self):
         from azure.cli.core import get_default_cli

@@ -165,6 +165,7 @@ short-summary: Import enhanced feature flags from a file or another App Configur
 long-summary: |
   File transfers default to appconfig/default: a JSON or YAML object containing
   feature_management.feature_flags, using id, conditions.client_filters and variants.configuration_value.
+  Percentile allocation bounds use from/to in the default profile and percentile_from/percentile_to in appconfig/ffset.
   Use --profile appconfig/ffset for an items array of enhanced /ff resource objects with name,
   optional labels and tags, conditions.filters and variants.value/content_type.
   The export embeds profile: appconfig/ffset alongside items. Import detects it when --profile is omitted.
@@ -189,6 +190,7 @@ short-summary: Export enhanced feature flags to a file or another App Configurat
 long-summary: |
   File transfers default to appconfig/default: a JSON or YAML object containing
   feature_management.feature_flags, using id, conditions.client_filters and variants.configuration_value.
+  Percentile allocation bounds use from/to in the default profile and percentile_from/percentile_to in appconfig/ffset.
   This application format excludes labels, tags, etag and last_modified. Feature names must be unique;
   select a single label if a feature has multiple labels.
   Use --profile appconfig/ffset for an object containing profile: appconfig/ffset and an items array, preserving
