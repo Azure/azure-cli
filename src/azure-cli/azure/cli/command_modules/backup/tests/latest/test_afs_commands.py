@@ -66,7 +66,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=4096)
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
@@ -353,25 +353,25 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             ]
         )
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=4096)
     @record_only()
     def test_afs_msi_reregistration_protection_restore(self):
         source_subscription = self.get_subscription_id()
         target_subscription = self.get_subscription_id()
         self.kwargs.update({
-            'rg': 'bhar11-prt-restore-rg',
-            'vault': 'bhar11-prt-olr-rsv',
-            'policy': 'bhar11-prt-snapshot-policy',
-            'storage_account': 'afsuami09191425',
+            'rg': 'cli-afs-msi-20261024-2215',
+            'vault': 'cli-afs-msi-261024-2215',
+            'policy': 'CliAfsSnapshotPolicy',
+            'storage_account': 'cliafsu2610242215',
             'uami_id': (
                 '/subscriptions/{}/'
-                'resourceGroups/bhar11-prt-restore-rg/providers/Microsoft.ManagedIdentity/'
-                'userAssignedIdentities/afs-test-uami-09191425'
+                'resourceGroups/cli-afs-msi-20261024-2215/providers/Microsoft.ManagedIdentity/'
+                'userAssignedIdentities/cli-afs-uami-261024-2215'
             ).format(source_subscription),
             'target_subscription': target_subscription,
-            'target_resource_group': 'afs-softdelete-rg',
-            'target_storage_account': 'bhar11csrtgtsa',
-            'target_share': 'restoredfs',
+            'target_resource_group': 'cli-afs-msi-20261024-2215',
+            'target_storage_account': 'cliafst2610242215',
+            'target_share': 'cli-uami-target',
             'share': self.create_random_name('climsirec', 20),
             'type': 'AzureStorage'
         })
@@ -487,14 +487,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             '--delete-snapshots include-leased'
         )
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=4096)
     @record_only()
     def test_afs_sami_protection_restore(self):
         self.kwargs.update({
-            'rg': 'bhar11-prt-restore-rg',
-            'vault': 'bhar11-prt-olr-rsv',
-            'policy': 'bhar11-prt-snapshot-policy',
-            'storage_account': 'afssami09191425',
+            'rg': 'cli-afs-msi-20261024-2215',
+            'vault': 'cli-afs-msi-261024-2215',
+            'policy': 'CliAfsSnapshotPolicy',
+            'storage_account': 'cliafss2610242215',
             'share': self.create_random_name('bhar11clisami', 20),
             'subscription': self.get_subscription_id(),
             'type': 'AzureStorage'
