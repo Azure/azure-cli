@@ -12,7 +12,7 @@ from requests.structures import CaseInsensitiveDict
 import azure.mgmt.resource.deploymentstacks.models as StackModels
 # from itertools import groupby
 
-from ._formatters import _format_ext_resource_identifiers
+from ._formatters import _format_ext_resource_identifiers, _parse_array_item_path
 from ._color import Color, ColoredStringBuilder
 from ._utils import str_lower_eq
 
@@ -507,12 +507,13 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         print_array_indices = all(c.path for c in children)
         sorted_children = sorted(
             children,
-            key=lambda x: int(x.path)) if print_array_indices else children
+            key=lambda x: _parse_array_item_path(x.path)[0]) if print_array_indices else children
 
         for i, item_change in enumerate(sorted_children):
             if print_array_indices:
                 child_symbol, child_color = self._get_change_type_formatting(item_change.change_type)
-                self.builder.append(child_symbol, child_color).append_line(f" {item_change.path}:")
+                _, display_path = _parse_array_item_path(item_change.path)
+                self.builder.append(child_symbol, child_color).append_line(f" {display_path}:")
                 self._push_indent()
 
             if self._format_change(item_change, is_array_item=True) and i < len(array_change.children) - 1:
