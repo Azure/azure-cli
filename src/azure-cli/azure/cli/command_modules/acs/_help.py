@@ -2229,7 +2229,7 @@ parameters:
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
   - name: --enable-managed-dranet
     type: bool
-    short-summary: Enable Managed DRANET on the node pool.
+    short-summary: Enable or disable Managed DRANET on the node pool.
   - name: --node-public-ip-tags
     type: string
     short-summary: The ipTags of the node public IPs.
@@ -2413,7 +2413,7 @@ parameters:
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
   - name: --enable-managed-dranet
     type: bool
-    short-summary: Enable Managed DRANET on the node pool.
+    short-summary: Enable or disable Managed DRANET on the node pool.
   - name: --os-sku
     type: string
     short-summary: The OS SKU of the agent node pool.
