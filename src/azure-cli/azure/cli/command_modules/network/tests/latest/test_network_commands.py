@@ -10174,6 +10174,54 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
 
         self.assertTrue(vna_list[0].get('id') == vna2_id)
 
+    @ResourceGroupPreparer(name_prefix='test_vna_capacity_provider', location='westus2')
+    def test_network_virtual_network_appliance_capacity_provider(self, resource_group):
+        self.kwargs.update({
+            'vnet_provider': 'vnet-provider',
+            'vnet_consumer': 'vnet-consumer',
+            'vnet_address': '10.10.0.0/16',
+            'subnet': 'VirtualNetworkApplianceSubnet',
+            'subnet_address': '10.10.0.0/24',
+            'capacity_provider': 'capacity-provider',
+            'vna': 'vna',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet_provider} --address-prefixes {vnet_address}')
+        self.kwargs['provider_subnet_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet_provider} '
+            '--address-prefix {subnet_address} --default-outbound false --query id'
+        ).get_output_in_json()
+        self.kwargs['capacity_provider_id'] = self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {capacity_provider} '
+            '--bandwidth-in-gbps 200 --subnet \"{{id:{provider_subnet_id}}}\" --query id'
+        ).get_output_in_json()
+
+        self.cmd('network vnet create -g {rg} -n {vnet_consumer} --address-prefixes {vnet_address}')
+        self.kwargs['consumer_subnet_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet_consumer} '
+            '--address-prefix {subnet_address} --default-outbound false --query id'
+        ).get_output_in_json()
+
+        self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {vna} '
+            '--subnet \"{{id:{consumer_subnet_id}}}\" '
+            '--capacity-provider \"{{id:{capacity_provider_id}}}\"',
+            checks=self.check('capacityProvider.id', '{capacity_provider_id}')
+        )
+        self.cmd(
+            'network virtual-network-appliance update -g {rg} -n {vna} '
+            '--capacity-provider \'{{"id":"{capacity_provider_id}"}}\'',
+            checks=self.check('capacityProvider.id', '{capacity_provider_id}')
+        )
+        self.cmd(
+            'network virtual-network-appliance show -g {rg} -n {vna}',
+            checks=self.check('capacityProvider.id', '{capacity_provider_id}')
+        )
+
+        vna_list = self.cmd('network virtual-network-appliance list -g {rg}').get_output_in_json()
+        consumer = next(item for item in vna_list if item['name'] == self.kwargs['vna'])
+        self.assertEqual(consumer['capacityProvider']['id'], self.kwargs['capacity_provider_id'])
+
     @ResourceGroupPreparer(name_prefix='test_vna_ip_version', location='eastus')
     def test_network_virtual_network_appliance_private_ip_address_version(self, resource_group):
         self.kwargs.update({

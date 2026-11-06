@@ -79,7 +79,8 @@ def flexible_server_create(cmd, client,
                            federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
                            immutable_backup=None,
-                           storage_type=None, iops=None, throughput=None, cluster_size=None, database_name=None, yes=False):
+                           storage_type=None, iops=None, throughput=None, cluster_size=None, database_name=None, yes=False,
+                           fips_mode=None):
 
     if not check_resource_group(resource_group_name):
         resource_group_name = None
@@ -205,7 +206,8 @@ def flexible_server_create(cmd, client,
                                    identity=identity,
                                    data_encryption=data_encryption,
                                    auth_config=auth_config,
-                                   cluster=cluster)
+                                   cluster=cluster,
+                                   fips_mode=fips_mode)
 
     # Add Microsoft Entra Admin
     if is_microsoft_entra_auth_enabled and admin_name is not None or admin_id is not None:
@@ -240,7 +242,8 @@ def flexible_server_create(cmd, client,
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config, cluster):
+                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config, cluster,
+                   fips_mode=None):
     validate_resource_group(resource_group_name)
 
     logging_name, server_client = db_context.logging_name, db_context.server_client
@@ -267,6 +270,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         data_encryption=data_encryption,
         auth_config=auth_config,
         cluster=cluster,
+        fips_mode=fips_mode,
         create_mode="Create")
 
     return resolve_poller(
@@ -454,7 +458,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        auto_grow=None,
                                        performance_tier=None,
                                        iops=None, throughput=None,
-                                       cluster_size=None, yes=False):
+                                       cluster_size=None, yes=False, fips_mode=None):
 
     # validator
     location = ''.join(instance.location.lower().split())
@@ -588,6 +592,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                             data_encryption=data_encryption,
                             auth_config=auth_config,
                             cluster=instance.cluster,
+                            fips_mode=fips_mode,
                             tags=tags)
 
     # High availability can't be updated with existing properties

@@ -5,11 +5,44 @@
 
 import time
 import unittest
+from io import BytesIO
+
+from vcr.request import Request
 
 from azure.cli.testsdk import ScenarioTest, record_only
 import json
 import os
+import re
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests.recording_processors import RecordingProcessor
+from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
+
+
+class SqlBackupScenarioTest(ScenarioTest):
+    def _process_request_recording(self, request):
+        if not self.disable_recording and isinstance(request.body, BytesIO):
+            request = Request(request.method, request.uri, request.body.getvalue(), request.headers)
+        return super()._process_request_recording(request)
+
+
+class CrossRegionRestoreAccessTokenReplacer(RecordingProcessor):
+    @staticmethod
+    def _replace_token(body):
+        is_bytes = isinstance(body, bytes)
+        text = body.decode('utf-8') if is_bytes else body
+        text = re.sub(r'("accessTokenString"\s*:\s*")[^"]*(")',
+                      r'\1fake_crr_access_token\2', text)
+        return text.encode('utf-8') if is_bytes else text
+
+    def process_request(self, request):
+        if is_json_payload(request) and request.body:
+            request.body = self._replace_token(request.body)
+        return request
+
+    def process_response(self, response):
+        if is_json_payload(response) and response['body']['string']:
+            response['body']['string'] = self._replace_token(response['body']['string'])
+        return response
 
 
 id_sql = '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/SQL-CLITEST-RG/providers/Microsoft.Compute/virtualMachines/sql-clitestvm-donotuse2'
@@ -27,8 +60,26 @@ item_irpending_sql = 'SQLDataBase;mssqlserver;msdb_restored'
 item_irpending_sql_fname = 'msdb_restored'
 instance_name = 'sqlinstance;mssqlserver'
 
+sub_sql_utk = '0ffd0773-90c5-472c-807d-0c0a10605b9d'
+rg_sql_utk = 'utk-rereg-tst'
+vault_sql_utk = 'utk-vlt3'
+vm_sql_utk = 'utk-vm-bkt'
+container_sql_utk = f'VMAppContainer;Compute;{rg_sql_utk};{vm_sql_utk}'
+database_sql_utk = 'cli_rerecord_20261024'
+item_sql_utk = f'SQLDataBase;mssqlserver;{database_sql_utk}'
+item_irpending_sql_utk = f'{item_sql_utk}_restored'
+id_sql_utk = (
+    f'/subscriptions/{sub_sql_utk}/resourceGroups/{rg_sql_utk}'
+    f'/providers/Microsoft.Compute/virtualMachines/{vm_sql_utk}'
+)
+item_id_sql_utk = (
+    f'/subscriptions/{sub_sql_utk}/resourceGroups/{rg_sql_utk}'
+    f'/providers/Microsoft.RecoveryServices/vaults/{vault_sql_utk}'
+    f'/backupFabrics/Azure/protectionContainers/{container_sql_utk}/protectedItems/{item_sql_utk}'
+)
 
-class BackupTests(ScenarioTest, unittest.TestCase):
+
+class BackupTests(SqlBackupScenarioTest, unittest.TestCase):
     # SQL workload tests start here
     # Please make sure you have the following setup in place before running the tests -
 
@@ -105,13 +156,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_backup_wl_sql_container(self):
 
         self.kwargs.update({
-            'vault': vault_sql,
-            'name': container_sql,
-            'fname': container_friendly_sql,
-            'rg': rg_sql,
+            'vault': vault_sql_utk,
+            'name': container_sql_utk,
+            'fname': vm_sql_utk,
+            'rg': rg_sql_utk,
             'wt': 'MSSQL',
-            'sub': sub_sql,
-            'id': id_sql
+            'sub': sub_sql_utk,
+            'id': id_sql_utk
         })
 
         self.register_container()
@@ -261,20 +312,22 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @record_only()
     def test_backup_wl_sql_rp(self):
-        resource_group = rg_sql.lower()
+        resource_group = rg_sql_utk.lower()
+        vault_sql = vault_sql_utk
+        container_sql = container_sql_utk
         self.kwargs.update({
             'vault': vault_sql,
             'name': container_sql,
             'rg': resource_group,
-            'fname': server_friendly_sql,
+            'fname': vm_sql_utk,
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
-            'sub': sub_sql,
-            'item': item1_sql,
+            'sub': sub_sql_utk,
+            'item': item_sql_utk,
             'pit': 'SQLDatabase',
-            'item_id': item_id_sql,
-            'id': id_sql,
-            'fitem': item1_sql_fname
+            'item_id': item_id_sql_utk,
+            'id': id_sql_utk,
+            'fitem': database_sql_utk
         })
 
         self.register_container()
@@ -345,21 +398,21 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @record_only()
     def test_backup_wl_sql_item(self):
-        resource_group = rg_sql.lower()
+        resource_group = rg_sql_utk.lower()
         self.kwargs.update({
-            'vault': vault_sql,
-            'name': container_sql,
+            'vault': vault_sql_utk,
+            'name': container_sql_utk,
             'rg': resource_group,
-            'fname': server_friendly_sql,
-            'vm_name': container_friendly_sql,
+            'fname': vm_sql_utk,
+            'vm_name': vm_sql_utk,
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
-            'sub': sub_sql,
-            'item': item_irpending_sql,
+            'sub': sub_sql_utk,
+            'item': item_irpending_sql_utk,
             'pit': 'SQLDatabase',
-            'item_id': item_id_sql,
-            'id': id_sql,
-            'fitem': item_irpending_sql_fname
+            'item_id': item_id_sql_utk,
+            'id': id_sql_utk,
+            'fitem': database_sql_utk + '_restored'
         })
 
         # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
@@ -437,20 +490,20 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @record_only()
     def test_backup_wl_sql_protection(self):
-        resource_group = rg_sql.lower()
+        resource_group = rg_sql_utk.lower()
         self.kwargs.update({
-            'vault': vault_sql,
-            'name': container_sql,
+            'vault': vault_sql_utk,
+            'name': container_sql_utk,
             'rg': resource_group,
-            'fname': server_friendly_sql,
+            'fname': vm_sql_utk,
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
-            'sub': sub_sql,
-            'item': item1_sql,
+            'sub': sub_sql_utk,
+            'item': item_sql_utk,
             'pit': 'SQLDatabase',
-            'item_id': item_id_sql,
-            'id': id_sql,
-            'fitem': item1_sql_fname 
+            'item_id': item_id_sql_utk,
+            'id': id_sql_utk,
+            'fitem': database_sql_utk
         })
 
         # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
@@ -510,21 +563,21 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @record_only()
     def test_backup_wl_sql_restore(self):
-        resource_group = rg_sql.lower()
+        resource_group = rg_sql_utk.lower()
         self.kwargs.update({
-            'vault': vault_sql,
-            'name': container_sql,
+            'vault': vault_sql_utk,
+            'name': container_sql_utk,
             'rg': resource_group,
-            'fname': server_friendly_sql,
+            'fname': vm_sql_utk,
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
-            'sub': sub_sql,
-            'item': item1_sql,
-            'fitem': item1_sql_fname,
-            'id': id_sql,
+            'sub': sub_sql_utk,
+            'item': item_sql_utk,
+            'fitem': database_sql_utk,
+            'id': id_sql_utk,
             'pit': 'SQLDatabase',
-            'item_id': item_id_sql,
-            'titem': item1_sql_fname + '_restored',
+            'item_id': item_id_sql_utk,
+            'titem': database_sql_utk + '_restored',
             'tinstance_name': instance_name
         })
 
@@ -604,21 +657,21 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @record_only()
     def test_backup_wl_sql_restore_as_files(self):
-        resource_group = rg_sql.lower()
+        resource_group = rg_sql_utk.lower()
         self.kwargs.update({
-            'vault': vault_sql,
-            'name': container_sql,
+            'vault': vault_sql_utk,
+            'name': container_sql_utk,
             'rg': resource_group,
-            'fname': server_friendly_sql,
+            'fname': vm_sql_utk,
             'policy': 'HourlyLogBackup',
             'wt': 'MSSQL',
-            'sub': sub_sql,
-            'item': item1_sql,
-            'fitem': item1_sql_fname,
-            'id': id_sql,
+            'sub': sub_sql_utk,
+            'item': item_sql_utk,
+            'fitem': database_sql_utk,
+            'id': id_sql_utk,
             'pit': 'SQLDatabase',
-            'item_id': item_id_sql,
-            'titem': item1_sql_fname + '_restored'
+            'item_id': item_id_sql_utk,
+            'titem': database_sql_utk + '_restored'
         })
         # self.cmd('backup container register -v {vault} -g {rg} --backup-management-type AzureWorkload --workload-type {wt} --resource-id {id}')
 
@@ -682,21 +735,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @record_only()
     def test_backup_wl_sql_crr(self):
         self.kwargs.update({
-            'vault': "sql-clitest-vault",
-            'name': "VMAppContainer;Compute;sql-clitest-rg;sql-clitest-vm",
-            'fname': "sql-clitest-vm",
+            'vault': "abhinksql3ccy",
+            'name': "VMAppContainer;Compute;abhinksql3ccy;abhinksql3ccy",
+            'fname': "abhinksql3ccy",
             'wt': 'MSSQL',
-            'sub': "vsarg-MABPortalTestAutomation_NOB",
-            'rg': "sql-clitest-rg",
-            'item': "SQLDataBase;mssqlserver;msdb",
-            'fitem': "msdb",
-            'tvault': "clitest-vault-secondary-donotuse",
-            'trg': "clitest-rg-donotuse",
-            'tcontainer': "clitest-sql-secondary-donotuse",
-            'tserver': "clitest-sql-sec",
+            'sub': "935cff54-7d3c-49cc-a1e0-a9aa8bf006f5",
+            'rg': "abhinksql3ccy",
+            'item': "SQLDataBase;mssqlserver;model",
+            'fitem': "model",
+            'tvault': "abhinksql",
+            'trg': "abhinksqlRg",
+            'tcontainer': "VMAppContainer;Compute;abhinksqlRg;abhinksql",
+            'tserver': "abhinksql",
             'tpit': 'SQLInstance',
-            'titem': 'msdb_restored'
+            'titem': 'cli_crr_model_20261024',
+            'filepath': r'C:\bkpdump'
         })
+        self.recording_processors.insert(0, CrossRegionRestoreAccessTokenReplacer())
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 1)])
 
@@ -727,7 +782,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup job wait -v {vault} -g {rg} -n {job} --use-secondary-region')
 
         #SQL CRR RAF Restore
-        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode restoreasfiles --rp-name {rp} --item-name {item} --container-name {container1} --target-container-name {tcontainer} --workload-type {wt} --target-vault-name {tvault} --target-resource-group {trg} --filepath "C:\"').get_output_in_json(), separators=(',', ':'))
+        self.kwargs['rc'] = json.dumps(self.cmd('backup recoveryconfig show --vault-name {vault} -g {rg} --restore-mode restoreasfiles --rp-name {rp} --item-name {item} --container-name {container1} --target-container-name {tcontainer} --workload-type {wt} --target-vault-name {tvault} --target-resource-group {trg} --filepath "{filepath}"').get_output_in_json(), separators=(',', ':'))
         with open("recoveryconfig_sql_crr.json", "w") as f:
             f.write(self.kwargs['rc'])
 
@@ -814,7 +869,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vault1': 'clitest-sqlreconfig-src',
             'vault2': 'clitest-sqlreconfig-dst',
             'container': 'clisqlrcvm',
-            'item': 'master',
+            'item': 'model',
             'policy_name': 'HourlyLogBackup'
         })
 
