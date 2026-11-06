@@ -78,6 +78,8 @@ examples:
         az sql db audit-policy update -g mygroup -s myserver -n mydb --state Enabled \\
             --lats Enabled --lawri myworkspaceresourceid \\
             --required-fields event_time action_id statement
+  - name: Clear the selected audit fields by sending an explicit JSON null.
+    text: az sql db audit-policy update -g mygroup -s myserver -n mydb --required-fields NULL
   - name: Disable a log analytics auditing policy.
     text: |
         az sql db audit-policy update -g mygroup -s myserver -n mydb
@@ -1515,6 +1517,8 @@ examples:
         az sql server audit-policy update -g mygroup -n myserver --state Enabled \\
             --lats Enabled --lawri myworkspaceresourceid \\
             --required-fields event_time action_id statement
+  - name: Clear the selected audit fields by sending an explicit JSON null.
+    text: az sql server audit-policy update -g mygroup -n myserver --required-fields NULL
   - name: Disable a log analytics auditing policy.
     text: |
         az sql server audit-policy update -g mygroup -n myserver

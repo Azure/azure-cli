@@ -1221,8 +1221,9 @@ def load_arguments(self, _):
 
         c.argument('required_fields',
                    arg_group=policy_arg_group,
-                   help='List of fields to include in audit events. Can only be specified when the Azure Monitor '
-                        'target is enabled.',
+                   help='List of fields to include in audit events when auditing and the Azure Monitor target are '
+                        'enabled. Use NULL alone (case-insensitive) to clear the selection by sending JSON null. '
+                        'Omit this argument to keep the current selection.',
                    nargs='+')
 
         c.argument('retention_days',
@@ -2085,8 +2086,9 @@ def load_arguments(self, _):
 
         c.argument('required_fields',
                    arg_group=policy_arg_group,
-                   help='List of fields to include in audit events. Can only be specified when the Azure Monitor '
-                        'target is enabled.',
+                   help='List of fields to include in audit events when auditing and the Azure Monitor target are '
+                        'enabled. Use NULL alone (case-insensitive) to clear the selection by sending JSON null. '
+                        'Omit this argument to keep the current selection.',
                    nargs='+')
 
         c.argument('retention_days',
