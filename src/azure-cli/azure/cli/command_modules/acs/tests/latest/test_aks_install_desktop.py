@@ -172,7 +172,7 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
         with self.assertRaises(ValidationError) as error:
             self.cmd('aks install-desktop --version 0.9.1')
         self.assertIn('libasound.so.2, libnspr4.so, libnss3.so', str(error.exception))
-        self.assertIn('https://github.com/Azure/aks-desktop#linux-runtime-dependencies', str(error.exception))
+        self.assertIn('Install the packages that provide these library files, then retry.', str(error.exception))
         self.assertEqual(self._desktop_launch_calls(), [])
         self.inspection.assert_called_once()
         for name in ('aks-desktop', 'stale'):

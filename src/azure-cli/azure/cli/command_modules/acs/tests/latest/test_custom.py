@@ -1249,7 +1249,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                 message = str(error.exception)
                 self.assertIn('libasound.so.2, libnspr4.so, libnss3.so', message)
                 self.assertEqual(message.count('libnspr4.so'), 1)
-                self.assertIn('https://github.com/Azure/aks-desktop#linux-runtime-dependencies', message)
+                self.assertIn('Install the packages that provide these library files, then retry.', message)
 
     def test_aks_install_desktop_dependency_inspection_arguments(self):
         environment = {'LC_ALL': 'fr_FR.UTF-8', 'LD_LIBRARY_PATH': '/custom/lib', 'PATH': '/usr/bin'}

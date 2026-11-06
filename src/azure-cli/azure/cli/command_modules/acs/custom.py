@@ -2779,8 +2779,8 @@ def _check_aks_desktop_dependencies(executable: str) -> None:
     missing = sorted(set(re.findall(r'^[ \t]*(\S+)[ \t]+=>[ \t]+not found[ \t\r]*$', output, re.MULTILINE)))
     if missing:
         raise ValidationError(
-            'AKS Desktop is missing required Linux libraries: {}. Install the runtime dependencies described at '
-            'https://github.com/Azure/aks-desktop#linux-runtime-dependencies and retry.'.format(', '.join(missing)))
+            'AKS Desktop is missing required Linux libraries: {}. '
+            'Install the packages that provide these library files, then retry.'.format(', '.join(missing)))
     if result.returncode or not re.search(r'^[ \t]*\S+[ \t]+=>[ \t]+/\S+', output, re.MULTILINE):
         logger.warning('Could not determine AKS Desktop dependencies from ldd output. Attempting to launch.')
 
