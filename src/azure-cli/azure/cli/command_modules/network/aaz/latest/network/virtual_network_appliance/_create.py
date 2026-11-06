@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-07-01",
+        "version": "2026-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkappliances/{}", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkappliances/{}", "2026-03-01"],
         ]
     }
 
@@ -46,6 +46,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="The resource group of the virtual network appliance.",
             required=True,
         )
         _args_schema.virtual_network_appliance_name = AAZStrArg(
@@ -84,6 +85,12 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Bandwidth of the VirtualNetworkAppliance resource in Gbps.",
         )
+        _args_schema.capacity_provider = AAZObjectArg(
+            options=["--capacity-provider"],
+            arg_group="Properties",
+            help="The reference to the capacity provider resource.",
+        )
+        cls._build_args_common_sub_resource_create(_args_schema.capacity_provider)
         _args_schema.private_ip_address_version = AAZStrArg(
             options=["--private-ip-version", "--private-ip-address-version"],
             arg_group="Properties",
@@ -100,9 +107,6 @@ class Create(AAZCommand):
         subnet.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}",
-            ),
         )
         subnet.name = AAZStrArg(
             options=["name"],
@@ -243,9 +247,6 @@ class Create(AAZCommand):
         network_security_group.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
-            ),
         )
         network_security_group.location = AAZResourceLocationArg(
             options=["l", "location"],
@@ -370,9 +371,6 @@ class Create(AAZCommand):
         route_table.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
-            ),
         )
         route_table.location = AAZResourceLocationArg(
             options=["l", "location"],
@@ -406,9 +404,6 @@ class Create(AAZCommand):
         _element.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}/routes/{}",
-            ),
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -456,9 +451,6 @@ class Create(AAZCommand):
         _element.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}",
-            ),
         )
         _element.location = AAZResourceLocationArg(
             options=["l", "location"],
@@ -494,9 +486,6 @@ class Create(AAZCommand):
         _element.id = AAZResourceIdArg(
             options=["id"],
             help="Resource ID.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}/serviceEndpointPolicyDefinitions/{}",
-            ),
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -672,7 +661,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-07-01",
+                    "api-version", "2026-03-01",
                     required=True,
                 ),
             }
@@ -704,6 +693,7 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("bandwidthInGbps", AAZFloatType, ".bandwidth_in_gbps")
+                _CreateHelper._build_schema_common_sub_resource_create(properties.set_prop("capacityProvider", AAZObjectType, ".capacity_provider"))
                 properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
                 properties.set_prop("subnet", AAZObjectType, ".subnet")
 
@@ -995,6 +985,10 @@ class Create(AAZCommand):
             properties.bandwidth_in_gbps = AAZFloatType(
                 serialized_name="bandwidthInGbps",
             )
+            properties.capacity_provider = AAZObjectType(
+                serialized_name="capacityProvider",
+            )
+            _CreateHelper._build_schema_common_sub_resource_read(properties.capacity_provider)
             properties.ip_configurations = AAZListType(
                 serialized_name="ipConfigurations",
                 flags={"read_only": True},
@@ -1175,6 +1169,9 @@ class _CreateHelper:
         properties = _schema_common_frontend_ip_configuration_read.properties
         properties.ddos_settings = AAZObjectType(
             serialized_name="ddosSettings",
+        )
+        properties.enable_connection_tracking = AAZBoolType(
+            serialized_name="enableConnectionTracking",
         )
         properties.gateway_load_balancer = AAZObjectType(
             serialized_name="gatewayLoadBalancer",
@@ -2258,6 +2255,9 @@ class _CreateHelper:
         properties.application_security_groups = AAZListType(
             serialized_name="applicationSecurityGroups",
         )
+        properties.billing_sku = AAZStrType(
+            serialized_name="billingSku",
+        )
         properties.custom_dns_configs = AAZListType(
             serialized_name="customDnsConfigs",
         )
@@ -2404,6 +2404,9 @@ class _CreateHelper:
         )
 
         properties = _schema_common_private_link_service_connection_read.properties
+        properties.approval_reference = AAZObjectType(
+            serialized_name="approvalReference",
+        )
         properties.group_ids = AAZListType(
             serialized_name="groupIds",
         )
@@ -2420,6 +2423,11 @@ class _CreateHelper:
         )
         properties.request_message = AAZStrType(
             serialized_name="requestMessage",
+        )
+
+        approval_reference = _schema_common_private_link_service_connection_read.properties.approval_reference
+        approval_reference.private_endpoint_id = AAZStrType(
+            serialized_name="privateEndpointId",
         )
 
         group_ids = _schema_common_private_link_service_connection_read.properties.group_ids
@@ -2529,6 +2537,10 @@ class _CreateHelper:
             serialized_name="servicePublicIPAddress",
         )
         cls._build_schema_common_public_ip_address_read(properties.service_public_ip_address)
+        properties.upgraded_to_v2 = AAZBoolType(
+            serialized_name="upgradedToV2",
+            flags={"read_only": True},
+        )
 
         ddos_settings = _schema_common_public_ip_address_read.properties.ddos_settings
         ddos_settings.ddos_custom_policy = AAZObjectType(
@@ -2559,6 +2571,9 @@ class _CreateHelper:
         ip_tags.Element = AAZObjectType()
 
         _element = _schema_common_public_ip_address_read.properties.ip_tags.Element
+        _element.first_party_service_tag_id = AAZStrType(
+            serialized_name="firstPartyServiceTagId",
+        )
         _element.ip_tag_type = AAZStrType(
             serialized_name="ipTagType",
         )
@@ -2780,9 +2795,7 @@ class _CreateHelper:
             _schema.id = cls._schema_common_sub_resource_read.id
             return
 
-        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType()
 
         common_sub_resource_read = _schema_common_sub_resource_read
         common_sub_resource_read.id = AAZStrType()
