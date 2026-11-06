@@ -1698,8 +1698,10 @@ short-summary: Copy files or directories to or from Azure storage.
 long-summary: |
   When supplying an account key or SAS token separately from a URL, also provide its storage account name
   using --account-name or --source-account-name, or configure a trusted connection string.
-  Account names are not inferred from URLs for credential attachment. Primary credentials are reused for
-  the source only when its account or endpoint matches; other source accounts need their own credentials.
+  When no credentials are available, the account name in an Azure storage URL is used to query that account's
+  key through Azure Resource Manager. URL-derived names are never used to identify the owner of supplied credentials.
+  Primary credentials are reused for the source only when its account or endpoint matches. Other source accounts
+  use their own supplied credentials or an account-specific key lookup; primary credentials are not reloaded for them.
   URLs that already contain a SAS token are passed through without attaching additional credentials.
 examples:
   - name: Upload a single file to Azure Blob using url.

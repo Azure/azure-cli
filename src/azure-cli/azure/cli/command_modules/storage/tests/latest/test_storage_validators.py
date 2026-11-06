@@ -466,6 +466,10 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
                             side_effect=lambda cmd, section, key, default: default)
         self.get_config = config.start()
         self.addCleanup(config.stop)
+        query = mock.patch('azure.cli.command_modules.storage._validators._query_account_key',
+                           return_value=None)
+        self.query = query.start()
+        self.addCleanup(query.stop)
 
     def _add_sas(self, url, **kwargs):
         from azure.cli.command_modules.storage._validators import _add_sas_for_url
@@ -596,6 +600,7 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
                     validate_azcopy_credential(self.cmd, ns)
                 self.assertNotIn('?', ns.source)
         self.generate.assert_not_called()
+        self.query.assert_not_called()
 
     def test_copy_does_not_reload_ambient_source_credentials(self):
         from azure.cli.command_modules.storage._validators import validate_azcopy_credential
@@ -702,20 +707,23 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
 
     def test_copy_login_does_not_attach_sas(self):
         from azure.cli.command_modules.storage._validators import validate_azcopy_credential
-        ns = self._copy_namespace(
-            source='https://sourceaccount.blob.core.windows.net/c/b',
-            destination='https://victim.file.core.windows.net/share/file',
-            account_name='victim', auth_mode='login', _subscription=None)
         token = mock.Mock()
-        with mock.patch('azure.cli.core._profile.Profile.get_login_credentials',
-                        return_value=(token, None, None)) as login:
-            validate_azcopy_credential(self.cmd, ns)
-        login.assert_called_once_with(subscription_id=None)
-        self.assertEqual(ns.source, 'https://sourceaccount.blob.core.windows.net/c/b')
-        self.assertEqual(ns.destination, 'https://victim.file.core.windows.net/share/file')
-        self.assertIs(ns.token_credential, token)
-        self.assertTrue(ns.enable_file_backup_request_intent)
+        for account_name in (None, 'victim'):
+            with self.subTest(account_name=account_name):
+                ns = self._copy_namespace(
+                    source='https://sourceaccount.blob.core.windows.net/c/b',
+                    destination='https://victim.file.core.windows.net/share/file',
+                    account_name=account_name, auth_mode='login', _subscription=None)
+                with mock.patch('azure.cli.core._profile.Profile.get_login_credentials',
+                                return_value=(token, None, None)) as login:
+                    validate_azcopy_credential(self.cmd, ns)
+                login.assert_called_once_with(subscription_id=None)
+                self.assertEqual(ns.source, 'https://sourceaccount.blob.core.windows.net/c/b')
+                self.assertEqual(ns.destination, 'https://victim.file.core.windows.net/share/file')
+                self.assertIs(ns.token_credential, token)
+                self.assertTrue(ns.enable_file_backup_request_intent)
         self.generate.assert_not_called()
+        self.query.assert_not_called()
 
     def test_copy_does_not_use_ambient_credentials_for_explicit_source_account(self):
         from azure.cli.command_modules.storage._validators import validate_azcopy_credential
@@ -732,16 +740,130 @@ class TestAzcopyEndpointValidation(unittest.TestCase):
             self.cmd, 'sourceaccount', 'c291cmNl', 'blob', resource_types='sco', permissions='rl')
         self.assertEqual(ns.source, 'https://sourceaccount.blob.core.windows.net/c/b?sig=test-signature')
 
-    def test_copy_unsigned_public_storage_urls_remain_unsigned(self):
+    def test_copy_url_only_retrieves_matching_account_key(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        key = 'bG9va3VwLWtleQ=='
+        self.query.return_value = key
+        for side in ('source', 'destination'):
+            for service in ('blob', 'dfs', 'file'):
+                for host in ('lookupaccount', 'lookupaccount-secondary', 'LOOKUPACCOUNT'):
+                    with self.subTest(side=side, service=service, host=host):
+                        url = 'https://{}.{}.core.windows.net:443/data/my folder/*'.format(host, service)
+                        ns = self._copy_namespace(**{side: url})
+                        self.query.reset_mock()
+                        self.generate.reset_mock()
+                        validate_azcopy_credential(self.cmd, ns)
+                        self.query.assert_called_once_with(self.cli, 'lookupaccount')
+                        self.generate.assert_called_once_with(
+                            self.cmd, 'lookupaccount', key, 'file' if service == 'file' else 'blob',
+                            resource_types='sco' if side == 'source' else 'co',
+                            permissions='rl' if side == 'source' else 'wac')
+                        self.assertEqual(getattr(ns, side), url + '?sig=test-signature')
+                        self.assertEqual(ns.account_name, 'lookupaccount' if side == 'destination' else None)
+
+    def test_copy_url_only_uses_separate_account_keys(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        keys = {'sourceaccount': 'c291cmNl', 'destinationaccount': 'ZGVzdGluYXRpb24='}
+        self.query.side_effect = lambda cli_ctx, account: keys[account]
+        self.generate.side_effect = lambda cmd, account, key, service, **kwargs: 'sig=' + account
+        for service in ('blob', 'dfs', 'file'):
+            with self.subTest(service=service):
+                source = 'https://sourceaccount.{}.core.windows.net/data/file'.format(service)
+                destination = 'https://destinationaccount.{}.core.windows.net/data/file'.format(service)
+                ns = self._copy_namespace(source=source, destination=destination)
+                self.query.reset_mock()
+                self.generate.reset_mock()
+                validate_azcopy_credential(self.cmd, ns)
+                self.assertEqual(self.query.call_args_list, [
+                    mock.call(self.cli, 'destinationaccount'), mock.call(self.cli, 'sourceaccount')])
+                sas_service = 'file' if service == 'file' else 'blob'
+                self.assertEqual(self.generate.call_args_list, [
+                    mock.call(self.cmd, 'destinationaccount', keys['destinationaccount'], sas_service,
+                              resource_types='co', permissions='wac'),
+                    mock.call(self.cmd, 'sourceaccount', keys['sourceaccount'], sas_service,
+                              resource_types='sco', permissions='rl')])
+                self.assertEqual(ns.source, source + '?sig=sourceaccount')
+                self.assertEqual(ns.destination, destination + '?sig=destinationaccount')
+                self.assertEqual(ns.account_name, 'destinationaccount')
+                self.assertEqual(ns.account_key, keys['destinationaccount'])
+
+    def test_copy_url_only_reuses_matching_account_lookup(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        key = 'bG9va3VwLWtleQ=='
+        self.query.return_value = key
+        ns = self._copy_namespace(
+            source='https://lookupaccount-secondary.blob.core.windows.net/data/source',
+            destination='https://lookupaccount.blob.core.windows.net/data/destination')
+        validate_azcopy_credential(self.cmd, ns)
+        self.query.assert_called_once_with(self.cli, 'lookupaccount')
+        self.assertEqual(self.generate.call_args_list, [
+            mock.call(self.cmd, 'lookupaccount', key, 'blob', resource_types='co', permissions='wac'),
+            mock.call(self.cmd, 'lookupaccount', key, 'blob', resource_types='sco', permissions='rl')])
+        self.assertTrue(ns.source.endswith('?sig=test-signature'))
+        self.assertTrue(ns.destination.endswith('?sig=test-signature'))
+
+    def test_copy_url_lookup_does_not_reload_ambient_credentials(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        source_key = 'c291cmNl'
+        self.query.return_value = source_key
+        for credential, value in (('sas_token', 'sig=ambient'), ('key', 'a2V5')):
+            for destination in ('.', 'https://victim.blob.core.windows.net/c/b',
+                                'https://victim.blob.core.windows.net/c/b?sig=destination'):
+                with self.subTest(credential=credential, destination=destination):
+                    self.get_config.side_effect = lambda cmd, section, key, default: (
+                        value if key == credential else default)
+                    ns = self._copy_namespace(
+                        source='https://sourceaccount.blob.core.windows.net/c/b',
+                        destination=destination, account_name='victim')
+                    self.get_config.reset_mock()
+                    self.query.reset_mock()
+                    self.generate.reset_mock()
+                    validate_azcopy_credential(self.cmd, ns)
+                    self.query.assert_called_once_with(self.cli, 'sourceaccount')
+                    expected_calls = []
+                    if credential == 'key' and destination.endswith('/b'):
+                        expected_calls.append(mock.call(
+                            self.cmd, 'victim', value, 'blob', resource_types='co', permissions='wac'))
+                    expected_calls.append(mock.call(
+                        self.cmd, 'sourceaccount', source_key, 'blob', resource_types='sco', permissions='rl'))
+                    self.assertEqual(self.generate.call_args_list, expected_calls)
+                    self.assertEqual(ns.source, 'https://sourceaccount.blob.core.windows.net/c/b?sig=test-signature')
+                    self.assertEqual(ns.account_name, 'victim')
+                    self.assertEqual(sum(call.args[2] == 'sas_token' for call in self.get_config.call_args_list), 1)
+
+    def test_copy_url_lookup_uses_active_cloud(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        self.cli.cloud = Namespace(suffixes=Namespace(storage_endpoint='storage.example.test'))
+        self.query.return_value = 'bG9va3VwLWtleQ=='
+        url = 'https://lookupaccount.blob.storage.example.test/data/file'
+        ns = self._copy_namespace(source=url)
+        validate_azcopy_credential(self.cmd, ns)
+        self.query.assert_called_once_with(self.cli, 'lookupaccount')
+        self.assertEqual(ns.source, url + '?sig=test-signature')
+
+    def test_copy_url_lookup_requires_account_origin(self):
+        from azure.cli.command_modules.storage._validators import validate_azcopy_credential
+        for url in ('http://lookupaccount.blob.core.windows.net/data/file',
+                    'https://lookupaccount.blob.core.windows.net:8443/data/file',
+                    'https://lookupaccount.blob.core.windows.net.attacker.example/data/file',
+                    'https://bucket.s3.amazonaws.com/data/file'):
+            with self.subTest(url=url):
+                ns = self._copy_namespace(destination=url)
+                validate_azcopy_credential(self.cmd, ns)
+                self.assertEqual(ns.destination, url)
+        self.query.assert_not_called()
+        self.generate.assert_not_called()
+
+    def test_copy_unsigned_storage_urls_remain_unsigned_when_key_lookup_unavailable(self):
         from azure.cli.command_modules.storage._validators import validate_azcopy_credential
         ns = self._copy_namespace(
             source='https://sourceaccount.blob.core.windows.net/c/b',
             destination='https://destinationaccount.blob.core.windows.net/c/b')
-        with mock.patch('azure.cli.command_modules.storage._validators._query_account_key') as query:
-            validate_azcopy_credential(self.cmd, ns)
+        validate_azcopy_credential(self.cmd, ns)
         self.assertEqual(ns.source, 'https://sourceaccount.blob.core.windows.net/c/b')
         self.assertEqual(ns.destination, 'https://destinationaccount.blob.core.windows.net/c/b')
-        query.assert_not_called()
+        self.assertEqual(self.query.call_args_list, [
+            mock.call(self.cli, 'destinationaccount'), mock.call(self.cli, 'sourceaccount')])
         self.generate.assert_not_called()
 
     def test_copy_wildcard_paths_with_spaces(self):

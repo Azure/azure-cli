@@ -1892,6 +1892,13 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
             origin[1])
         if storage_info:
             service = 'file' if storage_info[3] == 'file' else 'blob'
+            if not any((namespace.account_name, namespace.account_key, namespace.sas_token,
+                        namespace.connection_string, getattr(namespace, 'token_credential', None))):
+                endpoints = _storage_account_urls(cmd, storage_info[1], service)
+                if origin in [_storage_url_origin(endpoint) for endpoint in endpoints]:
+                    # Query this account through ARM without reloading ambient credentials.
+                    namespace.account_name = storage_info[1]
+                    _validate_azcopy_account(cmd, namespace, use_config=False)
         connection_string = namespace.connection_string
         if connection_string:
             for candidate_service in ('blob', 'file'):
