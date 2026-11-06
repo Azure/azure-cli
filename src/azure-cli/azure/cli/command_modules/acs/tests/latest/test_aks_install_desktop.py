@@ -10,11 +10,12 @@ import json
 import os
 from pathlib import Path
 import stat
+import subprocess
 import tarfile
 import tempfile
 from unittest import mock
 
-from azure.cli.core.azclierror import ClientRequestError, InvalidArgumentValueError
+from azure.cli.core.azclierror import ClientRequestError, InvalidArgumentValueError, ValidationError
 from azure.cli.testsdk import ScenarioTest
 
 
@@ -56,6 +57,10 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
         self._patch(mock.patch('tempfile.tempdir', str(self.downloads)))
         self._patch(mock.patch('platform.system', return_value='Linux'))
         self._patch(mock.patch('platform.machine', return_value='aarch64'))
+        # Stub inspection at the process boundary: the archive executable is synthetic.
+        self._patch(mock.patch('azure.cli.core.util.get_safe_executable_path', return_value='/usr/bin/ldd'))
+        self.inspection = self._patch(mock.patch('azure.cli.core.util.run_cmd', return_value=subprocess.CompletedProcess(
+            [], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)', '')))
         self.popen = self._patch(mock.patch('subprocess.Popen'))
         # A cold runtime may probe network interfaces during CLI initialization.
         # Include those calls so launch assertions cannot depend on probe caches.
@@ -145,6 +150,38 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
         self.metadata.assert_not_called()
         self.opener.open.assert_not_called()
         self.assertEqual(self._desktop_launch_calls(), [])
+
+    def test_install_desktop_missing_dependencies_preserves_previous_installation(self):
+        install_root = self.home / '.local' / 'share' / 'aks-desktop'
+        install_dir = install_root / '0.9.1'
+        install_dir.mkdir(parents=True)
+        for name in ('aks-desktop', 'stale'):
+            (install_dir / name).write_bytes(b'old installation')
+
+        def inspect(args, **kwargs):
+            staged = Path(args[1])
+            self.assertIn('-staging-', str(staged))
+            self.assertTrue(staged.stat().st_mode & stat.S_IXUSR)
+            self.assertEqual(staged.read_bytes(), b'fixture')
+            self.assertEqual((install_dir / 'aks-desktop').read_bytes(), b'old installation')
+            self.assertFalse(any('-backup-' in path.name for path in install_root.iterdir()))
+            return subprocess.CompletedProcess(args, 1, 'libnspr4.so => not found\nlibnss3.so => not found\n',
+                                               'libasound.so.2 => not found\nlibnspr4.so => not found\n')
+
+        self.inspection.side_effect = inspect
+        with self.assertRaises(ValidationError) as error:
+            self.cmd('aks install-desktop --version 0.9.1')
+        self.assertIn('libasound.so.2, libnspr4.so, libnss3.so', str(error.exception))
+        self.assertIn('https://github.com/Azure/aks-desktop#linux-runtime-dependencies', str(error.exception))
+        self.assertEqual(self._desktop_launch_calls(), [])
+        self.inspection.assert_called_once()
+        for name in ('aks-desktop', 'stale'):
+            self.assertEqual((install_dir / name).read_bytes(), b'old installation')
+        self.assertEqual(sorted(path.name for path in install_dir.iterdir()), ['aks-desktop', 'stale'])
+        self.assertEqual(list(install_root.iterdir()), [install_dir])
+        self.assertIsNotNone(self.installer_path)
+        self.assertFalse(self.installer_path.parent.exists())
+        self.assertEqual(list(self.downloads.iterdir()), [])
 
     def test_install_desktop_latest(self):
         self.cmd('aks install-desktop')
