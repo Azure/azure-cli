@@ -70,7 +70,7 @@ Then CLI will load the available clouds and the corresponding cloud endpoints fr
 If you are working with multiple clouds, you can learn more in [Work with multiple clouds](https://learn.microsoft.com/cli/azure/manage-clouds-azure-cli).
 
 ## Set CA bundle certificate
-Please follow the first solution in [Work behind a proxy](https://learn.microsoft.com/cli/azure/use-cli-effectively#work-behind-a-proxy) to set up the certificate in your airgapped cloud environment. For more details, you can also refer to the steps in the [guide](https://learn.microsoft.com/azure-stack/user/azure-stack-version-profiles-azurecli2) to set up CLI for Azure Stack Hub.
+Please follow the first solution in [Proxy blocks connection](https://learn.microsoft.com/en-us/cli/azure/use-azure-cli-successfully-troubleshooting#error-sslerror-bad-handshakecertificate-verify-failed-proxy-blocks-connection) to set up the certificate in your airgapped cloud environment. For more details, you can also refer to the steps in the [guide](https://learn.microsoft.com/azure-stack/user/azure-stack-version-profiles-azurecli2) to set up CLI for Azure Stack Hub.
 
 ## Login with service principal
 Use the service principal that was granted permission to access a subscription in the airgapped cloud to login.
