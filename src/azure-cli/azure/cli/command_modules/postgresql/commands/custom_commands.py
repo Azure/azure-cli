@@ -79,9 +79,10 @@ def flexible_server_create(cmd, client,
                            federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
                            immutable_backup=None,
-                           storage_type=None, iops=None, throughput=None, cluster_size=None, database_name=None, 
+                           storage_type=None, iops=None, throughput=None, cluster_size=None,
+                           database_name=None, fips_mode=None,
                            auto_grow_max_threshold_mb=None, auto_grow_increment_percent=None,
-                           yes=False, fips_mode=None):
+                           yes=False):
 
     if not check_resource_group(resource_group_name):
         resource_group_name = None
