@@ -10174,7 +10174,7 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
 
         self.assertTrue(vna_list[0].get('id') == vna2_id)
 
-    @ResourceGroupPreparer(name_prefix='test_vna_capacity_provider', location='eastus')
+    @ResourceGroupPreparer(name_prefix='test_vna_capacity_provider', location='westus2')
     def test_network_virtual_network_appliance_capacity_provider(self, resource_group):
         self.kwargs.update({
             'vnet_provider': 'vnet-provider',
@@ -10193,7 +10193,7 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
         ).get_output_in_json()
         self.kwargs['capacity_provider_id'] = self.cmd(
             'network virtual-network-appliance create -g {rg} -n {capacity_provider} '
-            '--bandwidth-in-gbps 50 --subnet \"{{id:{provider_subnet_id}}}\" --query id'
+            '--bandwidth-in-gbps 200 --subnet \"{{id:{provider_subnet_id}}}\" --query id'
         ).get_output_in_json()
 
         self.cmd('network vnet create -g {rg} -n {vnet_consumer} --address-prefixes {vnet_address}')
@@ -10210,7 +10210,7 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
         )
         self.cmd(
             'network virtual-network-appliance update -g {rg} -n {vna} '
-            '--capacity-provider \"{{id:{capacity_provider_id}}}\"',
+            '--capacity-provider \'{{"id":"{capacity_provider_id}"}}\'',
             checks=self.check('capacityProvider.id', '{capacity_provider_id}')
         )
         self.cmd(
