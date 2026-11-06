@@ -6,6 +6,7 @@
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
 import datetime as dt
 from datetime import datetime
+import json
 import os
 import random
 import subprocess
@@ -17,7 +18,7 @@ from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
 from azure.mgmt.core.tools import parse_resource_id
 from azure.cli.core.util import CLIError, run_cmd
-from azure.cli.core.azclierror import AuthenticationError
+from azure.cli.core.azclierror import AuthenticationError, ClientRequestError
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -298,8 +299,14 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
         .format(resource_type))
 
 
-def run_subprocess(command, stdout_show=None):
-    commands = shlex.split(command)
+def run_subprocess(command, stdout_show=None, input_data=None):
+    commands = shlex.split(command) if isinstance(command, str) else command
+    if input_data is not None:
+        # Keep caller-provided input out of subprocess diagnostics.
+        process = subprocess.run(commands, input=input_data, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if process.returncode:
+            raise ClientRequestError("Command '{}' failed with exit code {}.".format(commands[0], process.returncode))
+        return
     if stdout_show:
         process = subprocess.Popen(commands)
     else:
@@ -321,23 +328,15 @@ def register_credential_secrets(cmd, database_engine, server, repository):
     app.pop('displayName')
     app.pop('name')
 
-    app_key_val = []
-    for key, val in app.items():
-        app_key_val.append('"{}": "{}"'.format(key, val))
-
-    app_json = ',\n  '.join(app_key_val)
-    app_json = '{\n  ' + app_json + '\n}'
-    credential_file = "./temp_app_credential.txt"
-    with open(credential_file, "w") as f:
-        f.write(app_json)
-    run_subprocess('gh secret set {} --repo {} < {}'.format(AZURE_CREDENTIALS, repository, credential_file))
-    os.remove(credential_file)
+    run_subprocess(['gh', 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository],
+                   input_data=json.dumps(app).encode('utf-8'))
 
 
 def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name):
-    logger.warning("Added secret %s to github repository", connection_string_name)
     connection_string = "Server={}; Port=3306; Database={}; Uid={}; Pwd={}; SslMode=Preferred;".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-    run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
+    run_subprocess(['gh', 'secret', 'set', connection_string_name, '--repo', repository],
+                   input_data=connection_string.encode('utf-8'))
+    logger.warning("Added secret %s to github repository", connection_string_name)
 
 
 def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):
