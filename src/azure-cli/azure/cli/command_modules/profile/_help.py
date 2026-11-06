@@ -14,6 +14,9 @@ long-summary: >-
     By default, this command logs in with a user account.
     Azure CLI uses Web Account Manager (WAM) on Windows, and browser-based login on Linux and macOS by default.
     If WAM or a web browser is not available, Azure CLI will fall back to device code login.
+    Specifying --redirect-port forces browser-based login and disables this fallback and WAM. To sign in through SSH,
+    forward the same port from the machine running the browser and set BROWSER=echo on the remote machine to print the
+    login URL.
 
 
     [WARNING] Authentication with username and password in the command line is strongly discouraged.
@@ -35,6 +38,8 @@ long-summary: >-
 examples:
     - name: Log in interactively.
       text: az login
+    - name: Log in through SSH with a fixed callback port after forwarding that port from the machine running the browser.
+      text: BROWSER=echo az login --redirect-port 8400
     - name: Log in with username and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
       text: az login --username johndoe@contoso.com --password VerySecret
     - name: Log in with a service principal using client secret. Use --password=secret if the first character of the password is '-'.
