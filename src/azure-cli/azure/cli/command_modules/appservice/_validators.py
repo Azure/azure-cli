@@ -621,6 +621,12 @@ def _validate_ase_not_ilb(ase):
         raise ValidationError("Internal Load Balancer (ILB) App Service Environments not supported")
 
 
+def validate_webapp_up_disabled():
+    raise ValidationError(
+        "The 'az webapp up' command is deprecated and no longer supported for Azure App Service. "
+        "Use 'webapp create and webapp deploy' instead.")
+
+
 def validate_webapp_up(cmd, namespace):
     if namespace.runtime and namespace.html:
         raise MutuallyExclusiveArgumentError('Conflicting parameters: cannot have both --runtime and --html specified.')
