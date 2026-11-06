@@ -22,9 +22,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-07-01",
+        "version": "2026-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkappliances", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/virtualnetworkappliances", "2026-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkappliances", "2026-03-01"],
         ]
     }
 
@@ -46,13 +47,18 @@ class List(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
+            help="The resource group of the virtual network appliance.",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualNetworkAppliancesList(ctx=self.ctx)()
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        if condition_0:
+            self.VirtualNetworkAppliancesListAll(ctx=self.ctx)()
+        if condition_1:
+            self.VirtualNetworkAppliancesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -68,7 +74,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class VirtualNetworkAppliancesList(AAZHttpOperation):
+    class VirtualNetworkAppliancesListAll(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -82,7 +88,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkAppliances",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/virtualNetworkAppliances",
                 **self.url_parameters
             )
 
@@ -98,10 +104,6 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -112,7 +114,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-07-01",
+                    "api-version", "2026-03-01",
                     required=True,
                 ),
             }
@@ -176,6 +178,177 @@ class List(AAZCommand):
             properties.bandwidth_in_gbps = AAZFloatType(
                 serialized_name="bandwidthInGbps",
             )
+            properties.capacity_provider = AAZObjectType(
+                serialized_name="capacityProvider",
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.capacity_provider)
+            properties.ip_configurations = AAZListType(
+                serialized_name="ipConfigurations",
+                flags={"read_only": True},
+            )
+            properties.private_ip_address_version = AAZStrType(
+                serialized_name="privateIPAddressVersion",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.resource_guid = AAZStrType(
+                serialized_name="resourceGuid",
+                flags={"read_only": True},
+            )
+            properties.subnet = AAZObjectType()
+            _ListHelper._build_schema_common_subnet_read(properties.subnet)
+
+            ip_configurations = cls._schema_on_200.value.Element.properties.ip_configurations
+            ip_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.ip_configurations.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties.ip_configurations.Element.properties
+            properties.primary = AAZBoolType()
+            properties.private_ip_address = AAZStrType(
+                serialized_name="privateIPAddress",
+            )
+            properties.private_ip_address_version = AAZStrType(
+                serialized_name="privateIPAddressVersion",
+            )
+            properties.private_ip_allocation_method = AAZStrType(
+                serialized_name="privateIPAllocationMethod",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
+
+            return cls._schema_on_200
+
+    class VirtualNetworkAppliancesList(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkAppliances",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2026-03-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.location = AAZStrType()
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.tags = AAZDictType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.bandwidth_in_gbps = AAZFloatType(
+                serialized_name="bandwidthInGbps",
+            )
+            properties.capacity_provider = AAZObjectType(
+                serialized_name="capacityProvider",
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.capacity_provider)
             properties.ip_configurations = AAZListType(
                 serialized_name="ipConfigurations",
                 flags={"read_only": True},
@@ -339,6 +512,9 @@ class _ListHelper:
         properties = _schema_common_frontend_ip_configuration_read.properties
         properties.ddos_settings = AAZObjectType(
             serialized_name="ddosSettings",
+        )
+        properties.enable_connection_tracking = AAZBoolType(
+            serialized_name="enableConnectionTracking",
         )
         properties.gateway_load_balancer = AAZObjectType(
             serialized_name="gatewayLoadBalancer",
@@ -1422,6 +1598,9 @@ class _ListHelper:
         properties.application_security_groups = AAZListType(
             serialized_name="applicationSecurityGroups",
         )
+        properties.billing_sku = AAZStrType(
+            serialized_name="billingSku",
+        )
         properties.custom_dns_configs = AAZListType(
             serialized_name="customDnsConfigs",
         )
@@ -1568,6 +1747,9 @@ class _ListHelper:
         )
 
         properties = _schema_common_private_link_service_connection_read.properties
+        properties.approval_reference = AAZObjectType(
+            serialized_name="approvalReference",
+        )
         properties.group_ids = AAZListType(
             serialized_name="groupIds",
         )
@@ -1584,6 +1766,11 @@ class _ListHelper:
         )
         properties.request_message = AAZStrType(
             serialized_name="requestMessage",
+        )
+
+        approval_reference = _schema_common_private_link_service_connection_read.properties.approval_reference
+        approval_reference.private_endpoint_id = AAZStrType(
+            serialized_name="privateEndpointId",
         )
 
         group_ids = _schema_common_private_link_service_connection_read.properties.group_ids
@@ -1693,6 +1880,10 @@ class _ListHelper:
             serialized_name="servicePublicIPAddress",
         )
         cls._build_schema_common_public_ip_address_read(properties.service_public_ip_address)
+        properties.upgraded_to_v2 = AAZBoolType(
+            serialized_name="upgradedToV2",
+            flags={"read_only": True},
+        )
 
         ddos_settings = _schema_common_public_ip_address_read.properties.ddos_settings
         ddos_settings.ddos_custom_policy = AAZObjectType(
@@ -1723,6 +1914,9 @@ class _ListHelper:
         ip_tags.Element = AAZObjectType()
 
         _element = _schema_common_public_ip_address_read.properties.ip_tags.Element
+        _element.first_party_service_tag_id = AAZStrType(
+            serialized_name="firstPartyServiceTagId",
+        )
         _element.ip_tag_type = AAZStrType(
             serialized_name="ipTagType",
         )
@@ -1944,9 +2138,7 @@ class _ListHelper:
             _schema.id = cls._schema_common_sub_resource_read.id
             return
 
-        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType()
 
         common_sub_resource_read = _schema_common_sub_resource_read
         common_sub_resource_read.id = AAZStrType()

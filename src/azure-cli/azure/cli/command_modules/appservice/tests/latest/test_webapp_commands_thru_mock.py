@@ -80,6 +80,163 @@ def _get_test_cmd():
     return cmd
 
 
+class TestWebappUpRetirement(unittest.TestCase):
+
+    def setUp(self):
+        from azure.cli.core.mock import DummyCli
+        from azure.cli.command_modules.appservice import AppserviceCommandsLoader
+
+        self.cli_ctx = DummyCli()
+        self.loader = AppserviceCommandsLoader(self.cli_ctx)
+        self.command = self.loader.load_command_table(['webapp', 'up'])['webapp up']
+
+    def test_webapp_up_has_no_warning_metadata(self):
+        self.assertIsNone(self.command.deprecate_info)
+
+    def test_webapp_up_does_not_emit_native_deprecation_warning_for_both_os_types(self):
+        import io
+        from contextlib import redirect_stderr
+        from argparse import Namespace
+        from azure.cli.core.commands import AzCliCommandInvoker
+
+        self.cli_ctx.only_show_errors = False
+        invoker = AzCliCommandInvoker(self.cli_ctx)
+        invoker.commands_loader = self.loader
+        self.cli_ctx.invocation = invoker
+        for os_type in ('Windows', 'Linux'):
+            with self.subTest(os_type=os_type):
+                captured_err = io.StringIO()
+                with redirect_stderr(captured_err):
+                    invoker.resolve_warnings(self.command, Namespace(func=self.command, os_type=os_type))
+
+                self.assertEqual(captured_err.getvalue(), '')
+
+    def test_webapp_up_rejects_execution_before_clients_or_handler_are_called(self):
+        import io
+        from contextlib import redirect_stderr, redirect_stdout
+        from azure.cli.core.azclierror import logger as error_logger
+        from azure.cli.core.mock import DummyCli
+
+        argument_sets = [
+            [],
+            ['--os-type', 'Windows'],
+            ['--os-type', 'Linux'],
+            ['--os-type', 'Windows', '--dryrun'],
+            ['--os-type', 'Linux', '--dryrun'],
+            ['--dryrun'],
+            ['--html'],
+            ['--runtime', 'PYTHON:3.14'],
+            ['--runtime', 'DOTNETCORE:10.0', '--os-type', 'Windows'],
+            ['--runtime', 'DOTNETCORE:10.0', '--os-type', 'Linux'],
+            ['--runtime', 'PYTHON:3.14', '--html'],
+            ['--location', 'West US 2'],
+            ['-l', 'West US 2'],
+            ['--app-service-environment', 'MyAse', '--plan', 'MyPlan', '--sku', 'I1V2',
+             '--name', 'MyApp', '--resource-group', 'MyResourceGroup'],
+            ['--name', 'MyApp', '--resource-group', 'MyResourceGroup', '--location', 'westus2',
+             '--enriched-errors', 'false', '--domain-name-scope', 'TenantReuse'],
+            ['--logs', '--launch-browser', '--basic-auth', 'Enabled',
+             '--track-status', 'false', '--enable-kudu-warmup', 'false'],
+            ['-n', 'MyApp', '-g', 'MyResourceGroup', '-p', 'MyPlan', '-l', 'westus2',
+             '-r', 'PYTHON:3.14', '-b', '-e', 'MyAse'],
+            ['--ids', '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/MyApp'],
+            ['--ids', '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/MyApp',
+             '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/MyOtherApp', '--name', 'MyApp'],
+            ['--only-show-errors'],
+        ]
+        with (
+            mock.patch('azure.cli.command_modules.appservice.custom.webapp_up', autospec=True) as handler,
+            mock.patch('azure.cli.command_modules.appservice._validators.web_client_factory') as validator_client,
+            mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory') as handler_client,
+            mock.patch('azure.cli.core.commands.parameters.get_subscription_locations',
+                       side_effect=AssertionError('Retired commands must not look up Azure locations')) as locations,
+        ):
+            for arguments in argument_sets:
+                with self.subTest(arguments=arguments):
+                    output = io.StringIO()
+                    stderr = io.StringIO()
+                    with (
+                        redirect_stdout(output),
+                        redirect_stderr(stderr),
+                        self.assertLogs(error_logger, level='ERROR') as errors,
+                    ):
+                        exit_code = DummyCli().invoke(['webapp', 'up'] + arguments)
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(output.getvalue(), '')
+                    self.assertEqual(stderr.getvalue(), '')
+                    self.assertEqual(len(errors.records), 1)
+                    self.assertEqual(
+                        errors.records[0].getMessage(),
+                        "The 'az webapp up' command is deprecated and no longer supported for Azure App Service. "
+                        "Use 'webapp create and webapp deploy' instead.")
+                    handler.assert_not_called()
+                    validator_client.assert_not_called()
+                    handler_client.assert_not_called()
+                    locations.assert_not_called()
+
+    def test_webapp_up_help_explains_deprecation_and_migration_for_both_os_types(self):
+        import io
+        from contextlib import redirect_stdout
+
+        output = io.StringIO()
+        with redirect_stdout(output), self.assertRaises(SystemExit) as exit_context:
+            self.cli_ctx.invoke(['webapp', 'up', '--help'])
+
+        self.assertEqual(exit_context.exception.code, 0)
+        rendered = ' '.join(output.getvalue().split())
+        self.assertEqual(rendered.lower().count("use 'webapp create and webapp deploy' instead."), 1)
+        self.assertNotIn('This command has been deprecated', rendered)
+        self.assertIn(
+            "The 'az webapp up' command is deprecated and no longer supported for Azure App Service. "
+            "Use 'webapp create and webapp deploy' instead.", rendered)
+        self.assertIn('Invocations exit with an error without creating or deploying resources.', rendered)
+        self.assertIn('Legacy arguments are accepted only to report this error and are hidden from help.', rendered)
+        self.assertIn('Show the retirement message. This command exits with an error.', rendered)
+        self.assertNotIn('To migrate:', rendered)
+        self.assertNotIn('Create a webapp and deploy code from a local workspace', rendered)
+        for option in (
+            '--name', '--resource-group', '--plan', '--location', '--sku', '--os-type',
+            '--runtime', '--dryrun', '--logs', '--launch-browser', '--html',
+            '--app-service-environment', '--basic-auth', '--track-status',
+            '--enable-kudu-warmup', '--enriched-errors', '--domain-name-scope', '--ids',
+        ):
+            with self.subTest(option=option):
+                self.assertNotIn(option, rendered)
+        self.assertIn('Global Arguments', rendered)
+        for option in ('--help', '--debug', '--verbose', '--output', '--only-show-errors', '--subscription'):
+            with self.subTest(option=option):
+                self.assertIn(option, rendered)
+
+    def test_webapp_up_argument_hiding_does_not_affect_replacement_commands(self):
+        import io
+        from contextlib import redirect_stdout
+        from azure.cli.core.mock import DummyCli
+
+        for command, option in (('create', '--plan'), ('deploy', '--src-path')):
+            with self.subTest(command=command):
+                output = io.StringIO()
+                with redirect_stdout(output), self.assertRaises(SystemExit) as exit_context:
+                    DummyCli().invoke(['webapp', command, '--help'])
+
+                self.assertEqual(exit_context.exception.code, 0)
+                self.assertRegex(output.getvalue(), r'(?m)^Arguments\s*$')
+                self.assertIn('--name', output.getvalue())
+                self.assertIn('--resource-group', output.getvalue())
+                self.assertIn(option, output.getvalue())
+
+    def test_webapp_up_remains_discoverable_in_group_help(self):
+        import io
+        from contextlib import redirect_stdout
+
+        output = io.StringIO()
+        with redirect_stdout(output), self.assertRaises(SystemExit) as exit_context:
+            self.cli_ctx.invoke(['webapp', '--help'])
+
+        self.assertEqual(exit_context.exception.code, 0)
+        self.assertRegex(output.getvalue(), r'\bup\s+:\s+Deprecated command')
+
+
 class TestWebappOutputTransformers(unittest.TestCase):
 
     def test_transform_webapp_site_output_renames_server_farm_id_for_sdk_model(self):

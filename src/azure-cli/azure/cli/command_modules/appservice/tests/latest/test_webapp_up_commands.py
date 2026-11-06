@@ -22,6 +22,7 @@ WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 
 
+@unittest.skip("az webapp up is no longer supported; deployment scenarios are retired.")
 class WebAppUpE2ETests(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
