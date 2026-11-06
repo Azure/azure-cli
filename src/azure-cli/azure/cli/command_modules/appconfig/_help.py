@@ -159,9 +159,62 @@ examples:
     text: az appconfig kv delete -n MyAppConfiguration --key color --tags tag1=value1 tag2=value2 --yes
 """
 
+helps['appconfig enhanced-feature-flag import'] = """
+type: command
+short-summary: Import enhanced feature flags from a file or another App Configuration store.
+long-summary: |
+  File transfers default to appconfig/default: a JSON or YAML object containing
+  feature_management.feature_flags, using id, conditions.client_filters and variants.configuration_value.
+  Use --profile appconfig/ffset for an items array of enhanced /ff resource objects with name,
+  optional labels and tags, conditions.filters and variants.value/content_type.
+  The export embeds profile: appconfig/ffset alongside items. Import detects it when --profile is omitted.
+  Explicit --profile takes precedence. Older bare arrays still require --profile appconfig/ffset.
+  Legacy .NET feature-management and KVSet schemas are not supported. Read-only etag and last_modified
+  properties are ignored. Labels default to null unless --label or --preserve-labels is specified.
+  This command requires the enhanced feature flag client introduced with the enhanced-feature-flag command group.
+examples:
+  - name: Import Microsoft Feature Management flags from JSON.
+    text: az appconfig enhanced-feature-flag import -n MyAppConfiguration -s file --path flags.json --format json
+  - name: Import enhanced flags from JSON, preserving labels and tags.
+    text: az appconfig enhanced-feature-flag import -n MyAppConfiguration -s file --path flags.json --format json --profile appconfig/ffset --preserve-labels
+  - name: Import matching flags from another store and assign a new label.
+    text: az appconfig enhanced-feature-flag import -n MyAppConfiguration -s appconfig --src-name SourceStore --src-feature-name Beta* --src-label test --label production
+  - name: Preview strict reconciliation of a destination label from YAML.
+    text: az appconfig enhanced-feature-flag import -n MyAppConfiguration -s file --path flags.yaml --format yaml --label test --strict --dry-run
+"""
+
+helps['appconfig enhanced-feature-flag export'] = """
+type: command
+short-summary: Export enhanced feature flags to a file or another App Configuration store.
+long-summary: |
+  File transfers default to appconfig/default: a JSON or YAML object containing
+  feature_management.feature_flags, using id, conditions.client_filters and variants.configuration_value.
+  This application format excludes labels, tags, etag and last_modified. Feature names must be unique;
+  select a single label if a feature has multiple labels.
+  Use --profile appconfig/ffset for an object containing profile: appconfig/ffset and an items array, preserving
+  labels, tags and variant value/content_type but excluding etag and last_modified.
+  Import detects the embedded profile when --profile is omitted.
+  Legacy flags stored as key-values are not included.
+  If --label is omitted, only flags with the null label are exported. Use --label "*" for all labels.
+  Store transfers use the null destination label unless
+  --dest-label or --preserve-labels is specified. Existing matching destination flags are not rewritten.
+examples:
+  - name: Export enhanced flags with all labels to JSON.
+    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d file --path flags.json --format json --profile appconfig/ffset --label *
+  - name: Export enhanced flags with the null label to YAML.
+    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d file --path flags.yaml --format yaml
+  - name: Copy enhanced flags between stores, preserving labels and replacing tags.
+    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d appconfig --dest-name DestinationStore --label * --preserve-labels --dest-tags team=app
+  - name: Preview a filtered export without writing a file.
+    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d file --path flags.json --format json --feature-name Beta* --tags team=app --dry-run
+"""
+
 helps['appconfig kv export'] = """
 type: command
 short-summary: Export configurations to another place from your App Configuration store.
+long-summary: |
+  JSON exports with --profile appconfig/kvset contain profile: appconfig/kvset and an items array.
+  Import detects this profile when --profile is omitted.
 examples:
   - name: Export all keys and feature flags with label test to a json file. To use the Microsoft Feature Management schema when exporting feature flags to a file, set the environment variable AZURE_APPCONFIG_FM_COMPATIBLE to False.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
@@ -190,6 +243,10 @@ examples:
 helps['appconfig kv import'] = """
 type: command
 short-summary: Import configurations into your App Configuration store from another place.
+long-summary: |
+  If --profile is omitted, use the profile embedded in a JSON file, otherwise use appconfig/default.
+  Explicit --profile takes precedence. Older KVSet files without profile metadata still require
+  --profile appconfig/kvset. Detected profiles enforce the same argument restrictions as explicit profiles.
 examples:
   - name: Import all keys and feature flags from a file and apply test label.
     text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json

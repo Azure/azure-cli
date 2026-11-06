@@ -380,6 +380,16 @@ def validate_feature_key(namespace):
 
 
 def validate_import_profile(namespace):
+    if namespace.profile is None and namespace.source == 'file' and namespace.format_ == 'json' and namespace.path:
+        from ._kv_import_helpers import __read_with_appropriate_encoding
+        from ._utils import resolve_import_profile
+        from azure.cli.core.azclierror import FileOperationError
+        try:
+            data = __read_with_appropriate_encoding(namespace.path, "json")
+        except (OSError, ValueError) as exception:
+            raise FileOperationError("Failed to read the import file. " + str(exception)) from exception
+        namespace.profile = resolve_import_profile(
+            data, None, (ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET))
     if namespace.profile == ImportExportProfiles.KVSET:
         if namespace.source != 'file':
             raise InvalidArgumentValueError("Import profile '{}' can only be used when importing from a JSON file.".format(ImportExportProfiles.KVSET))
