@@ -1,0 +1,68 @@
+interactions:
+- request:
+    body: '{"identity": {"type": "UserAssigned", "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-identity-000002":
+      {}}}, "location": "eastus2", "properties": {"encryption": {"keySource": "Microsoft.NetApp"},
+      "ldapConfiguration": {"bindAuthenticationLevel": "Simple", "bindDN": "cn=users,cn=accounts,dc=test,dc=com",
+      "bindPasswordAkvConfig": {"azureKeyVaultUri": "https://my-key-vault.managedhsm.azure.net",
+      "secretName": "abcd", "userAssignedIdentity": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-identity-000002"},
+      "dnsServers": ["10.10.10.10"], "domain": "test.com", "groupDN": "cn=groups,cn=accounts,dc=test,dc=com",
+      "ldapPort": 1234, "ldapServers": ["10.10.10.10"], "netGroupDN": "cn=users,cn=accounts,dc=test,dc=com",
+      "secureLdapType": "LdapOverTLS", "serverCACertificate": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM1ekNDQWMrZ0F3SUJBZ0lVZXlubkZkZEpBQjU0TENJK3l3UUNYMkFsaEdjd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0d6RVpNQmNHQTFVRUF3d1FRMHhKSUV4RVFWQWdWR1Z6ZENCRFFUQWVGdzB5TmpFd01qTXhOelF5TkRoYQpGdzB5TnpFd01qTXhOelEzTkRoYU1Cc3hHVEFYQmdOVkJBTU1FRU5NU1NCTVJFRlFJRlJsYzNRZ1EwRXdnZ0VpCk1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLQW9JQkFRQ1ljbkFkWXk2eGVLaXl2ZVBBL2FYckRkeloKczRvQTc4WDJlSnpNSzJBckRPTjZvMDNYVkpSYzZiZXJ0QThnNGVTSXdZYVBiYTRwY3dIV1ZaMnl3VE0xTFJsNApKQStzR3lJRnVkdHFMTloxS3BsY0N5ZjN3TWV4b2RLMElydnJPZWVFRFlZUnVobUVuNW04VnphU1JJZzBNN1daCkd4OWU3Y21oMmJ4cFplOEhYd28vSGtUakJPckpneXVFSjkxL3lIbjREY1dzK0o2YUUwUFIyd1dPSE1WS1BDQmYKTC9wWThZNDR4UklNcUphTzJvZHJDdlNUb3psWll1MzNCMXVLSFNPM1BhZHpiTW4vcEdwS3lkMWNqZS9CT0ZCMApIajNCMGNSU2dZZHp5TndpN3BTMTVYdStvcUtXZytFckJwQUVmMDQ1aUt4UDZkYjBOT2IwTXJjV0tpblpBZ01CCkFBR2pJekFoTUE4R0ExVWRFd0VCL3dRRk1BTUJBZjh3RGdZRFZSMFBBUUgvQkFRREFnRUdNQTBHQ1NxR1NJYjMKRFFFQkN3VUFBNElCQVFDUTVpOXJFUFhSUGRtUDJxeXh3V3pjeDZHemFrQWxYaldHWGs5bnVsQUdWajlYd2pHawpPYk5FSmU5Y1NnUThTcDFadk1NRnBFNFJGVHhtb2NRMFNib0FHV2VYSDFON3A4OVdSMk9xUWR4QnU0cmNmMkVnCnJseS9LNlF5aDRuampPVDdEamwzdGZUNHhJTzhJTFF3WjAwR0EyZlJqRHZ1K1czcmxsSXRYOU50TVRsVmJERGoKbXY5SGF5M0JlVHZHQUMzbDd1dzJNOXFmcWErZ0lQL250Z1Y4TDVhdDVKNkVTKzNYdStGTzc5bDJ0Y09JdEJTZgozWEdYKzlLWWF3ODc2aUlab3ZKYmhoV2twTHdQdkVMQWJNS01KRndoMkYzSjRTbmdUNC9uREpuSkdjV3VCbngyCkptVjE5WXptejVOa2RnWWZoOFd4cEN3MjNXTG1MbFptOWdOVQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==",
+      "userDN": "cn=users,cn=accounts,dc=test,dc=com"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - netappfiles account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2515'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --name -l --dns-servers --ldap-servers --domain --secure-ldap-type --server-ca-certificate
+        --group-dn --ldap-port --user-dn --bind-authentication-level --bind-dn --bind-password-akv-secret-name
+        --bind-password-akv-uri --bind-password-akv-user-identity --net-group-dn --identity-type
+        --user-assigned-identities
+      User-Agent:
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2026-08-01
+  response:
+    body:
+      string: '{"error":{"code":"FailedIdentityOperation","message":"Identity operation
+        for resource ''/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003''
+        failed with error ''Failed to perform resource identity operation. Status:
+        ''BadRequest''. Response: ''{\"error\":{\"code\":\"BadRequest\",\"message\":\"Resource
+        ''/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-identity-000002''
+        was not found.\"}}''.''."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '615'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 23 Oct 2026 17:47:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-msedge-ref:
+      - 'Ref A: F765881AE9F34080B41CD8F7A57D1ABB Ref B: BL2AA2010204005 Ref C: 2026-10-23T17:47:49Z'
+    status:
+      code: 400
+      message: Bad Request
+version: 1

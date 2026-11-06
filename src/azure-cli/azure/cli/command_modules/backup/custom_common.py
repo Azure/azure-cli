@@ -20,6 +20,7 @@ fabric_name = "Azure"
 
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
+                     'SQLInstance': 'SQLInstance',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SQLDataBase': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
@@ -29,6 +30,7 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'AzureFileShare': 'AzureFileShare'}
 
 workload_bmt_map = {'SQLDataBase': 'AzureWorkload',
+                    'SQLInstance': 'AzureWorkload',
                     'SAPHanaDatabase': 'AzureWorkload',
                     'SAPHanaDBInstance': 'AzureWorkload',
                     'SAPAseDatabase': 'AzureWorkload',
@@ -336,6 +338,10 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
         recovery_point = custom_help.get_none_one_or_many(filtered_rps)
         if recovery_point is None:
             raise InvalidArgumentValueError("The recovery point provided does not exist. Please provide valid RP.")
+        if (custom_help.get_model_property(item.properties, 'workload_type', 'workloadType')
+                in ('SQLInstance', 'SQLDataBase') and
+                custom_help.get_model_property(recovery_point.properties, 'type', 'type') == 'SnapshotFull'):
+            return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
         return recovery_point
 
     try:

@@ -625,3 +625,59 @@ examples:
     text: |
         az monitor clone --source-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm1 --target-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm2
 """
+
+helps['monitor trace-association'] = """
+type: group
+short-summary: Route distributed traces to an Azure Monitor workspace.
+long-summary: >
+    A trace association sends the traces of an Application Insights component, or of every component in a resource
+    group or subscription, to an Azure Monitor workspace. Associations are additive: a component sends traces to the
+    workspaces associated with it, its resource group and its subscription.
+"""
+
+helps['monitor trace-association create'] = """
+type: command
+short-summary: Route the traces of a scope to an Azure Monitor workspace.
+long-summary: >
+    Creates the association of the scope, or replaces its workspace. Associations of other scopes are unchanged.
+    If the workspace has no trace container, one is created first. Replacing the workspace of a resource group or
+    subscription asks for confirmation. You need write access on both the scope and the workspace.
+examples:
+  - name: Route the traces of an Application Insights component to an Azure Monitor workspace.
+    text: |
+        az monitor trace-association create --resource-uri /subscriptions/{subscriptionID}/resourceGroups/MyResourceGroup/providers/Microsoft.Insights/components/MyAppInsights --azure-monitor-workspace /subscriptions/{subscriptionID}/resourceGroups/MyResourceGroup/providers/Microsoft.Monitor/accounts/MyWorkspace
+  - name: Route the traces of every Application Insights component in a resource group, creating the trace container with 90 days retention if the workspace has none.
+    text: |
+        az monitor trace-association create --resource-uri /subscriptions/{subscriptionID}/resourceGroups/MyResourceGroup --azure-monitor-workspace /subscriptions/{subscriptionID}/resourceGroups/MyResourceGroup/providers/Microsoft.Monitor/accounts/MyWorkspace --trace-retention-days 90
+"""
+
+helps['monitor trace-association show'] = """
+type: command
+short-summary: Show the association configured at exactly this scope.
+long-summary: Associations inherited from a resource group or subscription are not shown. Use list to see them.
+examples:
+  - name: Show the association of a resource group.
+    text: |
+        az monitor trace-association show --resource-uri /subscriptions/{subscriptionID}/resourceGroups/MyResourceGroup
+"""
+
+helps['monitor trace-association list'] = """
+type: command
+short-summary: List the associations that apply to a scope, including those of its resource group and subscription.
+examples:
+  - name: List the associations that apply to an Application Insights component.
+    text: |
+        az monitor trace-association list --resource-uri /subscriptions/{subscriptionID}/resourceGroups/MyResourceGroup/providers/Microsoft.Insights/components/MyAppInsights
+"""
+
+helps['monitor trace-association delete'] = """
+type: command
+short-summary: Delete the association of a scope.
+long-summary: >
+    Associations of other scopes, the Azure Monitor workspace and its trace container are unchanged. Deleting the
+    association of a resource group or subscription asks for confirmation.
+examples:
+  - name: Delete the association of a subscription without a confirmation prompt.
+    text: |
+        az monitor trace-association delete --resource-uri /subscriptions/{subscriptionID} --yes
+"""
