@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import argparse
+
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
@@ -1106,43 +1108,34 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('resource_group', arg_type=resource_group_name_type)
 
-    with self.argument_context('webapp up') as c:
-        c.argument('name', arg_type=webapp_name_arg_type,
+    with self.argument_context('webapp up', help=argparse.SUPPRESS) as c:
+        # Retain --ids without automatically generating visible resource-ID arguments.
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
+        c.argument('resource_group_name')
+        c.extra('ids', options_list=['--ids'], nargs='+', dest='_ids')
         c.argument('plan', options_list=['--plan', '-p'],
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name of the app service plan associated with the webapp. If not specified, a name is auto-generated.",
                    configured_default='appserviceplan')
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES),
-                   help="Set the OS type for the app to be created. Defaults to Linux for Python "
-                        "and Node.js runtimes, and to Windows for .NET and ASP.NET runtimes. "
-                        "Use 'linux' explicitly for .NET Linux deployments. "
-                        "Use 'az webapp list-runtimes' to see available runtimes.")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PYTHON:3.14\". "
-                                                                     "Recommended: always specify explicitly for reliable results. Auto-detection from source files may pick the wrong version. "
-                                                                     "Use `az webapp list-runtimes` for available list.")
-        c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
-                   default=False, action='store_true')
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('launch_browser', help="Launch the created app using the default browser. This is not supported in Azure Cloud Shell.", default=False,
+        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES))
+        c.argument('runtime', options_list=['--runtime', '-r'])
+        c.argument('dryrun', default=False, action='store_true')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), type=str)
+        c.argument('launch_browser', default=False,
                    action='store_true', options_list=['--launch-browser', '-b'])
-        c.argument('logs',
-                   help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
-                   default=False, action='store_true')
-        c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
-        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 or Isolated V4 sku')
-        c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
-        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
-                   arg_type=get_three_state_flag())
-        c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
-                   arg_type=get_three_state_flag())
+        c.argument('logs', default=False, action='store_true')
+        c.argument('html', default=False, action='store_true')
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'])
+        c.argument('basic_auth', arg_type=get_enum_type(BASIC_AUTH_TYPES))
+        c.argument('track_status', arg_type=get_three_state_flag())
+        c.argument('enable_kudu_warmup', arg_type=get_three_state_flag())
         c.argument('enriched_errors', options_list=['--enriched-errors'],
-                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
                    arg_type=get_three_state_flag(), default=True)
-        c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'], help="Specify the scope of uniqueness for the default hostname during resource creation.", arg_type=get_enum_type(AutoGeneratedDomainNameLabelScope))
+        c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'],
+                   arg_type=get_enum_type(AutoGeneratedDomainNameLabelScope))
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],

@@ -2969,14 +2969,20 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
         _test_private_endpoint(self)
 
     @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="westus2")
-    def test_private_endpoint_connection_sql_server(self, resource_group):
+    def test_private_endpoint_connection_sql_server(self, resource_group, resource_group_location):
+        # Use a test-owned Entra administrator instead of enabling local SQL authentication.
+        identity_name = self.create_random_name('sqlpeadmin', 24)
+        identity = self.cmd('identity create -g {} -n {} -l {}'
+                            .format(resource_group, identity_name, resource_group_location)).get_output_in_json()
         self.kwargs.update({
             'rg': resource_group,
             # config begin
             'cmd': 'sql server',
             'list_num': 1,
             'type': 'Microsoft.Sql/servers',
-            'extra_create': '--admin-user admin123 --admin-password SecretPassword123',
+            'extra_create': '--enable-ad-only-auth --external-admin-principal-type Application '
+                            '--external-admin-name {} --external-admin-sid {}'.format(
+                                identity_name, identity['principalId']),
         })
 
         _test_private_endpoint(self, approve=False, rejected=False)
