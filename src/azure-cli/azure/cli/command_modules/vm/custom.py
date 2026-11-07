@@ -2216,6 +2216,9 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
 
 # region VirtualMachines BootDiagnostics
 class DisableBootDiagnostics(UpdateVM):
+    def _output(self, *args, **kwargs):
+        return None
+
     def pre_instance_update(self, instance):
         from azure.cli.core.aaz import has_value
         diag_profile = False if not has_value(instance.properties.diagnostics_profile) else (
@@ -2237,6 +2240,9 @@ def disable_boot_diagnostics(cmd, resource_group_name, vm_name):
 
 
 class EnableBootDiagnostics(UpdateVM):
+    def _output(self, *args, **kwargs):
+        return None
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
