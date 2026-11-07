@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create and start a packet capture on the specified VM.
 
     :example: Create and start a packet capture 
-        az network network-watcher packet-capture create --network-watcher-name "NetworkWatcher_eastus2euap" --packet-capture-name "clitestpcap" --resource-group "NetworkWatcherRG" --storage-location '{"storageId": "/subscriptions//resourceGroups//providers/Microsoft.Storage/storageAccounts/", "filePath": "C:\Captures\testByCli.cap"}' --target "/subscriptions/*****/resourceGroups//providers/Microsoft.Compute/virtualMachines/testVmName"
+        az network network-watcher packet-capture create --network-watcher-name "NetworkWatcher_eastus2euap" --packet-capture-name "clitestpcap" --resource-group "NetworkWatcherRG" --storage-location '{"storageId": "/subscriptions//resourceGroups//providers/Microsoft.Storage/storageAccounts/", "filePath": "C:\\Captures\\testByCli.cap"}' --target "/subscriptions/*****/resourceGroups//providers/Microsoft.Compute/virtualMachines/testVmName"
     """
 
     _aaz_info = {
