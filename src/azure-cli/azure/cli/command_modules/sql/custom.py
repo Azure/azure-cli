@@ -17,6 +17,7 @@ from azure.cli.core.util import (
     todict,
 )
 from azure.cli.core.azclierror import (
+    InvalidArgumentValueError,
     MutuallyExclusiveArgumentError,
     ResourceNotFoundError,
     ValidationError,
@@ -2487,6 +2488,10 @@ def server_ms_support_audit_policy_show(
         category_name='DevOpsOperationsAudit')
 
 
+def _is_audit_policy_required_fields_reset(required_fields):
+    return required_fields is not None and len(required_fields) == 1 and required_fields[0].lower() == 'null'
+
+
 def _audit_policy_validate_arguments(
         state=None,
         blob_storage_target_state=None,
@@ -2494,6 +2499,7 @@ def _audit_policy_validate_arguments(
         storage_endpoint=None,
         storage_account_access_key=None,
         retention_days=None,
+        required_fields=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
         event_hub_target_state=None,
@@ -2502,6 +2508,11 @@ def _audit_policy_validate_arguments(
     '''
     Validate input agruments
     '''
+
+    reset_required_fields = _is_audit_policy_required_fields_reset(required_fields)
+    if required_fields is not None and not reset_required_fields and any(
+            field.lower() == 'null' for field in required_fields):
+        raise InvalidArgumentValueError('NULL must be specified alone with --required-fields.')
 
     blob_storage_arguments_provided = blob_storage_target_state is not None or\
         storage_account is not None or storage_endpoint is not None or\
@@ -2516,7 +2527,7 @@ def _audit_policy_validate_arguments(
         event_hub_name is not None
 
     if not state and not blob_storage_arguments_provided and\
-            not log_analytics_arguments_provided and not event_hub_arguments_provided:
+            not log_analytics_arguments_provided and not event_hub_arguments_provided and required_fields is None:
         raise CLIError('Either state or blob storage or log analytics or event hub arguments are missing')
 
     if _is_audit_policy_state_enabled(state) and\
@@ -2527,7 +2538,8 @@ def _audit_policy_validate_arguments(
     if _is_audit_policy_state_disabled(state) and\
             (blob_storage_arguments_provided or
              log_analytics_arguments_provided or
-             event_hub_name):
+             event_hub_name or
+             (required_fields is not None and not reset_required_fields)):
         raise CLIError('No additional arguments should be provided once state is disabled')
 
     if (_is_audit_policy_state_none_or_disabled(blob_storage_target_state)) and\
@@ -2907,6 +2919,7 @@ def _audit_policy_update_global_settings(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         log_analytics_target_state=None,
         event_hub_target_state=None):
@@ -2948,6 +2961,16 @@ def _audit_policy_update_global_settings(
             category_name=category_name,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
+
+    if _is_audit_policy_required_fields_reset(required_fields):
+        from azure.core.serialization import NULL
+        # Python None omits the property; the SDK sentinel sends an explicit JSON null.
+        instance.required_fields = NULL
+    elif required_fields is not None:
+        if not _is_audit_policy_state_enabled(instance.state) or not instance.is_azure_monitor_target_enabled:
+            raise ValidationError(
+                'required-fields can only be specified when auditing and the Azure Monitor target are enabled')
+        instance.required_fields = required_fields
 
 
 def _audit_policy_update_rollback(
@@ -2998,6 +3021,7 @@ def _audit_policy_update(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         category_name=None,
         log_analytics_target_state=None,
@@ -3014,6 +3038,7 @@ def _audit_policy_update(
         storage_endpoint=storage_endpoint,
         storage_account_access_key=storage_account_access_key,
         retention_days=retention_days,
+        required_fields=required_fields,
         log_analytics_target_state=log_analytics_target_state,
         log_analytics_workspace_resource_id=log_analytics_workspace_resource_id,
         event_hub_target_state=event_hub_target_state,
@@ -3058,6 +3083,7 @@ def _audit_policy_update(
             storage_endpoint=storage_endpoint,
             storage_account_access_key=storage_account_access_key,
             audit_actions_and_groups=audit_actions_and_groups,
+            required_fields=required_fields,
             retention_days=retention_days,
             log_analytics_target_state=log_analytics_target_state,
             event_hub_target_state=event_hub_target_state)
@@ -3089,6 +3115,7 @@ def server_audit_policy_update(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
@@ -3111,6 +3138,7 @@ def server_audit_policy_update(
         storage_endpoint=storage_endpoint,
         storage_account_access_key=storage_account_access_key,
         audit_actions_and_groups=audit_actions_and_groups,
+        required_fields=required_fields,
         retention_days=retention_days,
         category_name='SQLSecurityAuditEvents',
         log_analytics_target_state=log_analytics_target_state,
@@ -3132,6 +3160,7 @@ def db_audit_policy_update(
         storage_endpoint=None,
         storage_account_access_key=None,
         audit_actions_and_groups=None,
+        required_fields=None,
         retention_days=None,
         log_analytics_target_state=None,
         log_analytics_workspace_resource_id=None,
@@ -3154,6 +3183,7 @@ def db_audit_policy_update(
         storage_endpoint=storage_endpoint,
         storage_account_access_key=storage_account_access_key,
         audit_actions_and_groups=audit_actions_and_groups,
+        required_fields=required_fields,
         retention_days=retention_days,
         category_name='SQLSecurityAuditEvents',
         log_analytics_target_state=log_analytics_target_state,
