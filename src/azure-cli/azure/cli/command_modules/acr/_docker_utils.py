@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from urllib.parse import urlencode, urlparse, urlunparse
+from urllib.parse import urlencode, urlparse
 
 import time
 from json import loads
@@ -29,7 +29,7 @@ from ._constants import get_managed_sku
 from ._constants import ACR_AUDIENCE_RESOURCE_NAME
 from ._utils import get_registry_by_name, ResourceNotFound
 from ._format import add_timestamp
-from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
+from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR, CONNECTIVITY_UNTRUSTED_REALM_ERROR
 
 
 logger = get_logger(__name__)
@@ -69,6 +69,29 @@ class HelmAccessTokenPermission(Enum):
     DELETE = 'delete'
     PUSH_PULL = 'push,pull'
     DELETE_PULL = 'delete,pull'
+
+
+def _normalize_netloc(netloc):
+    # Hostnames are case-insensitive, and 443 is the default HTTPS port.
+    return netloc.lower().removesuffix(':443')
+
+
+def _is_trusted_realm(realm, login_server):
+    """Check that the token server named by a WWW-Authenticate realm is the registry login server.
+    The realm must use HTTPS. The whole network location is compared rather than the parsed hostname,
+    so a realm with user info (for example 'https://other.host@<login_server>') is rejected.
+    """
+    try:
+        parsed_realm = urlparse(realm)
+    except ValueError:
+        return False
+    if parsed_realm.scheme != 'https':
+        return False
+    return _normalize_netloc(parsed_realm.netloc) == _normalize_netloc(login_server)
+
+
+def _get_token_endpoint(login_server, path):
+    return 'https://{}{}'.format(login_server.rstrip('/'), path)
 
 
 def _handle_challenge_phase(login_server,
@@ -123,6 +146,14 @@ def _handle_challenge_phase(login_server,
             return error.format_error_message(login_server)
         raise CLIError(error.format_error_message(login_server).get_error_message())
 
+    if not _is_trusted_realm(token_params['realm'], login_server):
+        logger.debug("Rejected the authentication challenge realm '%s'. It must use HTTPS and match the registry "
+                     "login server '%s'.", token_params['realm'], login_server)
+        if is_diagnostics_context:
+            return CONNECTIVITY_UNTRUSTED_REALM_ERROR.format_error_message(login_server)
+        raise AzureResponseError(CONNECTIVITY_UNTRUSTED_REALM_ERROR.format_error_message(login_server)
+                                 .get_error_message())
+
     return token_params
 
 
@@ -157,8 +188,7 @@ def _get_aad_token_after_challenge(cli_ctx,
                                    permission,
                                    is_diagnostics_context,
                                    verify_user_permissions):
-    authurl = urlparse(token_params['realm'])
-    authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
+    authhost = _get_token_endpoint(login_server, '/oauth2/exchange')
 
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
@@ -197,7 +227,7 @@ def _get_aad_token_after_challenge(cli_ctx,
     if only_refresh_token:
         return refresh_token
 
-    authhost = urlunparse((authurl[0], authurl[1], '/oauth2/token', '', '', ''))
+    authhost = _get_token_endpoint(login_server, '/oauth2/token')
 
     if repository:
         scope = 'repository:{}:{}'.format(repository, permission)
@@ -356,8 +386,7 @@ def _get_token_with_username_and_password(login_server,
         # Registry level permissions only have * as permission, even for a read operation
         scope = 'registry:{}:*'.format(permission)
 
-    authurl = urlparse(token_params['realm'])
-    authhost = urlunparse((authurl[0], authurl[1], '/oauth2/token', '', '', ''))
+    authhost = _get_token_endpoint(login_server, '/oauth2/token')
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     content = {
         'service': token_params['service'],
@@ -476,6 +505,8 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                                                             permission)
         except CLIError as e:
             raise_toomanyrequests_error(str(e))
+            if CONNECTIVITY_UNTRUSTED_REALM_ERROR.error_title in str(e):
+                raise
             logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
