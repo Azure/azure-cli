@@ -672,7 +672,7 @@ def load_arguments(self, _):
                    help='Industry of the organization using the Anthropic model, such as Law. '
                         'Required for Anthropic deployments. Specify together with --organization-name and --country.')
         c.argument('country', options_list=['--country', '--country-code'],
-                   help='ISO country name or code of the organization, such as "United States" or US. '
+                   help='Two-letter ISO 3166-1 alpha-2 country code of the organization, such as US. '
                         'Required for Anthropic deployments. Specify together with --organization-name and --industry.')
 
     with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentScaleSettings') as c:

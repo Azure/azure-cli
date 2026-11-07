@@ -38,7 +38,7 @@ class CognitiveServicesDeploymentUnitTests(unittest.TestCase):
         self.provider_arguments = {
             'organization_name': 'Contoso',
             'industry': 'Law',
-            'country': 'United States',
+            'country': 'US',
         }
 
     def test_cognitiveservices_deployment_provider_data(self):
@@ -60,11 +60,11 @@ class CognitiveServicesDeploymentUnitTests(unittest.TestCase):
         self.assertEqual(kwargs, {'polling': False})
         self.assertIs(result, self.client.begin_create_or_update.return_value)
 
-    def test_cognitiveservices_deployment_country_names_and_codes(self):
+    def test_cognitiveservices_deployment_country_codes(self):
         for country, expected in (
-                ('United States', 'US'), ('us', 'US'), (' US ', 'US'),
-                ('United Kingdom', 'GB'), ('Canada', 'CA'), ('Germany', 'DE'),
-                ('Japan', 'JP'), ('India', 'IN')):
+                ('US', 'US'), ('us', 'US'), (' US ', 'US'),
+                ('gb', 'GB'), ('CA', 'CA'), ('DE', 'DE'),
+                ('JP', 'JP'), ('IN', 'IN')):
             with self.subTest(country=country):
                 self.provider_arguments['country'] = country
                 deployment_begin_create_or_update(**self.arguments, **self.provider_arguments)
@@ -124,10 +124,13 @@ class CognitiveServicesDeploymentUnitTests(unittest.TestCase):
                     self.client.begin_create_or_update.assert_not_called()
 
     def test_cognitiveservices_deployment_invalid_country(self):
-        self.provider_arguments['country'] = 'not-a-country'
-        with self.assertRaisesRegex(InvalidArgumentValueError, 'ISO country name or code'):
-            deployment_begin_create_or_update(**self.arguments, **self.provider_arguments)
-        self.client.begin_create_or_update.assert_not_called()
+        for country in ('not-a-country', 'United States', 'USA', 'U', '12', 'U1', 'U S', 'U-',
+                        '\u00fcS', '\u212aR'):
+            with self.subTest(country=country):
+                self.provider_arguments['country'] = country
+                with self.assertRaisesRegex(InvalidArgumentValueError, 'two-letter ISO 3166-1 alpha-2'):
+                    deployment_begin_create_or_update(**self.arguments, **self.provider_arguments)
+                self.client.begin_create_or_update.assert_not_called()
 
     def test_cognitiveservices_deployment_sdk_serialization(self):
         credential = mock.Mock(spec=['get_token'])
@@ -177,7 +180,7 @@ class CognitiveServicesDeploymentCliUnitTests(unittest.TestCase):
         factory.return_value.deployments.begin_create_or_update.assert_not_called()
 
     def test_cognitiveservices_deployment_cli_provider_arguments(self):
-        for country_option, country in (('--country', 'United States'), ('--country-code', 'US')):
+        for country_option, country in (('--country', 'us'), ('--country-code', 'US')):
             with self.subTest(country_option=country_option):
                 cli = DummyCli()
                 output = io.StringIO()
@@ -205,6 +208,28 @@ class CognitiveServicesDeploymentCliUnitTests(unittest.TestCase):
                     'organizationName': 'Contoso', 'industry': 'Law', 'countryCode': 'US',
                 })
 
+    def test_cognitiveservices_deployment_cli_rejects_country_names(self):
+        for country_option in ('--country', '--country-code'):
+            with self.subTest(country_option=country_option):
+                cli = DummyCli()
+                errors = io.StringIO()
+                with mock.patch(
+                        'azure.cli.command_modules.cognitiveservices._client_factory.'
+                        'get_cognitiveservices_management_client') as factory, \
+                        mock.patch('azure.cli.core.extension.get_extensions', return_value=[]), \
+                        redirect_stdout(io.StringIO()), redirect_stderr(errors):
+                    exit_code = cli.invoke([
+                        'cognitiveservices', 'account', 'deployment', 'create',
+                        '-g', 'my-rg', '-n', 'my-account', '--deployment-name', 'my-haiku',
+                        '--model-name', 'claude-haiku-4-5', '--model-version', '2',
+                        '--model-format', 'Anthropic', '--sku-name', 'GlobalStandard', '--sku-capacity', '1',
+                        '--organization-name', 'Contoso', '--industry', 'Law',
+                        country_option, 'United States',
+                    ])
+
+                self.assertNotEqual(exit_code, 0)
+                factory.return_value.deployments.begin_create_or_update.assert_not_called()
+
     def test_cognitiveservices_deployment_cli_help(self):
         cli = DummyCli()
         output = io.StringIO()
@@ -215,7 +240,9 @@ class CognitiveServicesDeploymentCliUnitTests(unittest.TestCase):
         self.assertEqual(exit_context.exception.code, 0, output.getvalue())
         for option in ('--organization-name', '--industry', '--country', '--country-code'):
             self.assertIn(option, output.getvalue())
-        self.assertIn('United States', output.getvalue())
+        self.assertIn('ISO 3166-1 alpha-2', output.getvalue())
+        self.assertIn('--country "US"', output.getvalue())
+        self.assertNotIn('United States', output.getvalue())
 
 
 if __name__ == '__main__':

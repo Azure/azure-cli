@@ -391,17 +391,14 @@ def deployment_begin_create_or_update(
             if not value.strip():
                 raise InvalidArgumentValueError(f"{option} must not be empty or whitespace.")
 
-        import pycountry
-
-        try:
-            country_code = pycountry.countries.lookup(country.strip()).alpha_2
-        except LookupError as ex:
+        country_code = country.strip()
+        if not re.fullmatch(r'[A-Za-z]{2}', country_code):
             raise InvalidArgumentValueError(
-                "--country must be an ISO country name or code, such as 'United States' or 'US'.") from ex
+                "--country must be a two-letter ISO 3166-1 alpha-2 country code, such as 'US'.")
         provider_data = {
             'organizationName': organization_name,
             'industry': industry,
-            'countryCode': country_code,
+            'countryCode': country_code.upper(),
         }
 
     dpy = Deployment()
