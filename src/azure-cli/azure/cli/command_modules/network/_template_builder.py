@@ -5,7 +5,7 @@
 
 # pylint: disable=unused-argument
 
-AG_VERSION = "2022-05-01"
+AG_VERSION = "2026-05-01"
 LB_VERSION = "2023-04-01"
 IP_VERSION = "2022-05-01"
 
@@ -81,7 +81,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        trusted_client_certificates=None,
                                        ssl_profile=None,
                                        ssl_profile_id=None,
-                                       ssl_cert_name=None):
+                                       ssl_cert_name=None, deployment_tier=None):
 
     # set the default names
     frontend_public_ip_name = 'appGatewayFrontendIP'
@@ -272,6 +272,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ag_properties.update({'enableHttp2': enable_http2})
     if enable_fips is not None:
         ag_properties.update({'enableFips': enable_fips})
+    if deployment_tier is not None:
+        ag_properties['deploymentTier'] = deployment_tier
     if min_capacity:
         if 'autoscaleConfiguration' not in ag_properties:
             ag_properties['autoscaleConfiguration'] = {}

@@ -68,6 +68,7 @@ Release History
 
 **Network**
 
+* `az network application-gateway create/update`: Add `--deployment-tier` for Standard_v2 and WAF_v2 SKUs
 * `az network application-gateway advanced-routing-set/advanced-routing-map`: Add new command groups to support advanced routing (#34198)
 * `az network application-gateway rule create/update`: Add `--advanced-routing-map` and `--auth-configs` parameters (#34198)
 * `az network application-gateway update`: Add `--reserved-capacity` parameter (#34198)
