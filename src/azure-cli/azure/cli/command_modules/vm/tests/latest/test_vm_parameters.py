@@ -4,7 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from argparse import Namespace
+from types import SimpleNamespace
 from unittest import mock
+
+from knack.util import CLIError
+
+from azure.cli.command_modules.vm import _validators, _vm_utils
+from azure.cli.command_modules.vm._constants import UPGRADE_SECURITY_HINT
 
 
 def mock_echo_args(command_name, parameters):
@@ -68,6 +75,140 @@ class TestVMValidators(unittest.TestCase):
             }
             self.assertEqual(ns.nics[0], nic1_expected)
             self.assertEqual(ns.nics[1], nic2_expected)
+
+
+class TestVMTrustedLaunchWarnings(unittest.TestCase):
+
+    @staticmethod
+    def _marketplace_namespace(metadata):
+        return Namespace(
+            image='publisher:offer:sku:version',
+            os_publisher='publisher', os_offer='offer', os_sku='sku', os_version='version',
+            plan_name=None, plan_product=None, plan_publisher=None,
+            security_type='ConfidentialVM',
+            os_disk_security_encryption_type='DiskWithVMGuestState',
+            enable_secure_boot=None, enable_vtpm=None,
+            _vm_image_info_cache=metadata,
+        )
+
+    def test_vm_create_confidential_image_no_trusted_launch_warning(self):
+        resource_prefix = (
+            '/subscriptions/00000000-0000-0000-0000-000000000000'
+            '/resourceGroups/rg/providers/Microsoft.Compute'
+        )
+        images = [
+            resource_prefix + '/images/image',
+            resource_prefix + '/galleries/gallery/images/image/versions/1.0.0',
+            '/SharedGalleries/gallery/Images/image/Versions/1.0.0',
+            '/CommunityGalleries/gallery/Images/image/Versions/1.0.0',
+        ]
+        for image in images:
+            for security_type in ('ConfidentialVM', 'cOnFiDeNtIaLvM'):
+                with self.subTest(image=image, security_type=security_type):
+                    namespace = Namespace(
+                        image=image, security_type=security_type,
+                        os_disk_security_encryption_type='DiskWithVMGuestState',
+                        enable_secure_boot=False, enable_vtpm=False,
+                    )
+                    before = vars(namespace).copy()
+                    with mock.patch.object(_vm_utils.logger, 'warning') as warning:
+                        _validators._validate_generation_version_and_trusted_launch(mock.Mock(), namespace)
+
+                    self.assertEqual(vars(namespace), before)
+                    self.assertNotIn(mock.call(UPGRADE_SECURITY_HINT), warning.call_args_list)
+
+    def test_vm_image_trusted_launch_warning_other_security_types(self):
+        for security_type, expected_warning in (
+                ('Standard', True), ('TrustedLaunch', False), ('tRuStEdLaUnCh', False), (None, False)):
+            with self.subTest(security_type=security_type):
+                namespace = Namespace(security_type=security_type)
+                with mock.patch.object(_vm_utils.logger, 'warning') as warning:
+                    _vm_utils.validate_image_trusted_launch(namespace)
+
+                self.assertEqual(mock.call(UPGRADE_SECURITY_HINT) in warning.call_args_list, expected_warning)
+                self.assertEqual(namespace.security_type, security_type)
+
+    def test_vm_create_confidential_marketplace_no_trusted_launch_warning(self):
+        metadata_cases = [
+            {'hyperVGeneration': 'V1', 'features': []},
+            {'hyperVGeneration': 'V2', 'features': [
+                {'name': 'SecurityType', 'value': 'ConfidentialVmSupported'}]},
+            {'hyperVGeneration': 'V2', 'features': [
+                {'name': 'SecurityType', 'value': 'TrustedLaunchAndConfidentialVmSupported'}]},
+            {'hyperVGeneration': 'V2'},
+            {},
+        ]
+        for metadata in metadata_cases:
+            for security_type in ('ConfidentialVM', 'cOnFiDeNtIaLvM'):
+                with self.subTest(metadata=metadata, security_type=security_type):
+                    namespace = self._marketplace_namespace(metadata)
+                    namespace.security_type = security_type
+                    namespace.enable_secure_boot = False
+                    namespace.enable_vtpm = False
+                    before = vars(namespace).copy()
+                    with mock.patch.object(_validators.logger, 'warning') as warning:
+                        _validators._validate_generation_version_and_trusted_launch(mock.Mock(), namespace)
+
+                    self.assertEqual(vars(namespace), before)
+                    self.assertNotIn(mock.call(UPGRADE_SECURITY_HINT), warning.call_args_list)
+
+    def test_vm_create_confidential_image_deprecation_warning(self):
+        namespace = self._marketplace_namespace({
+            'hyperVGeneration': 'V2',
+            'features': [{'name': 'SecurityType', 'value': 'TrustedLaunchAndConfidentialVmSupported'}],
+            'imageDeprecationStatus': {
+                'imageState': 'ScheduledForDeprecation',
+                'scheduledDeprecationTime': '2030-01-01T00:00:00+00:00',
+            },
+        })
+        before = vars(namespace).copy()
+        with mock.patch.object(_validators.logger, 'warning') as warning:
+            _validators._validate_generation_version_and_trusted_launch(mock.Mock(), namespace)
+
+        self.assertEqual(vars(namespace), before)
+        self.assertTrue(any('scheduled for deprecation' in call.args[0] for call in warning.call_args_list))
+        self.assertNotIn(mock.call(UPGRADE_SECURITY_HINT), warning.call_args_list)
+
+    def test_vm_marketplace_trusted_launch_warning_other_security_types(self):
+        features = [{'name': 'SecurityType', 'value': 'TrustedLaunchAndConfidentialVmSupported'}]
+        for generation in ('V1', 'V2', None):
+            for security_type in ('Standard', 'TrustedLaunch', None):
+                with self.subTest(generation=generation, security_type=security_type):
+                    namespace = Namespace(
+                        security_type=security_type, enable_secure_boot=None, enable_vtpm=None,
+                    )
+                    before = vars(namespace).copy()
+                    with mock.patch.object(_validators.logger, 'warning') as warning:
+                        _validators.trusted_launch_set_default(namespace, generation, features)
+
+                    self.assertEqual(vars(namespace), before)
+                    self.assertEqual(mock.call(UPGRADE_SECURITY_HINT) in warning.call_args_list,
+                                     generation is not None)
+
+    def test_vm_trusted_launch_defaults_preserved(self):
+        features = [SimpleNamespace(name='SecurityType', value='TrustedLaunchAndConfidentialVmSupported')]
+        for security_type, expected_security_type in (
+                (None, 'TrustedLaunch'), ('Standard', 'Standard'),
+                ('TrustedLaunch', 'TrustedLaunch'), ('ConfidentialVM', 'ConfidentialVM')):
+            for enabled in (None, False):
+                with self.subTest(security_type=security_type, enabled=enabled):
+                    namespace = Namespace(
+                        security_type=security_type, enable_secure_boot=enabled, enable_vtpm=enabled,
+                    )
+                    with mock.patch.object(_validators.logger, 'warning') as warning:
+                        _validators.trusted_launch_set_default(namespace, 'V2', features)
+
+                    expected_enabled = True if enabled is None and security_type != 'Standard' else enabled
+                    self.assertEqual(namespace.security_type, expected_security_type)
+                    self.assertEqual(namespace.enable_secure_boot, expected_enabled)
+                    self.assertEqual(namespace.enable_vtpm, expected_enabled)
+                    self.assertNotIn(mock.call(UPGRADE_SECURITY_HINT), warning.call_args_list)
+
+    def test_vm_create_confidential_image_lookup_error(self):
+        namespace = self._marketplace_namespace({})
+        with mock.patch.object(_validators, '_show_vm_image', side_effect=CLIError('image unavailable')):
+            with self.assertRaisesRegex(CLIError, 'image unavailable'):
+                _validators._validate_generation_version_and_trusted_launch(mock.Mock(), namespace)
 
 
 # class TestArgumentParser(unittest.TestCase):
