@@ -56,7 +56,7 @@ def duration_format(value):
 def metadata_item_format(value):
     """Space-separated values in 'key=value' format."""
     try:
-        data_name, data_value = value.split('=')
+        data_name, data_value = value.split('=', 1)
     except ValueError:
         message = ("Incorrectly formatted metadata. "
                    "Argument values should be in the format a=b c=d")
@@ -72,7 +72,7 @@ def string_dictionary_format(values):
     result = {}
     try:
         for value in values.split(' '):
-            k, v = value.split('=')
+            k, v = value.split('=', 1)
             result[k] = v
     except ValueError:
         message = ("Incorrectly formatted values. "
@@ -84,7 +84,7 @@ def string_dictionary_format(values):
 def environment_setting_format(value):
     """Space-separated values in 'key=value' format."""
     try:
-        env_name, env_value = value.split('=')
+        env_name, env_value = value.split('=', 1)
     except ValueError:
         message = ("Incorrectly formatted environment settings. "
                    "Argument values should be in the format a=b c=d")
