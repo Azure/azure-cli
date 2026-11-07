@@ -13,7 +13,7 @@ def load_arguments_eh(self, _):
         get_location_type, get_three_state_flag, get_resource_name_completion_list
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
     from azure.cli.command_modules.eventhubs._completers import get_eventhubs_command_completion_list
-    from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace
+    from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_namespace_name
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
     (SkuName, TlsVersion) = self.get_models('SkuName', 'TlsVersion', resource_type=ResourceType.MGMT_EVENTHUB)
@@ -88,7 +88,8 @@ def load_arguments_eh(self, _):
             c.argument('min_compaction_lag_in_mins', type=int, arg_group='Retention-Description', options_list=['--min-lag', '--min-compaction-lag-in-mins'], help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.")
             c.argument('encoding', arg_group='Capture', options_list=['encoding'], help='Enumerates the possible values for the encoding format of capture description. Note: \'AvroDeflate\' will be deprecated in New API Version')
     with self.argument_context('eventhubs eventhub list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace',
+                   validator=validate_namespace_name)
 
 # Region Geo DR Configuration
     with self.argument_context('eventhubs georecovery-alias set') as c:
