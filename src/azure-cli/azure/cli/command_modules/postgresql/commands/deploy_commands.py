@@ -5,9 +5,9 @@
 
 # pylint: disable=unused-argument, line-too-long
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
-from azure.cli.core.util import run_cmd
 from knack.log import get_logger
 from ..utils._flexible_server_util import (
+    run_cmd,
     run_subprocess,
     fill_action_template,
     get_git_root_dir,
@@ -45,12 +45,12 @@ def github_actions_setup(cmd, client, resource_group_name, server_name, database
 
     action_path = get_git_root_dir() + GITHUB_ACTION_PATH + action_name + '.yml'
     logger.warning("Making git commit for file %s", action_path)
-    run_subprocess("git add {}".format(action_path))
-    run_subprocess("git commit -m \"Add github action file\"")
+    run_subprocess(["git", "add", action_path])
+    run_subprocess(["git", "commit", "-m", "Add github action file"])
 
     if allow_push:
         logger.warning("Pushing the created action file to origin %s branch", branch)
-        run_subprocess("git push origin {}".format(branch))
+        run_subprocess(["git", "push", "origin", branch])
     else:
         logger.warning('You did not set --allow-push parameter. Please push the prepared file %s to your remote repo and run "deploy run" command to activate the workflow.', action_path)
 
@@ -59,14 +59,17 @@ def github_actions_run(action_name, branch):
 
     gitcli_check_and_login()
     logger.warning("Created an event for %s.yml in branch %s", action_name, branch)
-    run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
+    run_subprocess(["gh", "workflow", "run", action_name + ".yml", "--ref", branch])
 
 
 def gitcli_check_and_login():
-    output = run_cmd(["gh"], capture_output=True)
+    try:
+        output = run_cmd(["gh"], capture_output=True)
+    except FileNotFoundError as ex:
+        raise ClientRequestError('Please install "Github CLI" to run this command.') from ex
     if output.returncode:
         raise ClientRequestError('Please install "Github CLI" to run this command.')
 
     output = run_cmd(["gh", "auth", "status"], capture_output=True)
     if output.returncode:
-        run_subprocess("gh auth login", stdout_show=True)
+        run_subprocess(["gh", "auth", "login"], stdout_show=True)
