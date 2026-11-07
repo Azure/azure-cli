@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import os
 import shutil
+import tempfile
 from datetime import datetime, timedelta
 from unittest import mock
 from azure.cli.testsdk import (
@@ -38,6 +39,98 @@ class StorageAzcopyEndpointTests(ScenarioTest):
             self.assertEqual(azcopy.return_value.copy.call_args[0],
                              ('./source', 'https://victim.blob.core.windows.net.attacker.example/c'))
             generate.assert_not_called()
+
+    def test_storage_copy_requires_trusted_credential_account(self):
+        with mock.patch('azure.cli.command_modules.storage.operations.azcopy.AzCopy') as azcopy, \
+                mock.patch('azure.cli.command_modules.storage.azcopy.util._generate_sas_token') as generate, \
+                mock.patch('azure.cli.command_modules.storage._validators.get_config_value',
+                           side_effect=lambda cmd, section, key, default: default):
+            for credential in ('--sas-token sig=secret', '--account-key a2V5',
+                               '--source-sas sig=secret', '--source-account-key a2V5'):
+                for destination in ('.', 'https://victim.blob.core.windows.net/c/b?sig=destination'):
+                    with self.subTest(credential=credential, destination=destination):
+                        with self.assertRaisesRegex(InvalidArgumentValueError, 'Provide a storage account name'):
+                            self.cmd(
+                                'storage copy -s https://attacker.blob.core.windows.net/c/b '
+                                '-d {} {}'.format(destination, credential))
+            azcopy.assert_not_called()
+            generate.assert_not_called()
+
+    def test_storage_copy_ambient_credentials_are_account_bound(self):
+        from knack.config import CLIConfig
+
+        with tempfile.TemporaryDirectory() as inherited_config_dir, \
+                mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': inherited_config_dir}), \
+                mock.patch('azure.cli.command_modules.storage.operations.azcopy.AzCopy') as azcopy, \
+                mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value=None), \
+                mock.patch('azure.cli.command_modules.storage.azcopy.util._generate_sas_token',
+                           return_value='sig=test-signature') as generate:
+            for origin in ('environment', 'config'):
+                for credential, value in (('sas_token', 'sig=ambient'), ('key', 'a2V5')):
+                    for destination in ('.', 'https://victim.blob.core.windows.net/c/b',
+                                        'https://victim.blob.core.windows.net/c/b?sig=destination'):
+                        with self.subTest(origin=origin, credential=credential, destination=destination):
+                            with tempfile.TemporaryDirectory() as config_dir:
+                                env = {'AZURE_STORAGE_AUTH_MODE': 'key', 'AZURE_CONFIG_DIR': config_dir}
+                                if origin == 'environment':
+                                    env['AZURE_STORAGE_' + credential.upper()] = value
+                                with mock.patch.dict(os.environ, env, clear=True):
+                                    config = CLIConfig(config_dir=config_dir, config_env_var_prefix='AZURE')
+                                    self.assertEqual(config.config_dir, config_dir)
+                                    if origin == 'config':
+                                        config.set_value('storage', credential, value)
+                                    with mock.patch.object(self.cli_ctx, 'config', config):
+                                        generate.reset_mock()
+                                        self.cmd(
+                                            'storage copy -s https://attacker.blob.core.windows.net/c/b '
+                                            '-d {} --account-name victim'.format(destination))
+                                expected = destination
+                                if destination.endswith('/b'):
+                                    expected += '?' + (value if credential == 'sas_token' else 'sig=test-signature')
+                                self.assertEqual(
+                                    azcopy.return_value.copy.call_args[0],
+                                    ('https://attacker.blob.core.windows.net/c/b', expected))
+                                if credential == 'key' and destination.endswith('/b'):
+                                    self.assertEqual(generate.call_count, 1)
+                                    self.assertEqual(generate.call_args[0][1:3], ('victim', value))
+                                else:
+                                    generate.assert_not_called()
+            self.assertFalse(os.path.exists(os.path.join(inherited_config_dir, 'config')))
+
+    def test_storage_copy_url_only_account_key_lookup(self):
+        keys = {'sourceaccount': 'c291cmNl', 'destinationaccount': 'ZGVzdGluYXRpb24='}
+        with mock.patch('azure.cli.command_modules.storage.operations.azcopy.AzCopy') as azcopy, \
+                mock.patch('azure.cli.command_modules.storage._validators.get_config_value',
+                           side_effect=lambda cmd, section, key, default: default), \
+                mock.patch('azure.cli.command_modules.storage._validators._query_account_key',
+                           side_effect=lambda cli_ctx, account: keys[account]) as query, \
+                mock.patch('azure.cli.command_modules.storage.azcopy.util._generate_sas_token',
+                           side_effect=lambda cmd, account, key, service, **kwargs: 'sig=' + account) as generate:
+            for service in ('blob', 'dfs', 'file'):
+                source = 'https://sourceaccount.{}.core.windows.net/data/file'.format(service)
+                destination = 'https://destinationaccount.{}.core.windows.net/data/file'.format(service)
+                cases = [
+                    ('./source', destination, ['destinationaccount'],
+                     ['./source', destination + '?sig=destinationaccount']),
+                    (source, './destination', ['sourceaccount'], [source + '?sig=sourceaccount', './destination']),
+                    (source, destination, ['destinationaccount', 'sourceaccount'],
+                     [source + '?sig=sourceaccount', destination + '?sig=destinationaccount']),
+                    (source, source, ['sourceaccount'], [source + '?sig=sourceaccount', source + '?sig=sourceaccount']),
+                    (source, destination + '?sig=presigned', ['sourceaccount'],
+                     [source + '?sig=sourceaccount', destination + '?sig=presigned']),
+                    (source + '?sig=presigned', destination, ['destinationaccount'],
+                     [source + '?sig=presigned', destination + '?sig=destinationaccount']),
+                ]
+                for src, dst, accounts, expected in cases:
+                    with self.subTest(service=service, source=src, destination=dst):
+                        query.reset_mock()
+                        generate.reset_mock()
+                        self.cmd('storage copy -s "{}" -d "{}"'.format(src, dst))
+                        self.assertEqual(azcopy.return_value.copy.call_args[0], tuple(expected))
+                        self.assertEqual(query.call_args_list, [mock.call(mock.ANY, name) for name in accounts])
+                        generated_accounts = ['sourceaccount', 'sourceaccount'] if src == dst else accounts
+                        self.assertEqual([call.args[1:3] for call in generate.call_args_list],
+                                         [(name, keys[name]) for name in generated_accounts])
 
 
 class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
@@ -555,7 +648,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             .assert_with_checks(JMESPathCheck('exists', False))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='first_account', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_blob_url(self, resource_group, first_account, second_account, test_dir):
@@ -826,7 +919,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 11))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_file_url(self, resource_group, storage_account_info, test_dir):
 
@@ -874,7 +967,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_file_account(self, resource_group, storage_account_info, test_dir):
         storage_account, _ = storage_account_info
@@ -938,7 +1031,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(share, 'parentdst/target', storage_account), checks=JMESPathCheck('length(@)', 10))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='first_account', allow_shared_key_access=False)
+    @StorageAccountPreparer(parameter_name='first_account', kind='StorageV2', allow_shared_key_access=False)
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage',
                             allow_shared_key_access=False)
     @StorageTestFilesPreparer()
@@ -1034,7 +1127,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             local_file, sasURL))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='first_account', allow_shared_key_access=False)
+    @StorageAccountPreparer(parameter_name='first_account', kind='StorageV2', allow_shared_key_access=False)
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage',
                             allow_shared_key_access=False)
     @StorageTestFilesPreparer()
@@ -1142,7 +1235,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                        .format(third_container, second_account), checks=JMESPathCheck('length(@)', 10))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='first_account', allow_shared_key_access=False)
+    @StorageAccountPreparer(parameter_name='first_account', kind='StorageV2', allow_shared_key_access=False)
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage',
                             allow_shared_key_access=False)
     @StorageTestFilesPreparer()
@@ -1206,7 +1299,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 11))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_file_url_oauth(self, resource_group, storage_account_info, test_dir):
         storage_account, _ = storage_account_info
@@ -1253,7 +1346,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_file_account_oauth(self, resource_group, storage_account_info, test_dir):
         storage_account, _ = storage_account_info

@@ -121,15 +121,15 @@ def get_config_value(cmd, section, key, default):
 
 
 # pylint: disable=too-many-branches, too-many-statements
-def validate_client_parameters(cmd, namespace):
+def validate_client_parameters(cmd, namespace, *, use_config=True):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
-    account name and key """
+    account name and key. Set use_config=False to resolve only explicitly supplied credentials. """
     n = namespace
 
     if hasattr(n, 'auth_mode'):
-        auth_mode = n.auth_mode or get_config_value(cmd, 'storage', 'auth_mode', None)
+        auth_mode = n.auth_mode or (get_config_value(cmd, 'storage', 'auth_mode', None) if use_config else None)
         del n.auth_mode
-        if not n.account_name:
+        if use_config and not n.account_name:
             if hasattr(n, 'account_url') and not n.account_url:
                 n.account_name = get_config_value(cmd, 'storage', 'account', None)
                 n.account_url = (get_config_value(cmd, 'storage', 'service_endpoint', None) or
@@ -155,7 +155,7 @@ def validate_client_parameters(cmd, namespace):
         return
 
     # When there is no input for credential, we will read environment variable
-    if not n.connection_string and not n.account_key and not n.sas_token:
+    if use_config and not n.connection_string and not n.account_key and not n.sas_token:
         n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
@@ -166,16 +166,16 @@ def validate_client_parameters(cmd, namespace):
         n.sas_token = conn_dict.get('SharedAccessSignature')
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
-    if not n.account_name:
+    if use_config and not n.account_name:
         if hasattr(n, 'account_url') and not n.account_url:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
             n.account_url = (get_config_value(cmd, 'storage', 'service_endpoint', None) or
                              get_config_value(cmd, 'storage', 'account_url', None))
         else:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
-    if not n.account_key and not n.sas_token:
+    if use_config and not n.account_key and not n.sas_token:
         n.account_key = get_config_value(cmd, 'storage', 'key', None)
-    if not n.sas_token:
+    if use_config and not n.sas_token:
         n.sas_token = get_config_value(cmd, 'storage', 'sas_token', None)
 
     # strip the '?' from sas token. the portal and command line are returns sas token in different
@@ -1891,12 +1891,15 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
             r'([a-z0-9]{3,24})(-secondary)?\.(blob|dfs|file)\.' + re.escape(storage_endpoint.lower()),
             origin[1])
         if storage_info:
-            if not namespace.account_name:
-                namespace.account_name = get_config_value(cmd, 'storage', 'account', None) or storage_info[1]
             service = 'file' if storage_info[3] == 'file' else 'blob'
+            if not any((namespace.account_name, namespace.account_key, namespace.sas_token,
+                        namespace.connection_string, getattr(namespace, 'token_credential', None))):
+                endpoints = _storage_account_urls(cmd, storage_info[1], service)
+                if origin in [_storage_url_origin(endpoint) for endpoint in endpoints]:
+                    # Query this account through ARM without reloading ambient credentials.
+                    namespace.account_name = storage_info[1]
+                    _validate_azcopy_account(cmd, namespace, use_config=False)
         connection_string = namespace.connection_string
-        if not connection_string and not namespace.account_key and not namespace.sas_token:
-            connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
         if connection_string:
             for candidate_service in ('blob', 'file'):
                 if origin in [_storage_url_origin(endpoint) for endpoint in
@@ -1912,7 +1915,6 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
         cmd.command_kwargs["resource_type"] = ResourceType.DATA_STORAGE_BLOB
     elif share:
         cmd.command_kwargs["resource_type"] = ResourceType.DATA_STORAGE_FILESHARE
-    validate_client_parameters(cmd, namespace)
     kwargs = {'account_name': namespace.account_name,
               'account_key': namespace.account_key,
               'connection_string': namespace.connection_string,
@@ -1969,7 +1971,7 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
     from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
     from azure.cli.core.azclierror import InvalidArgumentValueError
 
-    if service is None:
+    if service is None or not (account_key or sas_token):
         return url
     origin = _storage_url_origin(url)
     endpoints = _storage_account_urls(cmd, account_name, service, connection_string)
@@ -1994,10 +1996,58 @@ def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, re
     return url
 
 
+def _validate_azcopy_account(cmd, namespace, *, use_config=True):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    validate_client_parameters(cmd, namespace, use_config=use_config)
+    if (not getattr(namespace, 'token_credential', None) and
+            (namespace.account_key or namespace.sas_token) and
+            not (namespace.account_name or namespace.connection_string)):
+        raise InvalidArgumentValueError(
+            'Provide a storage account name or a connection string before using storage credentials with copy URLs.',
+            recommendation='Use --account-name for primary credentials, --source-account-name for source credentials, '
+                           'or a connection string containing trusted storage endpoints.')
+
+
+def _azcopy_source_namespace(cmd, namespace):
+    from copy import copy
+
+    source = copy(namespace)
+    source.account_name = namespace.source_account_name
+    source.account_key = namespace.source_account_key
+    source.sas_token = namespace.source_sas
+    source.connection_string = namespace.source_connection_string
+    source.account_url = None
+
+    if not (source.account_key or source.sas_token or source.connection_string):
+        same_account = (source.account_name and
+                        source.account_name.removesuffix('-secondary') == namespace.account_name)
+        if not source.account_name and (namespace.account_name or namespace.connection_string):
+            if namespace.source is None:
+                same_account = True
+            elif '://' in namespace.source:
+                origin = _storage_url_origin(namespace.source)
+                same_account = any(
+                    origin == _storage_url_origin(endpoint)
+                    for service in ('blob', 'file')
+                    for endpoint in _storage_account_urls(
+                        cmd, namespace.account_name, service, namespace.connection_string))
+        if same_account:
+            source.account_name = source.account_name or namespace.account_name
+            source.account_key = namespace.account_key
+            source.sas_token = namespace.sas_token
+            source.connection_string = namespace.connection_string
+
+    # Source credentials must not be reloaded from the primary account's environment or configuration.
+    _validate_azcopy_account(cmd, source, use_config=False)
+    return source
+
+
 def validate_azcopy_credential(cmd, namespace):
-    auth_mode_login = False
-    if namespace.auth_mode == 'login':
-        auth_mode_login = True
+    auth_mode_login = namespace.auth_mode == 'login'
+    _validate_azcopy_account(cmd, namespace)
+    auth_mode_login = auth_mode_login or bool(getattr(namespace, 'token_credential', None))
+    if auth_mode_login:
         namespace.enable_file_backup_request_intent = True
 
     # Get destination uri
@@ -2015,28 +2065,19 @@ def validate_azcopy_credential(cmd, namespace):
                                                      connection_string=namespace.connection_string)
 
     if not _is_valid_uri(namespace.source):
-        # determine if source account is same with destination
-        if not namespace.source_account_key and not namespace.source_sas and not namespace.source_connection_string:
-            if namespace.source_account_name == namespace.account_name:
-                namespace.source_account_key = namespace.account_key
-                namespace.source_sas = namespace.sas_token
-                namespace.source_connection_string = namespace.connection_string
-        namespace.account_name = namespace.source_account_name
-        namespace.account_key = namespace.source_account_key
-        namespace.sas_token = namespace.source_sas
-        namespace.connection_string = namespace.source_connection_string
+        source = _azcopy_source_namespace(cmd, namespace)
 
         # Get source uri
-        namespace.url = namespace.source
+        source.url = namespace.source
         service, namespace.source = get_url_with_sas(
-            cmd, namespace, url=namespace.source,
+            cmd, source, url=namespace.source,
             container=namespace.source_container, blob=namespace.source_blob,
             share=namespace.source_share, file_path=namespace.source_file_path)
         if not auth_mode_login:
-            namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=namespace.account_name,
-                                                account_key=namespace.account_key, sas_token=namespace.sas_token,
+            namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=source.account_name,
+                                                account_key=source.account_key, sas_token=source.sas_token,
                                                 service=service, resource_types='sco', permissions='rl',
-                                                connection_string=namespace.connection_string)
+                                                connection_string=source.connection_string)
 
 
 def is_directory(props):
