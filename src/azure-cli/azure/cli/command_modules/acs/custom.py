@@ -3672,6 +3672,7 @@ def aks_agentpool_update(
     # ssh access
     ssh_access=None,
     yes=False,
+    node_vm_size=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
