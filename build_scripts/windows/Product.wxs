@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
   <?define ProductVersion="$(env.CLI_VERSION)" ?>
 
@@ -33,16 +35,14 @@
   <?error Unsupported platform "$(var.Platform)" ?>
   <?endif ?>
 
-  <Product Id="*"
-           Name="$(var.ProductName) ($(var.Architecture))"
+  <Package Name="$(var.ProductName) ($(var.Architecture))"
            Language="1033"
            Version="$(var.ProductVersion)"
            Manufacturer="$(var.ProductAuthor)"
-           UpgradeCode="$(var.UpgradeCode)">
-
-    <Package InstallerVersion="200"
-             Compressed="yes"
-             InstallScope="perMachine" />
+           UpgradeCode="$(var.UpgradeCode)"
+           InstallerVersion="200"
+           Compressed="yes"
+           Scope="perMachine">
 
     <Upgrade Id="$(var.UpgradeCode)">
       <UpgradeVersion Property="WIX_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMaximum="no" MigrateFeatures="yes" />
@@ -59,9 +59,9 @@
       <UpgradeVersion Property="WIX_X86_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMaximum="yes" MigrateFeatures="yes" />
       <UpgradeVersion Property="WIX_X86_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
     </Upgrade>
-    <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT (WIX_DOWNGRADE_DETECTED OR WIX_X86_DOWNGRADE_DETECTED)</Condition>
+    <Launch Condition="NOT (WIX_DOWNGRADE_DETECTED OR WIX_X86_DOWNGRADE_DETECTED)" Message="A newer version of $(var.ProductName) is already installed." />
     <?else ?>
-    <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT WIX_DOWNGRADE_DETECTED</Condition>
+    <Launch Condition="NOT WIX_DOWNGRADE_DETECTED" Message="A newer version of $(var.ProductName) is already installed." />
     <?endif ?>
 
     <Media Id="1" Cabinet="WindowsAzureCLI.cab" EmbedCab="yes" CompressionLevel="high" />
@@ -77,7 +77,7 @@
     <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
     
     <!-- Force reinstall of all files during upgrade -->
-    <SetProperty Id="REINSTALLMODE" Value="amus" Before="CostFinalize" Sequence="both">WIX_UPGRADE_DETECTED</SetProperty>
+    <SetProperty Id="REINSTALLMODE" Value="amus" Before="CostFinalize" Sequence="both" Condition="WIX_UPGRADE_DETECTED" />
 
     <Feature Id="ProductFeature"
              Title="Microsoft Azure CLI"
@@ -87,37 +87,35 @@
     </Feature>
 
     <!--Custom action to propagate path env variable change-->
-    <CustomActionRef Id="WixBroadcastEnvironmentChange" />
+    <util:BroadcastEnvironmentChange />
 
     <!-- User Interface -->
     <WixVariable Id="WixUILicenseRtf" Value="$(var.ProductResources)CLI_LICENSE.rtf"/>
     <WixVariable Id="WixUIDialogBmp" Value="$(var.ProductResources)Dialog.bmp" />
     <WixVariable Id="WixUIBannerBmp" Value="$(var.ProductResources)Banner.bmp" />
 
-    <UIRef Id="WixUI_Minimal"/>
+    <ui:WixUI Id="WixUI_Minimal" />
     <UIRef Id="WixUI_ErrorProgressText"/>
 
     <!-- Show message to restart any terminals only if the PATH is changed -->
     <CustomAction Id="Set_WIXUI_EXITDIALOGOPTIONALTEXT" Property="WIXUI_EXITDIALOGOPTIONALTEXT" Value="Please close and reopen any active terminal window to use Azure CLI." />
     <InstallUISequence>
-      <Custom Action="Set_WIXUI_EXITDIALOGOPTIONALTEXT" After="CostFinalize">NOT Installed AND NOT WIX_UPGRADE_DETECTED</Custom>
+      <Custom Action="Set_WIXUI_EXITDIALOGOPTIONALTEXT" After="CostFinalize" Condition="NOT Installed AND NOT WIX_UPGRADE_DETECTED" />
     </InstallUISequence>
 
-  </Product>
+  </Package>
 
   <Fragment>
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="$(var.ProgramFilesFolder)">
-        <Directory Id="SDKFOLDER" Name="Microsoft SDKs">
-          <Directory Id="AZUREFOLDER" Name="Azure">
-            <Directory Id="AZURECLIFOLDER" Name="CLI2">
-              <Directory Id="DynamicCliDir"/>
-              <Directory Id="BIN" Name="Bin" />
-            </Directory>
+    <StandardDirectory Id="$(var.ProgramFilesFolder)">
+      <Directory Id="SDKFOLDER" Name="Microsoft SDKs">
+        <Directory Id="AZUREFOLDER" Name="Azure">
+          <Directory Id="AZURECLIFOLDER" Name="CLI2">
+            <Directory Id="DynamicCliDir"/>
+            <Directory Id="BIN" Name="Bin" />
           </Directory>
         </Directory>
       </Directory>
-    </Directory>
+    </StandardDirectory>
   </Fragment>
 
   <Fragment>
@@ -164,6 +162,11 @@
                        Value="$(var.ProductVersion)"
                        KeyPath="yes"/>
       </Component>
+    </ComponentGroup>
+
+    <!-- Everything build.cmd laid out in the CLI folder (Python, site-packages, wbin, ...) -->
+    <ComponentGroup Id="AzureCliComponentGroup" Directory="DynamicCliDir">
+      <Files Include="$(var.AzureCliSource)\**" />
     </ComponentGroup>
 
     <ComponentGroup Id="ProductComponents">
