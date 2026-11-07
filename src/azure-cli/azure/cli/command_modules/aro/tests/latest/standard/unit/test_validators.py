@@ -815,7 +815,7 @@ test_validate_refresh_cluster_credentials_data = [
     ),
     (
         "should raise RequiredArgumentMissingError Exception because namespace.client_secret is not None",
-        Mock(client_secret="secret_123"),
+        Mock(client_secret=Mock()),
         RequiredArgumentMissingError
     ),
     (
