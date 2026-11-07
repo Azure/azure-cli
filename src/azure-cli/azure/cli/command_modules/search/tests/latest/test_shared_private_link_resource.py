@@ -14,7 +14,7 @@ class AzureSearchServicesTests(ScenarioTest):
         self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
         super().setUp()
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     @StorageAccountPreparer(name_prefix='satest', kind='StorageV2', allow_shared_key_access=False)
     def test_shared_private_link_resource_crud(self, resource_group, storage_account):
         self.kwargs.update({
