@@ -35,15 +35,30 @@ class TestBatchValidators(unittest.TestCase):
         obj = _validators.datetime_format("2017-01-24T15:47:24Z")
         self.assertIsInstance(obj, datetime.datetime)
 
+        # Lower case, more than 6 digits of fractional seconds, and UTC offsets are accepted
+        obj = _validators.datetime_format("2017-01-24t15:47:24.1234567z")
+        self.assertEqual(obj, datetime.datetime(2017, 1, 24, 15, 47, 24, 123456, tzinfo=datetime.timezone.utc))
+        obj = _validators.datetime_format("2017-01-24T15:47:24+05:30")
+        self.assertEqual(obj.utcoffset(), datetime.timedelta(hours=5, minutes=30))
+
         with self.assertRaises(ValueError):
             _validators.datetime_format("test")
+        with self.assertRaises(ValueError):
+            _validators.datetime_format("2017-01-24")
+        with self.assertRaises(ValueError):
+            _validators.datetime_format("2017-13-24T15:47:24Z")
 
     def test_batch_duration_format(self):
         obj = _validators.duration_format("P3Y6M4DT12H30M5S")
         self.assertIsInstance(obj, isodate.Duration)
 
+        obj = _validators.duration_format("PT15M")
+        self.assertEqual(obj, datetime.timedelta(minutes=15))
+
         with self.assertRaises(ValueError):
             _validators.duration_format("test")
+        with self.assertRaises(ValueError):
+            _validators.duration_format("1 day, 0:00:00")
 
     def test_batch_metadata_item_format(self):
         meta = _validators.metadata_item_format("name=value")

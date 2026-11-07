@@ -13,12 +13,21 @@ from azure.batch.models import (DiskEncryptionTarget)
 
 def datetime_format(value):
     """Validate the correct format of a datetime string and deserialize."""
-    from msrest.serialization import Deserializer
-    from msrest.exceptions import DeserializationError
+    import re
+    import isodate
+    message = "Argument {} is not a valid ISO-8601 datetime format"
+    # Same checks as msrest's Deserializer.deserialize_iso, which this used before:
+    # case-insensitive, date and time required, fractional seconds cut to 6 digits.
+    attr = value.upper()
+    if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}', attr):
+        raise ValueError(message.format(value))
+    attr = re.sub(r'(\.\d{6})\d+', r'\1', attr, count=1)
     try:
-        datetime_obj = Deserializer.deserialize_iso(value)
-    except DeserializationError:
-        message = "Argument {} is not a valid ISO-8601 datetime format"
+        datetime_obj = isodate.parse_datetime(attr)
+        utc_time = datetime_obj.utctimetuple()
+    except (ValueError, OverflowError):
+        raise ValueError(message.format(value))
+    if not 1 <= utc_time.tm_year <= 9999:
         raise ValueError(message.format(value))
     return datetime_obj
 
@@ -43,11 +52,10 @@ def disk_encryption_configuration_format(value):
 
 def duration_format(value):
     """Validate the correct format of a timespan string and deserilize."""
-    from msrest.serialization import Deserializer
-    from msrest.exceptions import DeserializationError
+    import isodate
     try:
-        duration_obj = Deserializer.deserialize_duration(value)
-    except DeserializationError:
+        duration_obj = isodate.parse_duration(value)
+    except (ValueError, OverflowError, AttributeError):
         message = "Argument {} is not in a valid ISO-8601 duration format"
         raise ValueError(message.format(value))
     return duration_obj

@@ -9,18 +9,15 @@ from azure.cli.core.azclierror import (
     AzureInternalError,
     AzureResponseError,
     BadRequestError,
-    ClientRequestError as AzCliClientRequestError,
     ForbiddenError,
     ResourceNotFoundError,
     UnauthorizedError,
-    ValidationError as AzCliValidationError,
 )
 
 logger = get_logger(__name__)
 
 
 def batch_exception_handler(ex):
-    from msrest.exceptions import ValidationError, ClientRequestError
     from azure.core.exceptions import HttpResponseError
 
     if isinstance(ex, HttpResponseError):
@@ -36,11 +33,8 @@ def batch_exception_handler(ex):
         if 500 <= ex.status_code < 600:
             raise AzureInternalError(batch_msg)
         raise AzureResponseError(batch_msg)
-    if isinstance(ex, ValidationError):
-        raise AzCliValidationError(ex)
-    if isinstance(ex, ClientRequestError):
-        raise AzCliClientRequestError(ex)
 
+    # Other errors, such as connection errors (azure.core ServiceRequestError), are mapped by azure-cli-core.
     raise ex
 
 
