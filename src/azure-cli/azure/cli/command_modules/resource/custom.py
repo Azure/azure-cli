@@ -392,7 +392,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     else:
         # This function is resource-group-specific, so we hardcode 'resourceGroup' deployment scope
         template_content, template_obj = _process_template_file(cmd, template_file, 'resourceGroup')
-        template_for_deployment = _get_template_for_deployment(template_uri, None, template_file, template_content, template_obj, None)
+        template_for_deployment = _get_template_for_deployment(template_uri, None, template_file, template_content,
+                                                               template_obj)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -1137,20 +1138,23 @@ def _load_template_spec_template(cmd, template_spec):
     return template_obj
 
 
-def _get_template_for_deployment(template_uri, template_spec, template_file, template_content, template_obj, parameters):
+def _get_template_for_deployment(template_uri, template_spec, template_file, template_content, template_obj,
+                                 is_bicepparam_file=False):
     """Determine what to use for template deployment based on the source"""
     if template_uri or template_spec:
         # For URI and template spec deployments, use None (template_link will be used)
         return None
 
-    if _is_bicepparam_file_provided(parameters):
-        # For bicepparam files, use the content
-        return template_content
+    if template_content is None:
+        # A .bicepparam file whose 'using' names a template spec: template_link is used
+        return None
 
-    if template_file and is_bicep_file(template_file):
+    if is_bicepparam_file or (template_file and is_bicep_file(template_file)):
         # For bicep files, convert the parsed object back to compact JSON string
         # This avoids the size inflation issue while maintaining compatibility
         # with the Azure SDK which expects string content
+        # A .bicepparam file's template is sent the same way: build-params emits it indented, and
+        # the indentation alone can push a template under the 4MB request limit over it
         return json.dumps(template_obj, separators=(',', ':'))
 
     # For ARM template files, use string content
@@ -1198,6 +1202,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     template_obj = None
     on_error_deployment = None
     template_content = None
+    is_bicepparam_file = _is_bicepparam_file_provided(parameters)
 
     if query_string and not template_uri:
         raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
@@ -1212,7 +1217,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     elif template_spec:
         template_link = TemplateLink(id=template_spec)
         template_obj = _load_template_spec_template(cmd, template_spec)
-    elif _is_bicepparam_file_provided(parameters):
+    elif is_bicepparam_file:
         template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(cmd, template_file, parameters)
         if template_spec_id:
             template_link = TemplateLink(id=template_spec_id)
@@ -1235,14 +1240,15 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
 
     template_obj['resources'] = template_obj.get('resources', [])
 
-    if _is_bicepparam_file_provided(parameters):
+    if is_bicepparam_file:
         parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
     else:
         parameters = _process_parameters(template_obj, parameters) or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
         parameters = json.loads(json.dumps(parameters))
 
-    template_for_deployment = _get_template_for_deployment(template_uri, template_spec, template_file, template_content, template_obj, parameters)
+    template_for_deployment = _get_template_for_deployment(template_uri, template_spec, template_file, template_content,
+                                                           template_obj, is_bicepparam_file)
 
     properties = DeploymentProperties(template=template_for_deployment, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment,
