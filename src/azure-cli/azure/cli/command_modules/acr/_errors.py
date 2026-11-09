@@ -102,7 +102,7 @@ CONNECTIVITY_WWW_AUTHENTICATE_ERROR = ErrorClass(
 
 CONNECTIVITY_UNTRUSTED_REALM_ERROR = ErrorClass(
     "CONNECTIVITY_UNTRUSTED_REALM_ERROR",
-    "Registry '{}' returned an authentication challenge with an untrusted token endpoint. The token endpoint must use HTTPS and match the registry login server. No credentials were sent to it."
+    "Registry '{}' returned an authentication challenge with an untrusted token endpoint. The endpoint must use HTTPS and match the registry login server. Authentication was stopped before sending credentials to the token endpoint."
 )
 
 

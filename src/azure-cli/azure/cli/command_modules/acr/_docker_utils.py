@@ -77,10 +77,7 @@ def _normalize_netloc(netloc):
 
 
 def _is_trusted_realm(realm, login_server):
-    """Check that the token server named by a WWW-Authenticate realm is the registry login server.
-    The realm must use HTTPS. The whole network location is compared rather than the parsed hostname,
-    so a realm with user info (for example 'https://other.host@<login_server>') is rejected.
-    """
+    """Check that the realm uses HTTPS and matches the registry login server."""
     try:
         parsed_realm = urlparse(realm)
     except ValueError:
