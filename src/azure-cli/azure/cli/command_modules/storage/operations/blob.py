@@ -12,7 +12,8 @@ from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import AzureResponseError, FileOperationError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_blob_objects,
                                                     collect_files_track2, mkdir_p, guess_content_type,
-                                                    normalize_blob_file_path, check_precondition_success)
+                                                    normalize_blob_file_path, check_precondition_success,
+                                                    get_safe_download_path)
 from azure.core import MatchConditions
 from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, HttpResponseError
 
@@ -445,19 +446,10 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
 
 def _get_blob_download_path(destination, normalized_blob_name, blob_name):
     """Build the local path for a blob, ensuring it cannot escape the destination directory."""
-    # Blob names are arbitrary server-controlled strings (e.g. '../../.ssh/authorized_keys', or 'C:/x' on Windows).
-    # Only accept names that normalize to a plain relative path (no drive, root or leading '.'/'..'); joining such a
-    # path onto the destination cannot leave it, without relying on case-insensitive path comparisons (Windows
-    # directories can be case-sensitive). Existing symlinks/junctions under the destination are followed on purpose,
-    # preserving user-created layouts.
-    relative_path = os.path.normpath(normalized_blob_name)
-    first_component = relative_path.split(os.path.sep)[0]
-    if os.path.splitdrive(relative_path)[0] or first_component in ('', os.path.curdir, os.path.pardir):
-        raise FileOperationError('Blob "{}" cannot be downloaded because its name resolves to a path outside the '
-                                 'destination directory "{}". Use the `--pattern` parameter to exclude it, or use '
-                                 'the `storage blob download` command to download it to an explicit file path.'
-                                 .format(blob_name, destination))
-    return os.path.join(destination, relative_path)
+    return get_safe_download_path(
+        destination, normalized_blob_name, blob_name, item_type='Blob',
+        recommendation='Use the `--pattern` parameter to exclude it, or use the `storage blob download` command to '
+                       'download it to an explicit file path.')
 
 
 # pylint: disable=unused-argument

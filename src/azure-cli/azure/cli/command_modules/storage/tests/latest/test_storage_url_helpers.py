@@ -5,11 +5,14 @@
 
 import unittest
 from knack import CLI
+from knack.util import CLIError
 
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.cloud import get_active_cloud
 
-from azure.cli.command_modules.storage.storage_url_helpers import StorageResourceIdentifier
+from azure.cli.command_modules.storage._client_factory import get_account_url
+from azure.cli.command_modules.storage.storage_url_helpers import StorageResourceIdentifier, is_valid_hostname_label
 
 
 class MockCLI(CLI):
@@ -90,6 +93,50 @@ class TestStorageUrlHelpers(unittest.TestCase):
         _test('https://momba.blob.core.windows.net/snake', 'momba')
         _test('http://momba.file.core.windows.net/snake', 'momba')
         _test('http://momba.file.core.windows.net/snake/d/e/f.txt?s=t', 'momba')
+        _test('https://MomBa.blob.core.windows.net/snake', 'MomBa')
+        _test('https://momba.BLOB.Core.Windows.Net/snake', 'momba')
+        _test('https://momba.blob.core.windows.net:443/snake', 'momba')
+        _test('https://user:pass@MomBa.blob.core.windows.net/snake', 'MomBa')
+        # non-ASCII characters that lowercase to ASCII must not leak into the account name
+        _test('https://\u212amomba.blob.core.windows.net/snake', 'kmomba')
+
+    def test_unrecognized_hosts(self):
+        monikers = [
+            # backslash: urllib3/requests end the host at '\', so the request would go to 2130706433:8443
+            'https://2130706433:8443\\.file.core.windows.net/myshare',
+            'https://evil.example\\.file.core.windows.net/x',
+            'https://evil.example\\.blob.core.windows.net/x/y',
+            # host does not end with the storage endpoint suffix
+            'https://momba.blob.core.windows.net.evil.example/snake',
+            'https://momba.blob.evil.example/snake',
+            'https://momba.blobcore.windows.net/snake',
+            'https://blob.core.windows.net/snake',
+            'https://.blob.core.windows.net/snake',
+            # account name is not a single hostname label
+            'https://evil.example.blob.core.windows.net/snake',
+            'https://ev_il.blob.core.windows.net/snake',
+            'https://evil%2Fx.blob.core.windows.net/snake',
+            # port and userinfo pointing somewhere else
+            'https://evil.example:443.blob.core.windows.net/snake',
+            'https://momba.blob.core.windows.net:443@evil.example/snake',
+            'https://momba.blob.core.windows.net@evil.example/snake',
+            'https://user@evil.example/momba.blob.core.windows.net/snake',
+        ]
+        for moniker in monikers:
+            with self.subTest(moniker=moniker):
+                i = StorageResourceIdentifier(self.cli.cloud, moniker)
+                self.assertTrue(i.is_url())
+                self.assertIsNone(i.account_name)
+                self.assertIsNone(i.container)
+                self.assertIsNone(i.blob)
+                self.assertIsNone(i.share)
+                self.assertIsNone(i.directory)
+                self.assertIsNone(i.filename)
+
+    def test_unrecognized_host_keeps_query_handling(self):
+        i = StorageResourceIdentifier(self.cli.cloud, 'https://evil.example\\.file.core.windows.net/x?sig=abc')
+        self.assertIsNone(i.account_name)
+        self.assertEqual(i.sas_token, 'sig=abc')
 
     def test_default_value(self):
         i = StorageResourceIdentifier(self.cli.cloud, '')
@@ -118,3 +165,35 @@ class TestStorageUrlHelpers(unittest.TestCase):
               '33Pr0v3Fs5VIjsUL6A%3D&snapshot=2016-12-05T23:12:03.1181304Z',
               'sv=2015-04-05&ss=bfqt&srt=sco&sp=rwdlacup&se=2016-12-05T23:02:02Z&st=2016-12-05T15:02:'
               '02Z&spr=https&sig=e0xYWg%2F142F5uUsPBflsUVQqL33Pr0v3Fs5VIjsUL6A%3D')
+
+
+class TestHostnameLabelValidation(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+
+    def test_is_valid_hostname_label(self):
+        for name in ('a', 'momba', 'MyAccount', 'my-account', 'momba-secondary', 'a' * 63, '123'):
+            with self.subTest(name=name):
+                self.assertTrue(is_valid_hostname_label(name))
+        for name in (None, '', 'a' * 64, 'evil.example', 'evil/x', 'evil?', 'evil#', 'user@evil', 'evil:443',
+                     'evil\\x', 'ev il', ' momba', 'momba\n', 'ev_il', '\u00e9vil', 123):
+            with self.subTest(name=name):
+                self.assertFalse(is_valid_hostname_label(name))
+
+    def test_get_account_url(self):
+        endpoint = self.cli.cloud.suffixes.storage_endpoint
+        self.assertEqual(get_account_url(self.cli, 'momba', 'blob'), 'https://momba.blob.{}'.format(endpoint))
+        self.assertEqual(get_account_url(self.cli, 'MyAccount', 'file'), 'https://MyAccount.file.{}'.format(endpoint))
+        self.assertEqual(get_account_url(self.cli, 'momba-secondary', 'dfs'),
+                         'https://momba-secondary.dfs.{}'.format(endpoint))
+
+    def test_get_account_url_rejects_invalid_account_names(self):
+        for name in ('evil.example/x?', 'evil.example', 'evil/x', 'evil?x', 'evil#x', 'user@evil', 'evil:443',
+                     'evil\\x', 'ev il', '', ' '):
+            with self.subTest(name=name):
+                with self.assertRaisesRegex(InvalidArgumentValueError, 'Invalid storage account name'):
+                    get_account_url(self.cli, name, 'file')
+
+    def test_get_account_url_requires_account_name(self):
+        with self.assertRaisesRegex(CLIError, 'Please provide storage account name'):
+            get_account_url(self.cli, None, 'blob')

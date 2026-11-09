@@ -222,7 +222,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
 
 
 def download_file(client, destination_path=None, timeout=None, max_connections=2, open_mode='wb', **kwargs):
-    from azure.cli.command_modules.storage.util import mkdir_p
+    from azure.cli.command_modules.storage.util import mkdir_p, get_safe_download_path
     destination_folder = os.path.dirname(destination_path) if destination_path else ""
     if destination_folder and not os.path.exists(destination_folder):
         mkdir_p(destination_folder)
@@ -230,8 +230,9 @@ def download_file(client, destination_path=None, timeout=None, max_connections=2
     if not destination_folder or os.path.isdir(destination_path):
         file = client.get_file_properties(timeout=timeout)
         file_name = file.name.split("/")[-1]
-        destination_path = os.path.join(destination_path, file_name) \
-            if destination_path else file_name
+        # the file name comes from the service, so it must not be able to leave the destination directory
+        destination_path = get_safe_download_path(destination_path or '', file_name, file.name, item_type='File',
+                                                  recommendation='Specify an explicit destination file path.')
 
     kwargs['progress_hook'] = kwargs.pop("progress_callback", None)
 
@@ -253,29 +254,34 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
     Download files from file share to local directory in batch
     """
 
-    from azure.cli.command_modules.storage.util import glob_files_remotely_track2, normalize_blob_file_path
+    from azure.cli.command_modules.storage.util import (glob_files_remotely_track2, normalize_blob_file_path,
+                                                        get_safe_download_path)
 
-    source_files = glob_files_remotely_track2(client, source, pattern, is_share_client=True)
+    # Both the directory and the file name come from the service listing. Validate every file before downloading any
+    # of them, so a malicious name fails the batch up front without writing anything.
+    files_to_download = []
+    for pair in glob_files_remotely_track2(client, source, pattern, is_share_client=True):
+        path = normalize_blob_file_path(None, os.path.join(*pair))
+        local_path = get_safe_download_path(
+            destination, path, '/'.join(p for p in pair if p), item_type='File',
+            recommendation='Use the `--pattern` parameter to exclude it, or use the `storage file download` command '
+                           'to download it to an explicit file path.')
+        files_to_download.append((pair, path, local_path))
 
     if dryrun:
-        source_files_list = list(source_files)
-
         logger.warning('download files from file share')
         logger.warning('    account %s', client.account_name)
         logger.warning('      share %s', source)
         logger.warning('destination %s', destination)
         logger.warning('    pattern %s', pattern)
-        logger.warning('      total %d', len(source_files_list))
+        logger.warning('      total %d', len(files_to_download))
         logger.warning(' operations')
-        for f in source_files_list:
-            logger.warning('  - %s/%s => %s', f[0], f[1], os.path.join(destination, *f))
+        for pair, _, local_path in files_to_download:
+            logger.warning('  - %s/%s => %s', pair[0], pair[1], local_path)
 
         return []
 
-    def _download_action(pair):
-        path = os.path.join(*pair)
-        local_path = os.path.join(destination, *pair)
-        path = normalize_blob_file_path(None, path)
+    def _download_action(path, local_path):
         file_client = client.get_file_client(path)
 
         download_file(file_client, destination_path=local_path, max_connections=max_connections,
@@ -283,7 +289,7 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
 
         return file_client.url
 
-    return list(_download_action(f) for f in source_files)
+    return list(_download_action(path, local_path) for _, path, local_path in files_to_download)
 
 
 def storage_file_copy(client, copy_source, **kwargs):

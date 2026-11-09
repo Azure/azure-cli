@@ -237,6 +237,23 @@ def normalize_blob_file_path(path, name):
     return path_sep.join(os.path.normpath(name).split(os.path.sep)).strip(path_sep)
 
 
+def get_safe_download_path(destination, relative_path, item_name, item_type='Item', recommendation=None):
+    """Join a server-provided relative path onto the destination, ensuring it cannot escape the destination."""
+    # Blob/file names are arbitrary server-controlled strings (e.g. '../../.ssh/authorized_keys', or 'C:/x' on
+    # Windows). Only accept names that normalize to a plain relative path (no drive, root or leading '.'/'..');
+    # joining such a path onto the destination cannot leave it, without relying on case-insensitive path comparisons
+    # (Windows directories can be case-sensitive). Existing symlinks/junctions under the destination are followed on
+    # purpose, preserving user-created layouts.
+    from azure.cli.core.azclierror import FileOperationError
+    normalized_path = os.path.normpath(relative_path)
+    first_component = normalized_path.split(os.path.sep)[0]
+    if os.path.splitdrive(normalized_path)[0] or first_component in ('', os.path.curdir, os.path.pardir):
+        raise FileOperationError('{} "{}" cannot be downloaded because its name resolves to a path outside the '
+                                 'destination directory "{}".'.format(item_type, item_name, destination),
+                                 recommendation=recommendation)
+    return os.path.join(destination, normalized_path)
+
+
 def check_precondition_success(func):
     def wrapper(*args, **kwargs):
         from azure.common import AzureHttpError

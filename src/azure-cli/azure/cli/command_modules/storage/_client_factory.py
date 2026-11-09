@@ -105,8 +105,15 @@ def cf_mgmt_encryption_scope(cli_ctx, _):
 
 def get_account_url(cli_ctx, account_name, service):
     from knack.util import CLIError
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    from .storage_url_helpers import is_valid_hostname_label
     if account_name is None:
         raise CLIError("Please provide storage account name or connection string.")
+    # the account name becomes the first label of the endpoint host, so it must not be able to change the host
+    if not is_valid_hostname_label(account_name):
+        raise InvalidArgumentValueError(
+            "Invalid storage account name '{}'. The account name may only contain letters, numbers and "
+            "hyphens.".format(account_name))
     storage_endpoint = cli_ctx.cloud.suffixes.storage_endpoint
     return "https://{}.{}.{}".format(account_name, service, storage_endpoint)
 

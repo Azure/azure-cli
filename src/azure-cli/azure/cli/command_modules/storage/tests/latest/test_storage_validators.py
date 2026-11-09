@@ -361,7 +361,7 @@ class TestGetSourceClientValidator(unittest.TestCase):
 
     def test_validate_with_source_uri_blob(self):
         # source given in form of uri, source_container parsed from uri, source and dest account are the same
-        ns = self._create_namespace(source_uri='https://storage_name.blob.core.windows.net/container2',
+        ns = self._create_namespace(source_uri='https://storagename.blob.core.windows.net/container2',
                                     destination_container='container1')
         with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
             get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
@@ -371,12 +371,12 @@ class TestGetSourceClientValidator(unittest.TestCase):
 
     def test_validate_with_different_source_uri_sas_blob(self):
         # source given in form of uri, source_container parsed from uri, source and dest account are different
-        ns = self._create_namespace(source_uri='https://other_name.blob.core.windows.net/container2?some_sas_token',
+        ns = self._create_namespace(source_uri='https://othername.blob.core.windows.net/container2?some_sas_token',
                                     destination_container='container1')
         get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_container, 'container2')
         self.assertIsNotNone(ns.source_client)
-        self.assertEqual(ns.source_client.account_name, 'other_name')
+        self.assertEqual(ns.source_client.account_name, 'othername')
 
     def test_validate_with_share_name_file(self):
         # source share name given, validator does not change namespace aside from ensuring source-client none
@@ -388,7 +388,7 @@ class TestGetSourceClientValidator(unittest.TestCase):
 
     def test_validate_with_source_uri_file(self):
         # source given in form of uri, source_share parsed from uri, source and dest account are the same
-        ns = self._create_namespace(source_uri='https://storage_name.file.core.windows.net/share2',
+        ns = self._create_namespace(source_uri='https://storagename.file.core.windows.net/share2',
                                     destination_share='share1')
         with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
             get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
@@ -397,12 +397,12 @@ class TestGetSourceClientValidator(unittest.TestCase):
 
     def test_validate_with_different_source_uri_sas_file(self):
         # source given in form of uri, source_share parsed from uri, source and dest account are different
-        ns = self._create_namespace(source_uri='https://other_name.file.core.windows.net/share2?some_sas_token',
+        ns = self._create_namespace(source_uri='https://othername.file.core.windows.net/share2?some_sas_token',
                                     destination_share='share1')
         get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_share, 'share2')
         self.assertIsNotNone(ns.source_client)
-        self.assertEqual(ns.source_client.account_name, 'other_name')
+        self.assertEqual(ns.source_client.account_name, 'othername')
 
     def test_validate_negatives(self):
         # bad argument combinations
