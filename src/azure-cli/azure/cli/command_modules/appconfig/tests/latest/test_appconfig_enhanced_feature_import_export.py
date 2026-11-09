@@ -328,7 +328,8 @@ class EnhancedFeatureImportExportTests(TestCase):
         for profile in (None, 1, {}, "appconfig/kvset", "unknown"):
             with self.subTest(profile=profile):
                 self.write_file({"profile": profile, "items": [self.resource]})
-                with self.assertRaises(InvalidArgumentValueError):
+                error = InvalidArgumentValueError if profile == ImportExportProfiles.KVSET else FileOperationError
+                with self.assertRaises(error):
                     transfers.import_feature_flags(None, "file", path=self.path, format_="json", yes=True)
                 self.get_client.assert_not_called()
 

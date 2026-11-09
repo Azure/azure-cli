@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch
 from azure.appconfiguration import ConfigurationSetting
 from azure.cli.core import get_default_cli
 from azure.cli.core.azclierror import InvalidArgumentValueError, FileOperationError
-from azure.cli.command_modules.appconfig import keyvalue, _kv_export_helpers
+from azure.cli.command_modules.appconfig import keyvalue, _kv_export_helpers, _utils
 from azure.cli.command_modules.appconfig._constants import ImportExportProfiles
 
 
@@ -78,14 +78,39 @@ class ImportProfileDetectionTests(TestCase):
                 client.assert_not_called()
 
     def test_invalid_embedded_profile_is_rejected(self):
-        for profile in ("appconfig/ffset", "unknown", None, 1, {}):
+        self.data["profile"] = ImportExportProfiles.FFSET
+        self.write_file()
+        with patch.object(keyvalue, "get_appconfig_data_client") as client:
+            with self.assertRaises(InvalidArgumentValueError):
+                keyvalue.import_config(None, "file", path=self.path, format_="json")
+            client.assert_not_called()
+
+    def test_kv_import_preserves_application_profile_key(self):
+        for profile in ("production", ImportExportProfiles.KVSET):
             with self.subTest(profile=profile):
-                self.data["profile"] = profile
+                self.data = {"profile": profile, "Example": "value"}
                 self.write_file()
-                with patch.object(keyvalue, "get_appconfig_data_client") as client:
-                    with self.assertRaises(InvalidArgumentValueError):
-                        keyvalue.import_config(None, "file", path=self.path, format_="json")
-                    client.assert_not_called()
+                with patch.object(keyvalue, "get_appconfig_data_client", return_value=Mock()), \
+                        patch.object(keyvalue, "__read_kv_from_config_store", return_value=[]), \
+                        patch.object(keyvalue, "__write_kv_and_features_to_config_store") as writer:
+                    result = get_default_cli().invoke([
+                        "appconfig", "kv", "import", "--name", "Destination", "--source", "file",
+                        "--format", "json", "--path", self.path, "--yes",
+                    ])
+                    self.assertEqual(0, result)
+                    imported = writer.call_args.kwargs["key_values"]
+                    self.assertEqual(self.data, {item.key: item.value for item in imported})
+
+    def test_profile_detection_requires_known_profile_and_items_array(self):
+        supported = (ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET)
+        for profile in ("production", "appconfig/unknown", None, 1, {}):
+            with self.subTest(profile=profile):
+                self.assertEqual(ImportExportProfiles.DEFAULT, _utils.resolve_import_profile(
+                    {"profile": profile, "items": []}, None, supported))
+        for items in (None, {}, "value"):
+            with self.subTest(items=items):
+                self.assertEqual(ImportExportProfiles.DEFAULT, _utils.resolve_import_profile(
+                    {"profile": ImportExportProfiles.KVSET, "items": items}, None, supported))
 
     def test_explicit_kvset_overrides_metadata_and_supports_older_files(self):
         for data in ({"profile": "unknown", "items": []}, {"items": []}):

@@ -127,7 +127,7 @@ def load_command_table(self, _):
     enhanced_feature_transfer_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.appconfig.enhanced_feature_import_export#{}'
     )
-    with self.command_group('appconfig enhanced-feature-flag', enhanced_feature_transfer_util) as g:
+    with self.command_group('appconfig enhanced-feature-flag', enhanced_feature_transfer_util, is_preview=True) as g:
         g.command('import', 'import_feature_flags')
         g.command('export', 'export_feature_flags')
 

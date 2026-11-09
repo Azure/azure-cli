@@ -27,9 +27,12 @@ logger = get_logger(__name__)
 def resolve_import_profile(data, profile, supported_profiles):
     if profile is not None:
         return profile
-    embedded_profile = data.get("profile") if isinstance(data, dict) else None
-    if isinstance(data, dict) and "profile" in data:
-        if not isinstance(embedded_profile, str) or embedded_profile not in supported_profiles:
+    if isinstance(data, dict) and isinstance(data.get("items"), list):
+        embedded_profile = data.get("profile")
+        if embedded_profile not in (
+                ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET, ImportExportProfiles.FFSET):
+            return ImportExportProfiles.DEFAULT
+        if embedded_profile not in supported_profiles:
             raise InvalidArgumentValueError(
                 "The file contains an unsupported import profile. Supported profiles: {}.".format(
                     ", ".join(supported_profiles)))

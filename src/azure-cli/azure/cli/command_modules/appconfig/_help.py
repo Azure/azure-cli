@@ -202,11 +202,11 @@ long-summary: |
   --dest-label or --preserve-labels is specified. Existing matching destination flags are not rewritten.
 examples:
   - name: Export enhanced flags with all labels to JSON.
-    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d file --path flags.json --format json --profile appconfig/ffset --label *
+    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d file --path flags.json --format json --profile appconfig/ffset --label "*"
   - name: Export enhanced flags with the null label to YAML.
-    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d file --path flags.yaml --format yaml
+    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d file --path flags.yaml --format yaml --label ""
   - name: Copy enhanced flags between stores, preserving labels and replacing tags.
-    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d appconfig --dest-name DestinationStore --label * --preserve-labels --dest-tags team=app
+    text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d appconfig --dest-name DestinationStore --label "*" --preserve-labels --dest-tags team=app
   - name: Preview a filtered export without writing a file.
     text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d file --path flags.json --format json --feature-name Beta* --tags team=app --dry-run
 """
@@ -216,7 +216,8 @@ type: command
 short-summary: Export configurations to another place from your App Configuration store.
 long-summary: |
   JSON exports with --profile appconfig/kvset contain profile: appconfig/kvset and an items array.
-  Import detects this profile when --profile is omitted.
+  Import detects this profile when --profile is omitted and the root contains an items array.
+  Other root profile properties remain application key-values.
 examples:
   - name: Export all keys and feature flags with label test to a json file. To use the Microsoft Feature Management schema when exporting feature flags to a file, set the environment variable AZURE_APPCONFIG_FM_COMPATIBLE to False.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json

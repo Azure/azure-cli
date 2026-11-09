@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long,too-many-locals,too-many-arguments
+# pylint: disable=line-too-long
 
 import json
 from copy import deepcopy
@@ -304,7 +304,7 @@ def _transfer_flags(client, flags, label, preserve_labels, import_mode, strict, 
         raise AzureResponseError("Failed to transfer enhanced feature flags. " + str(exception)) from exception
 
 
-def import_feature_flags(cmd, source, name=None, connection_string=None, auth_mode="key", endpoint=None,
+def import_feature_flags(cmd, source, name=None, connection_string=None, auth_mode="key", endpoint=None,  # pylint: disable=too-many-locals
                          label=None, tags=None, preserve_labels=False, yes=False, dry_run=False,
                          import_mode=ImportMode.IGNORE_MATCH, strict=False, path=None, format_=None,
                          src_name=None, src_connection_string=None, src_endpoint=None, src_auth_mode="key",
@@ -328,7 +328,7 @@ def import_feature_flags(cmd, source, name=None, connection_string=None, auth_mo
     _transfer_flags(client, flags, label, preserve_labels, import_mode, strict, yes, dry_run)
 
 
-def export_feature_flags(cmd, destination, name=None, connection_string=None, auth_mode="key", endpoint=None,
+def export_feature_flags(cmd, destination, name=None, connection_string=None, auth_mode="key", endpoint=None,  # pylint: disable=too-many-locals
                          feature_name=None, label=None, tags=None, yes=False, dry_run=False,
                          path=None, format_=None, dest_name=None, dest_connection_string=None,
                          dest_endpoint=None, dest_auth_mode="key", dest_label=None, dest_tags=None,
