@@ -19,6 +19,7 @@ from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     CLIError,
     CLIInternalError,
+    FileOperationError,
     InvalidArgumentValueError,
     ArgumentUsageError,
     MutuallyExclusiveArgumentError)
@@ -4917,7 +4918,24 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
                                  resolve_memory_configuration_from_service,
                                  resolve_replicas_from_service,
                                  resolve_environment_from_service,
-                                 resolve_secret_from_service)
+                                 resolve_secret_from_service,
+                                 validate_compose_file_paths)
+
+    compose_yaml = load_yaml_file(compose_file_path)
+    parsed_compose_file = ComposeFile(compose_yaml)
+    validate_compose_file_paths(parsed_compose_file, compose_file_path)
+    logger.info(parsed_compose_file)
+    service_files = {}
+    for service_name in parsed_compose_file.ordered_services:
+        service = parsed_compose_file.services[service_name]
+        try:
+            environment = resolve_environment_from_service(service)
+            secret_vars, secret_env_ref = resolve_secret_from_service(service, parsed_compose_file.secrets)
+        except (OSError, UnicodeError) as ex:
+            raise FileOperationError(
+                f"Unable to read Compose files for service '{service_name}'. "
+                "Check file permissions and text encoding.") from ex
+        service_files[service_name] = (environment, secret_vars, secret_env_ref)
 
     # Validate managed environment
     parsed_managed_env = parse_resource_id(managed_env)
@@ -4938,9 +4956,6 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
                                                                        tags=tags,
                                                                        location=location)
 
-    compose_yaml = load_yaml_file(compose_file_path)
-    parsed_compose_file = ComposeFile(compose_yaml)
-    logger.info(parsed_compose_file)
     containerapps_from_compose = []
     # Using the key to iterate to get the service name
     # pylint: disable=C0201,C0206
@@ -4964,8 +4979,7 @@ def create_containerapps_from_compose(cmd,  # pylint: disable=R0914
             managed_environment
         )
         replicas = resolve_replicas_from_service(service)
-        environment = resolve_environment_from_service(service)
-        secret_vars, secret_env_ref = resolve_secret_from_service(service, parsed_compose_file.secrets)
+        environment, secret_vars, secret_env_ref = service_files[service_name]
         if environment is not None and secret_env_ref is not None:
             environment.extend(secret_env_ref)
         elif secret_env_ref is not None:
