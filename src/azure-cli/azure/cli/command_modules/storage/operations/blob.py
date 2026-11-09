@@ -1175,7 +1175,18 @@ def exists(client, container_name, blob_name, snapshot, timeout):
 def incremental_copy_start(client, cmd, copy_source=None, metadata=None,
                            destination_if_modified_since=None, destination_if_unmodified_since=None,
                            destination_if_match=None, destination_if_none_match=None, **kwargs):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     from ..aaz.latest.storage.blob.incremental_copy import Start
+    from ..storage_url_helpers import is_valid_hostname_label
+
+    # The SDK derives account_name from the endpoint host without validating it, and the request below rebuilds the
+    # host from it (unescaped) and authenticates with the logged-in account, so it must be a single hostname label.
+    if not is_valid_hostname_label(client.account_name):
+        raise InvalidArgumentValueError(
+            'Cannot determine a valid storage account name from the blob endpoint host "{}".'
+            .format(client.primary_hostname),
+            recommendation='Use --account-name, or a connection string or endpoint of the form '
+                           'https://<account>.blob.<storage-endpoint-suffix>.')
 
     cmd_args = {
         "x_ms_version": "2025-07-05",
