@@ -178,7 +178,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         auto_grow_max_threshold_mb_arg_type = CLIArgumentType(
             type=int,
-            options_list=['--storage-auto-grow-max-threshold-mb', '--sag--max-threshold'],
+            options_list=['--storage-auto-grow-max-threshold-mb', '--sag-max-threshold'],
             help='Maximum allocated storage size autogrow may reach, in MB, not a disk-utilization trigger threshold. '
                  'Must be at least the current or requested storage size (1 GB = 1,024 MB). '
                  'Requires PremiumV2_LRS storage with autogrow enabled; for update, autogrow must already be enabled.'
@@ -198,22 +198,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Enable or disable immutable backups at server creation. When enabled, backups cannot be changed '
                  'or deleted during the retention period.',
             validator=immutable_backup_validator
-        )
-
-        auto_grow_max_threshold_mb_arg_type = CLIArgumentType(
-            type=int,
-            options_list=['--storage-auto-grow-max-threshold-mb', '--sag--max-threshold'],
-            help='Maximum allocated storage size autogrow may reach, in MB, not a disk-utilization trigger threshold. '
-                 'Must be at least the current or requested storage size (1 GB = 1,024 MB). '
-                 'Requires PremiumV2_LRS storage with autogrow enabled; for update, autogrow must already be enabled.'
-        )
-
-        auto_grow_increment_percent_arg_type = CLIArgumentType(
-            type=int,
-            options_list=['--storage-auto-grow-increment-percent', '--sag-increment-percent'],
-            help='Storage autogrow increment as a positive percentage of the current allocated storage size, '
-                 'not an absolute size increment or a utilization threshold. '
-                 'Requires PremiumV2_LRS storage with autogrow enabled; for update, autogrow must already be enabled.'
         )
 
         storage_type_arg_type = CLIArgumentType(
