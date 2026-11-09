@@ -8,6 +8,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.sql import custom
@@ -234,9 +235,50 @@ class SqlAuditPolicyRequiredFieldsTest(unittest.TestCase):
                 self.assertIn('requiredFields', properties)
                 self.assertIsNone(properties['requiredFields'])
 
+    def test_invalid_required_field_service_response_is_propagated(self):
+        fields = ['event_time', 'invalid_audit_field']
+        for handler, model in self.policies:
+            with self.subTest(model=model.__name__):
+                instance = model(state='Enabled', is_azure_monitor_target_enabled=True)
+                kwargs = {'database_name': 'database'} if handler is custom.db_audit_policy_update else {}
+                instance = handler(
+                    cmd=Mock(), instance=instance, server_name='server', resource_group_name='resource-group',
+                    required_fields=fields, **kwargs)
+                error = {'error': {
+                    'code': 'DataSecurityInvalidUserSuppliedParameter',
+                    'message': "Invalid audit field name 'invalid_audit_field' in RequiredFields. "
+                               "Must be one of the valid audit_event fields."}}
+                response = Mock(status_code=400, reason='Bad Request', headers={'content-type': 'application/json'})
+                response.json.return_value = error
+                response.text.return_value = json.dumps(error)
+                with SqlManagementClient(Mock(), '00000000-0000-0000-0000-000000000000') as client:
+                    operations = (client.database_blob_auditing_policies if kwargs
+                                  else client.server_blob_auditing_policies)
+                    args = ('resource-group', 'server', 'database') if kwargs else ('resource-group', 'server')
+                    with patch.object(client._client._pipeline, 'run') as run:
+                        run.return_value = SimpleNamespace(http_response=response)
+                        with self.assertRaisesRegex(HttpResponseError, 'invalid_audit_field') as raised:
+                            if kwargs:
+                                operations.create_or_update(*args, parameters=instance)
+                            else:
+                                operations.begin_create_or_update(*args, parameters=instance).result()
+                        properties = json.loads(run.call_args_list[0].args[0].content)['properties']
+                self.assertEqual(properties['requiredFields'], fields)
+                self.assertEqual(raised.exception.status_code, 400)
+
     def test_no_arguments_still_fails_argument_validation(self):
-        with self.assertRaises(CLIError):
-            custom._audit_policy_validate_arguments()
+        for state in (None, ''):
+            with self.subTest(state=state):
+                with self.assertRaisesRegex(CLIError, 'arguments are missing'):
+                    custom._audit_policy_validate_arguments(state=state)
+
+    def test_each_update_argument_group_satisfies_argument_validation(self):
+        for arguments in (
+                {'state': 'Disabled'}, {'blob_storage_target_state': 'Disabled'}, {'retention_days': '1'},
+                {'log_analytics_target_state': 'Disabled'}, {'event_hub_target_state': 'Disabled'},
+                {'required_fields': []}):
+            with self.subTest(arguments=arguments):
+                custom._audit_policy_validate_arguments(**arguments)
 
     def test_required_fields_rejected_when_state_disabled(self):
         with self.assertRaisesRegex(CLIError, 'state is disabled'):

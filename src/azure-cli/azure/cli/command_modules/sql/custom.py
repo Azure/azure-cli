@@ -2492,6 +2492,13 @@ def _is_audit_policy_required_fields_reset(required_fields):
     return required_fields is not None and len(required_fields) == 1 and required_fields[0].lower() == 'null'
 
 
+def _audit_policy_has_no_update_arguments(
+        state, blob_storage_arguments_provided, log_analytics_arguments_provided,
+        event_hub_arguments_provided, required_fields):
+    return not any((state, blob_storage_arguments_provided, log_analytics_arguments_provided,
+                    event_hub_arguments_provided, required_fields is not None))
+
+
 def _audit_policy_validate_arguments(
         state=None,
         blob_storage_target_state=None,
@@ -2526,8 +2533,9 @@ def _audit_policy_validate_arguments(
         event_hub_authorization_rule_id is not None or\
         event_hub_name is not None
 
-    if not state and not blob_storage_arguments_provided and\
-            not log_analytics_arguments_provided and not event_hub_arguments_provided and required_fields is None:
+    if _audit_policy_has_no_update_arguments(
+            state, blob_storage_arguments_provided, log_analytics_arguments_provided,
+            event_hub_arguments_provided, required_fields):
         raise CLIError('Either state or blob storage or log analytics or event hub arguments are missing')
 
     if _is_audit_policy_state_enabled(state) and\
@@ -2535,11 +2543,12 @@ def _audit_policy_validate_arguments(
         raise CLIError('One of the following arguments must be enabled:'
                        ' blob-storage-target-state, log-analytics-target-state, event-hub-target-state')
 
+    required_fields_selection_provided = required_fields is not None and not reset_required_fields
     if _is_audit_policy_state_disabled(state) and\
             (blob_storage_arguments_provided or
              log_analytics_arguments_provided or
              event_hub_name or
-             (required_fields is not None and not reset_required_fields)):
+             required_fields_selection_provided):
         raise CLIError('No additional arguments should be provided once state is disabled')
 
     if (_is_audit_policy_state_none_or_disabled(blob_storage_target_state)) and\

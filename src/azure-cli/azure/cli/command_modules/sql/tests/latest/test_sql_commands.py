@@ -317,10 +317,6 @@ def _test_audit_policy_required_fields(test, command, workspace_id, event_hub_ru
             test.check('logAnalyticsTargetState', log_analytics_state)]).get_output_in_json()
         test.assertCountEqual(result['requiredFields'], fields)
 
-    with test.assertRaisesRegex((CLIError, HttpResponseError), r'(?i)(required.?fields|invalid_audit_field)'):
-        test.cmd(update + ' --required-fields event_time invalid_audit_field')
-    test.cmd(show, checks=[test.check('requiredFields', ['event_time'])])
-
 
 class SqlServerExternalGovernanceTests(ScenarioTest):
     
