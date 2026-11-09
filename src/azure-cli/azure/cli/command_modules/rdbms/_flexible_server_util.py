@@ -6,18 +6,19 @@
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
 import datetime as dt
 from datetime import datetime
+import errno
 import json
 import os
 import random
 import subprocess
 import secrets
-import shlex
 import string
+import sys
 import yaml
 from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
 from azure.mgmt.core.tools import parse_resource_id
-from azure.cli.core.util import CLIError, run_cmd
+from azure.cli.core.util import CLIError, get_safe_executable_path, run_cmd as core_run_cmd
 from azure.cli.core.azclierror import AuthenticationError, ClientRequestError
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
@@ -299,8 +300,26 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
         .format(resource_type))
 
 
+def resolve_executable(executable):
+    """Bind Windows tool launches to installed executables without changing Unix lookup."""
+    if sys.platform != 'win32' or os.path.dirname(executable):
+        return executable
+    name = executable if os.path.splitext(executable)[1] else executable + '.exe'
+    resolved = get_safe_executable_path(name)
+    if resolved is None:
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), executable)
+    return resolved
+
+
+def run_cmd(args, **kwargs):
+    if isinstance(args, list) and args:
+        args = [resolve_executable(args[0]), *args[1:]]
+    return core_run_cmd(args, **kwargs)
+
+
 def run_subprocess(command, stdout_show=None, input_data=None):
-    commands = shlex.split(command) if isinstance(command, str) else command
+    commands = list(command)
+    commands[0] = resolve_executable(commands[0])
     if input_data is not None:
         # Keep caller-provided input out of subprocess diagnostics.
         process = subprocess.run(commands, input=input_data, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

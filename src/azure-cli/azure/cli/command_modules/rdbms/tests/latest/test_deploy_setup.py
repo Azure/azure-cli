@@ -5,6 +5,7 @@
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -17,6 +18,7 @@ from azure.cli.command_modules.mysql import custom as mysql_commands
 from azure.cli.command_modules.postgresql.commands import deploy_commands as postgresql_commands
 from azure.cli.command_modules.postgresql.utils import _flexible_server_util as postgresql
 from azure.cli.command_modules.rdbms import _flexible_server_util as rdbms
+from azure.cli.command_modules.rdbms import flexible_server_custom_common as rdbms_commands
 
 
 MODULES = (mysql, postgresql, rdbms)
@@ -25,9 +27,10 @@ MODULES = (mysql, postgresql, rdbms)
 class DeploySetupTest(unittest.TestCase):
 
     def setUp(self):
-        resolver = patch.object(mysql, 'resolve_executable', side_effect=lambda executable: executable)
-        resolver.start()
-        self.addCleanup(resolver.stop)
+        for module in MODULES:
+            resolver = patch.object(module, 'resolve_executable', side_effect=lambda executable: executable)
+            resolver.start()
+            self.addCleanup(resolver.stop)
         self.cmd = SimpleNamespace(cli_ctx=object())
         self.server = SimpleNamespace(
             id='/subscriptions/test-sub/resourceGroups/test-rg/'
@@ -168,8 +171,7 @@ class DeploySetupTest(unittest.TestCase):
                     patch.object(commands, 'run_cmd', side_effect=FileNotFoundError('gh missing')), \
                     patch.object(commands, 'fill_action_template') as fill, \
                     patch.object(commands, 'run_subprocess') as run:
-                error_type = ClientRequestError if commands is mysql_commands else FileNotFoundError
-                with self.assertRaises(error_type):
+                with self.assertRaises(ClientRequestError):
                     commands.github_actions_setup(
                         self.cmd, Mock(get=Mock(return_value=self.server)),
                         'test-rg', 'test-server', 'test-db', 'test-user', self.secret,
@@ -186,32 +188,36 @@ class DeploySetupTest(unittest.TestCase):
                 self.assertEqual(run.call_args.kwargs['input'], b'')
                 popen.assert_not_called()
 
-    def test_mysql_stdin_uses_resolved_executable_without_mutating_arguments(self):
+    def test_stdin_uses_resolved_executable_without_mutating_arguments(self):
         command = ['gh', 'secret', 'set', 'TEST_CONNECTION', '--repo', self.repository]
         original = list(command)
         executable = r'C:\Program Files\GitHub CLI\gh.exe'
         payload = self.secret.encode('utf-8')
-        with patch.object(mysql, 'resolve_executable', return_value=executable) as resolve, \
-                patch.object(mysql.subprocess, 'run', return_value=Mock(returncode=0)) as run:
-            mysql.run_subprocess(command, input_data=payload)
-        resolve.assert_called_once_with('gh')
-        run.assert_called_once_with(
-            [executable] + original[1:], input=payload,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.assertEqual(command, original)
+        for module in MODULES:
+            with self.subTest(module=module.__name__), \
+                    patch.object(module, 'resolve_executable', return_value=executable) as resolve, \
+                    patch.object(module.subprocess, 'run', return_value=Mock(returncode=0)) as run:
+                module.run_subprocess(command, input_data=payload)
+                resolve.assert_called_once_with('gh')
+                run.assert_called_once_with(
+                    [executable] + original[1:], input=payload,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                self.assertEqual(command, original)
 
-    def test_mysql_stdin_stops_when_executable_resolution_fails(self):
+    def test_stdin_stops_when_executable_resolution_fails(self):
         command = ['gh', 'secret', 'set', 'TEST_CONNECTION']
         original = list(command)
-        with patch.object(mysql, 'resolve_executable', side_effect=FileNotFoundError('gh')) as resolve, \
-                patch.object(mysql.subprocess, 'run') as run, \
-                patch.object(mysql.subprocess, 'Popen') as popen:
-            with self.assertRaises(FileNotFoundError):
-                mysql.run_subprocess(command, input_data=self.secret.encode('utf-8'))
-        resolve.assert_called_once_with('gh')
-        run.assert_not_called()
-        popen.assert_not_called()
-        self.assertEqual(command, original)
+        for module in MODULES:
+            with self.subTest(module=module.__name__), \
+                    patch.object(module, 'resolve_executable', side_effect=FileNotFoundError('gh')) as resolve, \
+                    patch.object(module.subprocess, 'run') as run, \
+                    patch.object(module.subprocess, 'Popen') as popen:
+                with self.assertRaises(FileNotFoundError):
+                    module.run_subprocess(command, input_data=self.secret.encode('utf-8'))
+                resolve.assert_called_once_with('gh')
+                run.assert_not_called()
+                popen.assert_not_called()
+                self.assertEqual(command, original)
 
     def test_existing_nonsecret_commands_keep_their_behavior(self):
         for module in MODULES:
@@ -220,7 +226,7 @@ class DeploySetupTest(unittest.TestCase):
                         patch.object(module.subprocess, 'Popen') as popen, \
                         patch.object(module.subprocess, 'run') as run:
                     popen.return_value.returncode = 0
-                    command = ['git', 'status'] if module is mysql else 'git status'
+                    command = ['git', 'status']
                     module.run_subprocess(command, stdout_show=show_output)
                     kwargs = {} if show_output else dict(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     popen.assert_called_once_with(['git', 'status'], **kwargs)
@@ -234,9 +240,104 @@ class DeploySetupTest(unittest.TestCase):
                     patch.object(module, 'logger') as logger:
                 popen.return_value.returncode = 1
                 popen.return_value.stderr.read.return_value = b'nonsecret failure\n'
-                command = ['git', 'status'] if module is mysql else 'git status'
+                command = ['git', 'status']
                 module.run_subprocess(command)
                 logger.warning.assert_called_once_with('nonsecret failure')
+
+    def test_workflow_run_preserves_quoted_names_and_branches(self):
+        action = 'deploy "quoted" --repo other/repo'
+        branch = 'feature "quoted" --ref other-branch'
+        for commands in (mysql_commands, postgresql_commands, rdbms_commands):
+            with self.subTest(module=commands.__name__), \
+                    patch.object(commands, 'gitcli_check_and_login'), \
+                    patch.object(commands, 'run_subprocess') as run:
+                commands.github_actions_run(action, branch)
+                run.assert_called_once_with(['gh', 'workflow', 'run', action + '.yml', '--ref', branch])
+
+    def test_setup_preserves_git_paths_and_branch_arguments(self):
+        self.server.network = SimpleNamespace(public_network_access='Enabled')
+        root = os.path.abspath('project with spaces')
+        action = 'deploy "quoted" --repo other/repo'
+        branch = 'feature "quoted" --ref other-branch'
+        for commands, module in ((mysql_commands, mysql), (postgresql_commands, postgresql)):
+            with self.subTest(module=commands.__name__), \
+                    patch.object(commands, 'gitcli_check_and_login'), \
+                    patch.object(commands, 'fill_action_template'), \
+                    patch.object(commands, 'get_git_root_dir', return_value=root), \
+                    patch.object(commands, 'run_subprocess') as run:
+                commands.github_actions_setup(
+                    self.cmd, Mock(get=Mock(return_value=self.server)),
+                    'test-rg', 'test-server', 'test-db', 'test-user', self.secret,
+                    'query.sql', self.repository, action_name=action, branch=branch, allow_push=True)
+                action_path = root + module.GITHUB_ACTION_PATH + action + '.yml'
+                self.assertEqual(run.call_args_list, [
+                    unittest.mock.call(['git', 'add', action_path]),
+                    unittest.mock.call(['git', 'commit', '-m', 'Add github action file']),
+                    unittest.mock.call(['git', 'push', 'origin', branch]),
+                ])
+
+    def test_interactive_login_uses_argument_list(self):
+        for commands in (mysql_commands, postgresql_commands, rdbms_commands):
+            with self.subTest(module=commands.__name__), \
+                    patch.object(commands, 'run_cmd', side_effect=[Mock(returncode=0), Mock(returncode=1)]), \
+                    patch.object(commands, 'run_subprocess') as run:
+                commands.gitcli_check_and_login()
+                run.assert_called_once_with(['gh', 'auth', 'login'], stdout_show=True)
+
+
+class WindowsDeploymentResolverTest(unittest.TestCase):
+
+    def test_windows_launches_use_safe_executable_for_stdin_and_normal_commands(self):
+        executable = os.path.abspath(os.path.join('installed tools', 'gh.exe'))
+        for module in (postgresql, rdbms):
+            for input_data in (None, b''):
+                with self.subTest(module=module.__name__, input_data=input_data), \
+                        patch.object(module.sys, 'platform', 'win32'), \
+                        patch.object(module, 'get_safe_executable_path', return_value=executable) as resolve, \
+                        patch.object(module.subprocess, 'run', return_value=Mock(returncode=0)) as run, \
+                        patch.object(module.subprocess, 'Popen', return_value=Mock(returncode=0)) as popen:
+                    command = ['gh', 'secret', 'set', 'TEST', '--repo', 'owner/repo']
+                    original = list(command)
+                    module.run_subprocess(command, input_data=input_data)
+                    resolve.assert_called_once_with('gh.exe')
+                    if input_data is None:
+                        popen.assert_called_once_with(
+                            [executable] + original[1:], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        run.assert_not_called()
+                    else:
+                        run.assert_called_once_with(
+                            [executable] + original[1:], input=b'',
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        popen.assert_not_called()
+                    self.assertEqual(command, original)
+
+    def test_missing_windows_tool_never_launches_bare_name(self):
+        for module in (postgresql, rdbms):
+            with self.subTest(module=module.__name__), \
+                    patch.object(module.sys, 'platform', 'win32'), \
+                    patch.object(module, 'get_safe_executable_path', return_value=None), \
+                    patch.object(module.subprocess, 'run') as run, \
+                    patch.object(module.subprocess, 'Popen') as popen:
+                with self.assertRaises(FileNotFoundError):
+                    module.run_subprocess(['gh', 'auth', 'login'])
+                with self.assertRaises(FileNotFoundError):
+                    module.run_subprocess(['gh', 'secret', 'set', 'TEST'], input_data=b'')
+                with self.assertRaises(FileNotFoundError):
+                    module.run_cmd(['gh', 'auth', 'status'], capture_output=True)
+                run.assert_not_called()
+                popen.assert_not_called()
+
+    def test_login_queries_use_resolved_executable(self):
+        executable = os.path.abspath(os.path.join('installed tools', 'gh.exe'))
+        for commands, module in ((postgresql_commands, postgresql), (rdbms_commands, rdbms)):
+            with self.subTest(module=commands.__name__), \
+                    patch.object(module, 'resolve_executable', return_value=executable), \
+                    patch.object(module, 'core_run_cmd', return_value=Mock(returncode=0)) as run:
+                commands.gitcli_check_and_login()
+                self.assertEqual(run.call_args_list, [
+                    unittest.mock.call([executable], capture_output=True),
+                    unittest.mock.call([executable, 'auth', 'status'], capture_output=True),
+                ])
 
 
 if __name__ == '__main__':
