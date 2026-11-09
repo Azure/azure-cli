@@ -405,12 +405,14 @@ class StorageResourceAazTest(unittest.TestCase):
 
     def test_cache_identity_commands_merge_and_remove_without_overwriting_other_properties(self):
         other_identity = IDENTITY + '2'
+        remaining_identity = IDENTITY + '3'
         for command_type, existing, args, expected in (
                 (identity.Assign, [IDENTITY], {'mi_user_assigned': [other_identity]},
                  {'type': 'SystemAssigned,UserAssigned',
                   'userAssignedIdentities': {IDENTITY: {}, other_identity: {}}}),
-                (identity.Remove, [IDENTITY, other_identity], {'mi_user_assigned': [IDENTITY]},
-                 {'type': 'SystemAssigned,UserAssigned', 'userAssignedIdentities': {other_identity: {}}}),
+                (identity.Remove, [IDENTITY, other_identity, remaining_identity],
+                 {'mi_user_assigned': [IDENTITY, other_identity]},
+                 {'type': 'SystemAssigned,UserAssigned', 'userAssignedIdentities': {remaining_identity: {}}}),
                 (identity.Remove, [IDENTITY], {'mi_system_assigned': 'true'},
                  {'type': 'UserAssigned', 'userAssignedIdentities': {IDENTITY: {}}})):
             with self.subTest(command=command_type.AZ_NAME, arguments=args):
