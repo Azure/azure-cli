@@ -48,6 +48,16 @@ def _is_valid_storage_account_name(account_name):
     return bool(account_name and re.fullmatch(r'[a-z0-9]{3,24}', account_name))
 
 
+def _validate_source_account_name(account_name):
+    """Ensure a source account name cannot change the host of the copy source URL built from it."""
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    from .storage_url_helpers import is_valid_hostname_label
+    if account_name is not None and not is_valid_hostname_label(account_name):
+        raise InvalidArgumentValueError(
+            "Invalid source storage account name '{}'. The account name may only contain letters, numbers and "
+            "hyphens.".format(account_name))
+
+
 def _query_account_rg(cli_ctx, account_name):
     """Query the storage account's resource group, which the mgmt sdk requires."""
     scf = storage_client_factory(cli_ctx)
@@ -266,6 +276,7 @@ def process_blob_source_uri(cmd, namespace):
         return
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
+    _validate_source_account_name(source_account_name or ns.get('account_name', None))
 
     # determine if the copy will happen in the same storage account
     if not source_account_name and source_account_key:
@@ -360,6 +371,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
                                              'specified'))
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
+    _validate_source_account_name(source_account_name or ns.get('account_name', None))
 
     if not source_account_name:
         if source_account_key:
@@ -472,6 +484,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
             'Ambiguous parameters, both blob and file sources are specified'))
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
+    _validate_source_account_name(source_account_name or ns.get('account_name', None))
 
     if not source_account_name:
         if source_account_key:

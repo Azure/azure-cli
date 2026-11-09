@@ -207,6 +207,7 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
     def test_validate_source_url_requires_valid_account_name_for_same_account(self, _):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
         for account_name in (None, 'same@attacker.example:443/'):
             with self.subTest(account_name=account_name):
                 ns = Namespace(
@@ -216,9 +217,13 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
                     account_name=account_name, account_key='key', sas_token=None,
                     container_name='dst', share_name=None)
 
-                validate_source_url(MockCmd(self.cli), ns)
-
-                self.assertFalse(ns.source_is_validated_same_account)
+                if account_name is None:
+                    validate_source_url(MockCmd(self.cli), ns)
+                    self.assertFalse(ns.source_is_validated_same_account)
+                else:
+                    with self.assertRaisesRegex(InvalidArgumentValueError, 'Invalid source storage account name'):
+                        validate_source_url(MockCmd(self.cli), ns)
+                    self.assertIsNone(ns.source_url)
 
     def test_get_not_none_validator(self):
         from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -253,6 +258,70 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
         with self.assertRaisesRegex(InvalidArgumentValueError, 'please specify one of --file and --data'):
             validate_upload_blob(Namespace(file_path=None, data=None))
+
+
+@mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+@mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value='queried_key')
+@mock.patch('azure.cli.command_modules.storage.util.create_short_lived_blob_sas_v2', return_value='blob_sas')
+@mock.patch('azure.cli.command_modules.storage.util.create_short_lived_file_sas_v2', return_value='file_sas')
+class TestCopySourceAccountNameValidation(unittest.TestCase):
+    INVALID_NAMES = ('evil.example/x?', 'evil.example', 'user@evil.example', 'evil.example:443', 'evil\\x', 'ev il')
+
+    def setUp(self):
+        self.cli = MockCLI()
+
+    @staticmethod
+    def _blob_source_namespace(**kwargs):
+        values = dict(copy_source=None, source_container='src', source_blob='input', source_snapshot=None,
+                      source_account_name=None, source_account_key=None, source_sas=None,
+                      account_name='destaccount', account_key='key', sas_token=None)
+        values.update(kwargs)
+        return Namespace(**values)
+
+    @staticmethod
+    def _source_namespace(**kwargs):
+        values = dict(copy_source=None, source_url=None, source_container='src', source_blob='input',
+                      source_snapshot=None, source_share=None, source_path=None, file_snapshot=None,
+                      source_account_name=None, source_account_key=None, source_sas=None, token_credential=None,
+                      account_name='destaccount', account_key='key', sas_token=None,
+                      container_name='dst', share_name=None)
+        values.update(kwargs)
+        return Namespace(**values)
+
+    def _validators(self):
+        return ((process_blob_source_uri, self._blob_source_namespace, 'copy_source'),
+                (validate_source_uri, self._source_namespace, 'copy_source'),
+                (validate_source_url, self._source_namespace, 'source_url'))
+
+    def test_rejects_invalid_source_account_names(self, *mocks):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        query_account_key = mocks[2]
+        for validator, make_namespace, result_attr in self._validators():
+            for name in self.INVALID_NAMES:
+                for kwargs in ({'source_account_name': name},
+                               {'source_account_name': name, 'source_account_key': 'source_key'},
+                               {'source_account_name': name, 'source_sas': 'sig=source'},
+                               # same account: the name comes from --account-name or a connection string
+                               {'account_name': name}):
+                    with self.subTest(validator=validator.__name__, **kwargs):
+                        ns = make_namespace(**kwargs)
+                        with self.assertRaisesRegex(InvalidArgumentValueError,
+                                                    'Invalid source storage account name'):
+                            validator(MockCmd(self.cli), ns)
+                        self.assertIsNone(getattr(ns, result_attr))
+        query_account_key.assert_not_called()
+
+    def test_builds_source_url_for_valid_account_names(self, *_):
+        for validator, make_namespace, result_attr in self._validators():
+            for kwargs, account in (({'source_account_name': 'srcaccount', 'source_account_key': 'k'}, 'srcaccount'),
+                                    ({'source_account_name': 'MySrc-Account', 'source_sas': 'sig=s'},
+                                     'MySrc-Account'),
+                                    ({}, 'destaccount')):
+                with self.subTest(validator=validator.__name__, **kwargs):
+                    ns = make_namespace(**kwargs)
+                    validator(MockCmd(self.cli), ns)
+                    self.assertTrue(getattr(ns, result_attr).startswith(
+                        'https://{}.blob.{}/src/input'.format(account, self.cli.cloud.suffixes.storage_endpoint)))
 
 
 class TestClientParametersValidator(unittest.TestCase):
