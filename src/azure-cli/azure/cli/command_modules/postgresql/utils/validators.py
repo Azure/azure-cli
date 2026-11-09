@@ -919,6 +919,10 @@ def _pg_storage_auto_grow_validator(storage_type, auto_grow, storage_gb,
         storage_type = instance.storage.type
         if auto_grow is None:
             auto_grow = instance.storage.auto_grow
+        if not has_auto_grow_options and (
+                not storage_type or storage_type.lower() != 'premiumv2_lrs' or
+                not auto_grow or auto_grow.lower() != 'enabled'):
+            return
         storage_gb = max(instance.storage.storage_size_gb,
                          storage_gb if storage_gb is not None else instance.storage.storage_size_gb)
         if auto_grow_max_threshold_mb is None:

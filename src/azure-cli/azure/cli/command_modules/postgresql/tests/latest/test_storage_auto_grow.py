@@ -21,7 +21,7 @@ class StorageAutoGrowTest(unittest.TestCase):
             'sku_info': {
                 'GeneralPurpose': {
                     'skus': ['Standard_D2ds_v4'],
-                    'storage_sizes': [128, 256],
+                    'storage_sizes': [128, 256, 512],
                     'supported_storageV2_size': 6,
                     'supported_storageV2_size_max': 65536,
                     'supported_storageV2_iops': 3000,
@@ -184,8 +184,8 @@ class StorageAutoGrowTest(unittest.TestCase):
 
     def test_postgresql_storage_size_update_without_autogrow_options(self):
         for storage_type, auto_grow, maximum, storage_gb in [
-                ('Premium_LRS', 'Enabled', 262144, 256),
-                ('PremiumV2_LRS', 'Disabled', 262144, 256),
+                ('Premium_LRS', 'Enabled', 262144, 512),
+                ('PremiumV2_LRS', 'Disabled', 262144, 512),
                 ('PremiumV2_LRS', 'Enabled', None, 512)]:
             with self.subTest(storage_type=storage_type, auto_grow=auto_grow, maximum=maximum):
                 server = self._server(storage_type, auto_grow)
@@ -194,6 +194,13 @@ class StorageAutoGrowTest(unittest.TestCase):
                     self.cmd, self.client, server, storage_gb=storage_gb)
                 self.assertEqual(parameters.storage.storage_size_gb, storage_gb)
                 self.assertEqual(parameters.storage.auto_grow_max_threshold_mb, maximum)
+
+    def test_postgresql_storage_size_update_while_disabling_autogrow(self):
+        parameters = custom_commands.flexible_server_update_custom_func(
+            self.cmd, self.client, self._server(), storage_gb=512, auto_grow='Disabled')
+        self.assertEqual(parameters.storage.storage_size_gb, 512)
+        self.assertEqual(parameters.storage.auto_grow, 'Disabled')
+        self.assertEqual(parameters.storage.auto_grow_max_threshold_mb, 262144)
 
     def test_postgresql_storage_auto_grow_can_be_enabled_without_options(self):
         self._create()
