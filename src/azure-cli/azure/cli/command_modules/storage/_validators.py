@@ -53,9 +53,9 @@ def _validate_source_account_name(account_name):
     from azure.cli.core.azclierror import InvalidArgumentValueError
     from .storage_url_helpers import is_valid_hostname_label
     if account_name is not None and not is_valid_hostname_label(account_name):
+        # the value is not echoed, since a mistyped value may be a URL or connection string containing credentials
         raise InvalidArgumentValueError(
-            "Invalid source storage account name '{}'. The account name may only contain letters, numbers and "
-            "hyphens.".format(account_name))
+            "Invalid source storage account name. The account name may only contain letters, numbers and hyphens.")
 
 
 def _query_account_rg(cli_ctx, account_name):

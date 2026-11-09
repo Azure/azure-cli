@@ -197,3 +197,9 @@ class TestHostnameLabelValidation(unittest.TestCase):
     def test_get_account_url_requires_account_name(self):
         with self.assertRaisesRegex(CLIError, 'Please provide storage account name'):
             get_account_url(self.cli, None, 'blob')
+
+    def test_get_account_url_does_not_echo_invalid_account_name(self):
+        name = 'https://myaccount.blob.core.windows.net/?sv=2025&sig=topsecret'
+        with self.assertRaises(InvalidArgumentValueError) as ctx:
+            get_account_url(self.cli, name, 'blob')
+        self.assertNotIn('topsecret', str(ctx.exception))

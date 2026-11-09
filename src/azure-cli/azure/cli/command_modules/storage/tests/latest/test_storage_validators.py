@@ -306,8 +306,9 @@ class TestCopySourceAccountNameValidation(unittest.TestCase):
                     with self.subTest(validator=validator.__name__, **kwargs):
                         ns = make_namespace(**kwargs)
                         with self.assertRaisesRegex(InvalidArgumentValueError,
-                                                    'Invalid source storage account name'):
+                                                    'Invalid source storage account name') as ctx:
                             validator(MockCmd(self.cli), ns)
+                        self.assertNotIn(name, str(ctx.exception))
                         self.assertIsNone(getattr(ns, result_attr))
         query_account_key.assert_not_called()
 
