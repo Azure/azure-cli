@@ -21,10 +21,11 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
 
 def _add_deprecated_service_level_encryption_key(args_schema):
     from azure.cli.core.aaz import AAZFreeFormDictArg
-    # Kept so scripts written for the 2026-03-01-preview CLI still parse; the property is absent from 2026-11-01.
+    # Preview-only: released in the CLI on 2026-03-01-preview but not yet in 2026-11-01. Kept so existing scripts parse
+    # and get a clear error; it may return in a later api-version.
     args_schema.encryption_with_cmk.service_level_encryption_key = AAZFreeFormDictArg(
         options=["service-level-encryption-key"],
-        help="[Deprecated] Not supported in api-version 2026-11-01 and fails if specified.",
+        help="Not yet available in api-version 2026-11-01 and fails if specified. Preview-only; may be supported in a later api-version.",
     )
 
 
@@ -32,8 +33,8 @@ def _validate_service_level_encryption_key_unused(args):
     from azure.cli.core.aaz import has_value
     if has_value(args.encryption_with_cmk) and has_value(args.encryption_with_cmk.service_level_encryption_key):
         raise InvalidArgumentValueError(
-            "--encryption-with-cmk service-level-encryption-key is not supported in api-version 2026-11-01. "
-            "Remove it, or use azure-cli 2.92 or earlier (api-version 2026-03-01-preview).")
+            "--encryption-with-cmk service-level-encryption-key is not available in api-version 2026-11-01 yet. "
+            "Remove it, or use azure-cli 2.92 or earlier (api-version 2026-03-01-preview) to keep using it.")
 
 
 class SearchServiceCreate(_SearchServiceCreate):
