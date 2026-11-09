@@ -19,7 +19,7 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
     return client.resource_groups.get(resource_group_name).location
 
 
-def _add_deprecated_service_level_encryption_key(args_schema):
+def _add_unavailable_service_level_encryption_key(args_schema):
     from azure.cli.core.aaz import AAZFreeFormDictArg
     # Preview-only: released in the CLI on 2026-03-01-preview but not yet in 2026-11-01. Kept so existing scripts parse
     # and get a clear error; it may return in a later api-version.
@@ -29,7 +29,7 @@ def _add_deprecated_service_level_encryption_key(args_schema):
     )
 
 
-def _validate_service_level_encryption_key_unused(args):
+def _raise_if_service_level_encryption_key_set(args):
     from azure.cli.core.aaz import has_value
     if has_value(args.encryption_with_cmk) and has_value(args.encryption_with_cmk.service_level_encryption_key):
         raise InvalidArgumentValueError(
@@ -58,7 +58,7 @@ class SearchServiceCreate(_SearchServiceCreate):
             enum=["aadOrApiKey", "apiKeyOnly"],
         )
 
-        _add_deprecated_service_level_encryption_key(args_schema)
+        _add_unavailable_service_level_encryption_key(args_schema)
         args_schema.ip_rules_internal._registered = False
         args_schema.api_key_only._registered = False
 
@@ -71,7 +71,7 @@ class SearchServiceCreate(_SearchServiceCreate):
         from azure.cli.core.aaz import has_value
         import re
         args = self.ctx.args
-        _validate_service_level_encryption_key_unused(args)
+        _raise_if_service_level_encryption_key_set(args)
 
         if args.hosting_mode == "highDensity" and args.sku != "standard3":
             raise UnrecognizedArgumentError(
@@ -120,7 +120,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
             help="Some Help",
             enum=["aadOrApiKey", "apiKeyOnly"],
         )
-        _add_deprecated_service_level_encryption_key(args_schema)
+        _add_unavailable_service_level_encryption_key(args_schema)
         args_schema.ip_rules_internal._registered = False
         args_schema.api_key_only._registered = False
 
@@ -130,7 +130,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
         from azure.cli.core.aaz import has_value
         import re
         args = self.ctx.args
-        _validate_service_level_encryption_key_unused(args)
+        _raise_if_service_level_encryption_key_set(args)
 
         if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialized_data() is True:
             if has_value(args.auth_options):
