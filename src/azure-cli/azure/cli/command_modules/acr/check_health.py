@@ -44,6 +44,7 @@ def _subprocess_communicate(command_parts, shell=False):
     from subprocess import PIPE, Popen, CalledProcessError
     output, stderr = "", ""
     succeeded = False
+    exit_code = 1
 
     try:
         p = Popen(command_parts, stdout=PIPE, stderr=PIPE, shell=shell)
@@ -51,11 +52,11 @@ def _subprocess_communicate(command_parts, shell=False):
         output = output.decode('UTF-8').rstrip()
         stderr = stderr.decode('UTF-8').rstrip()
         exit_code = p.returncode
-    except CalledProcessError as e:
+    except (OSError, CalledProcessError) as e:
         stderr = str(e)
 
     warning = None
-    if stderr.lower().startswith("warning"):
+    if exit_code == 0 and stderr.lower().startswith("warning"):
         warning = stderr
         stderr = None
 
@@ -156,6 +157,8 @@ def _get_helm_version(ignore_errors):
 
     # Helm version check
     output, warning, stderr, succeeded = _subprocess_communicate([helm_command, "version", "--client"])
+    if not succeeded and stderr and "unknown flag: --client" in stderr:
+        output, warning, stderr, succeeded = _subprocess_communicate([helm_command, "version"])
 
     if not succeeded:
         _handle_error(HELM_VERSION_ERROR.append_error_message(stderr), ignore_errors)
