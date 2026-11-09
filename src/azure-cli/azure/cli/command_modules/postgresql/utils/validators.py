@@ -929,7 +929,8 @@ def _pg_storage_auto_grow_validator(storage_type, auto_grow, storage_gb,
             raise ValidationError('--storage-auto-grow-max-threshold-mb and --storage-auto-grow-increment-percent '
                                   'require --storage-auto-grow Enabled.')
 
-    if auto_grow_max_threshold_mb is not None and auto_grow_max_threshold_mb < storage_gb * 1024:
+    if (auto_grow_max_threshold_mb is not None and storage_gb is not None and
+            auto_grow_max_threshold_mb < storage_gb * 1024):
         raise ValidationError('--storage-auto-grow-max-threshold-mb must be at least the current or requested '
                               'storage size: {} MB (1 GB = 1,024 MB).'.format(storage_gb * 1024))
     if auto_grow_increment_percent is not None and auto_grow_increment_percent <= 0:

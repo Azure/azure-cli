@@ -96,6 +96,14 @@ class StorageAutoGrowTest(unittest.TestCase):
         self.assertEqual(storage['autoGrowMaxThresholdMb'], 131072)
         self.assertEqual(storage['autoGrowIncrementPercent'], 101)
 
+    def test_postgresql_storage_auto_grow_create_without_storage_size(self):
+        self._create(storage_gb=None, auto_grow_max_threshold_mb=131071)
+        storage = self.client.begin_create_or_update.call_args.args[2].as_dict()['properties']['storage']
+        self.assertNotIn('storageSizeGB', storage)
+        self.assertEqual(storage['type'], 'PremiumV2_LRS')
+        self.assertEqual(storage['autoGrow'], 'Enabled')
+        self.assertEqual(storage['autoGrowMaxThresholdMb'], 131071)
+
     def test_postgresql_storage_auto_grow_create_rejects_invalid_options(self):
         cases = [
             {'storage_type': 'Premium_LRS', 'iops': None, 'throughput': None,
