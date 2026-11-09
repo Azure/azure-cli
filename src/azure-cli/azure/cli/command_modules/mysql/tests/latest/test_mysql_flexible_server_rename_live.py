@@ -26,7 +26,7 @@ class MysqlFlexibleServerRenameLiveTest(LiveScenarioTest):
             name=self.create_random_name('clirename', 20),
             new_name=self.create_random_name('clirenamed', 20))
         self.cmd('mysql flexible-server create -g {rg} -n {name} -l {location} '
-                 '--tier GeneralPurpose --sku-name Standard_D2ds_v4 --storage-size 32 --public-access none --yes')
+                 '--tier GeneralPurpose --sku-name Standard_D2ds_v5 --storage-size 32 --public-access none --yes')
         source = self.cmd('mysql flexible-server show -g {rg} -n {name}').get_output_in_json()
 
         result = self.cmd(
