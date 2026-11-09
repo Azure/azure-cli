@@ -22,6 +22,9 @@ class Update(AAZCommand):
 
     :example: Update a private endpoint.
         az network private-endpoint update --name MyPE --resource-group MyResourceGroup --set useRemoteGateways=true
+
+    :example: Update a private endpoint with an approval reference.
+        az network private-endpoint update -g MyResourceGroup -n PE-B --approval-reference-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateEndpoints/PE-A
     """
 
     _aaz_info = {

@@ -58,16 +58,18 @@ jobs:
   - bash: |
       set -e
       
-      echo "=== Installing Homebrew Python ${{ parameters.PythonVersion }} ==="
+      echo "=== Installing Homebrew Python $RELEASE_PYTHON_VERSION ==="
       echo "Architecture: $(Architecture)"
-      brew install python@${{ parameters.PythonVersion }}
+      brew install "python@$RELEASE_PYTHON_VERSION"
       
-      PYTHON_PATH=$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python
+      PYTHON_PATH="$(brew --prefix "python@$RELEASE_PYTHON_VERSION")/libexec/bin/python"
       echo "Python path: $PYTHON_PATH"
       $PYTHON_PATH --version
       
       echo "##vso[task.setvariable variable=PythonPath]$PYTHON_PATH"
     displayName: 'Install Homebrew Python'
+    env:
+      RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}
   
   - bash: |
       set -e
@@ -167,11 +169,11 @@ jobs:
       echo "=== Verifying Azure CLI on $ARCH ==="
       tar -xzf "$TARBALL" -C "$EXTRACT_DIR"
       
-      if ! brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
-        brew install python@${{ parameters.PythonVersion }}
+      if ! brew list "python@$RELEASE_PYTHON_VERSION" &>/dev/null; then
+        brew install "python@$RELEASE_PYTHON_VERSION"
       fi
 
-      AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python"
+      AZ_PYTHON="$(brew --prefix "python@$RELEASE_PYTHON_VERSION")/libexec/bin/python"
       export AZ_PYTHON
       
       echo "System architecture: $(uname -m)"
@@ -184,3 +186,5 @@ jobs:
       
       rm -rf "$EXTRACT_DIR"
     displayName: 'Verify CLI Works ($(Architecture))'
+    env:
+      RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}

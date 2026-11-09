@@ -234,7 +234,7 @@ def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None)
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
         resources = []
         try:
-            resources.extend(list_vault(client, resource_group_name))
+            resources.extend(list_vault(cmd, client, resource_group_name))
             resources.extend(list_hsm(hsm_client, resource_group_name))
         except:  # pylint: disable=bare-except
             pass
@@ -246,7 +246,7 @@ def list_vault_or_hsm(cmd, client, resource_group_name=None, resource_type=None)
         return list_hsm(hsm_client, resource_group_name)
 
     if resource_type == 'vault':
-        return list_vault(client, resource_group_name)
+        return list_vault(cmd, client, resource_group_name)
 
     raise CLIError('Unsupported resource type: {}'.format(resource_type))
 
@@ -257,10 +257,11 @@ def list_hsm(client, resource_group_name=None):
     return list(hsm_list)
 
 
-def list_vault(client, resource_group_name=None):
-    vault_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
-        if resource_group_name else client.list()
-    return list(vault_list)
+def list_vault(cmd, client, resource_group_name=None):
+    if resource_group_name:
+        return list(client.list_by_resource_group(resource_group_name=resource_group_name))
+    from ._validators import _get_vaults_list_client
+    return list(_get_vaults_list_client(cmd.cli_ctx).list())
 
 
 def _create_network_rule_set(cmd, bypass=None, default_action=None):

@@ -5,8 +5,9 @@
 
 import unittest
 from unittest import mock
+from types import SimpleNamespace
 
-from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
+from azure.cli.core.azclierror import ArgumentUsageError, MutuallyExclusiveArgumentError, ValidationError
 
 from azure.cli.command_modules.appservice._constants import ISOLATED_V4_SKUS
 from azure.cli.command_modules.appservice._validators import (
@@ -15,8 +16,44 @@ from azure.cli.command_modules.appservice._validators import (
     _validate_asp_sku,
     _validate_ip_address_existence,
     _validate_service_tag_existence,
+    validate_asp_create,
 )
 from azure.cli.command_modules.appservice.utils import get_sku_tier
+
+
+class ValidateAppServicePlanCreateTest(unittest.TestCase):
+    @staticmethod
+    def _make_namespace(is_linux=None, hyper_v=False, is_managed_instance=False):
+        return SimpleNamespace(
+            tags=None,
+            is_linux=is_linux,
+            hyper_v=hyper_v,
+            is_managed_instance=is_managed_instance,
+            sku='P1V4',
+            app_service_environment=None,
+            zone_redundant=False,
+        )
+
+    def test_managed_instance_defaults_to_windows(self):
+        namespace = self._make_namespace(is_managed_instance=True)
+
+        validate_asp_create(namespace)
+
+        self.assertFalse(namespace.is_linux)
+
+    def test_managed_instance_rejects_linux(self):
+        namespace = self._make_namespace(is_linux=True, is_managed_instance=True)
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError,
+                                    '--is-managed-instance creates a Windows plan'):
+            validate_asp_create(namespace)
+
+    def test_managed_instance_rejects_hyper_v(self):
+        namespace = self._make_namespace(hyper_v=True, is_managed_instance=True)
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError,
+                                    '--hyper-v and --is-managed-instance cannot be used together'):
+            validate_asp_create(namespace)
 
 
 class ValidateAppServicePlanSkuTest(unittest.TestCase):

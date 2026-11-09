@@ -1631,6 +1631,11 @@ helps['containerapp compose'] = """
 helps['containerapp compose create'] = """
     type: command
     short-summary: Create one or more Container Apps in a new or existing Container App Environment from a Compose specification.
+    long-summary: |
+        Secret files and env_file entries must use relative paths within the Compose file's directory.
+        Paths are resolved relative to that directory, not the current working directory. Absolute paths and
+        symbolic links that resolve outside that directory are not supported. Files are checked before deployment.
+        Values loaded from env_file are stored as ordinary environment variables, not Container App secrets.
     examples:
     - name: Create a container app by implicitly passing in a Compose configuration file from current directory.
       text: |

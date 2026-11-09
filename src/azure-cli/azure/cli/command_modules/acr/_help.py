@@ -45,6 +45,9 @@ examples:
 helps['acr check-health'] = """
 type: command
 short-summary: Gets health information on the environment and optionally a target registry.
+long-summary: |
+  The Helm version check supports clients with or without Helm's --client option.
+  Use --ignore-errors to report diagnostic failures without stopping the command.
 examples:
   - name: Gets health state with target registry 'myregistry', skipping confirmation for pulling image.
     text: >

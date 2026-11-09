@@ -30,7 +30,7 @@ if "%ARCH%"=="x86" (
     echo Please set ARCH to "x86" or "x64"
     goto ERROR
 )
-set PYTHON_VERSION=3.14.9
+set PYTHON_VERSION=3.14.10
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-%PYTHON_ARCH%.zip"
@@ -104,9 +104,10 @@ if not exist %PYTHON_DIR% (
     pushd %PYTHON_DIR%
 
     echo Downloading Python
-    curl --output python-archive.zip %PYTHON_DOWNLOAD_URL%
+    curl --fail --location --show-error --output python-archive.zip %PYTHON_DOWNLOAD_URL%
+    if !errorlevel! neq 0 goto ERROR
     unzip python-archive.zip
-    if %errorlevel% neq 0 goto ERROR
+    if !errorlevel! neq 0 goto ERROR
     del python-archive.zip
     echo Python downloaded and extracted successfully
 
@@ -127,8 +128,14 @@ if not exist %PYTHON_DIR% (
     )
 
     echo Installing pip
-    curl --output get-pip.py %GET_PIP_DOWNLOAD_URL%
-    %PYTHON_DIR%\python.exe get-pip.py
+    curl --fail --location --show-error --output get-pip.py %GET_PIP_DOWNLOAD_URL%
+    if !errorlevel! neq 0 goto ERROR
+    REM Select pip's interpreter runner instead of the bundled pip directory on Windows.
+    setlocal
+    set "PIP_PYTHON=%PYTHON_DIR%\python.exe"
+    "%PYTHON_DIR%\python.exe" get-pip.py
+    if !errorlevel! neq 0 goto ERROR
+    endlocal
     del get-pip.py
     echo Pip set up successful
 
@@ -138,11 +145,13 @@ if not exist %PYTHON_DIR% (
     REM see https://github.com/Azure/azure-cli/pull/29887
     echo Installing setuptools wheel
     %PYTHON_DIR%\python.exe -Im pip install setuptools wheel
+    if !errorlevel! neq 0 goto ERROR
 
     popd
 )
 set PYTHON_EXE=%PYTHON_DIR%\python.exe
-
+"%PYTHON_EXE%" -Im pip --version
+if %errorlevel% neq 0 goto ERROR
 
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
