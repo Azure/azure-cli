@@ -432,6 +432,36 @@ def _format_property_modify(builder, before, after, children, indent_level):
             builder.append_line()
 
 
+def _parse_array_item_path(path):
+    """Return (sort_key, display_path) for a what-if array-item path.
+
+    The service historically returned numeric paths like "0". Newer responses
+    use an underscored form like "_0", which breaks ``int(path)`` used for
+    sorting. Non-numeric paths keep service order (stable sort) and are
+    displayed unchanged.
+    """
+    if path is None:
+        return (float('inf'), '')
+    text = str(path)
+    candidate = text[1:] if text.startswith('_') else text
+    try:
+        return (int(candidate), candidate)
+    except (TypeError, ValueError):
+        return (float('inf'), text)
+
+
+def _array_item_sort_key(property_change):
+    """Sort array-item changes by numeric index, then by change type.
+
+    Non-numeric paths share a constant key, so the stable sort keeps them in
+    service order after the numeric items.
+    """
+    index, _ = _parse_array_item_path(property_change.path)
+    if index == float('inf'):
+        return (index, 0)
+    return (index, _property_change_type_to_weight[property_change.property_change_type])
+
+
 def _format_property_array_change(builder, parent_property_change, property_changes, indent_level):
     if not parent_property_change.path:
         # The parent change doesn't have a path, which means the current
@@ -449,7 +479,7 @@ def _format_property_array_change(builder, parent_property_change, property_chan
 
     _format_property_changes(
         builder,
-        sorted(property_changes, key=lambda x: (int(x.path), _property_change_type_to_weight[x.property_change_type])),
+        sorted(property_changes, key=_array_item_sort_key),
         indent_level,
     )
 
