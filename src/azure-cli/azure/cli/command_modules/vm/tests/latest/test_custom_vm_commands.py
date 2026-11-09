@@ -3,6 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import io
+import json
+import logging
+import os
+import tempfile
 import unittest
 from unittest import mock
 
@@ -368,6 +373,111 @@ class TestVmssGenericUpdateOptionalCollections(unittest.TestCase):
         result = self._get_vmss(instance, instance_id='0')
         ip_config = result['networkProfileConfiguration']['networkInterfaceConfigurations'][0]['ipConfigurations'][0]
         self.assertEqual(ip_config, {'name': 'ipconfig1'})
+
+
+class TestVMDelete(unittest.TestCase):
+
+    def setUp(self):
+        config_dir = tempfile.TemporaryDirectory(dir=os.path.dirname(__file__))
+        self.addCleanup(config_dir.cleanup)
+        patches = [
+            mock.patch.dict(os.environ, {
+                'AZURE_CONFIG_DIR': config_dir.name,
+                'AZURE_CORE_COLLECT_TELEMETRY': 'no',
+                'AZURE_CORE_CHECK_VERSION': 'false',
+                'AZURE_EXTENSION_USE_DYNAMIC_INSTALL': 'no',
+            }),
+            mock.patch('azure.cli.core.util.handle_version_update'),
+            mock.patch('azure.cli.core._profile.Profile.get_subscription', return_value={
+                'id': '00000000-0000-0000-0000-000000000000',
+                'name': 'test-subscription',
+                'tenantId': '00000000-0000-0000-0000-000000000001',
+            }),
+            mock.patch('azure.cli.core.aaz._command_ctx.AAZCommandCtx.get_login_credential'),
+            mock.patch('socket.socket.connect', side_effect=AssertionError('Unexpected network request')),
+        ]
+        for patch in patches:
+            patch.start()
+            self.addCleanup(patch.stop)
+
+    def _invoke_delete(self, show_status=200, error_code=None, delete_status=204, no_wait=False,
+                       error_message=None):
+        from azure.cli.core.azclierror import logger as error_logger
+        from azure.core.pipeline import PipelineContext, PipelineResponse
+        from azure.core.pipeline.policies import ContentDecodePolicy
+        from azure.core.pipeline.transport import RequestsTransportResponse
+        from requests import Response
+
+        methods = []
+
+        def send_request(request, **kwargs):
+            self.assertIn(request.method, ('GET', 'DELETE'))
+            methods.append(request.method)
+            response = Response()
+            response.status_code = show_status if request.method == 'GET' else delete_status
+            response.headers['Content-Type'] = 'application/json'
+            body = {}
+            if response.status_code >= 400:
+                body = {'error': {'code': error_code, 'message': error_message or 'Test service error: ' + error_code}}
+            elif request.method == 'GET':
+                body = {'name': 'test-vm', 'location': 'westus2', 'properties': {}}
+            response._content = json.dumps(body).encode() if response.status_code != 204 else b''
+            context = PipelineContext(None, stream=False)
+            context[ContentDecodePolicy.CONTEXT_NAME] = body
+            return PipelineResponse(request, RequestsTransportResponse(request, response), context)
+
+        args = ['vm', 'delete', '-g', 'test-rg', '-n', 'test-vm', '--yes', '--only-show-errors']
+        if no_wait:
+            args.append('--no-wait')
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with mock.patch('azure.cli.core.aaz._client.AAZBaseClient.send_request', side_effect=send_request), \
+                mock.patch('sys.stdout', stdout), mock.patch('sys.stderr', stderr), \
+                mock.patch.object(error_logger, 'handlers', [logging.StreamHandler(stderr)]), \
+                mock.patch.object(error_logger, 'propagate', False):
+            exit_code = DummyCli().invoke(args, out_file=stdout)
+        return exit_code, stdout.getvalue(), stderr.getvalue(), methods
+
+    def test_vm_delete_missing_resource_fails_before_delete(self):
+        messages = {
+            'ResourceNotFound': (
+                "The Resource 'Microsoft.Compute/virtualMachines/test-vm' under resource group 'test-rg' was not found."
+            ),
+            'ResourceGroupNotFound': "Resource group 'test-rg' could not be found.",
+        }
+        for error_code, message in messages.items():
+            for no_wait in (False, True):
+                with self.subTest(error_code=error_code, no_wait=no_wait):
+                    exit_code, stdout, stderr, methods = self._invoke_delete(
+                        show_status=404, error_code=error_code, no_wait=no_wait, error_message=message)
+                    self.assertEqual(exit_code, 3, stderr)
+                    self.assertEqual(stdout, '')
+                    self.assertIn(error_code, stderr)
+                    self.assertIn(message, stderr)
+                    self.assertEqual(methods, ['GET'])
+
+    def test_vm_delete_existing_resource_succeeds(self):
+        for delete_status in (200, 204):
+            for no_wait in (False, True):
+                with self.subTest(delete_status=delete_status, no_wait=no_wait):
+                    exit_code, stdout, stderr, methods = self._invoke_delete(
+                        delete_status=delete_status, no_wait=no_wait)
+                    self.assertEqual(exit_code, 0, stderr)
+                    self.assertEqual(stdout, '')
+                    self.assertEqual(stderr, '')
+                    self.assertEqual(methods, ['GET', 'DELETE'])
+
+    def test_vm_delete_preserves_authorization_errors(self):
+        for show_status, delete_status in ((403, 204), (200, 403)):
+            for no_wait in (False, True):
+                with self.subTest(show_status=show_status, no_wait=no_wait):
+                    exit_code, stdout, stderr, methods = self._invoke_delete(
+                        show_status=show_status, delete_status=delete_status,
+                        error_code='AuthorizationFailed', no_wait=no_wait)
+                    self.assertEqual(exit_code, 1, stderr)
+                    self.assertEqual(stdout, '')
+                    self.assertIn('AuthorizationFailed', stderr)
+                    self.assertNotIn('was not found', stderr)
+                    self.assertEqual(methods, ['GET'] if show_status == 403 else ['GET', 'DELETE'])
 
 
 class FakedVM:  # pylint: disable=too-few-public-methods
