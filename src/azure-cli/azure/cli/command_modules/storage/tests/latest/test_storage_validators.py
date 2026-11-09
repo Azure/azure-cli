@@ -433,6 +433,48 @@ class TestClientParametersValidator(unittest.TestCase):
         self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url)
         self.assertEqual(ns.account_url, self.local_url)
 
+    @mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value='queried_key')
+    def test_invalid_account_name_rejected_before_key_lookup(self, query_account_key):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        name = 'https://myaccount.blob.core.windows.net/?sv=2025&sig=topsecret'
+        for kwargs in ({'account_name': name}, {'account_name': name, 'auth_mode': 'key'},
+                       {'connection_string': 'AccountName=' + name}):
+            with self.subTest(**kwargs):
+                with mock.patch.dict('os.environ', {}, clear=True), \
+                        mock.patch('azure.cli.command_modules.storage._validators.logger') as logger, \
+                        self.assertRaisesRegex(InvalidArgumentValueError, 'Invalid storage account name') as ctx:
+                    validate_client_parameters(MockCmd(self.cli), self._create_namespace(**kwargs))
+                self.assertNotIn('topsecret', str(ctx.exception))
+                self.assertNotIn('topsecret', str(logger.mock_calls))
+        query_account_key.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value='queried_key')
+    def test_invalid_account_name_with_custom_endpoint_skips_key_lookup(self, query_account_key):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        ns = self._create_namespace(account_name='odd.name', account_url='https://storage.contoso.example')
+        with mock.patch.dict('os.environ', {}, clear=True), \
+                self.assertRaisesRegex(InvalidArgumentValueError, 'There are no credentials provided'):
+            validate_client_parameters(MockCmd(self.cli), ns)
+        query_account_key.assert_not_called()
+
+        # a custom endpoint with credentials is unaffected by the account name check
+        ns = self._create_namespace(account_name='odd.name', account_url='https://storage.contoso.example',
+                                    sas_token='?sig=s')
+        with mock.patch.dict('os.environ', {}, clear=True):
+            validate_client_parameters(MockCmd(self.cli), ns)
+        self.assertEqual((ns.account_name, ns.sas_token), ('odd.name', 'sig=s'))
+        query_account_key.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value='queried_key')
+    def test_valid_account_name_still_queries_key(self, query_account_key):
+        for name, expected in (('MyAccount', 'MyAccount'), ('myaccount-secondary', 'myaccount')):
+            with self.subTest(name=name):
+                ns = self._create_namespace(account_name=name)
+                with mock.patch.dict('os.environ', {}, clear=True):
+                    validate_client_parameters(MockCmd(self.cli), ns)
+                self.assertEqual((ns.account_name, ns.account_key), (expected, 'queried_key'))
+                query_account_key.assert_called_with(mock.ANY, expected)
+
     def _create_namespace(self, **kwargs):
         ns = Namespace(account_name=None, account_url=None, account_key=None, sas_token=None,
                        connection_string=None)
@@ -538,6 +580,17 @@ class TestGetSourceClientValidator(unittest.TestCase):
         self.assertEqual(ns.source_share, 'share2')
         self.assertIsNotNone(ns.source_client)
         self.assertEqual(ns.source_client.account_name, 'othername')
+
+    def test_validate_invalid_source_account_name_before_key_lookup(self):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        name = 'https://src.blob.core.windows.net/?sig=topsecret'
+        ns = self._create_namespace(source_account_name=name, source_container='container2',
+                                    destination_container='container1')
+        with mock.patch('azure.cli.command_modules.storage._validators._query_account_key') as query_account_key, \
+                self.assertRaisesRegex(InvalidArgumentValueError, 'Invalid source storage account name') as ctx:
+            get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
+        query_account_key.assert_not_called()
+        self.assertNotIn('topsecret', str(ctx.exception))
 
     def test_validate_negatives(self):
         # bad argument combinations
