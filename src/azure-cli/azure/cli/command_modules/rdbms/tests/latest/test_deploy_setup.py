@@ -5,6 +5,7 @@
 
 import hashlib
 import json
+import ntpath
 import os
 import subprocess
 import sys
@@ -302,12 +303,16 @@ class WindowsDeploymentResolverTest(unittest.TestCase):
         os.chmod(self.executable, 0o755)
 
     def test_windows_launches_use_safe_executable_for_stdin_and_normal_commands(self):
-        executable = self.executable
+        executable = r'C:\installed tools\gh.exe'
         for module in (postgresql, rdbms):
             for input_data in (None, b''):
                 with self.subTest(module=module.__name__, input_data=input_data), \
                         patch.object(sys, 'platform', 'win32'), \
                         patch.object(postgresql, 'is_windows', return_value=True), \
+                        patch.object(module.os, 'path', ntpath), \
+                        patch.object(ntpath, 'isfile', return_value=True), \
+                        patch.object(ntpath, 'samefile', return_value=False), \
+                        patch.object(module.os, 'access', return_value=True), \
                         patch.object(module, 'get_safe_executable_path', return_value=executable) as resolve, \
                         patch.object(module.subprocess, 'run', return_value=Mock(returncode=0)) as run, \
                         patch.object(module.subprocess, 'Popen', return_value=Mock(returncode=0)) as popen:
