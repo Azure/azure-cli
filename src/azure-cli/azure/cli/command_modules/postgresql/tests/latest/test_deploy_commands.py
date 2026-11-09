@@ -47,24 +47,25 @@ class DeploymentRunnerTest(unittest.TestCase):
 
                 expected = [executable, *original[1:]]
                 if stdout_show:
-                    popen.assert_called_once_with(expected)
+                    popen.assert_called_once_with(expected, shell=False)
                 else:
-                    popen.assert_called_once_with(expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    popen.assert_called_once_with(
+                        expected, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
                 process.wait.assert_called_once_with()
                 self.assertEqual(arguments, original)
 
-    def test_unix_and_explicit_paths_keep_existing_lookup(self):
-        with mock.patch.object(util.sys, 'platform', 'linux'), \
+    def test_unix_lookup_uses_which_for_names_and_explicit_paths(self):
+        executable = os.path.abspath(os.path.join('installed tools', 'gh'))
+        with mock.patch.object(util, 'is_windows', return_value=False), \
+                mock.patch('shutil.which', return_value=executable) as which, \
                 mock.patch.object(util, 'get_safe_executable_path') as find:
-            self.assertEqual(util.resolve_executable('gh'), 'gh')
-        find.assert_not_called()
-
-        with mock.patch.object(util.sys, 'platform', 'win32'), \
-                mock.patch.object(util, 'get_safe_executable_path') as find:
-            for executable in (os.path.abspath(os.path.join('installed tools', 'gh.exe')),
-                               os.path.join('.', 'gh.exe'), os.path.join('tools', 'gh.exe')):
-                with self.subTest(executable=executable):
-                    self.assertEqual(util.resolve_executable(executable), executable)
+            for argument in ('gh', executable, os.path.join('.', 'gh'), os.path.join('tools', 'gh')):
+                with self.subTest(argument=argument):
+                    self.assertEqual(util.resolve_executable(argument), executable)
+                    which.assert_called_with(argument)
+            which.return_value = None
+            with self.assertRaises(FileNotFoundError):
+                util.resolve_executable('gh')
         find.assert_not_called()
 
 
@@ -75,6 +76,7 @@ class DeploymentSecretsTest(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.project = temporary.name
         self.executable = os.path.join(self.project, 'installed tools', 'gh.exe')
+        self.git_executable = os.path.join(self.project, 'installed tools', 'git.exe')
         self.workflow = self.project + util.GITHUB_ACTION_PATH + 'deploy database.yml'
         server = SimpleNamespace(
             id='/subscriptions/test-subscription/resourceGroups/test-rg/'
@@ -99,7 +101,8 @@ class DeploymentSecretsTest(unittest.TestCase):
         self.upload = mock.Mock(return_value=subprocess.CompletedProcess([], 0, stdout=b'', stderr=b''))
         self.git = mock.Mock()
         patches = (
-            (deploy, 'gitcli_check_and_login', mock.Mock()),
+            (deploy, 'gitcli_check_and_login', mock.Mock(return_value=self.executable)),
+            (deploy, 'resolve_executable', mock.Mock(return_value=self.git_executable)),
             (deploy, 'get_git_root_dir', mock.Mock(return_value=self.project)),
             (deploy, 'run_subprocess', self.git),
             (util, 'get_git_root_dir', mock.Mock(return_value=self.project)),
@@ -133,9 +136,9 @@ class DeploymentSecretsTest(unittest.TestCase):
         self.assertEqual(json.loads(self.upload.call_args.kwargs['input']), self.credentials)
         self.files.assert_any_call(self.workflow, 'w', encoding='utf8')
         self.assertEqual(self.git.call_args_list, [
-            mock.call(['git', 'add', self.workflow]),
-            mock.call(['git', 'commit', '-m', 'Add github action file']),
-            mock.call(['git', 'push', 'origin', 'feature/database']),
+            mock.call([self.git_executable, 'add', self.workflow]),
+            mock.call([self.git_executable, 'commit', '-m', 'Add github action file']),
+            mock.call([self.git_executable, 'push', 'origin', 'feature/database']),
         ])
 
     def test_setup_stops_after_credential_upload_failure(self):
@@ -159,6 +162,9 @@ class DeploymentSecretsTest(unittest.TestCase):
 class WindowsDeploymentToolsTest(unittest.TestCase):
 
     def setUp(self):
+        platform = mock.patch.object(util, 'is_windows', return_value=True)
+        platform.start()
+        self.addCleanup(platform.stop)
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.project = os.path.join(temporary.name, 'project with spaces')
@@ -196,7 +202,7 @@ class WindowsDeploymentToolsTest(unittest.TestCase):
         ])
         popen.assert_called_once_with(
             [self.gh, 'workflow', 'run', 'deploy database.yml', '--ref', 'feature/database'],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
 
     def test_setup_resolves_git_and_preserves_paths(self):
         client = mock.Mock()
@@ -217,13 +223,14 @@ class WindowsDeploymentToolsTest(unittest.TestCase):
 
                 action_path = self.project + util.GITHUB_ACTION_PATH + 'deploy database.yml'
                 expected = [
-                    mock.call([self.git, 'add', action_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE),
+                    mock.call([self.git, 'add', action_path],
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False),
                     mock.call([self.git, 'commit', '-m', 'Add github action file'],
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE),
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False),
                 ]
                 if allow_push:
                     expected.append(mock.call([self.git, 'push', 'origin', 'feature/database'],
-                                              stdout=subprocess.PIPE, stderr=subprocess.PIPE))
+                                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False))
                 self.assertEqual(popen.call_args_list, expected)
 
     def test_interactive_login_uses_resolved_tool(self):
@@ -232,7 +239,7 @@ class WindowsDeploymentToolsTest(unittest.TestCase):
                 mock.patch.object(util.subprocess, 'Popen',
                                   return_value=mock.MagicMock(returncode=0)) as popen:
             deploy.gitcli_check_and_login()
-        popen.assert_called_once_with([self.gh, 'auth', 'login'])
+        popen.assert_called_once_with([self.gh, 'auth', 'login'], shell=False)
 
     def test_git_root_and_secret_queries_use_resolved_tools(self):
         completed = subprocess.CompletedProcess([], 0, stdout=self.project.encode('utf8'))
