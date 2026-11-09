@@ -610,6 +610,41 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4
         self.assertNotEqual(pos1, -1)
         self.assertLess(pos0, pos1)
 
+    def test_non_numeric_array_paths_keep_service_order(self):
+        """Non-numeric array-item paths keep service order instead of being reordered by change type."""
+        changes = [
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/Microsoft.Web/sites/site1",
+                change_type=ChangeType.modify,
+                delta=[
+                    WhatIfPropertyChange(
+                        path="properties.items",
+                        property_change_type=PropertyChangeType.array,
+                        children=[
+                            WhatIfPropertyChange(
+                                path="foo",
+                                property_change_type=PropertyChangeType.create,
+                                after="a",
+                            ),
+                            WhatIfPropertyChange(
+                                path="properties.logs",
+                                property_change_type=PropertyChangeType.delete,
+                                before="b",
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ]
+
+        result = format_what_if_operation_result(WhatIfOperationResult(changes=changes), False)
+
+        pos_foo = result.find("foo")
+        pos_logs = result.find("properties.logs")
+        self.assertNotEqual(pos_foo, -1)
+        self.assertNotEqual(pos_logs, -1)
+        self.assertLess(pos_foo, pos_logs)
+
     def test_diagnostics(self):
         changes = [
             WhatIfChange(

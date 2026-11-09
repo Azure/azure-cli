@@ -450,6 +450,18 @@ def _parse_array_item_path(path):
         return (float('inf'), text)
 
 
+def _array_item_sort_key(property_change):
+    """Sort array-item changes by numeric index, then by change type.
+
+    Non-numeric paths share a constant key, so the stable sort keeps them in
+    service order after the numeric items.
+    """
+    index, _ = _parse_array_item_path(property_change.path)
+    if index == float('inf'):
+        return (index, 0)
+    return (index, _property_change_type_to_weight[property_change.property_change_type])
+
+
 def _format_property_array_change(builder, parent_property_change, property_changes, indent_level):
     if not parent_property_change.path:
         # The parent change doesn't have a path, which means the current
@@ -467,7 +479,7 @@ def _format_property_array_change(builder, parent_property_change, property_chan
 
     _format_property_changes(
         builder,
-        sorted(property_changes, key=lambda x: (_parse_array_item_path(x.path)[0], _property_change_type_to_weight[x.property_change_type])),
+        sorted(property_changes, key=_array_item_sort_key),
         indent_level,
     )
 
