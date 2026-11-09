@@ -5,7 +5,7 @@
 from knack.log import get_logger
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import (UnrecognizedArgumentError, MutuallyExclusiveArgumentError,
-                                       RequiredArgumentMissingError)
+                                       RequiredArgumentMissingError, InvalidArgumentValueError)
 from .aaz.latest.search.service import Create as _SearchServiceCreate, Update as _SearchServiceUpdate
 
 logger = get_logger(__name__)
@@ -17,6 +17,23 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     # pylint: disable=no-member
     return client.resource_groups.get(resource_group_name).location
+
+
+def _add_deprecated_service_level_encryption_key(args_schema):
+    from azure.cli.core.aaz import AAZFreeFormDictArg
+    # Kept so scripts written for the 2026-03-01-preview CLI still parse; the property is absent from 2026-11-01.
+    args_schema.encryption_with_cmk.service_level_encryption_key = AAZFreeFormDictArg(
+        options=["service-level-encryption-key"],
+        help="[Deprecated] Not supported in api-version 2026-11-01 and fails if specified.",
+    )
+
+
+def _validate_service_level_encryption_key_unused(args):
+    from azure.cli.core.aaz import has_value
+    if has_value(args.encryption_with_cmk) and has_value(args.encryption_with_cmk.service_level_encryption_key):
+        raise InvalidArgumentValueError(
+            "--encryption-with-cmk service-level-encryption-key is not supported in api-version 2026-11-01. "
+            "Remove it, or use azure-cli 2.92 or earlier (api-version 2026-03-01-preview).")
 
 
 class SearchServiceCreate(_SearchServiceCreate):
@@ -40,6 +57,7 @@ class SearchServiceCreate(_SearchServiceCreate):
             enum=["aadOrApiKey", "apiKeyOnly"],
         )
 
+        _add_deprecated_service_level_encryption_key(args_schema)
         args_schema.ip_rules_internal._registered = False
         args_schema.api_key_only._registered = False
 
@@ -52,6 +70,7 @@ class SearchServiceCreate(_SearchServiceCreate):
         from azure.cli.core.aaz import has_value
         import re
         args = self.ctx.args
+        _validate_service_level_encryption_key_unused(args)
 
         if args.hosting_mode == "highDensity" and args.sku != "standard3":
             raise UnrecognizedArgumentError(
@@ -100,6 +119,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
             help="Some Help",
             enum=["aadOrApiKey", "apiKeyOnly"],
         )
+        _add_deprecated_service_level_encryption_key(args_schema)
         args_schema.ip_rules_internal._registered = False
         args_schema.api_key_only._registered = False
 
@@ -109,6 +129,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
         from azure.cli.core.aaz import has_value
         import re
         args = self.ctx.args
+        _validate_service_level_encryption_key_unused(args)
 
         if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialized_data() is True:
             if has_value(args.auth_options):
