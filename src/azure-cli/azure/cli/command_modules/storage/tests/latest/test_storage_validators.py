@@ -325,6 +325,71 @@ class TestCopySourceAccountNameValidation(unittest.TestCase):
                         'https://{}.blob.{}/src/input'.format(account, self.cli.cloud.suffixes.storage_endpoint)))
 
 
+@mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+class TestUnrecognizedStorageUrlValidation(unittest.TestCase):
+    URLS = ('http://127.0.0.1:10000/devstoreaccount1/c?sig=topsecret',
+            'https://acct.privatelink.blob.core.windows.net/c?sig=topsecret',
+            'https://acct.z22.blob.storage.azure.net/c?sig=topsecret',
+            'https://evil.example\\.file.core.windows.net/c?sig=topsecret',
+            'https://acct.blob.core.windows.net./c?sig=topsecret')
+
+    def setUp(self):
+        self.cli = MockCLI()
+
+    def _assert_rejected(self, validator, ns, arg_name):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaisesRegex(InvalidArgumentValueError,
+                                    'The {} URL is not a recognized Azure Storage'.format(arg_name)) as ctx:
+            validator(MockCmd(self.cli), ns)
+        self.assertNotIn('topsecret', str(ctx.exception))
+        self.assertNotIn('topsecret', str(ctx.exception.recommendations))
+        self.assertIn(self.cli.cloud.suffixes.storage_endpoint, str(ctx.exception.recommendations))
+
+    def test_blob_batch_container_url(self, validate_client):
+        from azure.cli.command_modules.storage._validators import _process_blob_batch_container_parameters
+        for url in self.URLS:
+            with self.subTest(url=url):
+                self._assert_rejected(_process_blob_batch_container_parameters,
+                                      Namespace(source=url, account_name=None, sas_token=None), '--source')
+                self._assert_rejected(
+                    lambda cmd, ns: _process_blob_batch_container_parameters(cmd, ns, source=False),
+                    Namespace(destination=url, account_name=None, sas_token=None), '--destination')
+        validate_client.assert_not_called()
+
+    def test_file_batch_urls(self, _):
+        import tempfile
+        from azure.cli.command_modules.storage._validators import (process_file_batch_source_parameters,
+                                                                   process_file_upload_batch_parameters)
+        with tempfile.TemporaryDirectory() as source_dir:
+            for url in self.URLS:
+                with self.subTest(url=url):
+                    self._assert_rejected(process_file_batch_source_parameters,
+                                          Namespace(source=url, account_name=None), '--source')
+                    self._assert_rejected(process_file_upload_batch_parameters,
+                                          Namespace(source=source_dir, destination=url, account_name=None),
+                                          '--destination')
+
+    def test_copy_source_uri(self, _):
+        for url in self.URLS:
+            with self.subTest(url=url):
+                ns = Namespace(account_name='storagename', account_key='key', connection_string=None, sas_token=None,
+                               source_account_key=None, source_account_name=None, source_container=None,
+                               source_sas=None, source_share=None, source_uri=url, destination_container='c',
+                               destination_share=None)
+                self._assert_rejected(get_source_file_or_blob_service_client_track2, ns, '--source-uri')
+
+    def test_recognized_urls_and_names_still_accepted(self, _):
+        from azure.cli.command_modules.storage._validators import (_process_blob_batch_container_parameters,
+                                                                   process_file_batch_source_parameters)
+        ns = Namespace(source='https://MyAcct.blob.core.windows.net/c?sig=s', account_name=None, sas_token=None)
+        _process_blob_batch_container_parameters(MockCmd(self.cli), ns)
+        self.assertEqual((ns.account_name, ns.source_container_name, ns.sas_token), ('MyAcct', 'c', 'sig=s'))
+
+        ns = Namespace(source='myshare', account_name=None)
+        process_file_batch_source_parameters(MockCmd(self.cli), ns)
+        self.assertEqual((ns.account_name, ns.share_name), (None, 'myshare'))
+
+
 class TestClientParametersValidator(unittest.TestCase):
     def setUp(self):
         self.cli = MockCLI()

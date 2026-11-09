@@ -48,6 +48,19 @@ def _is_valid_storage_account_name(account_name):
     return bool(account_name and re.fullmatch(r'[a-z0-9]{3,24}', account_name))
 
 
+def _validate_storage_url_recognized(cmd, identifier, arg_name, service, resource, path, endpoint_option):
+    """Reject URLs that are not account endpoint URLs for the active cloud, instead of guessing the account."""
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if identifier.is_url() and identifier.account_name is None:
+        # the URL is not echoed, since it may contain a SAS token
+        raise InvalidArgumentValueError(
+            'The {} URL is not a recognized Azure Storage {} URL for the current cloud.'.format(arg_name, resource),
+            recommendation='Use a URL of the form https://<account>.{}.{}/{}, or pass the {} name and specify '
+                           'the endpoint with --connection-string or {}.'.format(
+                               service, cmd.cli_ctx.cloud.suffixes.storage_endpoint, path, resource,
+                               endpoint_option))
+
+
 def _validate_source_account_name(account_name):
     """Ensure a source account name cannot change the host of the copy source URL built from it."""
     from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -1006,6 +1019,8 @@ def get_source_file_or_blob_service_client_track2(cmd, namespace):
         nor_container_or_share = not identifier.container and not identifier.share
         if not identifier.is_url():
             raise ValueError('incorrect usage: --source-uri expects a URI')
+        _validate_storage_url_recognized(cmd, identifier, '--source-uri', '<blob|file>', 'container or file share',
+                                         '<container|share>', '--blob-endpoint/--file-endpoint')
         if identifier.blob or identifier.directory or identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
 
@@ -1171,6 +1186,8 @@ def _process_blob_batch_container_parameters(cmd, namespace, source=True):
     from .storage_url_helpers import StorageResourceIdentifier
     container_arg_val = getattr(namespace, container_arg)  # either a url or name
     identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, container_arg_val)
+    _validate_storage_url_recognized(cmd, identifier, '--' + container_arg, 'blob', 'container', '<container>',
+                                     '--blob-endpoint')
 
     if not identifier.is_url():
         setattr(namespace, container_name_arg, container_arg_val)
@@ -1204,6 +1221,8 @@ def process_file_upload_batch_parameters(cmd, namespace):
     # 2. try to extract account name and container name from destination string
     from .storage_url_helpers import StorageResourceIdentifier
     identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.destination)
+    _validate_storage_url_recognized(cmd, identifier, '--destination', 'file', 'file share', '<share>',
+                                     '--file-endpoint')
     if identifier.is_url():
         if identifier.filename or identifier.directory:
             raise ValueError('incorrect usage: destination must be a file share url')
@@ -1232,6 +1251,7 @@ def process_file_download_batch_parameters(cmd, namespace):
 def process_file_batch_source_parameters(cmd, namespace):
     from .storage_url_helpers import StorageResourceIdentifier
     identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.source)
+    _validate_storage_url_recognized(cmd, identifier, '--source', 'file', 'file share', '<share>', '--file-endpoint')
     if identifier.is_url():
         if identifier.filename or identifier.directory:
             raise ValueError('incorrect usage: source should be either share URL or name')
