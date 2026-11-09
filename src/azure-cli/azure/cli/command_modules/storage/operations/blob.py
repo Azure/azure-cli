@@ -1181,10 +1181,10 @@ def incremental_copy_start(client, cmd, copy_source=None, metadata=None,
 
     # The SDK derives account_name from the endpoint host without validating it, and the request below rebuilds the
     # host from it (unescaped) and authenticates with the logged-in account, so it must be a single hostname label.
+    # The endpoint is deliberately not echoed, as it may contain credentials (userinfo or a SAS).
     if not is_valid_hostname_label(client.account_name):
         raise InvalidArgumentValueError(
-            'Cannot determine a valid storage account name from the blob endpoint host "{}".'
-            .format(client.primary_hostname),
+            'Cannot determine a valid storage account name from the configured blob endpoint.',
             recommendation='Use --account-name, or a connection string or endpoint of the form '
                            'https://<account>.blob.<storage-endpoint-suffix>.')
 

@@ -31,12 +31,16 @@ class TestStorageBlobIncrementalCopy(unittest.TestCase):
                                            copy_source='https://src.blob.core.windows.net/c/b?snapshot=1')
                 start.assert_not_called()
 
-    def test_error_does_not_include_sas_token(self):
-        client = BlobClient('https://evil.example\\x.blob.core.windows.net', container_name='container',
-                            blob_name='blob', credential='sig=secret')
-        with mock.patch(START), self.assertRaises(InvalidArgumentValueError) as ctx:
-            incremental_copy_start(client, mock.Mock(), copy_source='https://src.blob.core.windows.net/c/b')
-        self.assertNotIn('secret', str(ctx.exception))
+    def test_error_does_not_include_credentials(self):
+        for account_url, credential in (('https://evil.example\\x.blob.core.windows.net', 'sig=secret'),
+                                        ('https://user:secret@myaccount.blob.core.windows.net', None)):
+            with self.subTest(account_url=account_url):
+                client = BlobClient(account_url, container_name='container', blob_name='blob', credential=credential)
+                with mock.patch(START) as start, self.assertRaises(InvalidArgumentValueError) as ctx:
+                    incremental_copy_start(client, mock.Mock(), copy_source='https://src.blob.core.windows.net/c/b')
+                start.assert_not_called()
+                self.assertNotIn('secret', str(ctx.exception))
+                self.assertNotIn('secret', str(ctx.exception.recommendations))
 
     def test_passes_valid_account_name_to_request(self):
         for account_url, account_name in (('https://myaccount.blob.core.windows.net', 'myaccount'),
