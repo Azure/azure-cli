@@ -77,6 +77,7 @@ fi
 
 ##############################################
 # build test packages
+# Include fixtures read relative to installed test modules, including PowerShell scripts.
 title 'Build Azure CLI tests package'
 
 for test_src in $(find src/azure-cli/azure/cli/command_modules -name tests -type d); do
@@ -161,6 +162,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '*.md',
                        '*.pem',
                        '*.pfx',
+                       '*.ps1',
                        '*.sql',
                        '*.txt',
                        '*.txt',
@@ -179,6 +181,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '**/*.md',
                        '**/*.pem',
                        '**/*.pfx',
+                       '**/*.ps1',
                        '**/*.sql',
                        '**/*.txt',
                        '**/*.txt',
