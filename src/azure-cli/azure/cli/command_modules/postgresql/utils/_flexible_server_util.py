@@ -13,12 +13,11 @@ import random
 import subprocess
 import secrets
 import string
-import sys
 import yaml
 from knack.log import get_logger
 from knack.prompting import prompt_y_n, NoTTYException
 from azure.mgmt.core.tools import parse_resource_id
-from azure.cli.core.util import CLIError, get_safe_executable_path, run_cmd as core_run_cmd
+from azure.cli.core.util import CLIError, get_safe_executable_path, is_windows, run_cmd as core_run_cmd
 from azure.cli.core.azclierror import AuthenticationError, ClientRequestError
 from azure.core.exceptions import HttpResponseError
 from azure.core.paging import ItemPaged
@@ -256,14 +255,27 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
 
 
 def resolve_executable(executable):
-    """Bind Windows tool launches to installed executables without changing Unix lookup."""
-    if sys.platform != 'win32' or os.path.dirname(executable):
-        return executable
-    name = executable if os.path.splitext(executable)[1] else executable + '.exe'
-    resolved = get_safe_executable_path(name)
-    if resolved is None:
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), executable)
-    return resolved
+    """Resolve deployment tools to absolute native executable paths on Windows."""
+    import shutil
+
+    if not is_windows():
+        resolved = shutil.which(executable)
+        if resolved:
+            return os.path.abspath(resolved)
+    else:
+        explicit = bool(os.path.dirname(executable))
+        name = executable if os.path.splitext(executable)[1] else executable + '.exe'
+        resolved = executable if explicit else get_safe_executable_path(name)
+        if resolved:
+            drive, tail = os.path.splitdrive(resolved)
+            if (drive and tail.startswith(('\\', '/')) and
+                    os.path.splitext(resolved)[1].lower() in ('.exe', '.com') and
+                    os.path.isfile(resolved) and os.access(resolved, os.X_OK)):
+                # A PATH entry may contain a link back into the working directory.
+                if explicit or not os.path.samefile(os.path.dirname(os.path.realpath(resolved)), os.getcwd()):
+                    return os.path.abspath(resolved)
+
+    raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), executable)
 
 
 def run_cmd(args, **kwargs):
@@ -282,15 +294,16 @@ def run_subprocess(command, stdout_show=None, input_data=None):
             raise ClientRequestError("Command '{}' failed with exit code {}.".format(commands[0], process.returncode))
         return
     if stdout_show:
-        process = subprocess.Popen(commands)
+        process = subprocess.Popen(commands, shell=False)
     else:
-        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
     process.wait()
     if process.returncode:
         logger.warning(process.stderr.read().strip().decode('UTF-8'))
 
 
-def register_credential_secrets(cmd, database_engine, server, repository):
+def register_credential_secrets(cmd, database_engine, server, repository, gh_path=None):
+    gh_path = resolve_executable(gh_path or "gh")
     logger.warning('Adding secret "AZURE_CREDENTIALS" to github repository')
     resource_group = parse_resource_id(server.id)["resource_group"]
     provider = "DBforPostgreSQL"
@@ -302,24 +315,26 @@ def register_credential_secrets(cmd, database_engine, server, repository):
     app.pop('displayName')
     app.pop('name')
 
-    run_subprocess(['gh', 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository],
+    run_subprocess([gh_path, 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository],
                    input_data=json.dumps(app).encode('utf-8'))
 
 
-def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name):
+def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name, gh_path=None):
+    gh_path = resolve_executable(gh_path or "gh")
     connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-    run_subprocess(['gh', 'secret', 'set', connection_string_name, '--repo', repository],
+    run_subprocess([gh_path, 'secret', 'set', connection_string_name, '--repo', repository],
                    input_data=connection_string.encode('utf-8'))
     logger.warning("Added secret %s to github repository", connection_string_name)
 
 
-def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):
+def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository, gh_path=None, git_path=None):
 
-    action_dir = get_git_root_dir() + GITHUB_ACTION_PATH
+    gh_path = resolve_executable(gh_path or "gh")
+    action_dir = get_git_root_dir(git_path) + GITHUB_ACTION_PATH
     if not os.path.exists(action_dir):
         os.makedirs(action_dir)
 
-    process = run_cmd(["gh", "secret", "list", "--repo", repository], capture_output=True)
+    process = run_cmd([gh_path, "secret", "list", "--repo", repository], capture_output=True)
     github_secrets = process.stdout.strip().decode('UTF-8')
     # connection_string = AZURE_POSTGRESQL_CONNECTION_STRING
 
@@ -328,7 +343,8 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
             register_credential_secrets(cmd,
                                         database_engine=database_engine,
                                         server=server,
-                                        repository=repository)
+                                        repository=repository,
+                                        gh_path=gh_path)
         except HttpResponseError:
             raise AuthenticationError('You do not have authorization to create a service principal to run azure service in github actions. \n'
                                       'Please create a service principal that has access to the database server and add "AZURE_CREDENTIALS" secret to your github repository. \n'
@@ -343,7 +359,8 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
                                     administrator_login=administrator_login,
                                     administrator_login_password=administrator_login_password,
                                     repository=repository,
-                                    connection_string_name=connection_string_name)
+                                    connection_string_name=connection_string_name,
+                                    gh_path=gh_path)
 
     current_location = os.path.dirname(__file__)
 
@@ -360,8 +377,8 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
             yml_file.write(yaml.dump(template))
 
 
-def get_git_root_dir():
-    process = run_cmd(["git", "rev-parse", "--show-toplevel"], capture_output=True)
+def get_git_root_dir(git_path=None):
+    process = run_cmd([resolve_executable(git_path or "git"), "rev-parse", "--show-toplevel"], capture_output=True)
     return process.stdout.strip().decode('UTF-8')
 
 

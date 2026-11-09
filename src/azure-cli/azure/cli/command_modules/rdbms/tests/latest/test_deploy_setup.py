@@ -8,6 +8,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -31,6 +32,9 @@ class DeploySetupTest(unittest.TestCase):
             resolver = patch.object(module, 'resolve_executable', side_effect=lambda executable: executable)
             resolver.start()
             self.addCleanup(resolver.stop)
+        resolver = patch.object(postgresql_commands, 'resolve_executable', side_effect=lambda executable: executable)
+        resolver.start()
+        self.addCleanup(resolver.stop)
         self.cmd = SimpleNamespace(cli_ctx=object())
         self.server = SimpleNamespace(
             id='/subscriptions/test-sub/resourceGroups/test-rg/'
@@ -229,6 +233,8 @@ class DeploySetupTest(unittest.TestCase):
                     command = ['git', 'status']
                     module.run_subprocess(command, stdout_show=show_output)
                     kwargs = {} if show_output else dict(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if module is postgresql:
+                        kwargs['shell'] = False
                     popen.assert_called_once_with(['git', 'status'], **kwargs)
                     popen.return_value.wait.assert_called_once_with()
                     run.assert_not_called()
@@ -249,7 +255,7 @@ class DeploySetupTest(unittest.TestCase):
         branch = 'feature "quoted" --ref other-branch'
         for commands in (mysql_commands, postgresql_commands, rdbms_commands):
             with self.subTest(module=commands.__name__), \
-                    patch.object(commands, 'gitcli_check_and_login'), \
+                    patch.object(commands, 'gitcli_check_and_login', return_value='gh'), \
                     patch.object(commands, 'run_subprocess') as run:
                 commands.github_actions_run(action, branch)
                 run.assert_called_once_with(['gh', 'workflow', 'run', action + '.yml', '--ref', branch])
@@ -287,12 +293,21 @@ class DeploySetupTest(unittest.TestCase):
 
 class WindowsDeploymentResolverTest(unittest.TestCase):
 
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix='installed tools ')
+        self.addCleanup(temporary.cleanup)
+        self.executable = os.path.join(temporary.name, 'gh.exe')
+        with open(self.executable, 'w'):
+            pass
+        os.chmod(self.executable, 0o755)
+
     def test_windows_launches_use_safe_executable_for_stdin_and_normal_commands(self):
-        executable = os.path.abspath(os.path.join('installed tools', 'gh.exe'))
+        executable = self.executable
         for module in (postgresql, rdbms):
             for input_data in (None, b''):
                 with self.subTest(module=module.__name__, input_data=input_data), \
-                        patch.object(module.sys, 'platform', 'win32'), \
+                        patch.object(sys, 'platform', 'win32'), \
+                        patch.object(postgresql, 'is_windows', return_value=True), \
                         patch.object(module, 'get_safe_executable_path', return_value=executable) as resolve, \
                         patch.object(module.subprocess, 'run', return_value=Mock(returncode=0)) as run, \
                         patch.object(module.subprocess, 'Popen', return_value=Mock(returncode=0)) as popen:
@@ -301,8 +316,11 @@ class WindowsDeploymentResolverTest(unittest.TestCase):
                     module.run_subprocess(command, input_data=input_data)
                     resolve.assert_called_once_with('gh.exe')
                     if input_data is None:
+                        kwargs = dict(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        if module is postgresql:
+                            kwargs['shell'] = False
                         popen.assert_called_once_with(
-                            [executable] + original[1:], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                            [executable] + original[1:], **kwargs)
                         run.assert_not_called()
                     else:
                         run.assert_called_once_with(
@@ -314,7 +332,8 @@ class WindowsDeploymentResolverTest(unittest.TestCase):
     def test_missing_windows_tool_never_launches_bare_name(self):
         for module in (postgresql, rdbms):
             with self.subTest(module=module.__name__), \
-                    patch.object(module.sys, 'platform', 'win32'), \
+                    patch.object(sys, 'platform', 'win32'), \
+                    patch.object(postgresql, 'is_windows', return_value=True), \
                     patch.object(module, 'get_safe_executable_path', return_value=None), \
                     patch.object(module.subprocess, 'run') as run, \
                     patch.object(module.subprocess, 'Popen') as popen:
@@ -328,10 +347,11 @@ class WindowsDeploymentResolverTest(unittest.TestCase):
                 popen.assert_not_called()
 
     def test_login_queries_use_resolved_executable(self):
-        executable = os.path.abspath(os.path.join('installed tools', 'gh.exe'))
+        executable = self.executable
         for commands, module in ((postgresql_commands, postgresql), (rdbms_commands, rdbms)):
             with self.subTest(module=commands.__name__), \
                     patch.object(module, 'resolve_executable', return_value=executable), \
+                    patch.object(postgresql_commands, 'resolve_executable', return_value=executable), \
                     patch.object(module, 'core_run_cmd', return_value=Mock(returncode=0)) as run:
                 commands.gitcli_check_and_login()
                 self.assertEqual(run.call_args_list, [
