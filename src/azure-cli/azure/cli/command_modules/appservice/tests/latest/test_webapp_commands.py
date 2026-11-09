@@ -146,6 +146,8 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].os != `null`', True),
             JMESPathCheck('[0].runtime != `null`', True),
             JMESPathCheck('[0].config != `null`', True),
+            JMESPathCheck("length([?contains(config, '|')])", 0),
+            JMESPathCheck("length([?contains(config, ':')]) == length(@)", True),
             JMESPathCheck('[0].support != `null`', True),
         ])
         # Validate OS filter
@@ -3648,6 +3650,7 @@ class WebappEnrichedErrorsScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_enriched', location='westus2')
+    @unittest.skip("az webapp up is no longer supported; deployment scenarios are retired.")
     def test_webapp_up_enriched_errors_flag_accepted(self, resource_group):
         """Verify --enriched-errors flag is accepted by az webapp up with 409 conflict."""
         from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError

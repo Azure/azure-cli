@@ -23,9 +23,11 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.commands import _is_paged
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
+    protection_container_refresh_operation_statuses_cf,
     backup_operation_statuses_cf, protection_container_operation_results_cf,
     backup_crr_job_details_cf, crr_operation_status_cf, resource_guard_proxies_cf, resource_guard_proxy_cf)
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, InvalidArgumentValueError
+from azure.cli.core.azclierror import (
+    ResourceNotFoundError, ValidationError, InvalidArgumentValueError, AzureResponseError)
 
 import azure.cli.command_modules.backup._params as params
 
@@ -68,7 +70,7 @@ def is_id(identity):
 
 
 def is_sql(resource_type):
-    return resource_type.lower() == 'sqldatabase'
+    return resource_type.lower() in ('sqldatabase', 'sqlinstance')
 
 
 def is_hana(resource_type):
@@ -409,6 +411,8 @@ def get_model_property(model, attribute_name, wire_name):
     value = getattr(model, attribute_name, None)
     if value is None and hasattr(model, 'get'):
         value = model.get(wire_name)
+    if value is None:
+        value = getattr(model, 'additional_properties', {}).get(wire_name)
     return value
 
 
@@ -494,9 +498,25 @@ def track_backup_crr_operation(cli_ctx, result, azure_region):
 
 
 def track_refresh_operation(cli_ctx, result, vault_name, resource_group):
+    location_url = result.http_response.headers.get('Location')
+    status_url = result.http_response.headers.get('Azure-AsyncOperation')
+    if not location_url and status_url:
+        client = protection_container_refresh_operation_statuses_cf(cli_ctx)
+        operation_id = get_operation_id_from_header(status_url)
+        status = client.get(resource_group, vault_name, fabric_name, operation_id)
+        while status.status == 'InProgress':
+            time.sleep(5)
+            status = client.get(resource_group, vault_name, fabric_name, operation_id)
+        if status.status != 'Succeeded':
+            message = status.error.message if status.error is not None else status.status
+            raise AzureResponseError("Container discovery failed: {}.".format(message))
+        return
+    if not location_url:
+        raise AzureResponseError(
+            "Container discovery response contains neither Location nor Azure-AsyncOperation polling headers.")
     protection_container_refresh_operation_results_client = protection_container_refresh_operation_results_cf(cli_ctx)
 
-    operation_id = get_operation_id_from_header(result.http_response.headers['Location'])
+    operation_id = get_operation_id_from_header(location_url)
     result = protection_container_refresh_operation_results_client.get(vault_name, resource_group,
                                                                        fabric_name, operation_id,
                                                                        cls=get_pipeline_response)
@@ -558,7 +578,7 @@ def get_filter_string(filter_dict):
     for k, v in sorted(filter_dict.items()):
         filter_segment = None
         if isinstance(v, str):
-            filter_segment = "{} eq '{}'".format(k, v)
+            filter_segment = "{} eq '{}'".format(k, v.replace("'", "''"))
         elif isinstance(v, datetime):
             filter_segment = "{} eq '{}'".format(k, v.strftime('%Y-%m-%d %I:%M:%S %p'))  # yyyy-MM-dd hh:mm:ss tt
         elif isinstance(v, bool):
@@ -623,7 +643,7 @@ def get_or_read_json(json_or_file):
     if is_json(json_or_file):
         json_obj = json.loads(json_or_file)
     elif os.path.exists(json_or_file):
-        with open(json_or_file) as f:
+        with open(json_or_file, encoding='utf-8-sig') as f:
             json_obj = json.load(f)
     if json_obj is None:
         raise ValidationError(

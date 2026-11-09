@@ -2,18 +2,19 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import unittest
-from unittest import mock
+import io
 import os
 import sys
 import types
+import unittest
+from unittest import mock
 from collections.abc import Mapping
 
 from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.models import Site
-from knack.output import format_table
+from knack.output import format_json, format_table, format_tsv
 from knack.util import CLIError, CommandResultItem
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
@@ -54,14 +55,20 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          _render_secure_build_table_report,
                                                          _terminal_hyperlink,
                                                          _show_secure_build_after_deployment,
-                                                         create_webapp)
-from azure.cli.command_modules.appservice.commands import (transform_troubleshoot_config_output,
-                                                            transform_secure_build_output,
-                                                            transform_troubleshoot_deployment_output,
-                                                            transform_site_output,
-                                                            transform_webapp_site_output,
-                                                            transform_web_output)
+                                                         create_webapp,
+                                                         list_runtimes,
+                                                         webapp_up,
+                                                         _StackRuntimeHelper)
+from azure.cli.command_modules.appservice.commands import (
+    transform_troubleshoot_config_output,
+    transform_secure_build_output,
+    transform_troubleshoot_deployment_output,
+    transform_site_output,
+    transform_webapp_site_output,
+    transform_web_output,
+    transform_runtime_list_output)
 from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
+from azure.cli.command_modules.appservice.utils import get_linux_runtime_list_command
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -77,6 +84,269 @@ def _get_test_cmd():
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_APPSERVICE}
     cmd.cli_ctx = cli_ctx
     return cmd
+
+
+class TestWebappRuntimeSeparators(unittest.TestCase):
+
+    @staticmethod
+    def _helper():
+        helper = _StackRuntimeHelper.__new__(_StackRuntimeHelper)
+        helper._linux = True
+        helper._windows = True
+        helper._include_eol = False
+        helper._stacks = [
+            _StackRuntimeHelper.Runtime(
+                display_name='PYTHON|3.14', linux=True, runtime_family='Python',
+                configs={'linux_fx_version': 'PYTHON|3.14'}),
+            _StackRuntimeHelper.Runtime(
+                display_name='NODE|26', linux=False, runtime_family='Node',
+                configs={'WEBSITE_NODE_DEFAULT_VERSION': '~26'}),
+        ]
+        return helper
+
+    def test_colon_and_legacy_input_normalize_to_api_format(self):
+        for runtime, expected in (
+                ('PYTHON:3.14', 'PYTHON|3.14'),
+                ('PYTHON|3.14', 'PYTHON|3.14'),
+                ('NODE:26-lts', 'NODE|26-lts'),
+                ('DOTNETCORE:10.0', 'DOTNETCORE|10.0'),
+                ('PHP:8.4', 'PHP|8.4'),
+                ('JAVA:21-java21', 'JAVA|21-java21'),
+                ('java:1.8:Java SE:8', 'java|1.8|Java SE|8'),
+                (None, None)):
+            with self.subTest(runtime=runtime):
+                self.assertEqual(_StackRuntimeHelper.remove_delimiters(runtime), expected)
+
+    def test_listing_uses_colons_in_json_table_and_tsv(self):
+        helper = self._helper()
+        with mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', return_value=helper):
+            rows = list_runtimes(mock.Mock())
+        self.assertEqual([row['config'] for row in rows], ['PYTHON:3.14', 'NODE:26'])
+        for formatter in (format_json, format_table, format_tsv):
+            with self.subTest(formatter=formatter.__name__):
+                output = formatter(CommandResultItem(rows, table_transformer=transform_runtime_list_output))
+                self.assertIn('PYTHON:3.14', output)
+                self.assertIn('NODE:26', output)
+                self.assertNotIn('|', output)
+        self.assertEqual(helper._stacks[0].configs['linux_fx_version'], 'PYTHON|3.14')
+
+    def test_runtime_listing_round_trips_to_internal_catalog(self):
+        helper = self._helper()
+        for row in helper.get_stacks_as_table():
+            with self.subTest(runtime=row['config']):
+                normalized = _StackRuntimeHelper.remove_delimiters(row['config'])
+                self.assertIsNotNone(helper.resolve(normalized, linux=row['os'] == 'Linux'))
+
+    def test_runtime_rejection_commands_use_valid_family_filters(self):
+        families = {
+            'PYTHON': 'python', 'node': 'node', 'PHP': 'php',
+            'DOTNET': 'dotnet', 'DOTNETCORE': 'dotnet', 'ASPNET': 'dotnet',
+            'JAVA': 'java', 'TOMCAT': 'java', 'JBOSSEAP': 'java',
+            'unknown': None, 'ruby': None,
+        }
+        for family, runtime_filter in families.items():
+            for delimiter in (':', '|'):
+                with self.subTest(family=family, delimiter=delimiter):
+                    expected = "az webapp list-runtimes --os-type linux"
+                    if runtime_filter:
+                        expected += " --runtime {}".format(runtime_filter)
+                    self.assertEqual(get_linux_runtime_list_command(family + delimiter + '99.99'), expected)
+        self.assertEqual(get_linux_runtime_list_command(None),
+                         'az webapp list-runtimes --os-type linux')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_configs')
+    def test_config_set_rejection_recommends_filtered_native_command(self, get_configs, _site_operation):
+        for is_linux in (True, False):
+            for delimiter in (':', '|'):
+                with self.subTest(is_linux=is_linux, delimiter=delimiter):
+                    get_configs.return_value = types.SimpleNamespace(
+                        linux_fx_version='PYTHON|3.14' if is_linux else None)
+                    with mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper',
+                                    wraps=_StackRuntimeHelper) as helper_class:
+                        helper_class.return_value = self._helper()
+                        with self.assertRaises(ValidationError) as context:
+                            update_site_configs(mock.Mock(), 'rg', 'app', runtime='PYTHON' + delimiter + '99.99')
+                    if is_linux:
+                        self.assertIn("Run 'az webapp list-runtimes --os-type linux --runtime python'",
+                                      str(context.exception))
+                        self.assertIn("PYTHON:99.99", str(context.exception))
+                    else:
+                        self.assertEqual(str(context.exception),
+                                         "Windows runtime 'PYTHON|99.99' is not supported."
+                                         "Run 'az webapp list-runtimes --os-type windows' to cross check")
+
+    def test_webapp_up_rejection_preserves_existing_guidance(self):
+        from azure.cli.command_modules.appservice import custom
+        for os_type in ('linux', 'windows'):
+            with self.subTest(os=os_type):
+                with mock.patch.multiple(custom, web_client_factory=mock.DEFAULT,
+                                         get_profile_username=mock.DEFAULT, get_site_availability=mock.DEFAULT):
+                    with mock.patch.object(custom, '_StackRuntimeHelper', wraps=_StackRuntimeHelper) as helper_class:
+                        helper_class.return_value = self._helper()
+                        with self.assertRaises(ValidationError) as context:
+                            webapp_up(_get_test_cmd(), name='app', os_type=os_type, runtime='PYTHON:99.99')
+                self.assertEqual(str(context.exception),
+                                 "{} runtime 'PYTHON|99.99' is not supported. "
+                                 "Please check supported runtimes with: "
+                                 "'az webapp list-runtimes --os {}'".format(os_type, os_type))
+
+
+class TestWebappUpRetirement(unittest.TestCase):
+
+    def setUp(self):
+        from azure.cli.core.mock import DummyCli
+        from azure.cli.command_modules.appservice import AppserviceCommandsLoader
+
+        self.cli_ctx = DummyCli()
+        self.loader = AppserviceCommandsLoader(self.cli_ctx)
+        self.command = self.loader.load_command_table(['webapp', 'up'])['webapp up']
+
+    def test_webapp_up_has_no_warning_metadata(self):
+        self.assertIsNone(self.command.deprecate_info)
+
+    def test_webapp_up_does_not_emit_native_deprecation_warning_for_both_os_types(self):
+        import io
+        from contextlib import redirect_stderr
+        from argparse import Namespace
+        from azure.cli.core.commands import AzCliCommandInvoker
+
+        self.cli_ctx.only_show_errors = False
+        invoker = AzCliCommandInvoker(self.cli_ctx)
+        invoker.commands_loader = self.loader
+        self.cli_ctx.invocation = invoker
+        for os_type in ('Windows', 'Linux'):
+            with self.subTest(os_type=os_type):
+                captured_err = io.StringIO()
+                with redirect_stderr(captured_err):
+                    invoker.resolve_warnings(self.command, Namespace(func=self.command, os_type=os_type))
+
+                self.assertEqual(captured_err.getvalue(), '')
+
+    def test_webapp_up_rejects_execution_before_clients_or_handler_are_called(self):
+        import io
+        from contextlib import redirect_stderr, redirect_stdout
+        from azure.cli.core.azclierror import logger as error_logger
+        from azure.cli.core.mock import DummyCli
+
+        argument_sets = [
+            [],
+            ['--os-type', 'Windows'],
+            ['--os-type', 'Linux'],
+            ['--os-type', 'Windows', '--dryrun'],
+            ['--os-type', 'Linux', '--dryrun'],
+            ['--dryrun'],
+            ['--html'],
+            ['--runtime', 'PYTHON:3.14'],
+            ['--runtime', 'DOTNETCORE:10.0', '--os-type', 'Windows'],
+            ['--runtime', 'DOTNETCORE:10.0', '--os-type', 'Linux'],
+            ['--runtime', 'PYTHON:3.14', '--html'],
+            ['--location', 'West US 2'],
+            ['-l', 'West US 2'],
+            ['--app-service-environment', 'MyAse', '--plan', 'MyPlan', '--sku', 'I1V2',
+             '--name', 'MyApp', '--resource-group', 'MyResourceGroup'],
+            ['--name', 'MyApp', '--resource-group', 'MyResourceGroup', '--location', 'westus2',
+             '--enriched-errors', 'false', '--domain-name-scope', 'TenantReuse'],
+            ['--logs', '--launch-browser', '--basic-auth', 'Enabled',
+             '--track-status', 'false', '--enable-kudu-warmup', 'false'],
+            ['-n', 'MyApp', '-g', 'MyResourceGroup', '-p', 'MyPlan', '-l', 'westus2',
+             '-r', 'PYTHON:3.14', '-b', '-e', 'MyAse'],
+            ['--ids', '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/MyApp'],
+            ['--ids', '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/MyApp',
+             '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/MyOtherApp', '--name', 'MyApp'],
+            ['--only-show-errors'],
+        ]
+        with (
+            mock.patch('azure.cli.command_modules.appservice.custom.webapp_up', autospec=True) as handler,
+            mock.patch('azure.cli.command_modules.appservice._validators.web_client_factory') as validator_client,
+            mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory') as handler_client,
+            mock.patch('azure.cli.core.commands.parameters.get_subscription_locations',
+                       side_effect=AssertionError('Retired commands must not look up Azure locations')) as locations,
+        ):
+            for arguments in argument_sets:
+                with self.subTest(arguments=arguments):
+                    output = io.StringIO()
+                    stderr = io.StringIO()
+                    with (
+                        redirect_stdout(output),
+                        redirect_stderr(stderr),
+                        self.assertLogs(error_logger, level='ERROR') as errors,
+                    ):
+                        exit_code = DummyCli().invoke(['webapp', 'up'] + arguments)
+
+                    self.assertEqual(exit_code, 1)
+                    self.assertEqual(output.getvalue(), '')
+                    self.assertEqual(stderr.getvalue(), '')
+                    self.assertEqual(len(errors.records), 1)
+                    self.assertEqual(
+                        errors.records[0].getMessage(),
+                        "The 'az webapp up' command is deprecated and no longer supported for Azure App Service. "
+                        "Use 'webapp create and webapp deploy' instead.")
+                    handler.assert_not_called()
+                    validator_client.assert_not_called()
+                    handler_client.assert_not_called()
+                    locations.assert_not_called()
+
+    def test_webapp_up_help_explains_deprecation_and_migration_for_both_os_types(self):
+        import io
+        from contextlib import redirect_stdout
+
+        output = io.StringIO()
+        with redirect_stdout(output), self.assertRaises(SystemExit) as exit_context:
+            self.cli_ctx.invoke(['webapp', 'up', '--help'])
+
+        self.assertEqual(exit_context.exception.code, 0)
+        rendered = ' '.join(output.getvalue().split())
+        self.assertEqual(rendered.lower().count("use 'webapp create and webapp deploy' instead."), 1)
+        self.assertNotIn('This command has been deprecated', rendered)
+        self.assertIn(
+            "The 'az webapp up' command is deprecated and no longer supported for Azure App Service. "
+            "Use 'webapp create and webapp deploy' instead.", rendered)
+        self.assertIn('Invocations exit with an error without creating or deploying resources.', rendered)
+        self.assertIn('Legacy arguments are accepted only to report this error and are hidden from help.', rendered)
+        self.assertIn('Show the retirement message. This command exits with an error.', rendered)
+        self.assertNotIn('To migrate:', rendered)
+        self.assertNotIn('Create a webapp and deploy code from a local workspace', rendered)
+        for option in (
+            '--name', '--resource-group', '--plan', '--location', '--sku', '--os-type',
+            '--runtime', '--dryrun', '--logs', '--launch-browser', '--html',
+            '--app-service-environment', '--basic-auth', '--track-status',
+            '--enable-kudu-warmup', '--enriched-errors', '--domain-name-scope', '--ids',
+        ):
+            with self.subTest(option=option):
+                self.assertNotIn(option, rendered)
+        self.assertIn('Global Arguments', rendered)
+        for option in ('--help', '--debug', '--verbose', '--output', '--only-show-errors', '--subscription'):
+            with self.subTest(option=option):
+                self.assertIn(option, rendered)
+
+    def test_webapp_up_argument_hiding_does_not_affect_replacement_commands(self):
+        import io
+        from contextlib import redirect_stdout
+        from azure.cli.core.mock import DummyCli
+
+        for command, option in (('create', '--plan'), ('deploy', '--src-path')):
+            with self.subTest(command=command):
+                output = io.StringIO()
+                with redirect_stdout(output), self.assertRaises(SystemExit) as exit_context:
+                    DummyCli().invoke(['webapp', command, '--help'])
+
+                self.assertEqual(exit_context.exception.code, 0)
+                self.assertRegex(output.getvalue(), r'(?m)^Arguments\s*$')
+                self.assertIn('--name', output.getvalue())
+                self.assertIn('--resource-group', output.getvalue())
+                self.assertIn(option, output.getvalue())
+
+    def test_webapp_up_remains_discoverable_in_group_help(self):
+        import io
+        from contextlib import redirect_stdout
+
+        output = io.StringIO()
+        with redirect_stdout(output), self.assertRaises(SystemExit) as exit_context:
+            self.cli_ctx.invoke(['webapp', '--help'])
+
+        self.assertEqual(exit_context.exception.code, 0)
+        self.assertRegex(output.getvalue(), r'\bup\s+:\s+Deprecated command')
 
 
 class TestWebappOutputTransformers(unittest.TestCase):
@@ -717,6 +987,16 @@ class TestWebappMocked(unittest.TestCase):
         with mock.patch('azure.cli.command_modules.appservice.custom._runtime_supports_github_actions', autospec=True) as m:
             add_github_actions(cmd, rg, "name", "repo", runtime, "token")
             m.assert_called_with(cmd=cmd, runtime_string="NODE|26", is_linux=is_linux)
+            m.return_value = False
+            with self.assertRaises(ValidationError) as context:
+                add_github_actions(cmd, rg, "name", "repo", runtime, "token")
+            self.assertIn("Run 'az webapp list-runtimes --os-type linux --runtime node'",
+                          str(context.exception))
+            web_client_factory_mock.return_value.app_service_plans.get.return_value.reserved = False
+            with self.assertRaises(ValidationError) as context:
+                add_github_actions(cmd, rg, "name", "repo", runtime, "token")
+            self.assertEqual(str(context.exception),
+                             "Runtime NODE|26 is not supported for GitHub Actions deployments.")
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_set_deployment_user_creds(self, client_factory_mock):
@@ -1255,7 +1535,7 @@ class TestWebappMocked(unittest.TestCase):
 
         self.assertIn('InvalidLinuxRuntime', str(context.exception))
         self.assertIn('Runtime     : PYTHON|99.99', str(context.exception))
-        self.assertIn('az webapp list-runtimes --os-type linux -o table', str(context.exception))
+        self.assertIn("az webapp list-runtimes --os-type linux --runtime python", str(context.exception))
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
@@ -1271,7 +1551,27 @@ class TestWebappMocked(unittest.TestCase):
             create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan',
                           runtime='PYTHON:99.99', enriched_errors=False)
 
-        self.assertIn("Linux Runtime 'PYTHON|99.99' is not supported", str(context.exception))
+        self.assertIn("Linux Runtime 'PYTHON:99.99' is not supported", str(context.exception))
+        self.assertIn("Run 'az webapp list-runtimes --os-type linux --runtime python'",
+                      str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_windows_webapp_create_rejection_preserves_existing_guidance(
+            self, get_site_avail_mock, stack_helper_mock, web_client_mock):
+        cmd_mock = self._configure_webapp_create_failure(
+            get_site_avail_mock, stack_helper_mock, web_client_mock, False, None)
+        stack_helper_mock.remove_delimiters.return_value = 'DOTNETCORE|99.99'
+        stack_helper_mock.return_value.resolve.return_value = None
+
+        with self.assertRaises(ValidationError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan', runtime='DOTNETCORE:99.99')
+
+        self.assertEqual(str(context.exception),
+                         "Windows runtime 'DOTNETCORE|99.99' is not supported."
+                         "Run 'az webapp list-runtimes --os-type windows' to cross check")
+        web_client_mock.return_value.web_apps.begin_create_or_update.assert_not_called()
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
@@ -1902,6 +2202,39 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('requests.get')
+    def test_troubleshoot_status_preserves_orphan_startups_in_structured_output(
+            self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
+        send_raw_request_mock.side_effect = [
+            mock.MagicMock(json=mock.MagicMock(return_value=self._instances_payload({}))),
+            mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response([]))),
+        ]
+        requests_get_mock.return_value = self._make_response(200, json_data=[
+            {'InstanceId': 'previous-f', 'Startup': {
+                'Succeeded': 0, 'Failed': 1, 'MostRecentFailure': '2026-10-09T18:00:00Z'}},
+            {'InstanceId': 'previous-a', 'Startup': {
+                'Succeeded': 1, 'Failed': 0, 'MostRecentSuccess': '2026-10-09T12:00:00Z'}},
+            {'InstanceId': 'previous-e', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+            {'InstanceId': 'previous-b', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+            {'InstanceId': 'previous-d', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+            {'InstanceId': 'previous-c', 'Startup': {'Succeeded': 1, 'Failed': 0}},
+        ])
+
+        result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
+
+        self.assertEqual(len(result['orphanStartups']), 6)
+        self.assertEqual(
+            [entry['InstanceId'] for entry in result['orphanStartups']],
+            ['previous-a', 'previous-b', 'previous-c', 'previous-d', 'previous-e', 'previous-f'])
+        self.assertEqual(
+            result['orphanStartups'][-1]['Startup']['MostRecentFailure'],
+            '2026-10-09T18:00:00Z')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('requests.get')
     def test_troubleshoot_status_single_instance(self, requests_get_mock, send_raw_request_mock,
                                                  _scm_url_mock, _headers_mock):
         arm_item = {'instanceId': '7c2d9', 'state': 'Stopped', 'action': 'SiteStopped',
@@ -1937,7 +2270,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         )
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
-                return_value={'Authorization': 'Bearer token'})
+                return_value={'Authorization': '******'})
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
@@ -2134,8 +2467,67 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         rendered_payload = render_mock.call_args.args[0]
         self.assertEqual(rendered_payload['name'], 'myApp')
         self.assertEqual(rendered_payload['instances'][0]['instanceId'], '7c2d9')
+        self.assertEqual(
+            rendered_payload['startupSummaryUrl'],
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary')
 
-    def test_transform_troubleshoot_status_output_renders_error_columns(self):
+    def test_troubleshoot_status_report_supports_legacy_windows_encodings(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'instances': [{
+                'instanceId': '7c2d9',
+                'machineName': 'lw0sdlwk0007AB',
+                'state': 'Failed',
+                'lastError': 'ContainerTimeout',
+                'startup': {'Succeeded': 1, 'Failed': 1},
+            }],
+            'orphanStartups': [{
+                'InstanceId': 'orphan',
+                'Startup': {'Succeeded': 0, 'Failed': 1},
+            }],
+        }
+
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                output = io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors='strict')
+                with mock.patch.object(report_module.sys, 'stdout', output):
+                    report_module.render_report(payload)
+                    output.flush()
+
+    def test_troubleshoot_status_report_limits_orphan_startups(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_status_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'startupSummaryUrl': 'https://myapp.scm.azurewebsites.net/api/startuplogs/summary',
+            'orphanStartups': [{
+                'InstanceId': 'orphan-{}'.format(index),
+                'Startup': {'Succeeded': 0, 'Failed': 1},
+            } for index in range(6)],
+        }
+        output = io.StringIO()
+
+        with mock.patch.object(report_module.sys, 'stdout', output):
+            report_module.render_report(payload)
+
+        rendered = output.getvalue()
+        for index in range(5):
+            self.assertIn('Instance orphan-{} Startup Summary'.format(index), rendered)
+        self.assertNotIn('Instance orphan-5 Startup Summary', rendered)
+        self.assertIn(
+            'Below startup records are from instances that no longer host the application '
+            'but occurred within the last 24 hours. Limited to 5 instances.',
+            rendered)
+        self.assertIn(
+            'To review the full 24-hour history, visit '
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary.',
+            rendered)
+
+    @mock.patch('atexit.register')
+    def test_transform_troubleshoot_status_output_renders_error_columns(self, register_mock):
         # Regression: the LastError* columns exercise _format_dt only when
         # any instance has a visible error. A missing import there surfaces
         # as knack's opaque "Table output unavailable" message.
@@ -2166,6 +2558,28 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         self.assertEqual(row['LastErrorDetails'], 'boom')
         self.assertEqual(row['Succeeded (last 24h)'], 1)
         self.assertEqual(row['Failed (last 24h)'], 2)
+
+        register_mock.assert_called_once()
+        hint_callback = register_mock.call_args.args[0]
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                buffer = io.BytesIO()
+                output = io.TextIOWrapper(buffer, encoding=encoding, errors='strict')
+                with mock.patch.object(sys, 'stderr', output):
+                    hint_callback()
+                    output.flush()
+                rendered = buffer.getvalue().decode(encoding)
+                self.assertIn('Hint:', rendered)
+                self.assertIn('az webapp log tail -n myApp -g myRG', rendered)
+                self.assertIn('az webapp log startup show -n myApp -g myRG', rendered)
+
+        register_mock.reset_mock()
+        transform_troubleshoot_status_output({
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'instances': [{'instanceId': 'healthy', 'state': 'Started'}],
+        })
+        register_mock.assert_not_called()
 
 
 class TestRuntimeFailedHintMocked(unittest.TestCase):
@@ -2387,6 +2801,71 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         mock_app_service_plan_cls.assert_called()
         call_kwargs = mock_app_service_plan_cls.call_args
         self.assertIn('reserved=False', str(call_kwargs))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_managed_instance_defaults_to_windows(self, mock_location, mock_client_factory):
+        """When --is-managed-instance is specified, an omitted --is-linux defaults to false."""
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+        from azure.mgmt.web.models import AppServicePlan, HostingEnvironmentProfile, SkuDescription
+        mock_cmd = mock.MagicMock()
+        mock_app_service_plan_cls = mock.MagicMock(wraps=AppServicePlan)
+        mock_cmd.get_models.return_value = (
+            HostingEnvironmentProfile,
+            SkuDescription,
+            mock_app_service_plan_cls,
+        )
+        mock_cmd.cli_ctx = mock.MagicMock()
+        mock_client_factory.return_value = mock.MagicMock()
+
+        mock_poller = mock.MagicMock()
+        mock_poller.result.return_value = mock.sentinel.created_plan
+
+        with mock.patch(
+            'azure.cli.command_modules.appservice.custom.AppServicePlanCreate.__init__',
+            return_value=None,
+        ), mock.patch(
+            'azure.cli.command_modules.appservice.custom.AppServicePlanCreate.__call__',
+            autospec=True,
+            return_value=mock_poller,
+        ) as mock_create, mock.patch(
+            'azure.cli.command_modules.appservice.custom.is_async_response',
+            return_value=False,
+        ):
+            result = create_app_service_plan(
+                mock_cmd, 'rg', 'plan',
+                is_linux=None, hyper_v=False, is_managed_instance=True,
+            )
+
+        mock_app_service_plan_cls.assert_called_once()
+        self.assertIs(mock_app_service_plan_cls.call_args.kwargs['reserved'], False)
+
+        mock_create.assert_called_once()
+        command_args = mock_create.call_args.kwargs['command_args']
+        self.assertIs(command_args['reserved'], False)
+        self.assertIs(command_args['is_custom_mode'], True)
+        self.assertEqual(command_args['name'], 'plan')
+        self.assertEqual(command_args['resource_group'], 'rg')
+
+        mock_poller.result.assert_called_once_with()
+        self.assertIs(result, mock.sentinel.created_plan)
+
+    def test_managed_instance_rejects_linux(self):
+        """Managed Instance on App Service supports only Windows plans."""
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, '--is-managed-instance creates a Windows plan'):
+            create_app_service_plan(mock.MagicMock(), 'rg', 'plan', is_linux=True, hyper_v=False,
+                                    is_managed_instance=True)
+
+    def test_managed_instance_rejects_hyper_v(self):
+        """Managed Instance on App Service does not support Windows Containers."""
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError,
+                                    '--hyper-v and --is-managed-instance cannot be used together'):
+            create_app_service_plan(mock.MagicMock(), 'rg', 'plan', is_linux=None, hyper_v=True,
+                                    is_managed_instance=True)
 
 
 class TestOneDeployScmCache(unittest.TestCase):
@@ -3055,6 +3534,34 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         self.assertIn('Instance:', printed_text)
         self.assertIn('f5105a099b', printed_text)
 
+    def test_report_supports_legacy_windows_encodings(self):
+        from azure.cli.command_modules.appservice import _troubleshoot_config_report as report_module
+
+        payload = {
+            'name': 'myApp',
+            'resourceGroup': 'myRG',
+            'configCheck': {
+                'Settings': [{
+                    'Setting': 'alwaysOn',
+                    'Value': 'false',
+                    'Details': 'Enable Always On.',
+                    'DetailsLevel': 'warning',
+                }],
+            },
+            'runtimeError': {
+                'instanceId': 'f5105a099b0b07252d1991ca4444a69293f25b3fe8f8d948a2a5d46c82d33e9c5',
+                'state': 'Failed',
+                'lastError': 'ContainerTimeout',
+            },
+        }
+
+        for encoding in ('cp1252', 'cp437'):
+            with self.subTest(encoding=encoding):
+                output = io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors='strict')
+                with mock.patch.object(report_module.sys, 'stdout', output):
+                    report_module.render_report(payload)
+                    output.flush()
+
     # ---- _extract_runtime_error ----
 
     def test_extract_runtime_error_picks_latest_timestamp(self):
@@ -3381,6 +3888,7 @@ class TestTroubleshootConfigMocked(unittest.TestCase):
         })
         send_raw_request_mock.return_value = self._arm_response({'properties': [
             {'instanceId': 'abc', 'state': 'Stopped', 'lastError': 'ContainerTimeout',
+             'lastErrorDetails': 'old error', 'lastErrorAction': 'None',
              'lastErrorTimestamp': '2026-07-01T00:00:00Z'},
         ]})
 
@@ -3855,12 +4363,12 @@ class TestStackRuntimeDotnetLinux(unittest.TestCase):
         helper._stacks = parsed_results
         self.assertEqual(
             [row['config'] for row in helper.get_stacks_as_table()],
-            ['DOTNETCORE|11.0'])
+            ['DOTNETCORE:11.0'])
 
     def test_parse_windows_dotnet_catalog_unchanged(self):
-        for display_text, expected in (
-                ('.NET 11 (STS)', 'dotnet|11'),
-                ('.NET 11.0 (STS)', 'dotnet|11.0')):
+        for display_text, expected_display_name, expected_config in (
+                ('.NET 11 (STS)', 'dotnet|11', 'dotnet:11'),
+                ('.NET 11.0 (STS)', 'dotnet|11.0', 'dotnet:11.0')):
             with self.subTest(display_text=display_text):
                 helper = self._new_helper('placeholder')
                 parsed_results = []
@@ -3883,9 +4391,9 @@ class TestStackRuntimeDotnetLinux(unittest.TestCase):
                 helper._stacks = parsed_results
                 self.assertEqual(
                     [row['config'] for row in helper.get_stacks_as_table()],
-                    [expected])
+                    [expected_config])
                 runtime = helper.resolve('dotnet|11')
-                self.assertEqual(runtime.display_name, expected)
+                self.assertEqual(runtime.display_name, expected_display_name)
                 self.assertEqual(runtime.configs['net_framework_version'], 'v11.0')
 
 
@@ -3941,7 +4449,7 @@ class TestStackRuntimeNodeStandardization(unittest.TestCase):
             [('Linux', 'NODE|26'), ('Windows', 'NODE|26')])
         self.assertEqual(
             [(row['os'], row['config']) for row in helper.get_stacks_as_table(runtime_filter='node')],
-            [('Linux', 'NODE|26'), ('Windows', 'NODE|26')])
+            [('Linux', 'NODE:26'), ('Windows', 'NODE:26')])
         self.assertEqual(helper.resolve('NODE|26', linux=True).configs['linux_fx_version'], 'NODE|26')
         self.assertEqual(
             helper.resolve('NODE|26', linux=False).configs['WEBSITE_NODE_DEFAULT_VERSION'], '~26')
@@ -4001,6 +4509,9 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
 
     EXPECTED = {
         'JAVA|25-java25', 'JAVA|21-java21', 'JAVA|17-java17', 'JAVA|11-java11', 'JAVA|8-jre8',
+    }
+    EXPECTED_CONFIGS = {
+        'JAVA:25-java25', 'JAVA:21-java21', 'JAVA:17-java17', 'JAVA:11-java11', 'JAVA:8-jre8',
     }
 
     FULL_RUNTIMES = [
@@ -4068,7 +4579,7 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         aggregate = self._minor('SE', _TypespecContainerSettings(
             {'isAutoUpdate': True, 'runtimes': self.FULL_RUNTIMES}, is_auto_update=True))
         stack = self._java_se_stack([aggregate] + self._patch_minors())
-        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED_CONFIGS)
 
     def test_aggregate_javaNNRuntime_keys(self):
         # Fallback path: no 'runtimes' array, but the Mapping exposes individual
@@ -4084,7 +4595,7 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
             },
             is_auto_update=True))
         stack = self._java_se_stack([aggregate] + self._patch_minors())
-        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED_CONFIGS)
 
     def test_aggregate_not_first_selected_by_auto_update(self):
         # The aggregate auto-update container must be chosen by its is_auto_update
@@ -4092,7 +4603,7 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         aggregate = self._minor('SE', _TypespecContainerSettings(
             {'isAutoUpdate': True, 'runtimes': self.FULL_RUNTIMES}, is_auto_update=True))
         stack = self._java_se_stack(self._patch_minors() + [aggregate])
-        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED_CONFIGS)
 
     def test_typed_attrs_only_expose_java_8_11_but_mapping_has_all(self):
         # Reproduces the exact regression: the SDK types only java8_runtime /
@@ -4105,7 +4616,7 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         # Sanity-check the model: typed attrs cover only 8/11, additional_properties empty.
         self.assertEqual(aggregate.stack_settings.linux_container_settings.additional_properties, [])
         stack = self._java_se_stack([aggregate] + self._patch_minors())
-        self.assertEqual(self._java_se_configs(stack), self.EXPECTED)
+        self.assertEqual(self._java_se_configs(stack), self.EXPECTED_CONFIGS)
 
     def test_runtimes_array_entries_flagged_auto_update(self):
         # Entries derived from the aggregate must be flagged auto-update so they

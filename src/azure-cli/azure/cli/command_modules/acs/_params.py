@@ -1374,6 +1374,7 @@ def load_arguments(self, _):
         c.argument('gpu_driver', arg_type=get_enum_type(gpu_driver_install_modes))
         c.argument('enable_artifact_streaming', action='store_true', validator=validate_artifact_streaming)
         c.argument('disable_artifact_streaming', action='store_true', validator=validate_artifact_streaming)
+        c.argument('node_vm_size', options_list=['--node-vm-size', '-s'])
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)

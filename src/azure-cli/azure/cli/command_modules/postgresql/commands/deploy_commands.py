@@ -5,10 +5,10 @@
 
 # pylint: disable=unused-argument, line-too-long
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
-from azure.cli.core.util import run_cmd
 from knack.log import get_logger
 from ..utils._flexible_server_util import (
     resolve_executable,
+    run_cmd,
     run_subprocess,
     fill_action_template,
     get_git_root_dir,
@@ -67,8 +67,11 @@ def github_actions_run(action_name, branch):
 
 
 def gitcli_check_and_login():
-    gh_path = resolve_executable("gh")
-    output = run_cmd([gh_path], capture_output=True)
+    try:
+        gh_path = resolve_executable("gh")
+        output = run_cmd([gh_path], capture_output=True)
+    except FileNotFoundError as ex:
+        raise ClientRequestError('Please install "Github CLI" to run this command.') from ex
     if output.returncode:
         raise ClientRequestError('Please install "Github CLI" to run this command.')
 

@@ -276,6 +276,38 @@ def load_arguments(self, _):
         )
 
     with self.argument_context(
+        "cognitiveservices account create", arg_group="Agent Hosting"
+    ) as c:
+        c.argument(
+            "agent_hosting_cluster",
+            is_preview=True,
+            help="ARM resource ID of the customer-owned AKS cluster. Run preflight, prepare missing Storage "
+                 "and managed identities, and create the account with agent hosting.",
+        )
+        c.argument(
+            "agent_hosting_storage",
+            is_preview=True,
+            help="ARM resource ID of existing Storage to validate and reuse. Create Storage when omitted. "
+                 "Requires --agent-hosting-cluster.",
+        )
+        c.argument(
+            "agent_hosting_management_identity",
+            options_list=["--agent-hosting-management-identity", "--agent-hosting-mi"],
+            is_preview=True,
+            help="ARM resource ID of the hosting-management user-assigned identity. "
+                 "Validate and reuse when supplied; create when omitted. Automatically assigned to the account. "
+                 "Requires --agent-hosting-cluster.",
+        )
+        c.argument(
+            "agent_hosting_workload_identity",
+            options_list=["--agent-hosting-workload-identity", "--agent-hosting-wi"],
+            is_preview=True,
+            help="ARM resource ID of the workload user-assigned identity. "
+                 "Validate and reuse when supplied; create when omitted. Not assigned to the account. "
+                 "Requires --agent-hosting-cluster.",
+        )
+
+    with self.argument_context(
         "cognitiveservices account update", arg_group="AI Services"
     ) as c:
         c.argument(
@@ -663,6 +695,17 @@ def load_arguments(self, _):
         c.argument('model_format', help='Cognitive Services account deployment model format.')
         c.argument('model_version', help='Cognitive Services account deployment model version.')
         c.argument('model_source', help='Cognitive Services account deployment model source.')
+
+    with self.argument_context('cognitiveservices account deployment create', arg_group='Model provider') as c:
+        c.argument('organization_name',
+                   help='Name of the organization using the Anthropic model. '
+                        'Required for Anthropic deployments. Specify together with --industry and --country.')
+        c.argument('industry',
+                   help='Industry of the organization using the Anthropic model, such as Law. '
+                        'Required for Anthropic deployments. Specify together with --organization-name and --country.')
+        c.argument('country', options_list=['--country', '--country-code'],
+                   help='Two-letter ISO 3166-1 alpha-2 country code of the organization, such as US. '
+                        'Required for Anthropic deployments. Specify together with --organization-name and --industry.')
 
     with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentScaleSettings') as c:
         c.argument(

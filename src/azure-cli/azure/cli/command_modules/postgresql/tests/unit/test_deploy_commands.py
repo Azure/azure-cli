@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import json
 import tempfile
 import unittest
 from unittest.mock import Mock, call, mock_open, patch
@@ -43,7 +44,8 @@ class PostgresqlDeployTest(unittest.TestCase):
                 patch('subprocess.run', self.run),
                 patch('subprocess.Popen', self.popen),
                 patch('builtins.open', mock_open()),
-                patch.object(_util.os.path, 'exists', return_value=True),
+                patch.object(_util.os.path, 'exists', side_effect=lambda p: os.path.normcase(p) in self.files),
+                patch.object(_util.os, 'makedirs'),
                 patch.object(_util.os, 'remove'),
                 patch.object(_util.yaml, 'safe_load', return_value={
                     'jobs': {'build': {'steps': [{}, {}, {'with': {}}]}}}),
@@ -73,15 +75,17 @@ class PostgresqlDeployTest(unittest.TestCase):
             [self.gh], [self.gh, 'auth', 'status'],
             [self.git, 'rev-parse', '--show-toplevel'],
             [self.gh, 'secret', 'list', '--repo', 'owner/repo'],
+            [self.gh, 'secret', 'set', 'AZURE_CREDENTIALS', '--repo', 'owner/repo'],
             [self.git, 'rev-parse', '--show-toplevel']])
+        credentials = self.run.call_args_list[-2].kwargs
+        self.assertEqual(json.loads(credentials['input']), {
+            'clientId': 'app', 'clientSecret': 'unused', 'tenantId': 'tenant', 'subscriptionId': 'sub'})
         launches = [c.args[0] for c in self.popen.call_args_list]
         self.assertEqual(launches[0], [self.gh, 'auth', 'login'])
-        self.assertEqual(launches[1], [self.gh, 'secret', 'set', 'AZURE_CREDENTIALS',
-                                       '--repo', 'owner/repo', '<', './temp_app_credential.txt'])
-        self.assertEqual(launches[2][:7], [
+        self.assertEqual(launches[1][:7], [
             self.gh, 'secret', 'set', 'SERVER_DATABASE_POSTGRESQL_CONNECTION_STRING', '--repo', 'owner/repo', '-b'])
-        self.assertEqual(len(launches[2]), 8)
-        self.assertEqual(launches[3:], [
+        self.assertEqual(len(launches[1]), 8)
+        self.assertEqual(launches[2:], [
             [self.git, 'add', 'C:/work with spaces/.github/workflows/deploy action.yml'],
             [self.git, 'commit', '-m', 'Add github action file'],
             [self.git, 'push', 'origin', 'topic branch']])
@@ -106,7 +110,7 @@ class PostgresqlDeployTest(unittest.TestCase):
         for files in (set(), {os.path.normcase(os.path.join(self.cwd, os.path.basename(self.gh)))}):
             with self.subTest(files=files):
                 self.files = files
-                with self.assertRaises(FileNotFoundError):
+                with self.assertRaisesRegex(ClientRequestError, 'Please install'):
                     custom.github_actions_run('deploy', 'main')
         self.run.assert_not_called()
         self.popen.assert_not_called()
@@ -189,6 +193,14 @@ class PostgresqlDeployTest(unittest.TestCase):
             for executable in ('gh', 'gh.cmd', os.path.join(self.tools, 'gh.cmd')):
                 with self.subTest(executable=executable), self.assertRaises(FileNotFoundError):
                     _util.resolve_executable(executable)
+
+    @unittest.skipUnless(is_windows(), 'Windows executable lookup')
+    def test_windows_native_lookup_does_not_depend_on_pathext(self):
+        for pathext in ('', '.BAT;.CMD', '.CMD;.EXE'):
+            with self.subTest(pathext=pathext), patch.dict('os.environ', {'PATHEXT': pathext}):
+                for executable, expected in (('gh', self.gh), ('gh.exe', self.gh),
+                                             ('git', self.git), ('git.exe', self.git)):
+                    self.assertEqual(_util.resolve_executable(executable), expected)
 
     @unittest.skipUnless(is_windows(), 'Windows executable lookup')
     def test_windows_relative_explicit_paths_are_rejected(self):
