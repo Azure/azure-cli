@@ -347,7 +347,8 @@ class StorageManagementCliTest(unittest.TestCase):
 
     def cmd(self, command):
         output = io.StringIO()
-        with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+        with mock.patch('azure.cli.core.util.show_updates_available'), \
+                contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
             try:
                 result = self.cli_ctx.invoke(
                     shlex.split(command) + ['--subscription', '00000000-0000-0000-0000-000000000000'],
