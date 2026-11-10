@@ -11,7 +11,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
 
 from azure.cli.command_modules.resource._color import Color, ColoredStringBuilder
-from azure.cli.command_modules.resource._formatters import format_json, format_what_if_operation_result
+from azure.cli.command_modules.resource._formatters import format_json, format_what_if_operation_result, _parse_array_item_path
 
 
 cli_ctx = DummyCli()
@@ -574,6 +574,77 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4
 
         self.assertIn(expected, result)
 
+    def test_array_paths_with_leading_underscore(self):
+        """Service may return array indices as "_0" instead of "0" (issue #34372)."""
+        changes = [
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/Microsoft.Web/sites/site1",
+                change_type=ChangeType.modify,
+                delta=[
+                    WhatIfPropertyChange(
+                        path="properties.logs",
+                        property_change_type=PropertyChangeType.array,
+                        children=[
+                            WhatIfPropertyChange(
+                                path="_1",
+                                property_change_type=PropertyChangeType.create,
+                                after={"enabled": True},
+                            ),
+                            WhatIfPropertyChange(
+                                path="_0",
+                                property_change_type=PropertyChangeType.delete,
+                                before={"enabled": False},
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ]
+
+        result = format_what_if_operation_result(WhatIfOperationResult(changes=changes), False)
+
+        # Sorted numerically: _0 before _1. Must not raise ValueError.
+        pos0 = result.find("_0")
+        pos1 = result.find("_1")
+        self.assertNotEqual(pos0, -1)
+        self.assertNotEqual(pos1, -1)
+        self.assertLess(pos0, pos1)
+
+    def test_non_numeric_array_paths_keep_service_order(self):
+        """Non-numeric array-item paths keep service order instead of being reordered by change type."""
+        changes = [
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/Microsoft.Web/sites/site1",
+                change_type=ChangeType.modify,
+                delta=[
+                    WhatIfPropertyChange(
+                        path="properties.items",
+                        property_change_type=PropertyChangeType.array,
+                        children=[
+                            WhatIfPropertyChange(
+                                path="foo",
+                                property_change_type=PropertyChangeType.create,
+                                after="a",
+                            ),
+                            WhatIfPropertyChange(
+                                path="properties.logs",
+                                property_change_type=PropertyChangeType.delete,
+                                before="b",
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ]
+
+        result = format_what_if_operation_result(WhatIfOperationResult(changes=changes), False)
+
+        pos_foo = result.find("foo")
+        pos_logs = result.find("properties.logs")
+        self.assertNotEqual(pos_foo, -1)
+        self.assertNotEqual(pos_logs, -1)
+        self.assertLess(pos_foo, pos_logs)
+
     def test_diagnostics(self):
         changes = [
             WhatIfChange(
@@ -595,3 +666,15 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4
         self.assertIn('''[format('/subscriptions/00000000-0000-0000-0000-000000000000/providers/{0}', concat('Microsoft.Authorization/policyDefinitions/', format('{0}_{1}', 'policy-for-what-if-test', if(greater(int(utcNow('%f')), 4), '2', '3'))))] (Unsupported) Changes to the resource declared at 'properties.template.resources[1]' on line 1 and column 698 cannot be analyzed because its resource ID or API version cannot be calculated until the deployment is under way. Please see https://aka.ms/WhatIfUnidentifiableResource for more guidance.''', result)
 
         self.assertIn('''/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/nestedDeployment (NestedDeploymentShortCircuited) The nested deployment '/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/nestedDeployment' at line '1' and column '1020' could not be expanded because it uses outer-mode evaluation and its template contains expressions that could not be evaluated. Please see https://aka.ms/WhatIfEvalStopped for more guidance.''', result)
+
+
+class TestParseArrayItemPath(unittest.TestCase):
+    def test_plain_and_underscored_numeric_paths(self):
+        self.assertEqual((0, "0"), _parse_array_item_path("0"))
+        self.assertEqual((0, "0"), _parse_array_item_path("_0"))
+        self.assertEqual((12, "12"), _parse_array_item_path("_12"))
+
+    def test_non_numeric_paths_keep_text(self):
+        self.assertEqual("properties.logs", _parse_array_item_path("properties.logs")[1])
+        self.assertEqual("_foo", _parse_array_item_path("_foo")[1])
+        self.assertEqual("", _parse_array_item_path(None)[1])

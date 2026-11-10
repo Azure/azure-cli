@@ -13,6 +13,9 @@ from azure.cli.core import (
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.aaz import load_aaz_command_table
 from . import aaz
+from .azext_aro_hcp._help import helps as _helps  # pylint: disable=unused-import
+from .azext_aro_hcp._params import load_arguments as load_hcp_arguments
+from .azext_aro_hcp.commands import load_command_table as load_hcp_command_table
 
 
 class AroCommandsLoader(AzCommandsLoader):
@@ -34,10 +37,12 @@ class AroCommandsLoader(AzCommandsLoader):
             args=args
         )
         load_command_table(self, args)
+        load_hcp_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
         load_arguments(self, command)
+        load_hcp_arguments(self, command)
 
 
 COMMAND_LOADER_CLS = AroCommandsLoader

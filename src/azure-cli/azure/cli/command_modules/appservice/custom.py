@@ -83,7 +83,7 @@ from .utils import (_normalize_sku,
                     _remove_list_duplicates, get_raw_functionapp,
                     register_app_provider,
                     is_sku_tier_enabled_for_managed_instance,
-                    get_site_server_farm_id)
+                    get_site_server_farm_id, get_linux_runtime_list_command)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability,
                            get_regional_site_availability, get_profile_username,
@@ -118,6 +118,8 @@ from .aaz.latest.appservice.plan.managed_instance import (ShowRdpPassword
                                                           as AppServicePlanManagedInstanceShowRdpPassword)
 from .aaz.latest.appservice.plan.managed_instance.instance import (List as AppServicePlanManagedInstanceList,
                                                                    Recycle as AppServicePlanManagedInstanceRecycle)
+from .aaz.latest.web.site.config.egress import Create as EgressConfigCreate, Show as EgressConfigShow
+from .aaz.latest.web.site.slot.config.egress import Create as SlotEgressConfigCreate, Show as SlotEgressConfigShow
 
 logger = get_logger(__name__)
 
@@ -306,7 +308,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime, is_linux)
             if not match:
                 error_message = ("Linux Runtime '{}' is not supported. "
-                                 "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                                 "Run '{}' for supported runtimes."
+                                 .format(runtime.replace('|', ':'), get_linux_runtime_list_command(runtime)))
                 if enriched_errors:
                     raise_enriched_webapp_create_error(
                         resource_group_name=resource_group_name,
@@ -4066,6 +4069,166 @@ def restart_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restart', slot)
 
 
+def _egress_enum(value, choices, argument):
+    for choice in choices:
+        if isinstance(value, str) and value.lower() == choice.lower():
+            return choice
+    raise InvalidArgumentValueError("{} must be one of: {}.".format(argument, ', '.join(choices)))
+
+
+def _validate_egress_name(value, argument, max_length=None):
+    if (not isinstance(value, str) or not value or value[-1].isspace() or
+            (max_length is not None and len(value) > max_length)):
+        raise InvalidArgumentValueError(
+            "{} must be nonempty and must not end in whitespace{}."
+            .format(argument, ", with at most {} characters".format(max_length) if max_length else ""))
+
+
+def _build_egress_connection(connection_name=None, protocol=None, auth=None, source='AppSettings',
+                             host_setting=None, credential_setting=None, username_setting=None, value_setting=None,
+                             identity_resource_id=None, identity_scope=None,
+                             credential_header=None, credential_format=None):
+    from ._constants import EGRESS_PROTOCOLS, EGRESS_AUTH_TYPES, EGRESS_SOURCES
+
+    for argument, value in [('name', connection_name), ('protocol', protocol), ('auth', auth)]:
+        if value is None:
+            raise RequiredArgumentMissingError("Egress connections require '{}'.".format(argument))
+    _validate_egress_name(connection_name, 'Connection name', max_length=256)
+    settings = {}
+    setting_names = set()
+    for role, setting in [('Host', host_setting), ('Credential', credential_setting),
+                          ('Username', username_setting), ('Value', value_setting)]:
+        if setting is not None:
+            _validate_egress_name(setting, '{} setting name'.format(role))
+            if setting.lower() in setting_names:
+                raise InvalidArgumentValueError("Each setting name can have only one role in a connection.")
+            setting_names.add(setting.lower())
+            settings[setting] = {'role': role}
+    if not settings:
+        raise RequiredArgumentMissingError(
+            "Specify at least one of host-setting, credential-setting, username-setting, or value-setting.")
+    connection = {
+        'protocol': _egress_enum(protocol, EGRESS_PROTOCOLS, 'Protocol'),
+        'auth': _egress_enum(auth, EGRESS_AUTH_TYPES, 'Authentication'),
+        'source': _egress_enum(source, EGRESS_SOURCES, 'Source'),
+        'settings': settings,
+    }
+    if identity_resource_id is not None:
+        connection['identityResourceId'] = identity_resource_id
+    if identity_scope is not None:
+        connection['identityScope'] = identity_scope
+    if credential_format is not None and credential_header is None:
+        raise RequiredArgumentMissingError("Specify credential-header when using credential-format.")
+    if credential_header is not None:
+        connection['credentialInjection'] = {'header': credential_header}
+        if credential_format is not None:
+            connection['credentialInjection']['format'] = credential_format
+    return connection_name, connection
+
+
+def show_egress_config(cmd, resource_group_name, name, slot=None):
+    args = {'resource_group': resource_group_name, 'name': name}
+    command = EgressConfigShow
+    if slot:
+        args['slot'] = slot
+        command = SlotEgressConfigShow
+    return command(cli_ctx=cmd.cli_ctx)(command_args=args)
+
+
+# Generated serialization omits the empty properties container needed to clear the configuration.
+class _EgressConfigClear(EgressConfigCreate):
+    class EgressConfigsCreateOrUpdateEgressConfig(
+            EgressConfigCreate.EgressConfigsCreateOrUpdateEgressConfig):
+        @property
+        def content(self):
+            return {'properties': {}}
+
+
+class _SlotEgressConfigClear(SlotEgressConfigCreate):
+    class EgressConfigSlotConfigsCreateOrUpdateEgressConfigSlot(
+            SlotEgressConfigCreate.EgressConfigSlotConfigsCreateOrUpdateEgressConfigSlot):
+        @property
+        def content(self):
+            return {'properties': {}}
+
+
+def _put_egress_config(cmd, resource_group_name, name, connections=None, enabled=None, slot=None):
+    args = {'resource_group': resource_group_name, 'name': name}
+    if connections is not None:
+        args['connections'] = connections
+    if enabled is not None:
+        args['enabled'] = enabled
+    command = EgressConfigCreate
+    if slot:
+        args['slot'] = slot
+        command = SlotEgressConfigCreate
+    if connections is None and enabled is None:
+        command = _SlotEgressConfigClear if slot else _EgressConfigClear
+    return command(cli_ctx=cmd.cli_ctx)(command_args=args)
+
+
+def set_egress_config(cmd, resource_group_name, name, enabled=None, slot=None):
+    if enabled is None:
+        raise RequiredArgumentMissingError("Specify --enabled true or --enabled false.")
+    if not isinstance(enabled, bool):
+        raise InvalidArgumentValueError("Specify true or false for --enabled.")
+    enabled = 'Enabled' if enabled else 'Disabled'
+    config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    connections = config.get('connections') or {}
+    if not connections:
+        raise InvalidArgumentValueError(
+            "Cannot update the egress enabled state without a connection. Add a connection using "
+            "`az webapp config egress connection add`, then retry.")
+    return _put_egress_config(cmd, resource_group_name, name, connections, enabled, slot)
+
+
+def _find_egress_connection(connections, connection_name):
+    _validate_egress_name(connection_name, '--connection-name', max_length=256)
+    for key in connections:
+        if key.lower() == connection_name.lower():
+            return key
+    raise ResourceNotFoundError("Egress connection '{}' was not found.".format(connection_name))
+
+
+def add_egress_connection(cmd, resource_group_name, name, connection_name, protocol, auth, source='AppSettings',
+                          host_setting=None, credential_setting=None, username_setting=None, value_setting=None,
+                          identity_resource_id=None, identity_scope=None,
+                          credential_header=None, credential_format=None, slot=None):
+    _, connection = _build_egress_connection(
+        connection_name, protocol, auth, source, host_setting, credential_setting, username_setting, value_setting,
+        identity_resource_id, identity_scope, credential_header, credential_format)
+    config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    connections = dict(config.get('connections') or {})
+    key = next((key for key in connections if key.lower() == connection_name.lower()), connection_name)
+    connections[key] = connection
+    enabled = config.get('enabled')
+    if enabled is None:
+        enabled = 'Disabled'
+    result = _put_egress_config(cmd, resource_group_name, name, connections, enabled, slot)
+    result_connections = (result.get('properties') or {}).get('connections') or {}
+    return result_connections[_find_egress_connection(result_connections, connection_name)]
+
+
+def remove_egress_connection(cmd, resource_group_name, name, connection_name, slot=None, yes=False):
+    config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    connections = dict(config.get('connections') or {})
+    del connections[_find_egress_connection(connections, connection_name)]
+    if not connections:
+        from azure.cli.core.util import user_confirmation
+
+        logger.warning("Removing the last connection clears the entire egress configuration, "
+                       "including its enabled state.")
+        user_confirmation("Are you sure you want to remove the last egress connection?", yes=yes)
+    enabled = config.get('enabled') if connections else None
+    _put_egress_config(cmd, resource_group_name, name, connections or None, enabled, slot)
+
+
+def show_egress_connection(cmd, resource_group_name, name, connection_name, slot=None):
+    config = show_egress_config(cmd, resource_group_name, name, slot).get('properties') or {}
+    connections = config.get('connections') or {}
+    return connections[_find_egress_connection(connections, connection_name)]
+
+
 def get_site_configs(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
 
@@ -4411,8 +4574,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             helper = _StackRuntimeHelper(cmd, linux=config_is_linux, windows=not config_is_linux)
             match = helper.resolve(runtime, linux=config_is_linux)
             if not match:
-                raise ValidationError("Linux Runtime '{}' is not supported."
-                                      "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                raise ValidationError("Linux Runtime '{}' is not supported. Run '{}' for supported runtimes."
+                                      .format(runtime.replace('|', ':'),
+                                              get_linux_runtime_list_command(runtime)))
             helper.get_site_config_setter(match, linux=config_is_linux)(cmd=cmd, stack=match, site_config=configs)
         else:
             helper = _StackRuntimeHelper(cmd, linux=config_is_linux, windows=not config_is_linux)
@@ -5603,11 +5767,18 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None,
                             enriched_errors=False):
+    if hyper_v and is_managed_instance:
+        raise MutuallyExclusiveArgumentError(
+            '--hyper-v and --is-managed-instance cannot be used together because Windows Containers '
+            'are not supported in Managed Instance on Azure App Service.')
+
     if is_linux is None:
-        is_linux = not hyper_v
-    elif is_linux and hyper_v:
-        raise MutuallyExclusiveArgumentError('--hyper-v creates a Windows container plan and cannot be combined '
-                                             'with --is-linux true. Omit --is-linux or use "--is-linux false".')
+        is_linux = not (hyper_v or is_managed_instance)
+    elif is_linux and (hyper_v or is_managed_instance):
+        windows_plan_argument = '--hyper-v' if hyper_v else '--is-managed-instance'
+        raise MutuallyExclusiveArgumentError(
+            '{} creates a Windows plan and cannot be combined with --is-linux true. '
+            'Omit --is-linux or use "--is-linux false".'.format(windows_plan_argument))
 
     if sku is None:
         sku = 'P0V3' if is_linux else 'B1'
@@ -8932,7 +9103,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 'os': stack.os,
                 'runtime': stack.runtime_family,
                 'version': stack.version_label or '',
-                'config': stack.display_name,
+                'config': stack.display_name.replace(self.DEFAULT_DELIMETER, ':'),
                 'support': support_status,
                 'end_of_life': stack.eol_date or '-',
             })
@@ -13519,6 +13690,11 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
         raise ValidationError('Could not detect runtime. Please specify using the --runtime flag.')
 
     if not _runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string, is_linux=is_linux):
+        if is_linux:
+            raise ValidationError("Runtime '{}' is not supported for GitHub Actions deployments. "
+                                  "Run '{}' to inspect available web app runtimes."
+                                  .format(app_runtime_string.replace('|', ':'),
+                                          get_linux_runtime_list_command(app_runtime_string)))
         raise ValidationError("Runtime %s is not supported for GitHub Actions deployments." % app_runtime_string)
 
     # Get workflow template

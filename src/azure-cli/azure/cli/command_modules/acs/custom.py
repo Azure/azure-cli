@@ -2409,9 +2409,9 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                             }
                         ],
                         "volumeMounts": [
-                            {"name": "azurejson", "mountPath": "/etc/kubernetes"},
-                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
-                            {"name": "sfcerts", "mountPath": "/etc/pki"},
+                            {"name": "azurejson", "mountPath": "/etc/kubernetes", "readOnly": True},
+                            {"name": "sslcerts", "mountPath": "/etc/ssl/certs", "readOnly": True},
+                            {"name": "sfcerts", "mountPath": "/etc/pki", "readOnly": True},
                         ],
                     }
                 ],
@@ -2591,7 +2591,8 @@ def _select_aks_desktop_asset(release, version, system, arch, prefer_deb=True):
         ('linux', 'armv7l'): ['aks-desktop-{}-linux-armv7l.tar.gz'.format(version)],
     }.get((system, arch), [])
 
-    if (prefer_deb and (system, arch) == ('linux', 'x64') and
+    deb_arch = {'x64': 'amd64', 'arm64': 'arm64'}.get(arch)
+    if (prefer_deb and system == 'linux' and deb_arch and
             (os.environ.get('DISPLAY') or os.environ.get('WAYLAND_DISPLAY'))):
         try:
             os_release = platform.freedesktop_os_release()
@@ -2599,7 +2600,7 @@ def _select_aks_desktop_asset(release, version, system, arch, prefer_deb=True):
             os_release = {}
         distro_ids = {os_release.get('ID'), *os_release.get('ID_LIKE', '').split()}
         if distro_ids.intersection(('debian', 'ubuntu')) and shutil.which('xdg-open'):
-            names.insert(0, 'aks-desktop_{}-1_amd64.deb'.format(version))
+            names.insert(0, 'aks-desktop_{}-1_{}.deb'.format(version, deb_arch))
 
     assets = release.get('assets') or []
     for name in names:
@@ -2757,6 +2758,33 @@ def _extract_aks_desktop_archive(archive_path, destination):
             'Failed to extract the AKS Desktop archive ({}).'.format(ex))
 
 
+def _check_aks_desktop_dependencies(executable: str) -> None:
+    from azure.cli.core.util import get_safe_executable_path, run_cmd
+
+    try:
+        ldd = get_safe_executable_path('ldd')
+        if not ldd:
+            logger.warning('Could not check AKS Desktop dependencies: ldd was not found. Attempting to launch.')
+            return
+        environment = os.environ.copy()
+        environment['LC_ALL'] = 'C'
+        result = run_cmd([ldd, os.path.abspath(executable)], capture_output=True, encoding='utf-8',
+                         check=False, timeout=30, env=environment)
+    except (OSError, subprocess.TimeoutExpired, UnicodeError) as ex:
+        logger.warning('Could not check AKS Desktop dependencies (%s). Attempting to launch.', ex)
+        return
+
+    output = '\n'.join((result.stdout or '', result.stderr or ''))
+    # ldd can report missing libraries even with a nonzero exit status.
+    missing = sorted(set(re.findall(r'^[ \t]*(\S+)[ \t]+=>[ \t]+not found[ \t\r]*$', output, re.MULTILINE)))
+    if missing:
+        raise ValidationError(
+            'AKS Desktop is missing required Linux libraries: {}. '
+            'Install the packages that provide these library files, then retry.'.format(', '.join(missing)))
+    if result.returncode or not re.search(r'^[ \t]*\S+[ \t]+=>[ \t]+/\S+', output, re.MULTILINE):
+        logger.warning('Could not determine AKS Desktop dependencies from ldd output. Attempting to launch.')
+
+
 def _install_aks_desktop_archive(installer_path, version):
     install_root = os.path.join(os.path.expanduser('~'), '.local', 'share', 'aks-desktop')
     install_dir = os.path.join(install_root, version)
@@ -2780,6 +2808,7 @@ def _install_aks_desktop_archive(installer_path, version):
             raise FileOperationError(
                 'The AKS Desktop archive does not contain the expected executable.')
         os.chmod(executable, os.stat(executable).st_mode | stat.S_IXUSR)
+        _check_aks_desktop_dependencies(executable)
         executable_path = os.path.join(install_dir, os.path.relpath(executable, staging_dir))
 
         try:
@@ -3583,7 +3612,7 @@ def aks_agentpool_add(
     gpu_instance_profile=None,
     allowed_host_ports=None,
     asg_ids=None,
-    enable_managed_dranet=False,
+    enable_managed_dranet=None,
     node_public_ip_tags=None,
     disable_windows_outbound_nat=False,
     workload_runtime=None,
@@ -3652,7 +3681,7 @@ def aks_agentpool_update(
     aks_custom_headers=None,
     allowed_host_ports=None,
     asg_ids=None,
-    enable_managed_dranet=False,
+    enable_managed_dranet=None,
     os_sku=None,
     enable_fips_image=False,
     disable_fips_image=False,
@@ -3672,6 +3701,7 @@ def aks_agentpool_update(
     # ssh access
     ssh_access=None,
     yes=False,
+    node_vm_size=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
