@@ -14,7 +14,7 @@ Release History
 
 **AKS**
 
-* `az aks create`: Fix monitoring DCR association not created for Automatic SKU clusters (#34343)
+* `az aks create`: Fix an issue where monitoring DCR associations are not created for Automatic SKU clusters (#34343)
 * `az aks check-acr`: Validate `--acr` is a valid host name and mount host paths read-only in the check pod (#34361)
 * `az aks nodepool update`: Add `--node-vm-size` to resize VirtualMachineScaleSets node pools (#34319)
 * `az aks install-desktop`: Report missing Linux tarball libraries before launch and prefer an ARM64 DEB when available (#34376)
