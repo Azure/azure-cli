@@ -247,7 +247,7 @@ class SqlInstanceSnapshotEnvironment:
         name = self.test.create_random_name('sqlsnap', 15)
         self._cmd(
             'vm create -g "{group}" -n "{name}" -l "{location}" --image "{image}" '
-            '--size {size} --admin-username sqlsnapadmin --admin-password "{password}" '
+            '--size {size} --admin-username sqlsnapadmin --admin-password="{password}" '
             '--public-ip-sku Standard --nsg-rule NONE --assign-identity "[system]" "{identity}"{disks} --tags {tags}',
             group=group, name=name, location=location, image=self.image, password=self.password,
             size='Standard_B2as_v2' if seed else 'Standard_B4as_v2',
@@ -261,7 +261,7 @@ class SqlInstanceSnapshotEnvironment:
         self._cmd(
             'sql vm create -g "{group}" -n "{name}" -l "{location}" --license-type PAYG '
             '--sql-mgmt-type Full --connectivity-type LOCAL --sql-auth-update-username "{sql_username}" '
-            '--sql-auth-update-pwd "{sql_password}" --tags {tags}',
+            '--sql-auth-update-pwd="{sql_password}" --tags {tags}',
             group=group, name=name, location=location,
             sql_username=self.sql_username, sql_password=self.sql_password)
         self.run_sql(group, name, 'Seed' if seed else 'Target')
