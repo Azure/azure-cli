@@ -118,7 +118,7 @@ Release History
 
 * `az network private-endpoint`: Add `--approval-reference-id` to inherit approval from an approved private endpoint (#34340)
 * `az network express-route`: Add MultiCloud circuit support (#34306)
-* Fix #34345: `az network application-gateway waf-policy create`: `--managed-rules` is silently ignored (#34363)
+* Fix #34345: `az network application-gateway waf-policy create`: Fix an issue where `--managed-rules` is silently ignored (#34363)
 * `az network virtual-network-appliance`: Add support for `--capacity-provider` (#34318)
 
 **PostgreSQL**
