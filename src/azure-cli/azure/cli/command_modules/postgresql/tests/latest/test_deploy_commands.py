@@ -132,7 +132,7 @@ class DeploymentSecretsTest(unittest.TestCase):
 
         self.upload.assert_called_once_with(
             [self.executable, 'secret', 'set', util.AZURE_CREDENTIALS, '--repo', 'owner/repository'],
-            input=mock.ANY, capture_output=True, check=False)
+            input=mock.ANY, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self.assertEqual(json.loads(self.upload.call_args.kwargs['input']), self.credentials)
         self.files.assert_any_call(self.workflow, 'w', encoding='utf8')
         self.assertEqual(self.git.call_args_list, [
@@ -145,7 +145,7 @@ class DeploymentSecretsTest(unittest.TestCase):
         self.upload.return_value.returncode = 1
         self.upload.return_value.stderr = self.credentials['clientSecret'].encode('UTF-8')
         with self.assertLogs(util.logger.name, level='WARNING') as logs:
-            with self.assertRaisesRegex(ClientRequestError, 'Failed to set the AZURE_CREDENTIALS secret') as error:
+            with self.assertRaisesRegex(ClientRequestError, 'failed with exit code 1') as error:
                 deploy.github_actions_setup(
                     mock.Mock(), self.client, 'test-rg', 'server', 'database', 'admin', 'unused',
                     'schema file.sql', 'owner/repository', action_name='deploy database',
