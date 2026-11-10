@@ -25,7 +25,8 @@ def _add_unavailable_service_level_encryption_key(args_schema):
     # and get a clear error; it may return in a later api-version.
     args_schema.encryption_with_cmk.service_level_encryption_key = AAZFreeFormDictArg(
         options=["service-level-encryption-key"],
-        help="Not yet available in api-version 2026-11-01 and fails if specified. Preview-only; may be supported in a later api-version.",
+        help="Not yet available in api-version 2026-11-01 and fails if specified. "
+             "Preview-only; may be supported in a later api-version.",
     )
 
 
