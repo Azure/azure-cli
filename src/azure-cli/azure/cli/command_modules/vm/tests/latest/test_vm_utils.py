@@ -5,11 +5,14 @@
 
 import unittest
 from unittest import mock
-from urllib.parse import unquote
+from urllib.parse import parse_qs, unquote, urlencode, urlparse
 
+from azure.core import PipelineClient
+from azure.core.pipeline.policies import ContentDecodePolicy
 from azure.cli.command_modules.vm._vm_utils import list_sku_info
 from azure.cli.command_modules.vm.aaz.latest.vm import ListSkus
 from azure.cli.core.aaz._command_ctx import AAZCommandCtx
+from azure.cli.core.mock import DummyCli
 
 
 class TestListSkuInfo(unittest.TestCase):
@@ -53,6 +56,12 @@ class TestListSkuInfo(unittest.TestCase):
 
         self.assertEqual(list_sku_info(self.cli_ctx, 'eastus'), [])
 
+    def test_request_error_propagates(self):
+        self.list_skus.side_effect = RuntimeError('SKU request failed')
+
+        with self.assertRaisesRegex(RuntimeError, 'SKU request failed'):
+            list_sku_info(self.cli_ctx, 'eastus')
+
     def test_restrictions_preserved(self):
         self.skus[0]['restrictions'] = [{
             'type': 'Location',
@@ -85,3 +94,49 @@ class TestListSkuInfo(unittest.TestCase):
             operation = ListSkus.ResourceSkusList(ctx)
 
         self.assertEqual(unquote(operation.query_parameters['$filter']), "location eq 'eastus'")
+
+
+class TestListSkuInfoRequests(unittest.TestCase):
+
+    def test_paginated_requests(self):
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        endpoint = 'https://management.azure.com'
+        path = '/subscriptions/{}/providers/Microsoft.Compute/skus'.format(subscription_id)
+        skus = [
+            {'name': 'Standard_D2s_v5', 'locations': ['eastus']},
+            {'name': 'Standard_D4s_v5', 'locations': ['eastus']},
+        ]
+        cli_ctx = DummyCli()
+
+        for location in (None, 'eastus'):
+            with self.subTest(location=location):
+                query = {'api-version': '2019-04-01'}
+                if location:
+                    query['$filter'] = "location eq 'eastus'"
+                next_query = dict(query, **{'$skiptoken': 'next-page'})
+                pages = [
+                    {'value': skus[:1], 'nextLink': endpoint + path + '?' + urlencode(next_query)},
+                    {'value': skus[1:]},
+                ]
+                sessions = []
+                for page in pages:
+                    session = mock.Mock()
+                    session.http_response.status_code = 200
+                    session.context = {ContentDecodePolicy.CONTEXT_NAME: page}
+                    sessions.append(session)
+
+                with PipelineClient(base_url=endpoint) as client, \
+                        mock.patch.object(client, 'send_request', side_effect=sessions) as send_request, \
+                        mock.patch.object(AAZCommandCtx, 'get_http_client', return_value=client), \
+                        mock.patch.object(AAZCommandCtx, 'subscription_id',
+                                          new_callable=mock.PropertyMock, return_value=subscription_id):
+                    result = list(list_sku_info(cli_ctx, location))
+
+                self.assertEqual(result, skus)
+                self.assertEqual(send_request.call_count, 2)
+                for call, expected_query in zip(send_request.call_args_list, (query, next_query)):
+                    request = call.kwargs['request']
+                    self.assertEqual(request.method, 'GET')
+                    self.assertEqual(urlparse(request.url).path, path)
+                    self.assertEqual(parse_qs(urlparse(request.url).query),
+                                     {key: [value] for key, value in expected_query.items()})
