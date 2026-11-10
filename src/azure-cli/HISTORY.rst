@@ -138,7 +138,7 @@ Release History
 
 **Service Fabric**
 
-* `az sf cluster create`, `az sf application certificate add`: Fix creating a new Key Vault failing due to missing SKU family (#34234)
+* `az sf cluster create`, `az sf application certificate add`: Fix Key Vault creation failures caused by a missing SKU family (#34234)
 
 **SQL**
 
