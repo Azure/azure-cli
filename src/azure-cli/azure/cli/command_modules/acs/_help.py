@@ -2229,7 +2229,7 @@ parameters:
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
   - name: --enable-managed-dranet
     type: bool
-    short-summary: Enable Managed DRANET on the node pool.
+    short-summary: Enable or disable Managed DRANET on the node pool.
   - name: --node-public-ip-tags
     type: string
     short-summary: The ipTags of the node public IPs.
@@ -2413,7 +2413,7 @@ parameters:
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
   - name: --enable-managed-dranet
     type: bool
-    short-summary: Enable Managed DRANET on the node pool.
+    short-summary: Enable or disable Managed DRANET on the node pool.
   - name: --os-sku
     type: string
     short-summary: The OS SKU of the agent node pool.
@@ -2456,6 +2456,11 @@ parameters:
   - name: --disable-artifact-streaming
     type: bool
     short-summary: Disable artifact streaming for VirtualMachineScaleSets managed by a Linux node pool.
+  - name: --node-vm-size -s
+    type: string
+    short-summary: Resize the VMs of a VirtualMachineScaleSets node pool.
+    long-summary: |
+        AKS replaces every node in the node pool with a node of the new size. It adds surge nodes of the new size, then cordons, drains and deletes the old nodes, following the node pool's upgrade settings (--max-surge, --max-unavailable, --drain-timeout, --node-soak-duration). The target size must be compatible with the current node pool configuration. Can be combined with --update-cluster-autoscaler, or with --enable-cluster-autoscaler/--disable-cluster-autoscaler when they change the autoscaler state. Not supported for VirtualMachines node pools; use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" to change their VM sizes.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -2470,6 +2475,8 @@ examples:
         az aks nodepool update --resource-group MyResourceGroup \\
             --cluster-name MyManagedCluster --name npwin \\
             --os-sku Windows2025 --enable-fips-image
+  - name: Resize the VMs of a VirtualMachineScaleSets node pool to Standard_D4s_v5.
+    text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-vm-size Standard_D4s_v5
 """
 
 helps["aks nodepool upgrade"] = """

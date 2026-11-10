@@ -596,16 +596,33 @@ short-summary: Manage a function app's deployment configuration.
 helps['functionapp deployment config set'] = """
 type: command
 short-summary: Update an existing function app's deployment configuration.
+long-summary: >
+    Use --deployment-storage-* for a blob container, or --deployment-image and its authentication arguments for a
+    container image on Flex Consumption. Image deployment is separate from `az functionapp config container`. For an
+    existing image deployment, you can update the image or authentication separately. Use a new tag or digest when
+    deploying a newer image.
 examples:
   - name: Set the function app's deployment storage.
     text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-name MyStorageAccount --deployment-storage-container-name MyStorageContainer
   - name: Set the function app's deployment storage authentication method.
     text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-storage-auth-type userAssignedIdentity --deployment-storage-auth-value myAssignedId
+  - name: Run a public container image (Anonymous authentication).
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0 --deployment-image-auth-type Anonymous
+  - name: Pull a container image by digest with the app's system-assigned identity.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage@sha256:<digest> --deployment-image-auth-type SystemAssignedIdentity
+  - name: Pull the container image with a user-assigned identity.
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type UserAssignedIdentity --deployment-image-identity /subscriptions/<subscription-id>/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+  - name: Pull the container image with a username and password stored in app settings (Basic authentication).
+    text: az functionapp deployment config set --name MyFunctionApp --resource-group MyResourceGroup --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type Basic --deployment-image-username-setting REGISTRY_USERNAME --deployment-image-password-setting REGISTRY_PASSWORD
 """
 
 helps['functionapp deployment config show'] = """
 type: command
 short-summary: Get the details of a function app's deployment configuration.
+long-summary: >
+    For Registry deployment storage, shows the image reference and authentication type, with the user-assigned
+    identity resource ID or the names of the app settings that hold Basic credentials. Credential values aren't
+    retrieved or shown.
 examples:
   - name: Get the details of a function app's deployment configuration.
     text: az functionapp deployment config show --name MyFunctionApp --resource-group MyResourceGroup
@@ -624,6 +641,9 @@ short-summary: Manage a function app's runtime configuration.
 helps['functionapp runtime config set'] = """
 type: command
 short-summary: Update an existing function app's runtime configuration.
+long-summary: >
+    Registry deployment storage has no runtime. Use `az functionapp deployment config set` to update its container
+    image instead. This command updates the runtime for Flex apps using blob container deployment storage.
 examples:
   - name: Set the function app's runtime version.
     text: az functionapp runtime config set --name MyFunctionApp --resource-group MyResourceGroup --runtime-version 3.11
@@ -766,7 +786,9 @@ examples:
 helps['functionapp create'] = """
 type: command
 short-summary: Create a function app.
-long-summary: The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+long-summary: >
+    The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
+    Flex Consumption apps created with --deployment-image use the Recreate site update strategy by default.
 examples:
   - name: Create a basic function app.
     text: >
@@ -780,6 +802,9 @@ examples:
   - name: Create a flex consumption function app. See https://aka.ms/flex-http-concurrency for more information on default http concurrency values.
     text: >
         az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --runtime java --instance-memory 2048
+  - name: Create a flex consumption function app from an Azure Container Registry image using a system-assigned identity.
+    text: >
+        az functionapp create -g MyResourceGroup --name MyUniqueAppName -s MyStorageAccount --flexconsumption-location northeurope --deployment-image myregistry.azurecr.io/myimage:v1 --deployment-image-auth-type SystemAssignedIdentity --assign-identity [system] --role AcrPull --scope /subscriptions/<subscription-id>/resourceGroups/MyResourceGroup/providers/Microsoft.ContainerRegistry/registries/myregistry
 """
 
 helps['functionapp delete'] = """
@@ -1446,6 +1471,106 @@ examples:
 helps['webapp config'] = """
 type: group
 short-summary: Configure a web app.
+"""
+
+helps['webapp config egress'] = """
+type: group
+short-summary: Manage virtualized backend connections for a web app.
+"""
+
+helps['webapp config egress set'] = """
+type: command
+short-summary: Set the enabled state of a web app's egress configuration.
+long-summary: |
+  Read the existing egress configuration, update its enabled state, and write it back while
+  preserving all connections and their settings, identities, and credential injection configuration.
+  --enabled is required. Use --enabled true to enable virtual connections or --enabled false to disable them.
+  Add at least one connection with "az webapp config egress connection add" before enabling or disabling egress.
+  Manage individual connections with "az webapp config egress connection add" and
+  "az webapp config egress connection remove".
+examples:
+  - name: Enable virtual connections without modifying any connection definitions.
+    text: az webapp config egress set --resource-group MyRG --name MyApp --enabled true
+  - name: Disable virtual connections for a deployment slot while preserving its connections.
+    text: az webapp config egress set --resource-group MyRG --name MyApp --slot staging --enabled false
+  - name: Enable virtual connections using the flag without a value.
+    text: az webapp config egress set --resource-group MyRG --name MyApp --enabled
+"""
+
+helps['webapp config egress show'] = """
+type: command
+short-summary: Show the egress configuration for a web app.
+examples:
+  - name: Show the enabled state and all connections.
+    text: az webapp config egress show --resource-group MyRG --name MyApp
+  - name: Show only the connections for a deployment slot.
+    text: az webapp config egress show --resource-group MyRG --name MyApp --slot staging --query properties.connections
+"""
+
+helps['webapp config egress connection'] = """
+type: group
+short-summary: Manage named connections in a web app's egress configuration.
+"""
+
+helps['webapp config egress connection add'] = """
+type: command
+short-summary: Add or replace a named egress connection.
+long-summary: |
+  Preserve other connections and the enabled state. An existing connection with the same name
+  is replaced, regardless of casing. Only the supplied connection is returned.
+  If the enabled state is missing, initialize it to Disabled. Use "az webapp config egress set
+  --enabled true" to enable virtual connections after adding a connection.
+  Setting arguments accept existing setting names, not their values. The platform validates
+  protocol and authentication combinations. Managed identities must already be assigned to the app.
+examples:
+  - name: Add a SQL connection that uses managed identity and an existing connection string.
+    text: >-
+      az webapp config egress connection add --resource-group MyRG --name MyApp
+      --connection-name orders-db --source ConnectionStrings --protocol Tds --auth ManagedIdentity
+      --value-setting OrdersDb
+  - name: Add a PostgreSQL connection composed of separate app settings.
+    text: >-
+      az webapp config egress connection add --resource-group MyRG --name MyApp
+      --connection-name postgres --source AppSettings --protocol Postgres --auth Credential
+      --host-setting PG_HOST --username-setting PG_USER --credential-setting PG_PASSWORD
+  - name: Use a user-assigned identity with a custom token scope for a deployment slot.
+    text: >-
+      az webapp config egress connection add --resource-group MyRG --name MyApp --slot staging
+      --connection-name api --protocol Http --auth ManagedIdentity --host-setting API_HOST
+      --identity-resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+      --identity-scope https://storage.azure.com/.default
+  - name: Inject an HTTP credential using a header format.
+    text: >-
+      az webapp config egress connection add --resource-group MyRG --name MyApp
+      --connection-name api --protocol Http --auth Credential --host-setting API_HOST
+      --credential-setting API_TOKEN --credential-header Authorization --credential-format "Bearer {value}"
+"""
+
+helps['webapp config egress connection remove'] = """
+type: command
+short-summary: Remove a named egress connection.
+long-summary: |
+  Preserve other connections and the enabled state unless the last connection is removed.
+  Removing the last connection clears the entire egress configuration, including its enabled state.
+  A warning is shown and confirmation is required only when removing the last connection.
+  Use --yes or -y to skip confirmation for automation; the warning is still shown.
+examples:
+  - name: Remove the orders database connection.
+    text: az webapp config egress connection remove --resource-group MyRG --name MyApp --connection-name orders-db
+  - name: Remove a connection from a deployment slot.
+    text: az webapp config egress connection remove --resource-group MyRG --name MyApp --slot staging --connection-name cache
+  - name: Remove the last connection without prompting for confirmation.
+    text: az webapp config egress connection remove --resource-group MyRG --name MyApp --connection-name cache --yes
+"""
+
+helps['webapp config egress connection show'] = """
+type: command
+short-summary: Show a named egress connection.
+examples:
+  - name: Show the orders database connection.
+    text: az webapp config egress connection show --resource-group MyRG --name MyApp --connection-name orders-db
+  - name: Show the setting roles for a connection in a deployment slot.
+    text: az webapp config egress connection show --resource-group MyRG --name MyApp --slot staging --connection-name cache --query settings
 """
 
 helps['webapp config access-restriction'] = """
@@ -2403,6 +2528,15 @@ short-summary: List all scaled out instances of a web app or web app slot.
 helps['webapp list-runtimes'] = """
 type: command
 short-summary: List available built-in stacks which can be used for web apps.
+long-summary: The config field uses Framework:Version, which can be passed directly to --runtime.
+    Use ':' as the runtime separator in commands. Existing pipe-separated runtime input remains accepted.
+    The --runtime filter selects a family, such as python or dotnet, not a full Framework:Version value.
+    When a Linux web app runtime is rejected, run the suggested list-runtimes command to find supported runtime values.
+examples:
+  - name: List supported Python runtimes for Linux.
+    text: az webapp list-runtimes --os-type linux --runtime python --output table
+  - name: List runtime values that can be passed to --runtime.
+    text: az webapp list-runtimes --os-type linux --runtime dotnet --query "[].config" --output tsv
 """
 
 helps['functionapp list-runtimes'] = """
@@ -2871,53 +3005,18 @@ examples:
 
 helps['webapp up'] = """
 type: command
-short-summary: >
-    Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder
-    where the code is present. Current support includes Node, Python, .NET Core and ASP.NET. Node,
-    Python apps are created as Linux apps. .Net Core, ASP.NET, and static HTML apps are created as Windows apps.
-    Append the html flag to deploy as a static HTML app.
-    Each time the command is successfully run, default argument values for resource group, sku, location, plan, and name are saved for the current directory.
-    These defaults are then used for any arguments not provided on subsequent runs of the command in the same directory.  Use 'az configure' to manage defaults.
-    Run this command with the --debug parameter to see the API calls and parameters values being used.
+short-summary: Deprecated command.
 long-summary: |
-    Usage notes:
-    - If the app already exists, the existing SKU is kept. The --sku flag is ignored for existing apps.
-    - Use 'az webapp list-runtimes' to see available runtimes.
+    The 'az webapp up' command is deprecated and no longer supported for Azure App Service.
+    Use 'webapp create and webapp deploy' instead.
+
+    Invocations exit with an error without creating or deploying resources.
+    Legacy arguments are accepted only to report this error and are hidden from help.
 
 examples:
-  - name: View the details of the app that will be created, without actually running the operation
-    text: >
-        az webapp up --dryrun
-  - name: Create a web app with the default configuration, by running the command from the folder where the code to be deployed exists.
+  - name: Show the retirement message. This command exits with an error.
     text: >
         az webapp up
-  - name: Create a web app with a specified name
-    text: >
-        az webapp up -n MyUniqueAppName
-  - name: Deploy a Python app to Linux with explicit runtime and plan name.
-    text: >
-        az webapp up -n MyApp --runtime "PYTHON:3.14" --plan MyPlan --sku P1v3
-  - name: Deploy a .NET app to Linux (must specify --os-type linux).
-    text: >
-        az webapp up -n MyDotnetApp --runtime "DOTNETCORE:10.0" --os-type linux --plan MyPlan
-  - name: Create a web app with a specified name and a Java 11 runtime
-    text: >
-        az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
-  - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
-    text: >
-        az webapp up -l locationName
-  - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
-    text: >
-        az webapp up --logs
-  - name: Create a web app and deploy as a static HTML app.
-    text: >
-        az webapp up --html
-  - name: Create a web app with a specified domain name scope for unique hostname generation
-    text: >
-        az webapp up -n MyUniqueAppName --domain-name-scope TenantReuse
-  - name: Deploy with enriched error diagnostics on failure.
-    text: >
-        az webapp up --enriched-errors true
 """
 
 helps['webapp update'] = """

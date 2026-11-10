@@ -20,6 +20,9 @@ ISOLATED_V4_SKUS = [
     'I1MV4', 'I2MV4', 'I3MV4', 'I4MV4', 'I5MV4'
 ]
 FUNCTIONS_VERSIONS = ['4']
+EGRESS_PROTOCOLS = ['Http', 'Postgres', 'Redis', 'Tds']
+EGRESS_AUTH_TYPES = ['Credential', 'ManagedIdentity']
+EGRESS_SOURCES = ['AppSettings', 'ConnectionStrings']
 LOGICAPPS_NODE_RUNTIME_VERSIONS = ['~14', '~16', '~18']
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
@@ -146,6 +149,14 @@ LANGUAGE_EOL_DEPRECATION_NOTICES = {
 FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
 
 DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
+
+FLEX_REGISTRY_AUTH_TYPES = ['Anonymous', 'SystemAssignedIdentity', 'UserAssignedIdentity', 'Basic']
+
+FLEX_REGISTRY_API_VERSION = '2025-05-01'
+
+# Registry apps have no runtime stack to supply scale defaults.
+FLEX_DEFAULT_MAXIMUM_INSTANCE_COUNT = 1000
+FLEX_DEFAULT_INSTANCE_MEMORY_MB = 2048
 
 UPDATE_STRATEGY_TYPES = ['Recreate', 'RollingUpdate']
 
