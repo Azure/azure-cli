@@ -620,7 +620,7 @@ jobs:
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel build "setuptools>=78.1.1"
+  - bash: pip install --upgrade pip wheel build "setuptools>=78.1.1,<81"
     displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'

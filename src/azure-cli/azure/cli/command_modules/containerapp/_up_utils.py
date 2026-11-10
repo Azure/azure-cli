@@ -888,12 +888,20 @@ def _get_env_and_group_from_log_analytics(
 
 
 def _get_acr_from_image(cmd, app):
-    if app.image is not None and "azurecr.io" in app.image:
-        app.registry_server = app.image.split("/")[
-            0
-        ]  # TODO what if this conflicts with registry_server param?
-        parsed = urlparse(app.image)
-        registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
+    if app.image is not None:
+        registry_server = app.image.split("/", 1)[0]
+        if not is_acr_url(registry_server):
+            return
+        registry_name = get_acr_name(registry_server)
+        registry_parts = registry_name.split(".")
+        if len(registry_parts) == 3 and registry_parts[2].lower() == "geo":
+            registry_name, region, _ = registry_parts
+            if not region.isascii() or not region.isalnum():
+                return
+        if not registry_name.isascii() or not registry_name.isalnum():
+            return
+        registry_name = registry_name.lower()
+        app.registry_server = registry_server
         if app.registry_user is None or app.registry_pass is None:
             logger.info(
                 "No credential was provided to access Azure Container Registry. Trying to look up..."
@@ -976,6 +984,14 @@ def _get_registry_details(cmd, app: "ContainerApp", source):
         parsed = urlparse(app.registry_server)
         registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
         if app.registry_user is None or app.registry_pass is None:
+            acr_suffix = cmd.cli_ctx.cloud.suffixes.acr_login_server_endpoint
+            server = (parsed.netloc if parsed.scheme else parsed.path).lower()
+            if not server.endswith(acr_suffix) or "." in server[:-len(acr_suffix)]:
+                raise ValidationError(
+                    f"Registry server '{app.registry_server}' is not an Azure Container Registry. Use "
+                    "--registry-server, or pass --registry-username and --registry-password."
+                )
+            registry_name = server[:-len(acr_suffix)]
             registry_rg = _set_acr_creds(cmd, app, registry_name)
         else:
             registry_rg = _get_acr_rg(app)

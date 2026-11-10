@@ -19,6 +19,7 @@ from contextlib import contextmanager
 from dateutil.parser import parse
 
 import yaml
+from azure.cli.command_modules.acs import custom as acs_custom
 from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_POLICY_ADDON_NAME,
     CONST_CONTAINER_INSIGHTS_DEFAULT_SYSLOG_PORT,
@@ -98,6 +99,14 @@ from azure.cli.core.azclierror import (
 class AcsCustomCommandTest(unittest.TestCase):
     def setUp(self):
         self.cli = MockCLI()
+        # Synthetic archives contain fake executable bytes: never inspect them with host ldd.
+        for target, result in (
+            ('azure.cli.core.util.get_safe_executable_path', '/usr/bin/ldd'),
+            ('azure.cli.core.util.run_cmd', subprocess.CompletedProcess([], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)', '')),
+        ):
+            patcher = mock.patch(target, return_value=result)
+            patcher.start()
+            self.addCleanup(patcher.stop)
         self.models = AKSManagedClusterModels(MockCmd(self.cli), ResourceType.MGMT_CONTAINERSERVICE)
 
     def test_merge_credentials_non_existent(self):
@@ -1191,6 +1200,108 @@ class AcsCustomCommandTest(unittest.TestCase):
             release, '0.9.1', 'linux', 'x64')
         self.assertEqual(asset['name'], 'aks-desktop_0.9.1-1_amd64.deb')
 
+    def test_aks_install_desktop_arm64_package_compatibility(self):
+        deb = {'name': 'aks-desktop_0.9.1-1_arm64.deb'}
+        archive = {'name': 'aks-desktop-0.9.1-linux-arm64.tar.gz'}
+        cases = [
+            ({'DISPLAY': ':0'}, {'ID': 'debian'}, '/usr/bin/xdg-open', True, [deb, archive], deb),
+            ({'WAYLAND_DISPLAY': 'wayland-0'}, {'ID': 'ubuntu'}, '/usr/bin/xdg-open', True, [deb, archive], deb),
+            ({'DISPLAY': ':0'}, {'ID': 'mint', 'ID_LIKE': 'ubuntu debian'}, '/usr/bin/xdg-open', True, [deb, archive], deb),
+            ({}, {'ID': 'ubuntu'}, '/usr/bin/xdg-open', True, [deb, archive], archive),
+            ({'DISPLAY': ':0'}, {'ID': 'fedora'}, '/usr/bin/xdg-open', True, [deb, archive], archive),
+            ({'DISPLAY': ':0'}, {}, '/usr/bin/xdg-open', True, [deb, archive], archive),
+            ({'DISPLAY': ':0'}, {'ID': 'ubuntu'}, None, True, [deb, archive], archive),
+            ({'DISPLAY': ':0'}, {'ID': 'ubuntu'}, '/usr/bin/xdg-open', False, [deb, archive], archive),
+            ({'DISPLAY': ':0'}, {'ID': 'ubuntu'}, '/usr/bin/xdg-open', True, [archive], archive),
+        ]
+        for environment, distro, launcher, prefer_deb, assets, expected in cases:
+            with self.subTest(environment=environment, distro=distro, launcher=launcher, assets=assets,
+                              prefer_deb=prefer_deb), mock.patch.dict(os.environ, environment, clear=True), \
+                    mock.patch('platform.freedesktop_os_release', return_value=distro), \
+                    mock.patch('shutil.which', return_value=launcher):
+                self.assertEqual(_select_aks_desktop_asset(
+                    {'assets': assets}, '0.9.1', 'linux', 'arm64', prefer_deb=prefer_deb), expected)
+        with mock.patch.dict(os.environ, {'DISPLAY': ':0'}), \
+                mock.patch('platform.freedesktop_os_release', return_value={'ID': 'debian'}), \
+                mock.patch('shutil.which', return_value='/usr/bin/xdg-open'):
+            with self.assertRaisesRegex(ClientRequestError, 'multiple artifacts'):
+                _select_aks_desktop_asset({'assets': [deb, deb, archive]}, '0.9.1', 'linux', 'arm64')
+            armv7_archive = {'name': 'aks-desktop-0.9.1-linux-armv7l.tar.gz'}
+            self.assertEqual(_select_aks_desktop_asset(
+                {'assets': [{'name': 'aks-desktop_0.9.1-1_armhf.deb'}, armv7_archive]},
+                '0.9.1', 'linux', 'armv7l'), armv7_archive)
+        with mock.patch.dict(os.environ, {'DISPLAY': ':0'}), \
+                mock.patch('platform.freedesktop_os_release', side_effect=OSError('unavailable')):
+            self.assertEqual(_select_aks_desktop_asset(
+                {'assets': [deb, archive]}, '0.9.1', 'linux', 'arm64'), archive)
+
+    def test_aks_install_desktop_dependency_missing_libraries(self):
+        for status in (0, 1):
+            for stream in ('stdout', 'stderr', 'both'):
+                output = ('\tlibnspr4.so => not found\nlibnss3.so => not found\n'
+                          'libasound.so.2 => not found\nlibnspr4.so => not found\n')
+                result = subprocess.CompletedProcess(
+                    [], status, output if stream != 'stderr' else '', output if stream != 'stdout' else '')
+                with self.subTest(status=status, stream=stream), \
+                        mock.patch('azure.cli.core.util.run_cmd', return_value=result), \
+                        self.assertRaises(ValidationError) as error:
+                    acs_custom._check_aks_desktop_dependencies('/staged/aks-desktop')
+                message = str(error.exception)
+                self.assertIn('libasound.so.2, libnspr4.so, libnss3.so', message)
+                self.assertEqual(message.count('libnspr4.so'), 1)
+                self.assertIn('Install the packages that provide these library files, then retry.', message)
+
+    def test_aks_install_desktop_dependency_inspection_arguments(self):
+        environment = {'LC_ALL': 'fr_FR.UTF-8', 'LD_LIBRARY_PATH': '/custom/lib', 'PATH': '/usr/bin'}
+        with mock.patch.dict(os.environ, environment, clear=True), \
+                mock.patch('azure.cli.core.util.get_safe_executable_path', return_value='/usr/bin/ldd') as resolve, \
+                mock.patch('azure.cli.core.util.run_cmd', return_value=subprocess.CompletedProcess(
+                    [], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)\n', '')) as run, \
+                mock.patch.object(acs_custom.logger, 'warning') as warning:
+            acs_custom._check_aks_desktop_dependencies('relative app/aks-desktop')
+            resolve.assert_called_once_with('ldd')
+            run.assert_called_once_with(
+                ['/usr/bin/ldd', os.path.abspath('relative app/aks-desktop')],
+                capture_output=True, encoding='utf-8', check=False, timeout=30,
+                env={**environment, 'LC_ALL': 'C'})
+            warning.assert_not_called()
+            self.assertEqual(dict(os.environ), environment)
+
+    def test_aks_install_desktop_inconclusive_inspection_warns_and_launches(self):
+        cases = [
+            (None, None),
+            ('/usr/bin/ldd', FileNotFoundError('ldd disappeared')),
+            ('/usr/bin/ldd', OSError('inspection failed')),
+            ('/usr/bin/ldd', subprocess.TimeoutExpired(['/usr/bin/ldd'], 30)),
+            ('/usr/bin/ldd', UnicodeDecodeError('utf-8', b'\xff', 0, 1, 'invalid byte')),
+            ('/usr/bin/ldd', UnicodeError('unusable output')),
+            ('/usr/bin/ldd', subprocess.CompletedProcess([], 1, '', 'not a dynamic executable')),
+            ('/usr/bin/ldd', subprocess.CompletedProcess([], 1, 'libc.so.6 => /lib/libc.so.6 (0x1)', '')),
+            ('/usr/bin/ldd', subprocess.CompletedProcess([], 0, '', '')),
+            ('/usr/bin/ldd', subprocess.CompletedProcess([], 0, 'unexpected output', '')),
+            ('/usr/bin/ldd', subprocess.CompletedProcess([], 0, 'warning: libfake.so => not found', '')),
+        ]
+        for resolver, result in cases:
+            with self.subTest(resolver=resolver, result=result), tempfile.TemporaryDirectory() as temp_dir:
+                archive_path = os.path.join(temp_dir, 'installer.tar.gz')
+                self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
+                with mock.patch('os.path.expanduser', return_value=temp_dir), \
+                        mock.patch('azure.cli.core.util.get_safe_executable_path', return_value=resolver), \
+                        mock.patch('azure.cli.core.util.run_cmd',
+                                   **({'side_effect': result} if isinstance(result, Exception)
+                                      else {'return_value': result})) as run, \
+                        mock.patch('subprocess.Popen') as popen, \
+                        self.assertLogs(acs_custom.logger.name, level='WARNING') as logs:
+                    _launch_aks_desktop_installer(archive_path, 'linux', '0.9.1')
+                executable = os.path.join(temp_dir, '.local', 'share', 'aks-desktop', '0.9.1', 'aks-desktop')
+                with open(executable, 'rb') as installed:
+                    self.assertEqual(installed.read(), b'executable')
+                popen.assert_called_once_with([executable])
+                self.assertTrue(any('dependencies' in line and 'launch' in line for line in logs.output))
+                self.assertEqual(os.listdir(os.path.dirname(os.path.dirname(executable))), ['0.9.1'])
+                if resolver is None:
+                    run.assert_not_called()
+
     def test_aks_install_desktop_linux_package_compatibility(self):
         deb = 'aks-desktop_0.9.1-1_amd64.deb'
         archive = 'aks-desktop-0.9.1-linux-x64.tar.gz'
@@ -1912,10 +2023,17 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom.subprocess.run')
     def test_aks_install_desktop_launches_without_shell(self, mock_run):
-        _launch_aks_desktop_installer(
-            'aks-desktop-0.9.1-win-x64.exe', 'win', '0.9.1')
-        mock_run.assert_called_once_with(
-            ['aks-desktop-0.9.1-win-x64.exe'], check=True)
+        cases = [
+            ('win', 'aks-desktop-0.9.1-win-x64.exe', []),
+            ('mac', 'aks-desktop-0.9.1-mac-arm64.dmg', ['open']),
+            ('linux', 'aks-desktop_0.9.1-1_arm64.deb', ['xdg-open']),
+        ]
+        for system, installer, launcher in cases:
+            with self.subTest(system=system), mock.patch('azure.cli.core.util.run_cmd') as inspection:
+                _launch_aks_desktop_installer(installer, system, '0.9.1')
+                mock_run.assert_called_once_with(launcher + [installer], check=True)
+                inspection.assert_not_called()
+                mock_run.reset_mock()
 
     def test_aks_install_desktop_retains_gui_installer(self):
         cases = [
