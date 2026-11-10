@@ -124,7 +124,7 @@ class ImportProfileDetectionTests(TestCase):
 
     def test_explicit_default_and_unmarked_files_keep_default_behavior(self):
         for profile, data in ((None, {"Example": "value"}),
-                              (ImportExportProfiles.DEFAULT, self.data)):
+                              (ImportExportProfiles.DEFAULT, {"Example": "value"})):
             self.data = data
             self.write_file()
             with patch.object(keyvalue, "get_appconfig_data_client", return_value=Mock()), \
@@ -133,6 +133,32 @@ class ImportProfileDetectionTests(TestCase):
                 with self.assertRaisesRegex(RuntimeError, "default reader"):
                     keyvalue.import_config(None, "file", path=self.path, format_="json", profile=profile)
                 importer.assert_not_called()
+
+    def test_explicit_kv_profile_must_match_file_before_connecting(self):
+        for explicit, embedded in (
+                (ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET),
+                (ImportExportProfiles.KVSET, ImportExportProfiles.DEFAULT),
+                (ImportExportProfiles.KVSET, ImportExportProfiles.FFSET)):
+            with self.subTest(explicit=explicit, embedded=embedded):
+                self.data = {"profile": embedded, "items": []}
+                self.write_file()
+                with patch.object(keyvalue, "get_appconfig_data_client") as client:
+                    with self.assertRaisesRegex(InvalidArgumentValueError, "conflicts with the file profile"):
+                        keyvalue.import_config(None, "file", path=self.path, format_="json", profile=explicit)
+                    result = get_default_cli().invoke([
+                        "appconfig", "kv", "import", "--name", "Destination", "--source", "file",
+                        "--format", "json", "--path", self.path, "--profile", explicit, "--yes",
+                    ])
+                    self.assertNotEqual(0, result)
+                    client.assert_not_called()
+
+    def test_matching_explicit_kvset_profile_imports(self):
+        self.write_file()
+        with patch.object(keyvalue, "get_appconfig_data_client", return_value=Mock()), \
+                patch.object(keyvalue, "__import_kvset_from_file") as importer:
+            keyvalue.import_config(None, "file", path=self.path, format_="json",
+                                   profile=ImportExportProfiles.KVSET, yes=True)
+            importer.assert_called_once()
 
     def test_malformed_file_reports_error_before_connecting(self):
         with open(self.path, "w", encoding="utf-8") as target:

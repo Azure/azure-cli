@@ -339,10 +339,24 @@ class EnhancedFeatureImportExportTests(TestCase):
         self.assertEqual(self.resource, transfers._serialize_flag(
             self.client.set_feature_flag.call_args.args[0]))
         self.write_file({"profile": ImportExportProfiles.FFSET,
+                         "items": [self.resource],
                          "feature_management": {"feature_flags": [{"id": "Beta", "enabled": False}]}})
-        transfers.import_feature_flags(None, "file", path=self.path, format_="json",
-                                       profile=ImportExportProfiles.DEFAULT, yes=True)
-        self.assertEqual("Beta", self.client.set_feature_flag.call_args.args[0].name)
+        with self.assertRaisesRegex(InvalidArgumentValueError, "conflicts with the file profile"):
+            transfers.import_feature_flags(None, "file", path=self.path, format_="json",
+                                           profile=ImportExportProfiles.DEFAULT, yes=True)
+
+    def test_explicit_feature_profiles_reject_conflicts_before_connecting(self):
+        for format_ in ("json", "yaml"):
+            for explicit, embedded in (
+                    (ImportExportProfiles.DEFAULT, ImportExportProfiles.FFSET),
+                    (ImportExportProfiles.FFSET, ImportExportProfiles.DEFAULT),
+                    (ImportExportProfiles.FFSET, ImportExportProfiles.KVSET)):
+                with self.subTest(format_=format_, explicit=explicit, embedded=embedded):
+                    self.write_file({"profile": embedded, "items": [self.resource]}, format_)
+                    with self.assertRaisesRegex(InvalidArgumentValueError, "conflicts with the file profile"):
+                        transfers.import_feature_flags(None, "file", path=self.path, format_=format_,
+                                                       profile=explicit, yes=True)
+                    self.get_client.assert_not_called()
 
     def test_ffset_envelope_requires_items_array(self):
         for data in ({}, {"items": {}}, {"items": None}):

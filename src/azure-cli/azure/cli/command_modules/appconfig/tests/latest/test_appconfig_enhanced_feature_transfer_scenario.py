@@ -11,6 +11,7 @@ from types import SimpleNamespace
 
 import yaml
 from azure.core.exceptions import HttpResponseError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
@@ -148,8 +149,9 @@ class AppConfigEnhancedFeatureTransferScenarioTest(ScenarioTest):
 
             with open(ffset_json, "w", encoding="utf-8") as target:
                 json.dump(dict(resource_set, profile="appconfig/default"), target)
-            self._import(destination_endpoint, ffset_json,
-                         options="--profile appconfig/ffset --preserve-labels")
+            with self.assertRaisesRegex(InvalidArgumentValueError, "conflicts with the file profile"):
+                self._import(destination_endpoint, ffset_json,
+                             options="--profile appconfig/ffset --preserve-labels")
             after_override = self._export(destination_endpoint, destination_json,
                                           options='--profile appconfig/ffset --label "*"')
             self.assertEqual(imported, after_override)

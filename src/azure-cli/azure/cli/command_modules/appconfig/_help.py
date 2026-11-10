@@ -169,7 +169,7 @@ long-summary: |
   Use --profile appconfig/ffset for an items array of enhanced /ff resource objects with name,
   optional labels and tags, conditions.filters and variants.value/content_type.
   The export embeds profile: appconfig/ffset alongside items. Import detects it when --profile is omitted.
-  Explicit --profile takes precedence. Older bare arrays still require --profile appconfig/ffset.
+  An explicit --profile must agree with the file profile. Older bare arrays still require --profile appconfig/ffset.
   Legacy .NET feature-management and KVSet schemas are not supported. Read-only etag and last_modified
   properties are ignored. Labels default to null unless --label or --preserve-labels is specified.
   This command requires the enhanced feature flag client introduced with the enhanced-feature-flag command group.
@@ -248,7 +248,7 @@ type: command
 short-summary: Import configurations into your App Configuration store from another place.
 long-summary: |
   If --profile is omitted, use the profile embedded in a JSON file, otherwise use appconfig/default.
-  Explicit --profile takes precedence. Older KVSet files without profile metadata still require
+  An explicit --profile must agree with the file profile. Older KVSet files without profile metadata still require
   --profile appconfig/kvset. Detected profiles enforce the same argument restrictions as explicit profiles.
 examples:
   - name: Import all keys and feature flags from a file and apply test label.
