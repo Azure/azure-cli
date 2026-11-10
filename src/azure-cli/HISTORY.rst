@@ -130,7 +130,7 @@ Release History
 * `az postgres flexible-server create/update`: Add `--fips-mode` to enable or disable FIPS mode (#34288)
 * `az postgres flexible-server deploy`: Fix external tool invocation on Windows (#34329)
 * `az postgres flexible-server deploy`: Resolve deployment tool paths consistently (#34308)
-* `az postgres flexible server create | update': Add support for storage autogrow with Premium SSD v2 (#34384)
+* `az postgres flexible-server create/update`: Add support for storage autogrow with Premium SSD v2 (#34384)
 * `az postgres flexible-server deploy setup`: Fix GitHub Actions setup input and error handling (#34390)
 
 **Relay**
