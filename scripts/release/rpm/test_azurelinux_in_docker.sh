@@ -14,10 +14,10 @@ time az self-test
 time az --version
 
 cd /azure-cli/
-# Cap setuptools<81: 81 removes setup.py --dry-run and changes distutils command signatures (82 removes pkg_resources).
-# scripts/ci/build.sh builds with `python -m build --no-isolation`, so this pin is the setuptools the build uses.
-# `build` is the PEP 517 frontend that script invokes.
-python -m pip install --upgrade "setuptools<81" build
+export PIP_CONSTRAINT=/azure-cli/.azure-pipelines/pytest-constraints.txt
+# Provision build and setuptools for scripts/ci/build.sh's --no-isolation builds,
+# keeping setuptools at or above the security floor.
+python -m pip install --upgrade "setuptools>=78.1.1" build
 ./scripts/ci/build.sh
 
 # From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.
@@ -25,11 +25,11 @@ python -m pip install --upgrade "setuptools<81" build
 # Ref https://docs.fedoraproject.org/en-US/fedora/latest/release-notes/developers/Development_Python/#_pipsetup_py_installation_with_prefix
 export RPM_BUILD_ROOT=/
 
-pip install pytest --prefix /usr/lib64/az
-pip install pytest-xdist --prefix /usr/lib64/az
-pip install pytest-forked --prefix /usr/lib64/az
+python -m pip install pytest --prefix /usr/lib64/az
+python -m pip install pytest-xdist --prefix /usr/lib64/az
+python -m pip install pytest-forked --prefix /usr/lib64/az
 
-find /azure-cli/artifacts/build -name "azure_cli_testsdk*" | xargs pip install --prefix /usr/lib64/az --upgrade --ignore-installed
-find /azure-cli/artifacts/build -name "azure_cli_fulltest*" | xargs pip install --prefix /usr/lib64/az --upgrade --ignore-installed --no-deps
+find /azure-cli/artifacts/build -name "azure_cli_testsdk*" | xargs python -m pip install --prefix /usr/lib64/az --upgrade --ignore-installed
+find /azure-cli/artifacts/build -name "azure_cli_fulltest*" | xargs python -m pip install --prefix /usr/lib64/az --upgrade --ignore-installed --no-deps
 
 python /azure-cli/scripts/release/rpm/test_rpm_package.py

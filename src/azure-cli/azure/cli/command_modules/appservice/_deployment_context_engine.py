@@ -14,6 +14,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from ._deployment_failure_patterns import match_failure_pattern
+from .utils import get_linux_runtime_list_command
 
 logger = get_logger(__name__)
 
@@ -349,6 +350,11 @@ def build_enriched_webapp_create_error_context(*, resource_group_name=None, weba
         context["errorCode"] = pattern["errorCode"]
         context["stage"] = pattern["stage"]
         context["suggestedFixes"] = pattern["suggestedFixes"]
+        if pattern["errorCode"] == "InvalidLinuxRuntime":
+            context["suggestedFixes"] = [
+                "List supported Linux runtimes: '{}'".format(get_linux_runtime_list_command(runtime)),
+                *pattern["suggestedFixes"][1:],
+            ]
     else:
         context["errorCode"] = f"HTTP_{status_code}" if status_code else "UnknownWebAppCreateError"
         context["stage"] = "ResourceProvisioning"

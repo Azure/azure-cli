@@ -889,7 +889,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
 # region VirtualMachines
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches, broad-except
-def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_v5', location=None, tags=None,
+def create_vm(cmd, vm_name, resource_group_name, image=None, size=None, location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None, computer_name=None,
               admin_username=None, ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
               availability_set=None, nics=None, nsg=None, nsg_rule=None, accelerated_networking=None,
@@ -929,7 +929,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, add_proxy_agent_extension=None, disk_iops_read_write=None,
               disk_mbps_read_write=None, zone_movement=None,
-              os_disk_storage_fault_domain_alignment=None, data_disk_storage_fault_domain_alignment=None):
+              os_disk_storage_fault_domain_alignment=None, data_disk_storage_fault_domain_alignment=None,
+              preferred_size=None):
 
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1165,7 +1166,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension,
         disk_iops_read_write=disk_iops_read_write, disk_mbps_read_write=disk_mbps_read_write,
         zone_movement=zone_movement, os_disk_storage_fault_domain_alignment=os_disk_storage_fault_domain_alignment,
-        data_disk_storage_fault_domain_alignment=data_disk_storage_fault_domain_alignment)
+        data_disk_storage_fault_domain_alignment=data_disk_storage_fault_domain_alignment,
+        preferred_size=preferred_size)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1770,11 +1772,12 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_all_instance_down=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None,
               wire_server_use_local_file_rules=None, imds_mode=None, add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None, zone_movement=None, zone=None, **kwargs):
+              key_incarnation_id=None, zone_movement=None, zone=None, preferred_size=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
     from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
     vm = kwargs['parameters']
+    flex_profile_removed = 'flexProfile' not in vm
     vm = vm_convert_show_result_to_snake_case(vm)
 
     if wire_server_access_control_profile_reference_id is not None or \
@@ -1984,13 +1987,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             if vm.get("storage_profile", {}).get("os_disk", {}).get("os_type", None) is not None else None
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
-    if size is not None:
-        if vm.get("hardware_profile", {}).get("vm_size", None) == size:
-            logger.warning("VM size is already %s", size)
-        else:
-            if vm.get("hardware_profile", None) is None:
-                vm["hardware_profile"] = {}
-            vm["hardware_profile"]["vm_size"] = size
+    if size is not None and vm.get("hardware_profile", {}).get("vm_size", None) == size:
+        logger.warning("VM size is already %s", size)
 
     if v_cpus_available is not None:
         if vm.get("hardware_profile", None) is None:
@@ -2080,6 +2078,24 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         if vm["resiliency_profile"].get("zone_movement") is None:
             vm["resiliency_profile"]["zone_movement"] = {}
         vm["resiliency_profile"]["zone_movement"]["is_enabled"] = zone_movement
+
+    if flex_profile_removed:
+        vm.pop("flex_profile", None)
+
+    if size is not None:
+        if vm.get("hardware_profile") is None:
+            vm["hardware_profile"] = {}
+        vm["hardware_profile"]["vm_size"] = size
+
+    if preferred_size is not None:
+        if vm.get("flex_profile") is None:
+            vm["flex_profile"] = {}
+        vm["flex_profile"]["preferred_vm_size"] = preferred_size
+        hardware_profile = vm.get("hardware_profile")
+        if hardware_profile is not None:
+            hardware_profile.pop("vm_size", None)
+        if not hardware_profile:
+            vm.pop("hardware_profile", None)
 
     # Zone move orchestration: force deallocate → PUT with new zone → start
     zone_change = False

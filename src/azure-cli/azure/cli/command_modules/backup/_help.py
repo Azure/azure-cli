@@ -32,6 +32,10 @@ short-summary: Register a Resource to the given Recovery Services Vault.
 examples:
   - name: This command allows Azure Backup to convert the 'Resource' to a 'Backup Container' which is then registered to the given Recovery services vault. The Azure Backup service can then discover workloads of the given workload type within this container to be protected later.
     text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --resource-id MyResourceId --workload-type MSSQL --backup-management-type AzureWorkload
+  - name: Register a storage account for Azure Files backup using the vault's system-assigned managed identity.
+    text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --workload-type AzureFileShare --backup-management-type AzureStorage --access-type IdentityBased --mi-system-assigned
+  - name: Re-register a storage account with a user-assigned managed identity without prompting.
+    text: az backup container register --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --workload-type AzureFileShare --backup-management-type AzureStorage --access-type IdentityBased --mi-user-assigned MyIdentityResourceId --yes
 """
 
 helps['backup container re-register'] = """
@@ -306,6 +310,8 @@ short-summary: Start protecting a previously unprotected Azure File share within
 examples:
   - name: Start protecting a previously unprotected Azure File share within an Azure Storage account as per the specified policy to a Recovery services vault. Provide the Azure File share name and the parent storage account name.
     text: az backup protection enable-for-azurefileshare --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --azure-file-share MyAzureFileShare
+  - name: Protect an Azure file share using a user-assigned managed identity.
+    text: az backup protection enable-for-azurefileshare --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault --storage-account MyStorageAccount --azure-file-share MyAzureFileShare --access-type IdentityBased --mi-user-assigned MyIdentityResourceId
 """
 
 helps['backup protection undelete'] = """
@@ -323,7 +329,9 @@ type: command
 short-summary: Start protecting a previously unprotected workload within an Azure VM as per the specified policy to a Recovery services vault. Provide the workload details as a protectable item.
 examples:
   - name: Start protecting a previously unprotected workload within an Azure VM as per the specified policy to a Recovery services vault. Provide the workload details as a protectable item.
-    text: az backup protection enable-for-azurewl --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault --protectable-item-name ItemName --protectable-item-type SQLInstance --server-name Myserver --workload-type MSSQL
+    text: az backup protection enable-for-azurewl --policy-name MyPolicy --resource-group MyResourceGroup --vault-name MyVault --protectable-item-name ItemName --protectable-item-type SQLDatabase --server-name Myserver --workload-type MSSQL
+  - name: Protect selected databases under a SQL instance snapshot policy.
+    text: az backup protection enable-for-azurewl --policy-name SqlInstanceSnapshotPolicy --resource-group MyResourceGroup --vault-name MyVault --protectable-item-name "SQLInstance;mssqlserver" --protectable-item-type SQLInstance --server-name MyServer --workload-type SQLInstance --child-database-names Database1 Database2
 """
 
 helps['backup protection auto-enable-for-azurewl'] = """
@@ -366,9 +374,21 @@ short-summary: Manage recovery configuration of an Azure workload backed up item
 helps['backup recoveryconfig show'] = """
 type: command
 short-summary: Construct the recovery configuration of an Azure workload backed up item.
+long-summary: >
+    For SQL snapshot restores, provide --snapshot-rg and --identity-arm-id. Inspect the generated
+    target_physical_path entries and edit target_path only for volumes that need remapping.
+    Use --recovery-mode SnapshotAttach to attach snapshot disks without recovering databases,
+    or SnapshotAttachAndRecover to recover databases. Use --no-recovery-mode to leave databases
+    in the restoring state. For cross-region restore, generate the configuration normally and specify
+    --use-secondary-region only when submitting it with az backup restore restore-azurewl.
+    Configuration generation reads primary-region metadata. Select a recovery point available in the
+    secondary region and the intended target instance, disk resource group and managed identity for
+    that region. Restore validates the snapshot and log availability in the secondary region.
 examples:
   - name: Construct the recovery configuration of an Azure workload backed up item. The configuration object stores all details such as the recovery mode, target destinations for the restore and application specific parameters like target physical paths for SQL.
     text: az backup recoveryconfig show --container-name MyContainer --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault --restore-mode OriginalWorkloadRestore
+  - name: Generate a SQL instance snapshot original-location recovery configuration.
+    text: az backup recoveryconfig show --container-name MyContainer --item-name "SQLInstance;mssqlserver" --resource-group MyResourceGroup --vault-name MyVault --workload-type SQLInstance --rp-name MySnapshotRp --restore-mode OriginalWorkloadRestore --recovery-mode SnapshotAttachAndRecover --snapshot-rg RestoreResourceGroup --identity-arm-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/IdentityResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity"
 """
 
 helps['backup recoverypoint'] = """
@@ -383,6 +403,8 @@ examples:
   - name: List all recovery points of a backed up item. (autogenerated)
     text: az backup recoverypoint list --container-name MyContainer --backup-management-type AzureIaasVM --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault
     crafted: true
+  - name: Get the latest SQL instance snapshot recovery point.
+    text: az backup recoverypoint list --container-name MyContainer --item-name "SQLInstance;mssqlserver" --resource-group MyResourceGroup --vault-name MyVault --backup-management-type AzureWorkload --workload-type SQLInstance --restore-point-query-type Snapshot --get-latest-recovery-point-only true
 """
 
 helps['backup recoverypoint move'] = """
@@ -408,6 +430,8 @@ short-summary: List the start and end points of the unbroken log chain(s) of the
 examples:
   - name: List the start and end points of the unbroken log chain(s) of the given backup item. Use it to determine whether the point-in-time, to which the user wants the DB to be restored, is valid or not.
     text: az backup recoverypoint show-log-chain --container-name MyContainer --backup-management-type AzureWorkload --item-name MyItem --resource-group MyResourceGroup --vault-name MyVault
+  - name: Query database log ranges on top of a SQL instance snapshot. Use the instance ProtectedItemDataSourceId as the base datasource.
+    text: az backup recoverypoint show-log-chain --container-name MyContainer --backup-management-type AzureWorkload --item-name "SQLDataBase;mssqlserver;MyDatabase" --resource-group MyResourceGroup --vault-name MyVault --workload-type MSSQL --recovery-mode SnapshotAttachAndRecover --base-snapshot-recovery-point-id MySnapshotRp --base-recovery-point-datasource-id MyInstanceDatasourceId
 """
 
 helps['backup restore'] = """
@@ -469,6 +493,10 @@ short-summary: Restore backed up Azure file shares to the same file-share or ano
 examples:
   - name: Restore backed up Azure file shares to the same file-share or another file-share in registered storage accounts.
     text: az backup restore restore-azurefileshare --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation
+  - name: Restore an Azure file share to an alternate location using the vault's system-assigned managed identity.
+    text: az backup restore restore-azurefileshare --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode AlternateLocation --target-storage-account MyTargetStorageAccount --target-file-share MyTargetFileShare --mi-system-assigned
+  - name: Restore an Azure file share across both region and subscription.
+    text: az backup restore restore-azurefileshare --resource-group MyResourceGroup --vault-name MyVault --container-name MySecondaryRegionContainer --item-name MySecondaryRegionItem --rp-name MySecondaryRegionRecoveryPoint --resolve-conflict Overwrite --restore-mode AlternateLocation --target-subscription-id MyTargetSubscription --target-resource-group-name MyTargetResourceGroup --target-storage-account MyTargetStorageAccount --target-file-share MyTargetFileShare --use-secondary-region
 """
 
 helps['backup restore restore-azurefiles'] = """
@@ -477,14 +505,23 @@ short-summary: Restore backed up Azure files within a file-share to the same fil
 examples:
   - name: Restore backed up Azure files within a file-share to the same file-share or another file-share in registered storage accounts.
     text: az backup restore restore-azurefiles --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation --source-file-type File --source-file-path Filepath1 Filepath2
+  - name: Restore selected Azure files using a user-assigned managed identity.
+    text: az backup restore restore-azurefiles --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode AlternateLocation --target-storage-account MyTargetStorageAccount --target-file-share MyTargetFileShare --source-file-type File --source-file-path Filepath1 --mi-user-assigned MyIdentityResourceId
 """
 
 helps['backup restore restore-azurewl'] = """
 type: command
 short-summary: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
+long-summary: >
+    SQL snapshot cross-region restores support SnapshotAttach and SnapshotAttachAndRecover, including
+    point-in-time recovery. Generate the recovery configuration normally and specify
+    --use-secondary-region only when submitting the restore. The vault must support cross-region restore and the
+    selected recovery point must be available in the secondary region.
 examples:
   - name: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
     text: az backup restore restore-azurewl --resource-group MyResourceGroup --vault-name MyVault --recovery-config MyRecoveryConfig
+  - name: Submit a SQL snapshot restore using a secondary-region recovery configuration.
+    text: az backup restore restore-azurewl --resource-group MyResourceGroup --vault-name MyVault --recovery-config secondary-recovery-config.json --use-secondary-region
 """
 
 helps['backup vault'] = """

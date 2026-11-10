@@ -721,6 +721,21 @@ class TestWebappCreateEnrichment(unittest.TestCase):
         self.assertIn("acceptable values listed in Raw Error", context["suggestedFixes"][0])
         self.assertIn("remove --min-tls-cipher-suite", context["suggestedFixes"][1])
 
+    def test_invalid_runtime_context_has_family_specific_command_without_mutating_pattern(self):
+        for runtime, expected_filter in (('PYTHON:99.99', ' --runtime python'),
+                                         ('TOMCAT|99-java99', ' --runtime java'),
+                                         ('unknown:99', '')):
+            with self.subTest(runtime=runtime):
+                context = build_enriched_webapp_create_error_context(
+                    runtime=runtime, error_message="Linux Runtime is not supported")
+                self.assertEqual(
+                    context["suggestedFixes"][0],
+                    "List supported Linux runtimes: 'az webapp list-runtimes --os-type linux{}'"
+                    .format(expected_filter))
+        pattern = match_webapp_create_failure_pattern(error_message="Linux Runtime is not supported")
+        self.assertEqual(pattern["suggestedFixes"][0],
+                         "List supported Linux runtimes: 'az webapp list-runtimes --os-type linux -o table'")
+
     def test_unknown_error_has_property_focused_fixes(self):
         context = build_enriched_webapp_create_error_context(
             status_code=400,

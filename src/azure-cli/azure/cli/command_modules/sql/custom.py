@@ -13,8 +13,11 @@ from azure.core.exceptions import HttpResponseError
 from azure.cli.core.util import (
     CLIError,
     sdk_no_wait,
+    user_confirmation,
+    todict,
 )
 from azure.cli.core.azclierror import (
+    MutuallyExclusiveArgumentError,
     ResourceNotFoundError,
     ValidationError,
     AzCLIError,
@@ -52,8 +55,6 @@ from azure.mgmt.sql.models import (
     ManagedInstanceKey,
     ManagedInstanceLongTermRetentionPolicyName,
     ManagedInstancePairInfo,
-    ManagedShortTermRetentionPolicyName,
-    OutboundFirewallRule,
     PartnerInfo,
     PartnerRegionInfo,
     PerformanceLevelUnit,
@@ -63,6 +64,7 @@ from azure.mgmt.sql.models import (
     SecurityAlertPolicyState,
     SensitivityLabel,
     SensitivityLabelSource,
+    Server,
     ServerAzureADOnlyAuthentication,
     ServerConnectionPolicy,
     ServerCreateMode,
@@ -73,7 +75,6 @@ from azure.mgmt.sql.models import (
     ServerNetworkAccessFlag,
     ServerTrustGroup,
     ServicePrincipal,
-    ShortTermRetentionPolicyName,
     Sku,
     StorageKeyType,
     TransparentDataEncryptionName,
@@ -153,7 +154,8 @@ def _get_location_capability(cli_ctx, location, group):
     '''
 
     capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
-    location_capability = capabilities_client.list_by_location(location, group)
+    # SQL SDK 5.0 makes the capability filter keyword-only.
+    location_capability = capabilities_client.list_by_location(location, include=group)
     _assert_capability_available(location_capability)
     return location_capability
 
@@ -1143,6 +1145,12 @@ def _validate_elastic_pool_id(
     return elastic_pool_id
 
 
+def restorable_databases_list(client, resource_group_name, server_name, skiptoken=None, top=None):
+    """Get a list of restorable dropped databases."""
+    # Call the bound SDK 5.0 method so its validation decorator receives self and paging stays keyword-only.
+    return client.list_by_server(resource_group_name, server_name, skiptoken=skiptoken, top=top)
+
+
 def restorable_databases_get(
     client,
     server_name,
@@ -1161,7 +1169,8 @@ def restorable_databases_get(
     elif expand_keys:
         expand = 'keys'
 
-    return client.get(resource_group_name, server_name, restorable_dropped_database_id, expand)
+    # SQL SDK 5.0 makes optional query parameters keyword-only.
+    return client.get(resource_group_name, server_name, restorable_dropped_database_id, expand=expand)
 
 
 def recoverable_databases_get(
@@ -1188,6 +1197,7 @@ def recoverable_databases_get(
 
 
 def db_get(
+        cmd,
         client,
         database_name,
         server_name,
@@ -1204,7 +1214,14 @@ def db_get(
     elif expand_keys:
         expand = 'keys'
 
-    return client.get(resource_group_name, server_name, database_name, expand)
+    if expand_keys:
+        # SDK 5.0 defaults to 2026-08-01-preview, which omits expanded database keys.
+        # Use the stable API only for this expansion; normal show keeps the SDK default.
+        from ._util import get_sql_management_client
+        client = get_sql_management_client(cmd.cli_ctx, api_version='2025-01-01').databases
+
+    # SQL SDK 5.0 makes expand keyword-only.
+    return client.get(resource_group_name, server_name, database_name, expand=expand)
 
 
 def _db_dw_create(
@@ -1720,7 +1737,8 @@ def db_list_capabilities(
         show_details = []
 
     # Get capabilities tree from server
-    capabilities = client.list_by_location(location, CapabilityGroup.SUPPORTED_EDITIONS)
+    # SQL SDK 5.0 makes include keyword-only.
+    capabilities = client.list_by_location(location, include=CapabilityGroup.SUPPORTED_EDITIONS)
 
     # Get subtree related to databases
     editions = _get_default_server_version(capabilities).supported_editions
@@ -1987,6 +2005,9 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
             else ComputeModelType.provisioned)
 
     # Update sku
+    if capacity and not service_objective:
+        # Re-resolve capacity-qualified database SKUs after inferring the existing compute model.
+        instance.sku.name = None
     _db_elastic_pool_update_sku(
         cmd,
         instance,
@@ -2370,22 +2391,25 @@ def _audit_policy_show(
             server_name=server_name,
             database_name=database_name)
 
-    audit_policy.blob_storage_target_state = BlobAuditingPolicyState.DISABLED
-    audit_policy.event_hub_target_state = BlobAuditingPolicyState.DISABLED
-    audit_policy.log_analytics_target_state = BlobAuditingPolicyState.DISABLED
+    # SQL SDK 5.0 ignores ad-hoc model attributes during output conversion. Preserve calculated
+    # target states and diagnostic-setting details in a dict for all three audit-policy commands.
+    result = todict(audit_policy)
+    result['blobStorageTargetState'] = BlobAuditingPolicyState.DISABLED
+    result['eventHubTargetState'] = BlobAuditingPolicyState.DISABLED
+    result['logAnalyticsTargetState'] = BlobAuditingPolicyState.DISABLED
 
     # If audit policy's state is disabled there is nothing to do
     if _is_audit_policy_state_disabled(audit_policy.state):
-        return audit_policy
+        return result
 
     if not audit_policy.storage_endpoint:
-        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.DISABLED
+        result['blobStorageTargetState'] = BlobAuditingPolicyState.DISABLED
     else:
-        audit_policy.blob_storage_target_state = BlobAuditingPolicyState.ENABLED
+        result['blobStorageTargetState'] = BlobAuditingPolicyState.ENABLED
 
     # If 'is_azure_monitor_target_enabled' is false there is no reason to request diagnostic settings
     if not audit_policy.is_azure_monitor_target_enabled:
-        return audit_policy
+        return result
 
     # Request diagnostic settings
     diagnostic_settings = _get_diagnostic_settings(
@@ -2399,15 +2423,15 @@ def _audit_policy_show(
     # Initialize azure monitor properties
     if audit_diagnostic_setting is not None:
         if audit_diagnostic_setting.workspace_id is not None:
-            audit_policy.log_analytics_target_state = BlobAuditingPolicyState.ENABLED
-            audit_policy.log_analytics_workspace_resource_id = audit_diagnostic_setting.workspace_id
+            result['logAnalyticsTargetState'] = BlobAuditingPolicyState.ENABLED
+            result['logAnalyticsWorkspaceResourceId'] = audit_diagnostic_setting.workspace_id
 
         if audit_diagnostic_setting.event_hub_authorization_rule_id is not None:
-            audit_policy.event_hub_target_state = BlobAuditingPolicyState.enabled
-            audit_policy.event_hub_authorization_rule_id = audit_diagnostic_setting.event_hub_authorization_rule_id
-            audit_policy.event_hub_name = audit_diagnostic_setting.event_hub_name
+            result['eventHubTargetState'] = BlobAuditingPolicyState.ENABLED
+            result['eventHubAuthorizationRuleId'] = audit_diagnostic_setting.event_hub_authorization_rule_id
+            result['eventHubName'] = audit_diagnostic_setting.event_hub_name
 
-    return audit_policy
+    return result
 
 
 def server_audit_policy_show(
@@ -3260,45 +3284,57 @@ def get_long_term_retention(
 
 
 def update_short_term_retention(
-        client,
+        cmd,
         database_name,
         server_name,
         resource_group_name,
-        retention_days,
+        retention_days=None,
         diffbackup_hours=None,
         no_wait=False,
-        **kwargs):
+        lock_immutability=None,
+        yes=False):
     '''
     Updates short term retention for live database
     '''
+    from .operations.str_policy import DatabasePolicySet
 
-    kwargs['retention_days'] = retention_days
-    kwargs['diff_backup_interval_in_hours'] = diffbackup_hours
+    if retention_days is None and diffbackup_hours is None and lock_immutability is None:
+        raise RequiredArgumentMissingError(
+            'Specify --retention-days, --diffbackup-hours or --lock-immutability.')
+    if lock_immutability is True:
+        user_confirmation('Locking backup immutability cannot be reverted. '
+                          'Are you sure you want to lock backup immutability?', yes=yes)
+    return DatabasePolicySet(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'server_name': server_name,
+        'database_name': database_name,
+        'retention_days': retention_days,
+        'diffbackup_hours': diffbackup_hours,
+        'lock_immutability': lock_immutability,
+        'no_wait': no_wait,
+    })
 
-    return sdk_no_wait(
-        no_wait,
-        client.begin_create_or_update,
-        database_name=database_name,
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        policy_name=ShortTermRetentionPolicyName.DEFAULT,
-        parameters=kwargs)
 
-
-def get_short_term_retention(
-        client,
-        database_name,
-        server_name,
-        resource_group_name):
+def get_short_term_retention(cmd, database_name, server_name, resource_group_name):
     '''
     Gets short term retention for live database
     '''
+    return get_short_term_retention_for_wait(cmd, database_name, server_name, resource_group_name, 'default')
 
-    return client.get(
-        database_name=database_name,
-        server_name=server_name,
-        resource_group_name=resource_group_name,
-        policy_name=ShortTermRetentionPolicyName.DEFAULT)
+
+def get_short_term_retention_for_wait(cmd, database_name, server_name, resource_group_name, policy_name):
+    '''
+    Gets short term retention while preserving the wait command's policy name argument.
+
+    :param policy_name: The policy name. Should always be "default".
+    '''
+    from .operations.str_policy import DatabasePolicyShow
+    return DatabasePolicyShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'server_name': server_name,
+        'database_name': database_name,
+        'policy_name': policy_name,
+    })
 
 
 def _list_by_database_long_term_retention_backups(
@@ -4261,7 +4297,8 @@ def elastic_pool_list_capabilities(
         dtu = int(dtu)
 
     # Get capabilities tree from server
-    capabilities = client.list_by_location(location, CapabilityGroup.SUPPORTED_ELASTIC_POOL_EDITIONS)
+    # SQL SDK 5.0 makes include keyword-only.
+    capabilities = client.list_by_location(location, include=CapabilityGroup.SUPPORTED_ELASTIC_POOL_EDITIONS)
 
     # Get subtree related to elastic pools
     editions = _get_default_server_version(capabilities).supported_elastic_pool_editions
@@ -4502,7 +4539,8 @@ def server_create(
     if minimal_tls_version is not None:
         kwargs['minimal_tls_version'] = minimal_tls_version
     else:
-        kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2
+        # The TypeSpec serializer needs the wire value, not this CLI-local Enum instance.
+        kwargs['minimal_tls_version'] = SqlServerMinimalTlsVersionType.tls_1_2.value
 
     kwargs['key_id'] = key_id
     kwargs['federated_client_id'] = federated_client_id
@@ -4532,11 +4570,11 @@ def server_create(
     if soft_delete_retention_days is not None:
         kwargs['retention_days'] = soft_delete_retention_days
 
-    # Create
+    # SQL SDK 5.0 sends dicts as raw JSON; a Server model nests CLI kwargs under properties.
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        server_name=server_name,
                        resource_group_name=resource_group_name,
-                       parameters=kwargs)
+                       parameters=Server(**kwargs))
 
 
 def server_restore(
@@ -4601,8 +4639,8 @@ def server_list(
         # List all servers in the resource group
         return client.list_by_resource_group(resource_group_name=resource_group_name, expand=expand)
 
-    # List all servers in the subscription
-    return client.list(expand)
+    # SQL SDK 5.0 makes expand keyword-only when listing across the subscription.
+    return client.list(expand=expand)
 
 
 def server_get(
@@ -4618,8 +4656,8 @@ def server_get(
     if expand_ad_admin:
         expand = 'administrators/activedirectory'
 
-    # List all servers in the subscription
-    return client.get(resource_group_name, server_name, expand)
+    # SQL SDK 5.0 makes expand keyword-only.
+    return client.get(resource_group_name, server_name, expand=expand)
 
 
 def server_update(
@@ -4900,11 +4938,11 @@ def outbound_firewall_rule_create(
     '''
     Creates a new outbound firewall rule.
     '''
+    # SQL SDK 5.0's outbound-rule PUT has no request body; parameters would leak into transport kwargs.
     return client.begin_create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
-        outbound_rule_fqdn=outbound_rule_fqdn,
-        parameters=OutboundFirewallRule())
+        outbound_rule_fqdn=outbound_rule_fqdn)
 
 
 #########################################################
@@ -5521,8 +5559,8 @@ def managed_instance_list(
         # List all managed instances in the resource group
         return client.list_by_resource_group(resource_group_name=resource_group_name, expand=expand)
 
-    # List all managed instances in the subscription
-    return client.list(expand)
+    # SQL SDK 5.0 makes expand keyword-only when listing across the subscription.
+    return client.list(expand=expand)
 
 
 def managed_instance_get(
@@ -5538,8 +5576,8 @@ def managed_instance_get(
     if expand_ad_admin:
         expand = 'administrators/activedirectory'
 
-    # List all servers in the subscription
-    return client.get(resource_group_name, managed_instance_name, expand)
+    # SQL SDK 5.0 makes expand keyword-only.
+    return client.get(resource_group_name, managed_instance_name, expand=expand)
 
 
 def managed_instance_update(  # pylint: disable=too-many-locals
@@ -6110,49 +6148,43 @@ def midb_advanced_threat_protection_setting_update_setter(
 
 def update_short_term_retention_mi(
         cmd,
-        client,
         database_name,
         managed_instance_name,
         resource_group_name,
         retention_days,
         deleted_time=None,
-        **kwargs):
+        lock_immutability=None,
+        yes=False,
+        no_wait=False):
     '''
     Updates short term retention for database
     '''
 
-    kwargs['retention_days'] = retention_days
+    from .operations.str_policy import DroppedDatabasePolicySet, ManagedDatabasePolicySet
 
+    if deleted_time is not None and lock_immutability is not None:
+        raise MutuallyExclusiveArgumentError(
+            '--lock-immutability is not supported for restorable dropped managed databases. '
+            'Do not specify it with --deleted-time.')
+    if lock_immutability is True:
+        user_confirmation('Locking backup immutability cannot be reverted. '
+                          'Are you sure you want to lock backup immutability?', yes=yes)
     if deleted_time:
-        database_name = '{},{}'.format(
-            database_name,
-            _to_filetimeutc(deleted_time))
-
-        client = \
-            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
-                cmd.cli_ctx,
-                None)
-
-        policy = client.begin_create_or_update(
-            restorable_dropped_database_id=database_name,
-            managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name,
-            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT,
-            parameters=kwargs)
-    else:
-        policy = client.begin_create_or_update(
-            database_name=database_name,
-            managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name,
-            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT,
-            parameters=kwargs)
-
-    return policy
+        database_name = '{},{}'.format(database_name, _to_filetimeutc(deleted_time))
+    policy_command = DroppedDatabasePolicySet if deleted_time else ManagedDatabasePolicySet
+    database_argument = 'restorable_dropped_database_id' if deleted_time else 'database_name'
+    return policy_command(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'managed_instance_name': managed_instance_name,
+        database_argument: database_name,
+        'retention_days': retention_days,
+        'lock_immutability': lock_immutability,
+        'no_wait': no_wait,
+    })
 
 
 def get_short_term_retention_mi(
         cmd,
-        client,
         database_name,
         managed_instance_name,
         resource_group_name,
@@ -6160,30 +6192,17 @@ def get_short_term_retention_mi(
     '''
     Gets short term retention for database
     '''
+    from .operations.str_policy import DroppedDatabasePolicyShow, ManagedDatabasePolicyShow
 
     if deleted_time:
-        database_name = '{},{}'.format(
-            database_name,
-            _to_filetimeutc(deleted_time))
-
-        client = \
-            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
-                cmd.cli_ctx,
-                None)
-
-        policy = client.get(
-            restorable_dropped_database_id=database_name,
-            managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name,
-            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT)
-    else:
-        policy = client.get(
-            database_name=database_name,
-            managed_instance_name=managed_instance_name,
-            resource_group_name=resource_group_name,
-            policy_name=ManagedShortTermRetentionPolicyName.DEFAULT)
-
-    return policy
+        database_name = '{},{}'.format(database_name, _to_filetimeutc(deleted_time))
+    policy_command = DroppedDatabasePolicyShow if deleted_time else ManagedDatabasePolicyShow
+    database_argument = 'restorable_dropped_database_id' if deleted_time else 'database_name'
+    return policy_command(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'managed_instance_name': managed_instance_name,
+        database_argument: database_name,
+    })
 
 
 def _is_int(retention):

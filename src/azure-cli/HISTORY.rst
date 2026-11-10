@@ -3,6 +3,91 @@
 Release History
 ===============
 
+2.92.0
+++++++
+
+**AKS**
+
+* `az aks nodepool update`: Allow upgrading Windows2022 node pools to Windows2025 with `--os-sku` (#34141)
+* `az aks nodepool add`: Automatically enable FIPS images for Windows2025 node pools (#34141)
+* `az aks create`: Add `--ssh-access` with `localuser`, `disabled` and `entraid` options to configure SSH access for the node pools (#34161)
+* `az aks nodepool add/update`: Add `--ssh-access` with `localuser`, `disabled` and `entraid` options to configure SSH access for the node pool (#34161)
+* `az aks create/update`: Add `--kms-infrastructure-encryption` to support KMS platform-managed keys (PMK) (#34204)
+* `az aks`: Allow longer node pool names; the service enforces the actual limit (#34216)
+* `az aks nodepool add`: Make `--enable-managed-gpu` generally available (#34268)
+
+**App Service**
+
+* `az webapp show/list`: Restore `appServicePlanId` and remove `serverFarmId` from output (#34149)
+* `az functionapp show/list`: Add `appServicePlanId` to output while retaining `serverFarmId` (#34149)
+* `az logicapp show/list`: Add `appServicePlanId` to output while retaining `serverFarmId` (#34149)
+* `az functionapp list`: Handle apps without an App Service Plan ID when using `--output table` (#34149)
+
+**ARM**
+
+* `az stack-whatif`: Fix resource properties not rendering for resource creates and deletes (#34156)
+
+**Backup**
+
+* `az backup container register`: Add managed identity support for Azure Files backup (#34146)
+
+**Cloud**
+
+* `az cloud show`: Add missing `synapseAnalyticsResourceId` for `AzureBleuCloud` (#34188)
+* `az cloud set`: Add `AzureDelosCloud` (Germany sovereign cloud) to the known clouds list (#34200)
+
+**Cognitive Services**
+
+* `az cognitiveservices agent`: Announce hosted agent command deprecation (#34177)
+* `az cognitiveservices account adapter-deployment`: Add new command group (preview) (#34112)
+
+**Compute**
+
+* `az vm create`: Support Aligned Zonal Fault Domains with `--data-disk-storage-fault-domain-alignment` and `--os-disk-storage-fault-domain-alignment` (#33390)
+* `az vmss create`: Support Aligned Zonal Fault Domains with `--data-disk-storage-fault-domain-alignment`, `--os-disk-storage-fault-domain-alignment` and `--zonal-platform-fault-domain-align-mode` (#33390)
+* `az vm create/update`: Support FlexProfile with `--preferred-size` (#34231)
+
+**Compute Fleet**
+
+* `az compute-fleet`: Support API version 2026-08-01 (#34170)
+* `az compute-fleet identity`: Add `assign`, `remove`, `show`, and `wait` commands for managed identities (#34170)
+
+**Container app**
+
+* `az containerapp job execution list`: Follow ARM pagination to return all executions (#34209)
+* `az containerapp env create`: Pre-announce the future change of the `--logs-destination` default from `log-analytics` to `azure-monitor`; the current default remains unchanged (#34243)
+
+**Key Vault**
+
+* `az keyvault`: Add API version 2026-02-01 retirement notice to group help (#34208)
+* `az keyvault purge/recover/show-deleted`: Fix error message to reference `--name/-n` instead of the non-existent `--vault-name` (#34220)
+
+**MySQL**
+
+* `az mysql`: Fix Windows executable-search hijacking (#34190)
+
+**Network**
+
+* `az network application-gateway advanced-routing-set/advanced-routing-map`: Add new command groups to support advanced routing (#34198)
+* `az network application-gateway rule create/update`: Add `--advanced-routing-map` and `--auth-configs` parameters (#34198)
+* `az network application-gateway update`: Add `--reserved-capacity` parameter (#34198)
+
+**Packaging**
+
+* `az version`: Detect Homebrew casks with symlinked prefixes (#34196)
+
+**SQL**
+
+* `az sql db str-policy`: Add short-term backup immutability locking with confirmation and expose immutability status (#34207)
+* `az sql midb short-term-retention-policy`: Add immutability locking for live databases and expose status for live and dropped databases (#34207)
+
+**Storage**
+
+* Fix #34155: `az storage blob list`: Honor the configured storage service endpoint (#34176)
+* `az storage copy`, `az storage fs directory upload/download`: Validate configured account endpoints before attaching SAS credentials (#34230)
+* Fix #32284: `az storage blob sync`: Fix using azcopy with `--sas-token` without login into azcli (#34174)
+* Fix #32147: `az storage file upload-batch`: Fix infinite loop/crash when `--destination-path` is an absolute path (#34173)
+
 2.91.0
 ++++++
 

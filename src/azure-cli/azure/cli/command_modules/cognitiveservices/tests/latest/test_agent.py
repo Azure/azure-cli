@@ -54,17 +54,89 @@ from azure.cli.core.azclierror import (
 from azure.cli.command_modules.cognitiveservices.custom import (
     _validate_image_tag,
     _has_dockerfile,
+    _resolve_docker_command,
     _is_docker_running,
+    _build_image_locally,
+    _push_image_to_registry,
     _is_fully_qualified_image,
     _validate_path_for_subprocess,
     _get_agent_container_status,
     AGENT_API_VERSION_PARAMS,
 )
 from azure.cli.command_modules.cognitiveservices._params import _environment_variables_type
+from azure.cli.command_modules.cognitiveservices._client_factory import (
+    _build_ai_project_endpoint,
+    cf_ai_projects,
+)
 
 
 class CognitiveServicesAgentHelperTests(unittest.TestCase):
     """Unit tests for agent helper functions."""
+
+    def test_build_ai_project_endpoint(self):
+        self.assertEqual(
+            _build_ai_project_endpoint("csclitest_000002", "Project.Name-01"),
+            "https://csclitest_000002.services.ai.azure.com/api/projects/Project.Name-01",
+        )
+
+    def test_build_ai_project_endpoint_rejects_invalid_resource_names(self):
+        invalid_names = [
+            None,
+            "",
+            "a",
+            "-account",
+            "account/name",
+            "account\\name",
+            "account@host",
+            "account:443",
+            "account?query",
+            "account#fragment",
+            "account%2fpath",
+            "account name",
+            "a" * 65,
+        ]
+
+        for invalid_name in invalid_names:
+            with self.subTest(account_name=invalid_name):
+                with self.assertRaises((InvalidArgumentValueError, RequiredArgumentMissingError)):
+                    _build_ai_project_endpoint(invalid_name, "project01")
+
+            with self.subTest(project_name=invalid_name):
+                with self.assertRaises((InvalidArgumentValueError, RequiredArgumentMissingError)):
+                    _build_ai_project_endpoint("account01", invalid_name)
+
+    @mock.patch("azure.cli.core._profile.Profile")
+    def test_cf_ai_projects_rejects_invalid_account(self, profile):
+        profile.return_value.get_login_credentials.return_value = (mock.Mock(), None, None)
+        cli_ctx = mock.Mock()
+        cli_ctx.data = {}
+
+        with self.assertRaises(InvalidArgumentValueError):
+            cf_ai_projects(cli_ctx, {
+                "account_name": "account@attacker.example",
+                "project_name": "project01",
+            })
+
+    @mock.patch("azure.cli.core._profile.Profile")
+    def test_cf_ai_projects_rejects_invalid_project(self, profile):
+        profile.return_value.get_login_credentials.return_value = (mock.Mock(), None, None)
+        cli_ctx = mock.Mock()
+        cli_ctx.data = {}
+
+        with self.assertRaises(InvalidArgumentValueError):
+            cf_ai_projects(cli_ctx, {
+                "account_name": "account01",
+                "project_name": "project/other",
+            })
+
+    @mock.patch("azure.cli.core._profile.Profile")
+    def test_cf_ai_projects_requires_account_name(self, profile):
+        profile.return_value.get_login_credentials.return_value = (mock.Mock(), None, None)
+        cli_ctx = mock.Mock()
+        cli_ctx.data = {}
+
+        with self.assertRaisesRegex(RequiredArgumentMissingError, "--account-name"):
+            cf_ai_projects(cli_ctx, {"project_name": "project01"})
 
     def test_get_agent_container_status_builds_expected_request(self):
         """Test that agent status calls the default container endpoint and returns payload."""
@@ -231,15 +303,87 @@ class CognitiveServicesAgentHelperTests(unittest.TestCase):
         self.assertFalse(_has_dockerfile('/nonexistent/directory'))
         self.assertFalse(_has_dockerfile(None))
     
-    def test_is_docker_running(self):
-        """Test _is_docker_running (result depends on environment)."""
-        # We can't reliably test this since it depends on Docker being installed
-        # and running. Just verify it returns a boolean without errors.
-        result = _is_docker_running()
-        self.assertIsInstance(result, bool)
-        
-        # Log the result for debugging purposes in test output
-        print(f"Docker running status: {result}")
+    @mock.patch('azure.cli.command_modules.cognitiveservices.custom.subprocess.run')
+    def test_is_docker_running_uses_resolved_path(self, run_mock):
+        run_mock.return_value.returncode = 0
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            docker_path = os.path.join(temp_dir, 'docker.exe')
+            with open(docker_path, 'w'):
+                pass
+
+            with mock.patch(
+                    'azure.cli.command_modules.cognitiveservices.custom.shutil.which',
+                    return_value=docker_path):
+                self.assertTrue(_is_docker_running())
+
+        run_mock.assert_called_once_with(
+            [os.path.abspath(docker_path), 'info'],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+
+    def test_resolve_docker_command_preserves_launcher_symlink(self):
+        docker_path = os.path.abspath('/snap/bin/docker')
+        launcher_path = os.path.abspath('/usr/bin/snap')
+        working_directory = os.path.abspath('/workspace')
+
+        with mock.patch(
+                'azure.cli.command_modules.cognitiveservices.custom.shutil.which',
+                return_value=docker_path), mock.patch(
+                    'azure.cli.command_modules.cognitiveservices.custom.os.path.realpath',
+                    return_value=launcher_path), mock.patch(
+                        'azure.cli.command_modules.cognitiveservices.custom.os.getcwd',
+                        return_value=working_directory):
+            self.assertEqual(_resolve_docker_command(), docker_path)
+
+    @mock.patch('azure.cli.command_modules.cognitiveservices.custom.subprocess.run')
+    def test_is_docker_running_rejects_current_directory(self, run_mock):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            docker_path = os.path.join(temp_dir, 'docker.exe')
+            with open(docker_path, 'w'):
+                pass
+
+            with mock.patch(
+                    'azure.cli.command_modules.cognitiveservices.custom.shutil.which',
+                    return_value=docker_path), mock.patch(
+                        'azure.cli.command_modules.cognitiveservices.custom.os.getcwd',
+                        return_value=temp_dir):
+                self.assertIsNone(_resolve_docker_command())
+                self.assertFalse(_is_docker_running())
+
+        run_mock.assert_not_called()
+
+    @mock.patch(
+        'azure.cli.command_modules.cognitiveservices.custom._resolve_docker_command',
+        return_value=os.path.abspath('/trusted/docker'),
+    )
+    @mock.patch('azure.cli.command_modules.cognitiveservices.custom.subprocess.run')
+    def test_build_image_locally_uses_resolved_path(self, run_mock, resolve_mock):
+        run_mock.return_value.stdout = ''
+
+        with tempfile.TemporaryDirectory() as source_dir:
+            with open(os.path.join(source_dir, 'Dockerfile'), 'w') as dockerfile:
+                dockerfile.write('FROM scratch\n')
+
+            _build_image_locally(None, source_dir, 'registry.azurecr.io/agent:v1')
+
+        self.assertEqual(run_mock.call_args.args[0][0], resolve_mock.return_value)
+
+    @mock.patch(
+        'azure.cli.command_modules.cognitiveservices.custom._resolve_docker_command',
+        return_value=os.path.abspath('/trusted/docker'),
+    )
+    @mock.patch('azure.cli.command_modules.cognitiveservices.custom.subprocess.run')
+    def test_push_image_to_registry_uses_resolved_path(self, run_mock, resolve_mock):
+        run_mock.return_value.stdout = ''
+        run_mock.return_value.stderr = ''
+
+        _push_image_to_registry(None, 'registry.azurecr.io/agent:v1', 'registry')
+
+        push_command = run_mock.call_args_list[1].args[0]
+        self.assertEqual(push_command[0], resolve_mock.return_value)
     
     def test_agent_create_timeout_parameter_default(self):
         """Test that agent_create accepts timeout parameter with default value."""

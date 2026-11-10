@@ -222,6 +222,12 @@ class Update(AAZCommand):
             help="Specifies the time alloted for all extensions to start. The time duration should be between 15 minutes and 120 minutes (inclusive) and should be specified in ISO 8601 format. The default value is 90 minutes (PT1H30M). Minimum api-version: 2020-06-01.",
             nullable=True,
         )
+        _args_schema.flex_profile = AAZObjectArg(
+            options=["--flex-profile"],
+            arg_group="Properties",
+            help="[Preview Feature] Specifies a FlexProfile for VM size. Azure may deploy a compatible alternative VM size based on capacity and placement considerations, and returns the deployed size in hardwareProfile.vmSize. A request that adds flexProfile must omit hardwareProfile.vmSize. For a virtual machine that uses FlexProfile, a hardwareProfile.vmSize equal to the deployed size is ignored, so a GET response can be sent back unchanged. A PATCH request that omits flexProfile keeps it. A PUT request that omits flexProfile and sets hardwareProfile.vmSize clears it. This property cannot exist along with a non-null properties.availabilitySet, properties.capacityReservation, properties.host, properties.hostGroup, properties.proximityPlacementGroup or properties.virtualMachineScaleSet.",
+            nullable=True,
+        )
         _args_schema.hardware_profile = AAZObjectArg(
             options=["--hardware-profile"],
             arg_group="Properties",
@@ -422,6 +428,12 @@ class Update(AAZCommand):
             options=["storage-uri"],
             help="Uri of the storage account to use for placing the console output and screenshot. If storageUri is not specified while enabling boot diagnostics, managed storage will be used.",
             nullable=True,
+        )
+
+        flex_profile = cls._args_schema.flex_profile
+        flex_profile.preferred_vm_size = AAZStrArg(
+            options=["preferred-vm-size"],
+            help="Specifies the preferred VM size, for example Standard_D4s_v5. Azure may deploy a compatible alternative size based on capacity and placement considerations. Supported VM families for FlexProfile may vary by region. The recommended way to get the list of available sizes is using these APIs: [List all available virtual machine sizes in a region](https://docs.microsoft.com/rest/api/compute/resourceskus/list), [List all available virtual machine sizes for resizing](https://docs.microsoft.com/rest/api/compute/virtualmachines/listavailablesizes).",
         )
 
         hardware_profile = cls._args_schema.hardware_profile
@@ -2118,6 +2130,7 @@ class Update(AAZCommand):
                 properties.set_prop("diagnosticsProfile", AAZObjectType, ".diagnostics_profile")
                 properties.set_prop("evictionPolicy", AAZStrType, ".eviction_policy")
                 properties.set_prop("extensionsTimeBudget", AAZStrType, ".extensions_time_budget")
+                properties.set_prop("flexProfile", AAZObjectType, ".flex_profile")
                 properties.set_prop("hardwareProfile", AAZObjectType, ".hardware_profile")
                 _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("host", AAZObjectType, ".host"))
                 _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("hostGroup", AAZObjectType, ".host_group"))
@@ -2176,6 +2189,10 @@ class Update(AAZCommand):
             if boot_diagnostics is not None:
                 boot_diagnostics.set_prop("enabled", AAZBoolType, ".enabled")
                 boot_diagnostics.set_prop("storageUri", AAZStrType, ".storage_uri")
+
+            flex_profile = _builder.get(".properties.flexProfile")
+            if flex_profile is not None:
+                flex_profile.set_prop("preferredVMSize", AAZStrType, ".preferred_vm_size", typ_kwargs={"flags": {"required": True}})
 
             hardware_profile = _builder.get(".properties.hardwareProfile")
             if hardware_profile is not None:
@@ -3222,6 +3239,9 @@ class _UpdateHelper:
         properties.extensions_time_budget = AAZStrType(
             serialized_name="extensionsTimeBudget",
         )
+        properties.flex_profile = AAZObjectType(
+            serialized_name="flexProfile",
+        )
         properties.hardware_profile = AAZObjectType(
             serialized_name="hardwareProfile",
         )
@@ -3349,6 +3369,12 @@ class _UpdateHelper:
         boot_diagnostics.enabled = AAZBoolType()
         boot_diagnostics.storage_uri = AAZStrType(
             serialized_name="storageUri",
+        )
+
+        flex_profile = _schema_virtual_machine_read.properties.flex_profile
+        flex_profile.preferred_vm_size = AAZStrType(
+            serialized_name="preferredVMSize",
+            flags={"required": True},
         )
 
         hardware_profile = _schema_virtual_machine_read.properties.hardware_profile

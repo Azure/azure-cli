@@ -17,7 +17,7 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
             'sname': sname,
             'kind': 'QnAMaker.v2',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS',
+            'location': 'southcentralus',
             'apiProperties': 'qnaAzureSearchEndpointId=https://cs-cli-test-qnamaker.azurewebsites.net',
             'apiPropertiesJson': '{\\\"qnaAzureSearchEndpointId\\\":\\\"https://cs-cli-test-qnamaker.azurewebsites.net\\\"}',
         })

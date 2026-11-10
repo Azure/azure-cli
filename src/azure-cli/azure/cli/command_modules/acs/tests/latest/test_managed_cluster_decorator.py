@@ -64,10 +64,13 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
     CONST_ARTIFACT_SOURCE_DIRECT,
     CONST_AVAILABILITY_SET,
+    CONST_SSH_ACCESS_LOCALUSER,
+    CONST_SSH_ACCESS_DISABLED,
     CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_VIRTUAL_MACHINES,
     CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
     CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
+    CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
 )
 from azure.cli.command_modules.acs.agentpool_decorator import AKSAgentPoolContext, AKSAgentPoolParamDict
 from azure.cli.command_modules.acs.managed_cluster_decorator import (
@@ -5996,6 +5999,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_7.get_azure_keyvault_kms_key_vault_resource_id()
 
+        # key vault resource id is allowed with "Public" network access
         ctx_8 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict({
@@ -6006,9 +6010,10 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        with self.assertRaises(ArgumentUsageError):
-            ctx_8.get_azure_keyvault_kms_key_vault_resource_id()
+        self.assertEqual(ctx_8.get_azure_keyvault_kms_key_vault_resource_id(), key_vault_resource_id_1)
 
+        # "Private" network access without a key vault resource id is rejected by
+        # get_azure_keyvault_kms_key_vault_network_access
         ctx_9 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict({
@@ -6019,8 +6024,79 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        with self.assertRaises(ArgumentUsageError):
-            ctx_9.get_azure_keyvault_kms_key_vault_resource_id()
+        self.assertEqual(ctx_9.get_azure_keyvault_kms_key_vault_resource_id(), "")
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_9.get_azure_keyvault_kms_key_vault_network_access()
+
+        # PMK enabled: key vault resource id is required
+        ctx_10 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "enable_azure_keyvault_kms": True,
+                "azure_keyvault_kms_key_vault_network_access": "Public",
+                "kms_infrastructure_encryption": "Enabled",
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx_10.get_azure_keyvault_kms_key_vault_resource_id()
+
+        # PMK enabled: key vault resource id is allowed with "Public" network access
+        ctx_11 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "enable_azure_keyvault_kms": True,
+                "azure_keyvault_kms_key_vault_network_access": "Public",
+                "azure_keyvault_kms_key_vault_resource_id": key_vault_resource_id_1,
+                "kms_infrastructure_encryption": "Enabled",
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_11.get_azure_keyvault_kms_key_vault_resource_id(), key_vault_resource_id_1)
+
+    def test_get_kms_infrastructure_encryption(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertIsNone(ctx_0.get_kms_infrastructure_encryption())
+
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"kms_infrastructure_encryption": "Enabled"}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_kms_infrastructure_encryption(), "Enabled")
+
+        # backfill from the existing mc
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"kms_infrastructure_encryption": None}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        security_profile = self.models.ManagedClusterSecurityProfile()
+        security_profile.kubernetes_resource_object_encryption_profile = (
+            self.models.KubernetesResourceObjectEncryptionProfile(infrastructure_encryption="Enabled")
+        )
+        mc = self.models.ManagedCluster(location="test_location", security_profile=security_profile)
+        ctx_2.attach_mc(mc)
+        self.assertEqual(ctx_2.get_kms_infrastructure_encryption(), "Enabled")
+
+        # the value passed by the command takes precedence
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"kms_infrastructure_encryption": "Enabled"}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        ctx_3.attach_mc(self.models.ManagedCluster(location="test_location"))
+        self.assertEqual(ctx_3.get_kms_infrastructure_encryption(), "Enabled")
 
     def test_get_enable_image_cleaner(self):
         ctx_0 = AKSManagedClusterContext(
@@ -9354,6 +9430,54 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_mc_4 = dec_4.set_up_bootstrap_profile(mc_4)
 
+    def test_set_up_agentpool_profile_ssh_access(self):
+        # no ssh_access specified, no change
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        agentpool_profile_1 = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[agentpool_profile_1],
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_agentpool_profile_ssh_access(mc_1)
+        ground_truth_agentpool_profile_1 = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[ground_truth_agentpool_profile_1],
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # ssh_access specified, applied to all agent pool profiles
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"ssh_access": CONST_SSH_ACCESS_DISABLED},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        agentpool_profile_2 = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[agentpool_profile_2],
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_agentpool_profile_ssh_access(mc_2)
+        ground_truth_agentpool_profile_2 = self.models.ManagedClusterAgentPoolProfile(
+            name="nodepool1",
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_DISABLED,
+            ),
+        )
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            agent_pool_profiles=[ground_truth_agentpool_profile_2],
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
     def test_construct_mc_profile_default(self):
         import inspect
 
@@ -9423,6 +9547,9 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
             scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
+            security_profile=self.models.AgentPoolSecurityProfile(
+                ssh_access=CONST_SSH_ACCESS_LOCALUSER,
+            ),
         )
         ssh_config_1 = self.models.ContainerServiceSshConfiguration(
             public_keys=[self.models.ContainerServiceSshPublicKey(key_data=public_key)]
@@ -9729,6 +9856,82 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_high_log_scale_mode=True,
         )
 
+        # Case 6: Automatic SKU enables monitoring by default without --enable-addons,
+        # so the DCR association must still be created
+        dec_6 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "sku": CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_6 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={},
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_6,
+            },
+        )
+        dec_6.context.attach_mc(mc_6)
+        dec_6.context.set_intermediate("monitoring_addon_enabled", True)
+        mock_profile_6 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_6
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_6:
+            dec_6.postprocessing_after_mc_created(mc_6)
+        mock_ensure_6.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_6,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=False,
+            create_dcra=True,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=None,
+        )
+
+        # Case 7: non-Automatic SKU without --enable-addons or --enable-azure-monitor-logs
+        # skips DCR association
+        dec_7 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: self.models.ManagedClusterAddonProfile(enabled=True, config={}),
+            },
+        )
+        dec_7.context.attach_mc(mc_7)
+        dec_7.context.set_intermediate("monitoring_addon_enabled", True)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_7:
+            dec_7.postprocessing_after_mc_created(mc_7)
+        mock_ensure_7.assert_not_called()
+
     def test_put_mc(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -9821,6 +10024,119 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             },
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_set_up_azure_keyvault_kms(self):
+        key_id = "https://fakekeyvault.vault.azure.net/keys/fakekeyname"
+        key_vault_resource_id = (
+            "/subscriptions/8ecadfc9-d1a3-4ea4-b844-0d9f87e4d7c8/resourceGroups/foo/"
+            "providers/Microsoft.KeyVault/vaults/foo"
+        )
+
+        # no kms related changes
+        dec_0 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.set_up_azure_keyvault_kms(mc_0)
+        self.assertEqual(dec_mc_0, self.models.ManagedCluster(location="test_location"))
+
+        # pmk only
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "kms_infrastructure_encryption": "Enabled",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_azure_keyvault_kms(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                kubernetes_resource_object_encryption_profile=(
+                    self.models.KubernetesResourceObjectEncryptionProfile(infrastructure_encryption="Enabled")
+                ),
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # unset pmk should not set the encryption profile
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "kms_infrastructure_encryption": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_azure_keyvault_kms(mc_2)
+        self.assertEqual(dec_mc_2, self.models.ManagedCluster(location="test_location"))
+
+        # pmk and cmk, the key vault resource id is set even with "Public" network access
+        dec_3 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "kms_infrastructure_encryption": "Enabled",
+                "enable_azure_keyvault_kms": True,
+                "azure_keyvault_kms_key_id": key_id,
+                "azure_keyvault_kms_key_vault_network_access": "Public",
+                "azure_keyvault_kms_key_vault_resource_id": key_vault_resource_id,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.set_up_azure_keyvault_kms(mc_3)
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                kubernetes_resource_object_encryption_profile=(
+                    self.models.KubernetesResourceObjectEncryptionProfile(infrastructure_encryption="Enabled")
+                ),
+                azure_key_vault_kms=self.models.AzureKeyVaultKms(
+                    enabled=True,
+                    key_id=key_id,
+                    key_vault_network_access="Public",
+                    key_vault_resource_id=key_vault_resource_id,
+                ),
+            ),
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+        # cmk only with "Public" network access, the key vault resource id is not set
+        dec_4 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_keyvault_kms": True,
+                "azure_keyvault_kms_key_id": key_id,
+                "azure_keyvault_kms_key_vault_network_access": "Public",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(location="test_location")
+        dec_4.context.attach_mc(mc_4)
+        dec_mc_4 = dec_4.set_up_azure_keyvault_kms(mc_4)
+        ground_truth_mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                azure_key_vault_kms=self.models.AzureKeyVaultKms(
+                    enabled=True,
+                    key_id=key_id,
+                    key_vault_network_access="Public",
+                ),
+            ),
+        )
+        self.assertEqual(dec_mc_4, ground_truth_mc_4)
 
     def test_set_up_image_cleaner(self):
         dec_0 = AKSManagedClusterCreateDecorator(
@@ -11946,6 +12262,118 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             dec_azure_keyvault_secrets_provider_addon_profile_5,
             ground_truth_azure_keyvault_secrets_provider_addon_profile_5,
         )
+
+    def test_update_azure_keyvault_kms(self):
+        key_id = "https://fakekeyvault.vault.azure.net/keys/fakekeyname"
+        key_vault_resource_id = (
+            "/subscriptions/8ecadfc9-d1a3-4ea4-b844-0d9f87e4d7c8/resourceGroups/foo/"
+            "providers/Microsoft.KeyVault/vaults/foo"
+        )
+
+        # no kms related changes
+        dec_0 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.update_azure_keyvault_kms(mc_0)
+        self.assertEqual(dec_mc_0, self.models.ManagedCluster(location="test_location"))
+
+        # enable pmk only
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "kms_infrastructure_encryption": "Enabled",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_keyvault_kms(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                kubernetes_resource_object_encryption_profile=(
+                    self.models.KubernetesResourceObjectEncryptionProfile(infrastructure_encryption="Enabled")
+                ),
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # enable pmk and cmk, the key vault resource id is kept with "Public" network access
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "kms_infrastructure_encryption": "Enabled",
+                "enable_azure_keyvault_kms": True,
+                "azure_keyvault_kms_key_id": key_id,
+                "azure_keyvault_kms_key_vault_network_access": "Public",
+                "azure_keyvault_kms_key_vault_resource_id": key_vault_resource_id,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_azure_keyvault_kms(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                kubernetes_resource_object_encryption_profile=(
+                    self.models.KubernetesResourceObjectEncryptionProfile(infrastructure_encryption="Enabled")
+                ),
+                azure_key_vault_kms=self.models.AzureKeyVaultKms(
+                    enabled=True,
+                    key_id=key_id,
+                    key_vault_network_access="Public",
+                    key_vault_resource_id=key_vault_resource_id,
+                ),
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # disable cmk, the pmk profile is preserved
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_azure_keyvault_kms": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                kubernetes_resource_object_encryption_profile=(
+                    self.models.KubernetesResourceObjectEncryptionProfile(infrastructure_encryption="Enabled")
+                ),
+                azure_key_vault_kms=self.models.AzureKeyVaultKms(
+                    enabled=True,
+                    key_id=key_id,
+                    key_vault_network_access="Public",
+                ),
+            ),
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_azure_keyvault_kms(mc_3)
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                kubernetes_resource_object_encryption_profile=(
+                    self.models.KubernetesResourceObjectEncryptionProfile(infrastructure_encryption="Enabled")
+                ),
+                azure_key_vault_kms=self.models.AzureKeyVaultKms(
+                    enabled=False,
+                    key_id=key_id,
+                    key_vault_network_access="Public",
+                ),
+            ),
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
     def test_update_image_cleaner(self):
         dec_0 = AKSManagedClusterUpdateDecorator(

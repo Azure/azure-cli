@@ -48,7 +48,8 @@ class WebappBasicE2ETest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-e2e', length=24)
         plan = self.create_random_name(prefix='webapp-e2e-plan', length=24)
 
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        plan_id = self.cmd(
+            'appservice plan create -g {} -n {}'.format(resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', plan),
@@ -81,11 +82,15 @@ class WebappBasicE2ETest(ScenarioTest):
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', webapp_name),
+            JMESPathCheck('[0].appServicePlanId', plan_id),
+            JMESPathCheckNotExists('[0].serverFarmId'),
             JMESPathCheck('[0].hostNames[0]', webapp_name +
                           '.azurewebsites.net')
         ])
         self.cmd('webapp show -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('name', webapp_name),
+            JMESPathCheck('appServicePlanId', plan_id),
+            JMESPathCheckNotExists('serverFarmId'),
             JMESPathCheck('hostNames[0]', webapp_name + '.azurewebsites.net')
         ])
         result = self.cmd('webapp deployment source config-local-git -g {} -n {}'.format(
@@ -141,6 +146,8 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].os != `null`', True),
             JMESPathCheck('[0].runtime != `null`', True),
             JMESPathCheck('[0].config != `null`', True),
+            JMESPathCheck("length([?contains(config, '|')])", 0),
+            JMESPathCheck("length([?contains(config, ':')]) == length(@)", True),
             JMESPathCheck('[0].support != `null`', True),
         ])
         # Validate OS filter
@@ -2673,6 +2680,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
         ])            
 
 class WebappNetworkConnectionTests(ScenarioTest):
+    @unittest.skip("Linux webapp create requires --runtime/--container-image-name/--sitecontainers-app")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_hybridconnectionE2E(self, resource_group):
@@ -3642,6 +3650,7 @@ class WebappEnrichedErrorsScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_enriched', location='westus2')
+    @unittest.skip("az webapp up is no longer supported; deployment scenarios are retired.")
     def test_webapp_up_enriched_errors_flag_accepted(self, resource_group):
         """Verify --enriched-errors flag is accepted by az webapp up with 409 conflict."""
         from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError

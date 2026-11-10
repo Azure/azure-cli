@@ -530,6 +530,10 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --kms-infrastructure-encryption
+    type: string
+    short-summary: Enable encryption at rest of Kubernetes resource objects using service-managed keys.
+    long-summary: Enable infrastructure encryption for Kubernetes resource objects. This feature provides encryption at rest for cluster secrets and configuration using service-managed keys. The only accepted value is "Enabled"; once enabled it cannot be disabled. For more information see https://aka.ms/aks/kubernetesResourceObjectEncryption.
   - name: --enable-image-cleaner
     type: bool
     short-summary: Enable ImageCleaner Service.
@@ -1080,6 +1084,10 @@ parameters:
   - name: --azure-keyvault-kms-key-vault-resource-id
     type: string
     short-summary: Resource ID of Azure Key Vault.
+  - name: --kms-infrastructure-encryption
+    type: string
+    short-summary: Enable encryption at rest of Kubernetes resource objects using service-managed keys.
+    long-summary: Enable infrastructure encryption for Kubernetes resource objects. This feature provides encryption at rest for cluster secrets and configuration using service-managed keys. The only accepted value is "Enabled"; once enabled it cannot be disabled. For more information see https://aka.ms/aks/kubernetesResourceObjectEncryption.
   - name: --enable-image-cleaner
     type: bool
     short-summary: Enable ImageCleaner Service.
@@ -2191,6 +2199,7 @@ parameters:
   - name: --enable-fips-image
     type: bool
     short-summary: Use FIPS-enabled OS on agent nodes.
+    long-summary: Automatically enabled for Windows2025 node pools because Windows2025 requires a FIPS-enabled OS image.
   - name: --snapshot-id
     type: string
     short-summary: The source snapshot id used to create this nodepool.
@@ -2220,7 +2229,7 @@ parameters:
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
   - name: --enable-managed-dranet
     type: bool
-    short-summary: Enable Managed DRANET on the node pool.
+    short-summary: Enable or disable Managed DRANET on the node pool.
   - name: --node-public-ip-tags
     type: string
     short-summary: The ipTags of the node public IPs.
@@ -2245,6 +2254,10 @@ parameters:
   - name: --gpu-driver
     type: string
     short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None". Default is "Install".
+  - name: --enable-managed-gpu
+    type: bool
+    short-summary: Enable the Managed GPU experience, which installs additional components like DCGM metrics for monitoring on top of the GPU driver.
+    long-summary: Installs the GPU driver even if --gpu-driver is set to None. For more details, visit https://aka.ms/aks/managed-gpu.
   - name: --gateway-prefix-size
     type: int
     short-summary: The size of Public IPPrefix attached to the Gateway-mode node pool. The node pool must be in Gateway mode.
@@ -2284,6 +2297,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
   - name: Create a nodepool with KataVmIsolation enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
+  - name: Create a GPU node pool with the Managed GPU experience enabled.
+    text: az aks nodepool add -g MyResourceGroup -n gpunp --cluster-name MyManagedCluster --node-vm-size Standard_NC6s_v3 --enable-managed-gpu
 """
 
 helps["aks nodepool delete"] = """
@@ -2398,10 +2413,13 @@ parameters:
     short-summary: The IDs of the application security groups to which the node pool's network interface should belong. When specified, format should be a space-separated list of IDs.
   - name: --enable-managed-dranet
     type: bool
-    short-summary: Enable Managed DRANET on the node pool.
+    short-summary: Enable or disable Managed DRANET on the node pool.
   - name: --os-sku
     type: string
-    short-summary: The os-sku of the agent node pool.
+    short-summary: The OS SKU of the agent node pool.
+    long-summary: |
+        Windows2022 node pools can be upgraded to Windows2025. Specify --enable-fips-image when upgrading a non-FIPS node pool.
+        Downgrading from Windows2025 to Windows2022 is not supported.
   - name: --enable-fips-image
     type: bool
     short-summary: Switch to use FIPS-enabled OS on agent nodes.
@@ -2438,6 +2456,11 @@ parameters:
   - name: --disable-artifact-streaming
     type: bool
     short-summary: Disable artifact streaming for VirtualMachineScaleSets managed by a Linux node pool.
+  - name: --node-vm-size -s
+    type: string
+    short-summary: Resize the VMs of a VirtualMachineScaleSets node pool.
+    long-summary: |
+        AKS replaces every node in the node pool with a node of the new size. It adds surge nodes of the new size, then cordons, drains and deletes the old nodes, following the node pool's upgrade settings (--max-surge, --max-unavailable, --drain-timeout, --node-soak-duration). The target size must be compatible with the current node pool configuration. Can be combined with --update-cluster-autoscaler, or with --enable-cluster-autoscaler/--disable-cluster-autoscaler when they change the autoscaler state. Not supported for VirtualMachines node pools; use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" to change their VM sizes.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -2447,6 +2470,13 @@ examples:
     text: az aks nodepool update --disable-cluster-autoscaler -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
   - name: Update min-count or max-count for cluster autoscaler.
     text: az aks nodepool update --update-cluster-autoscaler --min-count 1 --max-count 10 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
+  - name: Upgrade a Windows2022 node pool to Windows2025 with a FIPS-enabled OS image.
+    text: |
+        az aks nodepool update --resource-group MyResourceGroup \\
+            --cluster-name MyManagedCluster --name npwin \\
+            --os-sku Windows2025 --enable-fips-image
+  - name: Resize the VMs of a VirtualMachineScaleSets node pool to Standard_D4s_v5.
+    text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-vm-size Standard_D4s_v5
 """
 
 helps["aks nodepool upgrade"] = """

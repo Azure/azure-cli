@@ -20,7 +20,7 @@ class CognitiveServicesCommitmentPlanTests(ScenarioTest):
             'sname': sname,
             'kind': 'TextAnalytics',
             'sku': 'S',
-            'location': 'SOUTHCENTRALUS'
+            'location': 'southcentralus'
         })
 
         # test to create cognitive services account

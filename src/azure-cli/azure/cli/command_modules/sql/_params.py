@@ -422,6 +422,8 @@ authentication_metadata_param_type = CLIArgumentType(
 
 memory_size_type = CLIArgumentType(
     options_list=['--memory'],
+    # SQL SDK 5.0 no longer applies msrest's str-to-int coercion before JSON serialization.
+    type=int,
     help='The memory size in gigabytes (GB).')
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
@@ -811,6 +813,20 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('allow_data_loss',
                    help='If specified, the failover operation will allow data loss.')
+
+        # SDK 5.0 uses :keyword: docs for optional query arguments, which legacy CLI introspection misses.
+        c.argument('filter', help='An OData filter expression to apply to the response.')
+        c.argument('expand', help='The child resources to include in the response.')
+
+    with self.argument_context('sql db list-deleted') as c:
+        c.argument('skiptoken', help='The continuation token for the next page of deleted databases.')
+        c.argument('top', help='The maximum number of deleted databases to return.')
+
+    with self.argument_context('sql elastic-pool list') as c:
+        c.argument('skip', help='The number of elastic pools to skip.')
+
+    with self.argument_context('sql mi failover') as c:
+        c.argument('replica_type', help='The type of managed-instance replica to fail over.')
 
     with self.argument_context('sql db') as c:
         _configure_db_dw_params(c)
@@ -1506,24 +1522,29 @@ def load_arguments(self, _):
     #                sql db str                   #
     ###############################################
     with self.argument_context('sql db str-policy set') as c:
-        create_args_for_complex_type(
-            c, 'parameters', Database, [
-                'retention_days',
-                'diffbackup_hours'
-            ])
-
         c.argument(
             'retention_days',
             options_list=['--retention-days'],
-            required=True,
+            type=int,
+            required=False,
             help='New backup short term retention policy retention in days.'
             'Valid retention days for live database of (DTU) Basic can be 1-7 days; Rest models can be 1-35 days.')
-
         c.argument(
             'diffbackup_hours',
             options_list=['--diffbackup-hours'],
+            type=int,
             help='New backup short term retention policy differential backup interval in hours.'
             'Valid differential backup interval for live database can be 12 or 24 hours.')
+        c.argument(
+            'lock_immutability',
+            arg_type=get_three_state_flag(),
+            help='Whether to lock backup immutability. Locking is irreversible. '
+                 'Setting false does not unlock an already locked policy.')
+        c.argument(
+            'yes',
+            options_list=['--yes', '-y'],
+            action='store_true',
+            help='Do not prompt for confirmation when locking backup immutability.')
 
     ###############################################
     #                sql dw                       #
@@ -2825,24 +2846,28 @@ def load_arguments(self, _):
             help='The id of recoverable database from geo-replicated instance')
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
-        create_args_for_complex_type(
-            c, 'parameters', ManagedDatabase, [
-                'deleted_time',
-                'retention_days'
-            ])
-
         c.argument(
             'deleted_time',
             options_list=['--deleted-time'],
-            help='If specified, updates retention days for a deleted database, instead of an existing database.'
-            'Must match the deleted time of a deleted database on the source Managed Instance.')
-
+            help='If specified, updates retention days for a deleted database, instead of an existing database. '
+                 'Must match the deleted time of a deleted database on the source Managed Instance.')
         c.argument(
             'retention_days',
             options_list=['--retention-days'],
+            type=int,
             required=True,
-            help='New backup short term retention policy in days.'
-            'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
+            help='New backup short term retention policy in days. '
+                 'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
+        c.argument(
+            'lock_immutability',
+            arg_type=get_three_state_flag(),
+            help='Whether to lock backup immutability for a live managed database. '
+                 'Locking is irreversible. Cannot be used with --deleted-time, even when false.')
+        c.argument(
+            'yes',
+            options_list=['--yes', '-y'],
+            action='store_true',
+            help='Do not prompt for confirmation when locking backup immutability.')
 
     with self.argument_context('sql midb short-term-retention-policy show') as c:
         c.argument(
@@ -3199,6 +3224,8 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db classification recommendation list') as c:
         c.ignore('skip_token')
+        c.argument('include_disabled_recommendations',
+                   help='Whether to include disabled sensitivity-classification recommendations.')
 
 ###################################################
 #           sql server ipv6-firewall-rule

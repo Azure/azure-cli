@@ -9,9 +9,13 @@ import os
 import sys
 import argparse
 import subprocess
+from pathlib import Path
+import shutil
+import tempfile
 from docutils import core, io
 
 from ..utilities.path import get_all_module_paths
+from ..utilities.packaging import get_package_version
 from ..utilities.display import print_heading
 
 HISTORY_NAME = 'HISTORY.rst'
@@ -63,19 +67,39 @@ def check_history_headings(mod_path):
             print("Unable to get versions from {}. Check formatting. e.g. there should be a new line after the 'Release History' heading.".format(history_path))
             return False
         first_version_history = all_versions[0]
-        actual_version = subprocess.check_output('python setup.py --version'.split(), cwd=mod_path, universal_newlines=True)
-        actual_version = actual_version.strip()
+        actual_version = get_package_version(mod_path)
         if first_version_history != actual_version:
-            print("The topmost version in {} does not match version {} defined in setup.py.".format(history_path, actual_version))
+            print("The topmost version in {} does not match source package version {}.".format(
+                history_path, actual_version))
             return False
         return True
 
 
+def _check_sdist_render(mod_path):
+    # Build only this package, not the repository. Omit tests/recordings and stale
+    # build metadata: they are unnecessary for README validation and can be huge.
+    # A real copy (not hard links) keeps backend writes away from the source tree.
+    with tempfile.TemporaryDirectory(prefix='cli-readme-') as temp_dir:
+        source_dir = Path(temp_dir) / 'source'
+        dist_dir = Path(temp_dir) / 'dist'
+        shutil.copytree(mod_path, source_dir, ignore=shutil.ignore_patterns(
+            '.git', '.venv', 'venv', 'env', '__pycache__', '*.pyc', '*.pyo',
+            '*.egg-info', '*.dist-info', '.pytest_cache', 'build', 'dist', 'tests', 'recordings'))
+        if not exec_command([sys.executable, '-m', 'build', '--sdist', '--outdir', str(dist_dir)],
+                            cwd=str(source_dir)):
+            return False
+        artifacts = sorted(str(path) for path in dist_dir.glob('*.tar.gz'))
+        if not artifacts:
+            print('No sdist produced for {}'.format(mod_path), file=sys.stderr)
+            return False
+        return exec_command([sys.executable, '-m', 'twine', 'check', '--strict'] + artifacts,
+                            cwd=str(source_dir))
+
+
 def check_readme_render(mod_path):
-    checks = []
-    checks.append(exec_command('python setup.py check -r -s', cwd=mod_path))
-    checks.append(check_history_headings(mod_path))
-    return all(checks)
+    history_ok = check_history_headings(mod_path)
+    render_ok = _check_sdist_render(mod_path)
+    return history_ok and render_ok
 
 
 def verify_all():
@@ -93,7 +117,7 @@ def verify_all():
         print('The following modules have invalid README/HISTORYs:')
         print('\n'.join(failed_mods))
         print('See above for the full warning/errors')
-        print('note: Line numbers in the errors map to the long_description of your setup.py.')
+        print('note: Rendering error line numbers refer to the built package description.')
         sys.exit(1)
     else:
         print('Verified READMEs of all modules successfully.', file=sys.stderr)
@@ -106,7 +130,7 @@ def verify_one(mod_name):
     if not res:
         print_heading('Error whilst verifying README/HISTORY of {}!'.format(mod_name))
         print('See above for the full warning/errors.')
-        print('note: Line numbers in the errors map to the long_description of your setup.py.')
+        print('note: Rendering error line numbers refer to the built package description.')
         sys.exit(1)
 
 

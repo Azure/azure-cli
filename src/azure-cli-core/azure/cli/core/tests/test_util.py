@@ -17,7 +17,8 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin)
+    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin,
+     get_safe_executable_path, get_latest_version_from_ame_storage)
 from azure.cli.core.mock import DummyCli
 
 
@@ -555,6 +556,41 @@ class TestUtils(unittest.TestCase):
         self.assertIn("azure-cli-core", output.result, "unexpected cmd execution result")
 
 
+class TestGetLatestVersionFromAmeStorage(unittest.TestCase):
+
+    @staticmethod
+    def _response(status_code, text=''):
+        return mock.Mock(status_code=status_code, text=text)
+
+    @mock.patch('requests.get', autospec=True)
+    def test_get_version_from_pyproject(self, get_mock):
+        get_mock.return_value = self._response(
+            200, '[project]\nname = "azure-cli-core"\nversion = "2.99.0"\nrequires-python = ">=3.10"\n')
+        self.assertEqual(get_latest_version_from_ame_storage('azure-cli-core'), '2.99.0')
+        get_mock.assert_called_once_with(
+            'https://azcliprod.blob.core.windows.net/cli/azure-cli-core/pyproject.toml', timeout=10)
+
+    @mock.patch('requests.get', autospec=True)
+    def test_fallback_to_setup_py(self, get_mock):
+        get_mock.side_effect = [self._response(404),
+                                self._response(200, 'from setuptools import setup\nVERSION = "1.2.0"\n')]
+        self.assertEqual(get_latest_version_from_ame_storage('azure-cli-telemetry'), '1.2.0')
+        self.assertEqual(get_mock.call_args_list[1][0][0],
+                         'https://azcliprod.blob.core.windows.net/cli/azure-cli-telemetry/setup.py')
+
+    @mock.patch('requests.get', autospec=True)
+    def test_fallback_when_pyproject_has_no_version(self, get_mock):
+        get_mock.side_effect = [self._response(200, '[project]\nname = "azure-cli"\n'),
+                                self._response(200, 'VERSION = "2.92.0"\n')]
+        self.assertEqual(get_latest_version_from_ame_storage(), '2.92.0')
+
+    @mock.patch('requests.get', autospec=True)
+    def test_return_none_on_failure(self, get_mock):
+        get_mock.side_effect = [Exception('connection error'), self._response(500)]
+        self.assertIsNone(get_latest_version_from_ame_storage())
+        self.assertEqual(get_mock.call_count, 2)
+
+
 class TestBase64ToHex(unittest.TestCase):
 
     def setUp(self):
@@ -741,6 +777,116 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(roughly_parse_command(['az']), 'az')
         self.assertEqual(roughly_parse_command(['--help']), '')  # Starts with flag
         self.assertEqual(roughly_parse_command(['-h']), '')  # Starts with short flag
+
+class TestSafeExecutablePath(unittest.TestCase):
+    EXE = 'planted.exe' if platform.system() == 'Windows' else 'planted'
+
+    def setUp(self):
+        self._orig_cwd = os.getcwd()
+        self._tmp = tempfile.TemporaryDirectory()
+        self.cwd = self._tmp.name
+        os.chdir(self.cwd)
+        self._make_exe(self.cwd)  # decoy in the CWD
+
+    def tearDown(self):
+        os.chdir(self._orig_cwd)
+        self._tmp.cleanup()
+
+    def _make_exe(self, directory):
+        path = os.path.join(directory, self.EXE)
+        open(path, 'w').close()
+        os.chmod(path, 0o755)
+        return path
+
+    def _resolve(self, *path_dirs):
+        with mock.patch.dict(os.environ, {'PATH': os.pathsep.join(path_dirs)}):
+            return get_safe_executable_path(self.EXE)
+
+    def test_explicit_path_returned_as_is(self):
+        explicit = os.path.join('some', 'dir', 'tool')
+        self.assertEqual(get_safe_executable_path(explicit), explicit)
+
+    def test_cwd_never_resolved(self):
+        self.assertIsNone(self._resolve(self.cwd))
+        self.assertIsNone(self._resolve('.'))
+        if platform.system() == 'Windows':
+            self.assertIsNone(self._resolve(self.cwd.swapcase()))
+
+    def test_trusted_dir_used_after_cwd(self):
+        with tempfile.TemporaryDirectory() as path_dir:
+            target = self._make_exe(path_dir)
+            self.assertEqual(os.path.normcase(self._resolve(self.cwd, path_dir)), os.path.normcase(target))
+
+    def test_unknown_cwd_fails_closed(self):
+        with tempfile.TemporaryDirectory() as path_dir:
+            self._make_exe(path_dir)
+            with mock.patch('os.getcwd', side_effect=OSError):
+                self.assertIsNone(self._resolve(path_dir))
+
+    def test_executable_link_target_is_checked(self):
+        with tempfile.TemporaryDirectory() as path_dir, tempfile.TemporaryDirectory() as other_dir:
+            target = self._make_exe(path_dir)
+            realpath = os.path.realpath
+            for destination in (self.cwd, other_dir):
+                with self.subTest(destination=destination):
+                    def link_target(path):
+                        if path == target:
+                            return os.path.join(destination, self.EXE)
+                        return realpath(path)
+
+                    with mock.patch('os.path.realpath', side_effect=link_target):
+                        resolved = self._resolve(path_dir)
+                    self.assertEqual(resolved, None if destination == self.cwd else target)
+
+    def test_unverifiable_path_is_skipped(self):
+        with tempfile.TemporaryDirectory() as unavailable, tempfile.TemporaryDirectory() as trusted:
+            self._make_exe(unavailable)
+            target = self._make_exe(trusted)
+            samefile = os.path.samefile
+            for error_type in (PermissionError, ValueError):
+                for failed_check in (1, 2):
+                    with self.subTest(error_type=error_type, failed_check=failed_check):
+                        checks = []
+
+                        def directory_identity(first, second):
+                            if os.path.normcase(first) == os.path.normcase(unavailable):
+                                checks.append(first)
+                                if len(checks) == failed_check:
+                                    raise error_type('Cannot verify directory identity')
+                            return samefile(first, second)
+
+                        with mock.patch('os.path.samefile', side_effect=directory_identity):
+                            self.assertEqual(self._resolve(unavailable, trusted), target)
+
+    @unittest.skipUnless(platform.system() == 'Windows', 'Windows only')
+    def test_explicit_extension_does_not_depend_on_pathext(self):
+        with tempfile.TemporaryDirectory() as path_dir:
+            target = self._make_exe(path_dir)
+            with open(target + '.BAT', 'w'):
+                pass
+            for extensions in (None, '', '.BAT;.CMD'):
+                with self.subTest(extensions=extensions), mock.patch.dict(os.environ):
+                    if extensions is None:
+                        os.environ.pop('PATHEXT', None)
+                    else:
+                        os.environ['PATHEXT'] = extensions
+                    self.assertEqual(self._resolve(path_dir), target)
+            os.remove(target)
+            with mock.patch.dict(os.environ, {'PATHEXT': '.BAT;.CMD'}):
+                self.assertIsNone(self._resolve(path_dir))
+
+    @unittest.skipUnless(platform.system() == 'Windows', 'Windows only')
+    def test_root_relative_path_entries_are_skipped(self):
+        with tempfile.TemporaryDirectory() as relative_dir, tempfile.TemporaryDirectory() as trusted:
+            self._make_exe(relative_dir)
+            target = self._make_exe(trusted)
+            root_relative = os.path.splitdrive(relative_dir)[1]
+            self.assertEqual(self._resolve(root_relative, trusted), target)
+
+    @unittest.skipUnless(platform.system() == 'Windows', 'Windows only')
+    def test_cmd_exe_resolves_to_system32(self):
+        resolved = get_safe_executable_path('cmd.exe')
+        self.assertTrue(resolved.lower().endswith(os.path.join('system32', 'cmd.exe')))
 
 if __name__ == '__main__':
     unittest.main()

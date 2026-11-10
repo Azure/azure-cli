@@ -17,6 +17,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_WINDOWS_NODE_VM_SIZE,
     CONST_DEFAULT_VMS_VM_SIZE,
     CONST_DEFAULT_WINDOWS_VMS_VM_SIZE,
+    CONST_GPU_DRIVER_INSTALL,
+    CONST_GPU_MANAGEMENT_MODE_MANAGED,
     CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
@@ -51,6 +53,7 @@ from azure.cli.core.commands import AzCliCommand
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, sdk_no_wait, read_file_content
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 logger = get_logger(__name__)
 
@@ -1482,7 +1485,7 @@ class AKSAgentPoolContext(BaseAKSContext):
 
     # Mutable Fips now allows changes after create
     def get_enable_fips_image(self) -> bool:
-        """Obtain the value of enable_fips_image, default value is False.
+        """Obtain enable_fips_image, defaulting to False except for new Windows2025 pools.
         :return: bool
         """
 
@@ -1496,6 +1499,13 @@ class AKSAgentPoolContext(BaseAKSContext):
                 self.agentpool.enable_fips is not None
             ):
                 enable_fips_image = self.agentpool.enable_fips
+            elif self.get_os_sku() == CONST_OS_SKU_WINDOWS2025:
+                if self.get_disable_fips_image():
+                    raise ArgumentUsageError(
+                        '"--disable-fips-image" cannot be used with "--os-sku Windows2025", '
+                        "which requires a FIPS-enabled OS image."
+                    )
+                enable_fips_image = True
 
         # Verify both flags have not been set
         if enable_fips_image and self.get_disable_fips_image():
@@ -1786,9 +1796,9 @@ class AKSAgentPoolContext(BaseAKSContext):
             ))
         return port_ranges
 
-    def get_enable_managed_dranet(self) -> bool:
+    def get_enable_managed_dranet(self) -> Union[bool, None]:
         """Obtain the value of enable_managed_dranet."""
-        return self.raw_param.get("enable_managed_dranet", False)
+        return self.raw_param.get("enable_managed_dranet")
 
     def get_ip_tags(self) -> Union[List[IPTag], None]:
         ip_tags = self.raw_param.get("node_public_ip_tags")
@@ -1871,6 +1881,16 @@ class AKSAgentPoolContext(BaseAKSContext):
         :return: string or None
         """
         return self._get_gpu_driver()
+
+    def get_enable_managed_gpu(self) -> Union[bool, None]:
+        """Obtain enable_managed_gpu, preserving the value on an attached create model."""
+        enable_managed_gpu = self.raw_param.get("enable_managed_gpu")
+        if self.decorator_mode == DecoratorMode.CREATE and self.agentpool:
+            gpu_profile = self.agentpool.gpu_profile
+            nvidia = getattr(gpu_profile, "nvidia", None)
+            if nvidia is not None and nvidia.management_mode is not None:
+                enable_managed_gpu = nvidia.management_mode == CONST_GPU_MANAGEMENT_MODE_MANAGED
+        return enable_managed_gpu
 
     def get_gateway_prefix_size(self) -> Union[int, None]:
         """Obtain the value of gateway_prefix_size.
@@ -1989,6 +2009,64 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return workload_runtime
+
+    def get_ssh_access(self) -> Union[str, None]:
+        """Obtain the value of ssh_access.
+        """
+        return self.raw_param.get("ssh_access")
+
+    def get_yes(self) -> bool:
+        """Obtain the value of yes.
+
+        :return: bool
+        """
+        return self.raw_param.get("yes")
+
+    def get_node_vm_size_for_update(self) -> Union[str, None]:
+        """Obtain and validate the value of node_vm_size for `az aks nodepool update`.
+
+        An explicit empty value is rejected instead of being treated as omitted.
+
+        :return: string or None
+        """
+        node_vm_size = self.raw_param.get("node_vm_size")
+        if node_vm_size is None:
+            return None
+        if not node_vm_size.strip():
+            raise InvalidArgumentValueError("--node-vm-size cannot be empty.")
+        return node_vm_size
+
+    def validate_node_vm_size_with_autoscaler_for_update(self) -> None:
+        """Reject a resize combined with an autoscaler request that would exit early without updating.
+
+        Must be called with the fetched agentpool attached and before the autoscaler properties are updated, since
+        it compares the request with the node pool's current autoscaler state.
+
+        On a VirtualMachineScaleSets pool, --enable-cluster-autoscaler when the autoscaler is already enabled, or
+        --disable-cluster-autoscaler when it is already disabled, is a no-op that exits early, which would silently
+        drop --node-vm-size. Other combinations (e.g. resize with --update-cluster-autoscaler, or with an
+        enable/disable that changes the autoscaler state) are left untouched so existing callers, such as
+        aks-preview, keep working. VirtualMachines pools are handled by update_auto_scaler_properties_vms and
+        update_vm_size, which aks-preview overrides with its own VirtualMachines handling.
+        """
+        if self.get_node_vm_size_for_update() is None:
+            return
+        if self.agentpool is None or self.get_vm_set_type() != CONST_VIRTUAL_MACHINE_SCALE_SETS:
+            return
+        autoscaler_enabled = bool(self.agentpool.enable_auto_scaling)
+        if self.raw_param.get("enable_cluster_autoscaler") and autoscaler_enabled:
+            raise MutuallyExclusiveArgumentError(
+                "Cluster autoscaler is already enabled for this node pool, so --enable-cluster-autoscaler "
+                "would skip the update and --node-vm-size would not be applied. "
+                "Remove --enable-cluster-autoscaler, or use --update-cluster-autoscaler to change "
+                "min-count or max-count."
+            )
+        if self.raw_param.get("disable_cluster_autoscaler") and not autoscaler_enabled:
+            raise MutuallyExclusiveArgumentError(
+                "Cluster autoscaler is already disabled for this node pool, so --disable-cluster-autoscaler "
+                "would skip the update and --node-vm-size would not be applied. "
+                "Remove --disable-cluster-autoscaler."
+            )
 
 
 class AKSAgentPoolAddDecorator:
@@ -2328,19 +2406,33 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_ssh_access(self, agentpool: AgentPool) -> AgentPool:
+        """Set up the SSH access property for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        ssh_access = self.context.get_ssh_access()
+        if ssh_access is not None:
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            agentpool.security_profile.ssh_access = ssh_access
+        return agentpool
+
     def set_up_agentpool_network_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
         asg_ids = self.context.get_asg_ids()
         allowed_host_ports = self.context.get_allowed_host_ports()
         enable_managed_dranet = self.context.get_enable_managed_dranet()
-        if allowed_host_ports is not None or enable_managed_dranet:
+        if allowed_host_ports is not None or enable_managed_dranet is not None:
             agentpool.network_profile = self.models.AgentPoolNetworkProfile()
             agentpool.network_profile.allowed_host_ports = allowed_host_ports
             agentpool.network_profile.application_security_groups = asg_ids
-            if enable_managed_dranet:
+            if enable_managed_dranet is not None:
                 agentpool.network_profile.dranet = self.models.DRANETProfile(
-                    mode="Managed"
+                    mode="Managed" if enable_managed_dranet else "Unmanaged"
                 )
 
         ip_tags = self.context.get_ip_tags()
@@ -2376,11 +2468,16 @@ class AKSAgentPoolAddDecorator:
         self._ensure_agentpool(agentpool)
 
         gpu_driver = self.context.get_gpu_driver()
+        enable_managed_gpu = self.context.get_enable_managed_gpu()
 
-        # Construct AgentPoolGPUProfile if one of the fields has been set
-        if gpu_driver:
-            agentpool.gpu_profile = self.models.GPUProfile()
-            agentpool.gpu_profile.driver = gpu_driver
+        if gpu_driver or enable_managed_gpu:
+            if agentpool.gpu_profile is None:
+                agentpool.gpu_profile = self.models.GPUProfile()
+            agentpool.gpu_profile.driver = CONST_GPU_DRIVER_INSTALL if enable_managed_gpu else gpu_driver
+            if enable_managed_gpu:
+                if agentpool.gpu_profile.nvidia is None:
+                    agentpool.gpu_profile.nvidia = self.models.NvidiaGPUProfile()
+                agentpool.gpu_profile.nvidia.management_mode = CONST_GPU_MANAGEMENT_MODE_MANAGED
 
         return agentpool
 
@@ -2538,6 +2635,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_crg_id(agentpool)
         # set up agentpool security profile
         agentpool = self.set_up_agentpool_security_profile(agentpool)
+        # set up agentpool ssh access
+        agentpool = self.set_up_ssh_access(agentpool)
         # set up message of the day
         agentpool = self.set_up_motd(agentpool)
         # set up gpu profile
@@ -2879,16 +2978,16 @@ class AKSAgentPoolUpdateDecorator:
         if (
             asg_ids is not None or
             allowed_host_ports is not None or
-            enable_managed_dranet
+            enable_managed_dranet is not None
         ) and not agentpool.network_profile:
             agentpool.network_profile = self.models.AgentPoolNetworkProfile()
         if asg_ids is not None:
             agentpool.network_profile.application_security_groups = asg_ids
         if allowed_host_ports is not None:
             agentpool.network_profile.allowed_host_ports = allowed_host_ports
-        if enable_managed_dranet:
+        if enable_managed_dranet is not None:
             agentpool.network_profile.dranet = self.models.DRANETProfile(
-                mode="Managed"
+                mode="Managed" if enable_managed_dranet else "Unmanaged"
             )
         return agentpool
 
@@ -2951,6 +3050,70 @@ class AKSAgentPoolUpdateDecorator:
 
         return agentpool
 
+    def update_ssh_access(self, agentpool: AgentPool) -> AgentPool:
+        """Update the SSH access property for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        ssh_access = self.context.get_ssh_access()
+        if ssh_access is not None:
+            if agentpool.security_profile is None:
+                agentpool.security_profile = self.models.AgentPoolSecurityProfile()  # pylint: disable=no-member
+            current_ssh_access = agentpool.security_profile.ssh_access
+            # already set to the same value, directly return
+            if current_ssh_access is not None and current_ssh_access.lower() == ssh_access.lower():
+                return agentpool
+
+            msg = (
+                f"You're going to update agentpool {agentpool.name} ssh access to '{ssh_access}'. "
+                "For Kubernetes versions below 1.37, this change takes effect after you upgrade the node pool. "
+                "For Kubernetes versions 1.37 and above, this change can trigger node pool reimaging. Proceed?"
+            )
+            if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+                raise DecoratorEarlyExitException()
+            agentpool.security_profile.ssh_access = ssh_access
+        return agentpool
+
+    def update_vm_size(self, agentpool: AgentPool) -> AgentPool:
+        """Update the VM size of a VirtualMachineScaleSets based AgentPool object.
+
+        Changing the VM size triggers a rolling replacement: AKS surges nodes with the new size, then cordons,
+        drains and deletes the old nodes according to the node pool's upgrade settings.
+
+        VirtualMachines node pools manage VM sizes through their scale profiles, so --node-vm-size is rejected
+        for them instead of being silently ignored. Combinations with no-op autoscaler requests are rejected
+        earlier by AKSAgentPoolContext.validate_node_vm_size_with_autoscaler_for_update.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        node_vm_size = self.context.get_node_vm_size_for_update()
+        if node_vm_size is None:
+            return agentpool
+
+        if self.context.get_vm_set_type() == CONST_VIRTUAL_MACHINES:
+            raise InvalidArgumentValueError(
+                "--node-vm-size is not supported for VirtualMachines node pools. "
+                'Please use "az aks nodepool manual-scale update" or "az aks nodepool auto-scale update" '
+                "to change the VM size of a VirtualMachines node pool."
+            )
+
+        # already set to the same value, directly return
+        if agentpool.vm_size and agentpool.vm_size.lower() == node_vm_size.lower():
+            return agentpool
+
+        msg = (
+            f"You're going to resize agentpool {agentpool.name} from '{agentpool.vm_size}' to '{node_vm_size}'. "
+            "All nodes in the node pool will be replaced with nodes of the new size. Proceed?"
+        )
+        if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+            raise DecoratorEarlyExitException()
+        agentpool.vm_size = node_vm_size
+        return agentpool
+
     def update_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
         self._ensure_agentpool(agentpool)
 
@@ -2990,6 +3153,9 @@ class AKSAgentPoolUpdateDecorator:
         """
         # fetch the Agentpool object
         agentpool = self.fetch_agentpool(agentpools)
+        # reject a resize combined with a no-op autoscaler request, before update_auto_scaler_properties changes the
+        # autoscaler state or exits early (e.g. autoscaler already enabled) and drops the resize
+        self.context.validate_node_vm_size_with_autoscaler_for_update()
         # update auto scaler properties
         agentpool = self.update_auto_scaler_properties(agentpool)
         # update auto scaler properties for vms pool
@@ -3010,6 +3176,10 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_vtpm(agentpool)
         # update secure boot
         agentpool = self.update_secure_boot(agentpool)
+        # update ssh access
+        agentpool = self.update_ssh_access(agentpool)
+        # update vm size
+        agentpool = self.update_vm_size(agentpool)
         # update local DNS profile
         agentpool = self.update_localdns_profile(agentpool)
         # update gpu profile

@@ -55,13 +55,15 @@ title 'Build Azure CLI and its command modules'
 # provisioning the frontend is easy to miss. Install it here if it is absent rather
 # than failing partway through the build.
 python -c 'import build' 2>/dev/null || python -m pip install --disable-pip-version-check -q build
+python -c 'import tomllib' 2>/dev/null || python -m pip install --disable-pip-version-check -q 'tomli>=2.0.1'
+python "$script_dir/check_package_versions.py"
 
-for setup_file in $(find src -name 'setup.py'); do
-    pushd $(dirname ${setup_file}) >/dev/null
+for pyproject_file in $(find src -name 'pyproject.toml'); do
+    pushd $(dirname ${pyproject_file}) >/dev/null
     echo "Building module at $(pwd) ..."
     # --no-isolation builds against the environment prepared by the caller rather than
-    # provisioning a fresh one, which keeps the caller's setuptools pin in force and
-    # avoids requiring outbound network access inside the packaging test containers.
+    # provisioning a fresh one. The caller must provide the build requirements;
+    # this avoids fetching them inside the packaging test containers.
     python -m build --wheel --no-isolation --outdir $output_dir
     python -m build --sdist --no-isolation --outdir $sdist_dir
     popd >/dev/null
@@ -75,6 +77,7 @@ fi
 
 ##############################################
 # build test packages
+# Include fixtures read relative to installed test modules, including PowerShell scripts.
 title 'Build Azure CLI tests package'
 
 for test_src in $(find src/azure-cli/azure/cli/command_modules -name tests -type d); do
@@ -159,6 +162,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '*.md',
                        '*.pem',
                        '*.pfx',
+                       '*.ps1',
                        '*.sql',
                        '*.txt',
                        '*.txt',
@@ -177,6 +181,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '**/*.md',
                        '**/*.pem',
                        '**/*.pfx',
+                       '**/*.ps1',
                        '**/*.sql',
                        '**/*.txt',
                        '**/*.txt',

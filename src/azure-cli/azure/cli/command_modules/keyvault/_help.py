@@ -10,6 +10,10 @@ from knack.help_files import helps  # pylint: disable=unused-import
 helps['keyvault'] = """
 type: group
 short-summary: Manage KeyVault keys, secrets, and certificates.
+long-summary: |
+    All Key Vault control plane API versions before 2026-02-01 retire on February 27, 2027. This retirement is separate from access-control migration. For the API-version update checklist, see [Plan for Azure RBAC as the default access control model in Key Vault](https://learn.microsoft.com/azure/key-vault/general/access-control-default).
+
+    Upgrade to Azure CLI 2.90.0 or later, which supports API version 2026-02-01 and later. Use of API versions earlier than 2026-02-01 will be suspended after February 27, 2027.
 """
 
 helps['keyvault backup'] = """

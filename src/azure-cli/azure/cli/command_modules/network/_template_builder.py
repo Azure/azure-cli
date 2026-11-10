@@ -520,7 +520,7 @@ def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2,
 
 
 def build_ddos_custom_policy(cmd, ddos_custom_policy_name, location=None, tags=None, detection_rule_name=None,
-                             detection_mode=None, packets_per_second=None, traffic_type=None):
+                             detection_mode=None, packets_per_second=None, traffic_type=None, mitigation_rules=None):
     policy = {'ddos_custom_policy_name': ddos_custom_policy_name}
 
     if location:
@@ -528,6 +528,12 @@ def build_ddos_custom_policy(cmd, ddos_custom_policy_name, location=None, tags=N
 
     if tags:
         policy['tags'] = tags
+
+    if mitigation_rules:
+        policy['mitigation_rules'] = mitigation_rules
+
+    if not (detection_rule_name or detection_mode or packets_per_second or traffic_type):
+        return policy
 
     detection_rules = {}
     traffic_detection_rule = {}

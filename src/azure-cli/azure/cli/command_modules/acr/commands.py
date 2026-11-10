@@ -302,7 +302,8 @@ def load_command_table(self, _):
     with self.command_group('acr', acr_run_util) as g:
         g.command('run', 'acr_run', supports_no_wait=True)
 
-    with self.command_group('acr pack', acr_pack_util, is_preview=True) as g:
+    with self.command_group('acr pack', acr_pack_util, is_preview=True,
+                            deprecate_info=self.deprecate(hide=False)) as g:
         g.command('build', 'acr_pack_build', supports_no_wait=True)
 
     with self.command_group('acr task', acr_task_util) as g:

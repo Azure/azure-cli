@@ -1,4 +1,4 @@
-﻿# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -1634,7 +1634,7 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} '
                  '--sku Standard_v2 --public-ip-address {ip} '
                  '--identity {identity_id} --priority 1001 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --created')
 
         # test validation: --hsm key-id without public-cert-data should fail
         self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name {ag} '
@@ -2251,6 +2251,107 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway url-path-map delete -g {rg} --gateway-name {ag} -n {name}')
         self.cmd('network application-gateway url-path-map list -g {rg} --gateway-name {ag}',
                  checks=[self.check('length(@)', 0)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_advanced_routing')
+    def test_network_ag_advanced_routing(self, resource_group):
+        self.kwargs.update({
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'cs': 'network application-gateway advanced-routing-set',
+            'map': 'network application-gateway advanced-routing-map',
+            'pool': 'appGatewayBackendPool',
+            'settings': 'appGatewayBackendHttpSettings',
+            'conds1': '[{condition-type:Header,property-name:x-env,property-values:[canary]}]',
+            'conds2': "[{condition-type:Path,property-value-matcher:{pattern:'/api/*'}},"
+                      "{condition-type:QueryString,property-name:version,property-values:[v2]}]",
+            'conds3': '[{condition-type:ClientIP,property-values:[10.0.0.0/8]}]',
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        ag = self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 '
+                      '--priority 1001').get_output_in_json()['applicationGateway']
+        self.kwargs['pool_id'] = ag['backendAddressPools'][0]['id']
+        self.kwargs['settings_id'] = ag['backendHttpSettingsCollection'][0]['id']
+
+        # condition set and nested conditions
+        self.kwargs['cs1_id'] = self.cmd('{cs} create -g {rg} --gateway-name {ag} -n cs1 --routing-conditions "{conds1}"', checks=[
+            self.check('properties.routingConditions[0].conditionType', 'Header'),
+            self.check('properties.routingConditions[0].propertyName', 'x-env'),
+        ]).get_output_in_json()['id']
+        self.kwargs['cs2_id'] = self.cmd('{cs} create -g {rg} --gateway-name {ag} -n cs2 --routing-conditions "{conds2}"', checks=[
+            self.check('properties.routingConditions[0].propertyValueMatcher.pattern', '/api/*'),
+            self.check('properties.routingConditions[1].conditionType', 'QueryString'),
+        ]).get_output_in_json()['id']
+        self.cmd('{cs} condition create -g {rg} --gateway-name {ag} --condition-set-name cs1 --condition-type Method '
+                 '--property-values GET HEAD', checks=self.check('propertyValues', ['GET', 'HEAD']))
+        self.cmd('{cs} condition update -g {rg} --gateway-name {ag} --condition-set-name cs1 --index 1 --property-values POST',
+                 checks=self.check('propertyValues', ['POST']))
+        self.cmd('{cs} condition show -g {rg} --gateway-name {ag} --condition-set-name cs1 --index 1',
+                 checks=self.check('conditionType', 'Method'))
+        self.cmd('{cs} condition list -g {rg} --gateway-name {ag} --condition-set-name cs1', checks=self.check('length(@)', 2))
+        self.cmd('{cs} condition delete -g {rg} --gateway-name {ag} --condition-set-name cs1 --index 1')
+        self.cmd('{cs} condition list -g {rg} --gateway-name {ag} --condition-set-name cs1', checks=self.check('length(@)', 1))
+        self.cmd('{cs} update -g {rg} --gateway-name {ag} -n cs1 --routing-conditions "{conds3}"',
+                 checks=self.check('properties.routingConditions[0].conditionType', 'ClientIP'))
+        self.cmd('{cs} show -g {rg} --gateway-name {ag} -n cs1',
+                 checks=self.check('properties.routingConditions[0].propertyValues', ['10.0.0.0/8']))
+        self.cmd('{cs} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
+
+        # advanced routing map and nested rules
+        self.kwargs['map_id'] = self.cmd(
+            '{map} create -g {rg} --gateway-name {ag} -n map1 --default-address-pool {pool} --default-http-settings {settings} '
+            '--rule-name r1 --priority 10 --condition-set cs1 --address-pool {pool} --http-settings {settings}', checks=[
+                self.check('properties.defaultBackendAddressPool.id', '{pool_id}'),
+                self.check('properties.defaultBackendHttpSettings.id', '{settings_id}'),
+                self.check('properties.advancedRoutingRules[0].name', 'r1'),
+                self.check('properties.advancedRoutingRules[0].properties.priority', 10),
+                self.check('properties.advancedRoutingRules[0].properties.advancedRoutingConditionSet.id', '{cs1_id}'),
+                self.check('properties.advancedRoutingRules[0].properties.backendAddressPool.id', '{pool_id}'),
+            ]).get_output_in_json()['id']
+        self.kwargs['set_id'] = self.cmd(
+            'network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n set1').get_output_in_json()['id']
+        self.cmd('{map} update -g {rg} --gateway-name {ag} -n map1 --default-rewrite-rule-set set1',
+                 checks=self.check('properties.defaultRewriteRuleSet.id', '{set_id}'))
+        self.cmd('{map} update -g {rg} --gateway-name {ag} -n map1 --default-rewrite-rule-set null',
+                 checks=self.check('properties.defaultRewriteRuleSet', None))
+        self.cmd('{map} show -g {rg} --gateway-name {ag} -n map1', checks=self.check('name', 'map1'))
+        self.cmd('{map} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+        self.cmd('{map} rule create -g {rg} --gateway-name {ag} --map-name map1 -n r2 --priority 20 --condition-set cs2 '
+                 '--address-pool {pool} --http-settings {settings}', checks=[
+                     self.check('properties.priority', 20),
+                     self.check('properties.advancedRoutingConditionSet.id', '{cs2_id}'),
+                     self.check('properties.backendHttpSettings.id', '{settings_id}'),
+                 ])
+        self.cmd('{map} rule update -g {rg} --gateway-name {ag} --map-name map1 -n r2 --priority 30',
+                 checks=self.check('properties.priority', 30))
+        self.cmd('{map} rule show -g {rg} --gateway-name {ag} --map-name map1 -n r2',
+                 checks=self.check('properties.backendAddressPool.id', '{pool_id}'))
+        self.cmd('{map} rule list -g {rg} --gateway-name {ag} --map-name map1', checks=self.check('length(@)', 2))
+
+        # request routing rule using the advanced routing map
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} -n port2 --port 8080')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n listener2 --frontend-port port2')
+        self.cmd('network application-gateway rule create -g {rg} --gateway-name {ag} -n rule2 --http-listener listener2 '
+                 '--rule-type AdvancedRouting --advanced-routing-map map1 --priority 200')
+        self.cmd('network application-gateway rule show -g {rg} --gateway-name {ag} -n rule2', checks=[
+            self.check('ruleType', 'AdvancedRouting'),
+            self.check('advancedRoutingMap.id', '{map_id}'),
+            self.check('backendAddressPool', None),
+            self.check('backendHttpSettings', None),
+        ])
+        self.cmd('network application-gateway rule update -g {rg} --gateway-name {ag} -n rule2 --advanced-routing-map {map_id} '
+                 '--priority 201', checks=[
+                     self.check('advancedRoutingMap.id', '{map_id}'),
+                     self.check('priority', 201),
+                 ])
+
+        self.cmd('network application-gateway rule delete -g {rg} --gateway-name {ag} -n rule2')
+        self.cmd('{map} rule delete -g {rg} --gateway-name {ag} --map-name map1 -n r2')
+        self.cmd('{map} rule list -g {rg} --gateway-name {ag} --map-name map1', checks=self.check('length(@)', 1))
+        self.cmd('{map} delete -g {rg} --gateway-name {ag} -n map1')
+        self.cmd('{map} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 0))
+        self.cmd('{cs} delete -g {rg} --gateway-name {ag} -n cs1')
+        self.cmd('{cs} delete -g {rg} --gateway-name {ag} -n cs2')
+        self.cmd('{cs} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 0))
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map_edge_case')
@@ -3195,6 +3296,24 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('policySettings.logScrubbing.state', 'Enabled')
                  ])
 
+    @ResourceGroupPreparer(name_prefix="cli_test_ag_waf_policy_managed_rules_")
+    def test_ag_waf_policy_managed_rules(self, resource_group):
+        self.kwargs.update({
+            "rg": resource_group,
+            "policy_name": self.create_random_name('waf', 7)
+        })
+
+        self.cmd(
+            "network application-gateway waf-policy create -g {rg} -n {policy_name} --managed-rules '{{managed-rule-sets:[{{rule-set-type:Microsoft_DefaultRuleSet,rule-set-version:2.1}},{{rule-set-type:Microsoft_BotManagerRuleSet,rule-set-version:1.1}}]}}'",
+            checks=[
+                self.check("name", "{policy_name}"),
+                self.check("managedRules.managedRuleSets[0].ruleSetType", "Microsoft_DefaultRuleSet"),
+                self.check("managedRules.managedRuleSets[0].ruleSetVersion", "2.1"),
+                self.check("managedRules.managedRuleSets[1].ruleSetType", "Microsoft_BotManagerRuleSet"),
+                self.check("managedRules.managedRuleSets[1].ruleSetVersion", "1.1"),
+            ]
+        )
+
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
     def test_network_app_gateway_waf_policy_managed_rules(self, resource_group):
         self.kwargs.update({
@@ -3936,6 +4055,51 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
         with self.assertRaisesRegex(CLIError, 'Please provide a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
+
+    @live_only()  # live_only as MultiCloud circuits need a real partner cloud account, contact service team for one
+    @unittest.skipUnless(
+        os.environ.get('AZURE_TEST_EXPRESS_ROUTE_PARTNER_ACCOUNT_ID') or
+        os.environ.get('AZURE_TEST_EXPRESS_ROUTE_ACTIVATION_KEY'),
+        'Set AZURE_TEST_EXPRESS_ROUTE_PARTNER_ACCOUNT_ID and/or AZURE_TEST_EXPRESS_ROUTE_ACTIVATION_KEY for live tests.')
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_multicloud', location='westus2')
+    def test_network_express_route_multicloud(self, resource_group):
+        workflows = [
+            ('account', '--partner-account-id', 'partnerAccountId',
+             os.environ.get('AZURE_TEST_EXPRESS_ROUTE_PARTNER_ACCOUNT_ID')),
+            ('activation', '--activation-key', 'activationKey',
+             os.environ.get('AZURE_TEST_EXPRESS_ROUTE_ACTIVATION_KEY')),
+        ]
+        for workflow, parameter, field, value in workflows:
+            if not value:
+                continue
+            with self.subTest(workflow=workflow):
+                self.kwargs.update({
+                    'rg': resource_group,
+                    'er': 'mccircuit-' + workflow,
+                    'parameter': parameter,
+                    'provisioning_value': value,
+                })
+                checks = [
+                    self.check('sku.name', 'MultiCloud_MeteredData'),
+                    self.check('sku.tier', 'MultiCloud'),
+                    self.check('sku.family', 'MeteredData'),
+                    self.check(field, '{provisioning_value}'),
+                    self.check("contains(['Standard', 'High', 'Maximum'], resiliencyLevel)", True),
+                ]
+                self.cmd('network express-route create -g {rg} -n {er} --bandwidth 1000 --provider aws --peering-location uswest2 '
+                         '--sku-tier MultiCloud --sku-family MeteredData {parameter} "{provisioning_value}"',
+                         checks=checks)
+                # No update step: the service currently returns InternalServerError on any re-PUT of a
+                # MultiCloud circuit. Add `express-route update` here once the service supports it.
+                self.cmd('network express-route show -g {rg} -n {er}', checks=checks)
+                self.cmd('network express-route list -g {rg}', checks=[
+                    self.check('length(@)', 1),
+                    self.check('[0].sku.name', 'MultiCloud_MeteredData'),
+                    self.check('[0].' + field, '{provisioning_value}'),
+                    self.check("contains(['Standard', 'High', 'Maximum'], [0].resiliencyLevel)", True),
+                ])
+                self.cmd('network express-route delete -g {rg} -n {er}')
+                self.cmd('network express-route list -g {rg}', checks=self.is_empty())
 
     @unittest.skip('Test is wrong, please fix. rg not found')
     @ResourceGroupPreparer(name_prefix='cli_test_express_route')
@@ -10010,6 +10174,54 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
 
         self.assertTrue(vna_list[0].get('id') == vna2_id)
 
+    @ResourceGroupPreparer(name_prefix='test_vna_capacity_provider', location='westus2')
+    def test_network_virtual_network_appliance_capacity_provider(self, resource_group):
+        self.kwargs.update({
+            'vnet_provider': 'vnet-provider',
+            'vnet_consumer': 'vnet-consumer',
+            'vnet_address': '10.10.0.0/16',
+            'subnet': 'VirtualNetworkApplianceSubnet',
+            'subnet_address': '10.10.0.0/24',
+            'capacity_provider': 'capacity-provider',
+            'vna': 'vna',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet_provider} --address-prefixes {vnet_address}')
+        self.kwargs['provider_subnet_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet_provider} '
+            '--address-prefix {subnet_address} --default-outbound false --query id'
+        ).get_output_in_json()
+        self.kwargs['capacity_provider_id'] = self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {capacity_provider} '
+            '--bandwidth-in-gbps 200 --subnet \"{{id:{provider_subnet_id}}}\" --query id'
+        ).get_output_in_json()
+
+        self.cmd('network vnet create -g {rg} -n {vnet_consumer} --address-prefixes {vnet_address}')
+        self.kwargs['consumer_subnet_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet_consumer} '
+            '--address-prefix {subnet_address} --default-outbound false --query id'
+        ).get_output_in_json()
+
+        self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {vna} '
+            '--subnet \"{{id:{consumer_subnet_id}}}\" '
+            '--capacity-provider \"{{id:{capacity_provider_id}}}\"',
+            checks=self.check('capacityProvider.id', '{capacity_provider_id}')
+        )
+        self.cmd(
+            'network virtual-network-appliance update -g {rg} -n {vna} '
+            '--capacity-provider \'{{"id":"{capacity_provider_id}"}}\'',
+            checks=self.check('capacityProvider.id', '{capacity_provider_id}')
+        )
+        self.cmd(
+            'network virtual-network-appliance show -g {rg} -n {vna}',
+            checks=self.check('capacityProvider.id', '{capacity_provider_id}')
+        )
+
+        vna_list = self.cmd('network virtual-network-appliance list -g {rg}').get_output_in_json()
+        consumer = next(item for item in vna_list if item['name'] == self.kwargs['vna'])
+        self.assertEqual(consumer['capacityProvider']['id'], self.kwargs['capacity_provider_id'])
+
     @ResourceGroupPreparer(name_prefix='test_vna_ip_version', location='eastus')
     def test_network_virtual_network_appliance_private_ip_address_version(self, resource_group):
         self.kwargs.update({
@@ -10138,6 +10350,116 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='test_ddos_cuspol_mr', location='centraluseuap')
+    def test_ddos_custom_policy_mitigation_rules(self, resource_group):
+        self.kwargs.update({
+            'policy_name': 'policy1',
+            'policy_name2': 'policy2',
+            'tcp_rule': '{name:mrTcp,traffic-scope:Tcp,'
+                        'tcp-default-mitigations:{per-source-rate-limiting:{packets-per-second:100000},'
+                        'per-source-connection-rate-limiting:{connections-per-second:1000}},'
+                        'source-policy-overrides:['
+                        '{policy-action:{action-type:Deny},conditions:{ip-prefixes:[198.51.100.0/24],geo-matches:[{country-code:CA}]}},'
+                        '{policy-action:{action-type:Permit},conditions:{ip-prefixes:[203.0.113.0/24],geo-matches:[{continent:NorthAmerica}]}}]}',
+            'udp_rule': '{name:mrUdp,traffic-scope:Udp,udp-default-mitigations:{per-source-rate-limiting:{packets-per-second:50000}}}',
+            'deny_override': '[{"policyAction":{"actionType":"Deny"},"conditions":{"ipPrefixes":["192.0.2.0/24"],'
+                             '"geoMatches":[{"continent":"Europe","countryCode":"FR"}]}}]',
+            'invalid_rule': '[{name:mrBad,traffic-scope:Udp,tcp-default-mitigations:{per-source-rate-limiting:{packets-per-second:1000}}}]',
+            'invalid_rate': '[{name:mrBad,traffic-scope:Udp,udp-default-mitigations:{per-source-rate-limiting:{packets-per-second:-1}}}]',
+        })
+        tcp_rule_checks = [
+            self.check('mitigationRules[0].name', 'mrTcp'),
+            self.check('mitigationRules[0].properties.trafficScope', 'Tcp'),
+            self.check('mitigationRules[0].properties.tcpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 100000),
+            self.check('mitigationRules[0].properties.tcpDefaultMitigations.perSourceConnectionRateLimiting.connectionsPerSecond', 1000),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].policyAction.actionType', 'Deny'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.ipPrefixes[0]', '198.51.100.0/24'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.geoMatches[0].countryCode', 'CA'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[1].policyAction.actionType', 'Permit'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[1].conditions.ipPrefixes[0]', '203.0.113.0/24'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[1].conditions.geoMatches[0].continent', 'NorthAmerica'),
+        ]
+        udp_rule_checks = [
+            self.check('mitigationRules[1].name', 'mrUdp'),
+            self.check('mitigationRules[1].properties.trafficScope', 'Udp'),
+            self.check('mitigationRules[1].properties.udpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 50000),
+        ]
+
+        # detection and mitigation rules together
+        self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} --detection-rule-name dr1 '
+                 '--detection-mode TrafficThreshold --traffic-type Tcp --packets-per-second 1000000 '
+                 '--mitigation-rules [{tcp_rule}]', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules)', 1),
+        ] + tcp_rule_checks)
+
+        # re-running create merges new mitigation rules by name and keeps existing detection/mitigation rules
+        self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} --mitigation-rules [{udp_rule}]', checks=[
+            self.check('detectionRules[0].name', 'dr1'),
+            self.check('length(mitigationRules)', 2),
+        ] + tcp_rule_checks + udp_rule_checks)
+
+        self.cmd('network ddos-custom-policy show -g {rg} -n {policy_name}', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules)', 2),
+        ] + tcp_rule_checks + udp_rule_checks)
+
+        # replace, then clear, one rule's source policy overrides without touching other rules
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} '
+                 '--set mitigationRules[0].properties.sourcePolicyOverrides=\'{deny_override}\'', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules[0].properties.sourcePolicyOverrides)', 1),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.ipPrefixes[0]', '192.0.2.0/24'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.geoMatches[0].continent', 'Europe'),
+            self.check('mitigationRules[0].properties.sourcePolicyOverrides[0].conditions.geoMatches[0].countryCode', 'FR'),
+            self.check('mitigationRules[0].properties.tcpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 100000),
+        ] + udp_rule_checks)
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} '
+                 '--remove mitigationRules[0].properties.sourcePolicyOverrides', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules[0].properties.sourcePolicyOverrides || `[]`)', 0),
+        ] + udp_rule_checks)
+
+        # unrelated update keeps all rules
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} --tags env=test', checks=[
+            self.check('tags.env', 'test'),
+            self.check('length(detectionRules)', 1),
+            self.check('length(mitigationRules)', 2),
+        ])
+
+        # update --mitigation-rules replaces the whole collection and keeps detection rules
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} --mitigation-rules [{udp_rule}]', checks=[
+            self.check('detectionRules[0].name', 'dr1'),
+            self.check('length(mitigationRules)', 1),
+            self.check('mitigationRules[0].name', 'mrUdp'),
+            self.check('mitigationRules[0].properties.udpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 50000),
+        ])
+
+        # mitigation-only policy
+        self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name2} --mitigation-rules [{udp_rule}]', checks=[
+            self.check('length(detectionRules || `[]`)', 0),
+            self.check('length(mitigationRules)', 1),
+            self.check('mitigationRules[0].properties.udpDefaultMitigations.perSourceRateLimiting.packetsPerSecond', 50000),
+        ])
+
+        self.cmd('network ddos-custom-policy list -g {rg}', checks=[
+            self.check('length(@)', 2),
+            self.check("length([?name=='{policy_name}'] | [0].mitigationRules)", 1),
+            self.check("[?name=='{policy_name2}'] | [0].mitigationRules[0].name", 'mrUdp'),
+        ])
+        self.cmd('network ddos-custom-policy list', checks=[
+            self.check("[?name=='{policy_name2}' && contains(id, '{rg}')] | [0].mitigationRules[0].name", 'mrUdp'),
+        ])
+
+        # service-side validation errors are surfaced
+        with self.assertRaisesRegex(HttpResponseError, 'DdosCustomPolicyHasInvalidProperties'):
+            self.cmd('network ddos-custom-policy create -g {rg} -n policy3 --mitigation-rules "{invalid_rule}"')
+        with self.assertRaisesRegex(HttpResponseError, 'DdosCustomPolicyHasInvalidProperties'):
+            self.cmd('network ddos-custom-policy create -g {rg} -n policy3 --mitigation-rules "{invalid_rate}"')
+
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y')
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name2} -y')
 
     @ResourceGroupPreparer(name_prefix='test_ddos_cuspol_lb', location='eastus')
     def test_ddos_custom_policy_attach_to_lb_fip(self, resource_group):

@@ -10,12 +10,31 @@ from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
     JMESPathCheck,
     ResourceGroupPreparer,
-    ScenarioTest)
+    ScenarioTest,
+    live_only)
 from .server_preparer import ServerPreparer
-from .constants import DEFAULT_LOCATION
+from .constants import DEFAULT_LOCATION, SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
 
 
 class PostgreSQLFlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
+
+    # Keep this live-only until a service recording is available.
+    @live_only()
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_postgres_flexible_server_immutable_backup_mgmt(self, resource_group):
+        for immutable_backup in ('Enabled', 'Disabled'):
+            self.kwargs.update(
+                server_name=self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
+                location=DEFAULT_LOCATION,
+                immutable_backup=immutable_backup)
+            self.cmd('postgres flexible-server create --resource-group {rg} --name {server_name} '
+                     '--location {location} --sku-name Standard_D2s_v3 --tier GeneralPurpose '
+                     '--storage-size 64 --version 16 --backup-retention 25 '
+                     '--immutable-backup {immutable_backup} --public-access None --yes')
+            self.cmd('postgres flexible-server show --resource-group {rg} --name {server_name}',
+                     checks=[JMESPathCheck('backup.immutableBackup', immutable_backup),
+                             JMESPathCheck('backup.backupRetentionDays', 25)])
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)

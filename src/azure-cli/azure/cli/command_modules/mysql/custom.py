@@ -17,7 +17,7 @@ from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resou
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.command_modules.mysql.random.generate import generate_username
-from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation, run_cmd
+from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.local_context import ALL
 from azure.mgmt.mysqlflexibleservers import models
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError, InvalidArgumentValueError, ValidationError
@@ -28,7 +28,7 @@ from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flex
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     _get_list_from_paged_response, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
     fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
-    ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH
+    ImportFromStorageProgressHook, OperationProgressBar, GITHUB_ACTION_PATH, run_cmd
 from ._network import prepare_mysql_exist_private_dns_zone, prepare_mysql_exist_private_network, prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from ._validators import mysql_arguments_validator, mysql_auto_grow_validator, mysql_georedundant_backup_validator, mysql_restore_tier_validator, mysql_accelerated_logs_validator, \
     mysql_retention_validator, mysql_sku_name_validator, mysql_storage_validator, validate_mysql_replica, validate_server_name, \
@@ -242,7 +242,11 @@ def github_actions_run(action_name, branch):
 
 
 def gitcli_check_and_login():
-    output = run_cmd(["gh"], capture_output=True)
+    try:
+        output = run_cmd(["gh"], capture_output=True)
+    except FileNotFoundError as ex:
+        # A gh.exe in the project folder does not count as an installed GitHub CLI.
+        raise ClientRequestError('Please install "Github CLI" to run this command.') from ex
     if output.returncode:
         raise ClientRequestError('Please install "Github CLI" to run this command.')
 

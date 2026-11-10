@@ -496,6 +496,7 @@ def load_arguments(self, _):
 
     for scope in ['vm create', 'vm update']:
         with self.argument_context(scope) as c:
+            c.argument('preferred_size', completer=get_vm_size_completion_list, is_preview=True, help='Preferred VM size for Flow VMs. Azure may deploy a compatible alternative size. Cannot be used with --size.')
             c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
             c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), help='The configuration parameter used while publishing scheduled events additional publishing targets.')
             c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
@@ -505,7 +506,7 @@ def load_arguments(self, _):
             c.argument('key_incarnation_id', type=int, help='Increase the value of this property allows user to reset the key used for securing communication channel between guest and host.')
             c.argument('security_type', arg_type=get_enum_type(SecurityType, default=None), help='Specify the security type of the virtual machine.')
             c.argument('zone_movement', arg_type=get_three_state_flag(), help='Indicates if zone movement is enabled. By default isEnabled is set to false i.e VM can\'t be moved from one zone to another.')
-            c.argument('disable_capacity_reservation_assignment', options_list=['--disable-capacity-reservation-assignment', '--no-cap-reservation'], arg_type=get_three_state_flag(), help='Explicitly opt out the VM from being associated with any capacity reservation. The VM will consume publicly available capacity.')
+            c.argument('disable_capacity_reservation_assignment', options_list=['--disable-capacity-reservation-assignment', '--no-cap-reservation'], arg_type=get_three_state_flag(), is_preview=True, help='Explicitly opt out the VM from being associated with any capacity reservation. The VM will consume publicly available capacity.')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -1035,7 +1036,7 @@ def load_arguments(self, _):
             c.argument('enable_automatic_zone_balancing', arg_type=get_three_state_flag(), options_list=['--enable-automatic-zone-balancing', '--enable-zone-balancing'], help='Specify whether automatic AZ balancing should be enabled on the virtualmachine scale set.')
             c.argument('automatic_zone_balancing_strategy', arg_type=get_enum_type(AutomaticZoneBalancingStrategy), options_list=['--automatic-zone-balancing-strategy', '--balancing-strategy'], help='Type of rebalance strategy that will be used for rebalancing virtualmachines in the scale set across availability zones.')
             c.argument('automatic_zone_balancing_behavior', arg_type=get_enum_type(AutomaticZoneBalancingBehavior), options_list=['--automatic-zone-balancing-behavior', '--balancing-behavior'], help='Type of rebalance behavior that will be used for recreating virtualmachines in the scale set across availability zones.')
-            c.argument('disable_capacity_reservation_assignment', arg_type=get_three_state_flag(),
+            c.argument('disable_capacity_reservation_assignment', arg_type=get_three_state_flag(), is_preview=True,
                        options_list=['--disable-capacity-reservation-assignment', '--no-cap-reservation'],
                        help='Specifies whether the virtual machine scale set is explicitly opted out from being associated with any capacity reservation. When set to true, its virtual machines will not be allowed to implicitly or explicitly associate with any type of capacity reservation and will consume publicly available capacity. This option applies to the parent VMSS only.')
 
@@ -1701,7 +1702,7 @@ def load_arguments(self, _):
                    help='The name of the capacity reservation group.')
         c.argument('tags', tags_type)
         c.argument('sharing_profile', nargs='*', help='Space-separated subscription resource IDs or nothing. Specify the settings to enable sharing across subscriptions for the capacity reservation group resource. Specify it to nothing to unsharing.')
-        c.argument('reservation_type', arg_type=get_enum_type(ReservationType), help='The capacity reservation type. The reservation type cannot be changed after the capacity reservation group is created.')
+        c.argument('reservation_type', arg_type=get_enum_type(ReservationType), is_preview=True, help='The capacity reservation type. The reservation type cannot be changed after the capacity reservation group is created.')
 
     with self.argument_context('capacity reservation group create') as c:
         c.argument('zones', zones_type, help='Availability Zones to use for this capacity reservation group. If not provided, the group supports only regional resources in the region. If provided, enforces each capacity reservation in the group to be in one of the zones.')

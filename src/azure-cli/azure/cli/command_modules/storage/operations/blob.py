@@ -20,6 +20,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from .._transformers import transform_response_with_bytearray
 from ..util import get_datetime_from_string
+from ..storage_url_helpers import same_url_origin as _same_url_origin
 
 logger = get_logger(__name__)
 
@@ -84,7 +85,12 @@ def get_immutability_policy(client, container_name, account_name, if_match=None,
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
                         metadata=None, public_access=None, fail_on_exist=False,
                         default_encryption_scope=None, deny_encryption_scope_override=None, enable_vlw=None,
-                        enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None):
+                        enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None,
+                        blob_access_point_configuration_name=None, blob_access_point_configuration_unique_id=None):
+    if blob_access_point_configuration_unique_id is not None and not blob_access_point_configuration_name:
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
+        raise RequiredArgumentMissingError(
+            'Specify --blob-access-point-configuration-name when using --blob-access-point-configuration-unique-id.')
     if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
                                              account_name=account_name, container_name=container_name):
         raise CLIError('The specified container already exists.')
@@ -100,6 +106,12 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
         ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
                                                         resource_type=ResourceType.MGMT_STORAGE)
         blob_container.immutable_storage_with_versioning = ImmutableStorageWithVersioning(enabled=enable_vlw)
+    if blob_access_point_configuration_name is not None:
+        BlobAccessPointConfigurationConnection = cmd.get_models(
+            'BlobAccessPointConfigurationConnection', resource_type=ResourceType.MGMT_STORAGE)
+        blob_container.blob_access_point_configuration = BlobAccessPointConfigurationConnection(
+            blob_access_point_configuration_name=blob_access_point_configuration_name,
+            blob_access_point_configuration_unique_id=blob_access_point_configuration_unique_id)
     return client.create(resource_group_name=resource_group_name, account_name=account_name,
                          container_name=container_name, blob_container=blob_container)
 
@@ -1101,41 +1113,6 @@ def query_blob(client, query_expression, input_config=None, output_config=None, 
         return None
 
     return reader.readall().decode("utf-8")
-
-
-def _normalize_url_origin(url):
-    from ipaddress import ip_address
-    from urllib.parse import urlsplit
-    import idna
-
-    try:
-        parsed = urlsplit(url)
-        scheme = parsed.scheme.lower()
-        hostname = parsed.hostname
-        if scheme not in ('http', 'https') or not hostname:
-            return None
-
-        hostname = hostname.rstrip('.')
-        if not hostname:
-            return None
-        try:
-            hostname = ip_address(hostname).compressed
-        except ValueError:
-            hostname = idna.encode(hostname, uts46=True).decode('ascii').lower().rstrip('.')
-            if not hostname:
-                return None
-
-        port = parsed.port
-        if port is None:
-            port = 443 if scheme == 'https' else 80
-        return scheme, hostname, port
-    except (UnicodeError, ValueError):
-        return None
-
-
-def _same_url_origin(first_url, second_url):
-    first_origin = _normalize_url_origin(first_url)
-    return first_origin is not None and first_origin == _normalize_url_origin(second_url)
 
 
 def _account_names_match(first_client, second_client):

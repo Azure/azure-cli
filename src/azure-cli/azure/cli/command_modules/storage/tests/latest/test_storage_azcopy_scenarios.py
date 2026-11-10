@@ -5,9 +5,39 @@
 import os
 import shutil
 from datetime import datetime, timedelta
-from azure.cli.testsdk import (StorageAccountPreparer, LiveScenarioTest, JMESPathCheck, ResourceGroupPreparer)
+from unittest import mock
+from azure.cli.testsdk import (
+    StorageAccountPreparer, LiveScenarioTest, ScenarioTest, JMESPathCheck, ResourceGroupPreparer)
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from knack.util import CLIError
+
+
+class StorageAzcopyEndpointTests(ScenarioTest):
+    def test_storage_copy_credential_endpoint_validation(self):
+        with mock.patch('azure.cli.command_modules.storage.operations.azcopy.AzCopy') as azcopy, \
+                mock.patch('azure.cli.command_modules.storage.azcopy.util._generate_sas_token',
+                           return_value='sig=test-signature') as generate:
+            with self.assertRaisesRegex(InvalidArgumentValueError, 'Cannot attach storage credentials'):
+                self.cmd(
+                    'storage copy --source ./source --destination https://another.blob.core.windows.net/c '
+                    '--account-name victim --account-key a2V5')
+            azcopy.assert_not_called()
+            generate.assert_not_called()
+
+            self.cmd('storage copy --source ./source --destination https://victim.blob.core.windows.net/c '
+                     '--account-name victim --account-key a2V5')
+            self.assertEqual(azcopy.return_value.copy.call_args[0],
+                             ('./source', 'https://victim.blob.core.windows.net/c?sig=test-signature'))
+
+            generate.reset_mock()
+            self.cmd(
+                'storage copy --source ./source '
+                '--destination https://victim.blob.core.windows.net.attacker.example/c '
+                '--account-name victim --account-key a2V5')
+            self.assertEqual(azcopy.return_value.copy.call_args[0],
+                             ('./source', 'https://victim.blob.core.windows.net.attacker.example/c'))
+            generate.assert_not_called()
 
 
 class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
@@ -189,7 +219,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                                 JMESPathCheck("properties.contentSettings.contentType", "application/javascript"))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_blob_azcopy_sync_sas(self, resource_group, storage_account, test_dir):
         from datetime import datetime, timedelta
@@ -212,7 +242,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account, sas), checks=JMESPathCheck('length(@)', 41))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_blob_azcopy_remove(self, resource_group, storage_account_info, test_dir):
         storage_account, account_key = storage_account_info
@@ -403,7 +433,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             container, storage_account), checks=JMESPathCheck('length(@)', 40))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_storage_file_azcopy_remove(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         s1 = self.create_share(account_info)
@@ -482,7 +512,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 0))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_remove_sas(self, resource_group, storage_account, test_dir):
         from datetime import datetime, timedelta
@@ -620,7 +650,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(local_file, sasURL))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='first_account', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_blob_account(self, resource_group, first_account, second_account, test_dir):
@@ -722,7 +752,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                  .format(third_container, second_account), checks=JMESPathCheck('length(@)', 10))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='first_account')
+    @StorageAccountPreparer(parameter_name='first_account', kind='StorageV2')
     @StorageAccountPreparer(parameter_name='second_account', sku='Premium_LRS', kind='BlockBlobStorage')
     @StorageTestFilesPreparer()
     def test_storage_azcopy_blob_source_with_credential(self, resource_group, first_account, second_account, test_dir):
