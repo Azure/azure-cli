@@ -10,6 +10,7 @@ Release History
 
 * `az acr pack`: Deprecate command group (#34175)
 * `az acr`: Validate the token endpoint before sending credentials (#34301)
+* `az acr check-health`: Correctly handle Helm version checks with newer versions (#34351)
 
 **AKS**
 
@@ -25,8 +26,8 @@ Release History
 
 **App Service**
 
-* `az webapp up`: [BREAKING CHANGE] Deprecate `az webapp up` command (#34344)
-* [BREAKING CHANGE] `az webapp list-runtimes`: Make the config field separator from pipe to colon for Linux and Windows across JSON, table, and TSV output (#34335)
+* [BREAKING CHANGE] `az webapp up`: Deprecate the command (#34344)
+* [BREAKING CHANGE] `az webapp list-runtimes`: Change the config field separator from pipe to colon for Linux and Windows across JSON, table, and TSV output (#34335)
 * `az functionapp deployment source config-zip`: Use the default hostname and disable redirects for Flex Consumption post-deployment health checks (#34286)
 * `az functionapp create`: Add `--deployment-image` and related arguments to create Flex Consumption apps that run a container image (#34147)
 * `az functionapp deployment config set`: Add `--deployment-image` and related arguments to configure container image deployment for Flex Consumption apps (#34147)
@@ -38,7 +39,8 @@ Release History
 * `az webapp troubleshoot status/config`: Fix troubleshoot report rendering on Windows (#34206)
 * `az webapp config egress`: Add enabled-state updates and configuration queries for web apps and deployment slots (#34249)
 * `az webapp config egress connection`: Add named connection add/show/remove with setting references and managed identity options (#34249)
-* Add site and serverfarm silo commands and related entities (#34356)
+* `az webapp silo`, `az appservice plan silo`: Add preview command groups to manage site and serverfarm silos and their VNet integration (#34356)
+* `az webapp managed-traffic`, `az webapp last-known-good`: Add preview command groups (#34356)
 * `az webapp create`, `az webapp config set`: Add improved unsupported Linux runtime error guidance (#34335)
 * `az appservice plan create`: Fix Windows defaults for App Service managed instance plans (#34110)
 
@@ -48,7 +50,7 @@ Release History
 
 **ARO**
 
-* `az aro`: Add the `az aro hcp` subcommand group for managing Azure Red Hat OpenShift with hosted control planes clusters (#34271)
+* `az aro hcp`: Add new command group for managing Azure Red Hat OpenShift clusters with hosted control planes (#34271)
 
 **Backup**
 
@@ -69,7 +71,7 @@ Release History
 **Cognitive Services**
 
 * `az cognitiveservices account create`: Add BYO AKS agent hosting support (#34303)
-* Add Anthropic deployment onboarding flags (#34280)
+* `az cognitiveservices account deployment create`: Add `--organization-name`, `--industry` and `--country` arguments for Anthropic deployments (#34280)
 * `az cognitiveservices account costcontrol`: Add new command group (#34337)
 * `az cognitiveservices account project costcontrol`: Add new command group (#34337)
 
@@ -80,9 +82,6 @@ Release History
 * `az containerapp up`: Validate registry server before getting ACR credentials (#34262)
 * `az containerapp up`: Validate image registry before inferring credentials (#34302)
 
-**Container Registry**
-
-* `az acr check-health`: Correctly handle Helm version checks with newer versions (#34351)
 
 **Cosmos DB**
 
@@ -96,7 +95,7 @@ Release History
 
 **Lab**
 
-* Fix #34353: Handle omitted formula password (#34354)
+* Fix #34353: `az lab vm create`: Handle omitted formula password when using `--formula` (#34354)
 
 **Monitor**
 
@@ -109,15 +108,15 @@ Release History
 
 **NetAppFiles**
 
-* BREAKING CHANGE `az netappfiles subvolume`: Remove subvolume commands (#34264)
-* BREAKING CHANGE `az netappfiles volume create`: Remove enable-subvolume option (#34264)
-* BREAKING CHANGE `az netappfiles volume update`: Remove enable-subvolume option (#34264)
+* [BREAKING CHANGE] `az netappfiles subvolume`: Remove subvolume commands (#34264)
+* [BREAKING CHANGE] `az netappfiles volume create`: Remove `--enable-subvolumes` parameter (#34264)
+* [BREAKING CHANGE] `az netappfiles volume update`: Remove `--enable-subvolumes` parameter (#34264)
 * `az netappfiles account refresh-ldap-bind-password`: Add command to refresh LDAP Bind DN password by fetching the latest password from Azure Key Vault (#34264)
 * `az netappfiles account ldap-configuration create/update/show/delete`: Add support for LDAP configuration (#34264)
 
 **Network**
 
-* `az network private-endpoint`: Add `--approval-reference-id` to inherit approval from an approved private endpoint. (#34340)
+* `az network private-endpoint`: Add `--approval-reference-id` to inherit approval from an approved private endpoint (#34340)
 * `az network express-route`: Add MultiCloud circuit support (#34306)
 * Fix #34345: `az network application-gateway waf-policy create`: `--managed-rules` is silently ignored (#34363)
 * `az network virtual-network-appliance`: Add support for `--capacity-provider` (#34318)
@@ -125,7 +124,7 @@ Release History
 **PostgreSQL**
 
 * `az postgres flexible-server upgrade`: Add support for Elastic Clusters (#34258)
-* Add immutable backup support to flexible-server create (#34320)
+* `az postgres flexible-server create`: Add immutable backup support (#34320)
 * `az postgres flexible-server migration update`: Fix online cutover request construction (#34323)
 * `az postgres flexible-server create/update`: Add `--fips-mode` to enable or disable FIPS mode (#34288)
 * `az postgres flexible-server deploy`: Fix external tool invocation on Windows (#34329)
@@ -135,7 +134,7 @@ Release History
 
 **Relay**
 
-* 2026-07-01-preview (#34180)
+* `az relay`: Bump API version to 2026-07-01-preview (#34180)
 
 **Service Fabric**
 
@@ -156,7 +155,7 @@ Release History
 
 **Synapse**
 
-* `az synapse workspace create`: /update: Fix repository argument validation and warning message formatting (#34313)
+* `az synapse workspace create/update`: Fix repository argument validation and warning message formatting (#34313)
 
 2.92.0
 ++++++
