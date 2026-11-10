@@ -315,8 +315,14 @@ def register_credential_secrets(cmd, database_engine, server, repository, gh_pat
     app.pop('displayName')
     app.pop('name')
 
-    run_subprocess([gh_path, 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository],
-                   input_data=json.dumps(app).encode('utf-8'))
+    process = subprocess.run(
+        [gh_path, 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository],
+        input=json.dumps(app).encode('utf-8'), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if process.returncode:
+        raise ClientRequestError(
+            'Failed to set the AZURE_CREDENTIALS secret in the GitHub repository (exit code {}).'.format(
+                process.returncode),
+            recommendation='Check your GitHub CLI authentication and repository permissions, then retry.')
 
 
 def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name, gh_path=None):

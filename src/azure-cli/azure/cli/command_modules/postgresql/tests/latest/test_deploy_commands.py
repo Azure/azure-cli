@@ -143,19 +143,29 @@ class DeploymentSecretsTest(unittest.TestCase):
 
     def test_setup_stops_after_credential_upload_failure(self):
         self.upload.return_value.returncode = 1
-        self.upload.return_value.stderr = self.credentials['clientSecret'].encode('UTF-8')
+        self.upload.return_value.stdout = b'unexpected upload stdout'
+        self.upload.return_value.stderr = (
+            self.credentials['clientSecret'].encode('UTF-8') + b' unexpected upload stderr')
         with self.assertLogs(util.logger.name, level='WARNING') as logs:
-            with self.assertRaisesRegex(ClientRequestError, 'failed with exit code 1') as error:
+            with self.assertRaisesRegex(ClientRequestError, 'Failed to set the AZURE_CREDENTIALS secret') as error:
                 deploy.github_actions_setup(
                     mock.Mock(), self.client, 'test-rg', 'server', 'database', 'admin', 'unused',
                     'schema file.sql', 'owner/repository', action_name='deploy database',
                     branch='feature/database', allow_push=True)
 
-        self.upload.assert_called_once()
+        self.upload.assert_called_once_with(
+            [self.executable, 'secret', 'set', util.AZURE_CREDENTIALS, '--repo', 'owner/repository'],
+            input=mock.ANY, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self.git.assert_not_called()
         self.files.assert_not_called()
-        self.assertNotIn(self.credentials['clientSecret'], str(error.exception))
-        self.assertNotIn(self.credentials['clientSecret'], '\n'.join(logs.output))
+        self.assertEqual(
+            str(error.exception),
+            'Failed to set the AZURE_CREDENTIALS secret in the GitHub repository (exit code 1).')
+        self.assertEqual(error.exception.recommendations, [
+            'Check your GitHub CLI authentication and repository permissions, then retry.'])
+        diagnostics = '\n'.join([str(error.exception), *error.exception.recommendations, *logs.output])
+        for value in (self.credentials['clientSecret'], 'unexpected upload stdout', 'unexpected upload stderr'):
+            self.assertNotIn(value, diagnostics)
 
 
 @unittest.skipUnless(sys.platform == 'win32', 'Windows executable search semantics')
