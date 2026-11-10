@@ -143,25 +143,6 @@ def get_config_value(cmd, section, key, default):
     return cmd.cli_ctx.config.get(section, key, default)
 
 
-def _query_account_key_with_warning(cmd, n):
-    message = """
-There are no credentials provided in your command and environment, we will query for account key for your storage account.
-It is recommended to provide --connection-string, --account-key or --sas-token in your command as credentials.
-"""
-    if 'auth_mode' in cmd.arguments:
-        message += """
-You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
-For more information about RBAC roles in storage, visit https://learn.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli.
-"""
-    logger.warning('%s\nIn addition, setting the corresponding environment variables can avoid inputting '
-                   'credentials in your command. Please use --help to get more information about environment '
-                   'variable usage.', message)
-    try:
-        n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
-    except Exception as ex:  # pylint: disable=broad-except
-        logger.warning("\nSkip querying account key due to failure: %s", ex)
-
-
 # pylint: disable=too-many-branches, too-many-statements
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
@@ -231,18 +212,32 @@ def validate_client_parameters(cmd, namespace):
         n.account_name = n.account_name[:-10]
 
     # if account name is specified but no key, attempt to query
-    if n.account_name and not n.account_key and not n.sas_token:
-        from .storage_url_helpers import is_valid_hostname_label
-        if not is_valid_hostname_label(n.account_name):
-            # Azure account names are always valid labels, so the lookup below could not succeed, and its failure
-            # warning would echo the value, which may be a URL or connection string containing credentials.
-            # With a custom endpoint the name is not part of the host, so leave it to the checks further down.
-            if not getattr(n, 'account_url', None):
-                from azure.cli.core.azclierror import InvalidArgumentValueError
-                raise InvalidArgumentValueError(
-                    "Invalid storage account name. The account name may only contain letters, numbers and hyphens.")
-        else:
-            _query_account_key_with_warning(cmd, n)
+    from .storage_url_helpers import is_valid_hostname_label
+    if n.account_name and not n.account_key and not n.sas_token and not is_valid_hostname_label(n.account_name) \
+            and not getattr(n, 'account_url', None):
+        # Azure account names are always valid labels, so the lookup below could not succeed, and its failure
+        # warning would echo the value, which may be a URL or connection string containing credentials.
+        # With a custom endpoint the name is not part of the host, so leave it to the checks further down.
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError(
+            "Invalid storage account name. The account name may only contain letters, numbers and hyphens.")
+    if n.account_name and not n.account_key and not n.sas_token and is_valid_hostname_label(n.account_name):
+        message = """
+There are no credentials provided in your command and environment, we will query for account key for your storage account.
+It is recommended to provide --connection-string, --account-key or --sas-token in your command as credentials.
+"""
+        if 'auth_mode' in cmd.arguments:
+            message += """
+You also can add `--auth-mode login` in your command to use Azure Active Directory (Azure AD) for authorization if your login account is assigned required RBAC roles.
+For more information about RBAC roles in storage, visit https://learn.microsoft.com/azure/storage/common/storage-auth-aad-rbac-cli.
+"""
+        logger.warning('%s\nIn addition, setting the corresponding environment variables can avoid inputting '
+                       'credentials in your command. Please use --help to get more information about environment '
+                       'variable usage.', message)
+        try:
+            n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("\nSkip querying account key due to failure: %s", ex)
 
     if hasattr(n, 'account_url') and n.account_url and not n.account_key and not n.sas_token:
         message = """

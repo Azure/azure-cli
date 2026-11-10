@@ -5,6 +5,7 @@
 
 import ntpath
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -29,10 +30,10 @@ class _FakeFileClient:
         self.name = path if name is None else name
         self.url = 'https://account.file.core.windows.net/share/' + path
 
-    def download_file(self, **kwargs):  # pylint: disable=unused-argument
+    def download_file(self, **_kwargs):
         return _FakeDownloader()
 
-    def get_file_properties(self, **kwargs):  # pylint: disable=unused-argument
+    def get_file_properties(self, **_kwargs):
         return SimpleNamespace(name=self.name)
 
 
@@ -44,7 +45,7 @@ class _FakeShareClient:
         self.listing = listing
         self.requested_files = []
 
-    def list_directories_and_files(self, directory_name=None, **kwargs):  # pylint: disable=unused-argument
+    def list_directories_and_files(self, directory_name=None, **_kwargs):
         return [{'name': name, 'is_directory': is_dir} for name, is_dir in self.listing.get(directory_name or '', [])]
 
     def get_file_client(self, path):
@@ -136,14 +137,22 @@ class TestStorageFileDownloadBatch(unittest.TestCase):
                     self.assertTrue(os.path.isfile(os.path.join(self.destination, outside.lstrip('/'))))
                 self.assertFalse(os.path.exists(outside))
 
-    @unittest.skipUnless(sys.platform == 'win32', 'Windows path semantics')
-    def test_download_batch_rejects_windows_traversal_names(self):
+    def test_download_batch_contains_windows_traversal_names(self):
         for listing in ({'': [('..\\..\\evil.txt', False)]},
                         {'': [('dir\\..\\..\\evil.txt', False)]},
                         {'': [('..\\..', True)], '../..': [('evil.txt', False)]},
                         {'': [(os.path.join(self.root, 'evil.txt').replace('\\', '/'), False)]}):
             with self.subTest(listing=listing):
-                self._assert_rejected(listing)
+                if sys.platform == 'win32':
+                    self._assert_rejected(listing)
+                else:
+                    # '\' is not a separator here, so these are ordinary names that must stay inside the destination
+                    self._run(listing)
+                    outside = [f for f in self._files_written()
+                               if not f.startswith(os.path.join('a', 'b', 'destination') + os.sep)]
+                    self.assertEqual(outside, [])
+                    shutil.rmtree(self.destination)
+                    os.makedirs(self.destination)
 
     def test_download_batch_rejects_windows_names_with_simulated_windows_paths(self):
         # Exercise Windows path semantics on any platform by swapping os.path for ntpath in the code under test
