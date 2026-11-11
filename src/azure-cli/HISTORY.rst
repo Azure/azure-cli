@@ -54,7 +54,7 @@ Release History
 
 **Backup**
 
-* Add SQL instance snapshot backup and restore support with the `SQLInstance` workload type (#34235)
+* `az backup`: Add SQL instance snapshot backup and restore support with the `SQLInstance` workload type (#34235)
 * `az backup container register`: Add `--container-subscription-id` (`--container-sub-id`) to select the source VM subscription independently of the vault subscription (#34235)
 * `az backup protection enable-for-azurewl`: Add `--child-database-names` to select databases for SQL instance snapshot protection (#34235)
 * `az backup policy create/set`: Add SQL instance `SnapshotV2` policy support (#34235)
@@ -81,7 +81,6 @@ Release History
 * `az containerapp update`: Fix `--yaml` dropping `identity.userAssignedIdentities`, which caused `IdentityDoesNotExist` errors (#34253)
 * `az containerapp up`: Validate registry server before getting ACR credentials (#34262)
 * `az containerapp up`: Validate image registry before inferring credentials (#34302)
-
 
 **Cosmos DB**
 
@@ -142,7 +141,7 @@ Release History
 
 **SQL**
 
-* Upgrade azure-mgmt-sql from 4.0.0b22 to 5.0.0b2 (#34266)
+* `az sql`: Upgrade azure-mgmt-sql from 4.0.0b22 to 5.0.0b2 (#34266)
 
 **Storage**
 
