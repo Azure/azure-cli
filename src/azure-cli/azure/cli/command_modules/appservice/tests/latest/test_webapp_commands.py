@@ -192,14 +192,13 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].value', '~22'),
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_runtime(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
         webapp_name_2 = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {} --is-linux false --sku B1'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|22LTS"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
         # ftpPublishingUrl may not be present in all API responses; validate format when present
@@ -209,7 +208,7 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheck('[0].value', '~22'),
         ])
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:8"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:10"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
         # ftpPublishingUrl may not be present in all API responses; validate format when present
         if 'ftpPublishingUrl' in r and r['ftpPublishingUrl']:
@@ -773,7 +772,6 @@ class WebappElasticScaleTest(ScenarioTest):
         ])
 
 class WebappConfigureTest(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_config(self, resource_group):
@@ -781,7 +779,7 @@ class WebappConfigureTest(ScenarioTest):
         plan_name = self.create_random_name('webapp-config-plan', 40)
 
         self.cmd(
-            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+            'appservice plan create -g {} -n {} --sku S1 --is-linux false'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
 
@@ -951,14 +949,14 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("javaContainer", "TOMCAT"),
             JMESPathCheck("javaContainerVersion", "9.0"),         
         ])
-        self.cmd('webapp config set -g {} -n {} --runtime dotnet:8'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("netFrameworkVersion", "v8.0"),
+        self.cmd('webapp config set -g {} -n {} --runtime dotnet:10'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("netFrameworkVersion", "v10.0"),
             JMESPathCheck("javaVersion", None),            
             JMESPathCheck("javaContainer", None),
             JMESPathCheck("javaContainerVersion", None),
         ])
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("netFrameworkVersion", "v8.0"),            
+            JMESPathCheck("netFrameworkVersion", "v10.0"),
             JMESPathCheck("javaVersion", None),
             JMESPathCheck("javaContainer", None),
             JMESPathCheck("javaContainerVersion", None),         
@@ -986,11 +984,11 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("linuxFxVersion", "PHP|8.4"),  
         ])                
-        self.cmd('webapp config set -g {} -n {} --runtime DOTNETCORE:8.0'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "DOTNETCORE|8.0"),
+        self.cmd('webapp config set -g {} -n {} --runtime DOTNETCORE:10.0'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "DOTNETCORE|10.0"),
         ])
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "DOTNETCORE|8.0"),
+            JMESPathCheck("linuxFxVersion", "DOTNETCORE|10.0"),
         ])        
         self.cmd('webapp config set -g {} -n {} --runtime NODE:22-lts'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("linuxFxVersion", "NODE|22-lts"),
