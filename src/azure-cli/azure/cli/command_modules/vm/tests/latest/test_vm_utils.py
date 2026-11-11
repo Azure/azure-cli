@@ -33,18 +33,21 @@ class TestListSkuInfo(unittest.TestCase):
     def test_location_filter(self):
         for location in ('eastus', 'EastUS', 'EASTUS'):
             with self.subTest(location=location):
+                self.list_skus_cls.reset_mock()
                 result = list_sku_info(self.cli_ctx, location)
 
-                self.list_skus_cls.assert_called_with(cli_ctx=self.cli_ctx)
-                self.list_skus.assert_called_with(command_args={'filter': "location eq 'eastus'"})
+                self.list_skus_cls.assert_called_once_with(cli_ctx=self.cli_ctx)
+                self.list_skus.assert_called_once_with(command_args={'filter': "location eq 'eastus'"})
                 self.assertEqual(result, self.skus[:2])
 
     def test_no_location(self):
         for location in (None, ''):
             with self.subTest(location=location):
+                self.list_skus_cls.reset_mock()
                 result = list_sku_info(self.cli_ctx, location)
 
-                self.list_skus.assert_called_with(command_args={})
+                self.list_skus_cls.assert_called_once_with(cli_ctx=self.cli_ctx)
+                self.list_skus.assert_called_once_with(command_args={})
                 self.assertEqual(result, self.skus)
 
     def test_no_matching_location(self):
