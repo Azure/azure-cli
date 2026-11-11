@@ -54,28 +54,32 @@ def poll_status(cmd, request_url):  # pylint: disable=inconsistent-return-statem
     animation = PollingAnimation()
 
     animation.tick()
-    r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    try:
+        while True:
+            r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+            if r.status_code != 200:
+                raise AzureResponseError(
+                    "Operation polling returned an unexpected HTTP status code: {}".format(r.status_code))
 
-    while r.status_code in [200] and start < end:
-        time.sleep(_extract_delay(r))
-        animation.tick()
-        r = send_raw_request(cmd.cli_ctx, "GET", request_url)
-        response_body = json.loads(r.text)
-        status = safe_get(response_body, "status")
-        if not status:
-            raise AzureResponseError("Http response body lack of necessary property: status")
-        if response_body["status"].lower() in ["failed", "canceled"]:
-            message = json.dumps(response_body["error"]) if "error" in response_body else "Operation failed or canceled"
-            raise HttpResponseError(
-                response=r,
-                message=message
-            )
-        if response_body["status"].lower() in ["succeeded"]:
-            break
-        start = time.time()
-
-    animation.flush()
-    return
+            response_body = json.loads(r.text)
+            status = safe_get(response_body, "status")
+            if not status:
+                raise AzureResponseError("Http response body lack of necessary property: status")
+            if response_body["status"].lower() in ["failed", "canceled"]:
+                message = json.dumps(response_body["error"]) if "error" in response_body else "Operation failed or canceled"
+                raise HttpResponseError(
+                    response=r,
+                    message=message
+                )
+            if response_body["status"].lower() == "succeeded":
+                return
+            start = time.time()
+            if start >= end:
+                raise AzureResponseError("Operation polling timed out before completion.")
+            time.sleep(_extract_delay(r))
+            animation.tick()
+    finally:
+        animation.flush()
 
 
 def poll_results(cmd, request_url):  # pylint: disable=inconsistent-return-statements
@@ -87,15 +91,17 @@ def poll_results(cmd, request_url):  # pylint: disable=inconsistent-return-state
     animation = PollingAnimation()
 
     animation.tick()
-    r = send_raw_request(cmd.cli_ctx, "GET", request_url)
-
-    while r.status_code in [202] and start < end:
-        time.sleep(_extract_delay(r))
-        animation.tick()
+    try:
         r = send_raw_request(cmd.cli_ctx, "GET", request_url)
-        start = time.time()
-
-    animation.flush()
+        while r.status_code == 202:
+            start = time.time()
+            if start >= end:
+                raise AzureResponseError("Operation polling timed out before completion.")
+            time.sleep(_extract_delay(r))
+            animation.tick()
+            r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+    finally:
+        animation.flush()
     if r.text:
         return json.loads(r.text)
 
@@ -406,7 +412,7 @@ class ContainerAppClient:
             operation_url = r.headers.get(HEADER_AZURE_ASYNC_OPERATION)
             if operation_url:
                 poll_status(cmd, operation_url)
-                r = send_raw_request(cmd.cli_ctx, "GET", "{}?api-version={}".format(resource_url, cls.api_version))
+                return None
             else:
                 operation_url = r.headers.get(HEADER_LOCATION)
                 result = poll_results(cmd, operation_url)

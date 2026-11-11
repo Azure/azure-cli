@@ -4,9 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from unittest.mock import Mock, call, patch
+from unittest.mock import ANY, Mock, call, patch
 
 from azure.cli.command_modules.containerapp import _clients
+from azure.cli.command_modules.containerapp.commands import load_command_table
+from azure.cli.command_modules.containerapp._transformers import transform_sensitive_values
 
 
 class ContainerAppStartStopTests(unittest.TestCase):
@@ -71,3 +73,41 @@ class ContainerAppStartStopTests(unittest.TestCase):
         self.assertEqual(actual_result, result)
         poll_results.assert_called_once_with(self.cmd, operation_url)
         send_request.assert_called_once_with(self.cmd.cli_ctx, "POST", request_url)
+
+    def test_async_operation_does_not_fetch_app_after_completion(self):
+        response = Mock(status_code=202, headers={"azure-asyncoperation": "https://management.azure.com/operations/123"})
+        with patch.object(_clients, "get_subscription_id", return_value="subscription"), \
+                patch.object(_clients, "send_raw_request", return_value=response) as send_request, \
+                patch.object(_clients, "poll_status"):
+            result = _clients.ContainerAppClient.start(self.cmd, "group", "app")
+
+        self.assertIsNone(result)
+        send_request.assert_called_once()
+
+    def test_start_and_stop_register_sensitive_value_transform(self):
+        loader = Mock()
+        group = Mock()
+        loader.command_group.return_value.__enter__.return_value = group
+
+        load_command_table(loader, None)
+
+        group.custom_command.assert_any_call(
+            "start", "start_containerapp", supports_no_wait=True,
+            exception_handler=ANY, transform=transform_sensitive_values)
+        group.custom_command.assert_any_call(
+            "stop", "stop_containerapp", supports_no_wait=True,
+            exception_handler=ANY, transform=transform_sensitive_values)
+
+    def test_poll_status_raises_when_operation_remains_incomplete(self):
+        response = Mock(status_code=200, text='{"status":"InProgress"}')
+        with patch.object(_clients, "POLLING_TIMEOUT", 0), \
+                patch.object(_clients, "send_raw_request", return_value=response):
+            with self.assertRaisesRegex(_clients.AzureResponseError, "timed out"):
+                _clients.poll_status(self.cmd, "https://management.azure.com/operations/123")
+
+    def test_poll_results_raises_when_operation_remains_accepted(self):
+        response = Mock(status_code=202, text="")
+        with patch.object(_clients, "POLLING_TIMEOUT", 0), \
+                patch.object(_clients, "send_raw_request", return_value=response):
+            with self.assertRaisesRegex(_clients.AzureResponseError, "timed out"):
+                _clients.poll_results(self.cmd, "https://management.azure.com/operations/123")

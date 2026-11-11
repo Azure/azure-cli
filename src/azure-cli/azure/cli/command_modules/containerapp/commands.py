@@ -25,8 +25,10 @@ def load_command_table(self, _):
                          table_transformer=transform_containerapp_output, transform=transform_sensitive_values)
         g.custom_command('update', 'update_containerapp', supports_no_wait=True, exception_handler=ex_handler_factory(),
                          table_transformer=transform_containerapp_output, transform=transform_sensitive_values)
-        g.custom_command('start', 'start_containerapp', supports_no_wait=True, exception_handler=ex_handler_factory())
-        g.custom_command('stop', 'stop_containerapp', supports_no_wait=True, exception_handler=ex_handler_factory())
+        g.custom_command('start', 'start_containerapp', supports_no_wait=True, exception_handler=ex_handler_factory(),
+                         transform=transform_sensitive_values)
+        g.custom_command('stop', 'stop_containerapp', supports_no_wait=True, exception_handler=ex_handler_factory(),
+                         transform=transform_sensitive_values)
         g.custom_command('delete', 'delete_containerapp', supports_no_wait=True, confirmation=True, exception_handler=ex_handler_factory())
         g.custom_command('exec', 'containerapp_ssh', validator=validate_ssh)
         g.custom_command('up', 'containerapp_up', supports_no_wait=False, exception_handler=ex_handler_factory())
