@@ -537,7 +537,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 class FunctionWorkloadProfile(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='northeurope')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
         
         functionapp_name = self.create_random_name(
@@ -2101,7 +2101,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             JMESPathCheck("[?name=='APPINSIGHTS_INSTRUMENTATIONKEY'].value|[0]", app_insights_key)])
 
     @ResourceGroupPreparer(location='southcentralus')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_consumption_plan_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
@@ -2120,7 +2120,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                     .format(resource_group, functionapp_name, 'southcentralus', storage_account, managed_environment_name))
             
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @VirtualNetworkPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_create_with_appcontainer_managed_environment_vnet_config_error(self, resource_group, storage_account, virtual_network):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
@@ -2130,7 +2130,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'France Central')])
+                     JMESPathCheck('location', 'East US')])
 
         with self.assertRaises(ArgumentUsageError):
             self.cmd('functionapp create -g {} -n {} -s {} --vnet {} --subnet {}  --environment {} --runtime dotnet --functions-version 4'
@@ -2227,7 +2227,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             .format(resource_group, functionapp_name, function_name))
 
     @ResourceGroupPreparer(location='eastus2')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_plan_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
@@ -2346,7 +2346,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
         
     @ResourceGroupPreparer(location='westeurope')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_registry_server_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 30)
@@ -2366,7 +2366,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                     .format(resource_group, functionapp_name, storage_account, managed_environment_name))
             
     @ResourceGroupPreparer(location='southcentralus')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_registry_username_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 30)
@@ -2386,7 +2386,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                     .format(resource_group, functionapp_name, storage_account, managed_environment_name))
             
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_registry_password_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 30)
