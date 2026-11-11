@@ -7,9 +7,7 @@ import hashlib
 import re
 from contextlib import contextmanager
 from dataclasses import dataclass, replace
-from fnmatch import fnmatchcase
 from typing import TYPE_CHECKING, Optional
-from urllib.parse import urlparse
 
 from azure.core.exceptions import AzureError, ResourceNotFoundError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
@@ -40,6 +38,17 @@ _OPTION_NAMES = {
     'cluster': '--agent-hosting-cluster', 'storage': '--agent-hosting-storage',
     'management_identity': '--agent-hosting-management-identity',
     'workload_identity': '--agent-hosting-workload-identity',
+}
+
+
+_ROLE_IDS = {
+    'Reader': 'acdd72a7-3385-48ef-bd42-f606fba81ae7',
+    'Kubernetes Extension Contributor': '85cb6faf-e071-4c9b-8136-154b5a04f717',
+    'Managed Identity Federated Identity Credential Contributor': '7e559ce2-48d7-4b27-9128-fa1b247f1308',
+    'Storage Blob Data Contributor': 'ba92f5b4-2d11-453d-a403-e96b0029c9fe',
+    'Storage Blob Data Owner': 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b',
+    'Owner': '8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+    'Contributor': 'b24988ac-6180-42a0-ab88-20f7382dd24c',
 }
 
 
@@ -131,12 +140,11 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
     with _read_check(checks, 'Node pools', resources.cluster):
         cluster_clients = _clients(cli_ctx, resources.cluster, clients)
         if cluster is not None:
-            _check_pools(cluster_clients.aks, cluster_clients.compute, cluster,
-                         resources.cluster, request.location, checks)
+            _check_pools(cluster_clients.aks, cluster, resources.cluster, checks)
     checked = PreflightResult(resources, management, workload, storage, storage_sku)
     grants = ()
     with _read_check(checks, 'Permissions', request.account_id):
-        grants = _check_permissions(cli_ctx, clients, request, checked, checks)
+        grants = _check_grants(cli_ctx, clients, request, checked, checks)
     if any(check['mandatory'] and check['status'] in ('FAIL', 'UNVERIFIED') for check in checks):
         raise ValidationError('BYO AKS preflight failed. No Azure resources were written. '
                               'Resolve the reported checks and retry.')
@@ -270,13 +278,6 @@ def _resolve_resources(request):
                    else identity_id(names['management_identity']),
                    workload_identity=request.workload_identity if request.workload_identity is not None
                    else identity_id(names['workload_identity']))
-
-
-def _existing_scope(arm_id, exists):
-    if exists:
-        return arm_id
-    parts = parse_resource_id(arm_id)
-    return f'/subscriptions/{parts["subscription"]}/resourceGroups/{parts["resource_group"]}'
 
 
 def _report(checks, name, scope, passed, observed, expected, remediation, mandatory=True):
@@ -416,12 +417,15 @@ def _image_supported(value):
 
 def _check_cluster(cluster, scope, location, checks):
     if cluster.properties is None:
-        _report(checks, 'AKS state', scope, 'UNVERIFIED', 'Missing properties', 'Succeeded',
+        _report(checks, 'AKS cluster', scope, 'UNVERIFIED', 'Missing properties', 'Readable cluster properties',
                 'Read a fully provisioned cluster.')
         return
     properties = cluster.properties
     network, oidc, security = properties.network_profile, properties.oidc_issuer_profile, properties.security_profile
     sku, identity = cluster.sku, cluster.identity
+    kubelet = next((value for key, value in (properties.identity_profile or {}).items()
+                    if isinstance(key, str) and key.lower() == 'kubeletidentity'), None)
+    kubelet_id = kubelet.object_id if kubelet else None
     version = properties.current_kubernetes_version or properties.kubernetes_version
     workload_identity = security.workload_identity if security else None
     node_mode = properties.node_provisioning_profile.mode if properties.node_provisioning_profile else None
@@ -430,9 +434,10 @@ def _check_cluster(cluster, scope, location, checks):
         ('AKS mode', sku_name == 'Base' and node_mode != 'Auto',
          f'{sku_name}/{node_mode}', 'Standard AKS offering, not Automatic; no pricing-tier restriction'),
         ('Kubernetes version', _version_at_least(version, '1.31'), version, '>= 1.31'),
-        ('AKS state', properties.provisioning_state == 'Succeeded', properties.provisioning_state, 'Succeeded'),
         ('AKS identity', bool(identity and identity.type in ('SystemAssigned', 'UserAssigned')),
          identity.type if identity else None, 'Managed identity'),
+        ('Kubelet identity', bool(kubelet_id and str(kubelet_id).strip()), kubelet_id,
+         'Readable kubelet identity objectId'),
         ('OIDC', bool(oidc and oidc.enabled is True and oidc.issuer_url), oidc.issuer_url if oidc else None,
          'Enabled with readable issuer URL'),
         ('Workload Identity', bool(workload_identity and workload_identity.enabled is True),
@@ -465,122 +470,42 @@ def _check_network_policy(network, scope, checks):
             remediation)
 
 
-def _pool_vm_sizes(properties):
-    sizes, seen = [], set()
-
-    def add(value):
-        if value is None or not str(value).strip():
-            return
-        size = str(value).strip()
-        key = size.lower()
-        if key not in seen:
-            seen.add(key)
-            sizes.append(size)
-
-    add(properties.vm_size)
-    virtual_machines = properties.virtual_machines_profile
-    scale = virtual_machines.scale if virtual_machines else None
-    for profile in scale.manual or [] if scale else []:
-        add(profile.size)
-    for node in properties.virtual_machine_nodes_status or []:
-        add(node.size)
-    return tuple(sizes)
-
-
-def _pool_capacity_status(sizes, capacity, minimum_cpu, minimum_memory):
-    if not sizes:
-        return 'UNVERIFIED', ['No VM size evidence']
-    status, evidence = 'PASS', []
-    for size in sizes:
-        key = size.lower()
-        if key not in capacity:
-            status = 'UNVERIFIED' if status == 'PASS' else status
-            evidence.append(f'{size}: SKU not found')
-            continue
-        available = capacity[key]
-        if available is None:
-            status = 'UNVERIFIED' if status == 'PASS' else status
-            evidence.append(f'{size}: missing vCPU or MemoryGB capability')
-            continue
-        cpu, memory = available
-        if cpu < minimum_cpu or memory < minimum_memory:
-            status = 'FAIL'
-        evidence.append(f'{size}: {cpu:g} vCPU/{memory:g} GiB')
-    return status, evidence
-
-
-def _vm_size_capacity(compute, location):
-    capacity = {}
-    for sku in compute.resource_skus.list(filter=f"location eq '{location}'"):
-        if sku.resource_type != 'virtualMachines' or not sku.name:
-            continue
-        key = sku.name.lower()
-        capacity.setdefault(key, None)
-        capabilities = {value.name.lower(): value.value for value in sku.capabilities or [] if value.name}
-        cores = capabilities.get('vcpusavailable') or capabilities.get('vcpus')
-        memory = capabilities.get('memorygb')
-        try:
-            if cores is not None and memory is not None:
-                capacity[key] = float(cores), float(memory)
-        except (TypeError, ValueError):
-            pass
-    return capacity
-
-
-def _evaluate_pool(pool, capacity):
+def _evaluate_pool(pool):
     properties = pool.properties
     if properties is None:
-        return None, None, f'{pool.name}: missing properties'
-    sizes = _pool_vm_sizes(properties)
-    system_capacity, system_evidence = _pool_capacity_status(sizes, capacity, 4, 16)
-    agent_capacity, agent_evidence = _pool_capacity_status(sizes, capacity, 8, 32)
+        return False, False, f'{pool.name}: missing properties'
     requirements = {
         'User': properties.mode == 'User', 'AzureLinux': properties.os_sku in ('AzureLinux', 'AzureLinux3'),
         'KataVmIsolation': properties.workload_runtime == 'KataVmIsolation',
         'count>=1': (properties.count or 0) >= 1,
         'image': _image_supported(properties.node_image_version),
         'label': (properties.node_labels or {}).get('agents.ai.azure.com/sandbox-node') == 'true',
-        'SSH disabled': bool(properties.security_profile and properties.security_profile.ssh_access == 'Disabled'),
-        'Succeeded': properties.provisioning_state == 'Succeeded',
     }
-    detail = (
-        f'{pool.name}: vmSizes={list(sizes)}; '
-        f'systemCapacity={system_capacity} {system_evidence}; '
-        f'agentCapacity={agent_capacity} {agent_evidence}; '
-        f'missing={[key for key, passed in requirements.items() if not passed]}')
-    system_status = system_capacity if (
-        properties.mode == 'System' and properties.provisioning_state == 'Succeeded') else None
-    return system_status, agent_capacity if all(requirements.values()) else None, detail
+    missing = [key for key, passed in requirements.items() if not passed]
+    detail = f'{pool.name}: mode={properties.mode}; missing={missing}'
+    return properties.mode == 'System', not missing, detail
 
 
-def _check_pools(aks, compute, cluster, scope, location, checks):
+def _check_pools(aks, cluster, scope, checks):
     parts = parse_resource_id(scope)
     pools = list(aks.agent_pools.list(parts['resource_group'], parts['name']))
-    capacity = _vm_size_capacity(compute, location)
-    system_statuses, agent_statuses, details = [], [], []
-    selected = None
+    has_system, has_agent, details = False, False, []
     for pool in pools:
-        system_status, agent_status, detail = _evaluate_pool(pool, capacity)
+        is_system, is_agent, detail = _evaluate_pool(pool)
+        has_system = has_system or is_system
+        has_agent = has_agent or is_agent
         details.append(detail)
-        if system_status:
-            system_statuses.append(system_status)
-        if agent_status:
-            agent_statuses.append(agent_status)
-            if agent_status == 'PASS' and selected is None:
-                selected = pool
-    system_status = 'PASS' if 'PASS' in system_statuses else (
-        'UNVERIFIED' if 'UNVERIFIED' in system_statuses else 'FAIL')
-    agent_status = 'PASS' if 'PASS' in agent_statuses else (
-        'UNVERIFIED' if 'UNVERIFIED' in agent_statuses else 'FAIL')
-    _report(checks, 'System node pool', scope, system_status, details, 'One Succeeded System pool >=4 vCPU/16 GiB',
-            'Prepare a qualifying System pool.')
-    _report(checks, 'Agent node pool', scope, agent_status, details,
+    _report(checks, 'System node pool', scope, has_system, details, 'At least one System node pool',
+            'Prepare a System node pool.')
+    _report(checks, 'Agent node pool', scope, has_agent, details,
             'One User pool satisfying all sandbox requirements', 'Prepare one qualifying User pool.')
     network = cluster.properties.network_profile if cluster.properties else None
     mode = network.network_plugin_mode if network else None
-    _report(checks, 'CNI mode', scope, mode == 'overlay', mode, 'Azure CNI Overlay',
-            'Use Azure CNI Overlay.')
-    return selected
+    pod_subnets = {pool.name: pool.properties.pod_subnet_id if pool.properties else None for pool in pools}
+    uses_pod_subnets = bool(pools) and all(bool(subnet and str(subnet).strip()) for subnet in pod_subnets.values())
+    _report(checks, 'CNI mode', scope, mode == 'overlay' or (mode is None and uses_pod_subnets),
+            f'{mode}; pool pod subnets={pod_subnets}', 'Azure CNI Overlay or Pod Subnet on every node pool',
+            'Use Azure CNI Overlay or configure a Pod subnet on every node pool.')
 
 
 def _storage_parameters(location, tags, sku):
@@ -601,8 +526,6 @@ def _check_storage(storage, scope, location, checks):
         _report(checks, 'Storage readiness', scope, 'UNVERIFIED', 'Missing properties', 'Succeeded',
                 'Read a fully provisioned Storage account.')
         return
-    endpoint = properties.primary_endpoints.blob if properties.primary_endpoints else ''
-    parsed = urlparse(endpoint or '')
     requirements = [
         ('Storage region', _normalize_location(storage.location) == _normalize_location(location),
          storage.location, location),
@@ -614,13 +537,6 @@ def _check_storage(storage, scope, location, checks):
         ('Storage HTTPS', properties.enable_https_traffic_only is True, properties.enable_https_traffic_only, True),
         ('Storage TLS', properties.minimum_tls_version in ('TLS1_2', 'TLS1_3'),
          properties.minimum_tls_version, '>=TLS1_2'),
-        ('Storage shared keys', properties.allow_shared_key_access is False,
-         properties.allow_shared_key_access, False),
-        ('Storage anonymous Blob', properties.allow_blob_public_access is False,
-         properties.allow_blob_public_access, False),
-        ('Storage Blob endpoint', parsed.scheme == 'https' and bool(parsed.hostname) and
-         not parsed.username and not parsed.password and not parsed.query and not parsed.fragment,
-         endpoint, 'Valid HTTPS Blob endpoint'),
     ]
     for name, passed, observed, expected in requirements:
         _report(checks, name, scope, passed, observed, expected, 'Supply Storage with the required configuration.')
@@ -629,180 +545,60 @@ def _check_storage(storage, scope, location, checks):
     _report(checks, 'Storage redundancy', scope, 'PASS' if sku else 'UNVERIFIED',
             sku or 'Missing SKU', 'Readable redundancy; ZRS or GZRS recommended',
             'None' if zone_redundant else 'Use ZRS or GZRS when available.', mandatory=False)
-    public = properties.public_network_access
-    action = properties.network_rule_set.default_action if properties.network_rule_set else None
-    restricted = public in ('Disabled', 'SecuredByPerimeter') or action == 'Deny'
-    status = 'PASS' if public == 'Enabled' and action == 'Allow' else 'NOT_APPLICABLE' if restricted else 'UNVERIFIED'
-    _report(checks, 'Storage public-network baseline', scope, status, f'{public}/{action}',
-            'Enabled/Allow for public baseline',
-            'Private/restricted Storage connectivity is unverified; verify routing and DNS.', mandatory=not restricted)
 
 
-def _permission_allows(permission, action, data=False):
-    if permission.condition:
-        return False
-    if '*' in action:
-        return _wildcard_action_allowed([permission], action, data)
-    allowed = permission.data_actions if data else permission.actions
-    excluded = permission.not_data_actions if data else permission.not_actions
-    action = action.lower()
-    return (any(fnmatchcase(action, pattern.lower()) for pattern in allowed or []) and
-            not any(fnmatchcase(action, pattern.lower()) for pattern in excluded or []))
+def _role_guid(role_definition_id):
+    return role_definition_id.rstrip('/').rsplit('/', 1)[-1].lower() if role_definition_id else ''
 
 
-def _action_pattern_step(pattern, positions, character=None):
-    if character is not None:
-        positions = {position if pattern[position] == '*' else position + 1
-                     for position in positions if position < len(pattern) and pattern[position] in ('*', character)}
-    expanded = set(positions)
-    for position in positions:
-        while position < len(pattern) and pattern[position] == '*':
-            position += 1
-            expanded.add(position)
-    return frozenset(expanded)
+def _accepted_role_ids(role_name):
+    role_id = _ROLE_IDS[role_name]
+    if role_name == 'Storage Blob Data Contributor':
+        return {role_id, _ROLE_IDS['Storage Blob Data Owner']}
+    return {role_id, _ROLE_IDS['Owner'], _ROLE_IDS['Contributor']}
 
 
-def _wildcard_action_allowed(permissions, action, data):
-    """Find whether any operation in the requested wildcard is left without an effective grant."""
-    action = action.lower()
-    rules = [
-        (tuple(pattern.lower() for pattern in (permission.data_actions if data else permission.actions) or []),
-         tuple(pattern.lower() for pattern in (permission.not_data_actions if data else permission.not_actions) or []))
-        for permission in permissions if not permission.condition
-    ]
-    if any(not excluded and ('*' in allowed or action in allowed) for allowed, excluded in rules):
-        return True
-    grant_patterns = [pattern for allowed, excluded in rules for pattern in allowed + excluded]
-    patterns = tuple(dict.fromkeys([action] + grant_patterns))
-    indexes = {pattern: index for index, pattern in enumerate(patterns)}
-    rules = [(tuple(indexes[pattern] for pattern in allowed), tuple(indexes[pattern] for pattern in excluded))
-             for allowed, excluded in rules]
-    # All other characters have the same matching behavior, represented by the empty symbol.
-    alphabet = (set(''.join(patterns)) - {'*'}) | {''}
-    start = tuple(_action_pattern_step(pattern, {0}) for pattern in patterns)
-    pending, visited = [start], {start}
-    while pending:
-        state = pending.pop()
-        matches = [len(pattern) in positions for pattern, positions in zip(patterns, state)]
-        if matches[0] and not any(any(matches[index] for index in allowed) and
-                                  not any(matches[index] for index in excluded) for allowed, excluded in rules):
-            return False
-        for character in alphabet:
-            following = tuple(_action_pattern_step(pattern, positions, character)
-                              for pattern, positions in zip(patterns, state))
-            if following[0] and following not in visited:
-                visited.add(following)
-                pending.append(following)
-    return True
-
-
-def _permissions(client, scope, principals, definitions):
-    principals = {principal.lower() for principal in principals}
-    for assignment in client.role_assignments.list_for_scope(scope, filter='atScope()'):
-        properties = assignment.properties
-        if (not properties or not properties.principal_id or properties.principal_id.lower() not in principals or
-                properties.condition):
-            continue
-        role_id = properties.role_definition_id
-        if role_id not in definitions:
-            definitions[role_id] = client.role_definitions.get_by_id(role_id)
-        role = definitions[role_id]
-        if role.properties:
-            yield from role.properties.permissions or []
-
-
-def _has_permissions(permissions, actions, data=False):
-    return all(_wildcard_action_allowed(permissions, action, data) if '*' in action else
-               any(_permission_allows(permission, action, data) for permission in permissions) for action in actions)
-
-
-def _validate_grant(permissions, role):
-    required = role.properties.permissions if role.properties else None
-    if not required or not any(item.actions or item.data_actions for item in required):
-        return False
-    return all(_has_permissions(permissions, item.actions or []) and
-               _has_permissions(permissions, item.data_actions or [], data=True) for item in required)
-
-
-def _operator_requirements(request, checked):
-    resources = checked.resources
-    parent = _existing_scope(resources.account_id, False)
-    required = [(parent, 'Microsoft.CognitiveServices/accounts/write')]
-    if request.management_identity is None or request.workload_identity is None:
-        required.append((parent, 'Microsoft.ManagedIdentity/userAssignedIdentities/write'))
-    if request.storage is None:
-        required.append((parent, 'Microsoft.Storage/storageAccounts/write'))
-    identity_scope = _existing_scope(resources.management_identity, checked.management_identity is not None)
-    required.append((identity_scope, 'Microsoft.ManagedIdentity/userAssignedIdentities/assign/action'))
-    required.append((resources.cluster, 'Microsoft.ContainerService/managedClusters/write'))
-    return required
-
-
-def _operator_permissions(cli_ctx, clients, scope, cache):
+def _assigned_role_ids(client, scope, principal, cache):
     key = scope.lower()
     if key not in cache:
-        parts = parse_resource_id(scope)
-        client = _clients(cli_ctx, scope, clients).authorization
-        if parts.get('namespace'):
-            permissions = client.permissions.list_for_resource(
-                parts['resource_group'], parts['namespace'], '', parts['type'], parts['name'])
-        else:
-            permissions = client.permissions.list_for_resource_group(parts['resource_group'])
-        cache[key] = list(permissions)
-    return cache[key]
+        cache[key] = list(client.role_assignments.list_for_scope(scope, filter='atScope()'))
+    principal = principal.lower()
+    return {
+        _role_guid(assignment.properties.role_definition_id)
+        for assignment in cache[key]
+        if (assignment.properties and assignment.properties.principal_id and
+            assignment.properties.principal_id.lower() == principal and not assignment.properties.condition and
+            assignment.properties.role_definition_id)
+    }
 
 
-def _check_permissions(cli_ctx, clients, request, checked, checks):
-    required = _operator_requirements(request, checked)
-    definitions, operator_permissions = {}, {}
-    for scope, action in required:
-        permissions = _operator_permissions(cli_ctx, clients, scope, operator_permissions)
-        allowed = any(_permission_allows(permission, action) for permission in permissions)
-        _report(checks, 'Operator permission', scope, allowed, action if allowed else f'Missing {action}',
-                action, 'Have an administrator grant the required unconditional permission.')
-    return _check_grants(cli_ctx, clients, request, checked, operator_permissions, definitions, checks)
-
-
-def _required_role(client, scope, name):
-    subscription_scope = f'/subscriptions/{parse_resource_id(scope)["subscription"]}'
-    roles = [role for role in client.role_definitions.list(subscription_scope, filter=f"roleName eq '{name}'")
-             if role.properties and role.properties.role_name == name and role.properties.role_type == 'BuiltInRole']
-    if len(roles) != 1:
-        raise ValidationError(f'Cannot resolve the built-in role {name} at {subscription_scope}.')
-    return roles[0]
-
-
-def _check_grants(cli_ctx, clients, request, checked, operator_permissions, definitions, checks):
+def _check_grants(cli_ctx, clients, request, checked, checks):
     resources = checked.resources
+    assignments_by_scope = {}
     grants = [
-        (resources.management_identity, checked.management_identity, resources.cluster, True,
+        (resources.management_identity, checked.management_identity, resources.cluster,
          'Reader', request.management_identity is not None),
-        (resources.management_identity, checked.management_identity, resources.cluster, True,
+        (resources.management_identity, checked.management_identity, resources.cluster,
          'Kubernetes Extension Contributor', request.management_identity is not None),
         (resources.management_identity, checked.management_identity, resources.workload_identity,
-         checked.workload_identity is not None, 'Managed Identity Federated Identity Credential Contributor',
+         'Managed Identity Federated Identity Credential Contributor',
          request.management_identity is not None and request.workload_identity is not None),
         (resources.workload_identity, checked.workload_identity, resources.storage,
-         checked.storage is not None, 'Storage Blob Data Contributor',
+         'Storage Blob Data Contributor',
          request.workload_identity is not None and request.storage is not None),
     ]
     assignments = []
-    for identity_id, identity, scope, exists, role_name, validation in grants:
-        client = _clients(cli_ctx, scope, clients).authorization
-        role = _required_role(client, scope, role_name)
+    for identity_id, identity, scope, role_name, validation in grants:
         if validation:
+            client = _clients(cli_ctx, scope, clients).authorization
             principal = identity.principal_id if identity else None
-            permissions = list(_permissions(client, scope, [principal], definitions)) if principal else []
-            allowed = bool(principal and _validate_grant(permissions, role))
+            assigned = _assigned_role_ids(client, scope, principal, assignments_by_scope) if principal else set()
+            allowed = bool(assigned & _accepted_role_ids(role_name))
             _report(checks, f'{role_name} validation', scope, allowed, f'{principal}: {role_name}',
-                    'Existing effective permission; no grant writes',
-                    'Have an administrator grant missing permissions.')
+                    'Existing effective role assignment; no grant writes',
+                    'Have an administrator grant the required role assignment.')
         else:
-            parent = _existing_scope(scope, exists)
-            permissions = _operator_permissions(cli_ctx, clients, parent, operator_permissions)
-            allowed = any(_permission_allows(permission, 'Microsoft.Authorization/roleAssignments/write')
-                          for permission in permissions)
-            _report(checks, f'{role_name} assignment authority', parent, allowed, role_name,
-                    'Unconditional roleAssignments/write', 'Have an administrator grant role-assignment authority.')
-            assignments.append(Grant(role_name, identity_id, scope, role.id))
+            role_id = (f'/subscriptions/{parse_resource_id(scope)["subscription"]}'
+                       f'/providers/Microsoft.Authorization/roleDefinitions/{_ROLE_IDS[role_name]}')
+            assignments.append(Grant(role_name, identity_id, scope, role_id))
     return assignments

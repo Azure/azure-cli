@@ -10,7 +10,9 @@ from azure.mgmt.core.tools import parse_resource_id
 from azure.cli.core.azclierror import ValidationError
 from knack.log import get_logger
 
-from ._agent_hosting_preflight import build_request, preflight, _missing_identity_fields, _storage_parameters
+from ._agent_hosting_preflight import (
+    build_request, preflight, _accepted_role_ids, _missing_identity_fields, _role_guid, _storage_parameters,
+)
 from ._client_factory import get_agent_hosting_clients
 
 
@@ -106,12 +108,13 @@ def _ensure_storage(client, arm_id, existing, location, tags, sku):
 
 
 def _find_grant(client, grant, principal, exact_scope=False):
+    accepted = {_role_guid(grant.role_id)} if exact_scope else _accepted_role_ids(grant.name)
     for assignment in client.role_assignments.list_for_scope(grant.scope, filter='atScope()'):
         properties = assignment.properties
         if not properties or not properties.principal_id or not properties.role_definition_id:
             continue
         if (properties.principal_id.lower() == principal.lower() and
-                properties.role_definition_id.lower() == grant.role_id.lower() and not properties.condition):
+                _role_guid(properties.role_definition_id) in accepted and not properties.condition):
             if not exact_scope or (properties.scope and
                                    properties.scope.rstrip('/').lower() == grant.scope.rstrip('/').lower()):
                 return assignment
