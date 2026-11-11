@@ -379,6 +379,44 @@ class ContainerAppClient:
         return r.json()
 
     @classmethod
+    def start(cls, cmd, resource_group_name, name, no_wait=False):
+        return cls._start_stop(cmd, resource_group_name, name, "start", no_wait)
+
+    @classmethod
+    def stop(cls, cmd, resource_group_name, name, no_wait=False):
+        return cls._start_stop(cmd, resource_group_name, name, "stop", no_wait)
+
+    @classmethod
+    def _start_stop(cls, cmd, resource_group_name, name, operation, no_wait):
+        management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+        sub_id = get_subscription_id(cmd.cli_ctx)
+        url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/containerApps/{}"
+        resource_url = url_fmt.format(
+            management_hostname.strip('/'),
+            sub_id,
+            resource_group_name,
+            name)
+        request_url = "{}/{}?api-version={}".format(resource_url, operation, cls.api_version)
+
+        r = send_raw_request(cmd.cli_ctx, "POST", request_url)
+        if no_wait:
+            return r.json() if r.text else None
+
+        if r.status_code == 202:
+            operation_url = r.headers.get(HEADER_AZURE_ASYNC_OPERATION)
+            if operation_url:
+                poll_status(cmd, operation_url)
+                r = send_raw_request(cmd.cli_ctx, "GET", "{}?api-version={}".format(resource_url, cls.api_version))
+            else:
+                operation_url = r.headers.get(HEADER_LOCATION)
+                result = poll_results(cmd, operation_url)
+                if result is None:
+                    raise ResourceNotFoundError("Could not find a container app")
+                return result
+
+        return r.json()
+
+    @classmethod
     def list_replicas(cls, cmd, resource_group_name, container_app_name, revision_name):
         replica_list = []
 

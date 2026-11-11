@@ -90,6 +90,22 @@ helps['containerapp update'] = """
               --scale-rule-auth triggerparam=secretref triggerparam=secretref
 """
 
+helps['containerapp start'] = """
+    type: command
+    short-summary: Start a container app.
+    examples:
+    - name: Start a container app.
+      text: az containerapp start -n my-containerapp -g MyResourceGroup
+"""
+
+helps['containerapp stop'] = """
+    type: command
+    short-summary: Stop a container app.
+    examples:
+    - name: Stop a container app.
+      text: az containerapp stop -n my-containerapp -g MyResourceGroup
+"""
+
 helps['containerapp delete'] = """
     type: command
     short-summary: Delete a container app.
