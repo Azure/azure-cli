@@ -139,6 +139,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
           use_device_code=False,
           # Service principal
           service_principal=None, certificate=None, use_cert_sn_issuer=None, client_assertion=None,
+          federated_identity=None, federated_token_callback=None,
           # Managed identity
           identity=False, client_id=None, object_id=None, resource_id=None,
           # Subscription discovery and default subscription selection control
@@ -156,7 +157,19 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
-        raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+        raise CLIError('usage error: --service-principal --username NAME --tenant TENANT with one credential '
+                       '(--password, --certificate, --federated-token, --federated-identity or '
+                       '--federated-token-callback)')
+    if sum(map(bool, [client_assertion, federated_identity, federated_token_callback])) > 1:
+        raise CLIError('usage error: Only one of --federated-token, --federated-identity and '
+                       '--federated-token-callback can be specified')
+    if (client_assertion or federated_identity or federated_token_callback) and (password or certificate):
+        raise CLIError('usage error: --federated-token, --federated-identity and --federated-token-callback '
+                       'cannot be combined with --password or --certificate')
+    if federated_identity and not service_principal:
+        raise CLIError("usage error: '--federated-identity' is only applicable with a service principal")
+    if federated_token_callback and not service_principal:
+        raise CLIError("usage error: '--federated-token-callback' is only applicable with a service principal")
     if skip_subscription_discovery and not tenant:
         raise CLIError("usage error: '--skip-subscription-discovery' requires '--tenant'")
     if skip_subscription_discovery and subscription:
@@ -188,7 +201,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not (password or client_assertion or certificate):
+        if not (password or client_assertion or certificate or federated_identity or federated_token_callback):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -197,11 +210,12 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         interactive = True
 
     if service_principal:
-        from azure.cli.core.auth.identity import ServicePrincipalAuth
+        from azure.cli.core.auth.identity import ServicePrincipalAuth, FEDERATED_IDENTITY
         password = ServicePrincipalAuth.build_credential(
             client_secret=password,
             certificate=certificate, use_cert_sn_issuer=use_cert_sn_issuer,
-            client_assertion=client_assertion)
+            client_assertion=FEDERATED_IDENTITY if federated_identity else client_assertion,
+            client_assertion_callback=federated_token_callback)
 
     login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
     # Send login_experience_v2 config to telemetry
