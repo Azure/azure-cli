@@ -189,13 +189,12 @@ class FunctionappACRDeploymentScenarioTest(ScenarioTest):
 
 
 class FunctionAppReservedInstanceTest(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_reserved_instance(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwithreservedinstance', 40)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -212,21 +211,20 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
 
 
 class FunctionAppHttpsOnlyTest(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_https_only(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('function', 40)
         linux_plan = "linux_plan"
         windows_plan = "windows_plan"
         self.cmd(f'appservice plan create -n {linux_plan} -g {resource_group} --is-linux')
-        self.cmd(f'appservice plan create -n {windows_plan} -g {resource_group}')
+        self.cmd(f'appservice plan create -n {windows_plan} -g {resource_group} --is-linux false')
 
-        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows -s {storage_account} --https-only --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', True)])
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows --runtime dotnet-isolated --runtime-version 10 -s {storage_account} --https-only --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', True)])
         functionapp_name = self.create_random_name('function', 40)
         self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only true --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', True)])
         functionapp_name = self.create_random_name('function', 40)
-        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows -s {storage_account} --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', False)])
+        self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {windows_plan} --os-type windows --runtime dotnet-isolated --runtime-version 10 -s {storage_account} --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', False)])
         functionapp_name = self.create_random_name('function', 40)
         self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only false --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', False)])
 
@@ -267,7 +265,6 @@ class FunctionAppHttpsOnlyTest(ScenarioTest):
             JMESPathCheck('httpsOnly', False)])
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_e2e(self, resource_group, resource_group2):
@@ -275,7 +272,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             'func-e2e', 24), self.create_random_name('func-e2e', 24)
         plan = self.create_random_name('func-e2e-plan', 24)
         storage, storage2 = self.create_random_name('funcstorage1', 24), self.create_random_name('funcstorage2', 24)
-        plan_id = self.cmd('appservice plan create -g {} -n {}'.format(
+        plan_id = self.cmd('appservice plan create -g {} -n {} --is-linux false'.format(
             resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd(
@@ -283,13 +280,13 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(
             storage2, resource_group2, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()['id']
 
-        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage), checks=[
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'.format(resource_group, functionapp_name, plan, storage), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', functionapp_name),
             JMESPathCheck('hostNames[0]',
                           functionapp_name + '.azurewebsites.net')
         ])
-        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group2,
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'.format(resource_group2,
                                                                      functionapp_name2, plan_id, storage_account_id2))
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
@@ -344,9 +341,8 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'Java|11')])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_on_linux_app_service_powershell(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         functionapp = self.create_random_name(
@@ -368,11 +364,10 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7.4')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7.6')])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
-    @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_on_linux_app_service_powershell_with_runtime_version(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         functionapp = self.create_random_name(
@@ -382,7 +377,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --runtime-version 7.6 --functions-version 4'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -394,39 +389,36 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7.4')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7.6')])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_on_windows_app_service_dotnet_with_runtime_version(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         functionapp = self.create_random_name(
             prefix='functionapp-windows', length=24)
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 8 --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
                  .format(resource_group, functionapp, plan, storage_account))
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('netFrameworkVersion', 'v8.0')])
+            JMESPathCheck('netFrameworkVersion', 'v10.0')])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_on_linux_app_service_dotnet_with_runtime_version(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         functionapp = self.create_random_name(
             prefix='functionapp-linux', length=24)
         self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 8 --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
                  .format(resource_group, functionapp, plan, storage_account))
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'DOTNET-ISOLATED|8.0')])
+            JMESPathCheck('linuxFxVersion', 'DOTNET-ISOLATED|10.0')])
 
 
 class FunctionUpdatePlan(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_move_plan_to_elastic(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappelastic', 40)
         ep_plan_name = self.create_random_name('somerandomplan', 40)
@@ -445,7 +437,7 @@ class FunctionUpdatePlan(ScenarioTest):
             JMESPathCheck('sku.name', 'S1')
         ])
 
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  .format(resource_group, functionapp_name, second_plan_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -492,14 +484,13 @@ class FunctionUpdatePlan(ScenarioTest):
 
 
 class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_consumption_e2e(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --runtime dotnet --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -521,14 +512,13 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e-ragrs', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer(sku='Standard_RAGRS')
+    @StorageAccountPreparer(sku='Standard_RAGRS', kind='StorageV2')
     def test_functionapp_consumption_ragrs_storage_e2e(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -659,7 +649,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
+    @unittest.skip('PowerShell 7.4 reached end-of-life; Linux Consumption does not support PowerShell 7.6.')
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_linux_powershell(self, resource_group, storage_account):
@@ -682,7 +672,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('linuxFxVersion', 'PowerShell|7.4')])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
+    @unittest.skip('Supported .NET versions reached end-of-life; Linux Consumption does not support .NET 10.')
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_linux_dotnet_isolated(self, resource_group, storage_account):
@@ -702,9 +692,8 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
 
 
 class FunctionappDaprConfig(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location='northeurope')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_enable_dapr(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappdapr', 32)
@@ -715,7 +704,7 @@ class FunctionappDaprConfig(ScenarioTest):
         self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
             .format(managed_environment_name, resource_group))
 
-        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --functions-version 4 --enable-dapr false'.format(
+        self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10 --enable-dapr false'.format(
             resource_group,
             functionapp_name,
             storage_account,
@@ -2064,10 +2053,9 @@ class FunctionAppFlex(LiveScenarioTest):
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='westeurope')
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 32)
@@ -2075,13 +2063,13 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'containerappmanagedenvironment', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location westeurope --logs-destination none'
+        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'West Europe')])
+                     JMESPathCheck('location', 'East US')])
 
-        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
@@ -2090,9 +2078,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
 
         self.assertTrue('ftpPublishingUrl' not in r)
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_existing_app_insights(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 32)
@@ -2107,7 +2094,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', 'East US')])
 
-        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --app-insights-key {} --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --app-insights-key {} --functions-version 4'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name, app_insights_key)).assert_with_checks([
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
@@ -2151,24 +2138,23 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -s {} --vnet {} --subnet {}  --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, storage_account, virtual_network, "default", managed_environment_name))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
-    @ResourceGroupPreparer(location='westeurope')
-    @StorageAccountPreparer()
-    @VirtualNetworkPreparer(location='westeurope')
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(kind='StorageV2')
+    @VirtualNetworkPreparer(location='eastus')
     def test_functionapp_create_with_appcontainer_managed_environment_add_vnet_error(self, resource_group, storage_account, virtual_network):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
         subnet_name = self.create_random_name('swiftsubnet', 24)
         vnet_name = self.create_random_name('swiftname', 24)
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location westeurope --logs-destination none'
+        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'West Europe')])
+                     JMESPathCheck('location', 'East US')])
 
         self.cmd(
-            'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
             .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
@@ -2178,9 +2164,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'
             .format(resource_group, functionapp_name, virtual_network, "default"))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location='southcentralus')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_remove_vnet_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
@@ -2192,37 +2177,35 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                      JMESPathCheck('location', 'South Central US')])
 
         self.cmd(
-            'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
             .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
         with self.assertRaises(ValidationError):
             self.cmd('functionapp vnet-integration remove -g {} -n {}'.format(resource_group, functionapp_name))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
-    @ResourceGroupPreparer(location='westeurope')
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(location='eastus')
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_list_vnet_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location westeurope --logs-destination none'
+        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'West Europe')])
+                     JMESPathCheck('location', 'East US')])
 
         self.cmd(
-            'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
             .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
         with self.assertRaises(ValidationError):
             self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location='northeurope')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_delete_functions(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         function_name = self.create_random_name('functionappwindowsruntimefunctions', 40)
@@ -2235,7 +2218,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                      JMESPathCheck('location', 'North Europe')])
 
         self.cmd(
-            'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
             .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
@@ -2269,9 +2252,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location='northeurope')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_config_with_appcontainer_managed_environment_error(self, resource_group, storage_account):
 
         functionapp_name = self.create_random_name('functionapp', 32)
@@ -2283,7 +2265,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', 'North Europe')])
         self.cmd(
-            'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+            'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
             .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
@@ -2296,9 +2278,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp config show -g {} -n {}'
             .format(resource_group, functionapp_name))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
-    @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(location='northeurope')
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_replicas(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 30)
@@ -2306,13 +2287,13 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'containerappmanagedenvironment', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
+        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'East US')])
+                     JMESPathCheck('location', 'North Europe')])
 
-        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4 --min-replicas 1 --max-replicas 10'
+        self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4 --min-replicas 1 --max-replicas 10'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
                      JMESPathCheck('name', functionapp_name)])
 
@@ -2336,9 +2317,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime dotnet --functions-version 4 --min-replicas 1'
                     .format(resource_group, functionapp_name, plan_name, storage_account))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
-    @ResourceGroupPreparer(location='eastus')
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(location='northeurope')
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_container_config_set_replicas(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 32)
@@ -2346,13 +2326,13 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'containerappmanagedenvironment', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
+        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'East US')])
+                     JMESPathCheck('location', 'North Europe')])
 
-        self.cmd('functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
                      JMESPathCheck('name', functionapp_name),
                      JMESPathPatternCheck('hostNames[0]', functionapp_name + ".+" + 'azurecontainerapps.io')])
@@ -2604,7 +2584,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
 
 class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
+    @unittest.skip('The omitted-runtime default is in-process .NET, which reached end-of-life on 2026-11-10.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_windows_without_runtime(self, resource_group, storage_account):
@@ -2623,15 +2603,14 @@ class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
 
 
 class FunctionAppWithAppInsightsKey(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_with_app_insights_key(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwithappinsights', 40)
         app_insights_key = '00000000-0000-0000-0000-123456789123'
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  ' --app-insights-key {}'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, app_insights_key)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
@@ -2726,14 +2705,13 @@ class FunctionAppWithDistributedTracing(ScenarioTest):
 
 
 class FunctionAppWithAppInsightsDefault(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_with_default_app_insights(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwithappinsights', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -2749,14 +2727,13 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
         self.assertTrue('AzureWebJobsDashboard' not in [
                         kp['name'] for kp in app_set])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_with_no_default_app_insights(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwithappinsights', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --disable-app-insights --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --disable-app-insights --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -2982,7 +2959,7 @@ class FunctionAppOnLinux(ScenarioTest):
                 "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4')
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
+    @unittest.skip('In-process .NET reached end-of-life on 2026-11-10; there is no supported in-process successor.')
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_dotnet_consumption(self, resource_group, storage_account):
@@ -3137,15 +3114,14 @@ class FunctionAppSlotTests(ScenarioTest):
 
 
 class FunctionAppKeysTests(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_keys_set(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappkeys', 40)
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -3165,15 +3141,14 @@ class FunctionAppKeysTests(ScenarioTest):
                      JMESPathCheck('name', key_name),
                      JMESPathCheck('value', None)])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_keys_list(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappkeys', 40)
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -3189,15 +3164,14 @@ class FunctionAppKeysTests(ScenarioTest):
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('functionKeys.{}'.format(key_name), key_value)])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_keys_delete(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappkeys', 40)
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -3216,9 +3190,8 @@ class FunctionAppKeysTests(ScenarioTest):
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('functionKeys.{}'.format(key_name), None)])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_keys_set_slot(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappkeys', 40)
         slot_name = self.create_random_name(prefix='slotname', length=24)
@@ -3229,7 +3202,7 @@ class FunctionAppKeysTests(ScenarioTest):
 
         self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, plan))
 
-        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'
                  .format(resource_group, functionapp_name, plan, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -3628,9 +3601,8 @@ class FunctionappDeploymentLogsScenarioTest(LiveScenarioTest):
 
 
 class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_local_context(self, resource_group, storage_account):
         from knack.util import CLIError
         self.kwargs.update({
@@ -3644,7 +3616,7 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
         with self.assertRaises(CLIError):
             self.cmd('functionapp plan delete')
 
-        self.cmd('functionapp create -n {functionapp_name} --storage-account {storage_account} --functions-version 4')
+        self.cmd('functionapp create -n {functionapp_name} --storage-account {storage_account} --functions-version 4 --runtime dotnet-isolated --runtime-version 10')
         self.cmd('functionapp show')
         with self.assertRaises(CLIError):
             self.cmd('functionapp delete')
@@ -3685,10 +3657,9 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group,
                                                            functionapp_name), checks=self.is_empty())
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_assign_user_identity(self, resource_group, storage_account):
         plan_name = self.create_random_name('func-msi-plan', 20)
         functionapp_name = self.create_random_name('func-msi', 20)
@@ -3699,7 +3670,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd(
             'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'.format(resource_group, functionapp_name, plan_name, storage_account))
 
         self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, functionapp_name))
         result = self.cmd('functionapp identity assign -g {} -n {} --identities {}'.format(
@@ -3718,10 +3689,9 @@ class FunctionappIdentityTest(ScenarioTest):
             self.check('userAssignedIdentities', None),
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_remove_identity(self, resource_group, storage_account):
         plan_name = self.create_random_name('func-msi-plan', 20)
         functionapp_name = self.create_random_name('func-msi', 20)
@@ -3735,7 +3705,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd(
             'functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan_name, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'.format(resource_group, functionapp_name, plan_name, storage_account))
 
         self.cmd('functionapp identity assign -g {} -n {} --identities [system] {} {}'.format(
             resource_group, functionapp_name, msi_result['id'], msi2_result['id']))
@@ -3770,10 +3740,9 @@ class FunctionappCorsTest(ScenarioTest):
 
 
 class FunctionappNetworkConnectionTests(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_vnetE2E(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('swiftfunctionapp', 24)
         plan = self.create_random_name('swiftplan', 24)
@@ -3785,9 +3754,9 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
             resource_group, vnet_name, subnet_name))
         self.cmd(
-            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+            'appservice plan create -g {} -n {} --is-linux false --sku P1V2'.format(resource_group, plan))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'.format(resource_group, functionapp_name, plan, storage_account))
         self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, functionapp_name, vnet_name, subnet_name))
         self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
@@ -3813,10 +3782,9 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_vnet_integration_consumption_plan(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('swiftfunctionapp', 24)
         subnet_name = self.create_random_name('swiftsubnet', 24)
@@ -3825,7 +3793,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
             resource_group, vnet_name, subnet_name))
         self.cmd(
-            'functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+            'functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
         # Wait for the functionapp and service plan to be created
         time.sleep(30)
         self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
@@ -3962,10 +3930,9 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             self.cmd(
                 'functionapp create -g {} -n {} -s {} --consumption-plan-location {} --vnet {} --subnet {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP, vnet_name, subnet_name))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_vnet_basic_sku_E2E(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('swiftfunctionapp', 24)
         plan = self.create_random_name('swiftplan', 24)
@@ -3975,9 +3942,9 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
             resource_group, vnet_name, subnet_name))
         self.cmd(
-            'appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan))
+            'appservice plan create -g {} -n {} --is-linux false --sku B1'.format(resource_group, plan))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'.format(resource_group, functionapp_name, plan, storage_account))
         self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, functionapp_name, vnet_name, subnet_name))
         self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
@@ -3985,10 +3952,9 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_vnet_EP_sku_E2E(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('swiftfunctionapp', 24)
         plan = self.create_random_name('swiftplan', 24)
@@ -4000,7 +3966,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         self.cmd(
             'functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, plan))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'.format(resource_group, functionapp_name, plan, storage_account))
         self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, functionapp_name, vnet_name, subnet_name))
         self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
@@ -4008,14 +3974,13 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg2")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg3")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg4")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg5")
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_vnet_duplicate_name(self, storage_account, resource_group, rg2, rg3, rg4, rg5):
         functionapp_name = self.create_random_name('functionapp', 24)
         plan = self.create_random_name('plan', 24)
@@ -4030,9 +3995,9 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
                 group, vnet_name, subnet_name))
 
         self.cmd(
-            'appservice plan create -g {} -n {} --sku P1V2'.format(resource_group, plan))
+            'appservice plan create -g {} -n {} --is-linux false --sku P1V2'.format(resource_group, plan))
         self.cmd(
-            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage_account))
+            'functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10'.format(resource_group, functionapp_name, plan, storage_account))
         self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'.format(resource_group, functionapp_name, vnet_name, subnet_name), checks=[
                 JMESPathCheck('subnetResourceId', subnet_id)
         ])
@@ -4244,15 +4209,14 @@ class FunctionAppConfigTest(ScenarioTest):
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_config_set(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         functionapp = self.create_random_name(
             prefix='functionapp-windows', length=24)
         self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan))
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 8 --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
                  .format(resource_group, functionapp, plan, storage_account))
         self.cmd('functionapp config set -g {} -n {} --always-on true --http20-enabled true --min-tls-version "1.2" --ftps-state "Disabled" --remote-debugging-enabled false --use-32bit-worker-process'
                  .format(resource_group, functionapp)).assert_with_checks([

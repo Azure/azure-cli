@@ -1755,21 +1755,20 @@ class AppServiceCors(ScenarioTest):
         self.cmd('webapp cors show -g {rg} -n {web} --slot {slot}',
                  checks=self.check('allowedOrigins', []))
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_cors(self, resource_group, storage_account):
         self.kwargs.update({
             'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
             'function': self.create_random_name(prefix='slot-traffic-web', length=24),
             'storage': self.create_random_name(prefix='storage', length=24)
         })
-        self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
+        self.cmd('appservice plan create -g {rg} -n {plan} --is-linux false --sku S1')
         self.cmd(
             'storage account create --name {storage} -g {rg} --sku Standard_LRS --allow-blob-public-access false')
         self.cmd(
-            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage} --functions-version 4')
+            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage} --functions-version 4 --runtime dotnet-isolated --runtime-version 10')
         self.cmd(
             'functionapp cors add -g {rg} -n {function} --allowed-origins https://msdn.com https://msn.com')
         result = self.cmd(
