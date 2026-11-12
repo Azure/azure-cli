@@ -8,14 +8,13 @@ parameters:
   - name: EnableCompactAAZ
     type: boolean
     default: false
-  # Temporary immutable candidates until the validated packages are released.
-  # Keep both requirements on the same commit; overrides may also be wheel paths.
+  # Keep release pins aligned with the other CI entry points; overrides may be wheel paths.
   - name: AzdevPackage
     type: string
-    default: 'azdev @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e'
+    default: 'azdev==0.2.15'
   - name: DiffToolPackage
     type: string
-    default: 'azure-cli-diff-tool @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e#subdirectory=azure-cli-diff-tool'
+    default: 'azure-cli-diff-tool==0.1.2'
 steps:
   - bash: |
       set -ev
