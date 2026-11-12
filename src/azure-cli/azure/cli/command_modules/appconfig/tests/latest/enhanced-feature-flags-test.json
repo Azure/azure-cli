@@ -1,0 +1,44 @@
+[
+  {
+    "name": "CliLiveTestBasic",
+    "enabled": false,
+    "label": "cli-ff-import-export-test",
+    "description": "Basic enhanced feature flag for CLI import/export testing.",
+    "tags": {
+      "purpose": "cli-live-test"
+    }
+  },
+  {
+    "name": "CliLiveTestVariant",
+    "enabled": true,
+    "label": "cli-ff-import-export-test",
+    "description": "Enhanced feature flag with variants for CLI round-trip testing.",
+    "variants": [
+      {
+        "name": "Blue",
+        "value": "{\"color\":\"blue\"}",
+        "content_type": "application/json"
+      },
+      {
+        "name": "Green",
+        "value": "{\"color\":\"green\"}",
+        "content_type": "application/json"
+      }
+    ],
+    "allocation": {
+      "default_when_enabled": "Blue",
+      "default_when_disabled": "Green",
+      "seed": "cli-live-test"
+    },
+    "telemetry": {
+      "enabled": true,
+      "metadata": {
+        "scenario": "import-export"
+      }
+    },
+    "tags": {
+      "purpose": "cli-live-test",
+      "team": "appconfig"
+    }
+  }
+]

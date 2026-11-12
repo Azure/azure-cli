@@ -17,6 +17,7 @@ from ._constants import (
     FeatureFlagConstants,
     JsonDiff,
     KVSetConstants,
+    ImportExportProfiles,
 )
 from ._diff_utils import get_serializer, print_preview
 from ._featuremodels import (
@@ -381,7 +382,7 @@ def __export_kvset_to_file(file_path, keyvalues, yes, dry_run=False):
 
     kvset_serializer = get_serializer("kvset")
     kvset = [kvset_serializer(keyvalue) for keyvalue in keyvalues]
-    obj = {KVSetConstants.KVSETRootElementName: kvset}
+    obj = {"profile": ImportExportProfiles.KVSET, KVSetConstants.KVSETRootElementName: kvset}
 
     updates = {JsonDiff.ADD: kvset}
     print_preview(
