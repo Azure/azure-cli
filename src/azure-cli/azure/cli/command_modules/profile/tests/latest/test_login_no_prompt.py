@@ -7,7 +7,7 @@ from unittest import mock
 
 from azure.cli.command_modules.profile.custom import login
 from azure.cli.core.mock import DummyCli
-from knack.util import CLIError
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
 
 
 class TestNoPromptLogin(unittest.TestCase):
@@ -17,12 +17,12 @@ class TestNoPromptLogin(unittest.TestCase):
         self.cmd.cli_ctx = DummyCli()
 
     def test_device_code_is_incompatible(self):
-        with self.assertRaisesRegex(CLIError, 'cannot be used'):
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'cannot be used'):
             login(self.cmd, no_prompt=True, use_device_code=True)
 
     @mock.patch('azure.cli.command_modules.profile.custom.prompt_pass')
     def test_username_cannot_prompt_for_password(self, password_prompt):
-        with self.assertRaisesRegex(CLIError, 'requires an explicit password'):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'explicit password'):
             login(self.cmd, username='user@example.com', no_prompt=True)
         password_prompt.assert_not_called()
 
