@@ -6,7 +6,7 @@ import unittest
 from unittest import mock
 
 from azure.cli.core.auth.identity import Identity
-from knack.util import CLIError
+from azure.cli.core.azclierror import AuthenticationError
 
 
 class TestSilentLogin(unittest.TestCase):
@@ -33,8 +33,8 @@ class TestSilentLogin(unittest.TestCase):
     @mock.patch('azure.cli.core.auth.identity.check_result')
     def test_broker_error_does_not_fallback(self, check_result_mock):
         identity, app = self.make_identity(broker=True)
-        check_result_mock.side_effect = CLIError('interaction required')
-        with self.assertRaisesRegex(CLIError, 'interaction required'):
+        check_result_mock.side_effect = AuthenticationError('interaction required')
+        with self.assertRaisesRegex(AuthenticationError, 'interaction required'):
             identity.login_silently(['arm'])
         app.acquire_token_interactive.assert_called_once()
         app.initiate_device_flow.assert_not_called()
@@ -43,7 +43,7 @@ class TestSilentLogin(unittest.TestCase):
     def test_broker_must_return_user_identity(self, check_result_mock):
         identity, _ = self.make_identity(broker=True)
         check_result_mock.return_value = None
-        with self.assertRaisesRegex(CLIError, 'did not identify a user'):
+        with self.assertRaisesRegex(AuthenticationError, 'did not identify a user'):
             identity.login_silently(['arm'])
 
     def test_nonbroker_uses_cached_account_without_browser(self):
@@ -63,7 +63,7 @@ class TestSilentLogin(unittest.TestCase):
             with self.subTest(count=len(accounts)):
                 identity, app = self.make_identity(broker=False)
                 app.get_accounts.return_value = accounts
-                with self.assertRaisesRegex(CLIError, 'exactly one cached account'):
+                with self.assertRaisesRegex(AuthenticationError, 'exactly one cached account'):
                     identity.login_silently(['arm'])
                 app.acquire_token_silent_with_error.assert_not_called()
                 app.acquire_token_interactive.assert_not_called()
@@ -73,7 +73,7 @@ class TestSilentLogin(unittest.TestCase):
         identity, app = self.make_identity(broker=False)
         app.get_accounts.return_value = [{'username': 'user@example.com'}]
         app.acquire_token_silent_with_error.return_value = {'error': 'interaction_required'}
-        check_result_mock.side_effect = CLIError('interaction required')
-        with self.assertRaisesRegex(CLIError, 'interaction required'):
+        check_result_mock.side_effect = AuthenticationError('interaction required')
+        with self.assertRaisesRegex(AuthenticationError, 'interaction required'):
             identity.login_silently(['arm'])
         app.acquire_token_interactive.assert_not_called()
