@@ -154,7 +154,8 @@ class Profile:
               show_progress=False,
               claims_challenge=None,
               skip_subscription_discovery=False,
-              subscription=None):
+              subscription=None,
+              no_prompt=False):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
@@ -165,18 +166,22 @@ class Profile:
 
         user_identity = None
         if interactive:
-            if not use_device_code and not can_launch_browser():
-                logger.info('No web browser is available. Fall back to device code.')
-                use_device_code = True
-
-            if not use_device_code and is_github_codespaces():
-                logger.info('GitHub Codespaces is detected. Fall back to device code.')
-                use_device_code = True
-
-            if use_device_code:
-                user_identity = identity.login_with_device_code(scopes=scopes, claims_challenge=claims_challenge)
+            if no_prompt:
+                # Do not fall back to browser, WAM UI, or device code on silent failures.
+                user_identity = identity.login_silently(scopes=scopes, claims_challenge=claims_challenge)
             else:
-                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge)
+                if not use_device_code and not can_launch_browser():
+                    logger.info('No web browser is available. Fall back to device code.')
+                    use_device_code = True
+
+                if not use_device_code and is_github_codespaces():
+                    logger.info('GitHub Codespaces is detected. Fall back to device code.')
+                    use_device_code = True
+
+                if use_device_code:
+                    user_identity = identity.login_with_device_code(scopes=scopes, claims_challenge=claims_challenge)
+                else:
+                    user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge)
         else:
             if not is_service_principal:
                 user_identity = identity.login_with_username_password(username, password, scopes=scopes)
