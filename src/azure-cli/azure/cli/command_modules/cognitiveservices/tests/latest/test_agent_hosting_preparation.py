@@ -11,8 +11,7 @@ from types import SimpleNamespace
 from unittest import mock
 
 from azure.core.exceptions import HttpResponseError, ResourceExistsError, ResourceNotFoundError
-from azure.mgmt.authorization.models import Permission, RoleAssignment, RoleDefinition
-from azure.mgmt.compute.models import ResourceSku
+from azure.mgmt.authorization.models import RoleAssignment
 from azure.mgmt.containerservice.models import AgentPool, ManagedCluster
 from azure.mgmt.cognitiveservices.models import Account
 from azure.mgmt.storage.models import SkuInformation, StorageAccount
@@ -21,9 +20,8 @@ from azure.cli.command_modules.cognitiveservices._agent_hosting import (
     prepare_agent_hosting, provision, _ensure_grant,
 )
 from azure.cli.command_modules.cognitiveservices._agent_hosting_preflight import (
-    Grant, build_request, preflight, _has_permissions, _image_supported,
-    _names, _operator_requirements, _permission_allows,
-    _resolve_resources, _select_storage_sku, _storage_parameters, validate_resource_ids,
+    Grant, _ROLE_IDS, build_request, preflight, _image_supported,
+    _names, _resolve_resources, _select_storage_sku, _storage_parameters, validate_resource_ids,
 )
 
 
@@ -58,6 +56,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
             'location': 'westus', 'sku': {'name': 'Base', 'tier': 'Standard'},
             'identity': {'type': 'SystemAssigned'}, 'properties': {
                 'provisioningState': 'Succeeded', 'kubernetesVersion': '1.31.0',
+                'identityProfile': {'kubeletidentity': {'objectId': 'kubelet-principal'}},
                 'oidcIssuerProfile': {'enabled': True, 'issuerURL': 'https://issuer.example/'},
                 'securityProfile': {'workloadIdentity': {'enabled': True}},
                 'networkProfile': {
@@ -84,35 +83,17 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 'primaryEndpoints': {'blob': 'https://storage.blob.core.windows.net/'},
             },
         }
-        self.roles = {}
-        role_permissions = {
-            'Owner': {'actions': ['*']},
-            'Reader': {'actions': ['*/read']},
-            'Kubernetes Extension Contributor': {
-                'actions': ['Microsoft.KubernetesConfiguration/extensions/*']},
-            'Managed Identity Federated Identity Credential Contributor': {
-                'actions': ['Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/*']},
-            'Storage Blob Data Contributor': {
-                'actions': ['Microsoft.Storage/storageAccounts/blobServices/containers/*'],
-                'dataActions': ['Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*']},
+        self.roles = {
+            name: {'id': f'/subscriptions/{_SUB}/providers/Microsoft.Authorization/roleDefinitions/{guid}'}
+            for name, guid in _ROLE_IDS.items()
         }
-        for index, (name, permission) in enumerate(role_permissions.items()):
-            self.roles[name] = {
-                'id': f'/subscriptions/{_SUB}/providers/Microsoft.Authorization/roleDefinitions/role{index}',
-                'roleName': name, 'roleType': 'BuiltInRole', 'permissions': [permission]}
-        self.assignments = [self._assignment('operator', 'Owner', f'/subscriptions/{_SUB}')]
+        self.assignments = []
         self.clients = {name: mock.Mock() for name in (
-            'aks', 'compute', 'storage', 'identity', 'resource', 'authorization', 'subscription')}
+            'aks', 'storage', 'identity', 'resource', 'authorization', 'subscription')}
         self.clients['subscription'].subscriptions.get.return_value = SimpleNamespace(tenant_id='tenant')
         self.clients['resource'].resource_groups.check_existence.return_value = True
         self.clients['aks'].managed_clusters.get.side_effect = lambda *args: ManagedCluster(self.cluster)
         self.clients['aks'].agent_pools.list.side_effect = lambda *args: [AgentPool(pool) for pool in self.pools]
-        self.clients['compute'].resource_skus.list.return_value = [
-            ResourceSku.deserialize({'name': name, 'resourceType': 'virtualMachines', 'capabilities': [
-                {'name': 'vCPUs', 'value': str(cores)}, {'name': 'MemoryGB', 'value': str(memory)}]})
-            for name, cores, memory in (
-                ('Standard_D2s_v5', 2, 8), ('Standard_D4s_v5', 4, 16),
-                ('Standard_D8s_v5', 8, 32), ('Standard_D16s_v5', 16, 64))]
         self.clients['identity'].user_assigned_identities.get.side_effect = self._get_identity
         self.clients['identity'].user_assigned_identities.create_or_update.side_effect = self._create_identity
         self.clients['storage'].storage_accounts.get_properties.side_effect = self._get_storage
@@ -123,16 +104,12 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.clients['storage'].storage_accounts.begin_create.return_value.result.side_effect = (
             lambda: StorageAccount(self.storage))
         auth = self.clients['authorization']
-        auth.role_definitions.list.side_effect = lambda scope, filter: [self._sdk_role(self.roles[filter.split("'")[1]])]
-        auth.role_definitions.get_by_id.side_effect = lambda arm_id: self._sdk_role(next(
-            role for role in self.roles.values() if role['id'] == arm_id))
         auth.role_assignments.list_for_scope.side_effect = lambda scope, **kwargs: [
             RoleAssignment({'id': item['id'], 'properties': item})
             for item in self.assignments if scope.lower() == item['scope'].lower() or
             scope.lower().startswith(item['scope'].lower() + '/')]
         auth.role_assignments.create.side_effect = lambda scope, name, parameters: RoleAssignment({
             'id': f'{scope}/providers/Microsoft.Authorization/roleAssignments/{name}'})
-        self._configure_caller_permissions(auth, _SUB)
         patcher = mock.patch(_PREFIX + 'get_agent_hosting_clients', side_effect=self._subscription_clients)
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -140,41 +117,13 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.client_factory = patcher.start()
         self.addCleanup(patcher.stop)
 
-    def _caller_permissions(self, scope):
-        for assignment in self.assignments:
-            if assignment['principalId'] not in ('operator', 'operator-group'):
-                continue
-            if not (scope.lower() == assignment['scope'].lower() or
-                    scope.lower().startswith(assignment['scope'].lower() + '/')):
-                continue
-            role = next(role for role in self.roles.values() if role['id'] == assignment['roleDefinitionId'])
-            for permission in role['permissions']:
-                properties = dict(permission)
-                if assignment.get('condition'):
-                    properties['condition'] = assignment['condition']
-                yield Permission(properties)
-
-    def _configure_caller_permissions(self, client, subscription):
-        client.permissions.list_for_resource_group.side_effect = (
-            lambda group: self._caller_permissions(f'/subscriptions/{subscription}/resourceGroups/{group}'))
-        client.permissions.list_for_resource.side_effect = (
-            lambda group, namespace, parent, resource_type, name: self._caller_permissions(
-                f'/subscriptions/{subscription}/resourceGroups/{group}/providers/{namespace}/{resource_type}/{name}'))
-
     def _subscription_clients(self, cli_ctx, subscription):
         clients = dict(self.clients)
         if subscription != _SUB:
             authorization = mock.Mock()
             authorization.role_assignments = clients['authorization'].role_assignments
-            authorization.role_definitions = clients['authorization'].role_definitions
-            self._configure_caller_permissions(authorization, subscription)
             clients['authorization'] = authorization
         return SimpleNamespace(**clients)
-
-    @staticmethod
-    def _sdk_role(role):
-        return RoleDefinition({'id': role['id'], 'properties': {
-            'roleName': role['roleName'], 'type': role['roleType'], 'permissions': role['permissions']}})
 
     def _assignment(self, principal, role, scope, **kwargs):
         return {'id': scope + '/providers/Microsoft.Authorization/roleAssignments/' + principal + role,
@@ -411,35 +360,15 @@ class AgentHostingPreparationTests(unittest.TestCase):
                     parameters = self.clients['storage'].storage_accounts.begin_create.call_args.args[2]
                     self.assertEqual(parameters['tags'], self.tags)
 
-    def test_supplied_dependencies_need_no_grant_write_permission(self):
-        self.roles['Owner']['permissions'][0]['notActions'] = ['Microsoft.Authorization/roleAssignments/write']
-        preparation = self._prepare()
-        checked = preflight(self.cli_ctx, preparation)
-        with mock.patch(_PREFIX + 'logger.warning') as warning:
-            provision(self.cli_ctx, checked, self.tags, request=preparation)
-        warning.assert_not_called()
+    def test_preflight_does_not_query_operator_permissions(self):
+        for supplied in (True, False):
+            with self.subTest(supplied=supplied):
+                checked = preflight(self.cli_ctx, self._prepare(supplied, supplied, supplied))
+                self.assertFalse(any('Operator permission' in check['name'] or 'assignment authority' in check['name']
+                                     for check in checked.checks))
+        self.clients['authorization'].permissions.list_for_resource_group.assert_not_called()
+        self.clients['authorization'].permissions.list_for_resource.assert_not_called()
         self._assert_no_writes()
-
-    def test_operator_requirements_follow_request_intent_and_target_scope(self):
-        request = self._prepare(False, False, False)
-        checked = SimpleNamespace(
-            resources=_resolve_resources(request), management_identity=None, workload_identity=None, storage=None)
-        required = _operator_requirements(request, checked)
-        self.assertEqual(required.count(
-            (_RG, 'Microsoft.ManagedIdentity/userAssignedIdentities/write')), 1)
-        self.assertIn((_CLUSTER, 'Microsoft.ContainerService/managedClusters/write'), required)
-
-        other = '11111111-1111-1111-1111-111111111111'
-        management = _MANAGEMENT.replace(_SUB, other).replace('/resourceGroups/rg/', '/resourceGroups/identity-rg/')
-        request = replace(self._prepare(), management_identity=management)
-        checked = SimpleNamespace(
-            resources=_resolve_resources(request), management_identity=None, workload_identity=object(), storage=object())
-        required = _operator_requirements(request, checked)
-        self.assertNotIn((_RG, 'Microsoft.ManagedIdentity/userAssignedIdentities/write'), required)
-        self.assertNotIn((_RG, 'Microsoft.Storage/storageAccounts/write'), required)
-        self.assertIn((
-            f'/subscriptions/{other}/resourceGroups/identity-rg',
-            'Microsoft.ManagedIdentity/userAssignedIdentities/assign/action'), required)
 
     def test_account_cluster_and_storage_require_same_subscription(self):
         request = self._prepare()
@@ -456,7 +385,6 @@ class AgentHostingPreparationTests(unittest.TestCase):
         request = self._prepare(management=False)
         other = '11111111-1111-1111-1111-111111111111'
         supplied = replace(request, workload_identity=_WORKLOAD.replace(_SUB, other))
-        self.assignments.append(self._assignment('operator', 'Owner', f'/subscriptions/{other}'))
         checked = preflight(self.cli_ctx, supplied)
         result = provision(self.cli_ctx, checked, self.tags)
         self.assertEqual(result['workload_identity'], supplied.workload_identity)
@@ -494,18 +422,6 @@ class AgentHostingPreparationTests(unittest.TestCase):
                     provision(self.cli_ctx, checked, self.tags)
                 self.clients['storage'].storage_accounts.begin_create.assert_not_called()
 
-    def test_workload_identity_does_not_require_operator_assign_action(self):
-        self.roles['Owner']['permissions'][0]['notActions'] = [
-            'Microsoft.ManagedIdentity/userAssignedIdentities/assign/action']
-        self.roles['Identity Assigner'] = {
-            'id': f'/subscriptions/{_SUB}/providers/Microsoft.Authorization/roleDefinitions/assigner',
-            'roleName': 'Identity Assigner', 'roleType': 'CustomRole',
-            'permissions': [{'actions': ['Microsoft.ManagedIdentity/userAssignedIdentities/assign/action']}],
-        }
-        self.assignments.append(self._assignment('operator', 'Identity Assigner', _MANAGEMENT))
-        preflight(self.cli_ctx, self._prepare())
-        self._assert_no_writes()
-
     def test_standard_aks_offering_does_not_restrict_pricing_tier(self):
         self.cluster['sku']['tier'] = 'Free'
         preflight(self.cli_ctx, self._prepare())
@@ -517,73 +433,28 @@ class AgentHostingPreparationTests(unittest.TestCase):
             preflight(self.cli_ctx, self._prepare())
         self._assert_no_writes()
 
-    def test_system_pool_must_be_succeeded(self):
-        self.pools[0]['properties']['provisioningState'] = 'Updating'
+    def test_system_pool_requires_only_system_mode(self):
+        self.pools[0]['properties'].update(provisioningState='Updating', vmSize='Standard_D2s_v5')
+        checked = preflight(self.cli_ctx, self._prepare())
+        statuses = {check['name']: check['status'] for check in checked.checks}
+        self.assertEqual(statuses['System node pool'], 'PASS')
+        self.pools[0]['properties']['mode'] = 'User'
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, self._prepare())
         self._assert_no_writes()
 
-    def test_top_level_vm_size_capacity_still_passes(self):
+    def test_removed_aks_capacity_ssh_and_readiness_checks_do_not_block(self):
+        self.cluster['properties']['provisioningState'] = 'Updating'
+        self.pools[0]['properties'].update(vmSize='Standard_B1s', provisioningState='Updating')
+        self.pools[1]['properties'].update(
+            vmSize='Standard_B1s', provisioningState='Updating',
+            securityProfile={'sshAccess': 'LocalUser'})
         checked = preflight(self.cli_ctx, self._prepare())
         statuses = {check['name']: check['status'] for check in checked.checks}
+        self.assertNotIn('AKS state', statuses)
         self.assertEqual(statuses['System node pool'], 'PASS')
         self.assertEqual(statuses['Agent node pool'], 'PASS')
         self._assert_no_writes()
-
-    def test_smaller_manual_or_actual_vm_size_fails_pool_capacity(self):
-        original = copy.deepcopy(self.pools)
-        for index, field, value, check in (
-                (0, 'virtualMachinesProfile', {
-                    'scale': {'manual': [{'count': 1, 'size': 'Standard_D2s_v5'}]}}, 'System node pool'),
-                (1, 'virtualMachinesProfile', {
-                    'scale': {'manual': [{'count': 1, 'size': 'Standard_D4s_v5'}]}}, 'Agent node pool'),
-                (1, 'virtualMachineNodesStatus', [{'size': 'Standard_D4s_v5'}], 'Agent node pool')):
-            with self.subTest(field=field, check=check):
-                self.pools = copy.deepcopy(original)
-                self.pools[index]['properties'][field] = value
-                with self.assertLogs('cli.' + _PREFLIGHT_PREFIX.rstrip('.'), level='WARNING') as logs:
-                    with self.assertRaises(ValidationError):
-                        preflight(self.cli_ctx, self._prepare())
-                self.assertTrue(any(f'Preflight check failed: {check}' in line for line in logs.output))
-                self._assert_no_writes()
-
-    def test_mixed_vm_sizes_pass_when_every_size_meets_capacity(self):
-        self.pools[0]['properties']['virtualMachinesProfile'] = {
-            'scale': {'manual': [{'count': 1, 'size': 'Standard_D8s_v5'}]}}
-        self.pools[1]['properties']['virtualMachinesProfile'] = {
-            'scale': {'manual': [{'count': 1, 'size': 'Standard_D16s_v5'}]}}
-        self.pools[1]['properties']['virtualMachineNodesStatus'] = [{'size': 'Standard_D8s_v5'}]
-        checked = preflight(self.cli_ctx, self._prepare())
-        statuses = {check['name']: check['status'] for check in checked.checks}
-        self.assertEqual(statuses['System node pool'], 'PASS')
-        self.assertEqual(statuses['Agent node pool'], 'PASS')
-        self._assert_no_writes()
-
-    def test_missing_vm_size_sku_or_capacity_is_unverified(self):
-        original_pools = copy.deepcopy(self.pools)
-        original_skus = self.clients['compute'].resource_skus.list.return_value
-        incomplete = ResourceSku.deserialize({
-            'name': 'Standard_Incomplete', 'resourceType': 'virtualMachines',
-            'capabilities': [{'name': 'vCPUs', 'value': '8'}]})
-        for reason, index, check in (
-                ('size', 1, 'Agent node pool'),
-                ('sku', 0, 'System node pool'),
-                ('capability', 1, 'Agent node pool')):
-            with self.subTest(reason=reason):
-                self.pools = copy.deepcopy(original_pools)
-                self.clients['compute'].resource_skus.list.return_value = original_skus
-                if reason == 'size':
-                    self.pools[index]['properties'].pop('vmSize')
-                elif reason == 'sku':
-                    self.pools[index]['properties']['vmSize'] = 'Standard_Missing'
-                else:
-                    self.pools[index]['properties']['vmSize'] = 'Standard_Incomplete'
-                    self.clients['compute'].resource_skus.list.return_value = original_skus + [incomplete]
-                with self.assertLogs('cli.' + _PREFLIGHT_PREFIX.rstrip('.'), level='WARNING') as logs:
-                    with self.assertRaises(ValidationError):
-                        preflight(self.cli_ctx, self._prepare())
-                self.assertTrue(any(f'Preflight check failed: {check}' in line for line in logs.output))
-                self._assert_no_writes()
 
     def test_sandbox_label_requires_exact_lowercase_true(self):
         for value in ('True', None):
@@ -601,55 +472,43 @@ class AgentHostingPreparationTests(unittest.TestCase):
             preflight(self.cli_ctx, preparation)
         self._assert_no_writes()
 
-    def test_partial_custom_grants_must_cover_all_existing_requirements(self):
+    def test_inherited_built_in_roles_satisfy_mi_validation_without_role_definition_queries(self):
         request = self._prepare()
-        self.assignments = [assignment for assignment in self.assignments
-                            if assignment['principalId'] != 'management-principal' or
-                            assignment['scope'] != _CLUSTER]
-        self.roles['Limited Hosting'] = {
-            'id': f'/subscriptions/{_SUB}/providers/Microsoft.Authorization/roleDefinitions/limited',
-            'roleName': 'Limited Hosting', 'roleType': 'CustomRole',
-            'permissions': [{'actions': ['*'], 'notActions': ['*/write']}],
-        }
-        self.assignments.append(self._assignment('management-principal', 'Limited Hosting', _CLUSTER))
-        with self.assertRaises(ValidationError):
-            preflight(self.cli_ctx, request)
+        for control_role in ('Owner', 'Contributor'):
+            for inherited_scope in (f'/subscriptions/{_SUB}', _RG):
+                with self.subTest(control_role=control_role, inherited_scope=inherited_scope):
+                    self.assignments = [
+                        self._assignment('management-principal', control_role, inherited_scope),
+                        self._assignment('workload-principal', 'Storage Blob Data Owner', inherited_scope),
+                    ]
+                    checked = preflight(self.cli_ctx, request)
+                    statuses = {check['name']: check['status'] for check in checked.checks}
+                    self.assertEqual(statuses['Reader validation'], 'PASS')
+                    self.assertEqual(statuses['Kubernetes Extension Contributor validation'], 'PASS')
+                    self.assertEqual(
+                        statuses['Managed Identity Federated Identity Credential Contributor validation'], 'PASS')
+                    self.assertEqual(statuses['Storage Blob Data Contributor validation'], 'PASS')
+        self.clients['authorization'].role_definitions.list.assert_not_called()
+        self.clients['authorization'].role_definitions.get_by_id.assert_not_called()
         self._assert_no_writes()
 
-        self.roles['Extension Writer'] = {
-            'id': f'/subscriptions/{_SUB}/providers/Microsoft.Authorization/roleDefinitions/writer',
-            'roleName': 'Extension Writer', 'roleType': 'CustomRole',
-            'permissions': [{'actions': ['*/write']}],
-        }
-        self.assignments.append(self._assignment('management-principal', 'Extension Writer', _CLUSTER))
-        checked = preflight(self.cli_ctx, request)
-        statuses = {check['name']: check['status'] for check in checked.checks}
-        self.assertEqual(statuses['Reader validation'], 'PASS')
-        self.assertEqual(statuses['Kubernetes Extension Contributor validation'], 'PASS')
-        self._assert_no_writes()
-
-    def test_blob_validation_does_not_infer_data_access_from_owner(self):
-        preparation = self._prepare()
-        self.assignments = [assignment for assignment in self.assignments
-                            if assignment['principalId'] != 'workload-principal']
-        self.assignments.append(self._assignment('workload-principal', 'Owner', _STORAGE))
-        with self.assertRaises(ValidationError):
-            preflight(self.cli_ctx, preparation)
-        self._assert_no_writes()
-
-    def test_missing_operator_authority_blocks_all_writes(self):
-        preparation = self._prepare(management=False)
-        self.roles['Owner']['permissions'][0]['notActions'] = ['Microsoft.Authorization/roleAssignments/write']
-        with self.assertRaises(ValidationError):
-            preflight(self.cli_ctx, preparation)
-        self._assert_no_writes()
+    def test_blob_validation_does_not_infer_data_access_from_owner_or_contributor(self):
+        for role in ('Owner', 'Contributor'):
+            with self.subTest(role=role):
+                preparation = self._prepare()
+                self.assignments = [assignment for assignment in self.assignments
+                                    if assignment['principalId'] != 'workload-principal']
+                self.assignments.append(self._assignment('workload-principal', role, _STORAGE))
+                with self.assertRaises(ValidationError):
+                    preflight(self.cli_ctx, preparation)
+                self._assert_no_writes()
 
     def test_qualifying_requirements_cannot_be_combined_across_pools(self):
         preparation = self._prepare()
         other = copy.deepcopy(self.pools[1])
         other['name'] = 'other'
         other['properties']['nodeLabels'] = {}
-        self.pools[1]['properties']['securityProfile']['sshAccess'] = 'LocalUser'
+        self.pools[1]['properties']['workloadRuntime'] = 'OCIContainer'
         self.pools.append(other)
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, preparation)
@@ -658,9 +517,8 @@ class AgentHostingPreparationTests(unittest.TestCase):
     def test_agent_pool_requirements_each_block_when_missing(self):
         original = copy.deepcopy(self.pools[1])
         for key, value in (
-                ('osSKU', 'Ubuntu'), ('count', 0), ('vmSize', 'Standard_D4s_v5'),
-                ('workloadRuntime', 'OCIContainer'), ('nodeImageVersion', 'AKSAzureLinux-V3katagen2-202608.13.9'),
-                ('nodeLabels', {}), ('securityProfile', {'sshAccess': 'LocalUser'}), ('provisioningState', 'Updating')):
+                ('osSKU', 'Ubuntu'), ('count', 0), ('workloadRuntime', 'OCIContainer'),
+                ('nodeImageVersion', 'AKSAzureLinux-V3katagen2-202608.13.9'), ('nodeLabels', {})):
             with self.subTest(key=key):
                 self.pools[1] = copy.deepcopy(original)
                 self.pools[1]['properties'][key] = value
@@ -719,16 +577,30 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.pools[1]['properties']['osSKU'] = 'AzureLinux3'
         preflight(self.cli_ctx, self._prepare())
 
-    def test_non_overlay_networking_is_rejected(self):
+    def test_cni_pod_subnet_is_accepted_and_other_non_overlay_modes_are_rejected(self):
+        pod_subnet = _RG + '/providers/Microsoft.Network/virtualNetworks/vnet/subnets/pods'
         self.cluster['properties']['networkProfile']['networkPluginMode'] = None
+        with self.assertRaises(ValidationError):
+            preflight(self.cli_ctx, self._prepare())
+        self.pools[0]['properties']['podSubnetID'] = pod_subnet
+        with self.assertRaises(ValidationError):
+            preflight(self.cli_ctx, self._prepare())
+        self.pools[1]['properties']['podSubnetID'] = pod_subnet
+        checked = preflight(self.cli_ctx, self._prepare())
+        statuses = {check['name']: check['status'] for check in checked.checks}
+        self.assertEqual(statuses['CNI mode'], 'PASS')
+        self.cluster['properties']['networkProfile']['networkPluginMode'] = 'custom'
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, self._prepare())
         self._assert_no_writes()
 
     def test_cluster_requirement_failures(self):
-        for key, value in (('kubernetesVersion', '1.30.9'), ('provisioningState', 'Updating'),
+        self.cluster['properties']['identityProfile'] = {'KubeletIdentity': {'objectId': 'kubelet-principal'}}
+        preflight(self.cli_ctx, self._prepare())
+        for key, value in (('kubernetesVersion', '1.30.9'), ('identityProfile', {}),
+                           ('identityProfile', {'kubeletidentity': {'objectId': '  '}}),
                            ('oidcIssuerProfile', {}), ('securityProfile', {})):
-            with self.subTest(key=key):
+            with self.subTest(key=key, value=value):
                 preparation = self._prepare()
                 original = self.cluster['properties'][key]
                 self.cluster['properties'][key] = value
@@ -737,24 +609,27 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 self.cluster['properties'][key] = original
                 self._assert_no_writes()
 
-    def test_restricted_storage_and_lrs_do_not_warn_or_block(self):
-        self.storage['properties']['publicNetworkAccess'] = 'Disabled'
+    def test_removed_storage_access_and_public_baseline_checks_do_not_warn_or_block(self):
+        self.storage['properties'].update(
+            allowSharedKeyAccess=True, allowBlobPublicAccess=True,
+            publicNetworkAccess=None, networkAcls=None, primaryEndpoints=None)
         self.storage['sku']['name'] = 'Standard_LRS'
         preparation = self._prepare()
         with mock.patch(_PREFLIGHT_PREFIX + 'logger.warning') as warning:
             checked = preflight(self.cli_ctx, preparation)
         warning.assert_not_called()
         checks = {check['name']: check for check in checked.checks}
-        self.assertEqual(checks['Storage public-network baseline']['status'], 'NOT_APPLICABLE')
+        for removed in ('Storage shared keys', 'Storage anonymous Blob',
+                        'Storage Blob endpoint', 'Storage public-network baseline'):
+            self.assertNotIn(removed, checks)
         self.assertEqual(checks['Storage redundancy']['status'], 'PASS')
         self.assertEqual(checks['Storage redundancy']['observed'], 'Standard_LRS')
         self.assertEqual(
             checks['Storage redundancy']['remediation'], 'Use ZRS or GZRS when available.')
 
     def test_invalid_storage_configuration_blocks(self):
-        for key, value in (('isHnsEnabled', True), ('allowSharedKeyAccess', True),
-                           ('allowBlobPublicAccess', True), ('supportsHttpsTrafficOnly', False),
-                           ('minimumTlsVersion', 'TLS1_0'), ('primaryEndpoints', {'blob': 'http://invalid'})):
+        for key, value in (('isHnsEnabled', True), ('supportsHttpsTrafficOnly', False),
+                           ('minimumTlsVersion', 'TLS1_0'), ('accessTier', 'Cool')):
             with self.subTest(key=key):
                 original = self.storage['properties'][key]
                 self.storage['properties'][key] = value
@@ -762,6 +637,10 @@ class AgentHostingPreparationTests(unittest.TestCase):
                     preflight(self.cli_ctx, self._prepare())
                 self.storage['properties'][key] = original
                 self._assert_no_writes()
+        self.storage['kind'] = 'Storage'
+        with self.assertRaises(ValidationError):
+            preflight(self.cli_ctx, self._prepare())
+        self._assert_no_writes()
 
     def test_supplied_storage_must_match_account_region(self):
         self.storage['location'] = 'eastus'
@@ -774,13 +653,6 @@ class AgentHostingPreparationTests(unittest.TestCase):
             name_available=False, message='Already taken')
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, self._prepare(storage=False))
-        self._assert_no_writes()
-
-    def test_unknown_storage_public_network_state_blocks(self):
-        self.storage['properties']['publicNetworkAccess'] = None
-        self.storage['properties']['networkAcls'] = None
-        with self.assertRaises(ValidationError):
-            preflight(self.cli_ctx, self._prepare())
         self._assert_no_writes()
 
     def test_resolved_management_and_workload_identity_cannot_be_same(self):
@@ -830,20 +702,6 @@ class AgentHostingPreparationTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             preflight(self.cli_ctx, preparation)
         self._assert_no_writes()
-
-    def test_unreadable_caller_permissions_block_preflight(self):
-        self.clients['authorization'].permissions.list_for_resource_group.side_effect = HttpResponseError('Forbidden')
-        with self.assertRaises(ValidationError):
-            preflight(self.cli_ctx, self._prepare())
-        self._assert_no_writes()
-        self.profile.get_raw_token.assert_not_called()
-
-    def test_unreadable_assignment_authority_is_not_silently_skipped(self):
-        self.clients['authorization'].permissions.list_for_resource.side_effect = HttpResponseError('Forbidden')
-        with self.assertRaises(ValidationError):
-            preflight(self.cli_ctx, self._prepare(management=False))
-        self._assert_no_writes()
-        self.profile.get_raw_token.assert_not_called()
 
     def test_conditional_grants_are_not_unconditional_evidence(self):
         preparation = self._prepare()
@@ -941,10 +799,31 @@ class AgentHostingPreparationTests(unittest.TestCase):
 
     def test_compatible_existing_grant_is_not_recreated(self):
         self._prepare()
-        role = self._sdk_role(self.roles['Reader'])
-        _ensure_grant(self.clients['authorization'], Grant('Reader', _MANAGEMENT, _CLUSTER, role.id),
+        _ensure_grant(self.clients['authorization'],
+                      Grant('Reader', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id']),
                       'management-principal')
         self.clients['authorization'].role_assignments.create.assert_not_called()
+
+    def test_provision_reuses_inherited_higher_built_in_roles_without_recreating_grants(self):
+        preparation = self._prepare(management=False, workload=True, storage=False)
+        self.assignments = [
+            {
+                'id': f'/subscriptions/{_SUB}/providers/Microsoft.Authorization/roleAssignments/mgmt-contrib',
+                'principalId': 'foundry-hosting-mi-principal',
+                'scope': f'/subscriptions/{_SUB}',
+                'roleDefinitionId': f'/providers/Microsoft.Authorization/roleDefinitions/{_ROLE_IDS["Contributor"]}',
+            },
+            self._assignment('workload-principal', 'Storage Blob Data Owner', _RG),
+        ]
+        checked = preflight(self.cli_ctx, preparation)
+        provision(self.cli_ctx, checked, self.tags)
+        self.clients['authorization'].role_assignments.create.assert_not_called()
+
+        self.assignments[-1] = self._assignment('workload-principal', 'Owner', _RG)
+        provision(self.cli_ctx, checked, self.tags)
+        self.clients['authorization'].role_assignments.create.assert_called_once()
+        self.assertEqual(self.clients['authorization'].role_assignments.create.call_args.args[0],
+                         checked.resources.storage)
 
     @staticmethod
     def _conflict(code='RoleAssignmentExists', status=409):
@@ -972,7 +851,8 @@ class AgentHostingPreparationTests(unittest.TestCase):
         grant = Grant('Reader', _MANAGEMENT, _CLUSTER, self.roles['Reader']['id'])
         base = {'principalId': 'management-principal', 'roleDefinitionId': grant.role_id, 'scope': _CLUSTER}
         cases = [
-            {'principalId': 'another-principal'}, {'roleDefinitionId': 'another-role'}, {'scope': _RG},
+            {'principalId': 'another-principal'}, {'roleDefinitionId': 'another-role'},
+            {'roleDefinitionId': self.roles['Owner']['id']}, {'scope': _RG},
             {'scope': None}, {'condition': 'unverified condition'},
         ]
         client = self.clients['authorization']
@@ -1052,45 +932,3 @@ class AgentHostingValueTests(unittest.TestCase):
         for image in (None, '', 'AKSAzureLinux-V3katagen2-202608.13.9', 'AKSUbuntu-202610.1.0',
                       'AKSAzureLinux-V3katagen2-invalid'):
             self.assertFalse(_image_supported(image))
-
-    def test_wildcard_requirements_do_not_bypass_write_or_delete_exclusions(self):
-        action = 'Microsoft.KubernetesConfiguration/extensions/*'
-        for operation in ('read', 'write', 'delete'):
-            with self.subTest(operation=operation):
-                permission = Permission({'actions': ['*'], 'notActions': [f'*/{operation}']})
-                self.assertFalse(_permission_allows(permission, action))
-
-    def test_another_role_can_fill_only_the_missing_wildcard_actions(self):
-        requirement = 'Microsoft.KubernetesConfiguration/extensions/*'
-        incomplete = Permission({'actions': ['*'], 'notActions': ['*/write']})
-        writer = Permission({'actions': ['*/write']})
-        self.assertFalse(_has_permissions([incomplete], [requirement]))
-        self.assertTrue(_has_permissions([incomplete, writer], [requirement]))
-        self.assertTrue(_has_permissions([writer, incomplete], [requirement]))
-        specific_writer = Permission({'actions': ['Microsoft.KubernetesConfiguration/extensions/write']})
-        self.assertTrue(_has_permissions([incomplete, specific_writer], [
-            'Microsoft.KubernetesConfiguration/extensions/read',
-            'Microsoft.KubernetesConfiguration/extensions/write',
-        ]))
-        self.assertFalse(_has_permissions([incomplete, specific_writer], [requirement]))
-
-    def test_excluded_or_conditional_grants_cannot_take_fast_path(self):
-        required = 'Microsoft.Storage/storageAccounts/*'
-        for properties in (
-                {'actions': ['*'], 'notActions': ['*/write']},
-                {'actions': [required], 'notActions': ['*/write']},
-                {'actions': ['*'], 'condition': 'unverified'},
-                {'actions': [required + 'read']},
-                {'dataActions': ['*']}):
-            with self.subTest(properties=properties):
-                self.assertFalse(_has_permissions([Permission(properties)], [required]))
-
-    def test_wildcard_data_permissions_use_their_own_exclusions_and_grants(self):
-        required = 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'
-        incomplete = Permission({'dataActions': ['*'], 'notDataActions': ['*/delete']})
-        delete = Permission({'dataActions': ['*/delete']})
-        self.assertFalse(_has_permissions([incomplete], [required], data=True))
-        self.assertTrue(_has_permissions([incomplete, delete], [required], data=True))
-        self.assertFalse(_has_permissions([Permission({'actions': ['*']}), delete], [required], data=True))
-        management_exclusions = Permission({'dataActions': ['*'], 'notActions': ['*']})
-        self.assertTrue(_has_permissions([management_exclusions], [required], data=True))
