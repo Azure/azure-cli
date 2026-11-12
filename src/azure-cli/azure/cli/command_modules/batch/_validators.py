@@ -4,9 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from knack.log import get_logger
+from knack.util import CLIError
 from azure.cli.core.util import get_file_json
 from urllib.parse import urlsplit
 from azure.batch.models import (DiskEncryptionTarget)
+
+logger = get_logger(__name__)
 
 # TYPES VALIDATORS
 
@@ -341,3 +345,27 @@ def validate_client_parameters(cmd, namespace):
 
     if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'aad':
         namespace.account_key = None
+
+
+def validate_retained_data_option(namespace, _=None):
+    """Warn that the value 'retaineddata' will be removed, only when it is used, as an option or in the
+    --json-file body (see _breaking_change.py)."""
+    body = getattr(namespace, 'json_file', None)
+    if isinstance(body, str):
+        try:
+            body = get_file_json(body)
+        except (OSError, ValueError, CLIError):
+            body = None  # the --json-file handling reports the error
+    if not isinstance(body, dict):
+        body = {}
+    for name, rest_name in (('node_deallocation_option', 'nodeDeallocationOption'),
+                            ('node_reboot_option', 'nodeRebootOption')):
+        if not hasattr(namespace, name):
+            continue
+        value = getattr(namespace, name) or body.get(rest_name)
+        if isinstance(value, str) and value.lower() == 'retaineddata':
+            from azure.cli.core.breaking_change import print_conditional_breaking_change
+            from azure.cli.command_modules.batch._breaking_change import RETAINED_DATA_TAG
+            print_conditional_breaking_change(None, RETAINED_DATA_TAG, command_name=namespace.command,
+                                              custom_logger=logger)
+            return
