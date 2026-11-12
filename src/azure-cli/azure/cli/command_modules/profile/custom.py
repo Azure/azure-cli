@@ -142,8 +142,16 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
           # Managed identity
           identity=False, client_id=None, object_id=None, resource_id=None,
           # Subscription discovery and default subscription selection control
-          skip_subscription_discovery=False, subscription=None):
+          skip_subscription_discovery=False, subscription=None, login_hint=None):
     """Log in to access Azure subscriptions"""
+
+    # A configured hint applies only to interactive browser/broker login.
+    incompatible_hint = any([username, password, service_principal, identity, use_device_code,
+                             certificate, client_assertion, use_cert_sn_issuer])
+    if login_hint is not None and incompatible_hint:
+        raise CLIError("usage error: '--login-hint' is only applicable to interactive browser or broker login")
+    if login_hint is None and not incompatible_hint:
+        login_hint = cmd.cli_ctx.config.get('login', 'login_hint', fallback=None)
 
     # quick argument usage check
     if any([password, service_principal, tenant]) and identity:
@@ -225,7 +233,8 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         show_progress=can_show_selector and not skip_subscription_discovery,
         claims_challenge=claims_challenge,
         skip_subscription_discovery=skip_subscription_discovery,
-        subscription=subscription
+        subscription=subscription,
+        login_hint=login_hint
     )
 
     # Filtered path (--subscription or --skip): show selector only when multiple matches

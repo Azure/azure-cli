@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
+import tempfile
 import unittest
 from unittest import mock
 
@@ -379,3 +380,47 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         # Selector should be shown even with 1 sub (backward compat)
         selector_mock.assert_called_once_with([sub])
         self.assertIsNone(result)
+
+
+class TestLoginHint(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.profile.custom.in_cloud_console', return_value=False)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_login_hint_precedence(self, profile_mock, _):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.get.return_value = 'configured@contoso.com'
+        cmd.cli_ctx.config.getboolean.return_value = False
+        profile_mock.return_value.login.return_value = []
+        for options, expected in [({}, 'configured@contoso.com'),
+                                  ({'login_hint': 'explicit@contoso.com'}, 'explicit@contoso.com'),
+                                  ({'login_hint': ''}, ''),
+                                  ({'use_device_code': True}, None),
+                                  ({'username': 'user', 'password': 'secret'}, None),
+                                  ({'service_principal': True, 'username': 'app', 'password': 'secret'}, None)]:
+            with self.subTest(options=options):
+                login(cmd, **options)
+                self.assertEqual(expected, profile_mock.return_value.login.call_args.kwargs['login_hint'])
+        from knack.config import CLIConfig
+        with tempfile.TemporaryDirectory() as config_dir:
+            cmd.cli_ctx.config = CLIConfig(config_dir=config_dir, config_env_var_prefix='AZURE')
+            cmd.cli_ctx.config.set_value('core', 'login_experience_v2', 'off')
+            login(cmd)
+            self.assertIsNone(profile_mock.return_value.login.call_args.kwargs['login_hint'])
+            cmd.cli_ctx.config.set_value('login', 'login_hint', 'file@contoso.com')
+            login(cmd)
+            self.assertEqual('file@contoso.com', profile_mock.return_value.login.call_args.kwargs['login_hint'])
+            with mock.patch.dict(os.environ, {'AZURE_LOGIN_LOGIN_HINT': 'env@contoso.com'}):
+                login(cmd)
+                self.assertEqual('env@contoso.com', profile_mock.return_value.login.call_args.kwargs['login_hint'])
+                login(cmd, login_hint='explicit@contoso.com')
+                self.assertEqual('explicit@contoso.com',
+                                 profile_mock.return_value.login.call_args.kwargs['login_hint'])
+
+    def test_login_hint_rejects_incompatible_flows(self):
+        for options in [{'username': 'user'}, {'password': 'secret'}, {'service_principal': True},
+                        {'identity': True}, {'use_device_code': True}, {'certificate': 'cert.pem'},
+                        {'client_assertion': 'token'}, {'use_cert_sn_issuer': True}]:
+            with self.subTest(options=options), self.assertRaisesRegex(CLIError, '--login-hint'):
+                login(mock.MagicMock(), login_hint='user@contoso.com', **options)

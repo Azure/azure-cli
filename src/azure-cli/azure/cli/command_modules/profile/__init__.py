@@ -46,6 +46,10 @@ class ProfileCommandsLoader(AzCommandsLoader):
         with self.argument_context('login') as c:
             c.argument('username', options_list=['--username', '-u'],
                        help='User name or service principal client ID.')
+            c.argument('login_hint', options_list=['--login-hint'],
+                       help='UPN or email address to suggest for interactive browser or broker login. '
+                            'Prompts may still appear. Defaults to login.login_hint configuration '
+                            '(AZURE_LOGIN_LOGIN_HINT).')
             c.argument('password', options_list=['--password', '-p'],
                        help='User password or service principal secret. Will prompt if not given.')
             c.argument('tenant', options_list=['--tenant', '-t'], validator=validate_tenant,

@@ -35,6 +35,10 @@ long-summary: >-
 examples:
     - name: Log in interactively.
       text: az login
+    - name: Log in interactively with an account hint. Authentication may still require interaction.
+      text: az login --login-hint johndoe@contoso.com
+    - name: Configure the default account hint for interactive browser or broker login.
+      text: az config set login.login_hint=johndoe@contoso.com
     - name: Log in with username and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
       text: az login --username johndoe@contoso.com --password VerySecret
     - name: Log in with a service principal using client secret. Use --password=secret if the first character of the password is '-'.
