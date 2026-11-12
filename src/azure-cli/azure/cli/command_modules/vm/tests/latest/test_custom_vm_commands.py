@@ -167,6 +167,105 @@ class TestVmCustom(unittest.TestCase):
         self.assertEqual(result, 'extension-name')
 
 
+class TestVMBootDiagnosticsExtensions(unittest.TestCase):
+    """Regression tests for https://github.com/Azure/azure-cli/issues/31910."""
+
+    _EXTENSIONS = {
+        'GuestAttestation': 'Microsoft.Azure.Security.LinuxAttestation',
+        'AzureMonitorWindowsAgent': 'Microsoft.Azure.Monitor'
+    }
+    _EXTENSION_CASES = (
+        (),
+        ('GuestAttestation',),
+        ('AzureMonitorWindowsAgent',),
+        ('GuestAttestation', 'AzureMonitorWindowsAgent')
+    )
+    _STORAGE_URI = 'https://bootdiagstorage.blob.core.windows.net/'
+
+    def _run_boot_diagnostics(self, command_type, handler, extension_names, enabled=True,
+                              storage=None, polling_error=None):
+        extensions = [{
+            'name': name,
+            'location': 'uksouth',
+            'type': 'Microsoft.Compute/virtualMachines/extensions',
+            'properties': {
+                'publisher': self._EXTENSIONS[name],
+                'type': name,
+                'typeHandlerVersion': '1.0',
+                'provisioningState': 'Succeeded'
+            }
+        } for name in extension_names]
+        instances = []
+        polling = mock.Mock(spec=['run', 'resource', 'get_continuation_token'])
+        polling.run.side_effect = polling_error
+        polling.resource.return_value = None
+        polling.get_continuation_token.return_value = None
+
+        def execute_operations(command):
+            # Stub service I/O, retaining the real update hook, poller, and output callback.
+            command.ctx.set_var('instance', {
+                'name': 'vm1',
+                'location': 'uksouth',
+                'properties': {
+                    'diagnosticsProfile': {
+                        'bootDiagnostics': {'enabled': enabled, 'storageUri': self._STORAGE_URI}
+                    }
+                },
+                'resources': extensions
+            }, schema_builder=command.VirtualMachinesGet._build_schema_on_200)
+            instance = command.ctx.vars.instance
+            command.pre_instance_update(instance)
+            instances.append(instance)
+            yield polling
+
+        kwargs = {'storage': storage} if handler is enable_boot_diagnostics else {}
+        with mock.patch.object(command_type, '_execute_operations', execute_operations):
+            self.assertIsNone(handler(_get_test_cmd(), 'rg1', 'vm1', **kwargs))
+
+        polling.run.assert_called_once_with()
+        polling.resource.assert_called_once_with()
+        result = instances[0].to_serialized_data()
+        self.assertEqual(result['resources'], extensions)
+        return result['properties']['diagnosticsProfile']['bootDiagnostics']
+
+    def test_vm_boot_diagnostics_enable_with_extensions(self):
+        from azure.cli.command_modules.vm.custom import EnableBootDiagnostics
+
+        for extension_names in self._EXTENSION_CASES:
+            for storage in (None, self._STORAGE_URI):
+                with self.subTest(extensions=extension_names, storage=storage):
+                    diagnostics = self._run_boot_diagnostics(
+                        EnableBootDiagnostics, enable_boot_diagnostics, extension_names,
+                        enabled=False, storage=storage)
+                    self.assertTrue(diagnostics['enabled'])
+                    self.assertEqual(diagnostics.get('storageUri'), storage)
+
+    def test_vm_boot_diagnostics_disable_with_extensions(self):
+        from azure.cli.command_modules.vm.custom import DisableBootDiagnostics
+
+        for extension_names in self._EXTENSION_CASES:
+            for enabled in (False, True):
+                with self.subTest(extensions=extension_names, enabled=enabled):
+                    diagnostics = self._run_boot_diagnostics(
+                        DisableBootDiagnostics, disable_boot_diagnostics, extension_names,
+                        enabled=enabled)
+                    self.assertFalse(diagnostics['enabled'])
+                    self.assertEqual(diagnostics.get('storageUri'), None if enabled else self._STORAGE_URI)
+
+    def test_vm_boot_diagnostics_extensions_service_error(self):
+        from azure.core.exceptions import HttpResponseError
+        from azure.cli.command_modules.vm.custom import EnableBootDiagnostics, DisableBootDiagnostics
+
+        for command_type, handler in ((EnableBootDiagnostics, enable_boot_diagnostics),
+                                      (DisableBootDiagnostics, disable_boot_diagnostics)):
+            with self.subTest(command=command_type.__name__):
+                error = HttpResponseError(message='Boot diagnostics update failed')
+                with self.assertRaises(HttpResponseError) as raised:
+                    self._run_boot_diagnostics(
+                        command_type, handler, tuple(self._EXTENSIONS), polling_error=error)
+                self.assertIs(raised.exception, error)
+
+
 class TestVMBootLog(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.vm.custom.logger.warning')
