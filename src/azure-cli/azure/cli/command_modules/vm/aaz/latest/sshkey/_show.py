@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "sshkey show",
+)
 class Show(AAZCommand):
     """Get information about a SSH public key.
 
@@ -49,6 +52,9 @@ class Show(AAZCommand):
             help="The name of the SSH public key.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="",
+            ),
         )
         return cls._args_schema
 
