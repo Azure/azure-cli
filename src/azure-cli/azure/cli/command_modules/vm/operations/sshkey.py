@@ -20,6 +20,9 @@ logger = get_logger(__name__)
 
 
 class SSHKeyCreate(_SSHKeyCreate):
+    _args_schema = None
+    _arguments_schema = None
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
