@@ -448,12 +448,17 @@ class AzurePluginNativeTest(unittest.TestCase):
 
     def test_inventory_policy_failure_is_not_reported_as_host_incompatibility(self):
         command = ('copilot', 'plugin', 'list', '--json')
-        response = subprocess.CompletedProcess(command, 1, '', 'blocked by managed policy')
-        with self.assertRaises(ClientRequestError) as caught:
-            self.install('github-copilot', {command: response})
-        self.assertNotIn('Upgrade', str(caught.exception))
-        self.assertIn('[sensitive inventory output suppressed]', str(caught.exception))
-        self.assertEqual(self.mutations(), [])
+        for diagnostic in ('blocked by managed policy', 'unsupported flag or policy refusal',
+                           'Unsupported option: plugins disabled by organization policy',
+                           'Unknown argument in MCP server environment',
+                           "error:\nunknown option '--json'"):
+            with self.subTest(diagnostic=diagnostic):
+                response = subprocess.CompletedProcess(command, 1, '', diagnostic)
+                with self.assertRaises(ClientRequestError) as caught:
+                    self.install('github-copilot', {command: response})
+                self.assertNotIn('Upgrade', str(caught.exception))
+                self.assertIn('[sensitive inventory output suppressed]', str(caught.exception))
+                self.assertEqual(self.mutations(), [])
 
     def test_claude_fresh_install_adds_official_marketplace_in_user_scope(self):
         self.assertTrue(self.install('claude-code', self.fresh_responses('claude-code', [])))

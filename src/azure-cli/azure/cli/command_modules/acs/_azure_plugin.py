@@ -335,11 +335,11 @@ def _run(host_id, argv, operation, timeout=300, *, sensitive=False):
     if result.returncode:
         detail = (f'exit {result.returncode}. {_diagnostic(result.stdout, sensitive=sensitive)} '
                   f'{_diagnostic(result.stderr, sensitive=sensitive)}')
-        # Classify parser failures without copying any part of the sensitive native output.
+        # Match a single parser-error line, not arbitrary policy or inventory text.
         if sensitive and re.search(
-                r'(?im)^\s*(?:error:\s*)?(?:unknown|unrecognized|unsupported|unexpected) '
-                r'(?:command|subcommand|option|argument|flag)\b', result.stderr):
-            detail += (' The host does not support a required JSON inventory command or option. ' +
+                r'(?im)^[ \t]*error:[ \t]*(?:unknown|unrecognized|unsupported|unexpected) '
+                r'''(?:command|subcommand|option|argument|flag)[ \t]+['"`]''', result.stderr):
+            detail += (' The host rejected a required JSON inventory command or option. ' +
                        _HOST_UPGRADE_GUIDANCE[host_id])
         raise ClientRequestError(_failure(host_id, operation, detail))
     return result
