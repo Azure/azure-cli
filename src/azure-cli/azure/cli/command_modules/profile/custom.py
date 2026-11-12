@@ -53,7 +53,6 @@ USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD = (
     "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
 
 
-
 def _resolve_login_defaults(cmd, tenant, subscription, skip_subscription_discovery):
     """Resolve login-specific config without changing defaults for other commands."""
     config = cmd.cli_ctx.config
