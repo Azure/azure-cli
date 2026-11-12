@@ -44,6 +44,61 @@ managed_instance_name_prefix = 'clitestmi'
 instance_pool_name_prefix = 'clitestip'
 managed_instance_name_max_length = 20
 
+AUDIT_REQUIRED_FIELDS = [
+    'action_id',
+    'Action_Name',
+    'additional_information',
+    'affected_rows',
+    'application_name',
+    'audit_schema_version',
+    'class_type',
+    'Class_Type_Description',
+    'client_ip',
+    'client_tls_version',
+    'client_tls_version_name',
+    'connection_id',
+    'data_sensitivity_information',
+    'database_name',
+    'database_principal_id',
+    'database_principal_name',
+    'database_transaction_id',
+    'duration_milliseconds',
+    'Event_Id',
+    'event_time',
+    'external_policy_permissions_checked',
+    'host_name',
+    'is_column_permission',
+    'is_local_secondary_replica',
+    'Is_Server_Level_Audit',
+    'ledger_start_sequence_number',
+    'object_id',
+    'object_name',
+    'obo_middle_tier_app_id',
+    'permission_bitmask',
+    'response_rows',
+    'schema_name',
+    'Securable_Class_Type',
+    'sequence_group_id',
+    'sequence_number',
+    'server_instance_name',
+    'server_principal_id',
+    'server_principal_name',
+    'server_principal_sid',
+    'session_context',
+    'session_id',
+    'session_server_principal_name',
+    'statement',
+    'succeeded',
+    'target_database_principal_id',
+    'target_database_principal_name',
+    'target_server_principal_id',
+    'target_server_principal_name',
+    'target_server_principal_sid',
+    'transaction_id',
+    'user_defined_event_id',
+    'user_defined_information',
+]
+
 # Region, subscription and existing-resource substitutions below select the recording environment;
 # they are retained independently of the SDK upgrade and must match the subscription used for live runs.
 
@@ -216,6 +271,52 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
             # Remove the per-MI administrator identity without touching shared tenant principals.
             if self.enable_ad_only_auth:
                 execute(DummyCli(), 'az identity delete -g {} -n {}-admin'.format(self.group, name))
+
+
+def _test_audit_policy_required_fields(test, command, workspace_id, event_hub_rule_id, event_hub_name):
+    update = command.format('update')
+    show = command.format('show')
+
+    with test.assertRaisesRegex(CLIError, 'Azure Monitor target'):
+        test.cmd(update + ' --required-fields event_time')
+    test.cmd(show, checks=[
+        test.check('state', 'Enabled'),
+        test.check('isAzureMonitorTargetEnabled', False)])
+
+    with test.assertRaisesRegex(CLIError, 'state is disabled'):
+        test.cmd(update + ' --state Disabled --required-fields event_time')
+    test.cmd(update + ' --state Disabled')
+    with test.assertRaisesRegex(CLIError, 'auditing and the Azure Monitor target'):
+        test.cmd(update + ' --required-fields event_time')
+
+    selected_fields = ['event_time', 'action_id', 'statement']
+    cases = (
+        ('Enabled', 'Disabled', selected_fields),
+        ('Disabled', 'Enabled', selected_fields),
+        ('Enabled', 'Enabled', selected_fields),
+        ('Enabled', 'Enabled', AUDIT_REQUIRED_FIELDS),
+        ('Enabled', 'Enabled', ['event_time']),
+    )
+    for event_hub_state, log_analytics_state, fields in cases:
+        target_args = (
+            ' --state Enabled --blob-storage-target-state Disabled'
+            ' --event-hub-target-state {} --log-analytics-target-state {}'
+        ).format(event_hub_state, log_analytics_state)
+        if event_hub_state == 'Enabled':
+            target_args += ' --event-hub-authorization-rule-id {} --event-hub {}'.format(
+                event_hub_rule_id, event_hub_name)
+        if log_analytics_state == 'Enabled':
+            target_args += ' --log-analytics-workspace-resource-id {}'.format(workspace_id)
+
+        result = test.cmd(update + target_args + ' --required-fields ' + ' '.join(fields),
+                          checks=[test.check('isAzureMonitorTargetEnabled', True)]).get_output_in_json()
+        test.assertCountEqual(result['requiredFields'], fields)
+        result = test.cmd(show, checks=[
+            test.check('state', 'Enabled'),
+            test.check('eventHubTargetState', event_hub_state),
+            test.check('logAnalyticsTargetState', log_analytics_state)]).get_output_in_json()
+        test.assertCountEqual(result['requiredFields'], fields)
+
 
 class SqlServerExternalGovernanceTests(ScenarioTest):
     
@@ -2485,6 +2586,11 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('eventHubTargetState', state_disabled),
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
 
+        _test_audit_policy_required_fields(
+            self, 'sql db audit-policy {{}} -g {} -s {} -n {}'.format(
+                resource_group, server, database_name),
+            log_analytics_workspace_id, eventhub_auth_rule_id, eventhub_name)
+
 
 class SqlServerSecurityScenarioTest(ScenarioTest):
     # Auditing requires StorageV2; preserve state checks as well as the SDK-compatible calculated fields.
@@ -2696,6 +2802,10 @@ class SqlServerSecurityScenarioTest(ScenarioTest):
                      JMESPathCheck('logAnalyticsTargetState', state_disabled),
                      JMESPathCheck('eventHubTargetState', state_disabled),
                      JMESPathCheck('isAzureMonitorTargetEnabled', False)])
+
+        _test_audit_policy_required_fields(
+            self, 'sql server audit-policy {{}} -g {} -n {}'.format(resource_group, server),
+            log_analytics_workspace_id, eventhub_auth_rule_id, eventhub_name)
 
 
 class SqlServerAdvancedThreatProtectionSettingsScenarioTest(ScenarioTest):
