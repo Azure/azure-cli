@@ -5,8 +5,10 @@
 
 # pylint: disable=protected-access
 
+import base64
 import unittest
-from azure.cli.core.auth.util import scopes_to_resource, resource_to_scopes, _generate_login_command
+from azure.cli.core.auth.util import (scopes_to_resource, resource_to_scopes, _generate_login_command,
+                                      parse_claims_challenge)
 
 
 class TestUtil(unittest.TestCase):
@@ -77,6 +79,22 @@ class TestUtil(unittest.TestCase):
                           'az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
                           '--scope "https://management.core.windows.net//.default" '
                           '--claims-challenge "eyJhY2Nlc3NfdG9rZW4iOnsiYWNycyI6eyJlc3NlbnRpYWwiOnRydWUsInZhbHVlcyI6WyJwMSJdfX19"')
+
+    def test_parse_claims_challenge(self):
+        claims = '{"access_token":{"nbf":{"essential":true,"value":"1603742800"}}}'
+        # Microsoft Graph sends the claims without base64 padding
+        encoded_claims = base64.urlsafe_b64encode(claims.encode()).decode().rstrip('=')
+        challenge = ('Bearer realm="", authorization_uri="https://login.microsoftonline.com/common/oauth2/authorize", '
+                     'error="insufficient_claims", claims="{}"'.format(encoded_claims))
+        self.assertEqual(parse_claims_challenge(challenge), claims)
+
+        # No claims
+        self.assertIsNone(parse_claims_challenge('Bearer error="invalid_token"'))
+        self.assertIsNone(parse_claims_challenge(''))
+        # Multiple claims
+        self.assertIsNone(parse_claims_challenge('Bearer claims="{0}", Bearer claims="{0}"'.format(encoded_claims)))
+        # Claims which are not valid UTF-8 after decoding
+        self.assertIsNone(parse_claims_challenge('Bearer claims="_w"'))
 
 
 if __name__ == '__main__':
