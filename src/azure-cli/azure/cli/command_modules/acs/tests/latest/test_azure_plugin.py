@@ -213,6 +213,28 @@ class AzurePluginConsentTest(unittest.TestCase):
                 self.assertEqual(self.stdout.getvalue(), '')
                 self.mocks[6].assert_not_called()
 
+    def test_codex_local_marketplace_gets_qualified_lifecycle_guidance(self):
+        self.mocks[5].side_effect = REAL_INSTALL_PLUGIN
+        self.mocks[4].side_effect = lambda name: name
+        process = NativeProcessFixture({
+            ('codex', 'plugin', 'list', '--available', '--json'): {'installed': [], 'available': []},
+            ('codex', 'plugin', 'marketplace', 'list', '--json'): {'marketplaces': [{
+                'name': 'azure-skills', 'root': '/fixture/local-marketplace',
+                'marketplaceSource': {'sourceType': 'local', 'source': '/fixture/local-marketplace'},
+            }]},
+            ('node', '--version'): 'v22.0.0',
+            ('codex', 'plugin', 'add', 'azure@azure-skills', '--json'): '{}',
+        })
+        self.mocks[6].side_effect = process
+        plugin.maybe_install_azure_plugin(self.cmd, True, ['codex'])
+        message = self.stderr.getvalue()
+        self.assertIn('Codex CLI: installed', message)
+        update = next(line for line in message.splitlines() if 'codex plugin marketplace upgrade' in line)
+        self.assertIn('Git marketplaces only', update)
+        self.assertIn('Local marketplaces: update the local source', message)
+        self.assertIn('codex plugin remove azure@azure-skills', message)
+        self.assertNotIn(('codex', 'plugin', 'marketplace', 'add', 'microsoft/azure-skills', '--json'), process.calls)
+
     def test_existing_private_source_gets_no_hardcoded_lifecycle_target(self):
         self.mocks[5].side_effect = REAL_INSTALL_PLUGIN
         self.mocks[4].side_effect = lambda name: name
@@ -396,6 +418,42 @@ class AzurePluginNativeTest(unittest.TestCase):
 
     def mutations(self):
         return [call for call in self.process.calls if 'add' in call or 'install' in call]
+
+    def test_unsupported_inventory_command_gives_redacted_upgrade_guidance(self):
+        cases = (
+            ('github-copilot', ('copilot', 'plugin', 'list', '--json'), "error: unknown option '--json'", '1.0.85'),
+            ('claude-code', ('claude', 'plugin', 'marketplace', 'list', '--json'),
+             "error: unknown command 'list'", None),
+            ('codex', ('codex', 'plugin', 'list', '--available', '--json'),
+             "error: unexpected argument '--json' found", '0.138.0'),
+            ('github-copilot', ('copilot', 'mcp', 'list', '--json'),
+             "error: unrecognized option '--json'", '1.0.85'),
+        )
+        for host, command, diagnostic, minimum in cases:
+            with self.subTest(host=host, command=command):
+                responses = self.fresh_responses(host, [])
+                responses[command] = subprocess.CompletedProcess(command, 1, 'private inventory', diagnostic)
+                with self.assertRaises(ClientRequestError) as caught:
+                    self.install(host, responses)
+                message = str(caught.exception)
+                self.assertIn('Upgrade', message)
+                self.assertIn(plugin.HOST_LABELS[host], message)
+                self.assertIn('JSON inventory', message)
+                if minimum:
+                    self.assertIn(minimum, message)
+                self.assertIn('[sensitive inventory output suppressed]', message)
+                self.assertNotIn('private inventory', message)
+                self.assertNotIn(diagnostic, message)
+                self.assertEqual(self.mutations(), [])
+
+    def test_inventory_policy_failure_is_not_reported_as_host_incompatibility(self):
+        command = ('copilot', 'plugin', 'list', '--json')
+        response = subprocess.CompletedProcess(command, 1, '', 'blocked by managed policy')
+        with self.assertRaises(ClientRequestError) as caught:
+            self.install('github-copilot', {command: response})
+        self.assertNotIn('Upgrade', str(caught.exception))
+        self.assertIn('[sensitive inventory output suppressed]', str(caught.exception))
+        self.assertEqual(self.mutations(), [])
 
     def test_claude_fresh_install_adds_official_marketplace_in_user_scope(self):
         self.assertTrue(self.install('claude-code', self.fresh_responses('claude-code', [])))

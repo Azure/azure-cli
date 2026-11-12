@@ -29,9 +29,19 @@ _LIFECYCLE_GUIDANCE = {
                    'Remove: claude plugin uninstall azure@claude-plugins-official --scope user',
     'github-copilot': 'Update: copilot plugin update azure@azure-skills\n'
                       'Remove: copilot plugin uninstall azure@azure-skills',
-    'codex': 'Update (marketplace-wide; affects other installed plugins from azure-skills): '
+    'codex': 'Update (Git marketplaces only; marketplace-wide; affects other installed plugins from azure-skills): '
              'codex plugin marketplace upgrade azure-skills\n'
+             'Local marketplaces: update the local source and follow Codex native plugin guidance to refresh it.\n'
              'Remove: codex plugin remove azure@azure-skills',
+}
+# Minimum stable releases documenting the JSON commands used here:
+# https://github.com/github/copilot-cli/releases/tag/v1.0.85
+# https://github.com/openai/codex/releases/tag/rust-v0.138.0
+# Claude Code documents the commands but not their minimum version; detect capability instead.
+_HOST_UPGRADE_GUIDANCE = {
+    'claude-code': 'Upgrade Claude Code to a version supporting JSON inventory commands.',
+    'github-copilot': 'Upgrade GitHub Copilot CLI to 1.0.85 or later for JSON inventory commands.',
+    'codex': 'Upgrade Codex CLI to 0.138.0 or later for JSON inventory commands.',
 }
 
 
@@ -325,5 +335,11 @@ def _run(host_id, argv, operation, timeout=300, *, sensitive=False):
     if result.returncode:
         detail = (f'exit {result.returncode}. {_diagnostic(result.stdout, sensitive=sensitive)} '
                   f'{_diagnostic(result.stderr, sensitive=sensitive)}')
+        # Classify parser failures without copying any part of the sensitive native output.
+        if sensitive and re.search(
+                r'(?im)^\s*(?:error:\s*)?(?:unknown|unrecognized|unsupported|unexpected) '
+                r'(?:command|subcommand|option|argument|flag)\b', result.stderr):
+            detail += (' The host does not support a required JSON inventory command or option. ' +
+                       _HOST_UPGRADE_GUIDANCE[host_id])
         raise ClientRequestError(_failure(host_id, operation, detail))
     return result
