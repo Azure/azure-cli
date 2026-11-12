@@ -9,6 +9,16 @@
 from azure.cli.core.util import CLIError
 
 
+def validate_namespace_name(namespace):
+    import re
+    name = namespace.namespace_name
+    if name and not re.fullmatch(r'^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$', name):
+        raise CLIError(
+            'Invalid namespace name "{}". The namespace name must be 6-50 characters, start with a letter, '
+            'end with a letter or digit, and contain only letters, digits, and hyphens.'.format(name)
+        )
+
+
 def validate_storageaccount(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.mgmt.core.tools import is_valid_resource_id, resource_id
