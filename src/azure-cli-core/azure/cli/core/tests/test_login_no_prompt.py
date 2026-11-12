@@ -14,7 +14,7 @@ class TestNoPromptRouting(unittest.TestCase):
     @mock.patch('azure.cli.core._profile.SubscriptionFinder')
     @mock.patch('azure.cli.core._profile._create_identity_instance')
     @mock.patch('azure.cli.core._profile.can_launch_browser')
-    def test_silent_login_does_not_attempt_interactive_fallback(self, browser_mock,
+    def test_login_silent_login_does_not_attempt_interactive_fallback(self, browser_mock,
                                                                  identity_factory, finder_factory):
         identity = identity_factory.return_value
         identity.login_silently.return_value = {'username': 'user@example.com', 'tenant_id': 'tenant'}
