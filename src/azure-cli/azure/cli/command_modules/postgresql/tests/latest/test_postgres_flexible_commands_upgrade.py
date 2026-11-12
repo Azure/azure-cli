@@ -39,6 +39,43 @@ class PostgreSQLFlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
         self.assertTrue(result['version'].startswith(new_version))
 
     @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_postgres_flexible_server_elastic_cluster_upgrade_mgmt(self, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        password = self.create_random_name('P@ssw0rd', 24)
+        current_version = '17'
+        target_version = '18'
+        node_count = 2
+
+        self.cmd(
+            'postgres flexible-server create -g {} -n {} --location {} --tier GeneralPurpose '
+            '--sku-name Standard_D2ds_v4 --version {} --node-count {} --public-access none '
+            '--admin-password {} --yes'.format(
+                resource_group, server_name, DEFAULT_LOCATION, current_version, node_count, password))
+
+        self.cmd(
+            'postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
+            checks=[
+                JMESPathCheck('version', current_version),
+                JMESPathCheck('cluster.clusterSize', node_count),
+            ])
+
+        self.cmd(
+            'postgres flexible-server upgrade -g {} -n {} --version {} --yes'.format(
+                resource_group, server_name, target_version),
+            checks=[
+                JMESPathCheck('version', target_version),
+                JMESPathCheck('cluster.clusterSize', node_count),
+            ])
+
+        self.cmd(
+            'postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
+            checks=[
+                JMESPathCheck('version', target_version),
+                JMESPathCheck('cluster.clusterSize', node_count),
+            ])
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=PRECHECK_LOCATION)
     def test_postgres_flexible_server_upgrade_validate_only_mgmt(self, resource_group):
         self._test_flexible_server_upgrade_validate_only_mgmt(resource_group)
