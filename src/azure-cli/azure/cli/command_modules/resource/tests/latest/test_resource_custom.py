@@ -849,6 +849,24 @@ class TestTemplateSizeOptimization(unittest.TestCase):
         # Assert
         self.assertEqual(result, template_content)  # Should return the string, not the object
 
+    def test_get_template_for_deployment_bicepparam_uses_compact_json(self):
+        """Test that the template a .bicepparam file builds is sent as compact JSON."""
+        from azure.cli.command_modules.resource.custom import _get_template_for_deployment
+        template_content = ('{\n  "parameters": {\n    "label": {\n      "type": "string"\n    }\n  },\n'
+                            '  "resources": []\n}')
+        template_obj = {"parameters": {"label": {"type": "string"}}, "resources": []}
+        result = _get_template_for_deployment(None, None, None, template_content, template_obj, is_bicepparam_file=True)
+
+        self.assertEqual(result, '{"parameters":{"label":{"type":"string"}},"resources":[]}')
+
+    def test_get_template_for_deployment_bicepparam_with_template_spec_uses_link(self):
+        """Test that a .bicepparam file using a template spec sends no inline template."""
+        from azure.cli.command_modules.resource.custom import _get_template_for_deployment
+
+        result = _get_template_for_deployment(None, None, None, None, {"resources": []}, is_bicepparam_file=True)
+
+        self.assertIsNone(result)
+
     def test_bicep_vs_arm_size_comparison(self):
         """Test that demonstrates bicep templates avoid string escaping overhead."""
         # This test demonstrates the size optimization concept
