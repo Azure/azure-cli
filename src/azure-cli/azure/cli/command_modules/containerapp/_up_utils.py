@@ -444,7 +444,11 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
                 _, stderr = process.communicate()
                 if process.returncode != 0:
                     docker_push_error = stderr.decode('utf-8')
-                    if not forced_acr_login and ".azurecr.io/" in image_name and "unauthorized: authentication required" in docker_push_error:
+                    authentication_required = any(message in docker_push_error for message in (
+                        "unauthorized: authentication required",
+                        "error from registry: authentication required",
+                    ))
+                    if not forced_acr_login and ".azurecr.io/" in image_name and authentication_required:
                         # Couldn't push to ACR because the user isn't authenticated. Let's try to login to ACR and retrigger the docker push
                         logger.warning(
                             f"The current user isn't authenticated to the {self.acr.name} ACR instance. Triggering an ACR login and retrying to push the image...")
@@ -497,7 +501,9 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
             raise ValidationError(f"Unable to run 'pack config' command to set default builder: {ex}") from ex
 
         # Run 'pack build' to produce a runnable application image for the Container App
-        command = [pack_exec_path, 'build', image_name, '--builder', builder_image_name, '--path', source]
+        # The builder's bundled lifecycle cannot export images to modern Docker daemons.
+        command = [pack_exec_path, 'build', image_name, '--builder', builder_image_name, '--path', source,
+                   '--lifecycle-image', 'buildpacksio/lifecycle:0.21.28']
         buildpack_run_tag = get_latest_buildpack_run_tag("aspnet", "7.0")
         if buildpack_run_tag is not None:
             buildpack_run_image = f"mcr.microsoft.com/oryx/builder:{buildpack_run_tag}"

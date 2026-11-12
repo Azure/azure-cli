@@ -152,7 +152,7 @@ class ContainerAppEnvHttpRouteConfigTest(ScenarioTest):
 
         self.cmd(f'containerapp delete -g {resource_group} -n {app1} -y')
         self.cmd(f'containerapp delete -g {resource_group} -n {app2} -y')
-        self.cmd(f'containerapp env delete -g {resource_group} -n {env_name} -y')
+        self.cmd(f'containerapp env delete -g {resource_group} -n {env_name} -y --no-wait')
 
         clean_up_test_file(http_route_config1_file_name)
         clean_up_test_file(http_route_config2_file_name)

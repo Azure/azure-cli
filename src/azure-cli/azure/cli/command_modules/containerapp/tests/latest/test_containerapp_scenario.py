@@ -5,6 +5,7 @@
 
 import os
 import platform
+import threading
 from unittest import mock
 import time
 import unittest
@@ -128,17 +129,35 @@ class ContainerappScenarioTest(ScenarioTest):
         self.containerapp_exec_test_helper(resource_group, external_containerapp_name, internal_containerapp["properties"]["latestRevisionName"])
 
     def containerapp_exec_test_helper(self, resource_group, containerapp_name, latest_revision_name):
-        self.cmd(f'containerapp exec -g {resource_group} -n {containerapp_name}')
+        from azure.cli.command_modules.containerapp._ssh_utils import SSH_INPUT_PREFIX
 
-        self.cmd(f'containerapp exec -g {resource_group} -n {containerapp_name} --command ls')
+        inputs = iter([b"exit\n", b"", b""])
 
-        replica_list = self.cmd(
-            f'containerapp replica list -g {resource_group} -n {containerapp_name} --revision {latest_revision_name}',
-            expect_failure=False).get_output_in_json()
+        def get_stdin_writer(connection):
+            stdin = next(inputs)
 
-        self.cmd(
-            f'containerapp exec -g {resource_group} -n {containerapp_name} --replica {replica_list[0]["name"]} --revision {latest_revision_name} --command ls',
-            expect_failure=False)
+            def write_stdin():
+                if stdin:
+                    connection.send(SSH_INPUT_PREFIX + stdin)
+                # Keep the writer alive until the remote command closes the session.
+                while connection.is_connected:
+                    time.sleep(0.1)
+
+            return threading.Thread(target=write_stdin)
+
+        with mock.patch("azure.cli.command_modules.containerapp.custom.get_stdin_writer",
+                        side_effect=get_stdin_writer):
+            self.cmd(f'containerapp exec -g {resource_group} -n {containerapp_name}')
+
+            self.cmd(f'containerapp exec -g {resource_group} -n {containerapp_name} --command ls')
+
+            replica_list = self.cmd(
+                f'containerapp replica list -g {resource_group} -n {containerapp_name} --revision {latest_revision_name}',
+                expect_failure=False).get_output_in_json()
+
+            self.cmd(
+                f'containerapp exec -g {resource_group} -n {containerapp_name} --replica {replica_list[0]["name"]} --revision {latest_revision_name} --command ls',
+                expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
