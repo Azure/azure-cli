@@ -20,7 +20,7 @@ class TestSilentLogin(unittest.TestCase):
         return identity, app
 
     @mock.patch('azure.cli.core.auth.identity.check_result')
-    def test_broker_uses_prompt_none(self, check_result_mock):
+    def test_login_broker_uses_prompt_none(self, check_result_mock):
         identity, app = self.make_identity(broker=True)
         check_result_mock.return_value = {'username': 'user@example.com', 'tenant_id': 'tenant'}
         self.assertEqual('user@example.com', identity.login_silently(['arm'])['username'])
@@ -31,7 +31,7 @@ class TestSilentLogin(unittest.TestCase):
         app.initiate_device_flow.assert_not_called()
 
     @mock.patch('azure.cli.core.auth.identity.check_result')
-    def test_broker_error_does_not_fallback(self, check_result_mock):
+    def test_login_broker_error_does_not_fallback(self, check_result_mock):
         identity, app = self.make_identity(broker=True)
         check_result_mock.side_effect = AuthenticationError('interaction required')
         with self.assertRaisesRegex(AuthenticationError, 'interaction required'):
@@ -40,13 +40,13 @@ class TestSilentLogin(unittest.TestCase):
         app.initiate_device_flow.assert_not_called()
 
     @mock.patch('azure.cli.core.auth.identity.check_result')
-    def test_broker_must_return_user_identity(self, check_result_mock):
+    def test_login_broker_must_return_user_identity(self, check_result_mock):
         identity, _ = self.make_identity(broker=True)
         check_result_mock.return_value = None
         with self.assertRaisesRegex(AuthenticationError, 'did not identify a user'):
             identity.login_silently(['arm'])
 
-    def test_nonbroker_uses_cached_account_without_browser(self):
+    def test_login_nonbroker_uses_cached_account_without_browser(self):
         identity, app = self.make_identity(broker=False)
         account = {'username': 'user@example.com', 'realm': 'tenant'}
         app.get_accounts.return_value = [account]
@@ -58,7 +58,7 @@ class TestSilentLogin(unittest.TestCase):
         app.acquire_token_interactive.assert_not_called()
         app.initiate_device_flow.assert_not_called()
 
-    def test_nonbroker_rejects_missing_or_ambiguous_accounts(self):
+    def test_login_nonbroker_rejects_missing_or_ambiguous_accounts(self):
         for accounts in ([], [{'username': 'a'}, {'username': 'b'}]):
             with self.subTest(count=len(accounts)):
                 identity, app = self.make_identity(broker=False)
@@ -69,7 +69,7 @@ class TestSilentLogin(unittest.TestCase):
                 app.acquire_token_interactive.assert_not_called()
 
     @mock.patch('azure.cli.core.auth.identity.check_result')
-    def test_nonbroker_silent_failure_propagates(self, check_result_mock):
+    def test_login_nonbroker_silent_failure_propagates(self, check_result_mock):
         identity, app = self.make_identity(broker=False)
         app.get_accounts.return_value = [{'username': 'user@example.com'}]
         app.acquire_token_silent_with_error.return_value = {'error': 'interaction_required'}
