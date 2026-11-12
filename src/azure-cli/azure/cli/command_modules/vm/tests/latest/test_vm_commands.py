@@ -8268,6 +8268,60 @@ class VMGenericUpdate(ScenarioTest):
 
 class VMGalleryImage(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_gallery_auth_', location='eastus2')
+    def test_vmss_create_gallery_image_without_definition_read(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'gallery': self.create_random_name('gallery', 20),
+            'vmss': self.create_random_name('vmss', 16),
+            'loc': resource_group_location,
+            'ssh_key': TEST_SSH_KEY_PUB_2,
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --location {loc}')
+        self.cmd(
+            'sig image-definition create -g {rg} --gallery-name {gallery} --location {loc} '
+            '--gallery-image-definition image --os-type linux --os-state Generalized '
+            '--hyper-v-generation V2 --features "SecurityType=Standard DiskControllerTypes=SCSI,NVMe" '
+            '-p publisher -f offer -s sku'
+        )
+        self.cmd(
+            'disk create -g {rg} -n source-disk --location {loc} --hyper-v-generation V2 --sku Standard_LRS '
+            '--image-reference Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest'
+        )
+        self.cmd('snapshot create -g {rg} -n source-snapshot --location {loc} --source source-disk')
+        self.kwargs['image_version'] = self.cmd(
+            'sig image-version create -g {rg} --gallery-name {gallery} --location {loc} '
+            '--gallery-image-definition image --gallery-image-version 1.0.0 '
+            '--os-snapshot source-snapshot --replica-count 1 --target-regions {loc}'
+        ).get_output_in_json()['id']
+
+        # Simulate version-only access without creating a separate identity or changing RBAC.
+        error = HttpResponseError(
+            message='AuthorizationFailed: gallery image definition read denied.',
+            response=mock.Mock(status_code=403, reason='Forbidden', headers={}),
+        )
+        with mock.patch('azure.cli.command_modules.vm.aaz.latest.sig.image_definition.Show') as definition_show:
+            definition_show.return_value.side_effect = error
+            create_command = (
+                'vmss create -g {rg} -n {vmss} --location {loc} --image {image_version} '
+                '--orchestration-mode Uniform --instance-count 1 --disable-overprovision '
+                '--vm-sku Standard_D2s_v6 --disk-controller-type NVMe --security-type Standard '
+                '--admin-username azureuser --authentication-type ssh --ssh-key-values "{ssh_key}" '
+                '--load-balancer "" --public-ip-address "" --nsg ""'
+            )
+            with self.assertRaisesRegex(RequiredArgumentMissingError, 'Specify --os-type linux or windows'):
+                self.cmd(create_command)
+            definition_show.return_value.assert_called_once()
+            definition_show.return_value.reset_mock()
+
+            self.cmd(create_command + ' --os-type linux')
+            definition_show.return_value.assert_called_once()
+
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('virtualMachineProfile.storageProfile.imageReference.id', '{image_version}'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.osType', 'Linux'),
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_sig_share_wait_', location='westus')
     def test_sig_share_wait(self, resource_group_location):
         self.kwargs.update({
