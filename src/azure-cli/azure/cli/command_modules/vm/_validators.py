@@ -1534,8 +1534,10 @@ def trusted_launch_set_default(namespace, generation_version, features):
             break
 
     from ._constants import UPGRADE_SECURITY_HINT, COMPATIBLE_SECURITY_TYPE_VALUE
+    is_confidential_vm = namespace.security_type and namespace.security_type.lower() == 'confidentialvm'
     if generation_version == 'V1':
-        logger.warning(UPGRADE_SECURITY_HINT)
+        if not is_confidential_vm:
+            logger.warning(UPGRADE_SECURITY_HINT)
 
     elif generation_version == 'V2':
         if features_security_type in trusted_launch:
@@ -1548,7 +1550,7 @@ def trusted_launch_set_default(namespace, generation_version, features):
 
                 if namespace.enable_secure_boot is None:
                     namespace.enable_secure_boot = True
-        else:
+        elif not is_confidential_vm:
             logger.warning(UPGRADE_SECURITY_HINT)
 
 
