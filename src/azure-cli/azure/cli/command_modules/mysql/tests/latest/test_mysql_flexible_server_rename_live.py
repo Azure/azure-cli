@@ -15,7 +15,8 @@ from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer
 class MysqlFlexibleServerRenameLiveTest(LiveScenarioTest):
     """Run explicitly with azdev test --live in an approved subscription.
 
-    This test creates a billable standalone server and verifies CLI rename submission and completion.
+    This test creates a billable standalone server and verifies CLI rename submission, completion,
+    and that the old ARM resource ID no longer resolves before cleanup.
     HA, replication, cross-region propagation, and data-plane validation belong to the service test suite.
     """
 
@@ -43,6 +44,10 @@ class MysqlFlexibleServerRenameLiveTest(LiveScenarioTest):
         self.assertTrue(renamed['fullyQualifiedDomainName'].startswith(self.kwargs['new_name'] + '.'))
         self.assertNotEqual(source['fullyQualifiedDomainName'], renamed['fullyQualifiedDomainName'])
         self.assertEqual('Ready', renamed['state'])
+        # CLI show commands translate HTTP 404 into exit code 3.
+        with self.assertRaises(SystemExit) as not_found:
+            self.cmd('mysql flexible-server show --ids {}'.format(source['id']))
+        self.assertEqual(3, not_found.exception.code)
         self.cmd('mysql flexible-server delete --ids {} --yes'.format(renamed['id']))
 
     def _wait_for_rename(self, operation_url):

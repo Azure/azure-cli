@@ -382,7 +382,7 @@ helps['mysql flexible-server rename'] = """
 type: command
 short-summary: Submit a request to rename an existing MySQL flexible server.
 long-summary: >
-    This operation requires rename support to be enabled by the service. It renames the existing server
+    This preview operation requires rename support to be enabled by the service. It renames the existing server
     within the same subscription, resource group, and location; it does not create a replacement server.
     The server's resource ID and fully qualified domain name change. Update connection strings and references
     to the old resource ID, including infrastructure-as-code state such as Terraform state, after completion.

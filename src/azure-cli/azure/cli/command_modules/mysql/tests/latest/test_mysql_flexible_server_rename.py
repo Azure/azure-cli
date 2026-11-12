@@ -31,7 +31,7 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
                          '/providers/Microsoft.DBforMySQL/locations/eastus/checkNameAvailability')
     operation_path = ('/subscriptions/' + subscription +
                       '/providers/Microsoft.DBforMySQL/locations/eastus/azureAsyncOperation/rename-operation')
-    api_version = '2025-12-30'
+    api_version = '2025-12-01-preview'
     availability_api_version = '2025-06-01-preview'
 
     def setUp(self):
@@ -272,11 +272,12 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
         self._rename()
         self.assertEqual(canonical_id, self.requests[-1][2]['properties']['sourceServerResourceId'])
 
-    def test_mysql_rename_cli_help_is_not_preview(self):
+    def test_mysql_rename_cli_help_is_preview(self):
         code, stdout, stderr = self._invoke(['--help'])
         self.assertEqual(0, code, stderr)
         self.assertIn('Submit a request to rename an existing MySQL flexible server.', stdout)
-        self.assertNotIn('preview', (stdout + stderr).lower())
+        self.assertIn('This command is in preview', ' '.join(stdout.split()))
+        self.assertIn('This preview operation requires rename support', ' '.join(stdout.split()))
         self.assertFalse(self.requests)
 
     def test_mysql_rename_cli_default_and_no_wait_return_initial_response(self):
@@ -289,7 +290,7 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
                     args.append('--no-wait')
                 code, stdout, stderr = self._invoke(args)
                 self.assertEqual(0, code, stderr)
-                self.assertNotIn('preview', stderr.lower())
+                self.assertIn('preview', stderr.lower())
                 self.assertEqual({
                     'statusCode': 202,
                     'content': '',
@@ -402,6 +403,52 @@ class MysqlFlexibleServerRenameTest(unittest.TestCase):
         self.assertIs(self.clients[self.availability_api_version].servers, servers)
         self.factory.assert_called_once_with(
             self.cmd.cli_ctx, MySQLManagementClient, api_version=self.availability_api_version)
+
+    def test_mysql_rename_live_requires_old_identity_not_found_before_cleanup(self):
+        from . import test_mysql_flexible_server_rename_live as live_tests
+
+        source = {'id': self.source_id, 'fullyQualifiedDomainName': 'oldserver.mysql.example.test'}
+        renamed = {'id': self.destination_id, 'state': 'Ready',
+                   'fullyQualifiedDomainName': 'newserver.mysql.example.test'}
+        result = {'statusCode': 202, 'content': '',
+                  'azureAsyncOperation': self.endpoint + self.operation_path}
+        outcomes = (
+            ('not_found', SystemExit(3), None),
+            ('still_exists', None, AssertionError),
+            ('other_exit_code', SystemExit(1), AssertionError),
+            ('forbidden', HttpResponseError('Forbidden'), HttpResponseError),
+            ('connection_error', ServiceRequestError('Connection failed'), ServiceRequestError),
+        )
+        for name, old_identity_result, expected_error in outcomes:
+            with self.subTest(outcome=name):
+                scenario = live_tests.MysqlFlexibleServerRenameLiveTest(
+                    'test_mysql_flexible_server_rename_standalone_live')
+                scenario.cmd = MagicMock(side_effect=[
+                    None,
+                    SimpleNamespace(get_output_in_json=lambda: source),
+                    SimpleNamespace(get_output_in_json=lambda: result),
+                    SimpleNamespace(get_output_in_json=lambda: {'status': 'Succeeded'}),
+                    None,
+                    SimpleNamespace(get_output_in_json=lambda: renamed),
+                    old_identity_result,
+                    None,
+                ])
+                with patch.dict('os.environ', {'AZURE_MYSQL_RENAME_TEST_LOCATION': 'eastus'}), \
+                        patch.object(scenario, 'create_random_name', side_effect=['oldserver', 'newserver']):
+                    # Bypass resource-group provisioning; all CLI commands are mocked.
+                    run = scenario.test_mysql_flexible_server_rename_standalone_live.__wrapped__
+                    if expected_error is None:
+                        run(scenario, 'testGroup')
+                    else:
+                        with self.assertRaises(expected_error):
+                            run(scenario, 'testGroup')
+                calls = scenario.cmd.call_args_list
+                self.assertEqual('mysql flexible-server show --ids ' + self.source_id, calls[6].args[0])
+                self.assertEqual({}, calls[6].kwargs)
+                self.assertEqual(8 if expected_error is None else 7, len(calls))
+                if expected_error is None:
+                    self.assertEqual(
+                        'mysql flexible-server delete --ids ' + self.destination_id + ' --yes', calls[7].args[0])
 
 
 if __name__ == '__main__':

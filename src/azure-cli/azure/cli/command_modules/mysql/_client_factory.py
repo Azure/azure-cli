@@ -15,8 +15,8 @@ SUB_ID_OVERRIDE = 'AZURE_CLI_RDBMS_SUB_ID'
 # Pin the flexible server management API version. The SDK default advanced to a newer
 # preview; keep the CLI on the version the existing commands were built and recorded against.
 MYSQL_FLEXIBLE_API_VERSION = '2025-06-01-preview'
-# Rename uses the ARM-registered stable API without changing existing commands.
-MYSQL_FLEXIBLE_RENAME_API_VERSION = '2025-12-30'
+# Pin rename to its preview API without changing existing commands.
+MYSQL_FLEXIBLE_RENAME_API_VERSION = '2025-12-01-preview'
 # Fabric mirroring operations are only available from this newer API version.
 MYSQL_FLEXIBLE_FABRIC_MIRRORING_API_VERSION = '2025-12-01-preview'
 
