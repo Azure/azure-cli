@@ -11,6 +11,7 @@ from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core._profile import Profile
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from azure.cli.core.util import in_cloud_console
 
 logger = get_logger(__name__)
@@ -149,7 +150,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     incompatible_hint = any([username, password, service_principal, identity, use_device_code,
                              certificate, client_assertion, use_cert_sn_issuer])
     if login_hint is not None and incompatible_hint:
-        raise CLIError("usage error: '--login-hint' is only applicable to interactive browser or broker login")
+        raise MutuallyExclusiveArgumentError(
+            "--login-hint can only be used with interactive browser or broker login.",
+            recommendation="Remove --login-hint when using another authentication method.")
     if login_hint is None and not incompatible_hint:
         login_hint = cmd.cli_ctx.config.get('login', 'login_hint', fallback=None)
 

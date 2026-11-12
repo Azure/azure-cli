@@ -12,6 +12,7 @@ from azure.cli.command_modules.profile.custom import (
 
 from azure.cli.core._profile import _TENANT_LEVEL_ACCOUNT_NAME
 from azure.cli.core.mock import DummyCli
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 from knack.util import CLIError
 
 
@@ -422,5 +423,5 @@ class TestLoginHint(unittest.TestCase):
         for options in [{'username': 'user'}, {'password': 'secret'}, {'service_principal': True},
                         {'identity': True}, {'use_device_code': True}, {'certificate': 'cert.pem'},
                         {'client_assertion': 'token'}, {'use_cert_sn_issuer': True}]:
-            with self.subTest(options=options), self.assertRaisesRegex(CLIError, '--login-hint'):
+            with self.subTest(options=options), self.assertRaisesRegex(MutuallyExclusiveArgumentError, '--login-hint'):
                 login(mock.MagicMock(), login_hint='user@contoso.com', **options)
