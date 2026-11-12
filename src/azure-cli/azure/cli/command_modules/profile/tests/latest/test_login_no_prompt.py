@@ -43,6 +43,20 @@ class TestNoPromptLogin(unittest.TestCase):
         self.assertTrue(profile_mock.return_value.login.call_args.kwargs['no_prompt'])
         profile_mock.return_value.set_active_subscription.assert_not_called()
 
+    @mock.patch('azure.cli.command_modules.profile.custom.prompt_pass')
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile')
+    def test_explicit_password_requires_no_prompt(self, profile_mock, password_prompt):
+        self.cmd.cli_ctx.config = mock.MagicMock()
+        self.cmd.cli_ctx.config.getboolean.return_value = False
+        profile_mock.return_value.login.return_value = []
+
+        login(self.cmd, username='user@example.com', password='password', no_prompt=True)
+
+        password_prompt.assert_not_called()
+        args, kwargs = profile_mock.return_value.login.call_args
+        self.assertFalse(args[0])  # Password authentication is not an interactive flow.
+        self.assertTrue(kwargs['no_prompt'])
+
     @mock.patch('azure.cli.command_modules.profile.custom.Profile')
     def test_default_remains_interactive(self, profile_mock):
         self.cmd.cli_ctx.config = mock.MagicMock()
