@@ -76,6 +76,9 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('use_device_code', action='store_true',
                        help="Use device code flow. Azure CLI will also use this if it can't launch a browser, "
                             "e.g. in remote SSH or Cloud Shell.")
+            c.argument('no_prompt', action='store_true',
+                       help='Authenticate without showing a browser, broker window, or terminal prompts. '
+                            'Requires an existing sign-in; fails if user interaction is needed.')
 
             # Service principal
             c.argument('service_principal', action='store_true',
