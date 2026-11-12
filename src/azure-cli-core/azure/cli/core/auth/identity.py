@@ -173,6 +173,34 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             claims_challenge=claims_challenge)
         return check_result(result)
 
+    def login_silently(self, scopes, claims_challenge=None):
+        """Authenticate a user without opening a browser or showing native UI."""
+        app = self._msal_app
+        if getattr(app, '_enable_broker', False):
+            # Only the broker path handles prompt='none' without opening a browser.
+            # MSAL's broker implementation returns before launching UI for this prompt.
+            result = app.acquire_token_interactive(
+                scopes, prompt='none', parent_window_handle=app.CONSOLE_WINDOW_HANDLE,
+                enable_msa_passthrough=True, claims_challenge=claims_challenge)
+            user = check_result(result)
+            if not user:
+                raise CLIError("Silent login did not identify a user. Run 'az login' interactively.")
+            return user
+
+        # MSAL's non-broker interactive path launches a browser even with prompt='none'.
+        # Use cached accounts and the silent API instead; fail on ambiguity.
+        accounts = app.get_accounts()
+        if len(accounts) != 1:
+            raise CLIError("Silent login requires exactly one cached account without WAM "
+                           "(found {}). Run 'az login' interactively first.".format(len(accounts)))
+        account = accounts[0]
+        result = app.acquire_token_silent_with_error(scopes, account, claims_challenge=claims_challenge)
+        if not result or 'access_token' not in result:
+            check_result(result)
+            raise CLIError("Silent login did not return an access token.")
+        # Cached access tokens can lack ID token claims; the cache account identifies the user.
+        return {'username': account['username'], 'tenant_id': account.get('realm')}
+
     def login_with_device_code(self, scopes, claims_challenge=None):
         flow = self._msal_app.initiate_device_flow(scopes, claims_challenge=claims_challenge)
         if "user_code" not in flow:
