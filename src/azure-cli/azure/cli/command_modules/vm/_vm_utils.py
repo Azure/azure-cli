@@ -126,7 +126,10 @@ def list_sku_info(cli_ctx, location=None):
     def _match_location(loc, locations):
         return next((x for x in locations if str(x).lower() == str(loc).lower()), None)
 
-    result = _ListSkus(cli_ctx=cli_ctx)(command_args={})
+    command_args = {}
+    if location:
+        command_args['filter'] = "location eq '{}'".format(location.lower().replace("'", "''"))
+    result = _ListSkus(cli_ctx=cli_ctx)(command_args=command_args)
     if location:
         result = [r for r in result if _match_location(location, r['locations'])]
     return result
