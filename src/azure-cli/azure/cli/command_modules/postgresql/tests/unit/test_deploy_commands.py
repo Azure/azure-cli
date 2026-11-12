@@ -76,16 +76,15 @@ class PostgresqlDeployTest(unittest.TestCase):
             [self.git, 'rev-parse', '--show-toplevel'],
             [self.gh, 'secret', 'list', '--repo', 'owner/repo'],
             [self.gh, 'secret', 'set', 'AZURE_CREDENTIALS', '--repo', 'owner/repo'],
+            [self.gh, 'secret', 'set', 'SERVER_DATABASE_POSTGRESQL_CONNECTION_STRING', '--repo', 'owner/repo'],
             [self.git, 'rev-parse', '--show-toplevel']])
-        credentials = self.run.call_args_list[-2].kwargs
+        credentials = self.run.call_args_list[-3].kwargs
         self.assertEqual(json.loads(credentials['input']), {
             'clientId': 'app', 'clientSecret': 'unused', 'tenantId': 'tenant', 'subscriptionId': 'sub'})
+        self.assertIn(b'host=server.example', self.run.call_args_list[-2].kwargs['input'])
         launches = [c.args[0] for c in self.popen.call_args_list]
         self.assertEqual(launches[0], [self.gh, 'auth', 'login'])
-        self.assertEqual(launches[1][:7], [
-            self.gh, 'secret', 'set', 'SERVER_DATABASE_POSTGRESQL_CONNECTION_STRING', '--repo', 'owner/repo', '-b'])
-        self.assertEqual(len(launches[1]), 8)
-        self.assertEqual(launches[2:], [
+        self.assertEqual(launches[1:], [
             [self.git, 'add', 'C:/work with spaces/.github/workflows/deploy action.yml'],
             [self.git, 'commit', '-m', 'Add github action file'],
             [self.git, 'push', 'origin', 'topic branch']])
