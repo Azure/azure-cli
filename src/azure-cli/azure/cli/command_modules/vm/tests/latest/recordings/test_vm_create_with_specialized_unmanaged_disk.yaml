@@ -66,12 +66,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$expand=properties&$orderby=name%20desc&$top=1&api-version=2024-11-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"properties\": {\r\n      \"hyperVGeneration\": \"V1\",\r\n
-        \     \"architecture\": \"x64\",\r\n      \"replicaType\": \"Unmanaged\",\r\n
-        \     \"replicaCount\": null,\r\n      \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\r\n
-        \   },\r\n    \"extendedLocation\": null,\r\n    \"location\": \"westus\",\r\n
-        \   \"name\": \"0.20240703.1797\",\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\r\n
-        \ }\r\n]"
+      string: "[\r\n  {\r\n    \"properties\": {\r\n      \"hyperVGeneration\": \"\
+        V1\",\r\n      \"architecture\": \"x64\",\r\n      \"replicaType\": \"Unmanaged\"\
+        ,\r\n      \"replicaCount\": null,\r\n      \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\
+        \r\n    },\r\n    \"extendedLocation\": null,\r\n    \"location\": \"westus\"\
+        ,\r\n    \"name\": \"0.20240703.1797\",\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\
+        \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
@@ -122,23 +122,26 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240703.1797?api-version=2024-11-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
-        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
-        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
-        {\r\n      \"automaticOSUpgradeSupported\": false\r\n    },\r\n    \"imageDeprecationStatus\":
-        {\r\n      \"imageState\": \"ScheduledForDeprecation\",\r\n      \"scheduledDeprecationTime\":
-        \"2026-06-09T00:00:00+00:00\",\r\n      \"alternativeOption\": {\r\n        \"type\":
-        \"Offer\",\r\n        \"value\": \"debian-13\"\r\n      }\r\n    },\r\n    \"imageDiscontinuationStatus\":
-        {\r\n      \"imageDiscontinuationState\": \"None\",\r\n      \"imageDiscontinuationDate\":
-        \"9999-12-31T23:59:59.9999999+00:00\"\r\n    },\r\n    \"features\": [\r\n
-        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
-        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
-        \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
-        \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
-        {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\n
-        \   },\r\n    \"dataDiskImages\": [],\r\n    \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\r\n
-        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"0.20240703.1797\",\r\n
-        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
+        \   \"architecture\": \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n\
+        \    \"disallowed\": {\r\n      \"vmDiskType\": \"None\"\r\n    },\r\n   \
+        \ \"automaticOSUpgradeProperties\": {\r\n      \"automaticOSUpgradeSupported\"\
+        : false\r\n    },\r\n    \"imageDeprecationStatus\": {\r\n      \"imageState\"\
+        : \"ScheduledForDeprecation\",\r\n      \"scheduledDeprecationTime\": \"2026-06-09T00:00:00+00:00\"\
+        ,\r\n      \"alternativeOption\": {\r\n        \"type\": \"Offer\",\r\n  \
+        \      \"value\": \"debian-13\"\r\n      }\r\n    },\r\n    \"imageDiscontinuationStatus\"\
+        : {\r\n      \"imageDiscontinuationState\": \"None\",\r\n      \"imageDiscontinuationDate\"\
+        : \"9999-12-31T23:59:59.9999999+00:00\"\r\n    },\r\n    \"features\": [\r\
+        \n      {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n    \
+        \    \"value\": \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\"\
+        ,\r\n        \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\"\
+        : \"IsHibernateSupported\",\r\n        \"value\": \"False\"\r\n      }\r\n\
+        \    ],\r\n    \"osDiskImage\": {\r\n      \"operatingSystem\": \"Linux\"\
+        ,\r\n      \"sizeInBytes\": 32212255232\r\n    },\r\n    \"dataDiskImages\"\
+        : [],\r\n    \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\r\n  },\r\n  \"\
+        location\": \"westus\",\r\n  \"name\": \"0.20240703.1797\",\r\n  \"id\": \"\
+        /Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\
+        \r\n}"
     headers:
       cache-control:
       - no-cache
@@ -285,12 +288,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$expand=properties&$orderby=name%20desc&$top=1&api-version=2024-11-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"properties\": {\r\n      \"hyperVGeneration\": \"V1\",\r\n
-        \     \"architecture\": \"x64\",\r\n      \"replicaType\": \"Unmanaged\",\r\n
-        \     \"replicaCount\": null,\r\n      \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\r\n
-        \   },\r\n    \"extendedLocation\": null,\r\n    \"location\": \"westus\",\r\n
-        \   \"name\": \"0.20240703.1797\",\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\r\n
-        \ }\r\n]"
+      string: "[\r\n  {\r\n    \"properties\": {\r\n      \"hyperVGeneration\": \"\
+        V1\",\r\n      \"architecture\": \"x64\",\r\n      \"replicaType\": \"Unmanaged\"\
+        ,\r\n      \"replicaCount\": null,\r\n      \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\
+        \r\n    },\r\n    \"extendedLocation\": null,\r\n    \"location\": \"westus\"\
+        ,\r\n    \"name\": \"0.20240703.1797\",\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\
+        \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
@@ -341,23 +344,26 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240703.1797?api-version=2024-11-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
-        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
-        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
-        {\r\n      \"automaticOSUpgradeSupported\": false\r\n    },\r\n    \"imageDeprecationStatus\":
-        {\r\n      \"imageState\": \"ScheduledForDeprecation\",\r\n      \"scheduledDeprecationTime\":
-        \"2026-06-09T00:00:00+00:00\",\r\n      \"alternativeOption\": {\r\n        \"type\":
-        \"Offer\",\r\n        \"value\": \"debian-13\"\r\n      }\r\n    },\r\n    \"imageDiscontinuationStatus\":
-        {\r\n      \"imageDiscontinuationState\": \"None\",\r\n      \"imageDiscontinuationDate\":
-        \"9999-12-31T23:59:59.9999999+00:00\"\r\n    },\r\n    \"features\": [\r\n
-        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
-        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
-        \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
-        \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
-        {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\n
-        \   },\r\n    \"dataDiskImages\": [],\r\n    \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\r\n
-        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"0.20240703.1797\",\r\n
-        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
+        \   \"architecture\": \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n\
+        \    \"disallowed\": {\r\n      \"vmDiskType\": \"None\"\r\n    },\r\n   \
+        \ \"automaticOSUpgradeProperties\": {\r\n      \"automaticOSUpgradeSupported\"\
+        : false\r\n    },\r\n    \"imageDeprecationStatus\": {\r\n      \"imageState\"\
+        : \"ScheduledForDeprecation\",\r\n      \"scheduledDeprecationTime\": \"2026-06-09T00:00:00+00:00\"\
+        ,\r\n      \"alternativeOption\": {\r\n        \"type\": \"Offer\",\r\n  \
+        \      \"value\": \"debian-13\"\r\n      }\r\n    },\r\n    \"imageDiscontinuationStatus\"\
+        : {\r\n      \"imageDiscontinuationState\": \"None\",\r\n      \"imageDiscontinuationDate\"\
+        : \"9999-12-31T23:59:59.9999999+00:00\"\r\n    },\r\n    \"features\": [\r\
+        \n      {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n    \
+        \    \"value\": \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\"\
+        ,\r\n        \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\"\
+        : \"IsHibernateSupported\",\r\n        \"value\": \"False\"\r\n      }\r\n\
+        \    ],\r\n    \"osDiskImage\": {\r\n      \"operatingSystem\": \"Linux\"\
+        ,\r\n      \"sizeInBytes\": 32212255232\r\n    },\r\n    \"dataDiskImages\"\
+        : [],\r\n    \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\r\n  },\r\n  \"\
+        location\": \"westus\",\r\n  \"name\": \"0.20240703.1797\",\r\n  \"id\": \"\
+        /Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\
+        \r\n}"
     headers:
       cache-control:
       - no-cache
@@ -408,12 +414,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions?$expand=properties&$orderby=name%20desc&$top=1&api-version=2024-11-01
   response:
     body:
-      string: "[\r\n  {\r\n    \"properties\": {\r\n      \"hyperVGeneration\": \"V1\",\r\n
-        \     \"architecture\": \"x64\",\r\n      \"replicaType\": \"Unmanaged\",\r\n
-        \     \"replicaCount\": null,\r\n      \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\r\n
-        \   },\r\n    \"extendedLocation\": null,\r\n    \"location\": \"westus\",\r\n
-        \   \"name\": \"0.20240703.1797\",\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\r\n
-        \ }\r\n]"
+      string: "[\r\n  {\r\n    \"properties\": {\r\n      \"hyperVGeneration\": \"\
+        V1\",\r\n      \"architecture\": \"x64\",\r\n      \"replicaType\": \"Unmanaged\"\
+        ,\r\n      \"replicaCount\": null,\r\n      \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\
+        \r\n    },\r\n    \"extendedLocation\": null,\r\n    \"location\": \"westus\"\
+        ,\r\n    \"name\": \"0.20240703.1797\",\r\n    \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\
+        \r\n  }\r\n]"
     headers:
       cache-control:
       - no-cache
@@ -464,23 +470,26 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/publishers/Debian/artifacttypes/vmimage/offers/debian-10/skus/10/versions/0.20240703.1797?api-version=2024-11-01
   response:
     body:
-      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
-        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
-        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
-        {\r\n      \"automaticOSUpgradeSupported\": false\r\n    },\r\n    \"imageDeprecationStatus\":
-        {\r\n      \"imageState\": \"ScheduledForDeprecation\",\r\n      \"scheduledDeprecationTime\":
-        \"2026-06-09T00:00:00+00:00\",\r\n      \"alternativeOption\": {\r\n        \"type\":
-        \"Offer\",\r\n        \"value\": \"debian-13\"\r\n      }\r\n    },\r\n    \"imageDiscontinuationStatus\":
-        {\r\n      \"imageDiscontinuationState\": \"None\",\r\n      \"imageDiscontinuationDate\":
-        \"9999-12-31T23:59:59.9999999+00:00\"\r\n    },\r\n    \"features\": [\r\n
-        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
-        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
-        \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
-        \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
-        {\r\n      \"operatingSystem\": \"Linux\",\r\n      \"sizeInBytes\": 32212255232\r\n
-        \   },\r\n    \"dataDiskImages\": [],\r\n    \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\r\n
-        \ },\r\n  \"location\": \"westus\",\r\n  \"name\": \"0.20240703.1797\",\r\n
-        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\r\n}"
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n \
+        \   \"architecture\": \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n\
+        \    \"disallowed\": {\r\n      \"vmDiskType\": \"None\"\r\n    },\r\n   \
+        \ \"automaticOSUpgradeProperties\": {\r\n      \"automaticOSUpgradeSupported\"\
+        : false\r\n    },\r\n    \"imageDeprecationStatus\": {\r\n      \"imageState\"\
+        : \"ScheduledForDeprecation\",\r\n      \"scheduledDeprecationTime\": \"2026-06-09T00:00:00+00:00\"\
+        ,\r\n      \"alternativeOption\": {\r\n        \"type\": \"Offer\",\r\n  \
+        \      \"value\": \"debian-13\"\r\n      }\r\n    },\r\n    \"imageDiscontinuationStatus\"\
+        : {\r\n      \"imageDiscontinuationState\": \"None\",\r\n      \"imageDiscontinuationDate\"\
+        : \"9999-12-31T23:59:59.9999999+00:00\"\r\n    },\r\n    \"features\": [\r\
+        \n      {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n    \
+        \    \"value\": \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\"\
+        ,\r\n        \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\"\
+        : \"IsHibernateSupported\",\r\n        \"value\": \"False\"\r\n      }\r\n\
+        \    ],\r\n    \"osDiskImage\": {\r\n      \"operatingSystem\": \"Linux\"\
+        ,\r\n      \"sizeInBytes\": 32212255232\r\n    },\r\n    \"dataDiskImages\"\
+        : [],\r\n    \"goLiveDate\": \"2025-10-02T00:00:00+00:00\"\r\n  },\r\n  \"\
+        location\": \"westus\",\r\n  \"name\": \"0.20240703.1797\",\r\n  \"id\": \"\
+        /Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/westus/Publishers/Debian/ArtifactTypes/VMImage/Offers/debian-10/Skus/10/Versions/0.20240703.1797\"\
+        \r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2479,46 +2488,49 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm1?$expand=instanceView&api-version=2026-04-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"hardwareProfile\": {\r\n      \"vmSize\":
-        \"Standard_D2s_v3\"\r\n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"vmId\": \"8f96c633-6bc6-47ce-bdcd-6280ae47996a\",\r\n    \"storageProfile\":
-        {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Debian\",\r\n
-        \       \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n        \"version\":
-        \"latest\",\r\n        \"exactVersion\": \"0.20240703.1797\"\r\n      },\r\n
-        \     \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"osdisk_61c8e0a7a4\",\r\n        \"createOption\": \"FromImage\",\r\n        \"vhd\":
-        {\r\n          \"uri\": \"https://vhdstorage61c8e0a7a4e7d4.blob.core.windows.net/vhds/osdisk_61c8e0a7a4.vhd\"\r\n
-        \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"deleteOption\":
-        \"Detach\",\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm1\",\r\n
-        \     \"adminUsername\": \"ubuntu\",\r\n      \"linuxConfiguration\": {\r\n
-        \       \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\":
-        true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\",\r\n
-        \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
-        \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
-        true\r\n    },\r\n    \"securityProfile\": {\r\n      \"securityType\": \"Standard\"\r\n
-        \   },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\"}]},\r\n
-        \   \"instanceView\": {\r\n      \"computerName\": \"vm1\",\r\n      \"osName\":
-        \"debian\",\r\n      \"osVersion\": \"10.13\",\r\n      \"vmAgent\": {\r\n
-        \       \"vmAgentVersion\": \"2.2.45\",\r\n        \"statuses\": [\r\n          {\r\n
-        \           \"code\": \"ProvisioningState/succeeded\",\r\n            \"level\":
-        \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n            \"message\":
-        \"Guest Agent is running\",\r\n            \"time\": \"2026-04-23T01:39:46+00:00\"\r\n
-        \         }\r\n        ],\r\n        \"extensionHandlers\": []\r\n      },\r\n
-        \     \"disks\": [\r\n        {\r\n          \"name\": \"osdisk_61c8e0a7a4\",\r\n
-        \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
-        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2026-04-23T01:39:13.2643097+00:00\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
-        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2026-04-23T01:39:42.8030201+00:00\"\r\n
-        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2026-04-23T01:39:12.5814085+00:00\"\r\n
-        \ },\r\n  \"etag\": \"\\\"2\\\"\"\r\n}"
+      string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm1\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"hardwareProfile\"\
+        : {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"vmId\": \"8f96c633-6bc6-47ce-bdcd-6280ae47996a\"\
+        ,\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"\
+        publisher\": \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"\
+        sku\": \"10\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\"\
+        : \"0.20240703.1797\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\"\
+        : \"Linux\",\r\n        \"name\": \"osdisk_61c8e0a7a4\",\r\n        \"createOption\"\
+        : \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage61c8e0a7a4e7d4.blob.core.windows.net/vhds/osdisk_61c8e0a7a4.vhd\"\
+        \r\n        },\r\n        \"caching\": \"ReadWrite\",\r\n        \"deleteOption\"\
+        : \"Detach\",\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
+        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm1\"\
+        ,\r\n      \"adminUsername\": \"ubuntu\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\"\
+        : true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\"\
+        ,\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n     \
+        \ },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\
+        \n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"securityProfile\"\
+        : {\r\n      \"securityType\": \"Standard\"\r\n    },\r\n    \"networkProfile\"\
+        : {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\"\
+        }]},\r\n    \"instanceView\": {\r\n      \"computerName\": \"vm1\",\r\n  \
+        \    \"osName\": \"debian\",\r\n      \"osVersion\": \"10.13\",\r\n      \"\
+        vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.45\",\r\n        \"statuses\"\
+        : [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\"\
+        ,\r\n            \"level\": \"Info\",\r\n            \"displayStatus\": \"\
+        Ready\",\r\n            \"message\": \"Guest Agent is running\",\r\n     \
+        \       \"time\": \"2026-04-23T01:39:46+00:00\"\r\n          }\r\n       \
+        \ ],\r\n        \"extensionHandlers\": []\r\n      },\r\n      \"disks\":\
+        \ [\r\n        {\r\n          \"name\": \"osdisk_61c8e0a7a4\",\r\n       \
+        \   \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\"\
+        ,\r\n              \"level\": \"Info\",\r\n              \"displayStatus\"\
+        : \"Provisioning succeeded\",\r\n              \"time\": \"2026-04-23T01:39:13.2643097+00:00\"\
+        \r\n            }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\"\
+        : \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"\
+        ProvisioningState/succeeded\",\r\n          \"level\": \"Info\",\r\n     \
+        \     \"displayStatus\": \"Provisioning succeeded\",\r\n          \"time\"\
+        : \"2026-04-23T01:39:42.8030201+00:00\"\r\n        },\r\n        {\r\n   \
+        \       \"code\": \"PowerState/running\",\r\n          \"level\": \"Info\"\
+        ,\r\n          \"displayStatus\": \"VM running\"\r\n        }\r\n      ]\r\
+        \n    },\r\n    \"timeCreated\": \"2026-04-23T01:39:12.5814085+00:00\"\r\n\
+        \  },\r\n  \"etag\": \"\\\"2\\\"\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2887,29 +2899,30 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm1?api-version=2026-04-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm1\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"hardwareProfile\": {\r\n      \"vmSize\":
-        \"Standard_D2s_v3\"\r\n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"vmId\": \"8f96c633-6bc6-47ce-bdcd-6280ae47996a\",\r\n    \"storageProfile\":
-        {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Debian\",\r\n
-        \       \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n        \"version\":
-        \"latest\",\r\n        \"exactVersion\": \"0.20240703.1797\"\r\n      },\r\n
-        \     \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"osdisk_61c8e0a7a4\",\r\n        \"createOption\": \"FromImage\",\r\n        \"vhd\":
-        {\r\n          \"uri\": \"https://vhdstorage61c8e0a7a4e7d4.blob.core.windows.net/vhds/osdisk_61c8e0a7a4.vhd\"\r\n
-        \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"deleteOption\":
-        \"Detach\",\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm1\",\r\n
-        \     \"adminUsername\": \"ubuntu\",\r\n      \"linuxConfiguration\": {\r\n
-        \       \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\":
-        true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\",\r\n
-        \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
-        \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
-        true\r\n    },\r\n    \"securityProfile\": {\r\n      \"securityType\": \"Standard\"\r\n
-        \   },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\"}]},\r\n
-        \   \"timeCreated\": \"2026-04-23T01:39:12.5814085+00:00\"\r\n  },\r\n  \"etag\":
-        \"\\\"2\\\"\"\r\n}"
+      string: "{\r\n  \"name\": \"vm1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm1\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"hardwareProfile\"\
+        : {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"vmId\": \"8f96c633-6bc6-47ce-bdcd-6280ae47996a\"\
+        ,\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"\
+        publisher\": \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"\
+        sku\": \"10\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\"\
+        : \"0.20240703.1797\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\"\
+        : \"Linux\",\r\n        \"name\": \"osdisk_61c8e0a7a4\",\r\n        \"createOption\"\
+        : \"FromImage\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage61c8e0a7a4e7d4.blob.core.windows.net/vhds/osdisk_61c8e0a7a4.vhd\"\
+        \r\n        },\r\n        \"caching\": \"ReadWrite\",\r\n        \"deleteOption\"\
+        : \"Detach\",\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
+        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm1\"\
+        ,\r\n      \"adminUsername\": \"ubuntu\",\r\n      \"linuxConfiguration\"\
+        : {\r\n        \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\"\
+        : true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\"\
+        ,\r\n          \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n     \
+        \ },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\
+        \n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"securityProfile\"\
+        : {\r\n      \"securityType\": \"Standard\"\r\n    },\r\n    \"networkProfile\"\
+        : {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic\"\
+        }]},\r\n    \"timeCreated\": \"2026-04-23T01:39:12.5814085+00:00\"\r\n  },\r\
+        \n  \"etag\": \"\\\"2\\\"\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -2942,6 +2955,60 @@ interactions:
     status:
       code: 200
       message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm1?api-version=2026-04-01
+  response:
+    body:
+      string: '{"name": "vm1", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm1",
+        "type": "Microsoft.Compute/virtualMachines", "location": "eastus", "properties":
+        {"provisioningState": "Succeeded", "vmId": "00000000-0000-0000-0000-000000000001",
+        "hardwareProfile": {"vmSize": "Standard_D2s_v3"}, "storageProfile": {"imageReference":
+        {"publisher": "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS", "version":
+        "latest", "exactVersion": "18.04.202107080"}, "osDisk": {"osType": "Linux",
+        "createOption": "FromImage", "caching": "ReadWrite", "managedDisk": {"storageAccountType":
+        "Premium_LRS", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/disks/vm1_OsDisk"},
+        "diskSizeGB": 30, "deleteOption": "Detach", "name": "vm1_OsDisk"}, "dataDisks":
+        []}, "osProfile": {"computerName": "vm1", "adminUsername": "azureuser", "linuxConfiguration":
+        {"disablePasswordAuthentication": true, "provisionVMAgent": true, "patchSettings":
+        {"patchMode": "ImageDefault", "assessmentMode": "ImageDefault"}}, "secrets":
+        [], "allowExtensionOperations": true, "requireGuestProvisionSignal": true},
+        "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Network/networkInterfaces/vm1VMNic"}]},
+        "timeCreated": "2023-01-01T00:00:00+00:00"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1558'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 01 Jan 2026 00:00:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -3021,8 +3088,9 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/76275968-29a2-429c-b347-bb98a47729b9?p=7b868834-a188-4556-8f0e-38ea6fa689ce&api-version=2024-11-01&t=639125052135400574&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=hKRtsYSNLj-HhpLSl8OWKwnGKmXR4bksyeAdcQBOibsnm2tjGVMOLve2gW6-9GXUAZyw0YVFqFHvhApGR-5i915uetT6d19m0WnyKG9dqzEp21a-yJu7HGsydz-pwctTNb-MqrU1s32S-SEII0r3fhEfY01P7SjqV0dBILAfYYYyxYJ8VviKo98OVXhWbhW5aKSx37YGggD1_xV_4057Vmi7AZvndgFvTC6hjHwAod6WvZ8X93R9Nm0AcBXcQnXLSLYKtmzM97doM8PRjAUm0OKIqEBJjWxAl7od7-4qz80say_alGDuIQqnQicaK3jzjVhFlyqlNclfvZU484GGRw&h=OdfDi-5CA05ELHZaXQ9vBgj3PlsRURRgD9KYnPExJzw
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2026-04-23T01:40:13.5098489+00:00\",\r\n  \"status\":
-        \"InProgress\",\r\n  \"name\": \"76275968-29a2-429c-b347-bb98a47729b9\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2026-04-23T01:40:13.5098489+00:00\",\r\n  \"\
+        status\": \"InProgress\",\r\n  \"name\": \"76275968-29a2-429c-b347-bb98a47729b9\"\
+        \r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3074,9 +3142,9 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/76275968-29a2-429c-b347-bb98a47729b9?p=7b868834-a188-4556-8f0e-38ea6fa689ce&api-version=2024-11-01&t=639125052135400574&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=hKRtsYSNLj-HhpLSl8OWKwnGKmXR4bksyeAdcQBOibsnm2tjGVMOLve2gW6-9GXUAZyw0YVFqFHvhApGR-5i915uetT6d19m0WnyKG9dqzEp21a-yJu7HGsydz-pwctTNb-MqrU1s32S-SEII0r3fhEfY01P7SjqV0dBILAfYYYyxYJ8VviKo98OVXhWbhW5aKSx37YGggD1_xV_4057Vmi7AZvndgFvTC6hjHwAod6WvZ8X93R9Nm0AcBXcQnXLSLYKtmzM97doM8PRjAUm0OKIqEBJjWxAl7od7-4qz80say_alGDuIQqnQicaK3jzjVhFlyqlNclfvZU484GGRw&h=OdfDi-5CA05ELHZaXQ9vBgj3PlsRURRgD9KYnPExJzw
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2026-04-23T01:40:13.5098489+00:00\",\r\n  \"endTime\":
-        \"2026-04-23T01:40:26.2285513+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"76275968-29a2-429c-b347-bb98a47729b9\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2026-04-23T01:40:13.5098489+00:00\",\r\n  \"\
+        endTime\": \"2026-04-23T01:40:26.2285513+00:00\",\r\n  \"status\": \"Succeeded\"\
+        ,\r\n  \"name\": \"76275968-29a2-429c-b347-bb98a47729b9\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -3447,36 +3515,38 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm2?$expand=instanceView&api-version=2026-04-01
   response:
     body:
-      string: "{\r\n  \"name\": \"vm2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm2\",\r\n
-        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"hardwareProfile\": {\r\n      \"vmSize\":
-        \"Standard_D2s_v3\"\r\n    },\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"vmId\": \"f59081d1-3ac6-4629-90e5-43e74fd00554\",\r\n    \"storageProfile\":
-        {\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"osdisk_61c8e0a7a4\",\r\n        \"createOption\": \"Attach\",\r\n        \"vhd\":
-        {\r\n          \"uri\": \"https://vhdstorage61c8e0a7a4e7d4.blob.core.windows.net/vhds/osdisk_61c8e0a7a4.vhd\"\r\n
-        \       },\r\n        \"caching\": \"ReadWrite\",\r\n        \"deleteOption\":
-        \"Detach\",\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        []\r\n    },\r\n    \"securityProfile\": {\r\n      \"securityType\": \"Standard\"\r\n
-        \   },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic\"}]},\r\n
-        \   \"instanceView\": {\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\":
-        \"Unknown\",\r\n        \"statuses\": [\r\n          {\r\n            \"code\":
-        \"ProvisioningState/Unavailable\",\r\n            \"level\": \"Warning\",\r\n
-        \           \"displayStatus\": \"Not Ready\",\r\n            \"message\":
-        \"VM status blob is found but not yet populated.\",\r\n            \"time\":
-        \"2026-04-23T01:41:25+00:00\"\r\n          }\r\n        ]\r\n      },\r\n
-        \     \"disks\": [\r\n        {\r\n          \"name\": \"osdisk_61c8e0a7a4\",\r\n
-        \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
-        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2026-04-23T01:41:01.6428631+00:00\"\r\n
-        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
-        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2026-04-23T01:41:20.7880407+00:00\"\r\n
-        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
-        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
-        \       }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2026-04-23T01:41:01.3685895+00:00\"\r\n
-        \ },\r\n  \"etag\": \"\\\"2\\\"\"\r\n}"
+      string: "{\r\n  \"name\": \"vm2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Compute/virtualMachines/vm2\"\
+        ,\r\n  \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\"\
+        : \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"hardwareProfile\"\
+        : {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n    \"provisioningState\"\
+        : \"Succeeded\",\r\n    \"vmId\": \"f59081d1-3ac6-4629-90e5-43e74fd00554\"\
+        ,\r\n    \"storageProfile\": {\r\n      \"osDisk\": {\r\n        \"osType\"\
+        : \"Linux\",\r\n        \"name\": \"osdisk_61c8e0a7a4\",\r\n        \"createOption\"\
+        : \"Attach\",\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstorage61c8e0a7a4e7d4.blob.core.windows.net/vhds/osdisk_61c8e0a7a4.vhd\"\
+        \r\n        },\r\n        \"caching\": \"ReadWrite\",\r\n        \"deleteOption\"\
+        : \"Detach\",\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
+        : []\r\n    },\r\n    \"securityProfile\": {\r\n      \"securityType\": \"\
+        Standard\"\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\":[{\"\
+        id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_with_specialized_unmanaged_disk000001/providers/Microsoft.Network/networkInterfaces/vm2VMNic\"\
+        }]},\r\n    \"instanceView\": {\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\"\
+        : \"Unknown\",\r\n        \"statuses\": [\r\n          {\r\n            \"\
+        code\": \"ProvisioningState/Unavailable\",\r\n            \"level\": \"Warning\"\
+        ,\r\n            \"displayStatus\": \"Not Ready\",\r\n            \"message\"\
+        : \"VM status blob is found but not yet populated.\",\r\n            \"time\"\
+        : \"2026-04-23T01:41:25+00:00\"\r\n          }\r\n        ]\r\n      },\r\n\
+        \      \"disks\": [\r\n        {\r\n          \"name\": \"osdisk_61c8e0a7a4\"\
+        ,\r\n          \"statuses\": [\r\n            {\r\n              \"code\"\
+        : \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\
+        \n              \"displayStatus\": \"Provisioning succeeded\",\r\n       \
+        \       \"time\": \"2026-04-23T01:41:01.6428631+00:00\"\r\n            }\r\
+        \n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\": \"V1\"\
+        ,\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\"\
+        ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning\
+        \ succeeded\",\r\n          \"time\": \"2026-04-23T01:41:20.7880407+00:00\"\
+        \r\n        },\r\n        {\r\n          \"code\": \"PowerState/running\"\
+        ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\
+        \r\n        }\r\n      ]\r\n    },\r\n    \"timeCreated\": \"2026-04-23T01:41:01.3685895+00:00\"\
+        \r\n  },\r\n  \"etag\": \"\\\"2\\\"\"\r\n}"
     headers:
       cache-control:
       - no-cache
