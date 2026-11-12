@@ -31,6 +31,16 @@ long-summary: >-
     To log in with a managed identity, specify --identity.
 
 
+    Default login targets can be configured with login.tenant and login.subscription.
+    Set login.skip_subscription_discovery=true to use the targeted fast path, avoiding
+    tenant-wide discovery. A subscription ID (GUID) is required for this fast path.
+    The corresponding AZURE_LOGIN_TENANT, AZURE_LOGIN_SUBSCRIPTION and
+    AZURE_LOGIN_SKIP_SUBSCRIPTION_DISCOVERY environment variables also work.
+    Command-line tenant and subscription values take precedence over login config.
+    Managed identity login ignores these defaults. They do not change the defaults
+    used by other commands; to do that, use defaults.subscription.
+
+
     For more details, see https://learn.microsoft.com/cli/azure/authenticate-azure-cli
 examples:
     - name: Log in interactively.
