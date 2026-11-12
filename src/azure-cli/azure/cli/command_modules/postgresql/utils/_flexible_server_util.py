@@ -284,12 +284,19 @@ def run_cmd(args, **kwargs):
     return core_run_cmd(args, **kwargs)
 
 
-def run_subprocess(command, stdout_show=None):
-    command = [resolve_executable(command[0])] + command[1:]
+def run_subprocess(command, stdout_show=None, input_data=None):
+    commands = list(command)
+    commands[0] = resolve_executable(commands[0])
+    if input_data is not None:
+        # Keep caller-provided input out of subprocess diagnostics.
+        process = subprocess.run(commands, input=input_data, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if process.returncode:
+            raise ClientRequestError("Command '{}' failed with exit code {}.".format(commands[0], process.returncode))
+        return
     if stdout_show:
-        process = subprocess.Popen(command, shell=False)
+        process = subprocess.Popen(commands, shell=False)
     else:
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+        process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
     process.wait()
     if process.returncode:
         logger.warning(process.stderr.read().strip().decode('UTF-8'))
@@ -310,7 +317,7 @@ def register_credential_secrets(cmd, database_engine, server, repository, gh_pat
 
     process = subprocess.run(
         [gh_path, 'secret', 'set', AZURE_CREDENTIALS, '--repo', repository],
-        input=json.dumps(app).encode('UTF-8'), capture_output=True, check=False)
+        input=json.dumps(app).encode('utf-8'), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if process.returncode:
         raise ClientRequestError(
             'Failed to set the AZURE_CREDENTIALS secret in the GitHub repository (exit code {}).'.format(
@@ -320,9 +327,10 @@ def register_credential_secrets(cmd, database_engine, server, repository, gh_pat
 
 def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name, gh_path=None):
     gh_path = resolve_executable(gh_path or "gh")
-    logger.warning("Added secret %s to github repository", connection_string_name)
     connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-    run_subprocess([gh_path, 'secret', 'set', connection_string_name, '--repo', repository, '-b', connection_string])
+    run_subprocess([gh_path, 'secret', 'set', connection_string_name, '--repo', repository],
+                   input_data=connection_string.encode('utf-8'))
+    logger.warning("Added secret %s to github repository", connection_string_name)
 
 
 def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository, gh_path=None, git_path=None):
