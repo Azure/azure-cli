@@ -16,19 +16,19 @@ class TestNoPromptLogin(unittest.TestCase):
         self.cmd = mock.MagicMock()
         self.cmd.cli_ctx = DummyCli()
 
-    def test_login_device_code_is_incompatible(self):
+    def test_profile_login_device_code_is_incompatible(self):
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'cannot be used'):
             login(self.cmd, no_prompt=True, use_device_code=True)
 
     @mock.patch('azure.cli.command_modules.profile.custom.prompt_pass')
-    def test_login_username_cannot_prompt_for_password(self, password_prompt):
+    def test_profile_login_username_cannot_prompt_for_password(self, password_prompt):
         with self.assertRaisesRegex(RequiredArgumentMissingError, 'explicit password'):
             login(self.cmd, username='user@example.com', no_prompt=True)
         password_prompt.assert_not_called()
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile')
     @mock.patch('azure.cli.command_modules.profile.custom.sys')
-    def test_login_bypasses_subscription_selector_even_on_tty(self, sys_mock, profile_mock):
+    def test_profile_login_bypasses_subscription_selector_even_on_tty(self, sys_mock, profile_mock):
         self.cmd.cli_ctx.config = mock.MagicMock()
         self.cmd.cli_ctx.config.getboolean.return_value = True
         sys_mock.stdin.isatty.return_value = True
@@ -45,7 +45,7 @@ class TestNoPromptLogin(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.profile.custom.prompt_pass')
     @mock.patch('azure.cli.command_modules.profile.custom.Profile')
-    def test_login_explicit_password_requires_no_prompt(self, profile_mock, password_prompt):
+    def test_profile_login_explicit_password_requires_no_prompt(self, profile_mock, password_prompt):
         self.cmd.cli_ctx.config = mock.MagicMock()
         self.cmd.cli_ctx.config.getboolean.return_value = False
         profile_mock.return_value.login.return_value = []
@@ -58,7 +58,7 @@ class TestNoPromptLogin(unittest.TestCase):
         self.assertTrue(kwargs['no_prompt'])
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile')
-    def test_login_default_remains_interactive(self, profile_mock):
+    def test_profile_login_default_remains_interactive(self, profile_mock):
         self.cmd.cli_ctx.config = mock.MagicMock()
         self.cmd.cli_ctx.config.getboolean.return_value = False
         profile_mock.return_value.login.return_value = []
