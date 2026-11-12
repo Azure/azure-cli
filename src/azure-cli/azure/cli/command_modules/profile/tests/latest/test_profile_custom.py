@@ -416,7 +416,7 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
         return cmd
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
-    def test_configured_tenant_subscription_skip(self, profile_mock):
+    def test_profile_configured_tenant_subscription_skip(self, profile_mock):
         settings = {
             ('login', 'tenant'): self.TENANT,
             ('login', 'subscription'): self.SUBSCRIPTION,
@@ -434,7 +434,7 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
         self.assertFalse(kwargs['show_progress'])
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
-    def test_explicit_arguments_override_config(self, profile_mock):
+    def test_profile_explicit_arguments_override_config(self, profile_mock):
         settings = {
             ('login', 'tenant'): self.TENANT,
             ('login', 'subscription'): self.SUBSCRIPTION,
@@ -453,7 +453,7 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
         self.assertTrue(kwargs['skip_subscription_discovery'])
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
-    def test_tenant_only_keeps_discovery(self, profile_mock):
+    def test_profile_tenant_only_keeps_discovery(self, profile_mock):
         cmd = self._cmd({('login', 'tenant'): self.TENANT})
         profile_mock.return_value.login.return_value = []
 
@@ -464,12 +464,12 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
         self.assertIsNone(kwargs['subscription'])
         self.assertFalse(kwargs['skip_subscription_discovery'])
 
-    def test_configured_skip_requires_tenant(self):
+    def test_profile_configured_skip_requires_tenant(self):
         cmd = self._cmd({('login', 'skip_subscription_discovery'): True})
         with self.assertRaisesRegex(CLIError, "requires '--tenant'"):
             login(cmd)
 
-    def test_configured_skip_requires_guid_subscription(self):
+    def test_profile_configured_skip_requires_guid_subscription(self):
         cmd = self._cmd({
             ('login', 'tenant'): self.TENANT,
             ('login', 'subscription'): 'Subscription Name',
@@ -479,7 +479,7 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
             login(cmd)
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
-    def test_managed_identity_ignores_login_defaults(self, profile_mock):
+    def test_profile_managed_identity_ignores_login_defaults(self, profile_mock):
         cmd = self._cmd({('login', 'tenant'): self.TENANT,
                          ('login', 'skip_subscription_discovery'): True})
 
@@ -490,7 +490,7 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
         cmd.cli_ctx.config.get.assert_not_called()
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
-    def test_no_login_defaults_preserves_unfiltered_login(self, profile_mock):
+    def test_profile_no_login_defaults_preserves_unfiltered_login(self, profile_mock):
         cmd = self._cmd()
         profile_mock.return_value.login.return_value = []
 
@@ -502,7 +502,7 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
         self.assertFalse(kwargs['skip_subscription_discovery'])
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
-    def test_configured_discovery_false_is_respected(self, profile_mock):
+    def test_profile_configured_discovery_false_is_respected(self, profile_mock):
         cmd = self._cmd({
             ('login', 'tenant'): self.TENANT,
             ('login', 'subscription'): self.SUBSCRIPTION,
@@ -516,7 +516,7 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
         self.assertFalse(kwargs['skip_subscription_discovery'])
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
-    def test_explicit_skip_overrides_configured_false(self, profile_mock):
+    def test_profile_explicit_skip_overrides_configured_false(self, profile_mock):
         cmd = self._cmd({
             ('login', 'tenant'): self.TENANT,
             ('login', 'subscription'): self.SUBSCRIPTION,
@@ -530,7 +530,7 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
         self.assertTrue(kwargs['skip_subscription_discovery'])
 
     @mock.patch('azure.cli.command_modules.profile._validators.validate_tenant')
-    def test_configured_tenant_domain_is_validated(self, validate_tenant_mock):
+    def test_profile_configured_tenant_domain_is_validated(self, validate_tenant_mock):
         cmd = self._cmd({('login', 'tenant'): 'contoso.onmicrosoft.com'})
         validate_tenant_mock.side_effect = lambda _cmd, namespace: setattr(namespace, 'tenant', self.TENANT)
         from azure.cli.command_modules.profile.custom import _resolve_login_defaults
