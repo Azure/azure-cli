@@ -394,6 +394,8 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         # Selector should be shown even with 1 sub (backward compat)
         selector_mock.assert_called_once_with([sub])
         self.assertIsNone(result)
+
+
 class TestLoginConfiguredDefaults(unittest.TestCase):
     """Login configuration is opt-in, validated, and distinct from command defaults."""
 
@@ -486,6 +488,46 @@ class TestLoginConfiguredDefaults(unittest.TestCase):
         profile_mock.return_value.login.assert_not_called()
         profile_mock.return_value.login_with_managed_identity.assert_called_once()
         cmd.cli_ctx.config.get.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_no_login_defaults_preserves_unfiltered_login(self, profile_mock):
+        cmd = self._cmd()
+        profile_mock.return_value.login.return_value = []
+
+        login(cmd)
+
+        args, kwargs = profile_mock.return_value.login.call_args
+        self.assertIsNone(args[4])
+        self.assertIsNone(kwargs['subscription'])
+        self.assertFalse(kwargs['skip_subscription_discovery'])
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_configured_discovery_false_is_respected(self, profile_mock):
+        cmd = self._cmd({
+            ('login', 'tenant'): self.TENANT,
+            ('login', 'subscription'): self.SUBSCRIPTION,
+            ('login', 'skip_subscription_discovery'): False,
+        })
+        profile_mock.return_value.login.return_value = []
+
+        login(cmd)
+
+        _, kwargs = profile_mock.return_value.login.call_args
+        self.assertFalse(kwargs['skip_subscription_discovery'])
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_explicit_skip_overrides_configured_false(self, profile_mock):
+        cmd = self._cmd({
+            ('login', 'tenant'): self.TENANT,
+            ('login', 'subscription'): self.SUBSCRIPTION,
+            ('login', 'skip_subscription_discovery'): False,
+        })
+        profile_mock.return_value.login.return_value = []
+
+        login(cmd, skip_subscription_discovery=True)
+
+        _, kwargs = profile_mock.return_value.login.call_args
+        self.assertTrue(kwargs['skip_subscription_discovery'])
 
     @mock.patch('azure.cli.command_modules.profile._validators.validate_tenant')
     def test_configured_tenant_domain_is_validated(self, validate_tenant_mock):
