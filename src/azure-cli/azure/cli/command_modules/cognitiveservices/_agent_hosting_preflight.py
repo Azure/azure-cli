@@ -282,21 +282,24 @@ def _resolve_resources(request):
 
 def _report(checks, name, scope, passed, observed, expected, remediation, mandatory=True):
     status = passed if isinstance(passed, str) else ('PASS' if passed else 'FAIL')
+    observed = _enum_value(observed)
     checks.append({'name': name, 'scope': scope, 'status': status, 'mandatory': mandatory,
                    'observed': observed, 'expected': expected, 'remediation': remediation})
     if isinstance(observed, (list, tuple)):
         observed = '\n    ' + '\n    '.join(str(item) for item in observed)
     elif isinstance(observed, dict):
         observed = '\n    ' + '\n    '.join(f'{key}: {value}' for key, value in observed.items())
+    label = f"Role '{name[:-11]}'" if name.endswith(' validation') else name
+    short_scope = '/'.join(scope.rstrip('/').rsplit('/', 2)[-2:])
     if status in ('FAIL', 'UNVERIFIED'):
         logger.warning('Preflight check failed: %s\n  Scope: %s\n  Details: %s\n  Requirement: %s\n  Action: %s',
-                       name, scope, observed, expected, remediation)
+                       label, scope, observed, expected, remediation)
     elif status == 'NOT_APPLICABLE':
-        logger.info('Not applicable: %s [%s]: observed=%s; note=%s', name, scope, observed, remediation)
+        logger.info('Not applicable: %s [%s]: observed=%s; note=%s', label, short_scope, observed, remediation)
     else:
-        recommendation = '' if remediation == 'None' else f'; recommendation={remediation}'
-        logger.info('Validated %s [%s]: observed=%s; expected=%s%s',
-                    name, scope, observed, expected, recommendation)
+        recommendation = '' if mandatory or remediation == 'None' else f'; recommendation={remediation}'
+        logger.info('Validated %s [%s]: observed=%s (expected: %s)%s',
+                    label, short_scope, observed, expected, recommendation)
 
 
 @contextmanager
@@ -428,11 +431,12 @@ def _check_cluster(cluster, scope, location, checks):
     kubelet_id = kubelet.object_id if kubelet else None
     version = properties.current_kubernetes_version or properties.kubernetes_version
     workload_identity = security.workload_identity if security else None
-    node_mode = properties.node_provisioning_profile.mode if properties.node_provisioning_profile else None
-    sku_name = sku.name if sku else None
+    node_mode = _enum_value(properties.node_provisioning_profile.mode) if properties.node_provisioning_profile else None
+    sku_name = _enum_value(sku.name) if sku else None
     requirements = [
         ('AKS mode', sku_name == 'Base' and node_mode != 'Auto',
-         f'{sku_name}/{node_mode}', 'Standard AKS offering, not Automatic; no pricing-tier restriction'),
+         f'{sku_name}/{node_mode}' if node_mode else sku_name,
+         'Standard AKS offering, not Automatic; no pricing-tier restriction'),
         ('Kubernetes version', _version_at_least(version, '1.31'), version, '>= 1.31'),
         ('AKS identity', bool(identity and identity.type in ('SystemAssigned', 'UserAssigned')),
          identity.type if identity else None, 'Managed identity'),
@@ -453,8 +457,8 @@ def _check_cluster(cluster, scope, location, checks):
 
 
 def _check_network_policy(network, scope, checks):
-    policy = network.network_policy if network else None
-    dataplane = network.network_dataplane if network else None
+    policy = _enum_value(network.network_policy) if network else None
+    dataplane = _enum_value(network.network_dataplane) if network else None
     if dataplane == 'cilium' or policy in ('azure', 'calico'):
         status = 'PASS'
     elif policy == 'none' and dataplane in (None, 'azure'):
@@ -474,6 +478,8 @@ def _evaluate_pool(pool):
     properties = pool.properties
     if properties is None:
         return False, False, f'{pool.name}: missing properties'
+    if properties.mode == 'System':
+        return True, False, f'{pool.name}: mode=System'
     requirements = {
         'User': properties.mode == 'User', 'AzureLinux': properties.os_sku in ('AzureLinux', 'AzureLinux3'),
         'KataVmIsolation': properties.workload_runtime == 'KataVmIsolation',
@@ -482,8 +488,8 @@ def _evaluate_pool(pool):
         'label': (properties.node_labels or {}).get('agents.ai.azure.com/sandbox-node') == 'true',
     }
     missing = [key for key, passed in requirements.items() if not passed]
-    detail = f'{pool.name}: mode={properties.mode}; missing={missing}'
-    return properties.mode == 'System', not missing, detail
+    detail = f'{pool.name}: mode={_enum_value(properties.mode)}; missing={missing}'
+    return False, not missing, detail
 
 
 def _check_pools(aks, cluster, scope, checks):
@@ -500,7 +506,7 @@ def _check_pools(aks, cluster, scope, checks):
     _report(checks, 'Agent node pool', scope, has_agent, details,
             'One User pool satisfying all sandbox requirements', 'Prepare one qualifying User pool.')
     network = cluster.properties.network_profile if cluster.properties else None
-    mode = network.network_plugin_mode if network else None
+    mode = _enum_value(network.network_plugin_mode) if network else None
     pod_subnets = {pool.name: pool.properties.pod_subnet_id if pool.properties else None for pool in pools}
     uses_pod_subnets = bool(pools) and all(bool(subnet and str(subnet).strip()) for subnet in pod_subnets.values())
     _report(checks, 'CNI mode', scope, mode == 'overlay' or (mode is None and uses_pod_subnets),
@@ -594,7 +600,9 @@ def _check_grants(cli_ctx, clients, request, checked, checks):
             principal = identity.principal_id if identity else None
             assigned = _assigned_role_ids(client, scope, principal, assignments_by_scope) if principal else set()
             allowed = bool(assigned & _accepted_role_ids(role_name))
-            _report(checks, f'{role_name} validation', scope, allowed, f'{principal}: {role_name}',
+            identity_name = identity_id.rsplit('/', 1)[-1]
+            subject = f'{identity_name} ({principal})' if principal else identity_name
+            _report(checks, f'{role_name} validation', scope, allowed, f'{subject}: {role_name}',
                     'Existing effective role assignment; no grant writes',
                     'Have an administrator grant the required role assignment.')
         else:
