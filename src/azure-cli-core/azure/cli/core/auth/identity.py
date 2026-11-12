@@ -9,6 +9,7 @@ import re
 import sys
 
 from azure.cli.core._environment import get_config_dir
+from azure.cli.core.azclierror import AuthenticationError
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
@@ -184,20 +185,23 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                 enable_msa_passthrough=True, claims_challenge=claims_challenge)
             user = check_result(result)
             if not user:
-                raise CLIError("Silent login did not identify a user. Run 'az login' interactively.")
+                raise AuthenticationError("Silent login did not identify a user.",
+                                          recommendation="Run 'az login' interactively to re-authenticate.")
             return user
 
         # MSAL's non-broker interactive path launches a browser even with prompt='none'.
         # Use cached accounts and the silent API instead; fail on ambiguity.
         accounts = app.get_accounts()
         if len(accounts) != 1:
-            raise CLIError("Silent login requires exactly one cached account without WAM "
-                           "(found {}). Run 'az login' interactively first.".format(len(accounts)))
+            raise AuthenticationError(
+                "Silent login requires exactly one cached account without WAM (found {}).".format(len(accounts)),
+                recommendation="Run 'az login' interactively first to select an account.")
         account = accounts[0]
         result = app.acquire_token_silent_with_error(scopes, account, claims_challenge=claims_challenge)
         if not result or 'access_token' not in result:
             check_result(result)
-            raise CLIError("Silent login did not return an access token.")
+            raise AuthenticationError("Silent login did not return an access token.",
+                                      recommendation="Run 'az login' interactively to re-authenticate.")
         # Cached access tokens can lack ID token claims; the cache account identifies the user.
         return {'username': account['username'], 'tenant_id': account.get('realm')}
 
