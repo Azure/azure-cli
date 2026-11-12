@@ -11,6 +11,7 @@ from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core._profile import Profile
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
 from azure.cli.core.util import in_cloud_console
 
 logger = get_logger(__name__)
@@ -154,7 +155,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
     if no_prompt and use_device_code:
-        raise CLIError("usage error: '--no-prompt' cannot be used with '--use-device-code'")
+        raise MutuallyExclusiveArgumentError("'--no-prompt' and '--use-device-code' cannot be used together.")
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
@@ -192,8 +193,10 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if username:
         if not (password or client_assertion or certificate):
             if no_prompt:
-                raise CLIError("usage error: '--no-prompt' requires an explicit password or credential when "
-                               "using '--username'")
+                raise RequiredArgumentMissingError(
+                    "An explicit password or service principal credential is required with '--username' "
+                    "when '--no-prompt' is specified.",
+                    recommendation="For user SSO, omit '--username' to use an existing sign-in.")
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
