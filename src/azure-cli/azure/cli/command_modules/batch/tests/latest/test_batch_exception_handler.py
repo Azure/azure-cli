@@ -5,21 +5,19 @@
 
 import unittest
 
-from msrest.exceptions import ClientRequestError, ValidationError
 from azure.cli.command_modules.batch._exception_handler import batch_exception_handler
 from azure.core.exceptions import (
     HttpResponseError,
-    ResourceNotFoundError
+    ResourceNotFoundError,
+    ServiceRequestError
 )
 from azure.batch.models import BatchError, BatchErrorMessage, BatchErrorDetail
 from azure.cli.core.azclierror import (
     AzureInternalError,
     BadRequestError,
-    ClientRequestError as AzCliClientRequestError,
     ForbiddenError,
     ResourceNotFoundError as AzCliResourceNotFoundError,
     UnauthorizedError,
-    ValidationError as AzCliValidationError,
 )
 
 from json import JSONDecodeError
@@ -87,19 +85,11 @@ class TestBatchExceptionHandler(unittest.TestCase):
         with self.assertRaisesRegex(AzCliResourceNotFoundError, r"^\(explosion\) Blew up$"):
             batch_exception_handler(err)
 
-    def test_validation_error(self):
-        err = ValidationError("rule", "target", "value")
-        try:
+    def test_service_request_err(self):
+        # Connection errors pass through unchanged; azure-cli-core maps them to ClientRequestError
+        err = ServiceRequestError("Kaboom")
+        with self.assertRaisesRegex(ServiceRequestError, r"^Kaboom$"):
             batch_exception_handler(err)
-        except AzCliValidationError as e:
-            self.assertEqual(str(e), str(err))
-    
-    def test_client_request_error(self):
-        err = ClientRequestError("Kaboom")
-        try:
-            batch_exception_handler(err)
-        except AzCliClientRequestError as e:
-            self.assertEqual(str(e), str(err))
 
     def test_response_err_details(self):
         err = HttpResponseError("Kaboom")
