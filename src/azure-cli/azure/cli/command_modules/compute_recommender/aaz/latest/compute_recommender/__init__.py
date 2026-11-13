@@ -9,5 +9,6 @@
 # flake8: noqa
 
 from .__cmd_group import *
+from ._compute_placement_score import *
 from ._spot_placement_recommender import *
 from ._spot_placement_score import *
