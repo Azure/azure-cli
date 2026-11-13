@@ -12646,6 +12646,38 @@ class VMPlacementScenarioTest(ScenarioTest):
 
 class VMAutoUpdateScenarioTest(ScenarioTest):
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_update_patch_settings_', location='australiaeast')
+    def test_vm_update_automatic_by_platform_settings(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm', 15),
+            'loc': resource_group_location,
+            'password': self.create_random_name('P@ssw0rd', 20),
+        })
+        patch_settings = 'osProfile.windowsConfiguration.patchSettings'
+
+        self.cmd('vm create -g {rg} -n {vm} --location {loc} --image Win2022Datacenter '
+                 '--size Standard_D2ds_v6 --security-type Standard --enable-agent --enable-auto-update '
+                 '--patch-mode AutomaticByOS --admin-username azureuser --admin-password {password} '
+                 '--nsg-rule NONE --public-ip-address ""')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check(patch_settings + '.patchMode', 'AutomaticByOS'),
+            self.check("contains(keys(" + patch_settings + "), 'automaticByPlatformSettings')", False),
+        ])
+
+        for bypass in (True, False):
+            self.kwargs['bypass'] = str(bypass).lower()
+            self.cmd('vm update -g {rg} -n {vm} --set '
+                     'osProfile.windowsConfiguration.enableAutomaticUpdates=true '
+                     'osProfile.windowsConfiguration.patchSettings.patchMode=AutomaticByPlatform '
+                     'osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings.'
+                     'bypassPlatformSafetyChecksOnUserSchedule={bypass}')
+            self.cmd('vm show -g {rg} -n {vm}', checks=[
+                self.check('osProfile.windowsConfiguration.enableAutomaticUpdates', True),
+                self.check(patch_settings + '.patchMode', 'AutomaticByPlatform'),
+                self.check(patch_settings +
+                           '.automaticByPlatformSettings.bypassPlatformSafetyChecksOnUserSchedule', bypass),
+            ])
+
     @unittest.skip('The selected VM image is not supported for hotpatching')
     @ResourceGroupPreparer(name_prefix='cli_test_vm_auto_update_')
     def test_vm_auto_update(self, resource_group):
