@@ -661,6 +661,12 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(ChangeType.modify, result.changes[0].change_type)
 
 class TestFormatBicepFile(unittest.TestCase):
+    def setUp(self):
+        for name in ("resolve_bicep_installation", "ensure_bicep_installation"):
+            patcher = mock.patch(f"azure.cli.command_modules.resource.custom.{name}", return_value=None)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
     @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
     @mock.patch("builtins.print")
@@ -674,12 +680,20 @@ class TestFormatBicepFile(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
-            mock.call(cmd.cli_ctx, "0.12.1"),
-            mock.call(cmd.cli_ctx, "0.26.54"),
+            mock.call(cmd.cli_ctx, "0.12.1", installation=None),
+            mock.call(cmd.cli_ctx, "0.26.54", installation=None),
         ])
-        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ["format", file_path, "--stdout"])
+        mock_run_bicep_command.assert_called_once_with(
+            cmd.cli_ctx, ["format", file_path, "--stdout"], installation=None
+        )
 
 class TestPublishWithSource(unittest.TestCase):
+    def setUp(self):
+        for name in ("resolve_bicep_installation", "ensure_bicep_installation"):
+            patcher = mock.patch(f"azure.cli.command_modules.resource.custom.{name}", return_value=None)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
     @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
     def test_publish_withsource(self, mock_run_bicep_command, mock_bicep_version_greater_than_or_equal_to):
@@ -692,9 +706,12 @@ class TestPublishWithSource(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
-            mock.call(cmd.cli_ctx, "0.4.1008"), # Min version for 'bicep publish'
+            mock.call(cmd.cli_ctx, "0.4.1008", installation=None),  # Min version for 'bicep publish'
         ])
-        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1'])
+        mock_run_bicep_command.assert_called_once_with(
+            cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1'],
+            installation=None,
+        )
 
     @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to", return_value=True)
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command", return_value="formatted content")
@@ -708,11 +725,14 @@ class TestPublishWithSource(unittest.TestCase):
 
         # Assert.
         mock_bicep_version_greater_than_or_equal_to.assert_has_calls([
-            mock.call(cmd.cli_ctx, "0.4.1008"), # Min version for 'bicep publish'
-            mock.call(cmd.cli_ctx, '0.26.54'),
-            mock.call(cmd.cli_ctx, "0.23.1") # Min version for 'bicep publish --with-source'
+            mock.call(cmd.cli_ctx, "0.4.1008", installation=None),  # Min version for 'bicep publish'
+            mock.call(cmd.cli_ctx, '0.26.54', installation=None),
+            mock.call(cmd.cli_ctx, "0.23.1", installation=None), # Min version for 'bicep publish --with-source'
         ])
-        mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1', '--with-source'])
+        mock_run_bicep_command.assert_called_once_with(
+            cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1', '--with-source'],
+            installation=None,
+        )
 
 
 class TestTemplateSizeOptimization(unittest.TestCase):

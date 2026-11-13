@@ -9,11 +9,14 @@ import stat
 import platform
 import subprocess
 import json
+import tempfile
 import certifi
 
 from json.decoder import JSONDecodeError
 from contextlib import suppress
+from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Optional
 
 import requests
 import semver
@@ -34,8 +37,10 @@ from ._bicep_config import (
     get_check_version_config,
     get_use_binary_from_path_config,
     remove_use_binary_from_path_config,
+    resolve_bicep_version_constraint,
     set_use_binary_from_path_config
 )
+from ._bicep_version import BicepVersionConstraint, parse_bicep_version_constraint
 
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
@@ -50,10 +55,206 @@ _bicep_installation_dir = os.path.join(_config_dir, "bin")
 _bicep_version_check_file_path = os.path.join(_config_dir, "bicepVersionCheck.json")
 _bicep_version_check_cache_ttl = timedelta(minutes=10)
 _bicep_version_check_time_format = "%Y-%m-%dT%H:%M:%S.%f"
+_bicep_releases_url = "https://downloads.bicep.azure.com/releases"
 
 _logger = get_logger(__name__)
 
 _requests_verify = not should_disable_connection_verify()
+
+
+@dataclass(frozen=True)
+class BicepInstallation:
+    """Keep a selected compiler's version and path together for execution and feature checks."""
+    version: semver.VersionInfo
+    executable_path: str
+
+
+def resolve_bicep_installation(entrypoint_file: str) -> Optional[BicepInstallation]:
+    """Read an entrypoint's project pin and acquire its compiler, or return None when unpinned."""
+    value = resolve_bicep_version_constraint(entrypoint_file)
+    if value is None:
+        return None
+    return ensure_bicep_version_installation(parse_bicep_version_constraint(value))
+
+
+def ensure_bicep_version_installation(constraint: BicepVersionConstraint) -> BicepInstallation:
+    """Acquire a project-compatible compiler, preferring the highest valid cached match before going online."""
+    if not constraint.is_satisfiable:
+        raise ValidationError(f'The Bicep version constraint "{constraint}" cannot be satisfied.')
+
+    system = platform.system()
+    machine = platform.machine()
+    target_platform = _get_bicep_target_platform(system, machine)
+    cached = _find_cached_bicep_installation(constraint, target_platform)
+    if cached is not None:
+        _logger.debug("Using cached Bicep CLI %s at '%s'.", cached.version, cached.executable_path)
+        return cached
+
+    releases = _get_stable_bicep_releases()
+    selected_version = max((version for version in releases if constraint.is_satisfied_by(version)), default=None)
+    if selected_version is None:
+        raise ValidationError(f'No published stable Bicep release satisfies the version constraint "{constraint}".')
+
+    installation = BicepInstallation(
+        selected_version, _get_versioned_bicep_path(selected_version, target_platform)
+    )
+    _download_bicep_version(installation, releases[selected_version], system, machine, target_platform)
+    return installation
+
+
+def _try_parse_bicep_release_version(tag):
+    """Parse a full stable release tag with an optional v/V prefix; return None for unsupported identifiers."""
+    if not isinstance(tag, str):
+        return None
+    value = tag[1:] if tag[:1].lower() == "v" else tag
+    if value.count(".") != 2:
+        return None
+    try:
+        constraint = parse_bicep_version_constraint(value)
+    except ValidationError:
+        return None
+    if not constraint.is_exact_version or str(constraint) != value:
+        return None
+    return constraint.lower_bound
+
+
+def _get_versioned_bicep_path(version, target_platform):
+    """Build one version/platform executable path inside the CLI cache without creating files."""
+    filename = "bicep.exe" if target_platform.startswith("win-") else "bicep"
+    return os.path.join(_bicep_installation_dir, "bicep-versions", str(version), target_platform, filename)
+
+
+def _validate_bicep_installation(executable_path, expected_version):
+    """Run an executable's --version and reject a mismatch, prerelease, build metadata, or execution failure."""
+    try:
+        actual_version = _get_bicep_installed_version(executable_path)
+    except (OSError, UnclassifiedUserFault, UnicodeError) as err:
+        raise ValidationError(f"Unable to run Bicep CLI at '{executable_path}': {err}") from err
+    if (actual_version is None or actual_version != expected_version or
+            actual_version.prerelease is not None or actual_version.build is not None):
+        raise ValidationError(
+            f"Bicep CLI at '{executable_path}' must report version {expected_version}, "
+            f"but reported {actual_version}."
+        )
+
+
+def _get_cached_bicep_versions():
+    """List canonical cache version directories newest first, without checking their executables."""
+    cache_dir = os.path.join(_bicep_installation_dir, "bicep-versions")
+    candidates = []
+    try:
+        with os.scandir(cache_dir) as entries:
+            for entry in entries:
+                version = _try_parse_bicep_release_version(entry.name)
+                if version is not None and str(version) == entry.name and entry.is_dir():
+                    candidates.append(version)
+    except FileNotFoundError:
+        return []
+    except OSError as err:
+        raise FileOperationError(f"Unable to read the Bicep version cache '{cache_dir}': {err}") from err
+
+    return sorted(candidates, reverse=True)
+
+
+def _try_get_cached_bicep_installation(version, target_platform):
+    """Validate one exact cached compiler and return its installation, or None when missing or invalid."""
+    executable_path = _get_versioned_bicep_path(version, target_platform)
+    try:
+        metadata = os.stat(executable_path)
+    except FileNotFoundError:
+        return None
+    except OSError as err:
+        raise FileOperationError(f"Unable to read cached Bicep CLI at '{executable_path}': {err}") from err
+    if not stat.S_ISREG(metadata.st_mode) or metadata.st_size == 0:
+        _logger.warning("Ignoring incomplete cached Bicep CLI at '%s'.", executable_path)
+        return None
+    try:
+        _validate_bicep_installation(executable_path, version)
+    except ValidationError as err:
+        _logger.warning("Ignoring invalid cached Bicep CLI: %s", err)
+        return None
+    return BicepInstallation(version, executable_path)
+
+
+def _find_cached_bicep_installation(constraint, target_platform):
+    """Find the highest valid cached compiler satisfying a project constraint for the requested platform."""
+    for version in _get_cached_bicep_versions():
+        if not constraint.is_satisfied_by(version):
+            continue
+        cached = _try_get_cached_bicep_installation(version, target_platform)
+        if cached is not None:
+            return cached
+    return None
+
+
+def _get_stable_bicep_releases():
+    """Fetch supported stable release versions and their original tags without downloading a compiler."""
+    os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
+    try:
+        with requests.get(_bicep_releases_url, verify=_requests_verify) as response:
+            response.raise_for_status()
+            payload = response.json()
+    except (requests.RequestException, ValueError) as err:
+        raise ClientRequestError(f"Unable to retrieve Bicep releases from '{_bicep_releases_url}': {err}") from err
+
+    if not isinstance(payload, list):
+        raise ClientRequestError("The Bicep releases response must contain a JSON array.")
+    releases = {}
+    for release in payload:
+        if (not isinstance(release, dict) or not isinstance(release.get("tag_name"), str) or
+                not release["tag_name"] or not isinstance(release.get("draft", False), bool) or
+                not isinstance(release.get("prerelease", False), bool)):
+            raise ClientRequestError("The Bicep releases response contains an invalid release entry.")
+        if release.get("draft", False) or release.get("prerelease", False):
+            continue
+        version = _try_parse_bicep_release_version(release["tag_name"])
+        if version is not None:
+            releases[version] = release["tag_name"]
+        else:
+            _logger.debug("Skipping unsupported Bicep release tag '%s'.", release["tag_name"])
+    return releases
+
+
+def _download_bicep_version(installation, release_tag, system, machine, target_platform):
+    """Stream an already selected release to a temporary file, validate it, and publish atomically."""
+    directory = os.path.dirname(installation.executable_path)
+    temporary_path = None
+    download_url = _get_bicep_download_url(system, machine, release_tag, target_platform=target_platform)
+    _logger.info("Installing Bicep CLI %s to '%s'.", installation.version, installation.executable_path)
+    os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
+    try:
+        os.makedirs(directory, exist_ok=True)
+        suffix = ".exe" if target_platform.startswith("win-") else ""
+        with tempfile.NamedTemporaryFile(dir=directory, prefix=".bicep-download-", suffix=suffix, delete=False) as file:
+            temporary_path = file.name
+            with requests.get(download_url, stream=True, verify=_requests_verify) as response:
+                response.raise_for_status()
+                for chunk in response.iter_content(chunk_size=65536):
+                    file.write(chunk)
+        if os.path.getsize(temporary_path) == 0:
+            raise ClientRequestError(f"The Bicep CLI download from '{download_url}' was empty.")
+        os.chmod(temporary_path, os.stat(temporary_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        _validate_bicep_installation(temporary_path, installation.version)
+        try:
+            os.replace(temporary_path, installation.executable_path)
+        except (FileExistsError, PermissionError):
+            # Another invocation may have published the same version while this one downloaded it.
+            if not os.path.isfile(installation.executable_path):
+                raise
+            _validate_bicep_installation(installation.executable_path, installation.version)
+            _logger.debug("Reusing Bicep CLI %s installed by another invocation.", installation.version)
+    except requests.RequestException as err:
+        raise ClientRequestError(f"Unable to download Bicep CLI from '{download_url}': {err}") from err
+    except OSError as err:
+        raise FileOperationError(f"Unable to install Bicep CLI at '{installation.executable_path}': {err}") from err
+    finally:
+        if temporary_path is not None:
+            try:
+                os.remove(temporary_path)
+            except FileNotFoundError:
+                pass
+            except OSError as err:
+                _logger.warning("Unable to remove temporary Bicep download '%s': %s", temporary_path, err)
 
 
 def validate_bicep_target_scope(template_schema, deployment_scope):
@@ -64,7 +265,12 @@ def validate_bicep_target_scope(template_schema, deployment_scope):
         )
 
 
-def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
+def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None,
+                      installation: Optional[BicepInstallation] = None):
+    if installation is not None:
+        _logger.debug("Using pinned Bicep CLI %s at '%s'.", installation.version, installation.executable_path)
+        return _run_command(installation.executable_path, args, custom_env)
+
     if _use_binary_from_path(cli_ctx):
         from shutil import which
 
@@ -239,15 +445,18 @@ def get_bicep_available_release_tags():
 def get_bicep_latest_release_tag():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
-        response = requests.get("https://aka.ms/BicepLatestRelease", verify=_requests_verify)
-        response.raise_for_status()
-        return response.json()["tag_name"]
-    except requests.RequestException as err:
-        raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
+        with requests.get("https://aka.ms/BicepLatestRelease", verify=_requests_verify) as response:
+            response.raise_for_status()
+            payload = response.json()
+    except (requests.RequestException, ValueError) as err:
+        raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.") from err
+    return payload["tag_name"]
 
 
-def bicep_version_greater_than_or_equal_to(cli_ctx, version):
-    if _use_binary_from_path(cli_ctx):
+def bicep_version_greater_than_or_equal_to(cli_ctx, version, installation: Optional[BicepInstallation] = None):
+    if installation is not None:
+        installed_version = installation.version
+    elif _use_binary_from_path(cli_ctx):
         installed_version = _get_bicep_installed_version("bicep")
     else:
         system = platform.system()
@@ -330,29 +539,21 @@ def _has_musl_library_only():
     return os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6")
 
 
-def _get_bicep_download_url(system, machine, release_tag, target_platform=None):
-    if not target_platform:
-        if system == "Windows" and _is_arm_architecture(machine):
-            target_platform = "win-arm64"
-        elif system == "Windows":
-            # default to x64
-            target_platform = "win-x64"
-        elif system == "Linux" and _is_arm_architecture(machine):
-            target_platform = "linux-arm64"
-        elif system == "Linux" and _has_musl_library_only():
-            # check for alpine linux
-            target_platform = "linux-musl-x64"
-        elif system == "Linux":
-            # default to x64
-            target_platform = "linux-x64"
-        elif system == "Darwin" and _is_arm_architecture(machine):
-            target_platform = "osx-arm64"
-        elif system == "Darwin":
-            # default to x64
-            target_platform = "osx-x64"
-        else:
-            raise ValidationError(f'The platform "{system}" is not supported.')
+def _get_bicep_target_platform(system, machine):
+    """Translate detected OS/CPU information into the shared Bicep platform identifier."""
+    if system == "Windows":
+        return "win-arm64" if _is_arm_architecture(machine) else "win-x64"
+    if system == "Linux":
+        if _is_arm_architecture(machine):
+            return "linux-arm64"
+        return "linux-musl-x64" if _has_musl_library_only() else "linux-x64"
+    if system == "Darwin":
+        return "osx-arm64" if _is_arm_architecture(machine) else "osx-x64"
+    raise ValidationError(f'The platform "{system}" is not supported.')
 
+
+def _get_bicep_download_url(system, machine, release_tag, target_platform=None):
+    target_platform = target_platform or _get_bicep_target_platform(system, machine)
     extension = ".exe" if target_platform.startswith("win-") else ""
     asset_name = f"bicep-{target_platform}{extension}"
 
