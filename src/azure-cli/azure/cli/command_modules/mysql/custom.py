@@ -1647,11 +1647,10 @@ def _create_database(db_context, cmd, resource_group_name, server_name, database
     database_client = cf_db(cmd.cli_ctx, None)
 
     logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
-    parameters = {
-        'name': database_name,
-        'charset': 'utf8',
-        'collation': 'utf8_general_ci'
-    }
+    parameters = models.Database(
+        charset='utf8',
+        collation='utf8_general_ci'
+    )
     resolve_poller(
         database_client.begin_create_or_update(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
         '{} Database Create/Update'.format(logging_name))
@@ -1666,11 +1665,10 @@ def database_create_func(client, resource_group_name, server_name, database_name
     elif (not charset and collation) or (charset and not collation):
         raise RequiredArgumentMissingError("charset and collation have to be input together.")
 
-    parameters = {
-        'name': database_name,
-        'charset': charset,
-        'collation': collation
-    }
+    parameters = models.Database(
+        charset=charset,
+        collation=collation
+    )
 
     return client.begin_create_or_update(
         resource_group_name,
