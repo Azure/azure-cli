@@ -2035,6 +2035,92 @@ class AcsCustomCommandTest(unittest.TestCase):
                 inspection.assert_not_called()
                 mock_run.reset_mock()
 
+    def test_aks_install_desktop_deb_installed_package(self):
+        import shlex
+
+        cases = [
+            ('older', 'install ok installed 0.10.0-20260924.1\n', 'manual'),
+            ('same', 'install ok installed 0.11.0-20261111.3\n', 'same'),
+            ('epoch', 'install ok installed 2:0.11.0-20261111.3\n', 'same'),
+            ('native', 'install ok installed 0.11.0\n', 'same'),
+            ('prerelease', 'install ok installed 0.11.0~rc1-20261110.1\n', 'same'),
+            ('rc-to-final', 'install ok installed 0.11.0~rc1-20261110.1\n', 'manual'),
+            ('held', 'hold ok installed 0.10.0-20260924.1\n', 'manual'),
+            ('pending-removal', 'deinstall ok installed 0.10.0-20260924.1\n', 'manual'),
+            ('downgrade', 'install ok installed 0.12.0-20261112.1\n', 'manual'),
+            ('removed', 'deinstall ok config-files 0.10.0-20260924.1\n', 'gui'),
+            ('absent', subprocess.CompletedProcess([], 1, '', 'not installed'), 'gui'),
+            ('error', subprocess.CompletedProcess([], 2, 'install ok installed 0.11.0', 'query failed'), 'gui'),
+            ('missing', FileNotFoundError(2, 'not found', 'dpkg-query'), 'gui'),
+            ('unavailable', None, 'gui'),
+            ('timeout', subprocess.TimeoutExpired(['dpkg-query'], 10), 'gui'),
+            ('decode', UnicodeDecodeError('utf-8', b'\xff', 0, 1, 'invalid byte'), 'gui'),
+            ('malformed', 'install ok installed\n', 'gui'),
+            ('multiple', 'install ok installed 0.11.0\ninstall ok installed 0.10.0\n', 'gui'),
+        ]
+        for case, result, outcome in cases:
+            version = '0.11.0-rc1' if case == 'prerelease' else '0.11.0'
+            name = 'aks-desktop_{}-1_amd64.deb'.format(version)
+            if isinstance(result, str):
+                result = subprocess.CompletedProcess([], 0, result, '')
+            with self.subTest(case=case), tempfile.TemporaryDirectory(prefix="desktop config's ") as config_dir:
+                paths = []
+
+                def download(asset, path):
+                    paths.append(path)
+                    with open(path, 'wb') as output:
+                        output.write(b'installer')
+
+                with (
+                    mock.patch.dict(os.environ, {'AZURE_CONFIG_DIR': os.path.relpath(config_dir), 'DISPLAY': ':0'}),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_platform',
+                               return_value=('linux', 'x64')),
+                    mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release',
+                               return_value=({'assets': [{'name': name}]}, version)),
+                    mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
+                               return_value={'ID': 'ubuntu'}),
+                    mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open'),
+                    mock.patch('azure.cli.core.util.get_safe_executable_path',
+                               return_value=None if result is None else '/usr/bin/dpkg-query'),
+                    mock.patch('azure.cli.core.util.run_cmd',
+                               side_effect=result if isinstance(result, Exception) else None,
+                               return_value=result) as query,
+                    mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset', side_effect=download),
+                    mock.patch('azure.cli.command_modules.acs.custom.subprocess.run') as launch,
+                    mock.patch('azure.cli.command_modules.acs.custom.subprocess.Popen') as popen,
+                ):
+                    with self.assertLogs(acs_custom.logger.name, level='WARNING') as logs:
+                        aks_install_desktop(None)
+                    popen.assert_not_called()
+                    message = '\n'.join(logs.output)
+                    if outcome == 'same':
+                        self.assertEqual(paths, [])
+                        launch.assert_not_called()
+                        self.assertFalse(os.path.exists(os.path.join(config_dir, 'aks-desktop')))
+                        self.assertIn('already installed', message)
+                        self.assertIn(version, message)
+                    else:
+                        self.assertEqual(len(paths), 1)
+                        with open(paths[0], 'rb') as installer:
+                            self.assertEqual(installer.read(), b'installer')
+                        if outcome == 'manual':
+                            launch.assert_not_called()
+                            command = message.split('sudo apt install ', 1)[1].splitlines()[0]
+                            self.assertEqual(shlex.split(command), [os.path.abspath(paths[0])])
+                            self.assertIn(result.stdout.split()[-1], message)
+                            self.assertIn(version, message)
+                            self.assertNotIn('opened application', message)
+                            self.assertNotIn('upgrade', message.lower())
+                        else:
+                            launch.assert_called_once_with(['xdg-open', paths[0]], check=True)
+                            self.assertIn('Complete installation in the opened application', message)
+                    if result is None:
+                        query.assert_not_called()
+                    else:
+                        query.assert_called_once_with(
+                            ['/usr/bin/dpkg-query', '-W', '-f=${Status} ${Version}\\n', 'aks-desktop'],
+                            capture_output=True, encoding='utf-8', check=False, timeout=10)
+
     def test_aks_install_desktop_retains_gui_installer(self):
         cases = [
             ('mac', 'arm64', 'aks-desktop-0.9.1-mac-arm64.dmg', 'open'),
