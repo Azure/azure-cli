@@ -1342,6 +1342,118 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix="clitest", location="eastus2")
+    def test_aks_get_credentials_relative_file(self, resource_group, resource_group_location):
+        import shutil
+        from unittest import mock
+        import yaml
+        from azure.cli.command_modules.acs import custom
+
+        self.assertIsNotNone(shutil.which("kubelogin"), "Install kubelogin before running this scenario.")
+        if self.is_live:
+            self.assertIsNotNone(shutil.which("kubectl"), "Install kubectl before running this scenario.")
+        account = self.cmd("account show").get_output_in_json()
+        self.kwargs.update({
+            "resource_group": resource_group,
+            "name": self.create_random_name("cliakstest", 16),
+            "subscription": account["id"],
+            "ssh_key_value": self.generate_ssh_keys(),
+            "identity": self._get_user_assigned_identity(resource_group),
+        })
+        cluster = self.cmd(
+            "aks create --resource-group {resource_group} --name {name} "
+            "--node-count 1 --ssh-key-value {ssh_key_value} --assign-identity {identity} "
+            "--enable-aad --enable-azure-rbac",
+            checks=[self.check("provisioningState", "Succeeded"), self.check("aadProfile.managed", True)],
+        ).get_output_in_json()
+
+        if self.is_live:
+            if (account["user"]["type"] == "servicePrincipal" and
+                    account["user"]["name"] not in ("userAssignedIdentity", "systemAssignedIdentity") and
+                    not self._get_test_identity_resource_id() and
+                    not os.getenv("AZURE_CLI_LIVE_TEST_IDENTITY_OBJECT_ID")):
+                principal = self.cmd(
+                    "ad sp show --id {}".format(account["user"]["name"])
+                ).get_output_in_json()["id"]
+            else:
+                principal = self._get_test_identity_object_id()
+            self.cmd(
+                'role assignment create --assignee-object-id {} --assignee-principal-type {} '
+                '--role "Azure Kubernetes Service RBAC Reader" --scope {}'.format(
+                    principal, "ServicePrincipal" if account["user"]["type"] == "servicePrincipal" else "User",
+                    cluster["id"],
+                )
+            )
+
+        existing = {
+            "apiVersion": "v1", "kind": "Config",
+            "clusters": [{"name": "other", "cluster": {"server": "https://127.0.0.1"}}],
+            "contexts": [{"name": "other", "context": {"cluster": "other", "user": "other"}}],
+            "current-context": "other",
+            "users": [{"name": "other", "user": {"token": "synthetic-test-token"}}],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            cwd = os.getcwd()
+            os.chdir(directory)
+            try:
+                self.kwargs["file"] = "relative-config"
+                with open(self.kwargs["file"], "w", encoding="utf-8") as stream:
+                    yaml.safe_dump(existing, stream)
+                os.chmod(self.kwargs["file"], 0o600)
+                command = (
+                    'aks get-credentials --name {name} --resource-group {resource_group} '
+                    '--subscription {subscription} -f "{file}" --overwrite-existing'
+                )
+                with self.assertLogs(custom.logger.name, level="WARNING") as messages:
+                    self.cmd(command)
+                self.assertFalse(any("Error running kubelogin" in message for message in messages.output))
+                self.assertTrue(any("Converted kubeconfig" in message for message in messages.output))
+                with open(self.kwargs["file"], encoding="utf-8") as stream:
+                    config = yaml.safe_load(stream)
+                self.assertEqual(config["current-context"], self.kwargs["name"])
+                context = next(item for item in config["contexts"] if item["name"] == config["current-context"])
+                user = next(item for item in config["users"] if item["name"] == context["context"]["user"])
+                args = user["user"]["exec"]["args"]
+                login_index = args.index("--login") if "--login" in args else args.index("-l")
+                self.assertEqual(args[login_index + 1], "azurecli")
+                self.assertNotIn("devicecode", args)
+                for section in ("clusters", "contexts", "users"):
+                    self.assertIn(existing[section][0], config[section])
+
+                if self.is_live:
+                    # Azure RBAC assignments may take several minutes to reach the API server.
+                    deadline = time.monotonic() + 300
+                    while True:
+                        result = subprocess.run(
+                            ["kubectl", "--kubeconfig", self.kwargs["file"], "--request-timeout=30s",
+                             "get", "namespaces", "-o", "name"],
+                            stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60, check=False,
+                        )
+                        self.assertNotIn("devicecode", result.stderr.lower())
+                        self.assertNotIn("devicelogin", result.stderr.lower())
+                        if result.returncode == 0:
+                            self.assertIn("namespace/default", result.stdout)
+                            break
+                        if "forbidden" not in result.stderr.lower() or time.monotonic() >= deadline:
+                            self.fail(result.stderr)
+                        time.sleep(10)
+
+                self.kwargs["file"] = "missing-kubelogin-config"
+                with tempfile.TemporaryDirectory() as empty_path, \
+                        mock.patch.dict(os.environ, {"PATH": empty_path}), \
+                        self.assertLogs(custom.logger.name, level="WARNING") as messages:
+                    self.cmd(command)
+                diagnostic = " ".join(messages.output)
+                self.assertIn("kubelogin was not found on PATH", diagnostic)
+                self.assertIn("Automatic conversion to Azure CLI authentication could not be completed", diagnostic)
+                self.assertNotIn("Error running kubelogin", diagnostic)
+                self.assertNotIn("Converted kubeconfig", diagnostic)
+                with open(self.kwargs["file"], encoding="utf-8") as stream:
+                    self.assertTrue(custom.uses_kubelogin_devicecode(stream.read()))
+            finally:
+                os.chdir(cwd)
+
 
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @AKSCustomRoleBasedServicePrincipalPreparer()

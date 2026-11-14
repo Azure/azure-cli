@@ -2064,23 +2064,28 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
             path, kubeconfig, overwrite_existing, context_name)
 
         # Check if kubeconfig requires kubelogin with devicecode and convert it
-        if uses_kubelogin_devicecode(kubeconfig):
-            if which("kubelogin"):
+        if path != "-" and uses_kubelogin_devicecode(kubeconfig):
+            kubelogin = which("kubelogin")
+            if kubelogin:
+                kubeconfig_path = os.path.abspath(path)
                 try:
                     # Run kubelogin convert-kubeconfig -l azurecli
                     subprocess.run(
-                        ["kubelogin", "convert-kubeconfig", "-l", "azurecli"],
-                        cwd=os.path.dirname(path),
+                        [os.path.abspath(kubelogin), "convert-kubeconfig", "-l", "azurecli",
+                         "--kubeconfig", kubeconfig_path],
+                        cwd=os.path.dirname(kubeconfig_path),
                         check=True,
                     )
                     logger.warning("Converted kubeconfig to use Azure CLI authentication.")
                 except subprocess.CalledProcessError as e:
                     logger.warning("Failed to convert kubeconfig with kubelogin: %s", str(e))
-                except Exception as e:  # pylint: disable=broad-except
+                except OSError as e:
                     logger.warning("Error running kubelogin: %s", str(e))
             else:
                 logger.warning(
-                    "The kubeconfig uses devicecode authentication which requires kubelogin. "
+                    "kubelogin was not found on PATH. "
+                    "Automatic conversion to Azure CLI authentication could not be completed. "
+                    "The kubeconfig still uses devicecode authentication. "
                     "Please install kubelogin from https://github.com/Azure/kubelogin or run "
                     "'az aks install-cli' to install both kubectl and kubelogin. "
                     "If devicecode login fails, try running "
