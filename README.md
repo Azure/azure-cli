@@ -176,7 +176,6 @@ Here's an example of installing edge builds with pip3 in a virtual environment. 
 ```bash
 $ python3 -m venv env
 $ . env/bin/activate
-$ pip3 install --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --upgrade-strategy=eager
 ```
 
 To upgrade your current edge build pass the `--upgrade` option. The `--no-cache-dir` option is also recommended since
