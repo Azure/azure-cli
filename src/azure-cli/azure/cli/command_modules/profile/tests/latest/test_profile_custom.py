@@ -241,7 +241,10 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         cmd.cli_ctx.config = mock.MagicMock()
-        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2 = True
+        cmd.cli_ctx.config.get.side_effect = lambda section, option, fallback=None: fallback
+        cmd.cli_ctx.config.getboolean.side_effect = (
+            lambda section, option, fallback=False: (
+                True if (section, option) == ('core', 'login_experience_v2') else fallback))
 
         result = login(cmd, tenant=tenant_id, skip_subscription_discovery=True)
 
@@ -272,7 +275,10 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         cmd.cli_ctx.config = mock.MagicMock()
-        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2=True
+        cmd.cli_ctx.config.get.side_effect = lambda section, option, fallback=None: fallback
+        cmd.cli_ctx.config.getboolean.side_effect = (
+            lambda section, option, fallback=False: (
+                True if (section, option) == ('core', 'login_experience_v2') else fallback))
 
         # Interactive login (no username) with --subscription
         result = login(cmd, tenant='tenant1', subscription=sub_id)
@@ -309,7 +315,10 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         cmd.cli_ctx.config = mock.MagicMock()
-        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2=True
+        cmd.cli_ctx.config.get.side_effect = lambda section, option, fallback=None: fallback
+        cmd.cli_ctx.config.getboolean.side_effect = (
+            lambda section, option, fallback=False: (
+                True if (section, option) == ('core', 'login_experience_v2') else fallback))
 
         # Interactive login (no username) with --subscription that matches 2 tenants
         result = login(cmd, tenant='home-tenant', subscription=sub_id)
@@ -340,7 +349,10 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         cmd.cli_ctx.config = mock.MagicMock()
-        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2=True
+        cmd.cli_ctx.config.get.side_effect = lambda section, option, fallback=None: fallback
+        cmd.cli_ctx.config.getboolean.side_effect = (
+            lambda section, option, fallback=False: (
+                True if (section, option) == ('core', 'login_experience_v2') else fallback))
 
         result = login(cmd, tenant='tenant1', subscription=sub_id)
 
@@ -371,7 +383,10 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         cmd.cli_ctx.config = mock.MagicMock()
-        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2=True
+        cmd.cli_ctx.config.get.side_effect = lambda section, option, fallback=None: fallback
+        cmd.cli_ctx.config.getboolean.side_effect = (
+            lambda section, option, fallback=False: (
+                True if (section, option) == ('core', 'login_experience_v2') else fallback))
 
         # Interactive login, no --subscription
         result = login(cmd)
@@ -379,3 +394,150 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         # Selector should be shown even with 1 sub (backward compat)
         selector_mock.assert_called_once_with([sub])
         self.assertIsNone(result)
+
+
+class TestLoginConfiguredDefaults(unittest.TestCase):
+    """Login configuration is opt-in, validated, and distinct from command defaults."""
+
+    TENANT = '11111111-1111-1111-1111-111111111111'
+    SUBSCRIPTION = '22222222-2222-2222-2222-222222222222'
+
+    @staticmethod
+    def _cmd(settings=None):
+        settings = dict(settings or {})
+        settings.setdefault(('core', 'login_experience_v2'), False)
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        config = mock.MagicMock()
+        config.get.side_effect = lambda section, option, fallback=None: settings.get((section, option), fallback)
+        config.getboolean.side_effect = (
+            lambda section, option, fallback=False: settings.get((section, option), fallback))
+        cmd.cli_ctx.config = config
+        return cmd
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_profile_configured_tenant_subscription_skip(self, profile_mock):
+        settings = {
+            ('login', 'tenant'): self.TENANT,
+            ('login', 'subscription'): self.SUBSCRIPTION,
+            ('login', 'skip_subscription_discovery'): True,
+        }
+        cmd = self._cmd(settings)
+        profile_mock.return_value.login.return_value = []
+
+        login(cmd)
+
+        args, kwargs = profile_mock.return_value.login.call_args
+        self.assertEqual(args[4], self.TENANT)
+        self.assertEqual(kwargs['subscription'], self.SUBSCRIPTION)
+        self.assertTrue(kwargs['skip_subscription_discovery'])
+        self.assertFalse(kwargs['show_progress'])
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_profile_explicit_arguments_override_config(self, profile_mock):
+        settings = {
+            ('login', 'tenant'): self.TENANT,
+            ('login', 'subscription'): self.SUBSCRIPTION,
+            ('login', 'skip_subscription_discovery'): True,
+        }
+        cmd = self._cmd(settings)
+        profile_mock.return_value.login.return_value = []
+        other_tenant = '33333333-3333-3333-3333-333333333333'
+        other_sub = '44444444-4444-4444-4444-444444444444'
+
+        login(cmd, tenant=other_tenant, subscription=other_sub)
+
+        args, kwargs = profile_mock.return_value.login.call_args
+        self.assertEqual(args[4], other_tenant)
+        self.assertEqual(kwargs['subscription'], other_sub)
+        self.assertTrue(kwargs['skip_subscription_discovery'])
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_profile_tenant_only_keeps_discovery(self, profile_mock):
+        cmd = self._cmd({('login', 'tenant'): self.TENANT})
+        profile_mock.return_value.login.return_value = []
+
+        login(cmd)
+
+        args, kwargs = profile_mock.return_value.login.call_args
+        self.assertEqual(args[4], self.TENANT)
+        self.assertIsNone(kwargs['subscription'])
+        self.assertFalse(kwargs['skip_subscription_discovery'])
+
+    def test_profile_configured_skip_requires_tenant(self):
+        cmd = self._cmd({('login', 'skip_subscription_discovery'): True})
+        with self.assertRaisesRegex(CLIError, "requires '--tenant'"):
+            login(cmd)
+
+    def test_profile_configured_skip_requires_guid_subscription(self):
+        cmd = self._cmd({
+            ('login', 'tenant'): self.TENANT,
+            ('login', 'subscription'): 'Subscription Name',
+            ('login', 'skip_subscription_discovery'): True,
+        })
+        with self.assertRaisesRegex(CLIError, 'must be a subscription ID'):
+            login(cmd)
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_profile_managed_identity_ignores_login_defaults(self, profile_mock):
+        cmd = self._cmd({('login', 'tenant'): self.TENANT,
+                         ('login', 'skip_subscription_discovery'): True})
+
+        login(cmd, identity=True)
+
+        profile_mock.return_value.login.assert_not_called()
+        profile_mock.return_value.login_with_managed_identity.assert_called_once()
+        cmd.cli_ctx.config.get.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_profile_no_login_defaults_preserves_unfiltered_login(self, profile_mock):
+        cmd = self._cmd()
+        profile_mock.return_value.login.return_value = []
+
+        login(cmd)
+
+        args, kwargs = profile_mock.return_value.login.call_args
+        self.assertIsNone(args[4])
+        self.assertIsNone(kwargs['subscription'])
+        self.assertFalse(kwargs['skip_subscription_discovery'])
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_profile_configured_discovery_false_is_respected(self, profile_mock):
+        cmd = self._cmd({
+            ('login', 'tenant'): self.TENANT,
+            ('login', 'subscription'): self.SUBSCRIPTION,
+            ('login', 'skip_subscription_discovery'): False,
+        })
+        profile_mock.return_value.login.return_value = []
+
+        login(cmd)
+
+        _, kwargs = profile_mock.return_value.login.call_args
+        self.assertFalse(kwargs['skip_subscription_discovery'])
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_profile_explicit_skip_overrides_configured_false(self, profile_mock):
+        cmd = self._cmd({
+            ('login', 'tenant'): self.TENANT,
+            ('login', 'subscription'): self.SUBSCRIPTION,
+            ('login', 'skip_subscription_discovery'): False,
+        })
+        profile_mock.return_value.login.return_value = []
+
+        login(cmd, skip_subscription_discovery=True)
+
+        _, kwargs = profile_mock.return_value.login.call_args
+        self.assertTrue(kwargs['skip_subscription_discovery'])
+
+    @mock.patch('azure.cli.command_modules.profile._validators.validate_tenant')
+    def test_profile_configured_tenant_domain_is_validated(self, validate_tenant_mock):
+        cmd = self._cmd({('login', 'tenant'): 'contoso.onmicrosoft.com'})
+        validate_tenant_mock.side_effect = lambda _cmd, namespace: setattr(namespace, 'tenant', self.TENANT)
+        from azure.cli.command_modules.profile.custom import _resolve_login_defaults
+
+        tenant, subscription, skip = _resolve_login_defaults(cmd, None, None, False)
+
+        self.assertEqual(tenant, self.TENANT)
+        self.assertIsNone(subscription)
+        self.assertFalse(skip)
+        validate_tenant_mock.assert_called_once()

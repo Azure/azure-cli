@@ -53,6 +53,30 @@ USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD = (
     "For more details, see https://go.microsoft.com/fwlink/?linkid=2276314")
 
 
+def _resolve_login_defaults(cmd, tenant, subscription, skip_subscription_discovery):
+    """Resolve login-specific config without changing defaults for other commands."""
+    config = cmd.cli_ctx.config
+
+    if tenant is None:
+        tenant = config.get('login', 'tenant', fallback=None)
+        if tenant:
+            # Explicit --tenant is validated by the argument parser. Apply the
+            # same validation to configured tenants, including domain names.
+            from types import SimpleNamespace
+            from ._validators import validate_tenant
+            namespace = SimpleNamespace(tenant=tenant)
+            validate_tenant(cmd, namespace)
+            tenant = namespace.tenant
+
+    if subscription is None:
+        subscription = config.get('login', 'subscription', fallback=None)
+
+    if not skip_subscription_discovery:
+        skip_subscription_discovery = config.getboolean('login', 'skip_subscription_discovery', fallback=False)
+
+    return tenant, subscription, skip_subscription_discovery
+
+
 def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
     from azure.cli.core.api import load_subscriptions
@@ -157,6 +181,10 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+    # Managed identity login has no user-selected tenant/subscription target.
+    if not identity:
+        tenant, subscription, skip_subscription_discovery = _resolve_login_defaults(
+            cmd, tenant, subscription, skip_subscription_discovery)
     if skip_subscription_discovery and not tenant:
         raise CLIError("usage error: '--skip-subscription-discovery' requires '--tenant'")
     if skip_subscription_discovery and subscription:
