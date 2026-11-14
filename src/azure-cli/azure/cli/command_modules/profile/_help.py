@@ -32,13 +32,16 @@ long-summary: >-
 
 
     Default login targets can be configured with login.tenant and login.subscription.
-    Set login.skip_subscription_discovery=true to use the targeted fast path, avoiding
-    tenant-wide discovery. A subscription ID (GUID) is required for this fast path.
+    To skip subscription discovery, set login.skip_subscription_discovery=true and
+    specify a tenant (with login.tenant or --tenant). With a subscription ID (GUID),
+    CLI retrieves only that subscription. Without a subscription, CLI creates a
+    tenant-level account without querying subscriptions.
     The corresponding AZURE_LOGIN_TENANT, AZURE_LOGIN_SUBSCRIPTION and
     AZURE_LOGIN_SKIP_SUBSCRIPTION_DISCOVERY environment variables also work.
     Command-line tenant and subscription values take precedence over login config.
-    Managed identity login ignores these defaults. They do not change the defaults
-    used by other commands; to do that, use defaults.subscription.
+    Managed identity login ignores these defaults.
+    A successful login with login.subscription selects the active subscription for
+    subsequent commands; it does not change the defaults.subscription config setting.
 
 
     For more details, see https://learn.microsoft.com/cli/azure/authenticate-azure-cli
