@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "consumption pricesheet",
-    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Inspect the price sheet of an Azure subscription within a billing period.

@@ -13,16 +13,18 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "consumption budget create",
-    is_preview=True,
 )
 class Create(AAZCommand):
-    """Create operation to create or update a budget. Update operation requires latest eTag to be set in the request mandatorily. You may obtain the latest eTag by performing a get operation. Create operation does not require eTag.
+    """Create operation to create or update a budget. You can optionally provide an eTag if desired as a form of concurrency control. To obtain the latest eTag for a given budget, perform a get operation prior to your put operation.
+
+    :example: Create a monthly cost budget
+        az consumption budget create -n my-budget --amount 100 --category Cost --time-grain Monthly --start-date 2025-01-01T00:00:00Z --end-date 2025-12-31T00:00:00Z --scope subscriptions/00000000-0000-0000-0000-000000000000
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.consumption/budgets/{}", "2023-05-01"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.consumption/budgets/{}", "2024-08-01"],
         ]
     }
 
@@ -47,14 +49,28 @@ class Create(AAZCommand):
             help="Budget Name.",
             required=True,
         )
-
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.e_tag = AAZStrArg(
-            options=["--e-tag"],
-            arg_group="Parameters",
+        _args_schema.scope = AAZStrArg(
+            options=["--scope"],
+            help="The fully qualified Azure Resource manager identifier of the resource.",
+            required=True,
+        )
+        _args_schema.etag = AAZStrArg(
+            options=["--etag"],
             help="eTag of the resource. To handle concurrent update scenario, this field will be used to determine whether the user is updating the latest version or not.",
+        )
+        _args_schema.end_date = AAZDateTimeArg(
+            options=["-e", "--end-date"],
+            help="The end date for the budget. If not provided, we default this to 10 years from the start date.",
+            fmt=AAZDateTimeFormat(
+                protocol="iso",
+            ),
+        )
+        _args_schema.start_date = AAZDateTimeArg(
+            options=["-s", "--start-date"],
+            help="The start date for the budget.",
+            fmt=AAZDateTimeFormat(
+                protocol="iso",
+            ),
         )
 
         # define Arg Group "Properties"
@@ -69,12 +85,12 @@ class Create(AAZCommand):
             options=["--category"],
             arg_group="Properties",
             help="The category of the budget, whether the budget tracks cost or usage.",
-            enum={"Cost": "Cost", "Usage": "Usage"},
+            enum={"Cost": "Cost"},
         )
-        _args_schema.filters = AAZObjectArg(
-            options=["--filters"],
+        _args_schema.filter = AAZObjectArg(
+            options=["--filter"],
             arg_group="Properties",
-            help="May be used to filter budgets by resource group, resource, or meter.",
+            help="May be used to filter budgets by user-specified dimensions and/or tags.",
         )
         _args_schema.notifications = AAZDictArg(
             options=["--notifications"],
@@ -84,37 +100,43 @@ class Create(AAZCommand):
         _args_schema.time_grain = AAZStrArg(
             options=["--time-grain"],
             arg_group="Properties",
-            help="The time covered by a budget. Tracking of the amount will be reset based on the time grain.",
-            enum={"Annually": "Annually", "Monthly": "Monthly", "Quarterly": "Quarterly"},
-        )
-        _args_schema.time_period = AAZObjectArg(
-            options=["--time-period"],
-            arg_group="Properties",
-            help="Has start and end date of the budget. The start date must be first of the month and should be less than the end date. Budget start date must be on or after June 1, 2017. Future start date should not be more than three months. Past start date should  be selected within the timegrain period. There are no restrictions on the end date.",
+            help="The time covered by a budget. Tracking of the amount will be reset based on the time grain. BillingMonth, BillingQuarter, and BillingAnnual are only supported by WD customers",
+            enum={"Annually": "Annually", "BillingAnnual": "BillingAnnual", "BillingMonth": "BillingMonth", "BillingQuarter": "BillingQuarter", "Monthly": "Monthly", "Quarterly": "Quarterly"},
         )
 
-        filters = cls._args_schema.filters
-        filters.meters = AAZListArg(
-            options=["meters"],
-            help="The list of filters on meters, mandatory for budgets of usage category. ",
+        filter = cls._args_schema.filter
+        filter.and_ = AAZListArg(
+            options=["and"],
+            help="The logical \"AND\" expression. Must have at least 2 items.",
+            fmt=AAZListArgFormat(
+                min_length=0,
+            ),
         )
-        filters.resource_groups = AAZListArg(
-            options=["resource-groups"],
-            help="The list of filters on resource groups, allowed at subscription level only.",
+        filter.dimensions = AAZObjectArg(
+            options=["dimensions"],
+            help="Has comparison expression for a dimension",
         )
-        filters.resources = AAZListArg(
-            options=["resources"],
-            help="The list of filters on resources.",
+        cls._build_args_budget_comparison_expression_create(filter.dimensions)
+        filter.tags = AAZObjectArg(
+            options=["tags"],
+            help="Has comparison expression for a tag",
         )
+        cls._build_args_budget_comparison_expression_create(filter.tags)
 
-        meters = cls._args_schema.filters.meters
-        meters.Element = AAZStrArg()
+        and_ = cls._args_schema.filter.and_
+        and_.Element = AAZObjectArg()
 
-        resource_groups = cls._args_schema.filters.resource_groups
-        resource_groups.Element = AAZStrArg()
-
-        resources = cls._args_schema.filters.resources
-        resources.Element = AAZStrArg()
+        _element = cls._args_schema.filter.and_.Element
+        _element.dimensions = AAZObjectArg(
+            options=["dimensions"],
+            help="Has comparison expression for a dimension",
+        )
+        cls._build_args_budget_comparison_expression_create(_element.dimensions)
+        _element.tags = AAZObjectArg(
+            options=["tags"],
+            help="Has comparison expression for a tag",
+        )
+        cls._build_args_budget_comparison_expression_create(_element.tags)
 
         notifications = cls._args_schema.notifications
         notifications.Element = AAZObjectArg()
@@ -122,12 +144,20 @@ class Create(AAZCommand):
         _element = cls._args_schema.notifications.Element
         _element.contact_emails = AAZListArg(
             options=["contact-emails"],
-            help="Email addresses to send the budget notification to when the threshold is exceeded.",
+            help="Email addresses to send the budget notification to when the threshold is exceeded. Must have at least one contact email or contact group specified at the Subscription or Resource Group scopes. All other scopes must have at least one contact email specified.",
             required=True,
+            fmt=AAZListArgFormat(
+                max_length=50,
+                min_length=0,
+            ),
         )
         _element.contact_groups = AAZListArg(
             options=["contact-groups"],
-            help="Action groups to send the budget notification to when the threshold is exceeded.",
+            help="Action groups to send the budget notification to when the threshold is exceeded. Must be provided as a fully qualified Azure resource id. Only supported at Subscription or Resource Group scopes.",
+            fmt=AAZListArgFormat(
+                max_length=50,
+                min_length=0,
+            ),
         )
         _element.contact_roles = AAZListArg(
             options=["contact-roles"],
@@ -137,6 +167,11 @@ class Create(AAZCommand):
             options=["enabled"],
             help="The notification is enabled or not.",
             required=True,
+        )
+        _element.locale = AAZStrArg(
+            options=["locale"],
+            help="Language in which the recipient will receive the notification",
+            enum={"cs-cz": "cs-cz", "da-dk": "da-dk", "de-de": "de-de", "en-gb": "en-gb", "en-us": "en-us", "es-es": "es-es", "fr-fr": "fr-fr", "hu-hu": "hu-hu", "it-it": "it-it", "ja-jp": "ja-jp", "ko-kr": "ko-kr", "nb-no": "nb-no", "nl-nl": "nl-nl", "pl-pl": "pl-pl", "pt-br": "pt-br", "pt-pt": "pt-pt", "ru-ru": "ru-ru", "sv-se": "sv-se", "tr-tr": "tr-tr", "zh-cn": "zh-cn", "zh-tw": "zh-tw"},
         )
         _element.operator = AAZStrArg(
             options=["operator"],
@@ -149,6 +184,12 @@ class Create(AAZCommand):
             help="Threshold value associated with a notification. Notification is sent when the cost exceeded the threshold. It is always percent and has to be between 0 and 1000.",
             required=True,
         )
+        _element.threshold_type = AAZStrArg(
+            options=["threshold-type"],
+            help="The type of threshold",
+            default="Actual",
+            enum={"Actual": "Actual", "Forecasted": "Forecasted"},
+        )
 
         contact_emails = cls._args_schema.notifications.Element.contact_emails
         contact_emails.Element = AAZStrArg()
@@ -158,18 +199,47 @@ class Create(AAZCommand):
 
         contact_roles = cls._args_schema.notifications.Element.contact_roles
         contact_roles.Element = AAZStrArg()
+        return cls._args_schema
 
-        time_period = cls._args_schema.time_period
-        time_period.end_date = AAZDateTimeArg(
-            options=["end-date"],
-            help="The end date for the budget. If not provided, we default this to 10 years from the start date.",
-        )
-        time_period.start_date = AAZDateTimeArg(
-            options=["start-date"],
-            help="The start date for the budget.",
+    _args_budget_comparison_expression_create = None
+
+    @classmethod
+    def _build_args_budget_comparison_expression_create(cls, _schema):
+        if cls._args_budget_comparison_expression_create is not None:
+            _schema.name = cls._args_budget_comparison_expression_create.name
+            _schema.operator = cls._args_budget_comparison_expression_create.operator
+            _schema.values = cls._args_budget_comparison_expression_create.values
+            return
+
+        cls._args_budget_comparison_expression_create = AAZObjectArg()
+
+        budget_comparison_expression_create = cls._args_budget_comparison_expression_create
+        budget_comparison_expression_create.name = AAZStrArg(
+            options=["name"],
+            help="The name of the column to use in comparison.",
             required=True,
         )
-        return cls._args_schema
+        budget_comparison_expression_create.operator = AAZStrArg(
+            options=["operator"],
+            help="The operator to use for comparison.",
+            required=True,
+            enum={"In": "In"},
+        )
+        budget_comparison_expression_create.values = AAZListArg(
+            options=["values"],
+            help="Array of values to use for comparison",
+            required=True,
+            fmt=AAZListArgFormat(
+                min_length=0,
+            ),
+        )
+
+        values = cls._args_budget_comparison_expression_create.values
+        values.Element = AAZStrArg()
+
+        _schema.name = cls._args_budget_comparison_expression_create.name
+        _schema.operator = cls._args_budget_comparison_expression_create.operator
+        _schema.values = cls._args_budget_comparison_expression_create.values
 
     def _execute_operations(self):
         self.pre_operations()
@@ -202,7 +272,7 @@ class Create(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/budgets/{budgetName}",
+                "/{scope}/providers/Microsoft.Consumption/budgets/{budgetName}",
                 **self.url_parameters
             )
 
@@ -212,7 +282,7 @@ class Create(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -222,7 +292,8 @@ class Create(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
+                    "scope", self.ctx.args.scope,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -232,7 +303,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-08-01",
                     required=True,
                 ),
             }
@@ -257,35 +328,32 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("eTag", AAZStrType, ".e_tag")
+            _builder.set_prop("eTag", AAZStrType, ".etag")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("amount", AAZFloatType, ".amount", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("category", AAZStrType, ".category", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("filters", AAZObjectType, ".filters")
+                properties.set_prop("filter", AAZObjectType, ".filter")
                 properties.set_prop("notifications", AAZDictType, ".notifications")
                 properties.set_prop("timeGrain", AAZStrType, ".time_grain", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("timePeriod", AAZObjectType, ".time_period", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("timePeriod", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
 
-            filters = _builder.get(".properties.filters")
-            if filters is not None:
-                filters.set_prop("meters", AAZListType, ".meters")
-                filters.set_prop("resourceGroups", AAZListType, ".resource_groups")
-                filters.set_prop("resources", AAZListType, ".resources")
+            filter = _builder.get(".properties.filter")
+            if filter is not None:
+                filter.set_prop("and", AAZListType, ".and_")
+                _CreateHelper._build_schema_budget_comparison_expression_create(filter.set_prop("dimensions", AAZObjectType, ".dimensions"))
+                _CreateHelper._build_schema_budget_comparison_expression_create(filter.set_prop("tags", AAZObjectType, ".tags"))
 
-            meters = _builder.get(".properties.filters.meters")
-            if meters is not None:
-                meters.set_elements(AAZStrType, ".")
+            and_ = _builder.get(".properties.filter.and")
+            if and_ is not None:
+                and_.set_elements(AAZObjectType, ".")
 
-            resource_groups = _builder.get(".properties.filters.resourceGroups")
-            if resource_groups is not None:
-                resource_groups.set_elements(AAZStrType, ".")
-
-            resources = _builder.get(".properties.filters.resources")
-            if resources is not None:
-                resources.set_elements(AAZStrType, ".")
+            _elements = _builder.get(".properties.filter.and[]")
+            if _elements is not None:
+                _CreateHelper._build_schema_budget_comparison_expression_create(_elements.set_prop("dimensions", AAZObjectType, ".dimensions"))
+                _CreateHelper._build_schema_budget_comparison_expression_create(_elements.set_prop("tags", AAZObjectType, ".tags"))
 
             notifications = _builder.get(".properties.notifications")
             if notifications is not None:
@@ -297,8 +365,10 @@ class Create(AAZCommand):
                 _elements.set_prop("contactGroups", AAZListType, ".contact_groups")
                 _elements.set_prop("contactRoles", AAZListType, ".contact_roles")
                 _elements.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("locale", AAZStrType, ".locale")
                 _elements.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("threshold", AAZFloatType, ".threshold", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("thresholdType", AAZStrType, ".threshold_type")
 
             contact_emails = _builder.get(".properties.notifications{}.contactEmails")
             if contact_emails is not None:
@@ -349,6 +419,10 @@ class Create(AAZCommand):
             _schema_on_200_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _schema_on_200_201.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -362,8 +436,13 @@ class Create(AAZCommand):
             )
             properties.current_spend = AAZObjectType(
                 serialized_name="currentSpend",
+                flags={"read_only": True},
             )
-            properties.filters = AAZObjectType()
+            properties.filter = AAZObjectType()
+            properties.forecast_spend = AAZObjectType(
+                serialized_name="forecastSpend",
+                flags={"read_only": True},
+            )
             properties.notifications = AAZDictType()
             properties.time_grain = AAZStrType(
                 serialized_name="timeGrain",
@@ -382,21 +461,29 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
-            filters = cls._schema_on_200_201.properties.filters
-            filters.meters = AAZListType()
-            filters.resource_groups = AAZListType(
-                serialized_name="resourceGroups",
+            filter = cls._schema_on_200_201.properties.filter
+            filter["and"] = AAZListType()
+            filter.dimensions = AAZObjectType()
+            _CreateHelper._build_schema_budget_comparison_expression_read(filter.dimensions)
+            filter.tags = AAZObjectType()
+            _CreateHelper._build_schema_budget_comparison_expression_read(filter.tags)
+
+            and_ = cls._schema_on_200_201.properties.filter["and"]
+            and_.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.filter["and"].Element
+            _element.dimensions = AAZObjectType()
+            _CreateHelper._build_schema_budget_comparison_expression_read(_element.dimensions)
+            _element.tags = AAZObjectType()
+            _CreateHelper._build_schema_budget_comparison_expression_read(_element.tags)
+
+            forecast_spend = cls._schema_on_200_201.properties.forecast_spend
+            forecast_spend.amount = AAZFloatType(
+                flags={"read_only": True},
             )
-            filters.resources = AAZListType()
-
-            meters = cls._schema_on_200_201.properties.filters.meters
-            meters.Element = AAZStrType()
-
-            resource_groups = cls._schema_on_200_201.properties.filters.resource_groups
-            resource_groups.Element = AAZStrType()
-
-            resources = cls._schema_on_200_201.properties.filters.resources
-            resources.Element = AAZStrType()
+            forecast_spend.unit = AAZStrType(
+                flags={"read_only": True},
+            )
 
             notifications = cls._schema_on_200_201.properties.notifications
             notifications.Element = AAZObjectType()
@@ -415,11 +502,15 @@ class Create(AAZCommand):
             _element.enabled = AAZBoolType(
                 flags={"required": True},
             )
+            _element.locale = AAZStrType()
             _element.operator = AAZStrType(
                 flags={"required": True},
             )
             _element.threshold = AAZFloatType(
                 flags={"required": True},
+            )
+            _element.threshold_type = AAZStrType(
+                serialized_name="thresholdType",
             )
 
             contact_emails = cls._schema_on_200_201.properties.notifications.Element.contact_emails
@@ -440,11 +531,73 @@ class Create(AAZCommand):
                 flags={"required": True},
             )
 
+            system_data = cls._schema_on_200_201.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
             return cls._schema_on_200_201
 
 
 class _CreateHelper:
     """Helper class for Create"""
+
+    @classmethod
+    def _build_schema_budget_comparison_expression_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+        _builder.set_prop("operator", AAZStrType, ".operator", typ_kwargs={"flags": {"required": True}})
+        _builder.set_prop("values", AAZListType, ".values", typ_kwargs={"flags": {"required": True}})
+
+        values = _builder.get(".values")
+        if values is not None:
+            values.set_elements(AAZStrType, ".")
+
+    _schema_budget_comparison_expression_read = None
+
+    @classmethod
+    def _build_schema_budget_comparison_expression_read(cls, _schema):
+        if cls._schema_budget_comparison_expression_read is not None:
+            _schema.name = cls._schema_budget_comparison_expression_read.name
+            _schema.operator = cls._schema_budget_comparison_expression_read.operator
+            _schema.values = cls._schema_budget_comparison_expression_read.values
+            return
+
+        cls._schema_budget_comparison_expression_read = _schema_budget_comparison_expression_read = AAZObjectType()
+
+        budget_comparison_expression_read = _schema_budget_comparison_expression_read
+        budget_comparison_expression_read.name = AAZStrType(
+            flags={"required": True},
+        )
+        budget_comparison_expression_read.operator = AAZStrType(
+            flags={"required": True},
+        )
+        budget_comparison_expression_read.values = AAZListType(
+            flags={"required": True},
+        )
+
+        values = _schema_budget_comparison_expression_read.values
+        values.Element = AAZStrType()
+
+        _schema.name = cls._schema_budget_comparison_expression_read.name
+        _schema.operator = cls._schema_budget_comparison_expression_read.operator
+        _schema.values = cls._schema_budget_comparison_expression_read.values
 
 
 __all__ = ["Create"]
