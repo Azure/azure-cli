@@ -112,14 +112,27 @@ def is_valid_sha256sum(a_file, expected_sum):
     return expected_sum == computed_hash
 
 
+import ssl
+from urllib.request import urlopen, Request
+
+def _get_urlopen_with_context():
+    try:
+        # Create an SSL context that uses the system's default CA bundle
+        context = ssl.create_default_context()
+        return lambda url: urlopen(url, context=context)
+    except Exception:
+        # Fallback to default urlopen if context creation fails
+        return urlopen
+
 def create_virtualenv(tmp_dir, install_dir):
     download_location = os.path.join(tmp_dir, VIRTUALENV_ARCHIVE)
     print_status('Downloading virtualenv package from {}.'.format(VIRTUALENV_DOWNLOAD_URL))
-    response = urlopen(VIRTUALENV_DOWNLOAD_URL)
+    opener = _get_urlopen_with_context()
+    response = opener(VIRTUALENV_DOWNLOAD_URL)
     with open(download_location, 'wb') as f: f.write(response.read())
     print_status("Downloaded virtualenv package to {}.".format(download_location))
     if is_valid_sha256sum(download_location, VIRTUALENV_ARCHIVE_SHA256):
-        print_status("Checksum of {} OK.".format(download_location))
+        print_status("Checksum of {} OK.".format(download_location))ad_location))
     else:
         raise CLIInstallError("The checksum of the downloaded virtualenv package does not match.")
     print_status("Extracting '{}' to '{}'.".format(download_location, tmp_dir))
