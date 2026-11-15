@@ -3,7 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import io
 import os
+import shlex
 import unittest
 import datetime
 import isodate
@@ -17,6 +19,7 @@ from azure.core import MatchConditions
 from azure.batch import models, BatchClient
 from azure.core.credentials import AzureNamedKeyCredential
 
+from azure.cli.core.mock import DummyCli
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
 
@@ -52,8 +55,8 @@ class TestBatchValidators(unittest.TestCase):
         with self.assertRaises(ValueError):
             _validators.metadata_item_format("test")
 
-        with self.assertRaises(ValueError):
-            _validators.metadata_item_format("name=value=other")
+        meta = _validators.metadata_item_format("name=value=other")
+        self.assertEqual(meta, {'name': 'name', 'value': 'value=other'})
 
     def test_batch_environment_setting_format(self):
         env = _validators.environment_setting_format("name=value")
@@ -62,8 +65,21 @@ class TestBatchValidators(unittest.TestCase):
         with self.assertRaises(ValueError):
             _validators.environment_setting_format("test")
 
+        env = _validators.environment_setting_format("CONN=Server=tcp:x;Database=y")
+        self.assertEqual(env, {'name': 'CONN', 'value': 'Server=tcp:x;Database=y'})
+
+        env = _validators.environment_setting_format("TOKEN=YWJj==")
+        self.assertEqual(env, {'name': 'TOKEN', 'value': 'YWJj=='})
+
+    def test_batch_string_dictionary_format(self):
+        result = _validators.string_dictionary_format("a=b c=d=e")
+        self.assertEqual(result, {'a': 'b', 'c': 'd=e'})
+
         with self.assertRaises(ValueError):
-            _validators.environment_setting_format("name=value=other")
+            _validators.string_dictionary_format("a=b test")
+
+        with self.assertRaises(ValueError):
+            _validators.string_dictionary_format("")
 
     def test_batch_application_package_reference_format(self):
         ref = _validators.batch_application_package_reference_format("app_1")
@@ -654,3 +670,43 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         # option = [arg for (name, arg) in args if name == 'node_reboot_option'][0]
         # self.assertIsNotNone(option.choices)
         # self.assertFalse([a for a in option.choices if "'" in a])
+
+
+class TestBatchTaskCreateCommand(unittest.TestCase):
+
+    @staticmethod
+    def _invoke(command):
+        account = ('--account-name test1 --account-key ZmFrZV9hY29jdW50X2tleQ== '
+                   '--account-endpoint https://test1.westus.batch.azure.com')
+        with mock.patch.object(BatchClient, 'create_task') as create_task, \
+                mock.patch.object(BatchClient, 'get_task', return_value=models.BatchTask({'id': 'task1'})):
+            try:
+                exit_code = DummyCli().invoke(shlex.split(f'{command} {account}'), out_file=io.StringIO())
+            except SystemExit as ex:  # argument parsing errors exit with code 2
+                exit_code = ex.code
+        return exit_code, create_task
+
+    def test_batch_task_create_environment_settings(self):
+        sql_connection = ('Server=tcp:servername.database.windows.net,1433;Initial Catalog=mydb;'
+                          'Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True')
+        exit_code, create_task = self._invoke(
+            'batch task create --job-id job1 --task-id task1 --command-line "cmd /c set" '
+            f'--environment-settings SqlConnection="{sql_connection}" LOG_LEVEL=info')
+
+        self.assertEqual(exit_code, 0)
+        create_task.assert_called_once()
+        self.assertEqual(create_task.call_args.kwargs['job_id'], 'job1')
+        self.assertEqual(create_task.call_args.kwargs['task'].as_dict(), {
+            'id': 'task1',
+            'commandLine': 'cmd /c set',
+            'environmentSettings': [
+                {'name': 'SqlConnection', 'value': sql_connection},
+                {'name': 'LOG_LEVEL', 'value': 'info'}]})
+
+        # A setting without '=' is still rejected before any request is sent
+        exit_code, create_task = self._invoke(
+            'batch task create --job-id job1 --task-id task1 --command-line "cmd /c set" '
+            '--environment-settings LOG_LEVEL')
+
+        self.assertEqual(exit_code, 2)
+        create_task.assert_not_called()
