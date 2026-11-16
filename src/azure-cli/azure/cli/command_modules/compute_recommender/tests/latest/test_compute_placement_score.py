@@ -16,7 +16,8 @@ from azure.core.exceptions import HttpResponseError
 from azure.core.pipeline.policies import ContentDecodePolicy
 from azure.cli.core import get_default_cli
 from azure.cli.core.aaz import AAZCommand
-from azure.cli.testsdk import LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk.scenario_tests import RecordingProcessor
 from azure.cli.command_modules.compute_recommender.aaz.latest.compute_recommender import ComputePlacementScore
 
 
@@ -122,8 +123,40 @@ class ComputePlacementScoreTest(unittest.TestCase):
                 self.assertEqual(expected, result, output.getvalue())
                 self.assertEqual(expected == 0, bool(parsed))
 
+    def test_scenario_commands_format_literal_sku_braces(self):
+        for method in ('test_compute_placement_score_generate',
+                       'test_compute_placement_score_generate_without_desired_locations'):
+            with self.subTest(method=method):
+                scenario = ComputePlacementScoreScenario(method)
+                data = {
+                    'desiredLocations': ['eastus'],
+                    'desiredCount': 1,
+                    'placementScores': [{
+                        'region': 'eastus', 'sku': 'Standard_D2_v2', 'placementPreference': 10,
+                    }],
+                }
+                commands = []
 
-class ComputePlacementScoreLiveScenario(LiveScenarioTest):
+                def capture(command):
+                    commands.append(scenario._apply_kwargs(command))
+                    return SimpleNamespace(get_output_in_json=lambda: data)
+
+                with patch.object(scenario, 'get_subscription_id', return_value=SUBSCRIPTION), \
+                        patch.object(scenario, 'cmd', side_effect=capture):
+                    getattr(scenario, method)()
+                self.assertEqual(1, len(commands))
+                self.assertIn('{sku:Standard_D2_v2}', commands[0])
+
+
+class _ComputePlacementScoreRecordingProcessor(RecordingProcessor):
+    def process_response(self, response):
+        self.replace_header_fn(response, 'x-ms-operation-identifier', lambda _: 'redacted')
+        return response
+
+
+class ComputePlacementScoreScenario(ScenarioTest):
+    def __init__(self, method_name):
+        super().__init__(method_name, recording_processors=[_ComputePlacementScoreRecordingProcessor()])
 
     def test_compute_placement_score_generate(self):
         self.kwargs['subscription'] = self.get_subscription_id()
@@ -131,7 +164,7 @@ class ComputePlacementScoreLiveScenario(LiveScenarioTest):
             'az compute-recommender compute-placement-score --location eastus '
             '--subscription {subscription} --availability-zones true '
             '--desired-locations eastus eastus2 --desired-count 10 '
-            '--desired-sizes "[{sku:Standard_D2_v2},{sku:Standard_D4_v2}]"'
+            '--desired-sizes "[{{sku:Standard_D2_v2}},{{sku:Standard_D4_v2}}]"'
         ).get_output_in_json()
         self.assertTrue(result['placementScores'])
         for score in result['placementScores']:
@@ -143,7 +176,7 @@ class ComputePlacementScoreLiveScenario(LiveScenarioTest):
     def test_compute_placement_score_generate_without_desired_locations(self):
         result = self.cmd(
             'az compute-recommender compute-placement-score --location eastus '
-            '--desired-sizes "[{sku:Standard_D2_v2}]"'
+            '--desired-sizes "[{{sku:Standard_D2_v2}}]"'
         ).get_output_in_json()
         self.assertEqual(['eastus'], result['desiredLocations'])
         self.assertEqual(1, result['desiredCount'])
