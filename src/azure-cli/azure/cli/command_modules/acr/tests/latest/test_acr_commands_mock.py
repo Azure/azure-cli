@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 import json
 import unittest
 from unittest import mock
@@ -55,6 +55,8 @@ from azure.cli.command_modules.acr._docker_utils import ResourceNotFound
 from azure.cli.command_modules.acr._errors import ErrorClass, CONNECTIVITY_UNTRUSTED_REALM_ERROR
 from azure.cli.command_modules.acr._constants import ACR_AUDIENCE_RESOURCE_NAME
 from azure.cli.core.azclierror import AzureResponseError
+from azure.cli.core.cloud import HARD_CODED_CLOUD_LIST
+from azure.cli.core._profile import _AZ_LOGIN_MESSAGE
 from azure.cli.core.mock import DummyCli
 from knack.prompting import NoTTYException
 from knack.util import CLIError
@@ -1196,6 +1198,44 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    registry_name=test_registry,
                                    login_server=test_login_server_with_tenant_suffix,
                                    tenant_suffix=test_tenant_suffix)
+
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription_id', return_value=TEST_SUBSCRIPTION)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    def test_acr_credentials_suffix_fallback_clouds(self, mock_get_raw_token, mock_requests_get,
+                                                   mock_requests_post, mock_get_registry_by_name,
+                                                   mock_get_subscription):
+        registry_name = 'testregistry'
+        for cloud in HARD_CODED_CLOUD_LIST:
+            cmd = self._setup_cmd()
+            cmd.cli_ctx.cloud = cloud
+            cloud_suffix = cloud.suffixes.acr_login_server_endpoint
+            for suffix in (None, 'microsoft', 'Tenant-123', 'a', '1', 'a' * 51):
+                login_server = registry_name + ('-' + suffix.lower() if suffix else '') + cloud_suffix
+                for discovery_error in (ResourceNotFound('Registry not found in this subscription.'),
+                                        CLIError(_AZ_LOGIN_MESSAGE)):
+                    with self.subTest(cloud=cloud.name, suffix=suffix, discovery_error=type(discovery_error)):
+                        mock_get_registry_by_name.side_effect = discovery_error
+                        mock_requests_get.reset_mock()
+                        mock_requests_post.reset_mock()
+                        self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get,
+                                                        mock_requests_post, login_server)
+                        self.assertEqual(
+                            get_login_credentials(cmd, registry_name, tenant_suffix=suffix),
+                            (login_server, EMPTY_GUID, TEST_ACR_REFRESH_TOKEN))
+                        self._validate_raw_token_request(mock_get_raw_token)
+                        self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
+                        for request in mock_requests_get.call_args_list + mock_requests_post.call_args_list:
+                            parsed = urlparse(request.args[0] if request.args else request.kwargs['url'])
+                            self.assertEqual(parsed.scheme, 'https')
+                            self.assertEqual(parsed.hostname, login_server)
+                            self.assertTrue(parsed.hostname.endswith(cloud_suffix))
+                            self.assertEqual(parsed.netloc, parsed.hostname)
+                            self.assertIn(parsed.path, ('/v2/', '/oauth2/exchange'))
+                            self.assertEqual(parsed.query, '')
+                            self.assertEqual(parsed.fragment, '')
 
     def _core_token_scenarios(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name, registry_exists, registry_name, login_server, tenant_suffix):
         from azure.mgmt.containerregistry.models import Registry, Sku
