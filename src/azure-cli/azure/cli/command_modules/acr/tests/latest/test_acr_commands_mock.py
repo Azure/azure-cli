@@ -1153,8 +1153,8 @@ class AcrMockCommandsTests(unittest.TestCase):
                                     mock_get_registry_by_name, mock_get_subscription):
         test_registry = 'testregistry'
         test_login_server = '{}.azurecr.io'.format(test_registry)
-        test_tenant_suffix = 'microsoft'
-        test_login_server_with_tenant_suffix = '{}-{}.azurecr.io'.format(test_registry, test_tenant_suffix)
+        test_suffix = 'microsoft'
+        test_login_server_with_suffix = '{}-{}.azurecr.io'.format(test_registry, test_suffix)
 
         # Mock as Profile.get_subscription_id fails in CI (CI logs in with a SP)
         mock_get_subscription.return_value = TEST_SUBSCRIPTION
@@ -1167,7 +1167,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    registry_exists=True,
                                    registry_name=test_registry,
                                    login_server=test_login_server,
-                                   tenant_suffix=None)
+                                   suffix=None)
 
         # Registry not found, login server without tenant suffix
         self._core_token_scenarios(mock_get_raw_token,
@@ -1177,7 +1177,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    registry_exists=False,
                                    registry_name=test_registry,
                                    login_server=test_login_server,
-                                   tenant_suffix=None)
+                                   suffix=None)
 
         # Registry found, login server with tenant suffix
         self._core_token_scenarios(mock_get_raw_token,
@@ -1186,8 +1186,8 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    mock_get_registry_by_name,
                                    registry_exists=True,
                                    registry_name=test_registry,
-                                   login_server=test_login_server_with_tenant_suffix,
-                                   tenant_suffix=test_tenant_suffix)
+                                   login_server=test_login_server_with_suffix,
+                                   suffix=test_suffix)
 
         # Registry not found, login server with tenant suffix
         self._core_token_scenarios(mock_get_raw_token,
@@ -1196,8 +1196,8 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    mock_get_registry_by_name,
                                    registry_exists=False,
                                    registry_name=test_registry,
-                                   login_server=test_login_server_with_tenant_suffix,
-                                   tenant_suffix=test_tenant_suffix)
+                                   login_server=test_login_server_with_suffix,
+                                   suffix=test_suffix)
 
     @mock.patch('azure.cli.core._profile.Profile.get_subscription_id', return_value=TEST_SUBSCRIPTION)
     @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
@@ -1223,7 +1223,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                         self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get,
                                                         mock_requests_post, login_server)
                         self.assertEqual(
-                            get_login_credentials(cmd, registry_name, tenant_suffix=suffix),
+                            get_login_credentials(cmd, registry_name, suffix=suffix),
                             (login_server, EMPTY_GUID, TEST_ACR_REFRESH_TOKEN))
                         self._validate_raw_token_request(mock_get_raw_token)
                         self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
@@ -1237,7 +1237,7 @@ class AcrMockCommandsTests(unittest.TestCase):
                             self.assertEqual(parsed.query, '')
                             self.assertEqual(parsed.fragment, '')
 
-    def _core_token_scenarios(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name, registry_exists, registry_name, login_server, tenant_suffix):
+    def _core_token_scenarios(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name, registry_exists, registry_name, login_server, suffix):
         from azure.mgmt.containerregistry.models import Registry, Sku
 
         cmd = self._setup_cmd()
@@ -1253,16 +1253,16 @@ class AcrMockCommandsTests(unittest.TestCase):
         self._setup_mock_token_requests(mock_get_raw_token, mock_requests_get, mock_requests_post, login_server)
 
         # Test get refresh token
-        get_login_credentials(cmd, registry_name, tenant_suffix=tenant_suffix)
+        get_login_credentials(cmd, registry_name, suffix=suffix)
         self._validate_raw_token_request(mock_get_raw_token)
         self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
 
         # Test get access token for container image repository
-        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, repository=TEST_REPOSITORY, permission=RepoAccessTokenPermission.METADATA_READ.value)
+        get_access_credentials(cmd, registry_name, suffix=suffix, repository=TEST_REPOSITORY, permission=RepoAccessTokenPermission.METADATA_READ.value)
         self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'repository:{}:{}'.format(TEST_REPOSITORY, RepoAccessTokenPermission.METADATA_READ.value))
 
         # Test get access token for artifact image repository
-        get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission=HelmAccessTokenPermission.PULL.value)
+        get_access_credentials(cmd, registry_name, suffix=suffix, artifact_repository=TEST_REPOSITORY, permission=HelmAccessTokenPermission.PULL.value)
         self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'artifact-repository:{}:{}'.format(TEST_REPOSITORY, HelmAccessTokenPermission.PULL.value))
 
     def _setup_mock_token_requests(self, mock_get_aad_token, mock_requests_get, mock_requests_post, login_server,

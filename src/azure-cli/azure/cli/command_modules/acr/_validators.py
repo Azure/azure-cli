@@ -19,8 +19,8 @@ BAD_MANIFEST_FQDN = "The positional parameter 'manifest_id' must be a fully qual
                     " manifest specifier such as 'myregistry.azurecr.io/hello-world:latest' or"\
                     " 'myregistry.azurecr.io/hello-world@sha256:abc123'."
 BAD_REGISTRY_NAME = "Registry names may contain only alpha numeric characters and must be between 5 and 50 characters"
-BAD_TENANT_SUFFIX = "Invalid --suffix. Use only ASCII letters, digits and hyphens, "\
-                    "starting and ending with a letter or digit."
+BAD_SUFFIX = "Invalid --suffix. Use only ASCII letters, digits and hyphens, "\
+             "starting and ending with a letter or digit."
 INVALID_LOGIN_SERVER_SUFFIX = "The login server suffix is not valid for the current cloud. Please try again using"\
                               " '{}'."
 
@@ -150,10 +150,10 @@ def validate_registry_name(cmd, namespace):
         raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
 
 
-def validate_tenant_suffix(namespace):
-    tenant_suffix = namespace.tenant_suffix
-    if tenant_suffix is not None and not re.fullmatch(r'[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?', tenant_suffix):
-        raise InvalidArgumentValueError(BAD_TENANT_SUFFIX)
+def validate_suffix(namespace):
+    suffix = namespace.suffix
+    if suffix is not None and not re.fullmatch(r'[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?', suffix):
+        raise InvalidArgumentValueError(BAD_SUFFIX)
 
 
 def validate_expiration_time(namespace):
