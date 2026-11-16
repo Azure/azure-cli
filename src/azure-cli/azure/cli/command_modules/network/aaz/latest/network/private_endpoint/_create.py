@@ -25,6 +25,9 @@ class Create(AAZCommand):
 
     :example: Create a private endpoint with ip-configs.
         az network private-endpoint create -n MyPE -g MyResourceGroup --vnet-name MyVnetName --subnet MySubnet --connection-name MyConnectionName --group-id MyGroupId --private-connection-resource-id MyResourceId --ip-configs [{name:Myipconfig1,group-id:MyGroupId ,member-name:MyMemberName,private-ip-address:10.0.0.4},{name:Myipconfig2,private-ip-address:10.0.0.6}]
+
+    :example: Create a private endpoint and inherit approval from an approved private endpoint.
+        az network private-endpoint create -g MyResourceGroup -n PE-B --vnet-name MyVnet --subnet MySubnet --private-connection-resource-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateLinkServices/MyPLS" --connection-name conn --manual-request true --approval-reference-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/privateEndpoints/PE-A"
     """
 
     _aaz_info = {

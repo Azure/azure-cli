@@ -21,6 +21,7 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _get_next_subnet_addr_suffix,
                                                       _validate_vm_vmss_msi,
                                                       _validate_vm_vmss_accelerated_networking,
+                                                      _get_resource_group_from_vault_name,
                                                       process_gallery_image_version_namespace)
 from azure.cli.command_modules.vm._vm_utils import normalize_disk_info, update_disk_sku_info
 from azure.cli.core.mock import DummyCli
@@ -647,6 +648,20 @@ class TestActions(unittest.TestCase):
             target_regions_list = ["westus=standard_lrs=2"]
             np.target_regions = target_regions_list
             process_gallery_image_version_namespace(cmd, np)
+
+    def test_get_resource_group_from_vault_name_uses_2015_11_01_on_every_page(self):
+        from urllib.parse import parse_qs, urlparse
+        from azure.cli.command_modules.keyvault.tests.latest.test_validators import \
+            _two_page_vaults_list_client_factory
+
+        requested_urls = []
+        with mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client',
+                        _two_page_vaults_list_client_factory(requested_urls)):
+            self.assertEqual(_get_resource_group_from_vault_name(None, 'vault2'), 'rg2')
+
+        self.assertEqual(len(requested_urls), 2)
+        for url in requested_urls:
+            self.assertEqual(parse_qs(urlparse(url).query)['api-version'], ['2015-11-01'])
 
 
 if __name__ == '__main__':

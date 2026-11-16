@@ -210,6 +210,55 @@ class TestUserCredentialAgenticSession(unittest.TestCase):
         self.assertEqual(claims["access_token"]["nbf"], {"essential": True, "value": "999"})
         self.assertEqual(claims["access_token"]["xms_cli_sid"]["values"], ["agent-sess-2"])
 
+    @patch.dict(os.environ, {COPILOT_AGENT_SESSION_ID: "agent-sess-3"})
+    def test_silent_failure_does_not_launch_interactive(self):
+        """Agentic-injected 'data' must not be mistaken for VM SSH, so a silent failure (e.g.
+        Conditional Access AADSTS53003) raises instead of launching interactive login."""
+        from azure.cli.core.azclierror import AuthenticationError
+        cred = self._build_user_credential(enable_broker=True)
+        cred._msal_app.acquire_token_silent_with_error.return_value = {
+            "error": "access_denied",
+            "error_description": "AADSTS53003: Access has been blocked by Conditional Access policies.",
+        }
+
+        with self.assertRaises(AuthenticationError):
+            cred.acquire_token(["https://management.azure.com/.default"])
+        cred._msal_app.acquire_token_interactive.assert_not_called()
+
+    @patch.dict(os.environ, {COPILOT_AGENT_SESSION_ID: "agent-sess-4"})
+    def test_vm_ssh_silent_failure_launches_interactive(self):
+        """VM SSH passes token_type 'ssh-cert', so a silent failure still launches interactive login."""
+        cred = self._build_user_credential(enable_broker=True)
+        cred._msal_app.acquire_token_silent_with_error.return_value = {
+            "error": "interaction_required",
+            "error_description": "AADSTS50076: MFA required.",
+        }
+        cred._msal_app.acquire_token_interactive.return_value = {
+            "access_token": "ssh-cert",
+            "token_type": "ssh-cert",
+            "expires_in": 3600,
+        }
+
+        result = cred.acquire_token(["https://pas.windows.net/CheckMyAccess/Linux/.default"],
+                                    data={"token_type": "ssh-cert", "key_id": "k"})
+
+        self.assertEqual(result["access_token"], "ssh-cert")
+        interactive_kwargs = cred._msal_app.acquire_token_interactive.call_args.kwargs
+        self.assertEqual(interactive_kwargs["data"]["client_session"], "agent-sess-4")
+
+    def test_non_ssh_data_silent_failure_does_not_launch_interactive(self):
+        """Caller-supplied 'data' without token_type 'ssh-cert' is not VM SSH."""
+        from azure.cli.core.azclierror import AuthenticationError
+        cred = self._build_user_credential(enable_broker=True)
+        cred._msal_app.acquire_token_silent_with_error.return_value = {
+            "error": "interaction_required",
+            "error_description": "AADSTS50076: MFA required.",
+        }
+
+        with self.assertRaises(AuthenticationError):
+            cred.acquire_token(["https://management.azure.com/.default"], data={"foo": "bar"})
+        cred._msal_app.acquire_token_interactive.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()

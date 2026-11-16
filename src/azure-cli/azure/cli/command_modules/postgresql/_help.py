@@ -43,6 +43,11 @@ examples:
           --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
           --tags "key=value" --version 19 --zonal-resiliency Enabled --zone 1 \\
           --standby-zone 3
+  - name: Create a PostgreSQL flexible server with immutable backups retained for 25 days.
+    text: >
+      az postgres flexible-server create --resource-group testgroup --name testserver --location testlocation \\
+        --sku-name Standard_D2s_v3 --tier GeneralPurpose --storage-size 64 --version 16 \\
+        --backup-retention 25 --immutable-backup Enabled
   - name: >
       Create server with high availability feature enabled that allows primary and standby in the same zone when multi-zone capacity is unavailable.
     text: >
@@ -248,6 +253,14 @@ examples:
     text: >
       az postgres flexible-server create -g testgroup -n testserver --location testlocation --storage-auto-grow Enabled
 
+  - name: Create a Premium SSD v2 server with autogrow capped at 262144 MB and a 10 percent storage increment.
+    text: >
+      az postgres flexible-server create -g testgroup -n testserver --location testlocation
+        --tier GeneralPurpose --sku-name Standard_D2ds_v4 --version 16
+        --storage-type PremiumV2_LRS --storage-size 128 --iops 3000 --throughput 125
+        --storage-auto-grow Enabled --storage-auto-grow-max-threshold-mb 262144
+        --storage-auto-grow-increment-percent 10
+
   - name: >
       Create elastic cluster with node count of 5.
     text: >
@@ -257,6 +270,10 @@ examples:
       Create elastic cluster with node count of 3 and custom database name.
     text: >
       az postgres flexible-server create -g testgroup -n testcluster --location testlocation --node-count 3 --database-name testdatabase
+
+  - name: Create a flexible server with FIPS mode enabled.
+    text: >
+      az postgres flexible-server create --resource-group testgroup --name testserver --location eastus2 --fips-mode Enabled
 """
 
 helps['postgres flexible-server show'] = """
@@ -265,6 +282,8 @@ short-summary: Get the details of a flexible server.
 examples:
   - name: Get the details of a flexible server
     text: az postgres flexible-server show --resource-group testgroup --name testserver
+  - name: Show the FIPS mode of a flexible server.
+    text: az postgres flexible-server show --resource-group testgroup --name testserver --query fipsMode
 """
 
 helps['postgres flexible-server list'] = """
@@ -309,6 +328,10 @@ examples:
     text: az postgres flexible-server update --resource-group testgroup --name testserver --private-dns-zone /subscriptions/{subscriptionId2}/resourceGroups/{resourceGroup2}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com
   - name: Update a flexible server's storage to enable / disable storage auto-grow.
     text: az postgres flexible-server update --resource-group testgroup --name testserver --storage-auto-grow Enabled
+  - name: Set an autogrow maximum of 524288 MB and a 20 percent increment on a Premium SSD v2 server with autogrow already enabled.
+    text: >
+      az postgres flexible-server update --resource-group testgroup --name testserver
+        --storage-auto-grow-max-threshold-mb 524288 --storage-auto-grow-increment-percent 20
   - name: Update a flexible server's storage to set custom storage performance tier.
     text: az postgres flexible-server update --resource-group testgroup --name testserver --performance-tier P15
   - name: Update a flexible server's storage to set IOPS (operations/sec). Server must be using Premium SSD v2 Disks.
@@ -317,6 +340,10 @@ examples:
     text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
   - name: Update a flexible server's cluster size by scaling up node count. Must be an elastic cluster.
     text: az postgres flexible-server update --resource-group testGroup --name testcluster --node-count 6
+  - name: Enable FIPS mode on a flexible server.
+    text: az postgres flexible-server update --resource-group testgroup --name testserver --fips-mode Enabled
+  - name: Disable FIPS mode on a flexible server.
+    text: az postgres flexible-server update --resource-group testgroup --name testserver --fips-mode Disabled
 """
 
 helps['postgres flexible-server restore'] = """
@@ -943,6 +970,7 @@ examples:
 helps['postgres flexible-server upgrade'] = """
 type: command
 short-summary: Upgrade the major version of a flexible server.
+long-summary: Supports flexible servers, including elastic clusters. The --validate-only parameter is not supported for elastic clusters.
 examples:
   - name: Upgrade server 'testserver' to PostgreSQL major version 19.
     text: az postgres flexible-server upgrade -g testgroup -n testserver -v 19

@@ -146,6 +146,8 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].os != `null`', True),
             JMESPathCheck('[0].runtime != `null`', True),
             JMESPathCheck('[0].config != `null`', True),
+            JMESPathCheck("length([?contains(config, '|')])", 0),
+            JMESPathCheck("length([?contains(config, ':')]) == length(@)", True),
             JMESPathCheck('[0].support != `null`', True),
         ])
         # Validate OS filter
@@ -196,7 +198,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick', length=24)
         webapp_name_2 = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
-        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('appservice plan create -g {} -n {} --is-linux false --sku B1'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|22LTS"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
         # ftpPublishingUrl may not be present in all API responses; validate format when present
@@ -206,7 +208,7 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheck('[0].value', '~22'),
         ])
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:8"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:10"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
         # ftpPublishingUrl may not be present in all API responses; validate format when present
         if 'ftpPublishingUrl' in r and r['ftpPublishingUrl']:
@@ -777,7 +779,7 @@ class WebappConfigureTest(ScenarioTest):
         plan_name = self.create_random_name('webapp-config-plan', 40)
 
         self.cmd(
-            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+            'appservice plan create -g {} -n {} --sku S1 --is-linux false'.format(resource_group, plan_name))
         self.cmd(
             'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
 
@@ -947,14 +949,14 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("javaContainer", "TOMCAT"),
             JMESPathCheck("javaContainerVersion", "9.0"),         
         ])
-        self.cmd('webapp config set -g {} -n {} --runtime dotnet:8'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("netFrameworkVersion", "v8.0"),
+        self.cmd('webapp config set -g {} -n {} --runtime dotnet:10'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("netFrameworkVersion", "v10.0"),
             JMESPathCheck("javaVersion", None),            
             JMESPathCheck("javaContainer", None),
             JMESPathCheck("javaContainerVersion", None),
         ])
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("netFrameworkVersion", "v8.0"),            
+            JMESPathCheck("netFrameworkVersion", "v10.0"),
             JMESPathCheck("javaVersion", None),
             JMESPathCheck("javaContainer", None),
             JMESPathCheck("javaContainerVersion", None),         
@@ -982,11 +984,11 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("linuxFxVersion", "PHP|8.4"),  
         ])                
-        self.cmd('webapp config set -g {} -n {} --runtime DOTNETCORE:8.0'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "DOTNETCORE|8.0"),
+        self.cmd('webapp config set -g {} -n {} --runtime DOTNETCORE:10.0'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "DOTNETCORE|10.0"),
         ])
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "DOTNETCORE|8.0"),
+            JMESPathCheck("linuxFxVersion", "DOTNETCORE|10.0"),
         ])        
         self.cmd('webapp config set -g {} -n {} --runtime NODE:22-lts'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("linuxFxVersion", "NODE|22-lts"),
@@ -1753,18 +1755,18 @@ class AppServiceCors(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_cors(self, resource_group, storage_account):
         self.kwargs.update({
             'plan': self.create_random_name(prefix='slot-traffic-plan', length=24),
             'function': self.create_random_name(prefix='slot-traffic-web', length=24),
             'storage': self.create_random_name(prefix='storage', length=24)
         })
-        self.cmd('appservice plan create -g {rg} -n {plan} --sku S1')
+        self.cmd('appservice plan create -g {rg} -n {plan} --is-linux false --sku S1')
         self.cmd(
             'storage account create --name {storage} -g {rg} --sku Standard_LRS --allow-blob-public-access false')
         self.cmd(
-            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage} --functions-version 4')
+            'functionapp create -g {rg} -n {function} --plan {plan} -s {storage} --functions-version 4 --runtime dotnet-isolated --runtime-version 10')
         self.cmd(
             'functionapp cors add -g {rg} -n {function} --allowed-origins https://msdn.com https://msn.com')
         result = self.cmd(
@@ -2678,6 +2680,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
         ])            
 
 class WebappNetworkConnectionTests(ScenarioTest):
+    @unittest.skip("Linux webapp create requires --runtime/--container-image-name/--sitecontainers-app")
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_hybridconnectionE2E(self, resource_group):
@@ -3647,6 +3650,7 @@ class WebappEnrichedErrorsScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_enriched', location='westus2')
+    @unittest.skip("az webapp up is no longer supported; deployment scenarios are retired.")
     def test_webapp_up_enriched_errors_flag_accepted(self, resource_group):
         """Verify --enriched-errors flag is accepted by az webapp up with 409 conflict."""
         from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError

@@ -48,6 +48,29 @@ def _is_valid_storage_account_name(account_name):
     return bool(account_name and re.fullmatch(r'[a-z0-9]{3,24}', account_name))
 
 
+def _validate_storage_url_recognized(cmd, identifier, arg_name, service, resource, path, endpoint_option):
+    """Reject URLs that are not account endpoint URLs for the active cloud, instead of guessing the account."""
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if identifier.is_url() and identifier.account_name is None:
+        # the URL is not echoed, since it may contain a SAS token
+        raise InvalidArgumentValueError(
+            'The {} URL is not a recognized Azure Storage {} URL for the current cloud.'.format(arg_name, resource),
+            recommendation='Use a URL of the form https://<account>.{}.{}/{}, or pass the {} name and specify '
+                           'the endpoint with --connection-string or {}.'.format(
+                               service, cmd.cli_ctx.cloud.suffixes.storage_endpoint, path, resource,
+                               endpoint_option))
+
+
+def _validate_source_account_name(account_name):
+    """Ensure a source account name cannot change the host of the copy source URL built from it."""
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    from .storage_url_helpers import is_valid_hostname_label
+    if account_name is not None and not is_valid_hostname_label(account_name):
+        # the value is not echoed, since a mistyped value may be a URL or connection string containing credentials
+        raise InvalidArgumentValueError(
+            "Invalid source storage account name. The account name may only contain letters, numbers and hyphens.")
+
+
 def _query_account_rg(cli_ctx, account_name):
     """Query the storage account's resource group, which the mgmt sdk requires."""
     scf = storage_client_factory(cli_ctx)
@@ -189,7 +212,16 @@ def validate_client_parameters(cmd, namespace):
         n.account_name = n.account_name[:-10]
 
     # if account name is specified but no key, attempt to query
-    if n.account_name and not n.account_key and not n.sas_token:
+    from .storage_url_helpers import is_valid_hostname_label
+    if n.account_name and not n.account_key and not n.sas_token and not is_valid_hostname_label(n.account_name) \
+            and not getattr(n, 'account_url', None):
+        # Azure account names are always valid labels, so the lookup below could not succeed, and its failure
+        # warning would echo the value, which may be a URL or connection string containing credentials.
+        # With a custom endpoint the name is not part of the host, so leave it to the checks further down.
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError(
+            "Invalid storage account name. The account name may only contain letters, numbers and hyphens.")
+    if n.account_name and not n.account_key and not n.sas_token and is_valid_hostname_label(n.account_name):
         message = """
 There are no credentials provided in your command and environment, we will query for account key for your storage account.
 It is recommended to provide --connection-string, --account-key or --sas-token in your command as credentials.
@@ -266,6 +298,7 @@ def process_blob_source_uri(cmd, namespace):
         return
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
+    _validate_source_account_name(source_account_name or ns.get('account_name', None))
 
     # determine if the copy will happen in the same storage account
     if not source_account_name and source_account_key:
@@ -360,6 +393,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
                                              'specified'))
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
+    _validate_source_account_name(source_account_name or ns.get('account_name', None))
 
     if not source_account_name:
         if source_account_key:
@@ -472,6 +506,7 @@ def validate_source_url(cmd, namespace):  # pylint: disable=too-many-statements,
             'Ambiguous parameters, both blob and file sources are specified'))
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
+    _validate_source_account_name(source_account_name or ns.get('account_name', None))
 
     if not source_account_name:
         if source_account_key:
@@ -980,6 +1015,7 @@ def get_source_file_or_blob_service_client_track2(cmd, namespace):
         if not (source_key or source_sas):
             # when neither storage account key nor SAS is given, try to fetch the key in the current
             # subscription
+            _validate_source_account_name(source_account)
             source_key = _query_account_key(cmd.cli_ctx, source_account)
 
     elif source_uri and not is_oauth:
@@ -993,6 +1029,8 @@ def get_source_file_or_blob_service_client_track2(cmd, namespace):
         nor_container_or_share = not identifier.container and not identifier.share
         if not identifier.is_url():
             raise ValueError('incorrect usage: --source-uri expects a URI')
+        _validate_storage_url_recognized(cmd, identifier, '--source-uri', '<blob|file>', 'container or file share',
+                                         '<container|share>', '--blob-endpoint/--file-endpoint')
         if identifier.blob or identifier.directory or identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
 
@@ -1158,6 +1196,8 @@ def _process_blob_batch_container_parameters(cmd, namespace, source=True):
     from .storage_url_helpers import StorageResourceIdentifier
     container_arg_val = getattr(namespace, container_arg)  # either a url or name
     identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, container_arg_val)
+    _validate_storage_url_recognized(cmd, identifier, '--' + container_arg, 'blob', 'container', '<container>',
+                                     '--blob-endpoint')
 
     if not identifier.is_url():
         setattr(namespace, container_name_arg, container_arg_val)
@@ -1191,6 +1231,8 @@ def process_file_upload_batch_parameters(cmd, namespace):
     # 2. try to extract account name and container name from destination string
     from .storage_url_helpers import StorageResourceIdentifier
     identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.destination)
+    _validate_storage_url_recognized(cmd, identifier, '--destination', 'file', 'file share', '<share>',
+                                     '--file-endpoint')
     if identifier.is_url():
         if identifier.filename or identifier.directory:
             raise ValueError('incorrect usage: destination must be a file share url')
@@ -1219,6 +1261,7 @@ def process_file_download_batch_parameters(cmd, namespace):
 def process_file_batch_source_parameters(cmd, namespace):
     from .storage_url_helpers import StorageResourceIdentifier
     identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.source)
+    _validate_storage_url_recognized(cmd, identifier, '--source', 'file', 'file share', '<share>', '--file-endpoint')
     if identifier.is_url():
         if identifier.filename or identifier.directory:
             raise ValueError('incorrect usage: source should be either share URL or name')
@@ -1804,6 +1847,66 @@ def validate_or_policy(cmd, namespace):
             name=namespace.destination_account)
 
 
+def _storage_url_origin(url):
+    from urllib.parse import urlsplit
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    from .storage_url_helpers import normalize_url_origin
+
+    try:
+        parsed = urlsplit(url)
+        if parsed.scheme not in ('https', 'http') or not parsed.hostname or parsed.fragment:
+            raise ValueError()
+        if (parsed.username is not None or parsed.password is not None or
+                '\\' in url or any(ord(char) < 32 for char in url)):
+            raise ValueError()
+        if url.startswith(' ') or ' ' in parsed.netloc:
+            raise ValueError()
+        origin = normalize_url_origin(url)
+        if origin is None:
+            raise ValueError()
+        return origin
+    except ValueError:
+        raise InvalidArgumentValueError(
+            'Invalid storage endpoint URL. Use an account endpoint without user information or a fragment.') from None
+
+
+def _storage_account_urls(cmd, account_name, service, connection_string=None):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    from ._client_factory import get_account_url
+
+    services = ('blob', 'dfs') if service == 'blob' else ('file',)
+    if connection_string:
+        try:
+            settings = {key.upper(): value for key, value in validate_key_value_pairs(connection_string).items()}
+        except ValueError:
+            raise InvalidArgumentValueError('Invalid storage connection string.') from None
+        client_types = {
+            'blob': (ResourceType.DATA_STORAGE_BLOB, '_blob_service_client#BlobServiceClient'),
+            'dfs': (ResourceType.DATA_STORAGE_FILEDATALAKE, '_data_lake_service_client#DataLakeServiceClient'),
+            'file': (ResourceType.DATA_STORAGE_FILESHARE, '_share_service_client#ShareServiceClient')
+        }
+        urls = []
+        for endpoint_service in services:
+            endpoint_key = 'BLOBENDPOINT' if endpoint_service == 'dfs' else endpoint_service.upper() + 'ENDPOINT'
+            if not any(settings.get(key) for key in ('ACCOUNTNAME', 'USEDEVELOPMENTSTORAGE', endpoint_key)):
+                continue
+            client_type = get_sdk(cmd.cli_ctx, *client_types[endpoint_service])
+            try:
+                with client_type.from_connection_string(connection_string) as client:
+                    urls.append(client.primary_endpoint)
+                    if client.secondary_hostname:
+                        urls.append(client.secondary_endpoint)
+            except ValueError:
+                raise InvalidArgumentValueError('Invalid storage connection string.') from None
+        return urls
+
+    if not _is_valid_storage_account_name(account_name):
+        raise InvalidArgumentValueError('Provide a valid storage account name for the storage credentials.')
+    return [get_account_url(cmd.cli_ctx, account, endpoint_service)
+            for endpoint_service in services
+            for account in (account_name, account_name + '-secondary')]
+
+
 def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=None, file_path=None):
     import re
 
@@ -1824,20 +1927,28 @@ def get_url_with_sas(cmd, namespace, url=None, container=None, blob=None, share=
     storage_endpoint = cmd.cli_ctx.cloud.suffixes.storage_endpoint
     service = None
     if url is not None:
-        # validate source is uri or local path
-        storage_pattern = re.compile(r'https://(.*?)\.(blob|dfs|file).%s' % storage_endpoint)
-        result = re.findall(storage_pattern, url)
-        if result:  # source is URL
-            storage_info = result[0]
-            namespace.account_name = storage_info[0]
-            if storage_info[1] in ['blob', 'dfs']:
-                service = 'blob'
-            elif storage_info[1] in ['file']:
-                service = 'file'
-            else:
-                raise ValueError('{} is not valid storage endpoint.'.format(url))
-        else:
-            logger.info("%s is not Azure storage url.", url)
+        if '://' not in url:
+            return service, url
+        origin = _storage_url_origin(url)
+        storage_info = re.fullmatch(
+            r'([a-z0-9]{3,24})(-secondary)?\.(blob|dfs|file)\.' + re.escape(storage_endpoint.lower()),
+            origin[1])
+        if storage_info:
+            if not namespace.account_name:
+                namespace.account_name = get_config_value(cmd, 'storage', 'account', None) or storage_info[1]
+            service = 'file' if storage_info[3] == 'file' else 'blob'
+        connection_string = namespace.connection_string
+        if not connection_string and not namespace.account_key and not namespace.sas_token:
+            connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
+        if connection_string:
+            for candidate_service in ('blob', 'file'):
+                if origin in [_storage_url_origin(endpoint) for endpoint in
+                              _storage_account_urls(cmd, namespace.account_name, candidate_service, connection_string)]:
+                    service = candidate_service
+                    namespace.connection_string = connection_string
+                    break
+        if service is None:
+            logger.info("The copy URL is not a configured Azure storage endpoint; no storage SAS will be attached.")
             return service, url
     # validate credential
     if container:
@@ -1896,8 +2007,19 @@ def _is_valid_uri(uri):
     return False
 
 
-def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, resource_types, permissions):
+def _add_sas_for_url(cmd, url, account_name, account_key, sas_token, service, resource_types, permissions,
+                     connection_string=None):
     from azure.cli.command_modules.storage.azcopy.util import _generate_sas_token
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
+    if service is None:
+        return url
+    origin = _storage_url_origin(url)
+    endpoints = _storage_account_urls(cmd, account_name, service, connection_string)
+    if origin not in [_storage_url_origin(endpoint) for endpoint in endpoints]:
+        raise InvalidArgumentValueError(
+            'Cannot attach storage credentials to a URL outside the configured account endpoints.',
+            recommendation='Use the account endpoint or configure the endpoint in a trusted connection string.')
 
     if sas_token:
         sas_token = sas_token.lstrip('?')
@@ -1932,7 +2054,8 @@ def validate_azcopy_credential(cmd, namespace):
             namespace.destination = _add_sas_for_url(cmd, url=namespace.destination,
                                                      account_name=namespace.account_name,
                                                      account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                                     service=service, resource_types='co', permissions='wac')
+                                                     service=service, resource_types='co', permissions='wac',
+                                                     connection_string=namespace.connection_string)
 
     if not _is_valid_uri(namespace.source):
         # determine if source account is same with destination
@@ -1955,7 +2078,8 @@ def validate_azcopy_credential(cmd, namespace):
         if not auth_mode_login:
             namespace.source = _add_sas_for_url(cmd, url=namespace.source, account_name=namespace.account_name,
                                                 account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                                service=service, resource_types='sco', permissions='rl')
+                                                service=service, resource_types='sco', permissions='rl',
+                                                connection_string=namespace.connection_string)
 
 
 def is_directory(props):
@@ -1990,7 +2114,8 @@ def validate_fs_directory_upload_destination_url(cmd, namespace):
     else:
         namespace.destination = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
                                                  account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                                 service='blob', resource_types='co', permissions='rwdlac')
+                                                 service='blob', resource_types='co', permissions='rwdlac',
+                                                 connection_string=namespace.connection_string)
     del namespace.destination_fs
     del namespace.destination_path
 
@@ -2011,7 +2136,8 @@ def validate_fs_directory_download_source_url(cmd, namespace):
     else:
         namespace.source = _add_sas_for_url(cmd, url=url, account_name=namespace.account_name,
                                             account_key=namespace.account_key, sas_token=namespace.sas_token,
-                                            service='blob', resource_types='co', permissions='rl')
+                                            service='blob', resource_types='co', permissions='rl',
+                                            connection_string=namespace.connection_string)
     del namespace.source_fs
     del namespace.source_path
 

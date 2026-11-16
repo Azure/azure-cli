@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2017-04-01",
+        "version": "2026-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.relay/namespaces/{}/authorizationrules/{}", "2017-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.relay/namespaces/{}/authorizationrules/{}", "2026-07-01-preview"],
         ]
     }
 
@@ -71,9 +71,6 @@ class Update(AAZCommand):
         _args_schema.rights = AAZListArg(
             options=["--rights"],
             help="Space-separated list of Authorization rule rights. Allowed values: Listen, Manage, Send.",
-            fmt=AAZListArgFormat(
-                unique=True,
-            ),
         )
 
         rights = cls._args_schema.rights
@@ -137,7 +134,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -165,7 +162,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -224,7 +221,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -252,7 +249,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2017-04-01",
+                    "api-version", "2026-07-01-preview",
                     required=True,
                 ),
             }
@@ -310,7 +307,7 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -340,8 +337,10 @@ class _UpdateHelper:
     def _build_schema_authorization_rule_read(cls, _schema):
         if cls._schema_authorization_rule_read is not None:
             _schema.id = cls._schema_authorization_rule_read.id
+            _schema.location = cls._schema_authorization_rule_read.location
             _schema.name = cls._schema_authorization_rule_read.name
             _schema.properties = cls._schema_authorization_rule_read.properties
+            _schema.system_data = cls._schema_authorization_rule_read.system_data
             _schema.type = cls._schema_authorization_rule_read.type
             return
 
@@ -351,11 +350,18 @@ class _UpdateHelper:
         authorization_rule_read.id = AAZStrType(
             flags={"read_only": True},
         )
+        authorization_rule_read.location = AAZStrType(
+            flags={"read_only": True},
+        )
         authorization_rule_read.name = AAZStrType(
             flags={"read_only": True},
         )
         authorization_rule_read.properties = AAZObjectType(
-            flags={"required": True, "client_flatten": True},
+            flags={"client_flatten": True},
+        )
+        authorization_rule_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
         )
         authorization_rule_read.type = AAZStrType(
             flags={"read_only": True},
@@ -369,9 +375,31 @@ class _UpdateHelper:
         rights = _schema_authorization_rule_read.properties.rights
         rights.Element = AAZStrType()
 
+        system_data = _schema_authorization_rule_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
         _schema.id = cls._schema_authorization_rule_read.id
+        _schema.location = cls._schema_authorization_rule_read.location
         _schema.name = cls._schema_authorization_rule_read.name
         _schema.properties = cls._schema_authorization_rule_read.properties
+        _schema.system_data = cls._schema_authorization_rule_read.system_data
         _schema.type = cls._schema_authorization_rule_read.type
 
 

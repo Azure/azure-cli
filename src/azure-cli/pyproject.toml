@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "azure-cli"
-version = "2.91.0"
+version = "2.93.0"
 description = "Microsoft Azure Command-Line Tools"
 readme = { file = "README.rst", content-type = "text/x-rst" }
 requires-python = ">=3.10.0"
@@ -28,7 +28,7 @@ dependencies = [
     'azure-appconfiguration==1.10.0b1',
     'azure-ai-projects~=1.0.0',
     'azure-batch==15.0.0b1',
-    'azure-cli-core==2.91.0',
+    'azure-cli-core==2.93.0',
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
     'azure-datalake-store~=1.0.1',
@@ -48,12 +48,12 @@ dependencies = [
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
-    'azure-mgmt-cognitiveservices==15.0.0b4', # Supports compute operations in private preview; consult the team before removing.
+    'azure-mgmt-cognitiveservices==15.0.0b6', # Supports compute and adapter deployment preview operations; consult the team before changing.
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==15.1.0b3',
     'azure-mgmt-containerregistrytasks==1.0.0b1',
-    'azure-mgmt-containerservice~=41.7.0',
+    'azure-mgmt-containerservice~=41.8.0',
     'azure-mgmt-cosmosdb==10.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
@@ -66,7 +66,7 @@ dependencies = [
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==5.0.0b1',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
-    'azure-mgmt-keyvault==14.0.1',
+    'azure-mgmt-keyvault==14.1.0',
     'azure-mgmt-loganalytics==13.0.0b4',
     'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
@@ -80,7 +80,7 @@ dependencies = [
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-mysqlflexibleservers==1.1.0b3',
-    'azure-mgmt-recoveryservicesbackup~=11.1.0',
+    'azure-mgmt-recoveryservicesbackup~=11.2.0',
     'azure-mgmt-recoveryservicesbackup-passivestamp==1.0.0b1',
     'azure-mgmt-recoveryservices~=4.2.0',
     'azure-mgmt-redhatopenshift~=3.0.0',
@@ -98,8 +98,9 @@ dependencies = [
     'azure-mgmt-servicefabric~=2.1.0',
     'azure-mgmt-signalr==2.0.0b2',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
-    'azure-mgmt-sql==4.0.0b22',
-    'azure-mgmt-storage==25.0.0',
+    # SQL's TypeSpec model adapters and operation signatures target this SDK version.
+    'azure-mgmt-sql==5.0.0b2',
+    'azure-mgmt-storage==25.3.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==11.0.0',

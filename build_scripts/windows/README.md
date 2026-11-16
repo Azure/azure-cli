@@ -31,3 +31,17 @@ Building
 2. Run `build_scripts\windows\scripts\build.cmd`.
 
 3. The unsigned MSI will be in the `.\out` folder.
+
+Python and pip bootstrap
+------------------------
+
+The build downloads embedded Python and `get-pip.py`. During bootstrap, it sets
+`PIP_PYTHON` to the embedded interpreter so pip uses its interpreter runner rather
+than executing the bundled `pip` directory, which triggers pip's Windows
+self-modification protection. This setting is scoped to bootstrap only.
+
+Downloads, extraction, bootstrap, and setuptools/wheel installation must succeed
+before packaging continues. The build also verifies that pip is importable,
+including when reusing an existing Python artifacts directory. If a previous
+bootstrap failed, remove only `build_scripts\windows\artifacts\Python` before
+retrying to create a fresh Python environment.

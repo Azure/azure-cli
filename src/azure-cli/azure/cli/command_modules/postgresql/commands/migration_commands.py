@@ -145,7 +145,7 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         migration_resource = migration_show_func(cmd, client, resource_group_name, server_name, migration_name)
         if migration_resource.migration_mode == "Offline":
             raise BadRequestError("Cutover is not possible for migration {} if the migration_mode set to offline. The migration will cutover automatically".format(migration_name))
-        parameters = postgresql_flexibleservers.models.MigrationResourceForPatch(trigger_cutover="True", dbs_to_trigger_cutover_migration_on=migration_resource.dbs_to_migrate)
+        parameters = postgresql_flexibleservers.models.MigrationResourceForPatch(trigger_cutover="True", dbs_to_trigger_cutover_on=migration_resource.dbs_to_migrate)
 
     if cancel is not None:
         if operationSpecified is True:

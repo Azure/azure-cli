@@ -5,6 +5,7 @@
 
 """Offline packaging regression tests; subprocesses and PyPI access are mocked."""
 
+import ast
 import importlib.util
 from pathlib import Path
 import subprocess
@@ -46,6 +47,32 @@ class PackageFixture(unittest.TestCase):
                        'raise AssertionError("Runtime must not be imported")\n'
                        '__version__ = "{}"\n'.format(version))
         return self.root / folder
+
+
+class FullTestPackageDataTests(unittest.TestCase):
+    def test_sql_snapshot_powershell_fixture_is_packaged(self):
+        root = Path(__file__).resolve().parents[3]
+        script = (root / 'scripts/ci/build.sh').read_text(encoding='utf-8')
+        template = script.split('cat >>$testsrc_dir/setup.py <<EOL\n', 1)[1].split('\nEOL', 1)[0]
+        tree = ast.parse('setup(packages=[\n' + template)
+        setup = tree.body[0].value
+        package_data = ast.literal_eval(next(
+            keyword.value for keyword in setup.keywords if keyword.arg == 'package_data'))
+        fixture = root / (
+            'src/azure-cli/azure/cli/command_modules/backup/tests/latest/'
+            'sql_instance_test_setup.ps1')
+        self.assertTrue(fixture.is_file())
+        with tempfile.TemporaryDirectory() as directory:
+            package = Path(directory)
+            for relative in (fixture.name, 'nested/' + fixture.name):
+                target = package / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(fixture.read_bytes())
+            included = {path.relative_to(package).as_posix()
+                        for pattern in package_data[''] for path in package.glob(pattern)}
+            for relative in (fixture.name, 'nested/' + fixture.name):
+                with self.subTest(path=relative):
+                    self.assertIn(relative, included)
 
 
 class PackageVersionTests(PackageFixture):

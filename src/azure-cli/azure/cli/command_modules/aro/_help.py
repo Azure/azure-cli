@@ -8,12 +8,12 @@ from knack.help_files import helps
 
 helps['aro'] = """
   type: group
-  short-summary: Manage Azure Red Hat OpenShift clusters.
+  short-summary: Manage Azure Red Hat OpenShift Standard clusters.
 """
 
 helps['aro create'] = """
   type: command
-  short-summary: Create a cluster.
+  short-summary: Create an Azure Red Hat OpenShift Standard cluster.
   examples:
   - name: Create a cluster.
     text: az aro create --resource-group MyResourceGroup --name MyCluster --vnet MyVnet --master-subnet MyMasterSubnet --worker-subnet MyWorkerSubnet
@@ -27,7 +27,7 @@ helps['aro create'] = """
 
 helps['aro validate'] = """
   type: command
-  short-summary: Validate permissions required to create a cluster.
+  short-summary: Validate permissions required to create an Azure Red Hat OpenShift Standard cluster.
   examples:
   - name: Validate permissions.
     text: az aro validate --resource-group MyGroup --name MyName --vnet MyVnet --master-subnet MyMasterSubnet --worker-subnet MyWorkerSubnet
@@ -37,7 +37,7 @@ helps['aro validate'] = """
 
 helps['aro list'] = """
   type: command
-  short-summary: List clusters.
+  short-summary: List Azure Red Hat OpenShift Standard clusters.
   examples:
   - name: List clusters.
     text: az aro list
@@ -47,7 +47,7 @@ helps['aro list'] = """
 
 helps['aro get-versions'] = """
   type: command
-  short-summary: List versions available for installation.
+  short-summary: List versions available for installation for Azure Red Hat OpenShift Standard clusters.
   examples:
   - name: List install versions available for the East US region.
     text: az aro get-versions --location eastus
@@ -57,7 +57,7 @@ helps['aro get-versions'] = """
 
 helps['aro delete'] = """
   type: command
-  short-summary: Delete a cluster.
+  short-summary: Delete an Azure Red Hat OpenShift Standard cluster.
   examples:
   - name: Delete a cluster.
     text: az aro delete --name MyCluster --resource-group MyResourceGroup
@@ -65,7 +65,7 @@ helps['aro delete'] = """
 
 helps['aro show'] = """
   type: command
-  short-summary: Get the details of a cluster.
+  short-summary: Get the details of an Azure Red Hat OpenShift Standard cluster.
   examples:
   - name: Get the details of a cluster.
     text: az aro show --name MyCluster --resource-group MyResourceGroup
@@ -73,7 +73,7 @@ helps['aro show'] = """
 
 helps['aro update'] = """
   type: command
-  short-summary: Update a cluster.
+  short-summary: Update an Azure Red Hat OpenShift Standard cluster.
   examples:
   - name: Update a cluster.
     text: az aro update --name MyCluster --resource-group MyResourceGroup
@@ -81,7 +81,7 @@ helps['aro update'] = """
 
 helps['aro list-credentials'] = """
   type: command
-  short-summary: List credentials of a cluster.
+  short-summary: List credentials of an Azure Red Hat OpenShift Standard cluster.
   examples:
   - name: List credentials of a cluster.
     text: az aro list-credentials --name MyCluster --resource-group MyResourceGroup
@@ -89,7 +89,7 @@ helps['aro list-credentials'] = """
 
 helps['aro get-admin-kubeconfig'] = """
   type: command
-  short-summary: List admin kubeconfig of a cluster.
+  short-summary: List admin kubeconfig of an Azure Red Hat OpenShift Standard cluster.
   examples:
   - name: List admin kubeconfig of a cluster. The default is to save it in a file named "kubeconfig".
     text: az aro get-admin-kubeconfig --name MyCluster --resource-group MyResourceGroup
@@ -97,23 +97,23 @@ helps['aro get-admin-kubeconfig'] = """
 
 helps['aro wait'] = """
   type: command
-  short-summary: Wait for a cluster to reach a desired state.
+  short-summary: Wait for an Azure Red Hat OpenShift Standard cluster to reach a desired state.
   long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
 """
 
 helps['aro identity'] = """
   type: group
-  short-summary: Manage identities related to Azure Red Hat OpenShift clusters.
+  short-summary: Manage identities related to Azure Red Hat OpenShift Standard clusters.
 """
 
 helps['aro identity get-required'] = """
   type: command
   short-summary: Get required identities
-  long-summary: Get required identities for creating a cluster with managed identities.
+  long-summary: Get required identities for creating an Azure Red Hat OpenShift Standard cluster with managed identities.
 """
 
 helps['aro identity create-required'] = """
   type: command
   short-summary: Create required identities
-  long-summary: Create required identities to prepare for creating a cluster with managed identities.
+  long-summary: Create required identities to prepare for creating an Azure Red Hat OpenShift Standard cluster with managed identities.
 """

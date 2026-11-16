@@ -43,11 +43,13 @@ jobs:
   - bash: |
       set -euo pipefail
 
-      brew install python@${{ parameters.PythonVersion }}
-      PYTHON_PATH="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python"
+      brew install "python@$RELEASE_PYTHON_VERSION"
+      PYTHON_PATH="$(brew --prefix "python@$RELEASE_PYTHON_VERSION")/libexec/bin/python"
       "$PYTHON_PATH" --version
       echo "##vso[task.setvariable variable=PythonPath]$PYTHON_PATH"
     displayName: 'Install Homebrew Python'
+    env:
+      RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}
 
   - bash: |
       set -euo pipefail

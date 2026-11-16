@@ -10,7 +10,7 @@ from azure.cli.core.util import empty_on_404
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
 from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
                           validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
-                          validate_webapp_up, validate_app_exists, validate_add_vnet, validate_app_is_functionapp,
+                          validate_webapp_up_disabled, validate_app_exists, validate_add_vnet, validate_app_is_functionapp,
                           validate_app_is_webapp, validate_functionapp_on_containerapp_vnet,
                           validate_functionapp_on_containerapp_vnet_add, validate_centauri_delete_function,
                           validate_functionapp_on_containerapp_site_config_set,
@@ -219,7 +219,7 @@ def transform_troubleshoot_status_output(result):
 
         def _print_hint(app=app_name, rg=resource_group):
             _sys.stderr.write(
-                '\n\u25b6 Hint:\n'
+                '\nHint:\n'
                 '  Check application logs:  az webapp log tail -n {name} -g {rg}\n'
                 '  Check startup logs:      az webapp log startup show -n {name} -g {rg}\n'
                 .format(name=app, rg=rg))
@@ -284,6 +284,10 @@ def _polish_bad_errors(ex, creating_plan):
 
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
+    if self.cli_ctx.cloud.profile == 'latest':
+        from ._active_backup import load_command_table as load_active_backup_commands
+        load_active_backup_commands(self)
+
     webclient_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.web.operations#WebSiteManagementClientOperationsMixin.{}',
         client_factory=cf_web_client
@@ -316,8 +320,7 @@ def load_command_table(self, _):
 
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_vnet_integration)
-        g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory(), validator=validate_webapp_up,
-                         deprecate_info=g.deprecate(redirect='webapp create and webapp deploy'))
+        g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory(), validator=validate_webapp_up_disabled)
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('exec', 'webapp_exec', custom_command_type=webapp_exec_custom, exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', transform=transform_webapp_site_output,
@@ -362,6 +365,15 @@ def load_command_table(self, _):
     with self.command_group('webapp config') as g:
         g.custom_command('set', 'update_site_configs')
         g.custom_show_command('show', 'get_site_configs')
+
+    with self.command_group('webapp config egress', is_preview=True) as g:
+        g.custom_command('set', 'set_egress_config')
+        g.custom_show_command('show', 'show_egress_config')
+
+    with self.command_group('webapp config egress connection', is_preview=True) as g:
+        g.custom_command('add', 'add_egress_connection')
+        g.custom_command('remove', 'remove_egress_connection')
+        g.custom_show_command('show', 'show_egress_connection')
 
     with self.command_group('webapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)

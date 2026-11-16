@@ -8,6 +8,8 @@ For unit tests, we support unit tests written in the forms standard [unittest](h
 
 For integration tests, we provide the `ScenarioTest` and `LiveScenarioTest` classes to support replayable tests via [VCR.py](https://vcrpy.readthedocs.io/en/latest/).
 
+CI and DEB/RPM package tests use [pytest constraints](../.azure-pipelines/pytest-constraints.txt) to keep pytest compatible with pytest-forked. Package-test setup exports `PIP_CONSTRAINT` so subsequent installations, including the test SDK, preserve the constraint. RPM package tests invoke pip through `python -m pip` to use the same interpreter as the test runner.
+
 ### About replayable tests
 
 Azure CLI translates user inputs into Azure Python SDK calls which communicate with [Azure REST API](https://learn.microsoft.com/rest/api/). These HTTP communications are captured and recorded so the integration tests can be replayed in an automation environment without making actual HTTP calls. This ensures that the commands actually work against the service when they are recorded (and then can be re-run live to verify) and provides protection against regressions or breaking changes when they are played back.

@@ -17,7 +17,7 @@ class CognitiveServicesPropertiesTests(ScenarioTest):
             'sname': sname,
             'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS'
+            'location': 'southcentralus'
         })
 
         # test to create cognitive services account
@@ -43,7 +43,7 @@ class CognitiveServicesPropertiesTests(ScenarioTest):
             'sname': sname,
             'kind': 'Face',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS'
+            'location': 'southcentralus'
         })
 
         # test to create cognitive services account
@@ -69,7 +69,7 @@ class CognitiveServicesPropertiesTests(ScenarioTest):
             'sname2': sname2,
             'kind': 'AIServices',
             'sku': 'S0',
-            'location': 'EASTUS'
+            'location': 'eastus'
         })
 
         # test to create cognitive services account with allow_project_management set to True by default for AIServices kind

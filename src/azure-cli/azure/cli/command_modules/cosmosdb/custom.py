@@ -773,6 +773,7 @@ def cli_cosmosdb_sql_container_update(client,
     sql_container_resource.default_ttl = sql_container.resource.default_ttl
     sql_container_resource.unique_key_policy = sql_container.resource.unique_key_policy
     sql_container_resource.conflict_resolution_policy = sql_container.resource.conflict_resolution_policy
+    sql_container_resource.computed_properties = sql_container.resource.computed_properties
     sql_container_resource.vector_embedding_policy = sql_container.resource.vector_embedding_policy
     sql_container_resource.full_text_policy = sql_container.resource.full_text_policy
 
@@ -3636,10 +3637,13 @@ def cli_cosmosdb_fleetspace_create(client,
     if not data_regions:
         raise CLIError('Missing required field "dataRegions" in properties.')
 
-    throughput_pool_config = FleetspacePropertiesThroughputPoolConfiguration(
-        min_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['minThroughput'],
-        max_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['maxThroughput']
-    )
+    pool_properties = fleetspace_body['properties'].get('throughputPoolConfiguration')
+    throughput_pool_config = None
+    if pool_properties:
+        throughput_pool_config = FleetspacePropertiesThroughputPoolConfiguration(
+            min_throughput=pool_properties['minThroughput'],
+            max_throughput=pool_properties['maxThroughput']
+        )
 
     fleetspace_resource = FleetspaceResource(
         fleetspace_api_kind="NoSQL",
@@ -3696,6 +3700,15 @@ def cli_cosmosdb_fleetspace_account_create(client,
                                            fleetspace_account_body):
 
     """Creates an Azure Cosmos DB Fleetspace Account."""
+
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    from ._validators import _parse_fleetspace_account_resource_id
+
+    account_properties = fleetspace_account_body['properties']['globalDatabaseAccountProperties']
+    account_name = _parse_fleetspace_account_resource_id(account_properties['resourceId'])['name']
+    if fleetspace_account_name.lower() != account_name.lower():
+        raise InvalidArgumentValueError(
+            f'--fleetspace-account-name "{fleetspace_account_name}" must match the database account name "{account_name}" in resourceId.')
 
     fleetspaceAccountPropertiesGlobalDatabaseAccountProperties = FleetspaceAccountPropertiesGlobalDatabaseAccountProperties(
         resource_id=fleetspace_account_body['properties']['globalDatabaseAccountProperties']['resourceId'],

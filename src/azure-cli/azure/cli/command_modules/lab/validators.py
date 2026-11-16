@@ -393,12 +393,14 @@ def _update_artifact_id(artifact_id, lab_resource_id):
 # TODO: Following methods are carried over from other command modules
 def validate_authentication_type(args, formula=None):
     if formula and formula.get('formulaContent'):
-        if formula['formulaContent']['isAuthenticationWithSshKey'] is True:
+        formula_content = formula['formulaContent']
+        if formula_content['isAuthenticationWithSshKey'] is True:
             args.authentication_type = 'ssh'
-            args.ssh_key = formula['formulaContent']['sshKey']
-        elif formula['formulaContent']['isAuthenticationWithSshKey'] is False:
-            args.user_name = formula['formulaContent']['userName']
-            args.password = formula['formulaContent']['password']
+            args.ssh_key = formula_content['sshKey']
+        elif formula_content['isAuthenticationWithSshKey'] is False:
+            args.user_name = formula_content['userName']
+            if not has_value(args.password) and formula_content.get('password') is not None:
+                args.password = formula_content['password']
             args.authentication_type = 'password'
 
     # validate proper arguments supplied based on the authentication type

@@ -22,9 +22,9 @@ class ListVms(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-04-01-preview",
+        "version": "2026-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}/virtualmachines", "2026-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}/virtualmachines", "2026-08-01"],
         ]
     }
 
@@ -138,7 +138,7 @@ class ListVms(AAZCommand):
                     "$skiptoken", self.ctx.args.skiptoken,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2026-04-01-preview",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }
@@ -195,7 +195,17 @@ class ListVms(AAZCommand):
                 serialized_name="operationStatus",
                 flags={"read_only": True},
             )
+            _element.priority = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.vm_size = AAZStrType(
+                serialized_name="vmSize",
+                flags={"read_only": True},
+            )
+            _element.zone = AAZStrType(
                 flags={"read_only": True},
             )
 

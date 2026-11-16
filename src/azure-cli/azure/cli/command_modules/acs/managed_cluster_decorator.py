@@ -9146,7 +9146,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 )
             return
 
-        if not azure_monitor_logs_enabled and self.context.raw_param.get("enable_addons") is None:
+        if not azure_monitor_logs_enabled and self.context.raw_param.get("enable_addons") is None and self.context.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
             return
 
         # Create the DCR Association here. Drive provisioning off whichever profile carries the

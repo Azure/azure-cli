@@ -50,6 +50,12 @@ class UserCredential:  # pylint: disable=too-few-public-methods
         logger.debug("UserCredential.acquire_token: scopes=%r, claims_challenge=%r, kwargs=%r",
                      scopes, claims_challenge, kwargs)
 
+        # Identify VM SSH by its explicit token_type rather than by the presence of 'data', because
+        # the agentic session logic below injects 'data' (client_session). Checking presence would
+        # misclassify every silent failure in an agentic session as VM SSH and launch interactive
+        # login. Evaluate on the caller's 'data' before that injection.
+        is_vm_ssh = (kwargs.get('data') or {}).get('token_type') == 'ssh-cert'
+
         # Apply agentic session parameters for user identity flows
         from .agentic_session import build_agentic_session_params, merge_access_token_claims
         agentic_session_id, agentic_claims = build_agentic_session_params()
@@ -82,12 +88,12 @@ class UserCredential:  # pylint: disable=too-few-public-methods
             check_result(result, tenant=self._msal_app.authority.tenant, scopes=scopes,
                          claims_challenge=claims_challenge)
         except AuthenticationError as ex:
-            # For VM SSH ('data' is passed), if getting access token fails because
+            # For VM SSH (token_type is 'ssh-cert'), if getting access token fails because
             # Conditional Access MFA step-up or compliance check is required, re-launch
             # web browser and do auth code flow again.
             # We assume the `az ssh` command is run on a system with GUI where a web
             # browser is available.
-            if 'data' in kwargs:
+            if is_vm_ssh:
                 logger.warning(ex)
                 result = self._acquire_token_interactive(scopes, **kwargs)
             # For other scenarios like Storage Conditional Access MFA step-up, do not

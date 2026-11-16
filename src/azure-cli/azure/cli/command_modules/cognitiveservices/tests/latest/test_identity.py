@@ -20,7 +20,7 @@ class CognitiveServicesIdentityTests(ScenarioTest):
             'sname': sname,
             'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS'
+            'location': 'southcentralus'
         })
 
         # test to create cognitive services account
@@ -48,7 +48,7 @@ class CognitiveServicesIdentityTests(ScenarioTest):
             'sname': sname,
             'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS'
+            'location': 'southcentralus'
         })
 
         # test to create cognitive services account

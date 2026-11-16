@@ -918,9 +918,20 @@ def validate_image_cleaner_enable_disable_mutually_exclusive(namespace):
         )
 
 
+def _is_valid_host_name(value):
+    if not value or len(value) > 253:
+        return False
+    label = r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?"
+    return re.fullmatch(r"{0}(?:\.{0})*".format(label), value) is not None
+
+
 def validate_registry_name(cmd, namespace):
     """Append login server endpoint suffix."""
     registry = namespace.acr
+    if registry is not None and not _is_valid_host_name(registry):
+        raise InvalidArgumentValueError(
+            "--acr must be a registry name or login server host name, e.g. myacr.azurecr.io"
+        )
     suffixes = cmd.cli_ctx.cloud.suffixes
     # Some clouds do not define 'acr_login_server_endpoint'
     from azure.cli.core.cloud import CloudSuffixNotSetException

@@ -18,7 +18,7 @@ from azure.cli.command_modules.postgresql.utils._util import get_autonomous_tuni
 from azure.cli.command_modules.postgresql.utils.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
     virtual_endpoint_name_validator, postgres_firewall_rule_name_validator, \
-    db_renaming_cluster_validator
+    db_renaming_cluster_validator, immutable_backup_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from .randomname.generate import generate_username
 
@@ -174,6 +174,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
             help='Enable or disable autogrow of the storage. Default value is Disabled.'
+        )
+
+        auto_grow_max_threshold_mb_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--storage-auto-grow-max-threshold-mb', '--sag-max-threshold'],
+            help='Maximum allocated storage size autogrow may reach, in MB, not a disk-utilization trigger threshold. '
+                 'Must be at least the current or requested storage size (1 GB = 1,024 MB). '
+                 'Requires PremiumV2_LRS storage with autogrow enabled; for update, autogrow must already be enabled.'
+        )
+
+        auto_grow_increment_percent_arg_type = CLIArgumentType(
+            type=int,
+            options_list=['--storage-auto-grow-increment-percent', '--sag-increment-percent'],
+            help='Storage autogrow increment as a positive percentage of the current allocated storage size, '
+                 'not an absolute size increment or a utilization threshold. '
+                 'Requires PremiumV2_LRS storage with autogrow enabled; for update, autogrow must already be enabled.'
+        )
+
+        immutable_backup_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            options_list=['--immutable-backup'],
+            help='Enable or disable immutable backups at server creation. When enabled, backups cannot be changed '
+                 'or deleted during the retention period.',
+            validator=immutable_backup_validator
         )
 
         storage_type_arg_type = CLIArgumentType(
@@ -352,6 +376,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Whether password authentication is enabled.'
         )
 
+        fips_mode_arg_type = CLIArgumentType(
+            options_list=['--fips-mode'],
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            help='Enable or disable FIPS (Federal Information Processing Standards) mode. '
+                 'The service default is Disabled on creation. If omitted on update, the current value is preserved.'
+        )
+
         pg_bouncer_arg_type = CLIArgumentType(
             options_list=['--pg-bouncer'],
             action='store_true',
@@ -417,13 +448,17 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
             c.argument('version', arg_type=version_arg_type)
             c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
+            c.argument('immutable_backup', default=None, arg_type=immutable_backup_arg_type)
             c.argument('microsoft_entra_auth', default='Disabled', arg_type=microsoft_entra_auth_arg_type)
             c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique identifier of the Microsoft Entra administrator.')
             c.argument('admin_name', options_list=['--admin-display-name', '-m'], help='Display name of the Microsoft Entra administrator user or group.')
             c.argument('admin_type', options_list=['--admin-type', '-t'],
                        arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
             c.argument('password_auth', default='Enabled', arg_type=password_auth_arg_type)
+            c.argument('fips_mode', arg_type=fips_mode_arg_type)
             c.argument('auto_grow', default='Disabled', arg_type=auto_grow_arg_type)
+            c.argument('auto_grow_max_threshold_mb', arg_type=auto_grow_max_threshold_mb_arg_type)
+            c.argument('auto_grow_increment_percent', arg_type=auto_grow_increment_percent_arg_type)
             c.argument('storage_type', default=None, arg_type=storage_type_arg_type)
             c.argument('iops', default=None, arg_type=iops_v2_arg_type)
             c.argument('throughput', default=None, arg_type=throughput_arg_type)
@@ -527,12 +562,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('public_access', arg_type=public_access_update_arg_type)
             c.argument('auto_grow', arg_type=auto_grow_arg_type)
+            c.argument('auto_grow_max_threshold_mb', arg_type=auto_grow_max_threshold_mb_arg_type)
+            c.argument('auto_grow_increment_percent', arg_type=auto_grow_increment_percent_arg_type)
             c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
             c.argument('iops', default=None, arg_type=iops_v2_arg_type)
             c.argument('throughput', default=None, arg_type=throughput_arg_type)
             c.argument('backup_retention', arg_type=pg_backup_retention_arg_type)
             c.argument('microsoft_entra_auth', arg_type=microsoft_entra_auth_arg_type)
             c.argument('password_auth', arg_type=password_auth_arg_type)
+            c.argument('fips_mode', arg_type=fips_mode_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('cluster_size', default=None, arg_type=update_node_count_arg_type)
             c.argument('zonal_resiliency', arg_type=zonal_resiliency_arg_type)

@@ -19,12 +19,18 @@ class Create(AAZCommand):
 
     :example: Create an ExpressRoute circuit.
         az network express-route create --bandwidth 200 -n MyCircuit --peering-location "SiliconValley" -g MyResourceGroup --provider "Equinix" -l "West US" --sku-family MeteredData --sku-tier Standard
+
+    :example: Create an ExpressRoute MultiCloud circuit using a partner cloud account ID.
+        az network express-route create --bandwidth 200 -n MyCircuit --peering-location uswest2 -g MyResourceGroup --provider AWS -l eastus2 --sku-family MeteredData --sku-tier MultiCloud --partner-account-id 123456789
+
+    :example: Create an ExpressRoute MultiCloud circuit using an activation key from the partner cloud provider.
+        az network express-route create --bandwidth 200 -n MyCircuit --peering-location uswest2 -g MyResourceGroup --provider AWS -l eastus2 --sku-family MeteredData --sku-tier MultiCloud --activation-key MyActivationKey
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}", "2025-09-01"],
         ]
     }
 
@@ -60,7 +66,7 @@ class Create(AAZCommand):
             ),
         )
         _args_schema.allow_classic_operations = AAZBoolArg(
-            options=["--allow-classic-operations"],
+            options=["--allow-classic-ops", "--allow-classic-operations"],
             help="Allow classic operations. Allowed values: false, true.",
         )
         _args_schema.bandwidth_in_gbps = AAZFloatArg(
@@ -97,7 +103,7 @@ class Create(AAZCommand):
             options=["--sku-tier"],
             help="SKU Tier of ExpressRoute circuit.  Allowed values: Basic, Local, Premium, Standard.  Default: Standard.",
             default="Standard",
-            enum={"Basic": "Basic", "Local": "Local", "Premium": "Premium", "Standard": "Standard"},
+            enum={"Basic": "Basic", "Local": "Local", "MultiCloud": "MultiCloud", "Premium": "Premium", "Standard": "Standard"},
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -111,6 +117,23 @@ class Create(AAZCommand):
 
         # define Arg Group "Properties"
 
+        _args_schema = cls._args_schema
+        _args_schema.activation_key = AAZStrArg(
+            options=["--activation-key"],
+            arg_group="Properties",
+            help="Activation Key from partner cloud provider.",
+        )
+        _args_schema.enable_direct_port_rate_limit = AAZBoolArg(
+            options=["--enable-port-rate-limit", "--enable-direct-port-rate-limit"],
+            arg_group="Properties",
+            help="Flag denoting rate-limiting status of the ExpressRoute direct-port circuit.",
+        )
+        _args_schema.partner_account_id = AAZStrArg(
+            options=["--partner-account-id"],
+            arg_group="Properties",
+            help="Account ID of customer account on partner cloud provider.",
+        )
+
         # define Arg Group "ServiceProviderProperties"
 
         _args_schema = cls._args_schema
@@ -121,12 +144,31 @@ class Create(AAZCommand):
         )
         return cls._args_schema
 
+    _args_common_sub_resource_create = None
+
+    @classmethod
+    def _build_args_common_sub_resource_create(cls, _schema):
+        if cls._args_common_sub_resource_create is not None:
+            _schema.id = cls._args_common_sub_resource_create.id
+            return
+
+        cls._args_common_sub_resource_create = AAZObjectArg()
+
+        common_sub_resource_create = cls._args_common_sub_resource_create
+        common_sub_resource_create.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+        )
+
+        _schema.id = cls._args_common_sub_resource_create.id
+
     _args_express_route_circuit_peering_config_create = None
 
     @classmethod
     def _build_args_express_route_circuit_peering_config_create(cls, _schema):
         if cls._args_express_route_circuit_peering_config_create is not None:
             _schema.advertised_communities = cls._args_express_route_circuit_peering_config_create.advertised_communities
+            _schema.advertised_public_prefix_info = cls._args_express_route_circuit_peering_config_create.advertised_public_prefix_info
             _schema.advertised_public_prefixes = cls._args_express_route_circuit_peering_config_create.advertised_public_prefixes
             _schema.customer_asn = cls._args_express_route_circuit_peering_config_create.customer_asn
             _schema.legacy_mode = cls._args_express_route_circuit_peering_config_create.legacy_mode
@@ -139,6 +181,10 @@ class Create(AAZCommand):
         express_route_circuit_peering_config_create.advertised_communities = AAZListArg(
             options=["advertised-communities"],
             help="The communities of bgp peering. Specified for microsoft peering.",
+        )
+        express_route_circuit_peering_config_create.advertised_public_prefix_info = AAZListArg(
+            options=["advertised-public-prefix-info"],
+            help="List of Prefix information required to perform validation.",
         )
         express_route_circuit_peering_config_create.advertised_public_prefixes = AAZListArg(
             options=["advertised-public-prefixes"],
@@ -160,32 +206,32 @@ class Create(AAZCommand):
         advertised_communities = cls._args_express_route_circuit_peering_config_create.advertised_communities
         advertised_communities.Element = AAZStrArg()
 
+        advertised_public_prefix_info = cls._args_express_route_circuit_peering_config_create.advertised_public_prefix_info
+        advertised_public_prefix_info.Element = AAZObjectArg()
+
+        _element = cls._args_express_route_circuit_peering_config_create.advertised_public_prefix_info.Element
+        _element.prefix = AAZStrArg(
+            options=["prefix"],
+            help="Advertised Public Prefix.",
+        )
+        _element.signature = AAZStrArg(
+            options=["signature"],
+            help="Signed string generated by encrypting validationId with a private key.",
+        )
+        _element.validation_id = AAZStrArg(
+            options=["validation-id"],
+            help="Validation string that contains circuit peering info.",
+        )
+
         advertised_public_prefixes = cls._args_express_route_circuit_peering_config_create.advertised_public_prefixes
         advertised_public_prefixes.Element = AAZStrArg()
 
         _schema.advertised_communities = cls._args_express_route_circuit_peering_config_create.advertised_communities
+        _schema.advertised_public_prefix_info = cls._args_express_route_circuit_peering_config_create.advertised_public_prefix_info
         _schema.advertised_public_prefixes = cls._args_express_route_circuit_peering_config_create.advertised_public_prefixes
         _schema.customer_asn = cls._args_express_route_circuit_peering_config_create.customer_asn
         _schema.legacy_mode = cls._args_express_route_circuit_peering_config_create.legacy_mode
         _schema.routing_registry_name = cls._args_express_route_circuit_peering_config_create.routing_registry_name
-
-    _args_sub_resource_create = None
-
-    @classmethod
-    def _build_args_sub_resource_create(cls, _schema):
-        if cls._args_sub_resource_create is not None:
-            _schema.id = cls._args_sub_resource_create.id
-            return
-
-        cls._args_sub_resource_create = AAZObjectArg()
-
-        sub_resource_create = cls._args_sub_resource_create
-        sub_resource_create.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-        )
-
-        _schema.id = cls._args_sub_resource_create.id
 
     def _execute_operations(self):
         self.pre_operations()
@@ -268,7 +314,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -300,10 +346,13 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("activationKey", AAZStrType, ".activation_key")
                 properties.set_prop("allowClassicOperations", AAZBoolType, ".allow_classic_operations")
                 properties.set_prop("bandwidthInGbps", AAZFloatType, ".bandwidth_in_gbps")
+                properties.set_prop("enableDirectPortRateLimit", AAZBoolType, ".enable_direct_port_rate_limit")
                 properties.set_prop("expressRoutePort", AAZObjectType)
                 properties.set_prop("globalReachEnabled", AAZBoolType, ".allow_global_reach")
+                properties.set_prop("partnerAccountId", AAZStrType, ".partner_account_id")
                 properties.set_prop("serviceProviderProperties", AAZObjectType)
 
             express_route_port = _builder.get(".properties.expressRoutePort")
@@ -364,11 +413,18 @@ class Create(AAZCommand):
             )
 
             properties = cls._schema_on_200_201.properties
+            properties.activation_key = AAZStrType(
+                serialized_name="activationKey",
+            )
             properties.allow_classic_operations = AAZBoolType(
                 serialized_name="allowClassicOperations",
             )
             properties.authorization_key = AAZStrType(
                 serialized_name="authorizationKey",
+            )
+            properties.authorization_status = AAZStrType(
+                serialized_name="authorizationStatus",
+                flags={"read_only": True},
             )
             properties.authorizations = AAZListType()
             properties.bandwidth_in_gbps = AAZFloatType(
@@ -377,19 +433,29 @@ class Create(AAZCommand):
             properties.circuit_provisioning_state = AAZStrType(
                 serialized_name="circuitProvisioningState",
             )
+            properties.enable_direct_port_rate_limit = AAZBoolType(
+                serialized_name="enableDirectPortRateLimit",
+            )
             properties.express_route_port = AAZObjectType(
                 serialized_name="expressRoutePort",
             )
-            _CreateHelper._build_schema_sub_resource_read(properties.express_route_port)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.express_route_port)
             properties.gateway_manager_etag = AAZStrType(
                 serialized_name="gatewayManagerEtag",
             )
             properties.global_reach_enabled = AAZBoolType(
                 serialized_name="globalReachEnabled",
             )
+            properties.partner_account_id = AAZStrType(
+                serialized_name="partnerAccountId",
+            )
             properties.peerings = AAZListType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.resiliency_level = AAZStrType(
+                serialized_name="resiliencyLevel",
                 flags={"read_only": True},
             )
             properties.service_key = AAZStrType(
@@ -430,6 +496,10 @@ class Create(AAZCommand):
             )
             properties.authorization_use_status = AAZStrType(
                 serialized_name="authorizationUseStatus",
+            )
+            properties.connection_resource_uri = AAZStrType(
+                serialized_name="connectionResourceUri",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -497,7 +567,7 @@ class Create(AAZCommand):
             properties.route_filter = AAZObjectType(
                 serialized_name="routeFilter",
             )
-            _CreateHelper._build_schema_sub_resource_read(properties.route_filter)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.route_filter)
             properties.secondary_azure_port = AAZStrType(
                 serialized_name="secondaryAzurePort",
             )
@@ -543,14 +613,14 @@ class Create(AAZCommand):
             properties.express_route_circuit_peering = AAZObjectType(
                 serialized_name="expressRouteCircuitPeering",
             )
-            _CreateHelper._build_schema_sub_resource_read(properties.express_route_circuit_peering)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.express_route_circuit_peering)
             properties.ipv6_circuit_connection_config = AAZObjectType(
                 serialized_name="ipv6CircuitConnectionConfig",
             )
             properties.peer_express_route_circuit_peering = AAZObjectType(
                 serialized_name="peerExpressRouteCircuitPeering",
             )
-            _CreateHelper._build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.peer_express_route_circuit_peering)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -581,7 +651,7 @@ class Create(AAZCommand):
             ipv6_peering_config.route_filter = AAZObjectType(
                 serialized_name="routeFilter",
             )
-            _CreateHelper._build_schema_sub_resource_read(ipv6_peering_config.route_filter)
+            _CreateHelper._build_schema_common_sub_resource_read(ipv6_peering_config.route_filter)
             ipv6_peering_config.secondary_peer_address_prefix = AAZStrType(
                 serialized_name="secondaryPeerAddressPrefix",
             )
@@ -620,11 +690,11 @@ class Create(AAZCommand):
             properties.express_route_circuit_peering = AAZObjectType(
                 serialized_name="expressRouteCircuitPeering",
             )
-            _CreateHelper._build_schema_sub_resource_read(properties.express_route_circuit_peering)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.express_route_circuit_peering)
             properties.peer_express_route_circuit_peering = AAZObjectType(
                 serialized_name="peerExpressRouteCircuitPeering",
             )
-            _CreateHelper._build_schema_sub_resource_read(properties.peer_express_route_circuit_peering)
+            _CreateHelper._build_schema_common_sub_resource_read(properties.peer_express_route_circuit_peering)
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -670,10 +740,17 @@ class _CreateHelper:
     """Helper class for Create"""
 
     @classmethod
+    def _build_schema_common_sub_resource_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
+
+    @classmethod
     def _build_schema_express_route_circuit_peering_config_create(cls, _builder):
         if _builder is None:
             return
         _builder.set_prop("advertisedCommunities", AAZListType, ".advertised_communities")
+        _builder.set_prop("advertisedPublicPrefixInfo", AAZListType, ".advertised_public_prefix_info")
         _builder.set_prop("advertisedPublicPrefixes", AAZListType, ".advertised_public_prefixes")
         _builder.set_prop("customerASN", AAZIntType, ".customer_asn")
         _builder.set_prop("legacyMode", AAZIntType, ".legacy_mode")
@@ -683,15 +760,34 @@ class _CreateHelper:
         if advertised_communities is not None:
             advertised_communities.set_elements(AAZStrType, ".")
 
+        advertised_public_prefix_info = _builder.get(".advertisedPublicPrefixInfo")
+        if advertised_public_prefix_info is not None:
+            advertised_public_prefix_info.set_elements(AAZObjectType, ".")
+
+        _elements = _builder.get(".advertisedPublicPrefixInfo[]")
+        if _elements is not None:
+            _elements.set_prop("prefix", AAZStrType, ".prefix")
+            _elements.set_prop("signature", AAZStrType, ".signature")
+            _elements.set_prop("validationId", AAZStrType, ".validation_id")
+
         advertised_public_prefixes = _builder.get(".advertisedPublicPrefixes")
         if advertised_public_prefixes is not None:
             advertised_public_prefixes.set_elements(AAZStrType, ".")
 
+    _schema_common_sub_resource_read = None
+
     @classmethod
-    def _build_schema_sub_resource_create(cls, _builder):
-        if _builder is None:
+    def _build_schema_common_sub_resource_read(cls, _schema):
+        if cls._schema_common_sub_resource_read is not None:
+            _schema.id = cls._schema_common_sub_resource_read.id
             return
-        _builder.set_prop("id", AAZStrType, ".id")
+
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType()
+
+        common_sub_resource_read = _schema_common_sub_resource_read
+        common_sub_resource_read.id = AAZStrType()
+
+        _schema.id = cls._schema_common_sub_resource_read.id
 
     _schema_express_route_circuit_peering_config_read = None
 
@@ -699,6 +795,7 @@ class _CreateHelper:
     def _build_schema_express_route_circuit_peering_config_read(cls, _schema):
         if cls._schema_express_route_circuit_peering_config_read is not None:
             _schema.advertised_communities = cls._schema_express_route_circuit_peering_config_read.advertised_communities
+            _schema.advertised_public_prefix_info = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefix_info
             _schema.advertised_public_prefixes = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefixes
             _schema.advertised_public_prefixes_state = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefixes_state
             _schema.customer_asn = cls._schema_express_route_circuit_peering_config_read.customer_asn
@@ -711,6 +808,9 @@ class _CreateHelper:
         express_route_circuit_peering_config_read = _schema_express_route_circuit_peering_config_read
         express_route_circuit_peering_config_read.advertised_communities = AAZListType(
             serialized_name="advertisedCommunities",
+        )
+        express_route_circuit_peering_config_read.advertised_public_prefix_info = AAZListType(
+            serialized_name="advertisedPublicPrefixInfo",
         )
         express_route_circuit_peering_config_read.advertised_public_prefixes = AAZListType(
             serialized_name="advertisedPublicPrefixes",
@@ -732,30 +832,30 @@ class _CreateHelper:
         advertised_communities = _schema_express_route_circuit_peering_config_read.advertised_communities
         advertised_communities.Element = AAZStrType()
 
+        advertised_public_prefix_info = _schema_express_route_circuit_peering_config_read.advertised_public_prefix_info
+        advertised_public_prefix_info.Element = AAZObjectType()
+
+        _element = _schema_express_route_circuit_peering_config_read.advertised_public_prefix_info.Element
+        _element.prefix = AAZStrType()
+        _element.signature = AAZStrType()
+        _element.validation_id = AAZStrType(
+            serialized_name="validationId",
+        )
+        _element.validation_state = AAZStrType(
+            serialized_name="validationState",
+            flags={"read_only": True},
+        )
+
         advertised_public_prefixes = _schema_express_route_circuit_peering_config_read.advertised_public_prefixes
         advertised_public_prefixes.Element = AAZStrType()
 
         _schema.advertised_communities = cls._schema_express_route_circuit_peering_config_read.advertised_communities
+        _schema.advertised_public_prefix_info = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefix_info
         _schema.advertised_public_prefixes = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefixes
         _schema.advertised_public_prefixes_state = cls._schema_express_route_circuit_peering_config_read.advertised_public_prefixes_state
         _schema.customer_asn = cls._schema_express_route_circuit_peering_config_read.customer_asn
         _schema.legacy_mode = cls._schema_express_route_circuit_peering_config_read.legacy_mode
         _schema.routing_registry_name = cls._schema_express_route_circuit_peering_config_read.routing_registry_name
-
-    _schema_sub_resource_read = None
-
-    @classmethod
-    def _build_schema_sub_resource_read(cls, _schema):
-        if cls._schema_sub_resource_read is not None:
-            _schema.id = cls._schema_sub_resource_read.id
-            return
-
-        cls._schema_sub_resource_read = _schema_sub_resource_read = AAZObjectType()
-
-        sub_resource_read = _schema_sub_resource_read
-        sub_resource_read.id = AAZStrType()
-
-        _schema.id = cls._schema_sub_resource_read.id
 
 
 __all__ = ["Create"]

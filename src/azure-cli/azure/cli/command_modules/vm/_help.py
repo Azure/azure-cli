@@ -1084,6 +1084,10 @@ examples:
   - name: Create a default Ubuntu2204 VM with automatic SSH authentication.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image Ubuntu2204
+  - name: Create a Flow VM with a preferred size in a supported region.
+    text: >
+        az vm create -n MyVm -g MyResourceGroup --location eastus2 --image Ubuntu2204
+        --preferred-size Standard_D2s_v3 --generate-ssh-keys --nsg-rule NONE --public-ip-address ""
   - name: Create a default RedHat VM with automatic SSH authentication using an image URN.
     text: >
         az vm create -n MyVm -g MyResourceGroup --image RedHat:RHEL:7-RAW:7.4.2018010506
@@ -1720,7 +1724,9 @@ examples:
 helps['vm list-skus'] = """
 type: command
 short-summary: Get details for compute-related resource SKUs.
-long-summary: This command incorporates subscription level restriction, offering the most accurate information.
+long-summary: >
+    This command incorporates subscription-level restrictions, offering the most accurate information.
+    Specify --location to filter SKUs on the server and avoid downloading SKUs for all regions.
 examples:
   - name: List all SKUs in the West US region.
     text: az vm list-skus -l westus
@@ -2140,6 +2146,10 @@ examples:
     text: az vm update -n name -g group --set tags.tagName=tagValue
   - name: Remove a tag.
     text: az vm update -n name -g group --remove tags.tagName
+  - name: Opt in to Flow VMs or change the preferred size.
+    text: az vm update -n MyVm -g MyResourceGroup --preferred-size Standard_D2s_v3
+  - name: Opt out of Flow VMs and pin a fixed size.
+    text: az vm update -n MyVm -g MyResourceGroup --size Standard_D2s_v3 --remove flexProfile
   - name: Set the primary NIC of a VM.
     text: az vm update -n name -g group --set networkProfile.networkInterfaces[1].primary=false networkProfile.networkInterfaces[0].primary=true
   - name: Add a new non-primary NIC to a VM.

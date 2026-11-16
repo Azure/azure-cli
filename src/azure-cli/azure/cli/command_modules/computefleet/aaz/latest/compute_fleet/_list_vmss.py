@@ -23,9 +23,9 @@ class ListVmss(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-04-01-preview",
+        "version": "2026-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}/virtualmachinescalesets", "2026-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}/virtualmachinescalesets", "2026-08-01"],
         ]
     }
 
@@ -125,7 +125,7 @@ class ListVmss(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-04-01-preview",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }

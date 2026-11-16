@@ -18,6 +18,7 @@ ADLOCATION = "northeurope"
 
 
 class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_account(self):
         self.kwargs.update({

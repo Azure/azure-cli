@@ -21,7 +21,7 @@ def list_workspaces(cmd, client, resource_group_name=None):
 def create_workspace(cmd, client, resource_group_name, workspace_name, storage_account, file_system,
                      sql_admin_login_user, sql_admin_login_password, location=None, key_name="default", key_identifier=None, enable_managed_virtual_network=None,
                      allowed_aad_tenant_ids=None, prevent_data_exfiltration=None, tags=None, repository_type=None, host_name=None, account_name=None,
-                     collaboration_branch=None, repository_name=None, root_folder='/', project_name=None, last_commit_id=None, tenant_id=None,
+                     collaboration_branch=None, repository_name=None, root_folder=None, project_name=None, last_commit_id=None, tenant_id=None,
                      managed_resource_group_name=None, user_assigned_identity_id=None, user_assigned_identity_in_encryption=None,
                      use_system_assigned_identity_in_encryption=None, no_wait=False):
 
@@ -77,7 +77,7 @@ def create_workspace(cmd, client, resource_group_name, workspace_name, storage_a
                                                                               project_name=project_name,
                                                                               repository_name=repository_name,
                                                                               collaboration_branch=collaboration_branch,
-                                                                              root_folder=root_folder,
+                                                                              root_folder=root_folder if root_folder is not None else '/',
                                                                               last_commit_id=last_commit_id,
                                                                               tenant_id=tenant_id)
 

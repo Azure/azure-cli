@@ -61,7 +61,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
             'sname': sname,
             'kind': 'FormRecognizer',
             'sku': 'S0',
-            'location': 'SOUTHCENTRALUS',
+            'location': 'southcentralus',
             'encryption': '{\\\"keySource\\\":\\\"Microsoft.CognitiveServices\\\"}'
         })
 

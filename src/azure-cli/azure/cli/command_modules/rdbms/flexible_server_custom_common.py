@@ -11,9 +11,9 @@ from dateutil.tz import tzutc
 from knack.log import get_logger
 from knack.util import CLIError
 from urllib.request import urlretrieve
-from azure.cli.core.util import sdk_no_wait, user_confirmation, run_cmd
+from azure.cli.core.util import sdk_no_wait, user_confirmation
 from azure.cli.core.azclierror import ClientRequestError
-from ._flexible_server_util import run_subprocess
+from ._flexible_server_util import run_cmd, run_subprocess
 from .validators import validate_public_access_server, validate_resource_group, check_resource_group
 
 logger = get_logger(__name__)
@@ -195,17 +195,20 @@ def github_actions_run(action_name, branch):
 
     gitcli_check_and_login()
     logger.warning("Created an event for %s.yml in branch %s", action_name, branch)
-    run_subprocess("gh workflow run {}.yml --ref {}".format(action_name, branch))
+    run_subprocess(["gh", "workflow", "run", action_name + ".yml", "--ref", branch])
 
 
 def gitcli_check_and_login():
-    output = run_cmd(["gh"], capture_output=True)
+    try:
+        output = run_cmd(["gh"], capture_output=True)
+    except FileNotFoundError as ex:
+        raise ClientRequestError('Please install "Github CLI" to run this command.') from ex
     if output.returncode:
         raise ClientRequestError('Please install "Github CLI" to run this command.')
 
     output = run_cmd(["gh", "auth", "status"], capture_output=True)
     if output.returncode:
-        run_subprocess("gh auth login", stdout_show=True)
+        run_subprocess(["gh", "auth", "login"], stdout_show=True)
 
 
 # Custom functions for server logs

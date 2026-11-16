@@ -8,14 +8,13 @@ parameters:
   - name: EnableCompactAAZ
     type: boolean
     default: false
-  # Temporary immutable candidates until the validated packages are released.
-  # Keep both requirements on the same commit; overrides may also be wheel paths.
+  # Keep release pins aligned with the other CI entry points; overrides may be wheel paths.
   - name: AzdevPackage
     type: string
-    default: 'azdev @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e'
+    default: 'azdev==0.2.15'
   - name: DiffToolPackage
     type: string
-    default: 'azure-cli-diff-tool @ git+https://github.com/aryasadeghi1/azure-cli-dev-tools.git@c429216bfdae9b196dcfa6689f4d3f15a7b7054e#subdirectory=azure-cli-diff-tool'
+    default: 'azure-cli-diff-tool==0.1.2'
 steps:
   - bash: |
       set -ev
@@ -23,6 +22,12 @@ steps:
       python -m venv env
       chmod +x env/bin/activate
       . env/bin/activate
+
+      # Keep constraints available when breaking-change tests switch branches.
+      cp "$CLI_REPO_PATH/.azure-pipelines/pytest-constraints.txt" "$VIRTUAL_ENV/pytest-constraints.txt"
+      PIP_CONSTRAINT="$VIRTUAL_ENV/pytest-constraints.txt"
+      export PIP_CONSTRAINT
+      echo "##vso[task.setvariable variable=PIP_CONSTRAINT]$PIP_CONSTRAINT"
 
       python -m pip install -U pip "setuptools>=78.1.1"
       packages=("$AZDEV_PACKAGE")

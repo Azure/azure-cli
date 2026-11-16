@@ -3,6 +3,20 @@
 Release History
 ===============
 
+2.93.0
+++++++
+* Upgrade bundled Python to 3.14.10 for Windows and Debian packages (#34326)
+* Bump `pymsalruntime` to 0.20.7 on Windows and macOS (#34359)
+* Improve executable lookup consistency on Windows (#34329)
+* Fix removal of a single specified user-assigned identity incorrectly removing all user-assigned identities (#34383)
+
+2.92.0
+++++++
+* Add `get_safe_executable_path` to prevent binary planting when spawning subprocess (#34212)
+* Resolve GHSA-6q48-6c7w-9gw2 (#34250)
+* Add `core.output_newline` config (native|lf) and default to LF line endings on stdout when run from WSL or Git Bash on Windows (#34236)
+* Resolve OpenSSL and Certifi related vulnerabilities (#34275)
+
 2.91.0
 ++++++
 * Remove AzureGermanCloud from hard-coded cloud list (#34042)

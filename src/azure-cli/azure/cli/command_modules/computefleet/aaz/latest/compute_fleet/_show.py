@@ -23,9 +23,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-04-01-preview",
+        "version": "2026-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2026-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2026-08-01"],
         ]
     }
 
@@ -124,7 +124,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-04-01-preview",
+                    "api-version", "2026-08-01",
                     required=True,
                 ),
             }
@@ -266,9 +266,6 @@ class Show(AAZCommand):
             properties.vm_sizes_profile = AAZListType(
                 serialized_name="vmSizesProfile",
                 flags={"required": True},
-            )
-            properties.zone_allocation_policy = AAZObjectType(
-                serialized_name="zoneAllocationPolicy",
             )
 
             additional_locations_profile = cls._schema_on_200.properties.additional_locations_profile
@@ -440,24 +437,6 @@ class Show(AAZCommand):
                 flags={"required": True},
             )
             _element.rank = AAZIntType()
-
-            zone_allocation_policy = cls._schema_on_200.properties.zone_allocation_policy
-            zone_allocation_policy.distribution_strategy = AAZStrType(
-                serialized_name="distributionStrategy",
-                flags={"required": True},
-            )
-            zone_allocation_policy.zone_preferences = AAZListType(
-                serialized_name="zonePreferences",
-            )
-
-            zone_preferences = cls._schema_on_200.properties.zone_allocation_policy.zone_preferences
-            zone_preferences.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.zone_allocation_policy.zone_preferences.Element
-            _element.rank = AAZIntType()
-            _element.zone = AAZStrType(
-                flags={"required": True},
-            )
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(

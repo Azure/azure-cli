@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-07-01",
+        "version": "2026-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkappliances/{}", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkappliances/{}", "2026-03-01"],
         ]
     }
 
@@ -48,6 +48,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.resource_group = AAZResourceGroupNameArg(
+            help="The resource group of the virtual network appliance.",
             required=True,
         )
         _args_schema.virtual_network_appliance_name = AAZStrArg(
@@ -89,6 +90,13 @@ class Update(AAZCommand):
             help="Bandwidth of the VirtualNetworkAppliance resource in Gbps.",
             nullable=True,
         )
+        _args_schema.capacity_provider = AAZObjectArg(
+            options=["--capacity-provider"],
+            arg_group="Properties",
+            help="The reference to the capacity provider resource.",
+            nullable=True,
+        )
+        cls._build_args_common_sub_resource_update(_args_schema.capacity_provider)
         _args_schema.private_ip_address_version = AAZStrArg(
             options=["--private-ip-version", "--private-ip-address-version"],
             arg_group="Properties",
@@ -108,9 +116,6 @@ class Update(AAZCommand):
             options=["id"],
             help="Resource ID.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}",
-            ),
         )
         subnet.name = AAZStrArg(
             options=["name"],
@@ -286,9 +291,6 @@ class Update(AAZCommand):
             options=["id"],
             help="Resource ID.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
-            ),
         )
         network_security_group.location = AAZResourceLocationArg(
             options=["l", "location"],
@@ -444,9 +446,6 @@ class Update(AAZCommand):
             options=["id"],
             help="Resource ID.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
-            ),
         )
         route_table.location = AAZResourceLocationArg(
             options=["l", "location"],
@@ -485,9 +484,6 @@ class Update(AAZCommand):
             options=["id"],
             help="Resource ID.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}/routes/{}",
-            ),
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -545,9 +541,6 @@ class Update(AAZCommand):
             options=["id"],
             help="Resource ID.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}",
-            ),
         )
         _element.location = AAZResourceLocationArg(
             options=["l", "location"],
@@ -590,9 +583,6 @@ class Update(AAZCommand):
             options=["id"],
             help="Resource ID.",
             nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}/serviceEndpointPolicyDefinitions/{}",
-            ),
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -786,7 +776,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-07-01",
+                    "api-version", "2026-03-01",
                     required=True,
                 ),
             }
@@ -817,7 +807,84 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_virtual_network_appliance_read(cls._schema_on_200)
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.id = AAZStrType()
+            _schema_on_200.location = AAZStrType()
+            _schema_on_200.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _schema_on_200.tags = AAZDictType()
+            _schema_on_200.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties
+            properties.bandwidth_in_gbps = AAZFloatType(
+                serialized_name="bandwidthInGbps",
+            )
+            properties.capacity_provider = AAZObjectType(
+                serialized_name="capacityProvider",
+            )
+            _UpdateHelper._build_schema_common_sub_resource_read(properties.capacity_provider)
+            properties.ip_configurations = AAZListType(
+                serialized_name="ipConfigurations",
+                flags={"read_only": True},
+            )
+            properties.private_ip_address_version = AAZStrType(
+                serialized_name="privateIPAddressVersion",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.resource_guid = AAZStrType(
+                serialized_name="resourceGuid",
+                flags={"read_only": True},
+            )
+            properties.subnet = AAZObjectType()
+            _UpdateHelper._build_schema_common_subnet_read(properties.subnet)
+
+            ip_configurations = cls._schema_on_200.properties.ip_configurations
+            ip_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.ip_configurations.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.properties.ip_configurations.Element.properties
+            properties.primary = AAZBoolType()
+            properties.private_ip_address = AAZStrType(
+                serialized_name="privateIPAddress",
+            )
+            properties.private_ip_address_version = AAZStrType(
+                serialized_name="privateIPAddressVersion",
+            )
+            properties.private_ip_allocation_method = AAZStrType(
+                serialized_name="privateIPAllocationMethod",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
+            tags = cls._schema_on_200.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200
 
@@ -885,7 +952,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-07-01",
+                    "api-version", "2026-03-01",
                     required=True,
                 ),
             }
@@ -928,7 +995,84 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_virtual_network_appliance_read(cls._schema_on_200_201)
+
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200_201.id = AAZStrType()
+            _schema_on_200_201.location = AAZStrType()
+            _schema_on_200_201.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _schema_on_200_201.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _schema_on_200_201.tags = AAZDictType()
+            _schema_on_200_201.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200_201.properties
+            properties.bandwidth_in_gbps = AAZFloatType(
+                serialized_name="bandwidthInGbps",
+            )
+            properties.capacity_provider = AAZObjectType(
+                serialized_name="capacityProvider",
+            )
+            _UpdateHelper._build_schema_common_sub_resource_read(properties.capacity_provider)
+            properties.ip_configurations = AAZListType(
+                serialized_name="ipConfigurations",
+                flags={"read_only": True},
+            )
+            properties.private_ip_address_version = AAZStrType(
+                serialized_name="privateIPAddressVersion",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.resource_guid = AAZStrType(
+                serialized_name="resourceGuid",
+                flags={"read_only": True},
+            )
+            properties.subnet = AAZObjectType()
+            _UpdateHelper._build_schema_common_subnet_read(properties.subnet)
+
+            ip_configurations = cls._schema_on_200_201.properties.ip_configurations
+            ip_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.ip_configurations.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200_201.properties.ip_configurations.Element.properties
+            properties.primary = AAZBoolType()
+            properties.private_ip_address = AAZStrType(
+                serialized_name="privateIPAddress",
+            )
+            properties.private_ip_address_version = AAZStrType(
+                serialized_name="privateIPAddressVersion",
+            )
+            properties.private_ip_allocation_method = AAZStrType(
+                serialized_name="privateIPAllocationMethod",
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
+            tags = cls._schema_on_200_201.tags
+            tags.Element = AAZStrType()
 
             return cls._schema_on_200_201
 
@@ -950,6 +1094,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("bandwidthInGbps", AAZFloatType, ".bandwidth_in_gbps")
+                _UpdateHelper._build_schema_common_sub_resource_update(properties.set_prop("capacityProvider", AAZObjectType, ".capacity_provider"))
                 properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
                 properties.set_prop("subnet", AAZObjectType, ".subnet")
 
@@ -1336,6 +1481,9 @@ class _UpdateHelper:
         properties = _schema_common_frontend_ip_configuration_read.properties
         properties.ddos_settings = AAZObjectType(
             serialized_name="ddosSettings",
+        )
+        properties.enable_connection_tracking = AAZBoolType(
+            serialized_name="enableConnectionTracking",
         )
         properties.gateway_load_balancer = AAZObjectType(
             serialized_name="gatewayLoadBalancer",
@@ -2419,6 +2567,9 @@ class _UpdateHelper:
         properties.application_security_groups = AAZListType(
             serialized_name="applicationSecurityGroups",
         )
+        properties.billing_sku = AAZStrType(
+            serialized_name="billingSku",
+        )
         properties.custom_dns_configs = AAZListType(
             serialized_name="customDnsConfigs",
         )
@@ -2565,6 +2716,9 @@ class _UpdateHelper:
         )
 
         properties = _schema_common_private_link_service_connection_read.properties
+        properties.approval_reference = AAZObjectType(
+            serialized_name="approvalReference",
+        )
         properties.group_ids = AAZListType(
             serialized_name="groupIds",
         )
@@ -2581,6 +2735,11 @@ class _UpdateHelper:
         )
         properties.request_message = AAZStrType(
             serialized_name="requestMessage",
+        )
+
+        approval_reference = _schema_common_private_link_service_connection_read.properties.approval_reference
+        approval_reference.private_endpoint_id = AAZStrType(
+            serialized_name="privateEndpointId",
         )
 
         group_ids = _schema_common_private_link_service_connection_read.properties.group_ids
@@ -2690,6 +2849,10 @@ class _UpdateHelper:
             serialized_name="servicePublicIPAddress",
         )
         cls._build_schema_common_public_ip_address_read(properties.service_public_ip_address)
+        properties.upgraded_to_v2 = AAZBoolType(
+            serialized_name="upgradedToV2",
+            flags={"read_only": True},
+        )
 
         ddos_settings = _schema_common_public_ip_address_read.properties.ddos_settings
         ddos_settings.ddos_custom_policy = AAZObjectType(
@@ -2720,6 +2883,9 @@ class _UpdateHelper:
         ip_tags.Element = AAZObjectType()
 
         _element = _schema_common_public_ip_address_read.properties.ip_tags.Element
+        _element.first_party_service_tag_id = AAZStrType(
+            serialized_name="firstPartyServiceTagId",
+        )
         _element.ip_tag_type = AAZStrType(
             serialized_name="ipTagType",
         )
@@ -2941,9 +3107,7 @@ class _UpdateHelper:
             _schema.id = cls._schema_common_sub_resource_read.id
             return
 
-        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType()
 
         common_sub_resource_read = _schema_common_sub_resource_read
         common_sub_resource_read.id = AAZStrType()
@@ -3502,104 +3666,6 @@ class _UpdateHelper:
         _schema.properties = cls._schema_common_virtual_network_tap_read.properties
         _schema.tags = cls._schema_common_virtual_network_tap_read.tags
         _schema.type = cls._schema_common_virtual_network_tap_read.type
-
-    _schema_virtual_network_appliance_read = None
-
-    @classmethod
-    def _build_schema_virtual_network_appliance_read(cls, _schema):
-        if cls._schema_virtual_network_appliance_read is not None:
-            _schema.etag = cls._schema_virtual_network_appliance_read.etag
-            _schema.id = cls._schema_virtual_network_appliance_read.id
-            _schema.location = cls._schema_virtual_network_appliance_read.location
-            _schema.name = cls._schema_virtual_network_appliance_read.name
-            _schema.properties = cls._schema_virtual_network_appliance_read.properties
-            _schema.tags = cls._schema_virtual_network_appliance_read.tags
-            _schema.type = cls._schema_virtual_network_appliance_read.type
-            return
-
-        cls._schema_virtual_network_appliance_read = _schema_virtual_network_appliance_read = AAZObjectType()
-
-        virtual_network_appliance_read = _schema_virtual_network_appliance_read
-        virtual_network_appliance_read.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        virtual_network_appliance_read.id = AAZStrType()
-        virtual_network_appliance_read.location = AAZStrType()
-        virtual_network_appliance_read.name = AAZStrType(
-            flags={"read_only": True},
-        )
-        virtual_network_appliance_read.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        virtual_network_appliance_read.tags = AAZDictType()
-        virtual_network_appliance_read.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_virtual_network_appliance_read.properties
-        properties.bandwidth_in_gbps = AAZFloatType(
-            serialized_name="bandwidthInGbps",
-        )
-        properties.ip_configurations = AAZListType(
-            serialized_name="ipConfigurations",
-            flags={"read_only": True},
-        )
-        properties.private_ip_address_version = AAZStrType(
-            serialized_name="privateIPAddressVersion",
-        )
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-        properties.resource_guid = AAZStrType(
-            serialized_name="resourceGuid",
-            flags={"read_only": True},
-        )
-        properties.subnet = AAZObjectType()
-        cls._build_schema_common_subnet_read(properties.subnet)
-
-        ip_configurations = _schema_virtual_network_appliance_read.properties.ip_configurations
-        ip_configurations.Element = AAZObjectType()
-
-        _element = _schema_virtual_network_appliance_read.properties.ip_configurations.Element
-        _element.etag = AAZStrType(
-            flags={"read_only": True},
-        )
-        _element.id = AAZStrType()
-        _element.name = AAZStrType()
-        _element.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
-        _element.type = AAZStrType(
-            flags={"read_only": True},
-        )
-
-        properties = _schema_virtual_network_appliance_read.properties.ip_configurations.Element.properties
-        properties.primary = AAZBoolType()
-        properties.private_ip_address = AAZStrType(
-            serialized_name="privateIPAddress",
-        )
-        properties.private_ip_address_version = AAZStrType(
-            serialized_name="privateIPAddressVersion",
-        )
-        properties.private_ip_allocation_method = AAZStrType(
-            serialized_name="privateIPAllocationMethod",
-        )
-        properties.provisioning_state = AAZStrType(
-            serialized_name="provisioningState",
-            flags={"read_only": True},
-        )
-
-        tags = _schema_virtual_network_appliance_read.tags
-        tags.Element = AAZStrType()
-
-        _schema.etag = cls._schema_virtual_network_appliance_read.etag
-        _schema.id = cls._schema_virtual_network_appliance_read.id
-        _schema.location = cls._schema_virtual_network_appliance_read.location
-        _schema.name = cls._schema_virtual_network_appliance_read.name
-        _schema.properties = cls._schema_virtual_network_appliance_read.properties
-        _schema.tags = cls._schema_virtual_network_appliance_read.tags
-        _schema.type = cls._schema_virtual_network_appliance_read.type
 
 
 __all__ = ["Update"]

@@ -1634,7 +1634,7 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} '
                  '--sku Standard_v2 --public-ip-address {ip} '
                  '--identity {identity_id} --priority 1001 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --created')
 
         # test validation: --hsm key-id without public-cert-data should fail
         self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name {ag} '
@@ -3296,6 +3296,24 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('policySettings.logScrubbing.state', 'Enabled')
                  ])
 
+    @ResourceGroupPreparer(name_prefix="cli_test_ag_waf_policy_managed_rules_")
+    def test_ag_waf_policy_managed_rules(self, resource_group):
+        self.kwargs.update({
+            "rg": resource_group,
+            "policy_name": self.create_random_name('waf', 7)
+        })
+
+        self.cmd(
+            "network application-gateway waf-policy create -g {rg} -n {policy_name} --managed-rules '{{managed-rule-sets:[{{rule-set-type:Microsoft_DefaultRuleSet,rule-set-version:2.1}},{{rule-set-type:Microsoft_BotManagerRuleSet,rule-set-version:1.1}}]}}'",
+            checks=[
+                self.check("name", "{policy_name}"),
+                self.check("managedRules.managedRuleSets[0].ruleSetType", "Microsoft_DefaultRuleSet"),
+                self.check("managedRules.managedRuleSets[0].ruleSetVersion", "2.1"),
+                self.check("managedRules.managedRuleSets[1].ruleSetType", "Microsoft_BotManagerRuleSet"),
+                self.check("managedRules.managedRuleSets[1].ruleSetVersion", "1.1"),
+            ]
+        )
+
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_')
     def test_network_app_gateway_waf_policy_managed_rules(self, resource_group):
         self.kwargs.update({
@@ -4037,6 +4055,51 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
 
         with self.assertRaisesRegex(CLIError, 'Please provide a complete resource ID'):
             self.cmd('network express-route gateway connection show --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.Network/expressRouteGateways/aaa')
+
+    @live_only()  # live_only as MultiCloud circuits need a real partner cloud account, contact service team for one
+    @unittest.skipUnless(
+        os.environ.get('AZURE_TEST_EXPRESS_ROUTE_PARTNER_ACCOUNT_ID') or
+        os.environ.get('AZURE_TEST_EXPRESS_ROUTE_ACTIVATION_KEY'),
+        'Set AZURE_TEST_EXPRESS_ROUTE_PARTNER_ACCOUNT_ID and/or AZURE_TEST_EXPRESS_ROUTE_ACTIVATION_KEY for live tests.')
+    @ResourceGroupPreparer(name_prefix='cli_test_express_route_multicloud', location='westus2')
+    def test_network_express_route_multicloud(self, resource_group):
+        workflows = [
+            ('account', '--partner-account-id', 'partnerAccountId',
+             os.environ.get('AZURE_TEST_EXPRESS_ROUTE_PARTNER_ACCOUNT_ID')),
+            ('activation', '--activation-key', 'activationKey',
+             os.environ.get('AZURE_TEST_EXPRESS_ROUTE_ACTIVATION_KEY')),
+        ]
+        for workflow, parameter, field, value in workflows:
+            if not value:
+                continue
+            with self.subTest(workflow=workflow):
+                self.kwargs.update({
+                    'rg': resource_group,
+                    'er': 'mccircuit-' + workflow,
+                    'parameter': parameter,
+                    'provisioning_value': value,
+                })
+                checks = [
+                    self.check('sku.name', 'MultiCloud_MeteredData'),
+                    self.check('sku.tier', 'MultiCloud'),
+                    self.check('sku.family', 'MeteredData'),
+                    self.check(field, '{provisioning_value}'),
+                    self.check("contains(['Standard', 'High', 'Maximum'], resiliencyLevel)", True),
+                ]
+                self.cmd('network express-route create -g {rg} -n {er} --bandwidth 1000 --provider aws --peering-location uswest2 '
+                         '--sku-tier MultiCloud --sku-family MeteredData {parameter} "{provisioning_value}"',
+                         checks=checks)
+                # No update step: the service currently returns InternalServerError on any re-PUT of a
+                # MultiCloud circuit. Add `express-route update` here once the service supports it.
+                self.cmd('network express-route show -g {rg} -n {er}', checks=checks)
+                self.cmd('network express-route list -g {rg}', checks=[
+                    self.check('length(@)', 1),
+                    self.check('[0].sku.name', 'MultiCloud_MeteredData'),
+                    self.check('[0].' + field, '{provisioning_value}'),
+                    self.check("contains(['Standard', 'High', 'Maximum'], [0].resiliencyLevel)", True),
+                ])
+                self.cmd('network express-route delete -g {rg} -n {er}')
+                self.cmd('network express-route list -g {rg}', checks=self.is_empty())
 
     @unittest.skip('Test is wrong, please fix. rg not found')
     @ResourceGroupPreparer(name_prefix='cli_test_express_route')
@@ -10110,6 +10173,54 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
         ]).get_output_in_json()
 
         self.assertTrue(vna_list[0].get('id') == vna2_id)
+
+    @ResourceGroupPreparer(name_prefix='test_vna_capacity_provider', location='westus2')
+    def test_network_virtual_network_appliance_capacity_provider(self, resource_group):
+        self.kwargs.update({
+            'vnet_provider': 'vnet-provider',
+            'vnet_consumer': 'vnet-consumer',
+            'vnet_address': '10.10.0.0/16',
+            'subnet': 'VirtualNetworkApplianceSubnet',
+            'subnet_address': '10.10.0.0/24',
+            'capacity_provider': 'capacity-provider',
+            'vna': 'vna',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet_provider} --address-prefixes {vnet_address}')
+        self.kwargs['provider_subnet_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet_provider} '
+            '--address-prefix {subnet_address} --default-outbound false --query id'
+        ).get_output_in_json()
+        self.kwargs['capacity_provider_id'] = self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {capacity_provider} '
+            '--bandwidth-in-gbps 200 --subnet \"{{id:{provider_subnet_id}}}\" --query id'
+        ).get_output_in_json()
+
+        self.cmd('network vnet create -g {rg} -n {vnet_consumer} --address-prefixes {vnet_address}')
+        self.kwargs['consumer_subnet_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet_consumer} '
+            '--address-prefix {subnet_address} --default-outbound false --query id'
+        ).get_output_in_json()
+
+        self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {vna} '
+            '--subnet \"{{id:{consumer_subnet_id}}}\" '
+            '--capacity-provider \"{{id:{capacity_provider_id}}}\"',
+            checks=self.check('capacityProvider.id', '{capacity_provider_id}')
+        )
+        self.cmd(
+            'network virtual-network-appliance update -g {rg} -n {vna} '
+            '--capacity-provider \'{{"id":"{capacity_provider_id}"}}\'',
+            checks=self.check('capacityProvider.id', '{capacity_provider_id}')
+        )
+        self.cmd(
+            'network virtual-network-appliance show -g {rg} -n {vna}',
+            checks=self.check('capacityProvider.id', '{capacity_provider_id}')
+        )
+
+        vna_list = self.cmd('network virtual-network-appliance list -g {rg}').get_output_in_json()
+        consumer = next(item for item in vna_list if item['name'] == self.kwargs['vna'])
+        self.assertEqual(consumer['capacityProvider']['id'], self.kwargs['capacity_provider_id'])
 
     @ResourceGroupPreparer(name_prefix='test_vna_ip_version', location='eastus')
     def test_network_virtual_network_appliance_private_ip_address_version(self, resource_group):

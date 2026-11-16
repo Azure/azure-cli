@@ -158,9 +158,9 @@ def _render_settings_table(settings):
         sname='Setting', sw=setting_w, vname='Value', vw=value_w, dname='Details')
     _row((Style.HIGHLIGHT, header))
     _row((Style.SECONDARY, '{s}{v}{d}'.format(
-        s=('─' * (setting_w - 2)).ljust(setting_w),
-        v=('─' * (value_w - 2)).ljust(value_w),
-        d='─' * 40)))
+        s=('-' * (setting_w - 2)).ljust(setting_w),
+        v=('-' * (value_w - 2)).ljust(value_w),
+        d='-' * 40)))
 
     for setting in settings:
         name = str(setting.get('Setting') or '')
@@ -178,7 +178,7 @@ def _render_config_checks(payload, config_check, settings):
     if payload.get('configCheck') is not None:
         _render_snapshot_metadata(payload, config_check)
     _out()
-    _row((Style.HIGHLIGHT, '═══ BUILT-IN CHECKS ' + '═' * 55))
+    _row((Style.HIGHLIGHT, '=== BUILT-IN CHECKS ' + '=' * 55))
     _out()
     if payload.get('configCheck') is None:
         if payload.get('configCheckStatus') == 404:
@@ -201,7 +201,7 @@ def _render_config_checks(payload, config_check, settings):
 def _render_runtime_error(runtime_error):
     _out()
     _out()
-    _row((Style.HIGHLIGHT, '═══ SITE RUNTIME ERROR RECOMMENDATION ' + '═' * 37))
+    _row((Style.HIGHLIGHT, '=== SITE RUNTIME ERROR RECOMMENDATION ' + '=' * 37))
     _out()
     timestamp_raw = runtime_error.get('lastErrorTimestamp')
     timestamp = _format_dt(timestamp_raw) or str(timestamp_raw or '')
@@ -228,7 +228,7 @@ def _render_hints(payload, any_issue):
     slot = payload.get('slot')
     slot_arg = ' --slot {}'.format(slot) if slot else ''
     _out()
-    _out((Style.WARNING, '▶ Hint:'))
+    _out((Style.WARNING, 'Hint:'))
     if any_issue:
         _out('  Update flagged app setting:  az webapp config appsettings set -n {} -g {}{} '
              '--settings KEY=VALUE'.format(site_name, resource_group, slot_arg))

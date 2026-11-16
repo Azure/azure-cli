@@ -62,6 +62,14 @@ examples:
                 "keyVaultUri": "https://issue23056kv.vault.azure.net/"
               }
             }'
+  - name: Create an AI Services account with customer-owned AKS, automatically creating Storage and managed identities.
+    text: |
+        az cognitiveservices account create \\
+            --name foundryByocAccount \\
+            --resource-group myResourceGroup \\
+            --kind AIServices --sku S0 --location westus \\
+            --custom-domain foundrybyocaccount \\
+            --agent-hosting-cluster "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerService/managedClusters/cluster1"
 """
 
 helps[
@@ -332,10 +340,17 @@ helps[
 ] = """
 type: command
 short-summary: Create a deployment for Azure Cognitive Services account.
-long-summary: This article lists the Azure CLI commands for Azure Cognitive Services account and subscription management only. Refer to the documentation at https://learn.microsoft.com/azure/cognitive-services/ for individual services to learn how to use the APIs and supported SDKs.
+long-summary: |
+  To deploy an Anthropic model, use an eligible Foundry account and supply --organization-name, --industry,
+  and --country for every Anthropic deployment. Use values for the real organization using
+  the model. Supply a two-letter ISO 3166-1 alpha-2 country code, such as US, rather than a country name.
+  These arguments are not required for other model formats. Model availability, Marketplace eligibility,
+  terms, and quota requirements still apply.
 examples:
   - name: Create a deployment for Azure Cognitive Services account.
     text: az cognitiveservices account deployment create -g yuanyang-test-sdk -n yytest-oai --deployment-name dpy --model-name ada --model-version "1" --model-format OpenAI --sku-capacity 1 --sku-name "Standard"
+  - name: Create an Anthropic Claude deployment with organization information.
+    text: az cognitiveservices account deployment create -g myResourceGroup -n myFoundryAccount --deployment-name my-haiku --model-name claude-haiku-4-5 --model-version "2" --model-format Anthropic --sku-capacity 1 --sku-name GlobalStandard --organization-name "Contoso" --industry "Law" --country "US"
 """
 
 helps[
@@ -449,6 +464,76 @@ examples:
         az cognitiveservices account managed-compute-deployment delete
         -g myResourceGroup -n myAccount
         --deployment-name gpt-oss-120b-gpu
+"""
+
+helps[
+    "cognitiveservices account adapter-deployment"
+] = """
+type: group
+short-summary: Manage LoRA adapter deployments for Azure Cognitive Services accounts.
+long-summary: |
+    An adapter deployment is a lightweight LoRA weight patch that attaches to an existing
+    managed compute (parent) deployment. It owns no SKU, capacity, base model, or runtime
+    - all inference resources come from the parent managed compute deployment referenced
+    by --target-deployment-name.
+"""
+
+helps[
+    "cognitiveservices account adapter-deployment create"
+] = """
+type: command
+short-summary: Create (or replace / re-target) a LoRA adapter deployment attached to a managed compute deployment.
+long-summary: |
+    The adapter must reference a protected Foundry fine-tuning LoRA output as its source model.
+    The target deployment is the name of an existing managed compute deployment in the same
+    account. Re-issuing create with the same adapter name and a different --target-deployment-name
+    re-targets the adapter; --source-model-id is immutable.
+examples:
+  - name: Create an adapter deployment attached to an existing managed compute deployment.
+    text: >
+        az cognitiveservices account adapter-deployment create
+        -g myResourceGroup -n myAccount
+        --adapter-deployment-name my-lora-adapter
+        --source-model-id "azureai://accounts/myAccount/projects/myProject/models/my-fine-tuned-lora/versions/1"
+        --target-deployment-name gpt-oss-120b-gpu
+"""
+
+helps[
+    "cognitiveservices account adapter-deployment show"
+] = """
+type: command
+short-summary: Show an adapter deployment for Azure Cognitive Services account.
+examples:
+  - name: Show an adapter deployment.
+    text: >
+        az cognitiveservices account adapter-deployment show
+        -g myResourceGroup -n myAccount
+        --adapter-deployment-name my-lora-adapter
+"""
+
+helps[
+    "cognitiveservices account adapter-deployment list"
+] = """
+type: command
+short-summary: List all adapter deployments for Azure Cognitive Services account.
+examples:
+  - name: List all adapter deployments.
+    text: >
+        az cognitiveservices account adapter-deployment list
+        -g myResourceGroup -n myAccount
+"""
+
+helps[
+    "cognitiveservices account adapter-deployment delete"
+] = """
+type: command
+short-summary: Delete an adapter deployment from Azure Cognitive Services account.
+examples:
+  - name: Delete an adapter deployment.
+    text: >
+        az cognitiveservices account adapter-deployment delete
+        -g myResourceGroup -n myAccount
+        --adapter-deployment-name my-lora-adapter
 """
 
 helps[
@@ -1042,6 +1127,8 @@ helps['cognitiveservices account compute create'] = """
     examples:
     - name: Create a compute resource.
       text: az cognitiveservices account compute create -g MyResourceGroup -n MyAccount --compute-name my-compute --location westus2 --pool-name my-pool --instance-type Standard_DS3_v2 --node-count 1
+    - name: Create a Spot compute resource without waiting for completion.
+      text: az cognitiveservices account compute create -g MyResourceGroup -n MyAccount --compute-name my-compute --location westus2 --pool-name my-pool --instance-type Standard_DS3_v2 --node-count 1 --vm-priority Spot --no-wait
 """
 
 helps['cognitiveservices account compute delete'] = """
@@ -1050,6 +1137,8 @@ helps['cognitiveservices account compute delete'] = """
     examples:
     - name: Delete a compute resource.
       text: az cognitiveservices account compute delete -g MyResourceGroup -n MyAccount --compute-name my-compute
+    - name: Delete a compute resource without waiting for completion.
+      text: az cognitiveservices account compute delete -g MyResourceGroup -n MyAccount --compute-name my-compute --no-wait
 """
 
 helps['cognitiveservices account compute show'] = """
@@ -1066,4 +1155,14 @@ helps['cognitiveservices account compute list'] = """
     examples:
     - name: List compute resources.
       text: az cognitiveservices account compute list -g MyResourceGroup -n MyAccount
+"""
+
+helps['cognitiveservices account compute wait'] = """
+    type: command
+    short-summary: Wait for a compute resource to reach a specified condition.
+    examples:
+    - name: Wait for a compute resource to finish creating.
+      text: az cognitiveservices account compute wait -g MyResourceGroup -n MyAccount --compute-name my-compute --created
+    - name: Wait for a compute resource to be deleted.
+      text: az cognitiveservices account compute wait -g MyResourceGroup -n MyAccount --compute-name my-compute --deleted
 """

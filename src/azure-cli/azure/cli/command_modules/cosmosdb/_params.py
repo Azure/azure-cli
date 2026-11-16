@@ -30,6 +30,7 @@ from azure.cli.command_modules.cosmosdb._validators import (
     validate_mongo_user_definition_body,
     validate_mongo_user_definition_id,
     validate_fleetspace_body,
+    validate_fleetspace_create_body,
     validate_fleetspaceAccount_body)
 
 from azure.cli.command_modules.cosmosdb.actions import (
@@ -86,10 +87,20 @@ FLEETSPACE_PROPERTIES_EXAMPLE = """--body "{
 }"
 """
 
+FLEETSPACE_UPDATE_PROPERTIES_EXAMPLE = """--body "{
+    \\"properties\\": {
+        \\"throughputPoolConfiguration\\": {
+            \\"minThroughput\\": 100000,
+            \\"maxThroughput\\": 300000
+        }
+    }
+}"
+"""
+
 FLEETSPACE_ACCOUNT_PROPERTIES_EXAMPLE = """--body "{
     \\"properties\\": {
         \\"globalDatabaseAccountProperties\\": {
-            \\"resourceId\\": \\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.DocumentDB/databaseAccounts/example-account\\",
+            \\"resourceId\\": \\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.DocumentDB/databaseAccounts/myaccount\\",
             \\"armLocation\\": \\"East US\\"
         }
     }
@@ -727,17 +738,17 @@ def load_arguments(self, _):
         c.argument('fleetspace_name', options_list=['--fleetspace-name', '-n'], help='Name of the Fleetspace resource.', required=True)
 
     with self.argument_context('cosmosdb fleetspace create') as c:
-        c.argument('fleetspace_body', options_list=['--body', '-b'], validator=validate_fleetspace_body, completer=FilesCompleter(), help="Fleetspace body with properties.serviceTier (required), properties.dataRegions (required), and properties.throughputPoolConfiguration (fields: minThroughput, maxThroughput). You can enter it as a string or as a file, e.g., --body @fleetspace.json or " + FLEETSPACE_PROPERTIES_EXAMPLE)
+        c.argument('fleetspace_body', options_list=['--body', '-b'], validator=validate_fleetspace_create_body, completer=FilesCompleter(), help="NoSQL fleetspace JSON body with required properties.serviceTier and nonempty properties.dataRegions. Omit throughputPoolConfiguration, or use null or {}, for non-pooled creation. Pooled creation requires positive integer minThroughput and maxThroughput, with max >= min; additional limits are service-configured. Use inline JSON or --body @fleetspace.json. Example: " + FLEETSPACE_PROPERTIES_EXAMPLE)
 
     with self.argument_context('cosmosdb fleetspace update') as c:
-        c.argument('fleetspace_body', options_list=['--body', '-b'], validator=validate_fleetspace_body, completer=FilesCompleter(), help="Fleetspace body with properties.serviceTier (optional), properties.dataRegions (optional), and properties.throughputPoolConfiguration (fields: minThroughput, maxThroughput). You can enter it as a string or as a file, e.g., --body @fleetspace.json or " + FLEETSPACE_PROPERTIES_EXAMPLE)
+        c.argument('fleetspace_body', options_list=['--body', '-b'], validator=validate_fleetspace_body, completer=FilesCompleter(), help="Fleetspace JSON body requiring properties.throughputPoolConfiguration with both positive integer minThroughput and maxThroughput, with max >= min. Additional limits are service-configured. Partial updates and omitted/null/empty configurations are not supported. serviceTier and dataRegions are creation settings and cannot change existing settings. Use inline JSON or --body @fleetspace.json. Example: " + FLEETSPACE_UPDATE_PROPERTIES_EXAMPLE)
 
     # Cosmos DB Fleetspace account
     with self.argument_context('cosmosdb fleetspace account') as c:
         c.argument('resource_group', options_list=['--resource-group', '-g'], help='Name of the resource group.', required=True)
         c.argument('fleet_name', options_list=['--fleet-name'], help='Name of the Cosmos DB Fleet.', required=True)
         c.argument('fleetspace_name', options_list=['--fleetspace-name'], help='Name of the Fleetspace resource.', required=True)
-        c.argument('fleetspace_account_name', options_list=['--fleetspace-account-name', '-n'], help='Name of the Fleetspace Account resource.', required=True)
+        c.argument('fleetspace_account_name', options_list=['--fleetspace-account-name', '-n'], help='Database account name from resourceId (case-insensitive match), not an association alias.', required=True)
 
     with self.argument_context('cosmosdb fleetspace account create') as c:
-        c.argument('fleetspace_account_body', options_list=['--body', '-b'], validator=validate_fleetspaceAccount_body, completer=FilesCompleter(), help="Fleetspace Account body with properties.globalDatabaseAccountProperties (fields: armLocation, resourceId). You can enter it as a string or as a file, e.g., --body @fleetspaceAccount.json or " + FLEETSPACE_ACCOUNT_PROPERTIES_EXAMPLE)
+        c.argument('fleetspace_account_body', options_list=['--body', '-b'], validator=validate_fleetspaceAccount_body, completer=FilesCompleter(), help="Fleetspace Account JSON body with properties.globalDatabaseAccountProperties: resourceId must identify a Cosmos DB database account; armLocation is required and nonblank, but the service derives the authoritative account location. Use inline JSON or --body @fleetspaceAccount.json. Example: " + FLEETSPACE_ACCOUNT_PROPERTIES_EXAMPLE)

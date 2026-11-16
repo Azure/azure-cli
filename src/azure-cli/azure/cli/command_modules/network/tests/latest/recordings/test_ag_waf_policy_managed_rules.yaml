@@ -1,0 +1,113 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - network application-gateway waf-policy create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --managed-rules
+      User-Agent:
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ag_waf_policy_managed_rules_000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_waf_policy_managed_rules_000001","name":"cli_test_ag_waf_policy_managed_rules_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_ag_waf_policy_managed_rules","date":"2026-11-05T05:16:11Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '425'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 05 Nov 2026 05:16:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: E96611357F084692813B403CD7E6DBDD Ref B: SYD281080706031 Ref C: 2026-11-05T05:16:16Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"managedRules": {"managedRuleSets":
+      [{"ruleSetType": "Microsoft_DefaultRuleSet", "ruleSetVersion": "2.1"}, {"ruleSetType":
+      "Microsoft_BotManagerRuleSet", "ruleSetVersion": "1.1"}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - network application-gateway waf-policy create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '220'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --managed-rules
+      User-Agent:
+      - AZURECLI/2.92.0 azsdk-python-core/1.39.0 Python/3.14.6 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/waf000002?api-version=2025-03-01
+  response:
+    body:
+      string: '{"name":"waf000002","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ag_waf_policy_managed_rules_000001/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/waf000002","etag":"W/\"a6c178a4-d1bb-4b29-bf58-5df0dd99582e\"","type":"Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies","location":"westus","properties":{"provisioningState":"Updating","customRules":[],"policySettings":{"requestBodyCheck":true,"maxRequestBodySizeInKb":128,"fileUploadLimitInMb":100,"state":"Disabled","mode":"Detection","requestBodyInspectLimitInKB":128,"fileUploadEnforcement":true,"requestBodyEnforcement":true},"managedRules":{"managedRuleSets":[{"ruleSetType":"Microsoft_DefaultRuleSet","ruleSetVersion":"2.1","ruleGroupOverrides":[],"computedDisabledRules":[{"ruleGroupName":"MS-ThreatIntel-CVEs","rules":[99001019]}]},{"ruleSetType":"Microsoft_BotManagerRuleSet","ruleSetVersion":"1.1","ruleGroupOverrides":[]}],"exclusions":[]}}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5503f5d6-97c6-4ee8-9daa-06920abc9baf?api-version=2025-03-01&t=639294525798998101&c=MIIHwzCCBqugAwIBAgIQMMxgbe7vsBD68rjnEhGLAzANBgkqhkiG9w0BAQsFADA1MTMwMQYDVQQDEypDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBDVVMgQ0EgMDEwHhcNMjYxMTAyMjIzMjE5WhcNMjcwMTI5MDQzMjE5WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL69FLWQonFei4J8gpxWlbb5vE1lk7G-zuQ2OOGSrVNmZEHPBppME9HuQPpNAfxysz-ub3X2U9V3ABdp_oVvuEGAjswWWwg4lS2kn_1oBuqRO2BtAp-2Ni0pyL6oQ2MmUTcugZYUVV06bhRucT6FuFX8aP4ekgyWYjXIp7jWjVo-ZT73tDGOzs8UB4bCxvxDBSANzwqCWOwpJKfk5WJVml1m2Hcd-bD-0NAr8WTOY986OEP_GgsEEwY-661XFbYSUXavhk6ct-e26H1cHAOhHeyKtfT_BggoYZIrbSiMF3xX9T6EBk70kIKr-smwYekoL0E-iGkkmbLeVky_2JeGSWECAwEAAaOCBMIwggS-MIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0OBBYEFAV4oAKZO7BUCysxstDEHbgyuqURMB8GA1UdIwQYMBaAFPzkWgovhQ7nRLkHc3jg1EQHohkRMIIBygYDVR0fBIIBwTCCAb0wb6BtoGuGaWh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS82MC9jdXJyZW50LmNybDBxoG-gbYZraHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvY2VudHJhbHVzL2NybHMvY2NtZWNlbnRyYWx1c3BraS9jY21lY2VudHJhbHVzaWNhMDEvNjAvY3VycmVudC5jcmwwYKBeoFyGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9jZW50cmFsdXMvY3Jscy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS82MC9jdXJyZW50LmNybDB1oHOgcYZvaHR0cDovL2NjbWVjZW50cmFsdXNwa2kuY2VudHJhbHVzLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZWNlbnRyYWx1c2ljYTAxLzYwL2N1cnJlbnQuY3JsMIIBzwYIKwYBBQUHAQEEggHBMIIBvTByBggrBgEFBQcwAoZmaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMHQGCCsGAQUFBzAChmhodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9jZW50cmFsdXMvY2FjZXJ0cy9jY21lY2VudHJhbHVzcGtpL2NjbWVjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjBjBggrBgEFBQcwAoZXaHR0cDovL2NybC5taWNyb3NvZnQuY29tL2NlbnRyYWx1cy9jYWNlcnRzL2NjbWVjZW50cmFsdXNwa2kvY2NtZWNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMGwGCCsGAQUFBzAChmBodHRwOi8vY2NtZWNlbnRyYWx1c3BraS5jZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lY2VudHJhbHVzaWNhMDEwDQYJKoZIhvcNAQELBQADggEBAFB1LjN242PoUngSDtuG3R45AP0aoBUlDjIKXPcMrY8fY04CjV7a-l3pR_t8cPdvXjuGiINsbsYhl_mOGbzXigbBfgH4jH4j9kDgpEsVBVTF_18MmP-fPGU7eqfVkFfsOxUuZccsQWvvYzMwaKEN300X6piZ4XtMNIUEdeQLAGBrY47udJBm6XadYFCEWryIYOm-32nptdkGWmTTCFtvPl3xEOxZJ-RDQPAPXufHutgbN0TLo8G9bvKgujHZI082EKpaxmGpQ8TCZhkEXAUUZNYfp4KepcV08sgLETqooecDAcRAzrPIr8v_3WkPzlUPcsNWeZlWGQ7dUwNlD-ntPXM&s=CB9o_hOe7IYPGGSKOGTYa-Mk0XlkWQIowcNbDqYudLS0cCEBTRBvj1ihxUVxqQh0BlFv0PvrSGrUZKkutAX6TloKWE57wUvO4VZRYzMS_0BfUYmcvJzQ_hTyWtb806Eefz5qRmS6bsgxoiI4uzRA_cWwdq6JsHNLA6DJ1cqq84_6xOY4WAJef08V-imfKI4LeyKjb7asP5KOSZxZchG5pxDsKoDNVjNvTj4K1a-FSgad8KNuXYmuPxlWs8V64jn1zrplLf4Ebijy4AxRTGSIx1P047YRgEYQPAyWVSs_tqyOgcgRK_oAdn1p6CWXs_5Wp_wAitpEaEeogKFVXf5SwQ&h=8GgGmYu5WCDWKWFCAPL2Pjn2aRpHqC_UDgsVggSP4cI
+      cache-control:
+      - no-cache
+      content-length:
+      - '986'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 05 Nov 2026 05:16:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ee7762d8-ef17-417d-a6aa-f0a1ea4e8a2c
+      x-ms-operation-identifier:
+      - tenantId=72031ed9-9b48-4bb7-804a-0d1a2a44e7be,objectId=e506a37b-b69f-4a58-8b6f-eaff8ef1388d/australiaeast/af75fb3f-b85a-4f85-b910-bcf51cde7187
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-ms-throttle-levels:
+      - operationRatePct=0.1, operationConcurrencyPct=0.3, subscriptionWriteRatePct=0.1,
+        etc
+      x-msedge-ref:
+      - 'Ref A: 17417200DFDE4E00B96A86A29CA6E771 Ref B: SYD281080709042 Ref C: 2026-11-05T05:16:16Z'
+    status:
+      code: 201
+      message: Created
+version: 1

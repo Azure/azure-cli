@@ -11,7 +11,7 @@ from azure.cli.core.commands.parameters import tags_type, get_location_type, get
 from azure.cli.command_modules.mysql.action import AddArgs
 from azure.cli.command_modules.mysql.random.generate import generate_username
 from azure.cli.command_modules.mysql._validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
-    firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, validate_action_name, validate_branch
+    firewall_rule_name_validator, validate_identity, validate_byok_identity, validate_identities, validate_action_name, validate_branch, validate_server_rename
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from ._util import get_current_time, normalize_mysql_tier
 from argcomplete.completers import FilesCompleter
@@ -425,6 +425,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     with self.argument_context('mysql flexible-server delete') as c:
         c.argument('yes', arg_type=yes_arg_type)
+
+    with self.argument_context('mysql flexible-server rename') as c:
+        c.argument('new_name', options_list=['--new-name'], required=True, validator=validate_server_rename,
+                   help='New name for the existing server. The subscription, resource group, and location do not change.')
+        c.extra('no_wait', action='store_true',
+                help='Accepted for compatibility. Rename always returns the initial response without waiting for completion.')
 
     with self.argument_context('mysql flexible-server restore') as c:
         c.argument('restore_point_in_time', arg_type=restore_point_in_time_arg_type)

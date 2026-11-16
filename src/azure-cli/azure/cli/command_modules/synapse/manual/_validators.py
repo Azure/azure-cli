@@ -56,11 +56,21 @@ def validate_audit_policy_arguments(namespace):
 
 def validate_repository_type(namespace):
     logger = get_logger(__name__)
-    repository_config_args = ['--host-name', '--account-name', '--collaboration-branch', '--repository-name', '--root-folder'
-                              '--project-name', '--tenant-id']
-    if namespace.repository_type is None:
-        logger.warning('Parameter --repository-type is missing, the following arguments are ignored: %s. Repository configuration will not work.',
-                       ' ,'.join(repository_config_args))
+    repository_config_args = ['--host-name', '--account-name', '--collaboration-branch',
+                              '--repository-name', '--root-folder', '--project-name', '--tenant-id',
+                              '--last-commit-id']
+    repo_args_values = [getattr(namespace, 'host_name', None),
+                        getattr(namespace, 'account_name', None),
+                        getattr(namespace, 'collaboration_branch', None),
+                        getattr(namespace, 'repository_name', None),
+                        getattr(namespace, 'root_folder', None),
+                        getattr(namespace, 'project_name', None),
+                        getattr(namespace, 'tenant_id', None),
+                        getattr(namespace, 'last_commit_id', None)]
+    if namespace.repository_type is None and any(arg is not None for arg in repo_args_values):
+        logger.warning('Parameter --repository-type is missing, the following arguments are ignored: %s. '
+                       'Repository configuration will not work.',
+                       ', '.join(repository_config_args))
 
 
 def add_progress_callback(cmd, namespace):

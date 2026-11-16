@@ -286,6 +286,9 @@ class ListAll(AAZCommand):
             properties.extensions_time_budget = AAZStrType(
                 serialized_name="extensionsTimeBudget",
             )
+            properties.flex_profile = AAZObjectType(
+                serialized_name="flexProfile",
+            )
             properties.hardware_profile = AAZObjectType(
                 serialized_name="hardwareProfile",
             )
@@ -413,6 +416,12 @@ class ListAll(AAZCommand):
             boot_diagnostics.enabled = AAZBoolType()
             boot_diagnostics.storage_uri = AAZStrType(
                 serialized_name="storageUri",
+            )
+
+            flex_profile = cls._schema_on_200.value.Element.properties.flex_profile
+            flex_profile.preferred_vm_size = AAZStrType(
+                serialized_name="preferredVMSize",
+                flags={"required": True},
             )
 
             hardware_profile = cls._schema_on_200.value.Element.properties.hardware_profile

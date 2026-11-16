@@ -17,7 +17,7 @@ from azure.cli.core.commands.parameters import (
 )
 from azure.cli.core.util import shell_safe_json_parse, CLIError
 
-from azure.cli.core.commands.validators import validate_tag
+from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tag
 from azure.cli.core.decorators import Completer
 
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_resource_skus
@@ -26,6 +26,7 @@ from azure.mgmt.cognitiveservices.models import (
     KeyName,
     DeploymentScaleType,
     HostingModel,
+    VmPriority,
 )
 
 logger = get_logger(__name__)
@@ -272,6 +273,38 @@ def load_arguments(self, _):
         )
         c.argument(
             "yes", action="store_true", help="Do not prompt for terms confirmation"
+        )
+
+    with self.argument_context(
+        "cognitiveservices account create", arg_group="Agent Hosting"
+    ) as c:
+        c.argument(
+            "agent_hosting_cluster",
+            is_preview=True,
+            help="ARM resource ID of the customer-owned AKS cluster. Run preflight, prepare missing Storage "
+                 "and managed identities, and create the account with agent hosting.",
+        )
+        c.argument(
+            "agent_hosting_storage",
+            is_preview=True,
+            help="ARM resource ID of existing Storage to validate and reuse. Create Storage when omitted. "
+                 "Requires --agent-hosting-cluster.",
+        )
+        c.argument(
+            "agent_hosting_management_identity",
+            options_list=["--agent-hosting-management-identity", "--agent-hosting-mi"],
+            is_preview=True,
+            help="ARM resource ID of the hosting-management user-assigned identity. "
+                 "Validate and reuse when supplied; create when omitted. Automatically assigned to the account. "
+                 "Requires --agent-hosting-cluster.",
+        )
+        c.argument(
+            "agent_hosting_workload_identity",
+            options_list=["--agent-hosting-workload-identity", "--agent-hosting-wi"],
+            is_preview=True,
+            help="ARM resource ID of the workload user-assigned identity. "
+                 "Validate and reuse when supplied; create when omitted. Not assigned to the account. "
+                 "Requires --agent-hosting-cluster.",
         )
 
     with self.argument_context(
@@ -663,6 +696,17 @@ def load_arguments(self, _):
         c.argument('model_version', help='Cognitive Services account deployment model version.')
         c.argument('model_source', help='Cognitive Services account deployment model source.')
 
+    with self.argument_context('cognitiveservices account deployment create', arg_group='Model provider') as c:
+        c.argument('organization_name',
+                   help='Name of the organization using the Anthropic model. '
+                        'Required for Anthropic deployments. Specify together with --industry and --country.')
+        c.argument('industry',
+                   help='Industry of the organization using the Anthropic model, such as Law. '
+                        'Required for Anthropic deployments. Specify together with --organization-name and --country.')
+        c.argument('country', options_list=['--country', '--country-code'],
+                   help='Two-letter ISO 3166-1 alpha-2 country code of the organization, such as US. '
+                        'Required for Anthropic deployments. Specify together with --organization-name and --industry.')
+
     with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentScaleSettings') as c:
         c.argument(
             'scale_settings_scale_type', get_enum_type(DeploymentScaleType),
@@ -689,6 +733,20 @@ def load_arguments(self, _):
 
     with self.argument_context('cognitiveservices account managed-compute-deployment update') as c:
         c.argument('tags', tags_type)
+
+    with self.argument_context('cognitiveservices account adapter-deployment') as c:
+        c.argument('adapter_deployment_name',
+                   options_list=['--adapter-deployment-name', '--adapter-name'],
+                   help='Adapter deployment name.')
+
+    with self.argument_context('cognitiveservices account adapter-deployment create') as c:
+        c.argument('source_model_id', options_list=['--source-model-id'],
+                   help='Immutable Foundry fine-tuning LoRA output model URI '
+                   '(e.g., azureai://accounts/{account}/projects/{project}/models/{model}/versions/{version}).')
+        c.argument('target_deployment_name', options_list=['--target-deployment-name'],
+                   help='Name of the existing managed compute parent deployment (resolved within '
+                   'the same account) that will serve this adapter. Re-specify to re-target an '
+                   'existing adapter deployment.')
 
     with self.argument_context('cognitiveservices account commitment-plan') as c:
         c.argument('commitment_plan_name', help='Cognitive Services account commitment plan name')
@@ -803,13 +861,16 @@ def load_arguments(self, _):
         c.argument('compute_name', help='Cognitive Services account compute name.')
 
     with self.argument_context('cognitiveservices account compute create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx),
-                   help='Location for the compute resource.')
+        c.argument(
+            'location', arg_type=get_location_type(self.cli_ctx), required=False,
+            validator=get_default_location_from_resource_group,
+            help='Location for the compute resource. If omitted, uses the configured default '
+                 'location or the resource group location.')
         c.argument('pool_name', arg_group='Pool', help='Name of the compute pool.')
         c.argument('instance_type', arg_group='Pool',
                    help='VM instance type for the pool (e.g. Standard_DS3_v2).')
         c.argument('node_count', arg_group='Pool', type=int,
                    help='Number of nodes in the pool.')
-        c.argument('vm_priority', arg_group='Pool',
-                   help='VM priority for the pool (e.g. Dedicated, LowPriority). '
-                        'If omitted, the service default is used.')
+        c.argument(
+            'vm_priority', arg_group='Pool', arg_type=get_enum_type(VmPriority),
+            help='VM priority for the pool.')

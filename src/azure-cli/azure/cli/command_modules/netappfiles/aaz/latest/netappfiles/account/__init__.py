@@ -15,6 +15,7 @@ from ._delete import *
 from ._get_key_vault_status import *
 from ._list import *
 from ._migrate_backup import *
+from ._refresh_ldap_bind_password import *
 from ._renew_credentials import *
 from ._show import *
 from ._transitiontocmk import *

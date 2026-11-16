@@ -325,7 +325,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         wire_server_access_control_profile_reference_id=None,
         imds_access_control_profile_reference_id=None, key_incarnation_id=None, add_proxy_agent_extension=None,
         disk_iops_read_write=None, disk_mbps_read_write=None, zone_movement=None,
-        os_disk_storage_fault_domain_alignment=None, data_disk_storage_fault_domain_alignment=None):
+        os_disk_storage_fault_domain_alignment=None, data_disk_storage_fault_domain_alignment=None,
+        preferred_size=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -602,8 +603,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
         return profile
 
-    vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
+    vm_properties = {'hardwareProfile': {}, 'networkProfile': {'networkInterfaces': nics},
                      'storageProfile': _build_storage_profile()}
+    if preferred_size is None:
+        vm_properties['hardwareProfile']['vmSize'] = size
+    else:
+        vm_properties['flexProfile'] = {'preferredVMSize': preferred_size}
     if processor_mode is not None:
         vm_properties['hardwareProfile']['processorMode'] = processor_mode
 
@@ -659,6 +664,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     if vm_size_properties:
         vm_properties['hardwareProfile']['vmSizeProperties'] = vm_size_properties
+    if not vm_properties['hardwareProfile']:
+        del vm_properties['hardwareProfile']
 
     if availability_set_id:
         vm_properties['availabilitySet'] = {'id': availability_set_id}

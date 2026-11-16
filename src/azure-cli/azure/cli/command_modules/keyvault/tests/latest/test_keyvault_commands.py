@@ -113,7 +113,7 @@ class CreateVaultSoftDeleteTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.keyvault.custom._create_network_rule_set', return_value=None)
     @mock.patch('azure.cli.core._profile.Profile')
-    @mock.patch('azure.cli.core.util.sdk_no_wait')
+    @mock.patch('azure.cli.command_modules.keyvault.custom.sdk_no_wait')
     def test_create_vault_sets_enable_soft_delete_true(self, mock_sdk_no_wait, mock_profile, _mock_network):
         from azure.cli.command_modules.keyvault.custom import create_vault
 
@@ -153,6 +153,33 @@ class CreateVaultSoftDeleteTest(unittest.TestCase):
         self.assertIs(vault_properties.enable_soft_delete, True,
                       "create_vault must explicitly set enable_soft_delete=True in the request body "
                       "to satisfy Azure Policy checks")
+
+
+class CreateHsmV2SkuTest(unittest.TestCase):
+    """Verify create_hsm sends the Standard_B*v2 SKUs added in API version 2026-05-15 with family 'B'."""
+
+    @mock.patch('azure.cli.command_modules.keyvault.custom.sdk_no_wait')
+    @mock.patch('azure.cli.core._profile.Profile')
+    def test_create_hsm_v2_sku_request_body(self, mock_profile, mock_sdk_no_wait):
+        from azure.mgmt.keyvault import models
+        from azure.cli.command_modules.keyvault.custom import create_hsm
+
+        mock_profile.return_value.get_subscription.return_value = {
+            'tenantId': '00000000-0000-0000-0000-000000000000'
+        }
+        cmd = mock.MagicMock()
+        cmd.cli_ctx.data = {}
+        cmd.get_models.side_effect = lambda name, **_: getattr(models, name)
+
+        for sku in ['Standard_B1v2', 'Standard_B5v2', 'Standard_B10v2', 'Standard_B15v2', 'Standard_B20v2']:
+            with self.subTest(sku=sku):
+                mock_sdk_no_wait.reset_mock()
+                create_hsm(cmd, mock.MagicMock(), resource_group_name='rg', hsm_name='hsm',
+                           administrators=['00000000-0000-0000-0000-000000000001'],
+                           location='eastus', sku=sku)
+
+                parameters = mock_sdk_no_wait.call_args.kwargs['parameters']
+                self.assertEqual(parameters.as_dict()['sku'], {'name': sku, 'family': 'B'})
 
 
 class KeyVaultEkmValidatorUnitTest(unittest.TestCase):
@@ -724,6 +751,48 @@ class KeyVaultHSMMgmtScenarioTest(ScenarioTest):
 
         self.cmd('keyvault delete --hsm-name {hsm_name}')
         self.cmd('keyvault purge --hsm-name {hsm_name}')
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='clitest-mhsm-rg', location='eastus2euap')
+    def test_keyvault_hsm_v2_sku(self, resource_group):
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e"
+        self.kwargs.update({
+            'hsm_name': self.create_random_name('clitest-mhsm-', 24),
+            'invalid_hsm_name': self.create_random_name('clitest-mhsm-', 24),
+            'loc': 'eastus2euap',
+            'init_admin': logged_in_user,
+            'sku': 'Standard_B1v2'
+        })
+
+        sku_checks = [
+            self.check('sku.name', '{sku}'),
+            self.check('sku.family', 'B')
+        ]
+
+        with self.assertRaisesRegex(CLIError, 'Please specify --administrators'):
+            self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --retention-days 7 --sku {sku}')
+
+        self.cmd('keyvault create --hsm-name {invalid_hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
+                 '--retention-days 7 --default-action Deny --bypass None --public-network-access Disabled '
+                 '--sku Standard_B99v2', expect_failure=True)
+
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l {loc} --administrators {init_admin} '
+                 '--retention-days 7 --default-action Deny --bypass None --public-network-access Disabled '
+                 '--sku {sku}', checks=sku_checks + [
+                     self.check('name', '{hsm_name}'),
+                     self.check('properties.provisioningState', 'Succeeded')
+                 ])
+        self.cmd('keyvault show --hsm-name {hsm_name} -g {rg}', checks=sku_checks)
+        self.cmd('keyvault list --resource-type hsm -g {rg} --query "[?name==\'{hsm_name}\']"', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].name', '{hsm_name}'),
+            self.check('[0].sku.name', '{sku}'),
+            self.check('[0].sku.family', 'B')
+        ])
+
+        self.cmd('keyvault delete --hsm-name {hsm_name}')
+        self.cmd('keyvault purge --hsm-name {hsm_name} -l {loc}')
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):

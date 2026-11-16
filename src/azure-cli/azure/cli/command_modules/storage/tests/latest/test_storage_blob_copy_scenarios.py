@@ -246,7 +246,7 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(expect_content, actual_content)
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_storage_blob_copy_same_account_sas(self, resource_group, storage_account):
         source_file = self.create_temp_file(16, full_random=True)
         account_info = self.get_account_info(resource_group, storage_account)

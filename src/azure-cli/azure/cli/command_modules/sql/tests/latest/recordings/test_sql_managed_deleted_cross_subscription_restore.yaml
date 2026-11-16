@@ -5,7 +5,7 @@ interactions:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql mi create
       Connection:
@@ -14,946 +14,119 @@ interactions:
       - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
         --family --tags --proxy-override --bsr --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westcentralus/capabilities?include=supportedManagedInstanceVersions&api-version=2020-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/indiasouthcentral/capabilities?api-version=2026-08-01-preview&include=supportedManagedInstanceVersions
   response:
     body:
-      string: '{"name":"West Central US","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","sku":"GP_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"},{"name":"Gen8IM","sku":"GP_G8IM","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
+      string: '{"name":"India South Central","supportedManagedInstanceVersions":[{"name":"12.0","supportedEditions":[{"name":"GeneralPurpose","isGeneralPurposeV2":false,"supportedFamilies":[{"name":"Gen5","sku":"GP_Gen5","zoneRedundant":false,"supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"}],"status":"Default"},{"name":"Gen8IH","sku":"GP_G8IH","zoneRedundant":false,"supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"}],"status":"Available"},{"name":"Gen8IM","sku":"GP_G8IM","zoneRedundant":false,"supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"2","value":2,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":640,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":false,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"}],"status":"Available"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
         is available in multi-az regions"},{"storageAccountType":"GZRS","status":"Visible","reason":"GZRS
-        is available in multi-az regions"}],"zoneRedundant":false,"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen5","sku":"BC_Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Default"},{"name":"Gen8IM","sku":"BC_G8IM","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Standard Series instances with more
-        than 5.5TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
-        Instance is not accepting creation of Standard Series instances with more
-        than 5.5TB local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"},{"name":"SQL_WestCentralUS_MI_1","status":"Available"},{"name":"SQL_WestCentralUS_MI_2","status":"Available"}],"status":"Available"}],"status":"Available"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
+        is available in multi-az regions"}],"status":"Default"},{"name":"BusinessCritical","supportedFamilies":[{"name":"Gen5","sku":"BC_Gen5","zoneRedundant":false,"supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"}],"status":"Default"},{"name":"Gen8IH","sku":"BC_G8IH","zoneRedundant":false,"supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"6","value":6,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Default"},{"name":"10","value":10,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"12","value":12,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"20","value":20,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"48","value":48,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":12,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"56","value":56,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":12,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"96","value":96,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"128","value":128,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"}],"status":"Available"},{"name":"Gen8IM","sku":"BC_G8IM","zoneRedundant":false,"supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"supportedMemoryLimitsMB":{"minValue":28672,"maxValue":49152,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":28,"maxValue":48,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"6","value":6,"supportedMemoryLimitsMB":{"minValue":43008,"maxValue":73728,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":42,"maxValue":72,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"8","value":8,"supportedMemoryLimitsMB":{"minValue":57344,"maxValue":98304,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":56,"maxValue":96,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":1,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Default"},{"name":"10","value":10,"supportedMemoryLimitsMB":{"minValue":71680,"maxValue":122880,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":70,"maxValue":120,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"12","value":12,"supportedMemoryLimitsMB":{"minValue":86016,"maxValue":147456,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":84,"maxValue":144,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"16","value":16,"supportedMemoryLimitsMB":{"minValue":114688,"maxValue":196608,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":112,"maxValue":192,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"20","value":20,"supportedMemoryLimitsMB":{"minValue":143360,"maxValue":245760,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":140,"maxValue":240,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"24","value":24,"supportedMemoryLimitsMB":{"minValue":172032,"maxValue":294912,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":168,"maxValue":288,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"32","value":32,"supportedMemoryLimitsMB":{"minValue":229376,"maxValue":393216,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":224,"maxValue":384,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":4,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"40","value":40,"supportedMemoryLimitsMB":{"minValue":286720,"maxValue":491520,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":280,"maxValue":480,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"48","value":48,"supportedMemoryLimitsMB":{"minValue":344064,"maxValue":491520,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":336,"maxValue":480,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"56","value":56,"supportedMemoryLimitsMB":{"minValue":401408,"maxValue":458752,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":392,"maxValue":448,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"64","value":64,"supportedMemoryLimitsMB":{"minValue":458752,"maxValue":458752,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":448,"maxValue":448,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
+        Instance is not accepting creation of Premiumseries instances with more than
+        5.5TB  local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"80","value":80,"supportedMemoryLimitsMB":{"minValue":573440,"maxValue":573440,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":560,"maxValue":560,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
+        Instance is not accepting creation of Premiumseries instances with more than
+        5.5TB  local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"96","value":96,"supportedMemoryLimitsMB":{"minValue":573440,"maxValue":573440,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":560,"maxValue":560,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
+        Instance is not accepting creation of Premiumseries instances with more than
+        5.5TB  local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"128","value":128,"supportedMemoryLimitsMB":{"minValue":573440,"maxValue":573440,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":560,"maxValue":560,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":5632,"unit":"Gigabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"},{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Disabled","reason":"Managed
+        Instance is not accepting creation of Premiumseries instances with more than
+        5.5TB  local storage for Business Critical edition."}],"instancePoolSupported":true,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"}],"status":"Available"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
         is available in multi-az regions"},{"storageAccountType":"GZRS","status":"Visible","reason":"GZRS
-        is available in multi-az regions"}],"zoneRedundant":true,"status":"Available"},{"name":"Hermes","supportedFamilies":[],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Visible","reason":"ZRS
+        is available in multi-az regions"}],"status":"Available"},{"name":"GeneralPurpose","isGeneralPurposeV2":true,"supportedFamilies":[{"name":"Gen8IH","sku":"GP_G8IH","zoneRedundant":false,"supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":6400,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":145,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"6","value":6,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":9600,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":217,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":12800,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":290,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Default"},{"name":"10","value":10,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":16000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":367,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"12","value":12,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":19200,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":445,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":25600,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":600,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"20","value":20,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":32000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":665,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":38400,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":730,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":51200,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":865,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":64000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1152,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"48","value":48,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":76800,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"56","value":56,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"96","value":96,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"128","value":128,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"}],"status":"Available"},{"name":"Gen8IM","sku":"GP_G8IM","zoneRedundant":false,"supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"supportedMemoryLimitsMB":{"minValue":28672,"maxValue":49152,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":28,"maxValue":48,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":6400,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":145,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"6","value":6,"supportedMemoryLimitsMB":{"minValue":43008,"maxValue":73728,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":42,"maxValue":72,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":9600,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":217,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"8","value":8,"supportedMemoryLimitsMB":{"minValue":57344,"maxValue":98304,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":56,"maxValue":96,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":12800,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":290,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Default"},{"name":"10","value":10,"supportedMemoryLimitsMB":{"minValue":71680,"maxValue":122880,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":70,"maxValue":120,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":16000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":367,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"12","value":12,"supportedMemoryLimitsMB":{"minValue":86016,"maxValue":147456,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":84,"maxValue":144,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":19200,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":445,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"16","value":16,"supportedMemoryLimitsMB":{"minValue":114688,"maxValue":196608,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":112,"maxValue":192,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":25600,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":600,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"20","value":20,"supportedMemoryLimitsMB":{"minValue":143360,"maxValue":245760,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":140,"maxValue":240,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":32000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":665,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"24","value":24,"supportedMemoryLimitsMB":{"minValue":172032,"maxValue":294912,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":168,"maxValue":288,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":38400,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":730,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"32","value":32,"supportedMemoryLimitsMB":{"minValue":229376,"maxValue":393216,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":224,"maxValue":384,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":51200,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":865,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"40","value":40,"supportedMemoryLimitsMB":{"minValue":286720,"maxValue":491520,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":280,"maxValue":480,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":64000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1152,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"48","value":48,"supportedMemoryLimitsMB":{"minValue":344064,"maxValue":491520,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":336,"maxValue":480,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":76800,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"56","value":56,"supportedMemoryLimitsMB":{"minValue":401408,"maxValue":458752,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":392,"maxValue":448,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"64","value":64,"supportedMemoryLimitsMB":{"minValue":458752,"maxValue":458752,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":448,"maxValue":448,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"80","value":80,"supportedMemoryLimitsMB":{"minValue":573440,"maxValue":573440,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":560,"maxValue":560,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"96","value":96,"supportedMemoryLimitsMB":{"minValue":573440,"maxValue":573440,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":560,"maxValue":560,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"128","value":128,"supportedMemoryLimitsMB":{"minValue":573440,"maxValue":573440,"scaleSize":1024,"status":"Available"},"supportedMemorySizesInGB":{"minValue":560,"maxValue":560,"scaleSize":1,"status":"Available"},"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"}],"status":"Default"},{"name":"Gen5","sku":"GP_Gen5","zoneRedundant":false,"supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"4","value":4,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":2,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":6400,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":145,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"8","value":8,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":8,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":12800,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":290,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Default"},{"name":"16","value":16,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":25600,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":600,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"24","value":24,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":16,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":38400,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":730,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"32","value":32,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":51200,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":865,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"40","value":40,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":64000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1152,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"64","value":64,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"},{"name":"80","value":80,"includedMaxSize":{"limit":262144,"unit":"Megabytes"},"supportedStorageSizes":[{"minValue":{"limit":32,"unit":"Gigabytes"},"maxValue":{"limit":32,"unit":"Terabytes"},"scaleSize":{"limit":32,"unit":"Gigabytes"},"status":"Available"}],"includedStorageIOps":300,"supportedStorageIOps":{"minValue":300,"maxValue":80000,"scaleSize":1,"status":"Available"},"iopsMinValueOverrideFactorPerSelectedStorageGB":3.0,"iopsIncludedValueOverrideFactorPerSelectedStorageGB":3.0,"includedStorageThroughputMBps":75,"supportedStorageThroughputMBps":{"minValue":75,"maxValue":1200,"scaleSize":1,"status":"Available"},"throughputMBpsMinValueOverrideFactorPerSelectedStorageGB":0.0,"throughputMBpsIncludedValueOverrideFactorPerSelectedStorageGB":0.0,"instancePoolSupported":false,"standaloneSupported":true,"supportedMaintenanceConfigurations":[{"name":"SQL_Default","status":"Default"}],"status":"Available"}],"status":"Available"}],"supportedStorageCapabilities":[{"storageAccountType":"GRS","status":"Default"},{"storageAccountType":"LRS","status":"Available"},{"storageAccountType":"ZRS","status":"Available","reason":"ZRS
         is available in multi-az regions"},{"storageAccountType":"GZRS","status":"Visible","reason":"GZRS
-        is available in multi-az regions"}],"zoneRedundant":false,"status":"Available"}],"supportedInstancePoolEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen5_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen5_16","value":16,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_24","value":24,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_32","value":32,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_40","value":40,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_64","value":64,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_80","value":80,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"}],"status":"Default"}],"status":"Default"}],"status":"Default"}],"status":"Available"}'
+        is available in multi-az regions"}],"status":"Available"}],"supportedInstancePoolEditions":[{"name":"GeneralPurpose","supportedFamilies":[{"name":"Gen5","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen5_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen5_16","value":16,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_24","value":24,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_32","value":32,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_40","value":40,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_64","value":64,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen5_80","value":80,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Available"}],"status":"Available"},{"name":"Gen8IM","supportedLicenseTypes":[{"name":"LicenseIncluded","status":"Default"},{"name":"BasePrice","status":"Available"}],"supportedVcoresValues":[{"name":"GP_Gen8IM_8","value":8,"storageLimit":{"limit":8388608,"unit":"Megabytes"},"status":"Default"},{"name":"GP_Gen8IM_16","value":16,"storageLimit":{"limit":16777216,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen8IM_24","value":24,"storageLimit":{"limit":16777216,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen8IM_32","value":32,"storageLimit":{"limit":16777216,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen8IM_40","value":40,"storageLimit":{"limit":16777216,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen8IM_64","value":64,"storageLimit":{"limit":16777216,"unit":"Megabytes"},"status":"Available"},{"name":"GP_Gen8IM_80","value":80,"storageLimit":{"limit":16777216,"unit":"Megabytes"},"status":"Available"}],"status":"Available"}],"status":"Default"}],"status":"Default"}],"isZoneResilientProvisioningAllowed":false,"status":"Available"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '21092'
+      - '78635'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:05:19 GMT
+      - Mon, 26 Oct 2026 12:40:24 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=99545ea9-828b-43fa-8f98-d5d7b8c82b6a/southindia/af30a8fa-d01d-4672-a883-dd191d19fb28
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: A6F899E9E2B4401F859C4E73887E81DA Ref B: PNQ241100406042 Ref C: 2026-10-26T12:40:24Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westcentralus", "tags": {}, "sku": {"name": "GP_Gen5"}, "properties":
-      {"administratorLogin": "admin123", "administratorLoginPassword": "SecretPassword123SecretPassword",
-      "subnetId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance",
-      "licenseType": "LicenseIncluded", "vCores": 4, "storageSizeInGB": 32, "collation":
-      "Serbian_Cyrillic_100_CS_AS", "publicDataEndpointEnabled": true, "proxyOverride":
-      "Proxy", "requestedBackupStorageRedundancy": "Geo", "administrators": {}}}'
+    body: '{"tags": {}, "location": "indiasouthcentral", "sku": {"name": "GP_Gen5"},
+      "properties": {"licenseType": "LicenseIncluded", "administrators": {}, "subnetId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance",
+      "collation": "Serbian_Cyrillic_100_CS_AS", "administratorLoginPassword": "SecretPassword123SecretPassword",
+      "vCores": "4", "storageSizeInGB": 32, "publicDataEndpointEnabled": true, "requestedBackupStorageRedundancy":
+      "Geo", "proxyOverride": "Proxy", "administratorLogin": "admin123"}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
-      - gzip, deflate
+      - gzip, deflate, zstd
       CommandName:
       - sql mi create
       Connection:
       - keep-alive
       Content-Length:
-      - '615'
+      - '621'
       Content-Type:
       - application/json
       ParameterSetName:
       - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
         --family --tags --proxy-override --bsr --public-data-endpoint-enabled
       User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
+      - AZURECLI/2.91.0 azsdk-python-core/1.39.0 Python/3.14.7 (Windows-11-10.0.26300-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2026-08-01-preview
   response:
     body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","administratorLogin":"admin123","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"SystemDefault","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo"},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
+      string: '{"error":{"code":"RequestDisallowedByPolicy","target":"clitestmi000001","message":"Resource
+        ''clitestmi000001'' was disallowed by policy. Reasons: ''When Microsoft Entra-only
+        authentication is disabled for a managed instance, an S360 item is generated.
+        To prevent this from happening, this policy will block the disabling of Microsoft
+        Entra-only authentication.''. See error details for policy resource IDs.","additionalInfo":[{"type":"PolicyViolation","info":{"evaluationDetails":{"evaluatedExpressions":[{"result":"True","expressionKind":"Field","expression":"type","path":"type","expressionValue":"Microsoft.Sql/managedInstances","targetValue":"Microsoft.Sql/managedInstances","operator":"Equals"},{"result":"True","expressionKind":"Field","expression":"Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication","path":"properties.administrators.azureADOnlyAuthentication","expressionValue":"******","targetValue":"False","operator":"Exists"}],"reason":"When
+        Microsoft Entra-only authentication is disabled for a managed instance, an
+        S360 item is generated. To prevent this from happening, this policy will block
+        the disabling of Microsoft Entra-only authentication."},"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/78215662-041e-49ed-a9dd-5385911b3a1f","policySetDefinitionId":"/providers/Microsoft.Authorization/policySetDefinitions/9b8d8228-e8cc-4c95-8d98-47f32df40b5e","policyDefinitionReferenceId":"SqlManagedInstance_Creation_ADOnlyEnabled","policySetDefinitionName":"9b8d8228-e8cc-4c95-8d98-47f32df40b5e","policySetDefinitionDisplayName":"Azure
+        SQL Managed Instance should have Microsoft Entra-only authentication","policySetDefinitionVersion":"1.0.0","policyDefinitionName":"78215662-041e-49ed-a9dd-5385911b3a1f","policyDefinitionDisplayName":"Azure
+        SQL Managed Instances should have Microsoft Entra-only authentication enabled
+        during creation","policyDefinitionVersion":"1.2.0","policyDefinitionEffect":"Deny","policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/7787bb41f4d545bebc6b4b2d","policyAssignmentName":"7787bb41f4d545bebc6b4b2d","policyAssignmentDisplayName":"Azure
+        SQL Managed Instance should have Microsoft Entra-only authentication","policyAssignmentScope":"/subscriptions/00000000-0000-0000-0000-000000000000","policyAssignmentParameters":{"effect":"Deny"},"policyExemptionIds":[],"policyEnrollmentIds":[]}}]}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '754'
+      - '2448'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Jan 2023 13:05:26 GMT
+      - Mon, 26 Oct 2026 12:40:24 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-failure-cause:
+      - gateway
+      x-msedge-ref:
+      - 'Ref A: 518394B4FF0F4C3893548397F60D2F2B Ref B: PNQ231110909052 Ref C: 2026-10-26T12:40:24Z'
     status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1203'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:06:25 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1203'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:06:56 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1203'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:07:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1203'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:07:57 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Creating","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Creating","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1203'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:08:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -l -u -p --subnet --license-type --collation --capacity --storage --edition
-        --family --tags --proxy-override --bsr --public-data-endpoint-enabled
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1201'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:08:57 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":4},"properties":{"provisioningState":"Succeeded","fullyQualifiedDomainName":"clitestmi000001.1e6d90da5016.database.windows.net","administratorLogin":"admin123","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Network/virtualNetworks/vnet-mi-tooling/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":4,"storageSizeInGB":32,"collation":"Serbian_Cyrillic_100_CS_AS","dnsZone":"1e6d90da5016","publicDataEndpointEnabled":true,"proxyOverride":"Proxy","timezoneId":"UTC","maintenanceConfigurationId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/SQL_Default","privateEndpointConnections":[],"currentBackupStorageRedundancy":"Geo","requestedBackupStorageRedundancy":"Geo","zoneRedundant":false},"location":"westcentralus","tags":{},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001","name":"clitestmi000001","type":"Microsoft.Sql/managedInstances"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1201'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:08:58 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "westcentralus", "properties": {"restorePointInTime": "2023-01-27T12:53:58.140434Z",
-      "createMode": "PointInTimeRestore", "crossSubscriptionSourceDatabaseId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/gen4-testing-RG/providers/Microsoft.Sql/managedInstances/filiptanic-gen4-on-gen7-different-subnet/databases/cross-sub-restored",
-      "crossSubscriptionTargetManagedInstanceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '565'
-      Content-Type:
-      - application/json
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIRestoreCrossSubDB000002?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"operation":"CreateManagedRestoreRequest","startTime":"2023-01-27T13:09:03.44Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '81'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:09:03 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseOperationResults/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"2129d4e9-6fe9-4af1-9dbe-8bace95b45fb","status":"InProgress","startTime":"2023-01-27T13:09:03.44Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:09:18 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"2129d4e9-6fe9-4af1-9dbe-8bace95b45fb","status":"InProgress","startTime":"2023-01-27T13:09:03.44Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:09:33 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"2129d4e9-6fe9-4af1-9dbe-8bace95b45fb","status":"InProgress","startTime":"2023-01-27T13:09:03.44Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:09:48 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"2129d4e9-6fe9-4af1-9dbe-8bace95b45fb","status":"InProgress","startTime":"2023-01-27T13:09:03.44Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:10:03 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"2129d4e9-6fe9-4af1-9dbe-8bace95b45fb","status":"InProgress","startTime":"2023-01-27T13:09:03.44Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:10:18 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"2129d4e9-6fe9-4af1-9dbe-8bace95b45fb","status":"InProgress","startTime":"2023-01-27T13:09:03.44Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:10:34 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"2129d4e9-6fe9-4af1-9dbe-8bace95b45fb","status":"InProgress","startTime":"2023-01-27T13:09:03.44Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '107'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:10:50 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedDatabaseAzureAsyncOperation/2129d4e9-6fe9-4af1-9dbe-8bace95b45fb?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"name":"2129d4e9-6fe9-4af1-9dbe-8bace95b45fb","status":"Succeeded","startTime":"2023-01-27T13:09:03.44Z"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '106'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:11:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql midb restore
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --dest-name --dest-mi --dest-resource-group --source-sub --mi -g -n --time
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIRestoreCrossSubDB000002?api-version=2022-05-01-preview
-  response:
-    body:
-      string: '{"properties":{"collation":"SQL_Latin1_General_CP1_CI_AS","status":"Online","creationDate":"2023-01-27T13:09:05.55Z","defaultSecondaryLocation":"westus2"},"location":"westcentralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001/databases/MIRestoreCrossSubDB000002","name":"MIRestoreCrossSubDB000002","type":"Microsoft.Sql/managedInstances/databases"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '460'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:11:05 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - sql mi delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -n --yes --no-wait
-      User-Agent:
-      - AZURECLI/2.44.1 azsdk-python-mgmt-sql/0.9.0 Python/3.8.3 (Windows-10-10.0.17763-SP0)
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/managedInstances/clitestmi000001?api-version=2021-05-01-preview
-  response:
-    body:
-      string: '{"operation":"DropManagedServer","startTime":"2023-01-27T13:11:08.307Z"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceAzureAsyncOperation/d17b6f39-6157-48ff-8558-71ca2b73f07b?api-version=2021-05-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '72'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 27 Jan 2023 13:11:07 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CustomerExperienceTeam_RG/providers/Microsoft.Sql/locations/westcentralus/managedInstanceOperationResults/d17b6f39-6157-48ff-8558-71ca2b73f07b?api-version=2021-05-01-preview
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
+      code: 403
+      message: Forbidden
 version: 1

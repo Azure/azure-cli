@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import argparse
+
 from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
@@ -19,7 +21,8 @@ from azure.mgmt.web.models import (DatabaseType, ConnectionStringType, BuiltInAu
 
 from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
-                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES, ISOLATED_V4_SKUS)
+                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES, ISOLATED_V4_SKUS,
+                         EGRESS_PROTOCOLS, EGRESS_AUTH_TYPES, EGRESS_SOURCES, FLEX_REGISTRY_AUTH_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
@@ -135,9 +138,12 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', arg_type=get_three_state_flag(), default=None, required=False,
-                   help='Host web app on Linux worker. Defaults to true unless --hyper-v is specified. '
+                   help='Host web app on Linux worker. Defaults to true unless --hyper-v or '
+                        '--is-managed-instance is specified. '
                         'Use "--is-linux false" to create a Windows plan.')
-        c.argument('hyper_v', action='store_true', required=False, help='Host Windows Container Web App on Hyper-V worker.')
+        c.argument('hyper_v', action='store_true', required=False,
+                   help='Host Windows Container Web App on Hyper-V worker. Cannot be used with '
+                        '--is-managed-instance.')
         c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
                                                                                  'scaling an app independently from '
@@ -145,7 +151,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Minimum instance count is 2.')
         c.argument('tags', arg_type=tags_type)
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
-        c.argument('is_managed_instance', action='store_true', help='host web app on managed instance')
+        c.argument('is_managed_instance', action='store_true',
+                   help='Host web app on Managed Instance. Managed Instance supports Windows plans only and '
+                        'cannot be used with --hyper-v.')
         c.argument('mi_system_assigned',
                    arg_type=get_three_state_flag(),
                    help="Enable system-assigned managed identity for this app service plan.")
@@ -814,7 +822,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('login_with_github', help='Interactively log in with GitHub to retrieve the Personal Access Token', action='store_true')
 
     with self.argument_context('webapp deployment github-actions add')as c:
-        c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework|Version, e.g. "PHP|5.6". Use "az webapp list-runtimes" for available list.')
+        c.argument('runtime', options_list=['--runtime', '-r'], help='Canonicalized web runtime in the format of Framework:Version, e.g. "PHP:5.6". Use "az webapp list-runtimes" for available list.')
         c.argument('force', options_list=['--force', '-f'], help='When true, the command will overwrite any workflow file with a conflicting name.', action='store_true')
 
     with self.argument_context('webapp deployment source config-zip')as c:
@@ -927,6 +935,31 @@ subscription than the app service environment, please use the resource ID for --
                        help="space-separated slot {} in a format of either `<name>=<value>` or `@<json_file>`".format(
                            scope))
             c.argument('setting_names', nargs='+', help="space-separated {} names".format(scope))
+
+    with self.argument_context('webapp config egress set') as c:
+        c.argument('enabled', arg_type=get_three_state_flag(), required=True,
+                   help='Enable virtual connections with true or disable them with false.')
+
+    with self.argument_context('webapp config egress connection') as c:
+        c.argument('connection_name', help='Name of the egress connection. Names are case-insensitive.')
+
+    with self.argument_context('webapp config egress connection remove') as c:
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true',
+                   help='Do not prompt for confirmation when removing the last connection.')
+
+    with self.argument_context('webapp config egress connection add') as c:
+        c.argument('protocol', arg_type=get_enum_type(EGRESS_PROTOCOLS), help='Backend protocol.')
+        c.argument('auth', arg_type=get_enum_type(EGRESS_AUTH_TYPES), help='Backend authentication strategy.')
+        c.argument('source', arg_type=get_enum_type(EGRESS_SOURCES),
+                   help='Source of the referenced settings. Defaults to AppSettings.')
+        c.argument('host_setting', help='Name of the setting containing the backend host, not the host value.')
+        c.argument('credential_setting', help='Name of the setting containing the credential, not the credential value.')
+        c.argument('username_setting', help='Name of the setting containing the username, not the username value.')
+        c.argument('value_setting', help='Name of the setting containing the complete connection string or URL.')
+        c.argument('identity_resource_id', help='Resource ID of a user-assigned identity already assigned to the app. By default, use the system-assigned identity.')
+        c.argument('identity_scope', help='Scope used to acquire a managed identity token for the backend connection.')
+        c.argument('credential_header', help='HTTP header used to inject a standalone credential, for example Authorization.')
+        c.argument('credential_format', help='HTTP credential header format, for example "Bearer {value}". Requires --credential-header.')
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'],
@@ -1080,43 +1113,34 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('resource_group', arg_type=resource_group_name_type)
 
-    with self.argument_context('webapp up') as c:
-        c.argument('name', arg_type=webapp_name_arg_type,
+    with self.argument_context('webapp up', help=argparse.SUPPRESS) as c:
+        # Retain --ids without automatically generating visible resource-ID arguments.
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET,
                                                                                            LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
+        c.argument('resource_group_name')
+        c.extra('ids', options_list=['--ids'], nargs='+', dest='_ids')
         c.argument('plan', options_list=['--plan', '-p'],
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name of the app service plan associated with the webapp. If not specified, a name is auto-generated.",
                    configured_default='appserviceplan')
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES),
-                   help="Set the OS type for the app to be created. Defaults to Linux for Python "
-                        "and Node.js runtimes, and to Windows for .NET and ASP.NET runtimes. "
-                        "Use 'linux' explicitly for .NET Linux deployments. "
-                        "Use 'az webapp list-runtimes' to see available runtimes.")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PYTHON:3.14\". "
-                                                                     "Recommended: always specify explicitly for reliable results. Auto-detection from source files may pick the wrong version. "
-                                                                     "Use `az webapp list-runtimes` for available list.")
-        c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
-                   default=False, action='store_true')
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('launch_browser', help="Launch the created app using the default browser. This is not supported in Azure Cloud Shell.", default=False,
+        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES))
+        c.argument('runtime', options_list=['--runtime', '-r'])
+        c.argument('dryrun', default=False, action='store_true')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), type=str)
+        c.argument('launch_browser', default=False,
                    action='store_true', options_list=['--launch-browser', '-b'])
-        c.argument('logs',
-                   help="Configure default logging required to enable viewing log stream immediately after launching the webapp",
-                   default=False, action='store_true')
-        c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
-        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'], help='name or resource ID of the (pre-existing) App Service Environment to deploy to. Requires an Isolated V2 or Isolated V4 sku')
-        c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
-        c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
-                   arg_type=get_three_state_flag())
-        c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
-                   arg_type=get_three_state_flag())
+        c.argument('logs', default=False, action='store_true')
+        c.argument('html', default=False, action='store_true')
+        c.argument('app_service_environment', options_list=['--app-service-environment', '-e'])
+        c.argument('basic_auth', arg_type=get_enum_type(BASIC_AUTH_TYPES))
+        c.argument('track_status', arg_type=get_three_state_flag())
+        c.argument('enable_kudu_warmup', arg_type=get_three_state_flag())
         c.argument('enriched_errors', options_list=['--enriched-errors'],
-                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. Enabled by default; use --enriched-errors false to disable.',
                    arg_type=get_three_state_flag(), default=True)
-        c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'], help="Specify the scope of uniqueness for the default hostname during resource creation.", arg_type=get_enum_type(AutoGeneratedDomainNameLabelScope))
+        c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'],
+                   arg_type=get_enum_type(AutoGeneratedDomainNameLabelScope))
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
@@ -1229,6 +1253,25 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
                    "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
                    "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.")
+
+    for scope in ['functionapp create', 'functionapp deployment config set']:
+        with self.argument_context(scope, arg_group='Flex Registry Deployment') as c:
+            c.argument('deployment_image', options_list=['--deployment-image'], is_preview=True,
+                       help="Container image for a Flex Consumption app, specified by tag or digest, e.g. "
+                       "`myregistry.azurecr.io/myimage:v1` or `myregistry.azurecr.io/myimage@sha256:<digest>`.")
+            c.argument('deployment_image_auth_type', options_list=['--deployment-image-auth-type', '--diat'],
+                       arg_type=get_enum_type(FLEX_REGISTRY_AUTH_TYPES), is_preview=True,
+                       help="How the platform authenticates to the registry: Anonymous (public image), SystemAssignedIdentity, UserAssignedIdentity (requires --deployment-image-identity), "
+                       "or Basic (requires --deployment-image-username-setting and --deployment-image-password-setting). The CLI doesn't assign identities or grant registry access.")
+            c.argument('deployment_image_identity',
+                       options_list=['--deployment-image-identity', '--dii'], is_preview=True,
+                       help="Resource ID of the user-assigned managed identity used to pull the image. Only valid with UserAssignedIdentity. Saved as provided; the CLI doesn't create, look up, or assign it.")
+            c.argument('deployment_image_username_setting',
+                       options_list=['--deployment-image-username-setting', '--dius'], is_preview=True,
+                       help="Name of the app setting that stores the registry username. Only valid with Basic.")
+            c.argument('deployment_image_password_setting',
+                       options_list=['--deployment-image-password-setting', '--dips'], is_preview=True,
+                       help="Name of the app setting that stores the registry password. Only valid with Basic. Pass the app setting name, not the password.")
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())

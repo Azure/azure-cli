@@ -74,6 +74,10 @@ def load_command_table(self, _):
         client_factory=cf_metric_alerts,
         exception_handler=exception_handler)
 
+    trace_association_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.trace_association#{}',
+        exception_handler=exception_handler)
+
     with self.command_group('monitor action-group', action_group_sdk, custom_command_type=action_group_custom) as g:
         g.wait_command('wait')
 
@@ -150,5 +154,12 @@ def load_command_table(self, _):
 
     with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom) as g:
         g.custom_command('clone', 'clone_existed_settings', is_preview=True)
+
+    with self.command_group('monitor trace-association', custom_command_type=trace_association_custom,
+                            is_preview=True) as g:
+        g.custom_command('create', 'create_trace_association')
+        g.custom_show_command('show', 'show_trace_association')
+        g.custom_command('list', 'list_trace_associations')
+        g.custom_command('delete', 'delete_trace_association')
 
     # private-link-scope commands are auto-discovered from operations tree

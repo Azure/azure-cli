@@ -5,6 +5,7 @@
 
 import time
 import os
+import re
 import urllib
 import urllib3
 import certifi
@@ -26,6 +27,26 @@ from ._constants import LOGICAPP_KIND, FUNCTIONAPP_KIND, LINUXAPP_KIND, ISOLATED
 logger = get_logger(__name__)
 
 REQUESTS_CA_BUNDLE = "REQUESTS_CA_BUNDLE"
+
+
+def get_linux_runtime_list_command(runtime):
+    family = re.split(r'[:|]', runtime or '', maxsplit=1)[0].strip().lower()
+    runtime_filters = {
+        'dotnet': 'dotnet',
+        'dotnetcore': 'dotnet',
+        'aspnet': 'dotnet',
+        'node': 'node',
+        'php': 'php',
+        'python': 'python',
+        'java': 'java',
+        'tomcat': 'java',
+        'jbosseap': 'java',
+    }
+    command = "az webapp list-runtimes --os-type linux"
+    runtime_filter = runtime_filters.get(family)
+    if runtime_filter:
+        command += " --runtime {}".format(runtime_filter)
+    return command
 
 
 # get a RID when the name may be an RID
@@ -261,10 +282,10 @@ def _rename_server_farm_props(webapp):
     return webapp
 
 
-def get_raw_functionapp(cli_ctx, resource_group_name, name):
+def get_raw_functionapp(cli_ctx, resource_group_name, name, api_version='2023-12-01'):
     site_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'
     subscription_id = get_subscription_id(cli_ctx)
-    site_url = site_url_base.format(subscription_id, resource_group_name, name, '2023-12-01')
+    site_url = site_url_base.format(subscription_id, resource_group_name, name, api_version)
     request_url = cli_ctx.cloud.endpoints.resource_manager + site_url
     response = send_raw_request(cli_ctx, "GET", request_url)
     return response.json()
