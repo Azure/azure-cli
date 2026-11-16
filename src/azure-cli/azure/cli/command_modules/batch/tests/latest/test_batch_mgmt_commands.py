@@ -453,7 +453,7 @@ class TestBatchAccountPublicNetworkAccess(unittest.TestCase):
         self.client.update.reset_mock()
         self.assertEqual(self.cli.invoke(command.split(), out_file=io.StringIO()), 0)
         self.client.update.assert_called_once()
-        return self.client.update.call_args.kwargs['parameters'].serialize()
+        return self.client.update.call_args.kwargs['parameters'].as_dict()
 
     def test_batch_account_identity_keeps_public_network_access(self):
         for command in ['batch account identity assign -g rg -n acc --system-assigned',

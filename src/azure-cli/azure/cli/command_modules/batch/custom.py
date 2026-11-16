@@ -11,12 +11,13 @@ from azure.core.exceptions import DeserializationError
 from azure.mgmt.batch import BatchManagementClient
 from azure.core import MatchConditions
 from azure.mgmt.batch.models import (BatchAccountCreateParameters, BatchAccountUpdateParameters,
-                                     AutoStorageBaseProperties, ActivateApplicationPackageParameters,
+                                     AutoStorageBaseProperties, AutoStorageAuthenticationMode,
+                                     ActivateApplicationPackageParameters,
                                      Application, EncryptionProperties,
                                      KeyVaultProperties, BatchAccountIdentity,
                                      BatchAccountRegenerateKeyParameters, PublicNetworkAccessType, BatchAccount,
-                                     NetworkProfile, EndpointAccessProfile, IPRule, EndpointAccessDefaultAction,
-                                     ResourceIdentityType, UserAssignedIdentities)
+                                     NetworkProfile, EndpointAccessProfile, IPRule, IPRuleAction,
+                                     EndpointAccessDefaultAction, ResourceIdentityType, UserAssignedIdentities)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (AffinityInfo, BatchPoolResizeContent, BatchStartTask, BatchTaskConstraints, BatchTask,
@@ -29,6 +30,10 @@ from azure.cli.core.util import sdk_no_wait, get_file_json
 
 logger = get_logger(__name__)
 MAX_TASKS_PER_REQUEST = 100
+
+# azure-mgmt-batch 17.3.0 filled in this value when it wasn't given; send it explicitly so the requests stay the
+# same with 19.0.0.
+AUTO_STORAGE_AUTHENTICATION_MODE = AutoStorageAuthenticationMode.STORAGE_KEYS
 
 
 def transfer_doc(source_func, *additional_source_funcs):
@@ -76,7 +81,8 @@ def create_account(client,
                    keyvault=None, keyvault_url=None, no_wait=False, public_network_access=None,
                    encryption_key_source=None, encryption_key_identifier=None,
                    mi_user_assigned=None, mi_system_assigned=None):
-    properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
+    properties = AutoStorageBaseProperties(storage_account_id=storage_account,
+                                           authentication_mode=AUTO_STORAGE_AUTHENTICATION_MODE) \
         if storage_account else None
 
     identity = None
@@ -116,7 +122,8 @@ def update_account(client, resource_group_name, account_name,
                    tags=None, storage_account=None, encryption_key_source=None, public_network_access=None,
                    encryption_key_identifier=None):
 
-    properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
+    properties = AutoStorageBaseProperties(storage_account_id=storage_account,
+                                           authentication_mode=AUTO_STORAGE_AUTHENTICATION_MODE) \
         if storage_account else None
     if (encryption_key_source and
             encryption_key_source.lower() == "microsoft.keyvault" and not
@@ -152,8 +159,8 @@ def assign_batch_identity(cmd, client, resource_group_name, account_name, mi_sys
         my_dict = {mi_user_assigned: useridentity}
         identity = BatchAccountIdentity(type=ResourceIdentityType.USER_ASSIGNED, user_assigned_identities=my_dict)
 
-    # Leave public network access as it is: azure-mgmt-batch sends 'Enabled' when it isn't set
-    parameters = BatchAccountUpdateParameters(identity=identity, public_network_access=None)
+    # Leave public network access as it is: don't set it in the update
+    parameters = BatchAccountUpdateParameters(identity=identity)
 
     client.update(resource_group_name=resource_group_name, account_name=account_name, parameters=parameters)
 
@@ -181,8 +188,8 @@ def remove_batch_identity(cmd, client, resource_group_name, account_name, mi_sys
                                            if batch_account.identity.type == ResourceIdentityType.USER_ASSIGNED
                                            else ResourceIdentityType.SYSTEM_ASSIGNED)
 
-    # Leave public network access as it is: azure-mgmt-batch sends 'Enabled' when it isn't set
-    parameters = BatchAccountUpdateParameters(identity=batch_account.identity, public_network_access=None)
+    # Leave public network access as it is: don't set it in the update
+    parameters = BatchAccountUpdateParameters(identity=batch_account.identity)
 
     client.update(resource_group_name=resource_group_name, account_name=account_name, parameters=parameters)
 
@@ -301,7 +308,7 @@ def add_network_rule(cmd, client, resource_group_name=None, account_name=None, p
                 default_action=EndpointAccessDefaultAction.ALLOW)
         if networkprofile.account_access.ip_rules is None:
             networkprofile.account_access.ip_rules = []
-        networkprofile.account_access.ip_rules.append(IPRule(value=ip_address))
+        networkprofile.account_access.ip_rules.append(IPRule(action=IPRuleAction.ALLOW, value=ip_address))
 
     if profile.lower() == "nodemanagement":
         if networkprofile.node_management_access is None:
@@ -309,7 +316,7 @@ def add_network_rule(cmd, client, resource_group_name=None, account_name=None, p
                 default_action=EndpointAccessDefaultAction.ALLOW)
         if networkprofile.node_management_access.ip_rules is None:
             networkprofile.node_management_access.ip_rules = []
-        networkprofile.node_management_access.ip_rules.append(IPRule(value=ip_address))
+        networkprofile.node_management_access.ip_rules.append(IPRule(action=IPRuleAction.ALLOW, value=ip_address))
 
     # The network profile only takes effect when public network access is enabled
     parameters = BatchAccountUpdateParameters(public_network_access=PublicNetworkAccessType.ENABLED,
