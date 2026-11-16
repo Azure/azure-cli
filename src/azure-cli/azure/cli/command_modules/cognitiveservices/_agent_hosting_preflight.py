@@ -52,6 +52,9 @@ _ROLE_IDS = {
 }
 
 
+_PREFLIGHT_DOC_URL = 'https://aka.ms/byo-aks-fulfill-cluster-requirements'
+
+
 @dataclass(frozen=True)
 class HostingRequest:
     account_id: str
@@ -111,6 +114,7 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
             _check_domain(cognitive_client, existing_account, custom_domain, kind)
         return PreflightResult(resources, None, None, None, existing_account=True)
     account_clients = _clients(cli_ctx, request.account_id, clients)
+    logger.info("Validating BYO AKS prerequisites for cluster '%s' ...", _resource_name(resources.cluster))
     if not account_clients.resource.resource_groups.check_existence(account['resource_group']):
         raise ValidationError(
             f"Resource group '{account['resource_group']}' does not exist. Create it before retrying.")
@@ -121,7 +125,7 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
         _check_tenants(cli_ctx, clients, resources, checks)
     _report(checks, 'Distinct identities', request.account_id,
             resources.management_identity.lower() != resources.workload_identity.lower(),
-            f'{resources.management_identity}; {resources.workload_identity}',
+            f'{_resource_name(resources.management_identity)}; {_resource_name(resources.workload_identity)}',
             'Different management and workload identities', 'Supply distinct identities.')
     cluster = None
     with _read_check(checks, 'AKS cluster', resources.cluster):
@@ -145,9 +149,8 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
     grants = ()
     with _read_check(checks, 'Permissions', request.account_id):
         grants = _check_grants(cli_ctx, clients, request, checked, checks)
-    if any(check['mandatory'] and check['status'] in ('FAIL', 'UNVERIFIED') for check in checks):
-        raise ValidationError('BYO AKS preflight failed. No Azure resources were written. '
-                              'Resolve the reported checks and retry.')
+    _raise_if_preflight_failed(checks)
+    logger.info('BYO AKS preflight validation passed.')
     return replace(checked, grants=tuple(grants), checks=tuple(checks))
 
 
@@ -281,26 +284,35 @@ def _resolve_resources(request):
                    else identity_id(names['workload_identity']))
 
 
+def _resource_name(value):
+    return value.rstrip('/').rsplit('/', 1)[-1] if value else ''
+
+
 def _report(checks, name, scope, passed, observed, expected, remediation, mandatory=True):
     status = passed if isinstance(passed, str) else ('PASS' if passed else 'FAIL')
     observed = _enum_value(observed)
     checks.append({'name': name, 'scope': scope, 'status': status, 'mandatory': mandatory,
                    'observed': observed, 'expected': expected, 'remediation': remediation})
-    if isinstance(observed, (list, tuple)):
-        observed = '\n    ' + '\n    '.join(str(item) for item in observed)
-    elif isinstance(observed, dict):
-        observed = '\n    ' + '\n    '.join(f'{key}: {value}' for key, value in observed.items())
-    label = f"Role '{name[:-11]}'" if name.endswith(' validation') else name
-    short_scope = '/'.join(scope.rstrip('/').rsplit('/', 2)[-2:])
-    if status in ('FAIL', 'UNVERIFIED'):
-        logger.warning('Preflight check failed: %s\n  Scope: %s\n  Details: %s\n  Requirement: %s\n  Action: %s',
-                       label, scope, observed, expected, remediation)
-    elif status == 'NOT_APPLICABLE':
-        logger.info('Not applicable: %s [%s]: observed=%s; note=%s', label, short_scope, observed, remediation)
-    else:
-        recommendation = '' if mandatory or remediation == 'None' else f'; recommendation={remediation}'
-        logger.info('Validated %s [%s]: observed=%s (expected: %s)%s',
-                    label, short_scope, observed, expected, recommendation)
+
+
+def _raise_if_preflight_failed(checks):
+    failed = [check for check in checks if check['mandatory'] and check['status'] in ('FAIL', 'UNVERIFIED')]
+    if not failed:
+        return
+    lines, recommendations = [], []
+    for check in failed:
+        name, observed, remediation = check['name'], check['observed'], check['remediation']
+        label = f"Role '{name[:-11]}'" if name.endswith(' validation') else name
+        if isinstance(observed, (list, tuple)):
+            observed = ', '.join(str(item) for item in observed) or 'None'
+        lines.append(f"  - {label} ('{_resource_name(check['scope'])}'): {observed} (expected {check['expected']})")
+        if remediation and remediation != 'None' and remediation not in recommendations:
+            recommendations.append(remediation)
+    recommendations.append(f'See {_PREFLIGHT_DOC_URL} for more details.')
+    raise ValidationError(
+        'BYO AKS preflight failed. No Azure resources were written:\n' + '\n'.join(lines),
+        recommendation=recommendations,
+    )
 
 
 @contextmanager
@@ -508,10 +520,11 @@ def _check_pools(aks, cluster, scope, checks):
             'One User pool satisfying all sandbox requirements', 'Prepare one qualifying User pool.')
     network = cluster.properties.network_profile if cluster.properties else None
     mode = _enum_value(network.network_plugin_mode) if network else None
-    pod_subnets = {pool.name: pool.properties.pod_subnet_id if pool.properties else None for pool in pools}
-    uses_pod_subnets = bool(pools) and all(bool(subnet and str(subnet).strip()) for subnet in pod_subnets.values())
+    pod_subnets = {pool.name: bool(pool.properties and pool.properties.pod_subnet_id and
+                                   str(pool.properties.pod_subnet_id).strip()) for pool in pools}
+    uses_pod_subnets = bool(pools) and all(pod_subnets.values())
     _report(checks, 'CNI mode', scope, mode == 'overlay' or (mode is None and uses_pod_subnets),
-            f'{mode}; pool pod subnets={pod_subnets}', 'Azure CNI Overlay or Pod Subnet on every node pool',
+            f'mode={mode}; podSubnets={pod_subnets}', 'Azure CNI Overlay or Pod Subnet on every node pool',
             'Use Azure CNI Overlay or configure a Pod subnet on every node pool.')
 
 
@@ -549,13 +562,16 @@ def _check_storage(storage, scope, location, checks):
         _report(checks, name, scope, passed, observed, expected, 'Supply Storage with the required configuration.')
     sku = str(_enum_value(storage.sku.name)) if storage.sku and storage.sku.name else ''
     zone_redundant = sku.endswith(('ZRS', 'GZRS'))
+    if sku and not zone_redundant:
+        logger.info("Storage account '%s' uses %s; ZRS or GZRS is recommended when available.",
+                    _resource_name(scope), sku)
     _report(checks, 'Storage redundancy', scope, 'PASS' if sku else 'UNVERIFIED',
             sku or 'Missing SKU', 'Readable redundancy; ZRS or GZRS recommended',
             'None' if zone_redundant else 'Use ZRS or GZRS when available.', mandatory=False)
 
 
 def _role_guid(role_definition_id):
-    return role_definition_id.rstrip('/').rsplit('/', 1)[-1].lower() if role_definition_id else ''
+    return _resource_name(role_definition_id).lower()
 
 
 def _accepted_role_ids(role_name):
@@ -601,9 +617,8 @@ def _check_grants(cli_ctx, clients, request, checked, checks):
             principal = identity.principal_id if identity else None
             assigned = _assigned_role_ids(client, scope, principal, assignments_by_scope) if principal else set()
             allowed = bool(assigned & _accepted_role_ids(role_name))
-            identity_name = identity_id.rsplit('/', 1)[-1]
-            subject = f'{identity_name} ({principal})' if principal else identity_name
-            _report(checks, f'{role_name} validation', scope, allowed, f'{subject}: {role_name}',
+            identity_name = _resource_name(identity_id)
+            _report(checks, f'{role_name} validation', scope, allowed, f'{identity_name}: {role_name}',
                     'Existing effective role assignment; no grant writes',
                     'Have an administrator grant the required role assignment.')
         else:
