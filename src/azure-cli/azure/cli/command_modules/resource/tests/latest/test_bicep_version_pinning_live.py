@@ -120,7 +120,7 @@ def _invoke_child(root, config, request, cwd=None, path=None):
         environment["PATH"] = path + os.pathsep + environment.get("PATH", "")
     bootstrap = (
         f"import sys; sys.path[:0] = {sys.path!r}; "
-        "from test_bicep_version_pinning_live import _run_live_request; "
+        f"from {__name__} import _run_live_request; "
         f"_run_live_request({request!r})"
     )
     process = subprocess.run(
