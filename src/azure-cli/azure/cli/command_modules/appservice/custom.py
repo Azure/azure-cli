@@ -6753,9 +6753,12 @@ def _copy_string_to_clipboard(string_value):
     from azure.cli.core.util import get_safe_executable_path, run_cmd
 
     cmd_path = get_safe_executable_path('cmd.exe')
+    if not cmd_path:
+        raise ValidationError("Unable to locate cmd.exe to copy the RDP password to the clipboard.")
+
     clip_path = get_safe_executable_path('clip.exe')
-    if not cmd_path or not clip_path:
-        raise ValidationError("Unable to locate cmd.exe or clip.exe to copy the RDP password to the clipboard.")
+    if not clip_path:
+        raise ValidationError("Unable to locate clip.exe to copy the RDP password to the clipboard.")
 
     run_cmd([cmd_path, "/c", "echo", "|", "set", "/p={}|".format(string_value), clip_path], check=False)
 

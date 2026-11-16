@@ -31,12 +31,14 @@ class AppServicePlanClipboardTest(unittest.TestCase):
     @mock.patch('azure.cli.core.util.run_cmd')
     @mock.patch('azure.cli.core.util.get_safe_executable_path')
     def test_appservice_clipboard_missing_executable_fails_closed(self, resolve, run):
-        for paths in ([None, r'C:\Windows\System32\clip.exe'], [r'C:\Windows\System32\cmd.exe', None]):
-            with self.subTest(paths=paths):
+        for executable, paths in (('cmd.exe', [None]), ('clip.exe', [r'C:\Windows\System32\cmd.exe', None])):
+            with self.subTest(executable=executable):
+                resolve.reset_mock()
                 resolve.side_effect = paths
-                with self.assertRaisesRegex(ValidationError, 'Unable to locate'):
+                with self.assertRaisesRegex(ValidationError, f'Unable to locate {executable} to copy'):
                     custom._copy_string_to_clipboard('TestPassword123!')
 
+                self.assertEqual(resolve.call_count, len(paths))
                 run.assert_not_called()
 
     @unittest.skipUnless(sys.platform == 'win32', 'Windows only')
