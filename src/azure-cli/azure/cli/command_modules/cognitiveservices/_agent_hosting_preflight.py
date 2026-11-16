@@ -259,7 +259,8 @@ def _names(subscription, group, account):
     token = hashlib.sha256(account_id.lower().encode('utf-8')).hexdigest()[:10]
     return {
         'storage': re.sub('[^a-z0-9]', '', account.lower())[:14] + token,
-        'management_identity': account.lower() + '-hosting-mi', 'workload_identity': account.lower() + '-workload-mi',
+        'management_identity': account.lower() + '-hosting-mi-' + token,
+        'workload_identity': account.lower() + '-workload-mi-' + token,
     }
 
 

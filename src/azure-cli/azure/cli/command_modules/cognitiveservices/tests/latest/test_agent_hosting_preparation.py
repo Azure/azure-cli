@@ -414,7 +414,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
             with self.subTest(field=field):
                 def create_identity(group, name, parameters, field=field):
                     identity = original(group, name, parameters)
-                    if name.endswith('-workload-mi'):
+                    if '-workload-mi-' in name:
                         setattr(identity, field, None)
                     return identity
                 self.clients['identity'].user_assigned_identities.create_or_update.side_effect = create_identity
@@ -922,9 +922,12 @@ class AgentHostingValueTests(unittest.TestCase):
         names = _names(_SUB, 'rg', 'team-ai-prod')
         self.assertTrue(names['storage'].startswith('teamaiprod'))
         self.assertLessEqual(len(names['storage']), 24)
-        self.assertEqual(names['management_identity'], 'team-ai-prod-hosting-mi')
+        self.assertEqual(names['management_identity'], 'team-ai-prod-hosting-mi-4c0efe9e92')
+        self.assertEqual(names['workload_identity'], 'team-ai-prod-workload-mi-4c0efe9e92')
         self.assertEqual(names, _names(_SUB.upper(), 'RG', 'TEAM-AI-PROD'))
-        self.assertNotEqual(names['storage'], _names(_SUB, 'other-rg', 'team-ai-prod')['storage'])
+        other_group_names = _names(_SUB, 'other-rg', 'team-ai-prod')
+        for resource in ('storage', 'management_identity', 'workload_identity'):
+            self.assertNotEqual(names[resource], other_group_names[resource])
 
     def test_image_baseline_accepts_only_same_series_at_or_above_minimum(self):
         for image in ('AKSAzureLinux-V3katagen2-202608.14.0', 'AKSAzureLinux-V3katagen2-202609.1.0'):
