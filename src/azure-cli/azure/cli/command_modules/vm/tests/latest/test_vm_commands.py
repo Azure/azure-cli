@@ -6960,6 +6960,82 @@ class MSIScenarioTest(ScenarioTest):
         ])
 
 
+class VMIdentityAssignmentRestrictedCallerScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_identity_assign_rbac_', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_identity_assign_rbac_ids_', location='westcentralus',
+                           parameter_name='identity_resource_group',
+                           parameter_name_for_location='identity_resource_group_location', key='identity_rg')
+    def test_vm_vmss_identity_assign_restricted_caller(
+            self, resource_group, resource_group_location, identity_resource_group):
+        from azure.cli.core._profile import Profile
+        from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
+        from azure.cli.core.auth.msal_credentials import ServicePrincipalCredential
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'caller': self.create_random_name('cli-identity-rbac-', 32),
+            'scope': '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group),
+            'ssh_key': TEST_SSH_KEY_PUB.strip(),
+        })
+        identities = [
+            self.cmd('identity create -g {identity_rg} -l {loc} -n identity-' + suffix).get_output_in_json()['id']
+            for suffix in ('a', 'b')
+        ]
+        self.kwargs['identity_a'], self.kwargs['identity_b'] = identities
+        principal = self.cmd('ad sp create-for-rbac --name {caller}').get_output_in_json()
+        self.addCleanup(self.cmd, 'ad app delete --id ' + principal['appId'])
+        self.kwargs['principal_id'] = self.cmd('ad sp show --id ' + principal['appId']).get_output_in_json()['id']
+
+        # Keep A outside the caller's Contributor scope; grant assignment permission only on B.
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --assignee-object-id {principal_id} '
+                     '--assignee-principal-type ServicePrincipal --role Contributor --scope {scope}')
+            self.cmd('role assignment create --assignee-object-id {principal_id} '
+                     '--assignee-principal-type ServicePrincipal --role "Managed Identity Operator" '
+                     '--scope {identity_b}')
+
+        self.cmd('vm create -g {rg} -l {loc} -n vm1 --image Ubuntu2204 '
+                 '--admin-username azureuser --ssh-key-value "{ssh_key}" '
+                 '--public-ip-address "" --assign-identity {identity_a} '
+                 '--size Standard_D2s_v4 --nsg-rule NONE')
+        self.cmd('vmss create -g {rg} -l {loc} -n vmss1 --image Ubuntu2204 '
+                 '--admin-username azureuser --ssh-key-value "{ssh_key}" '
+                 '--public-ip-address "" --assign-identity {identity_a} '
+                 '--vm-sku Standard_D2s_v4 --instance-count 0 --orchestration-mode Uniform '
+                 '--upgrade-policy-mode Manual --load-balancer ""')
+
+        credential, subscription_id, tenant_id = Profile(cli_ctx=self.cli_ctx).get_login_credentials()
+        if self.in_recording:
+            credential = CredentialAdaptor(ServicePrincipalCredential(
+                principal['appId'], principal['password'],
+                authority=self.cli_ctx.cloud.endpoints.active_directory.rstrip('/') + '/' + principal['tenant']))
+
+        # Override only this test's credentials, without changing the signed-in CLI account.
+        with mock.patch.object(Profile, 'get_login_credentials',
+                               return_value=(credential, subscription_id, tenant_id)):
+            for resource_type, name in (('vm', 'vm1'), ('vmss', 'vmss1')):
+                with self.subTest(resource_type=resource_type):
+                    command = resource_type + ' identity assign -g {rg} -n ' + name
+                    show_command = resource_type + ' identity show -g {rg} -n ' + name
+                    previous = self.cmd(show_command).get_output_in_json()
+                    self.assertEqual(previous['type'], 'UserAssigned')
+                    self.assertEqual({key.lower() for key in previous['userAssignedIdentities']},
+                                     {identities[0].lower()})
+                    with self.assertRaisesRegex(HttpResponseError, 'LinkedAuthorizationFailed') as error:
+                        self.cmd(command + ' --identities {identity_a}')
+                    self.assertIn(identities[0].lower(), str(error.exception).lower())
+
+                    result = self.cmd(command + ' --identities {identity_b}').get_output_in_json()
+                    current = self.cmd(show_command).get_output_in_json()
+                    users = {key.lower(): value for key, value in current['userAssignedIdentities'].items()}
+                    self.assertEqual(set(users), {identity.lower() for identity in identities})
+                    self.assertEqual(current['type'], 'UserAssigned')
+                    self.assertEqual(result['userAssignedIdentities'], current['userAssignedIdentities'])
+                    for identity, value in previous['userAssignedIdentities'].items():
+                        self.assertEqual(users[identity.lower()], value)
+
+
 class VMIdentityAssignmentLiveScenarioTest(LiveScenarioTest):
 
     # These scenarios check preservation, not permissions under a restricted caller.
