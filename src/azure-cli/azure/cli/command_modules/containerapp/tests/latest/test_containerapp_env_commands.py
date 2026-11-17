@@ -63,6 +63,16 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('length(@)', 0),
         ])
 
+    @ResourceGroupPreparer(location="australiaeast")
+    def test_containerapp_env_default_logs_destination(self, resource_group):
+        self.cmd('configure --defaults location=australiaeast')
+        default_env_name = self.create_random_name(prefix='containerapp-env', length=24)
+        self.cmd('containerapp env create -g {} -n {}'.format(resource_group, default_env_name), checks=[
+            JMESPathCheck('properties.appLogsConfiguration.destination', "azure-monitor"),
+            JMESPathCheck('properties.appLogsConfiguration.logAnalyticsConfiguration', None),
+        ])
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, default_env_name))
+
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="australiaeast")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)

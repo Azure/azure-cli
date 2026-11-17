@@ -223,6 +223,7 @@ class ContainerAppEnvironment(Resource):
                 resource_group_name=self.resource_group.name,
                 logs_key=self.logs_key,
                 logs_customer_id=self.logs_customer_id,
+                logs_destination="log-analytics",
                 disable_warnings=True,
             )
             self.exists = True
@@ -239,6 +240,7 @@ class ContainerAppEnvironment(Resource):
                         resource_group_name=self.resource_group.name,
                         logs_key=self.logs_key,
                         logs_customer_id=self.logs_customer_id,
+                        logs_destination="log-analytics",
                         disable_warnings=True,
                     )
 
