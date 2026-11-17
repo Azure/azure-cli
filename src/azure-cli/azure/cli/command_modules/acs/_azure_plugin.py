@@ -8,7 +8,6 @@
 import json
 import os
 import re
-import shutil
 import signal
 import subprocess
 import sys
@@ -18,6 +17,7 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import (
     ClientRequestError, InvalidArgumentValueError, ResourceNotFoundError, ValidationError,
 )
+from azure.cli.core.util import get_safe_executable_path
 
 logger = get_logger(__name__)
 
@@ -135,7 +135,7 @@ def install_plugin(host_id: str) -> bool:
     """
     if host_id not in HOST_IDS:
         raise InvalidArgumentValueError(f'Unsupported Azure plugin host: {host_id}. Choose from {", ".join(HOST_IDS)}.')
-    executable = shutil.which(_EXECUTABLES[host_id])
+    executable = get_safe_executable_path(_EXECUTABLES[host_id])
     if not executable:
         raise ResourceNotFoundError(_failure(host_id, 'prerequisite check',
                                              f'Install {_EXECUTABLES[host_id]} and make it available on PATH.'))
@@ -176,8 +176,8 @@ def install_plugin(host_id: str) -> bool:
 
 
 def _check_runtime(host_id):
-    node = shutil.which('node')
-    if not node or not shutil.which('npx'):
+    node = get_safe_executable_path('node')
+    if not node or not get_safe_executable_path('npx'):
         raise ResourceNotFoundError(_failure(host_id, 'runtime prerequisite check',
                                              'Install Node.js 22 or later with node and npx available on PATH.'))
     result = _run(host_id, [node, '--version'], 'Node.js version check')

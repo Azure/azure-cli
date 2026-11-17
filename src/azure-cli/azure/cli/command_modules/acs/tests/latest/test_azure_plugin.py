@@ -102,7 +102,7 @@ class AzurePluginOptionsTest(unittest.TestCase):
     def test_invalid_option_relationships_fail_before_any_external_work(self):
         cases = [(True, None), (True, []), (True, ['']), (True, ['pi']), (True, ['codex', 'other']),
                  (None, ['codex']), (False, ['codex']), (None, []), (False, [])]
-        with mock.patch.object(plugin.shutil, 'which') as which, \
+        with mock.patch.object(plugin, 'get_safe_executable_path') as which, \
                 mock.patch.object(plugin.subprocess, 'Popen') as run:
             for enabled, hosts in cases:
                 with self.subTest(enabled=enabled, hosts=hosts), self.assertRaises(InvalidArgumentValueError):
@@ -131,7 +131,8 @@ class AzurePluginConsentTest(unittest.TestCase):
             mock.patch('sys.stdin.isatty', return_value=True),
             mock.patch('sys.stderr', self.stderr),
             mock.patch('knack.prompting._input', side_effect=AssertionError('Unexpected prompt')),
-            mock.patch.object(plugin.shutil, 'which', side_effect=lambda name: name if name == 'codex' else None),
+            mock.patch.object(plugin, 'get_safe_executable_path',
+                              side_effect=lambda name: name if name == 'codex' else None),
             mock.patch.object(plugin, 'install_plugin', side_effect=self.install),
             mock.patch.object(plugin.subprocess, 'Popen', side_effect=AssertionError('Unexpected native process')),
             mock.patch('sys.stdout', self.stdout),
@@ -381,7 +382,7 @@ class AzurePluginConsentTest(unittest.TestCase):
 
 class AzurePluginNativeTest(unittest.TestCase):
     def setUp(self):
-        patcher = mock.patch.object(plugin.shutil, 'which', side_effect=lambda name: name)
+        patcher = mock.patch.object(plugin, 'get_safe_executable_path', side_effect=lambda name: name)
         self.which = patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -858,6 +859,60 @@ class AzurePluginNativeTest(unittest.TestCase):
         with self.assertRaisesRegex(ResourceNotFoundError, 'Claude Code.*PATH'):
             self.install('claude-code', {})
         self.assertEqual(self.process.calls, [])
+
+
+class AzurePluginExecutableTest(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name).resolve()
+        cwd, self.trusted = root / 'cwd', root / 'trusted'
+        cwd.mkdir()
+        self.trusted.mkdir()
+        self.suffix = '.exe' if sys.platform.startswith('win') else ''
+        for folder in (cwd, self.trusted):
+            for name in ('claude', 'copilot', 'codex', 'node', 'npx'):
+                executable = folder / (name + self.suffix)
+                executable.write_text('inert executable fixture')
+                executable.chmod(0o755)
+        previous_cwd = os.getcwd()
+        self.addCleanup(os.chdir, previous_cwd)
+        os.chdir(cwd)
+        # Exercise relative, empty and absolute cwd entries before the trusted PATH directory.
+        patcher = mock.patch.dict(os.environ, {
+            'PATH': os.pathsep.join(('.', '', str(cwd), str(self.trusted))), 'PATHEXT': '.EXE',
+        })
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_host_lookup_ignores_cwd_decoy_and_uses_trusted_path(self):
+        for host, name, args, inventory in (
+                ('claude-code', 'claude', ('plugin', 'list', '--json'), [CLAUDE_PLUGIN]),
+                ('github-copilot', 'copilot', ('plugin', 'list', '--json'), [COPILOT_PLUGIN]),
+                ('codex', 'codex', ('plugin', 'list', '--available', '--json'),
+                 {'installed': [CODEX_PLUGIN], 'available': []})):
+            executable = str(self.trusted / (name + self.suffix))
+            process = NativeProcessFixture({(executable, *args): inventory})
+            with self.subTest(host=host), mock.patch.object(plugin.subprocess, 'Popen', side_effect=process):
+                self.assertFalse(plugin.install_plugin(host))
+                self.assertEqual(process.calls, [(executable, *args)])
+
+    def test_node_lookup_ignores_cwd_decoy_and_uses_trusted_path(self):
+        executable = str(self.trusted / ('node' + self.suffix))
+        process = NativeProcessFixture({(executable, '--version'): 'v22.0.0\n'})
+        with mock.patch.object(plugin.subprocess, 'Popen', side_effect=process):
+            plugin._check_runtime('codex')
+        self.assertEqual(process.calls, [(executable, '--version')])
+
+    def test_cwd_only_npx_does_not_satisfy_runtime_prerequisite(self):
+        (self.trusted / ('npx' + self.suffix)).unlink()
+        (Path.cwd() / ('node' + self.suffix)).unlink()
+        executable = str(self.trusted / ('node' + self.suffix))
+        process = NativeProcessFixture({(executable, '--version'): 'v22.0.0\n'})
+        with mock.patch.object(plugin.subprocess, 'Popen', side_effect=process), \
+                self.assertRaisesRegex(ResourceNotFoundError, 'Install Node.js 22 or later with node and npx'):
+            plugin._check_runtime('codex')
+        self.assertEqual(process.calls, [])
 
 
 class AzurePluginProcessTest(unittest.TestCase):
