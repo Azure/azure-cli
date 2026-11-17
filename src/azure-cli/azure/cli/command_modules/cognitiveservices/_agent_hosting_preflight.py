@@ -116,9 +116,8 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
     account_clients = _clients(cli_ctx, request.account_id, clients)
     logger.info("Validating BYO AKS prerequisites for cluster '%s' ...", _resource_name(resources.cluster))
     if not account_clients.resource.resource_groups.check_existence(account['resource_group']):
-        raise ValidationError(
-            f"Resource group '{account['resource_group']}' does not exist. Create it before retrying.")
-    _report(checks, 'Resource group', request.account_id, True, 'Exists', 'Existing resource group', 'None')
+        raise ValidationError(f"Resource group '{account['resource_group']}' does not exist.")
+    _report(checks, 'Resource group', request.account_id, True, 'Exists', 'existing resource group')
     if custom_domain:
         _check_domain(cognitive_client, None, custom_domain, kind)
     with _read_check(checks, 'Tenants', request.account_id):
@@ -126,7 +125,7 @@ def preflight(cli_ctx, request, *, kind=None, custom_domain=None):
     _report(checks, 'Distinct identities', request.account_id,
             resources.management_identity.lower() != resources.workload_identity.lower(),
             f'{_resource_name(resources.management_identity)}; {_resource_name(resources.workload_identity)}',
-            'Different management and workload identities', 'Supply distinct identities.')
+            'distinct management and workload identities')
     cluster = None
     with _read_check(checks, 'AKS cluster', resources.cluster):
         cluster_parts = parse_resource_id(resources.cluster)
@@ -271,7 +270,7 @@ def _resource_name(value):
     return value.rstrip('/').rsplit('/', 1)[-1] if value else ''
 
 
-def _report(checks, name, scope, passed, observed, expected, remediation, mandatory=True):
+def _report(checks, name, scope, passed, observed, expected, remediation='None', mandatory=True):
     status = passed if isinstance(passed, str) else ('PASS' if passed else 'FAIL')
     observed = _enum_value(observed)
     checks.append({'name': name, 'scope': scope, 'status': status, 'mandatory': mandatory,
@@ -300,11 +299,9 @@ def _read_check(checks, name, scope):
     try:
         yield
     except ResourceNotFoundError:
-        _report(checks, name, scope, False, 'Resource not found', 'Existing readable resource',
-                'Supply an existing resource ID.')
+        _report(checks, name, scope, False, 'not found', 'existing resource')
     except AzureError as error:
-        _report(checks, name, scope, 'UNVERIFIED', str(error), 'Readable prerequisite evidence',
-                'Resolve the reported Azure error and retry.')
+        _report(checks, name, scope, 'UNVERIFIED', str(error), 'accessible resource')
 
 
 def _check_tenants(cli_ctx, clients, resources, checks):
@@ -318,7 +315,7 @@ def _check_tenants(cli_ctx, clients, resources, checks):
         if tenant is None:
             tenant = current
         _report(checks, 'Tenant', subscription, bool(current and tenant and current.lower() == tenant.lower()),
-                current, tenant or 'Readable tenant ID', 'Use subscriptions in the same tenant.')
+                current, tenant or 'tenant ID')
 
 
 def _missing_identity_fields(identity, workload=False):
@@ -334,14 +331,13 @@ def _read_identity(client, arm_id, supplied, checks, workload=False):
         try:
             identity = client.user_assigned_identities.get(parts['resource_group'], parts['name'])
         except ResourceNotFoundError:
-            _report(checks, 'Identity', arm_id, not supplied, 'Not found',
-                    'Existing supplied resource' if supplied else 'Planned creation',
-                    'Supply an existing resource ID.')
+            _report(checks, 'Identity', arm_id, not supplied, 'not found',
+                    'existing resource' if supplied else 'planned creation')
             return None
         missing = _missing_identity_fields(identity, workload)
-        _report(checks, 'Identity metadata', arm_id, not missing, f'Missing: {missing}' if missing else 'Available',
-                'principalId, clientId and tenantId' if workload else 'principalId',
-                'Wait for identity provisioning to complete.')
+        _report(checks, 'Identity metadata', arm_id, not missing,
+                f"missing {', '.join(missing)}" if missing else 'available',
+                'principalId, clientId, tenantId' if workload else 'principalId')
         return identity
     return None
 
@@ -354,8 +350,7 @@ def _read_storage(client, arm_id, supplied, location, checks):
             storage = client.storage_accounts.get_properties(parts['resource_group'], parts['name'])
         except ResourceNotFoundError:
             if supplied:
-                _report(checks, 'Storage', arm_id, False, 'Not found', 'Existing supplied resource',
-                        'Supply an existing resource ID.')
+                _report(checks, 'Storage', arm_id, False, 'not found', 'existing resource')
                 return None, None
         if storage is not None:
             _check_storage(storage, arm_id, location, checks)
@@ -363,12 +358,10 @@ def _read_storage(client, arm_id, supplied, location, checks):
             availability = client.storage_accounts.check_name_availability({
                 'name': parts['name'], 'type': 'Microsoft.Storage/storageAccounts'})
             _report(checks, 'Storage name availability', arm_id, availability.name_available is True,
-                    availability.message or availability.name_available, 'Available deterministic Storage name',
-                    'Supply an existing Storage account if the generated name is unavailable.')
+                    availability.message or availability.name_available, 'available storage account name')
             if availability.name_available is True:
                 storage_sku = _select_storage_sku(client, location)
-                _report(checks, 'Storage configuration', arm_id, True, storage_sku,
-                        'Planned StorageV2/Hot; prefer ZRS and use LRS when unavailable', 'None')
+                _report(checks, 'Storage configuration', arm_id, True, storage_sku, 'StorageV2/Hot')
     return storage, storage_sku
 
 
@@ -413,8 +406,7 @@ def _image_supported(value):
 
 def _check_cluster(cluster, scope, location, checks):
     if cluster.properties is None:
-        _report(checks, 'AKS cluster', scope, 'UNVERIFIED', 'Missing properties', 'Readable cluster properties',
-                'Read a fully provisioned cluster.')
+        _report(checks, 'AKS cluster', scope, 'UNVERIFIED', 'missing properties', 'cluster properties')
         return
     properties = cluster.properties
     network, oidc, security = properties.network_profile, properties.oidc_issuer_profile, properties.security_profile
@@ -428,24 +420,22 @@ def _check_cluster(cluster, scope, location, checks):
     sku_name = _enum_value(sku.name) if sku else None
     requirements = [
         ('AKS mode', sku_name == 'Base' and node_mode != 'Auto',
-         f'{sku_name}/{node_mode}' if node_mode else sku_name,
-         'Standard AKS offering, not Automatic; no pricing-tier restriction'),
+         f'{sku_name}/{node_mode}' if node_mode else sku_name, 'Standard AKS, not Automatic'),
         ('Kubernetes version', _version_at_least(version, '1.31'), version, '>= 1.31'),
         ('AKS identity', bool(identity and identity.type in ('SystemAssigned', 'UserAssigned')),
-         identity.type if identity else None, 'Managed identity'),
-        ('Kubelet identity', bool(kubelet_id and str(kubelet_id).strip()), kubelet_id,
-         'Readable kubelet identity objectId'),
+         identity.type if identity else None, 'managed identity'),
+        ('Kubelet identity', bool(kubelet_id and str(kubelet_id).strip()), kubelet_id, 'kubelet identity objectId'),
         ('OIDC', bool(oidc and oidc.enabled is True and oidc.issuer_url), oidc.issuer_url if oidc else None,
-         'Enabled with readable issuer URL'),
+         'enabled with issuer URL'),
         ('Workload Identity', bool(workload_identity and workload_identity.enabled is True),
-         workload_identity.enabled if workload_identity else None, 'Enabled'),
+         workload_identity.enabled if workload_identity else None, 'enabled'),
         ('CNI plugin', bool(network and network.network_plugin == 'azure'),
-         network.network_plugin if network else None, 'Azure CNI'),
+         network.network_plugin if network else None, 'azure'),
         ('AKS region', bool(cluster.location and cluster.location.lower() == location.lower()),
          cluster.location, location),
     ]
     for name, passed, observed, expected in requirements:
-        _report(checks, name, scope, passed, observed, expected, 'Configure a supported AKS cluster and retry.')
+        _report(checks, name, scope, passed, observed, expected)
     _check_network_policy(network, scope, checks)
 
 
@@ -458,21 +448,16 @@ def _check_network_policy(network, scope, checks):
         status = 'FAIL'
     else:
         status = 'UNVERIFIED'
-    remediation = 'None' if status == 'PASS' else (
-        'Enable an AKS-supported network policy engine before retrying. '
-        'Missing or custom configurations cannot be verified from AKS resource properties. '
-        'This command does not modify the cluster.')
     _report(checks, 'Network policy', scope, status, f'networkPolicy={policy}; networkDataplane={dataplane}',
-            'AKS-managed network policy enabled: Azure NPM, Calico or the Cilium dataplane',
-            remediation)
+            'Azure NPM, Calico, or Cilium')
 
 
 def _evaluate_pool(pool):
     properties = pool.properties
     if properties is None:
-        return False, False, f'{pool.name}: missing properties'
+        return False, False, f'{pool.name} (missing properties)'
     if properties.mode == 'System':
-        return True, False, f'{pool.name}: mode=System'
+        return True, False, f'{pool.name} (System)'
     requirements = {
         'User': properties.mode == 'User', 'AzureLinux': properties.os_sku in ('AzureLinux', 'AzureLinux3'),
         'KataVmIsolation': properties.workload_runtime == 'KataVmIsolation',
@@ -481,7 +466,7 @@ def _evaluate_pool(pool):
         'label': (properties.node_labels or {}).get('agents.ai.azure.com/sandbox-node') == 'true',
     }
     missing = [key for key, passed in requirements.items() if not passed]
-    detail = f'{pool.name}: mode={_enum_value(properties.mode)}; missing={missing}'
+    detail = f"{pool.name} (missing {', '.join(missing)})" if missing else pool.name
     return False, not missing, detail
 
 
@@ -494,18 +479,15 @@ def _check_pools(aks, cluster, scope, checks):
         has_system = has_system or is_system
         has_agent = has_agent or is_agent
         details.append(detail)
-    _report(checks, 'System node pool', scope, has_system, details, 'At least one System node pool',
-            'Prepare a System node pool.')
-    _report(checks, 'Agent node pool', scope, has_agent, details,
-            'One User pool satisfying all sandbox requirements', 'Prepare one qualifying User pool.')
+    _report(checks, 'System node pool', scope, has_system, details, 'at least one System pool')
+    _report(checks, 'Agent node pool', scope, has_agent, details, 'at least one qualifying sandbox User pool')
     network = cluster.properties.network_profile if cluster.properties else None
     mode = _enum_value(network.network_plugin_mode) if network else None
     pod_subnets = {pool.name: bool(pool.properties and pool.properties.pod_subnet_id and
                                    str(pool.properties.pod_subnet_id).strip()) for pool in pools}
     uses_pod_subnets = bool(pools) and all(pod_subnets.values())
     _report(checks, 'CNI mode', scope, mode == 'overlay' or (mode is None and uses_pod_subnets),
-            f'mode={mode}; podSubnets={pod_subnets}', 'Azure CNI Overlay or Pod Subnet on every node pool',
-            'Use Azure CNI Overlay or configure a Pod subnet on every node pool.')
+            f'mode={mode}; podSubnets={pod_subnets}', 'Azure CNI Overlay or Pod Subnet on all pools')
 
 
 def _storage_parameters(location, tags, sku):
@@ -523,8 +505,7 @@ def _storage_parameters(location, tags, sku):
 def _check_storage(storage, scope, location, checks):
     properties = storage.properties
     if properties is None:
-        _report(checks, 'Storage readiness', scope, 'UNVERIFIED', 'Missing properties', 'Succeeded',
-                'Read a fully provisioned Storage account.')
+        _report(checks, 'Storage readiness', scope, 'UNVERIFIED', 'missing properties', 'Succeeded')
         return
     requirements = [
         ('Storage region', _normalize_location(storage.location) == _normalize_location(location),
@@ -532,21 +513,20 @@ def _check_storage(storage, scope, location, checks):
         ('Storage readiness', properties.provisioning_state == 'Succeeded', properties.provisioning_state, 'Succeeded'),
         ('Storage kind', storage.kind == 'StorageV2', storage.kind, 'StorageV2'),
         ('Storage tier', properties.access_tier == 'Hot', properties.access_tier, 'Hot'),
-        ('Storage HNS', properties.is_hns_enabled is not True, properties.is_hns_enabled,
-         'Disabled (false or omitted)'),
+        ('Storage HNS', properties.is_hns_enabled is not True, properties.is_hns_enabled, False),
         ('Storage HTTPS', properties.enable_https_traffic_only is True, properties.enable_https_traffic_only, True),
         ('Storage TLS', properties.minimum_tls_version in ('TLS1_2', 'TLS1_3'),
          properties.minimum_tls_version, '>=TLS1_2'),
     ]
     for name, passed, observed, expected in requirements:
-        _report(checks, name, scope, passed, observed, expected, 'Supply Storage with the required configuration.')
+        _report(checks, name, scope, passed, observed, expected)
     sku = str(_enum_value(storage.sku.name)) if storage.sku and storage.sku.name else ''
     zone_redundant = sku.endswith(('ZRS', 'GZRS'))
     if sku and not zone_redundant:
         logger.info("Storage account '%s' uses %s; ZRS or GZRS is recommended when available.",
                     _resource_name(scope), sku)
     _report(checks, 'Storage redundancy', scope, 'PASS' if sku else 'UNVERIFIED',
-            sku or 'Missing SKU', 'Readable redundancy; ZRS or GZRS recommended',
+            sku or 'missing SKU', 'ZRS or GZRS recommended',
             'None' if zone_redundant else 'Use ZRS or GZRS when available.', mandatory=False)
 
 
@@ -598,9 +578,8 @@ def _check_grants(cli_ctx, clients, request, checked, checks):
             assigned = _assigned_role_ids(client, scope, principal, assignments_by_scope) if principal else set()
             allowed = bool(assigned & _accepted_role_ids(role_name))
             identity_name = _resource_name(identity_id)
-            _report(checks, f'{role_name} validation', scope, allowed, f'{identity_name}: {role_name}',
-                    'Existing effective role assignment; no grant writes',
-                    'Have an administrator grant the required role assignment.')
+            _report(checks, f'{role_name} validation', scope, allowed,
+                    'assigned' if allowed else f"missing on '{identity_name}'", 'assigned')
         else:
             role_id = (f'/subscriptions/{parse_resource_id(scope)["subscription"]}'
                        f'/providers/Microsoft.Authorization/roleDefinitions/{_ROLE_IDS[role_name]}')

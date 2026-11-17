@@ -31,8 +31,7 @@ def prepare_agent_hosting(cmd, resource_group_name, account_name, location, tags
     try:
         return provision(cmd.cli_ctx, checked, tags, request=request)
     except (AzureError, ValidationError):
-        logger.warning('BYO AKS dependency preparation failed. Resources and role assignments created before the '
-                       'failure were not deleted. Review the preceding messages before retrying.')
+        logger.warning('BYO AKS dependency preparation failed; resources created before the failure were not deleted.')
         raise
 
 
