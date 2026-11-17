@@ -4661,6 +4661,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 imds_use_local_file_rules=None, **kwargs):
     from .operations.vmss_vms import convert_show_result_to_snake_case as vmss_vms_convert_show_result_to_snake_case
     from .operations.vmss import convert_show_result_to_snake_case as vmss_convert_show_result_to_snake_case
+    if instance_id is not None and imds_use_local_file_rules is not None:
+        raise ArgumentUsageError('--imds-use-local-file-rules cannot be used with --instance-id.')
+
     vmss = kwargs['parameters']
     if instance_id:
         vmss = vmss_vms_convert_show_result_to_snake_case(vmss)
