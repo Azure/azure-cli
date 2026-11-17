@@ -160,6 +160,9 @@ class VMCreate(_VMCreate):
 
 
 class VMPatch(_VMPatch):
+    _arguments_schema = None
+    _args_schema = None
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg

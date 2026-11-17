@@ -105,6 +105,9 @@ class VMSSShowForUpdate(VMSSShow):
 
 
 class VMSSPatch(_VMSSPatch):
+    _arguments_schema = None
+    _args_schema = None
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
