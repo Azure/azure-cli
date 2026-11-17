@@ -930,7 +930,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size=None, location
               key_incarnation_id=None, add_proxy_agent_extension=None, disk_iops_read_write=None,
               disk_mbps_read_write=None, zone_movement=None,
               os_disk_storage_fault_domain_alignment=None, data_disk_storage_fault_domain_alignment=None,
-              preferred_size=None):
+              preferred_size=None, imds_use_local_file_rules=None):
 
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1161,6 +1161,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size=None, location
         align_regional_disks_to_vm_zone=align_regional_disks_to_vm_zone, wire_server_mode=wire_server_mode,
         wire_server_use_local_file_rules=wire_server_use_local_file_rules,
         imds_mode=imds_mode,
+        imds_use_local_file_rules=imds_use_local_file_rules,
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
         key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension,
@@ -1772,7 +1773,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_all_instance_down=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None,
               wire_server_use_local_file_rules=None, imds_mode=None, add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None, zone_movement=None, zone=None, preferred_size=None, **kwargs):
+              key_incarnation_id=None, zone_movement=None, zone=None, preferred_size=None,
+              imds_use_local_file_rules=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
     from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
@@ -1947,7 +1949,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                                                    "v_tpm_enabled": enable_vtpm}
 
     proxy_agent_parameters = [
-        enable_proxy_agent, wire_server_mode, wire_server_use_local_file_rules, imds_mode, key_incarnation_id
+        enable_proxy_agent, wire_server_mode, wire_server_use_local_file_rules, imds_mode, key_incarnation_id,
+        imds_use_local_file_rules
     ]
     if any(parameter is not None for parameter in proxy_agent_parameters):
         wire_server = {}
@@ -1974,6 +1977,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                 wire_server_use_local_file_rules
         if imds_mode is not None:
             vm["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
+        if imds_use_local_file_rules is not None:
+            vm["security_profile"]["proxy_agent_settings"]["imds"]["use_local_file_rules"] = \
+                imds_use_local_file_rules
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -3779,7 +3785,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
                 exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None,
                 data_disk_storage_fault_domain_alignment=None, os_disk_storage_fault_domain_alignment=None,
-                zonal_platform_fault_domain_align_mode=None):
+                zonal_platform_fault_domain_align_mode=None, imds_use_local_file_rules=None):
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm._template_builder import (StorageProfile, build_vmss_resource,
@@ -4102,6 +4108,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
             zone_balance=zone_balance, wire_server_mode=wire_server_mode,
             wire_server_use_local_file_rules=wire_server_use_local_file_rules, imds_mode=imds_mode,
+            imds_use_local_file_rules=imds_use_local_file_rules,
             add_proxy_agent_extension=add_proxy_agent_extension,
             wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
             imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
@@ -4650,7 +4657,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, max_zone_count=None,
                 instance_percent_policy=None, max_instance_percent=None,
-                zone_placement_policy=None, include_zones=None, exclude_zones=None, **kwargs):
+                zone_placement_policy=None, include_zones=None, exclude_zones=None,
+                imds_use_local_file_rules=None, **kwargs):
     from .operations.vmss_vms import convert_show_result_to_snake_case as vmss_vms_convert_show_result_to_snake_case
     from .operations.vmss import convert_show_result_to_snake_case as vmss_convert_show_result_to_snake_case
     vmss = kwargs['parameters']
@@ -4892,34 +4900,37 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if vmss.get("virtual_machine_profile", None) is None:
             vmss["virtual_machine_profile"] = {}
 
-        security_profile = vmss["virtual_machine_profile"].get("security_profile", {})
+        if vmss["virtual_machine_profile"].get("security_profile") is None:
+            vmss["virtual_machine_profile"]["security_profile"] = {}
+        security_profile = vmss["virtual_machine_profile"]["security_profile"]
         prev_security_type = security_profile.get("security_type", None)
         # At present, `SecurityType` has options `TrustedLaunch` and `Standard`
         if security_type == 'TrustedLaunch' and prev_security_type != security_type:
-            vmss["virtual_machine_profile"]["security_profile"] = {
+            security_profile.update({
                 'security_type': security_type,
                 'uefi_settings': {
                     'secure_boot_enabled': enable_secure_boot if enable_secure_boot is not None else False,
                     'v_tpm_enabled': enable_vtpm if enable_vtpm is not None else True
                 }
-            }
+            })
         elif security_type == 'Standard':
             if prev_security_type == 'TrustedLaunch':
                 logger.warning('Turning off Trusted launch disables foundational security for your VMs. '
                                'For more information, visit https://aka.ms/TrustedLaunch')
-            vmss["virtual_machine_profile"]["security_profile"] = {
+            security_profile.update({
                 'security_type': security_type,
                 'uefi_settings': None
-            }
+            })
         else:
-            vmss["virtual_machine_profile"]["security_profile"] = {
+            security_profile.update({
                 'uefi_settings': {
                     'secure_boot_enabled': enable_secure_boot,
                     'v_tpm_enabled': enable_vtpm
-                }}
+                }})
 
     if enable_proxy_agent is not None or wire_server_mode is not None or \
-            wire_server_use_local_file_rules is not None or imds_mode is not None:
+            wire_server_use_local_file_rules is not None or imds_mode is not None or \
+            imds_use_local_file_rules is not None:
         if vmss.get("virtual_machine_profile", None) is None:
             vmss["virtual_machine_profile"] = {}
 
@@ -4950,6 +4961,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 "use_local_file_rules"] = wire_server_use_local_file_rules
         if imds_mode is not None:
             vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
+        if imds_use_local_file_rules is not None:
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"][
+                "use_local_file_rules"] = imds_use_local_file_rules
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
         if vmss.get("orchestration_mode", None) != 'Flexible':
