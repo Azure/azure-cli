@@ -8,7 +8,7 @@ import time
 import yaml
 
 from azure.cli.core.azclierror import ValidationError
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse, SingleValueReplacer
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, live_only, StorageAccountPreparer,
                                LogAnalyticsWorkspacePreparer)
 
@@ -77,6 +77,10 @@ class ContainerappEnvScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location="australiaeast")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerapp_env_logs_e2e(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+        workspace_id_replacer = SingleValueReplacer()
+        workspace_id_replacer.random_name = laworkspace_customer_id
+        workspace_id_replacer.moniker = "veryFakedCustomerId=="
+        self.recording_processors.append(workspace_id_replacer)
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-env', length=24)
@@ -157,7 +161,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('name', env_name),
             JMESPathCheck('properties.appLogsConfiguration.destination', None),
         ])
-        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
@@ -220,7 +224,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('containerapp env dapr-component list -n {} -g {}'.format(env_name, resource_group), checks=[
             JMESPathCheck('length(@)', 0),
         ])
-        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
@@ -580,7 +584,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('containerapp env certificate list -g {} -n {}'.format(resource_group, env_name), checks=[
             JMESPathCheck('length(@)', 0),
         ])
-        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name), expect_failure=False)
 
 
     @AllowLargeResponse(8192)
@@ -761,7 +765,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('name', env_name),
             JMESPathCheck('properties.peerAuthentication.mtls.enabled', False),
         ])
-        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
@@ -798,7 +802,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             JMESPathCheck('name', env_name),
             JMESPathCheck('properties.peerTrafficConfiguration.encryption.enabled', False),
         ])
-        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env_name), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name), expect_failure=False)
 
     @ResourceGroupPreparer(location="northeurope")
     def test_containerapp_env_dapr_connection_string(self, resource_group):
@@ -820,11 +824,10 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         result = self.cmd('containerapp list-usages').get_output_in_json()
-        usages = result["value"]
-        self.assertEqual(len(usages), 1)
-        self.assertEqual(usages[0]["name"]["value"], "ManagedEnvironmentCount")
-        self.assertGreater(usages[0]["limit"], 0)
-        self.assertGreaterEqual(usages[0]["usage"], 0)
+        usages = {usage["name"]["value"]: usage for usage in result["value"]}
+        self.assertIn("ManagedEnvironmentCount", usages)
+        self.assertGreater(usages["ManagedEnvironmentCount"]["limit"], 0)
+        self.assertGreaterEqual(usages["ManagedEnvironmentCount"]["usage"], 0)
 
         env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
 
@@ -843,10 +846,12 @@ class ContainerappEnvScenarioTest(ScenarioTest):
         ])
 
         result = self.cmd('containerapp env list-usages --id {}'.format(containerapp_env["id"])).get_output_in_json()
-        usages = result["value"]
-        self.assertEqual(len(usages), 3)
-        self.assertGreater(usages[0]["limit"], 0)
-        self.assertGreaterEqual(usages[0]["usage"], 0)
+        usages = {usage["name"]["value"]: usage for usage in result["value"]}
+        for name in ("ManagedEnvironmentGeneralPurposeCores", "ManagedEnvironmentMemoryOptimizedCores",
+                     "ManagedEnvironmentConsumptionCores"):
+            self.assertIn(name, usages)
+            self.assertGreater(usages[name]["limit"], 0)
+            self.assertGreaterEqual(usages[name]["usage"], 0)
 
     @ResourceGroupPreparer(location="northeurope")
     def test_containerapp_env_deprecate_arguments(self, resource_group):

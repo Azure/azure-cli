@@ -898,7 +898,7 @@ class ContainerappIngressTests(ScenarioTest):
             JMESPathCheck('allowedMethods[0]', "GET"),
             JMESPathCheck('length(allowedHeaders)', 1),
             JMESPathCheck('allowedHeaders[0]', "header1"),
-            JMESPathCheck('exposeHeaders', None),
+            JMESPathCheck('exposeHeaders', []),
             JMESPathCheck('allowCredentials', False),
             JMESPathCheck('maxAge', 0),
         ])
@@ -910,7 +910,7 @@ class ContainerappIngressTests(ScenarioTest):
             JMESPathCheck('allowedMethods[0]', "GET"),
             JMESPathCheck('length(allowedHeaders)', 1),
             JMESPathCheck('allowedHeaders[0]', "header1"),
-            JMESPathCheck('exposeHeaders', None),
+            JMESPathCheck('exposeHeaders', []),
             JMESPathCheck('allowCredentials', False),
             JMESPathCheck('maxAge', 0),
         ])
@@ -924,7 +924,7 @@ class ContainerappIngressTests(ScenarioTest):
                 JMESPathCheck('allowedMethods[0]', "GET"),
                 JMESPathCheck('length(allowedHeaders)', 1),
                 JMESPathCheck('allowedHeaders[0]', "header1"),
-                JMESPathCheck('exposeHeaders', None),
+                JMESPathCheck('exposeHeaders', []),
                 JMESPathCheck('allowCredentials', True),
                 JMESPathCheck('maxAge', None),
             ])
@@ -1732,7 +1732,7 @@ class ContainerappScaleTests(ScenarioTest):
         self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),
             JMESPathCheck("properties.configuration.ingress.external", True),
-            JMESPathCheck("properties.configuration.ingress.additionalPortMappings", None),
+            JMESPathCheck("properties.configuration.ingress.additionalPortMappings", []),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].name", "name"),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].ipAddressRange", "1.1.1.1/10"),
             JMESPathCheck("properties.configuration.ingress.ipSecurityRestrictions[0].action", "Allow"),
