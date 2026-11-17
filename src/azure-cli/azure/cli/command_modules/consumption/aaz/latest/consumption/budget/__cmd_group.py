@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "consumption budget",
-    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage budgets for an Azure subscription.

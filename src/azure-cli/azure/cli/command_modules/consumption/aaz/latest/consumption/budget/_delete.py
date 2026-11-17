@@ -13,16 +13,19 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "consumption budget delete",
-    is_preview=True,
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete operation to delete a budget.
+
+    :example: DeleteBudget
+        az consumption budget delete --scope subscriptions/00000000-0000-0000-0000-000000000000 --name TestBudget
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.consumption/budgets/{}", "2023-05-01"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.consumption/budgets/{}", "2024-08-01"],
         ]
     }
 
@@ -46,7 +49,11 @@ class Delete(AAZCommand):
             options=["-n", "--name", "--budget-name"],
             help="Budget Name.",
             required=True,
-            id_part="name",
+        )
+        _args_schema.scope = AAZStrArg(
+            options=["--scope"],
+            help="The fully qualified Azure Resource manager identifier of the resource.",
+            required=True,
         )
         return cls._args_schema
 
@@ -77,7 +84,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/budgets/{budgetName}",
+                "/{scope}/providers/Microsoft.Consumption/budgets/{budgetName}",
                 **self.url_parameters
             )
 
@@ -87,7 +94,7 @@ class Delete(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -97,7 +104,8 @@ class Delete(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
+                    "scope", self.ctx.args.scope,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -107,7 +115,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2024-08-01",
                     required=True,
                 ),
             }
