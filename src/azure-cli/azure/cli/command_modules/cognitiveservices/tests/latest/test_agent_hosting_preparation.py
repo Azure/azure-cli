@@ -857,7 +857,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.assignments = [
             {
                 'id': f'/subscriptions/{_SUB}/providers/Microsoft.Authorization/roleAssignments/mgmt-contrib',
-                'principalId': 'foundry-hosting-mi-principal',
+                'principalId': f"{_names(_SUB, 'rg', 'foundry')['management_identity']}-principal",
                 'scope': f'/subscriptions/{_SUB}',
                 'roleDefinitionId': f'/providers/Microsoft.Authorization/roleDefinitions/{_ROLE_IDS["Contributor"]}',
             },
