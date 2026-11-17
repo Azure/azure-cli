@@ -880,7 +880,7 @@ class AzurePluginExecutableTest(unittest.TestCase):
         os.chdir(cwd)
         # Exercise relative, empty and absolute cwd entries before the trusted PATH directory.
         patcher = mock.patch.dict(os.environ, {
-            'PATH': os.pathsep.join(('.', '', str(cwd), str(self.trusted))), 'PATHEXT': '.EXE',
+            'PATH': os.pathsep.join(('.', '', str(cwd), str(self.trusted))), 'PATHEXT': '.exe',
         })
         patcher.start()
         self.addCleanup(patcher.stop)
