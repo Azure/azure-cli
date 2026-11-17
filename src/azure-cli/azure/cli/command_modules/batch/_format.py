@@ -168,19 +168,6 @@ def node_list_table_format(result):
     return table_output
 
 
-def pool_node_agent_skus_list_table_format(result):
-    """Format pool node-agent-skus list as a table."""
-    table_output = []
-    for item in result:
-        table_row = OrderedDict()
-        table_row['Agent Id'] = item.get('id', None)
-        table_row['Publisher'] = item.get('publisher', None)
-        table_row['Offer'] = item.get('offer', None)
-        table_row['Sku'] = item.get('sku', None)
-        table_output.append(table_row)
-    return table_output
-
-
 def pool_list_table_format(result):
     """Format pool list as a table."""
     table_output = []
