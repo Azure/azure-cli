@@ -581,7 +581,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_message_ttl', help='Determine how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
         c.argument('notifications', options_list=['--notifications'], nargs='+', help='List of artifact pattern for which notifications need to be generated. Use the format "--notifications [PATTERN1 PATTERN2 ...]".')
         c.argument('garbage_collection_enabled', options_list=['--gc-enabled'],
-                   help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag(), required=False, default="true")
+                   help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag(), required=False, default=True)
         c.argument('garbage_collection_schedule', options_list=['--gc-schedule'],
                    help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.', required=False, default="0 0 * * *")
         c.argument('identity', help='Resource ID of a user-assigned managed identity to authenticate the connected registry with its parent. Required when --auth-type is ManagedIdentity.')
