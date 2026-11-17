@@ -63,7 +63,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                                 expect_failure=True)
 
         result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_DS1_v2 '
-                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
+                                '--image canonical:0001-com-ubuntu-server-jammy:22_04-lts --node-agent-sku-id "batch.node.ubuntu 22.04" '
                                 '--disk-encryption-targets "TemporaryDisk"')
 
         self.wait_for_pool_steady("pool_image1")
@@ -146,8 +146,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         })
 
         self.batch_cmd('batch pool create --id {p_id} --vm-size "standard_d2s_v3" '
-                        '--image "canonical:ubuntuserver:18.04-lts" '
-                        '--node-agent-sku-id "batch.node.ubuntu 18.04" '
+                        '--image "canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2" '
+                        '--node-agent-sku-id "batch.node.ubuntu 22.04" '
                         '--target-dedicated-nodes 2 '
                         '--security-type "TrustedLaunch" '
                         '--encryption-at-host true '
@@ -429,7 +429,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test create pool using parameters
         self.batch_cmd('batch pool create --id {p_id} --vm-size Standard_DS1_v2 '
-                                '--image canonical:ubuntuserver:18.04-lts --node-agent-sku-id "batch.node.ubuntu 18.04" '
+                                '--image canonical:0001-com-ubuntu-server-jammy:22_04-lts --node-agent-sku-id "batch.node.ubuntu 22.04" '
                                 '--disk-encryption-targets "TemporaryDisk"')
 
         # test create job with missing parameters
@@ -462,7 +462,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.batch_cmd('batch job set --job-id {j_id} --on-all-tasks-complete badValue ')
 
         # test patch job
-        self.batch_cmd('batch job set --job-id {j_id} --job-max-wall-clock-time P3Y6M4DT12H30M5S '
+        self.batch_cmd('batch job set --job-id {j_id} --job-max-wall-clock-time P1279DT12H30M5S '
                        '--on-all-tasks-complete terminatejob')
         self.batch_cmd('batch job show --job-id {j_id}').assert_with_checks([
             self.check('onAllTasksComplete', 'terminatejob'),
@@ -545,8 +545,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test create pool using parameters
         self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_DS1_v2 '
-                       '--image Canonical:UbuntuServer:18.04-LTS '
-                       '--node-agent-sku-id "batch.node.ubuntu 18.04"')
+                       '--image canonical:0001-com-ubuntu-server-jammy:22_04-lts '
+                       '--node-agent-sku-id "batch.node.ubuntu 22.04"')
         
         # test that deprecated --target-communication argument causes argparse error
         with self.assertRaises(SystemExit):
@@ -645,9 +645,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch pool show --pool-id {pool_i} --select "enableAutoScale"').assert_with_checks([
             self.check('enableAutoScale', False)])
 
-        # Pool list usage metrics command exists but the API is retired
+        # Pool list usage metrics command exists but the API is retired; newer service builds no longer know the URI
         # TODO: Remove this test when the usage metrics CLI command is removed
-        with self.assertRaisesRegex(CLIError, r".*Pool list usage metrics API was retired.*"):
+        with self.assertRaisesRegex(CLIError, r"Pool list usage metrics API was retired|"
+                                              r"The requested URI does not represent any resource"):
             self.batch_cmd('batch pool usage-metrics list')
 
         # TODO: Test update pool from JSON file
