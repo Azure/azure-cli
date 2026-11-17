@@ -90,6 +90,15 @@ def transform_runtime_list_output(result):
     ]) for r in result]
 
 
+def transform_runtime_version_output(result):
+    from collections import OrderedDict
+    if not isinstance(result, dict):
+        return []
+    return [OrderedDict([
+        ('RuntimeVersion', result.get('runtimeVersion') or '-')
+    ])]
+
+
 def transform_secure_build_output(result):
     import sys
     from .custom import _render_secure_build_table_report, _secure_build_finding_rows
@@ -334,6 +343,8 @@ def load_command_table(self, _):
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-instances', 'list_instances')
         g.custom_command('list-runtimes', 'list_runtimes', table_transformer=transform_runtime_list_output)
+        g.custom_show_command('show-runtime-version', 'show_webapp_runtime_version',
+                              table_transformer=transform_runtime_version_output, is_preview=True)
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')

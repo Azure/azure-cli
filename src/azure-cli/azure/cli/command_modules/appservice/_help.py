@@ -2539,6 +2539,20 @@ examples:
     text: az webapp list-runtimes --os-type linux --runtime dotnet --query "[].config" --output tsv
 """
 
+helps['webapp show-runtime-version'] = """
+type: command
+short-summary: Show the resolved platform runtime version currently running on a Linux web app.
+long-summary: >
+    Returns the actual runtime stack and patch version resolved by the platform on a running
+    worker (for example, PYTHON-3.12.7), rather than only the configured linuxFxVersion.
+    Custom container images do not report a platform runtime version.
+examples:
+  - name: Show the resolved runtime version for a Linux web app.
+    text: az webapp show-runtime-version --name MyWebApp --resource-group MyResourceGroup
+  - name: Show the resolved runtime version for a deployment slot.
+    text: az webapp show-runtime-version --name MyWebApp --resource-group MyResourceGroup --slot staging
+"""
+
 helps['functionapp list-runtimes'] = """
 type: command
 short-summary: List available built-in stacks which can be used for function apps.

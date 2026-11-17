@@ -8227,6 +8227,69 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
     return payload
 
 
+def show_webapp_runtime_version(cmd, resource_group_name, name, slot=None):
+    from azure.cli.core.azclierror import HTTPError
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    _ensure_linux_webapp(
+        cmd, resource_group_name, name, slot,
+        command_label="'az webapp show-runtime-version'")
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    api_version = '2024-11-01'
+    slot_segment = '/slots/{}'.format(quote(slot, safe='')) if slot else ''
+    arm_url = (
+        '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+        '/sites/{name}{slot_seg}/runtimeVersion?api-version={ver}'
+    ).format(
+        rm=cmd.cli_ctx.cloud.endpoints.resource_manager.rstrip('/'),
+        sub=quote(subscription_id, safe=''),
+        rg=quote(resource_group_name, safe=''),
+        name=quote(name, safe=''),
+        slot_seg=slot_segment,
+        ver=api_version)
+
+    target = "slot '{}' of web app '{}'".format(slot, name) if slot else "web app '{}'".format(name)
+    unavailable_recommendation = (
+        'Ensure the web app uses a built-in Linux runtime stack and has started at least once. '
+        'Custom container images do not report a platform runtime version.')
+
+    try:
+        response = send_raw_request(cmd.cli_ctx, 'GET', arm_url)
+    except (HTTPError, HttpResponseError) as ex:
+        resp = getattr(ex, 'response', None)
+        status_code = getattr(resp, 'status_code', None) or getattr(ex, 'status_code', None)
+        if status_code == 404:
+            raise ResourceNotFoundError(
+                'Runtime version information is not available for {}.'.format(target),
+                recommendation=unavailable_recommendation) from ex
+        if status_code == 503:
+            raise AzureResponseError(
+                'Unable to read runtime version information for {} because the SCM container '
+                'or site is currently unavailable.'.format(target)) from ex
+        raise
+
+    try:
+        payload = response.json()
+    except ValueError as ex:
+        raise AzureResponseError('The runtimeVersion endpoint returned invalid JSON.') from ex
+
+    if not isinstance(payload, dict):
+        raise AzureResponseError('The runtimeVersion endpoint returned an unexpected response.')
+
+    runtime_version = payload.get('runtimeVersion')
+    if runtime_version is None and isinstance(payload.get('properties'), dict):
+        runtime_version = payload['properties'].get('runtimeVersion')
+    if isinstance(runtime_version, str):
+        runtime_version = runtime_version.strip()
+    if not runtime_version:
+        raise ResourceNotFoundError(
+            'Runtime version information is not available for {}.'.format(target),
+            recommendation=unavailable_recommendation)
+
+    return {'runtimeVersion': runtime_version}
+
+
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory(cmd.cli_ctx)
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
