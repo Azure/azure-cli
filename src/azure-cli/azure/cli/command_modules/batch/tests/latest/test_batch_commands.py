@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import io
+import json
 import os
 import shlex
 import unittest
@@ -11,6 +12,7 @@ import datetime
 import isodate
 import tempfile
 from unittest import mock
+from urllib.parse import quote
 
 import importlib
 import inspect
@@ -241,6 +243,63 @@ class TestBatchFileDownloadCommand(unittest.TestCase):
 
                 self.assertEqual(exit_code, 2)
                 run.assert_not_called()
+
+
+class TestBatchFileShowCommand(unittest.TestCase):
+    """Run 'az batch task file show' and 'az batch node file show' with the HTTP call mocked."""
+
+    ACCOUNT_ARGS = ['--account-name', 'test1', '--account-key', 'ZmFrZV9hY29jdW50X2tleQ==',
+                    '--account-endpoint', 'https://test1.westus.batch.azure.com']
+    # The service returns the file properties as response headers, with these names and formats
+    HEADERS = {
+        'content-length': '17',
+        'content-type': 'text/plain',
+        'last-modified': 'Tue, 17 Nov 2026 09:30:00 GMT',
+        'ocp-creation-time': 'Tue, 17 Nov 2026 08:00:00 GMT',
+        'ocp-batch-file-isdirectory': 'False',
+        'ocp-batch-file-mode': '0o100644',
+        'etag': '0x8DE24A1B2C3D4E5',
+        'request-id': '00000000-0000-0000-0000-000000000000',
+    }
+    # Command: the file URL that the service returns, URL-encoded, in 'ocp-batch-file-url'
+    COMMANDS = {
+        'batch task file show --job-id job1 --task-id task1 --file-path wd/stdout.txt':
+            'https://test1.westus.batch.azure.com/jobs/job1/tasks/task1/files/wd/stdout.txt',
+        'batch node file show --pool-id pool1 --node-id node1 --file-path startup/stdout.txt':
+            'https://test1.westus.batch.azure.com/pools/pool1/nodes/node1/files/startup/stdout.txt',
+    }
+
+    def setUp(self):
+        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config
+        environ = {name: value for name, value in os.environ.items() if not name.startswith('AZURE_BATCH_')}
+        environ_patch = mock.patch.dict(os.environ, environ, clear=True)
+        environ_patch.start()
+        self.addCleanup(environ_patch.stop)
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+
+    def test_batch_file_show(self):
+        for command, url in self.COMMANDS.items():
+            with self.subTest(command=command):
+                headers = dict(self.HEADERS, **{'ocp-batch-file-url': quote(url, safe='')})
+                response = mock.Mock(spec=['status_code', 'headers'], status_code=200, headers=headers)
+                out = io.StringIO()
+                with mock.patch('azure.core.pipeline.Pipeline.run',
+                                return_value=mock.Mock(http_response=response)) as run:
+                    exit_code = self.cli.invoke(command.split() + self.ACCOUNT_ARGS, out_file=out)
+
+                self.assertEqual(exit_code, 0)
+                self.assertEqual(run.call_args.args[0].method, 'HEAD')
+                self.assertNotIn('raw', run.call_args.kwargs)
+                self.assertEqual(json.loads(out.getvalue()), {
+                    'contentLength': 17,
+                    'contentType': 'text/plain',
+                    'creationTime': '2026-11-17T08:00:00+00:00',
+                    'fileMode': '0o100644',
+                    'isDirectory': False,
+                    'lastModified': '2026-11-17T09:30:00+00:00',
+                    'url': url})
 
 
 class TestBatchParser(unittest.TestCase):
