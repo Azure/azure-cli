@@ -41,27 +41,15 @@ def provision(cli_ctx, checked, tags, request=None):
     tags = dict(tags or {})
     account = parse_resource_id(resources.account_id)
     clients = get_agent_hosting_clients(cli_ctx, account['subscription'])
-    reused = tuple(
-        arm_id
-        for arm_id, supplied, existing in (
-            (resources.management_identity, request.management_identity if request else None,
-             checked.management_identity),
-            (resources.workload_identity, request.workload_identity if request else None,
-             checked.workload_identity),
-            (resources.storage, request.storage if request else None, checked.storage),
-        )
-        if request is not None and supplied is None and existing is not None
-    )
-    if reused:
-        names = ', '.join(f"'{_resource_name(arm_id)}'" for arm_id in reused)
-        logger.warning('Using existing BYO AKS dependencies: %s.', names)
-    management = _ensure_identity(clients.identity, resources.management_identity, checked.management_identity,
-                                  resources.location, tags, log_reuse=resources.management_identity not in reused)
-    workload = _ensure_identity(clients.identity, resources.workload_identity, checked.workload_identity,
-                                resources.location, tags, workload=True,
-                                log_reuse=resources.workload_identity not in reused)
-    _ensure_storage(clients.storage, resources.storage, checked.storage, resources.location, tags, checked.storage_sku,
-                    log_reuse=resources.storage not in reused)
+    management = _ensure_identity(
+        clients.identity, resources.management_identity, checked.management_identity,
+        resources.location, tags, warn_reuse=bool(request and request.management_identity is None))
+    workload = _ensure_identity(
+        clients.identity, resources.workload_identity, checked.workload_identity,
+        resources.location, tags, workload=True, warn_reuse=bool(request and request.workload_identity is None))
+    _ensure_storage(
+        clients.storage, resources.storage, checked.storage, resources.location, tags, checked.storage_sku,
+        warn_reuse=bool(request and request.storage is None))
     principals = {
         resources.management_identity: management.principal_id, resources.workload_identity: workload.principal_id,
     }
@@ -75,13 +63,13 @@ def provision(cli_ctx, checked, tags, request=None):
             'workload_identity': resources.workload_identity}
 
 
-def _ensure_identity(client, arm_id, existing, location, tags, workload=False, log_reuse=True):
+def _ensure_identity(client, arm_id, existing, location, tags, workload=False, warn_reuse=False):
     from azure.mgmt.msi.models import Identity
     identity_type = 'workload' if workload else 'hosting-management'
     name = _resource_name(arm_id)
     if existing is not None:
-        if log_reuse:
-            logger.info("Using existing %s identity '%s'", identity_type, name)
+        if warn_reuse:
+            logger.warning("Using existing %s identity '%s'.", identity_type, name)
         return existing
     parts = parse_resource_id(arm_id)
     logger.warning("Creating %s identity '%s' ...", identity_type, name)
@@ -94,11 +82,11 @@ def _ensure_identity(client, arm_id, existing, location, tags, workload=False, l
     return identity
 
 
-def _ensure_storage(client, arm_id, existing, location, tags, sku, log_reuse=True):
+def _ensure_storage(client, arm_id, existing, location, tags, sku, warn_reuse=False):
     name = _resource_name(arm_id)
     if existing is not None:
-        if log_reuse:
-            logger.info("Using existing storage account '%s'", name)
+        if warn_reuse:
+            logger.warning("Using existing storage account '%s'.", name)
         return existing
     if sku is None:
         raise ValidationError(f"Storage SKU was not resolved for '{name}'. Run preflight again.")
@@ -123,12 +111,10 @@ def _find_grant(client, grant, principal, exact_scope=False):
 
 
 def _ensure_grant(client, grant, principal):
+    if _find_grant(client, grant, principal) is not None:
+        return
     identity_name = _resource_name(grant.identity_id)
     scope_name = _resource_name(grant.scope)
-    if _find_grant(client, grant, principal) is not None:
-        logger.info("Using existing '%s' role assignment for '%s' on '%s'",
-                    grant.name, identity_name, scope_name)
-        return
     name = str(uuid.uuid5(uuid.NAMESPACE_URL, f'{grant.scope}/{principal}/{grant.role_id}'.lower()))
     logger.info("Assigning role '%s' to '%s' on '%s'", grant.name, identity_name, scope_name)
     try:
@@ -143,7 +129,5 @@ def _ensure_grant(client, grant, principal):
                                grant.name, identity_name, scope_name, read_error)
                 existing = None
             if existing is not None:
-                logger.info("Using existing '%s' role assignment for '%s' on '%s'",
-                            grant.name, identity_name, scope_name)
                 return
         raise

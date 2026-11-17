@@ -293,8 +293,10 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 self.cognitive.accounts.get.side_effect = None
                 self.cognitive.accounts.get.return_value = self._account_with_hosting(**changes)
                 self.client_factory.reset_mock()
-                with self.assertRaisesRegex(ValidationError, 'incompatible agent hosting configuration'):
+                with self.assertRaisesRegex(ValidationError, 'different agent hosting configuration') as caught:
                     preflight(self.cli_ctx, self._prepare())
+                self.assertIn("Account 'foundry'", str(caught.exception))
+                self.assertNotIn('/subscriptions/', str(caught.exception))
                 self._assert_no_dependency_queries()
 
     def test_unavailable_or_unverified_domain_blocks_dependency_creation(self):
@@ -553,9 +555,8 @@ class AgentHostingPreparationTests(unittest.TestCase):
         warning.assert_not_called()
         self.assertIn("Network policy ('cluster')", str(caught.exception))
         self.assertNotIn('/subscriptions/', str(caught.exception))
-        self.assertTrue(any('network policy engine' in item for item in caught.exception.recommendations))
-        self.assertIn('See https://aka.ms/byo-aks-fulfill-cluster-requirements for more details.',
-                      caught.exception.recommendations)
+        self.assertEqual(caught.exception.recommendations,
+                         ['See https://aka.ms/byo-aks-fulfill-cluster-requirements for more details.'])
         self.clients['aks'].managed_clusters.get.assert_called_once()
         self._assert_no_writes()
 
@@ -570,7 +571,8 @@ class AgentHostingPreparationTests(unittest.TestCase):
                         preflight(self.cli_ctx, self._prepare())
                 warning.assert_not_called()
                 self.assertIn("Network policy ('cluster')", str(caught.exception))
-                self.assertTrue(any('network policy engine' in item for item in caught.exception.recommendations))
+                self.assertEqual(caught.exception.recommendations,
+                                 ['See https://aka.ms/byo-aks-fulfill-cluster-requirements for more details.'])
                 self._assert_no_writes()
 
     def test_kubenet_is_rejected_even_with_overlay(self):
@@ -676,7 +678,8 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 preflight(self.cli_ctx, preparation)
         warning.assert_not_called()
         self.assertIn("Identity ('management'): Forbidden", str(caught.exception))
-        self.assertIn('Resolve the reported Azure error and retry.', caught.exception.recommendations)
+        self.assertEqual(caught.exception.recommendations,
+                         ['See https://aka.ms/byo-aks-fulfill-cluster-requirements for more details.'])
         self._assert_no_writes()
 
     def test_preflight_returns_results_without_mutating_request(self):
@@ -767,32 +770,43 @@ class AgentHostingPreparationTests(unittest.TestCase):
             lambda group, name: self._create_identity(group, name, None))
         self.clients['storage'].storage_accounts.get_properties.side_effect = lambda *args: StorageAccount(self.storage)
         checked = preflight(self.cli_ctx, preparation)
+        self.assignments = [
+            self._assignment(f"{checked.resources.management_identity.rsplit('/', 1)[-1]}-principal",
+                             'Owner', _CLUSTER),
+            self._assignment(f"{checked.resources.management_identity.rsplit('/', 1)[-1]}-principal",
+                             'Managed Identity Federated Identity Credential Contributor',
+                             checked.resources.workload_identity),
+            self._assignment(f"{checked.resources.workload_identity.rsplit('/', 1)[-1]}-principal",
+                             'Storage Blob Data Contributor', checked.resources.storage),
+        ]
         with self.assertLogs('cli.' + _PREFIX.rstrip('.'), level='INFO') as logs:
             provision(self.cli_ctx, checked, self.tags, request=preparation)
-        warnings = [line for line in logs.output if line.startswith('WARNING:')]
+        warnings = '\n'.join(line for line in logs.output if line.startswith('WARNING:'))
         infos = [line for line in logs.output if line.startswith('INFO:')]
-        expected_names = ', '.join(
-            f"'{arm_id.rsplit('/', 1)[-1]}'"
-            for arm_id in (checked.resources.management_identity,
-                           checked.resources.workload_identity,
-                           checked.resources.storage))
-        self.assertEqual(len(warnings), 1)
-        self.assertIn(f'Using existing BYO AKS dependencies: {expected_names}.', warnings[0])
+        mgmt_name = checked.resources.management_identity.rsplit('/', 1)[-1]
+        workload_name = checked.resources.workload_identity.rsplit('/', 1)[-1]
+        storage_name = checked.resources.storage.rsplit('/', 1)[-1]
+        self.assertIn(f"Using existing hosting-management identity '{mgmt_name}'.", warnings)
+        self.assertIn(f"Using existing workload identity '{workload_name}'.", warnings)
+        self.assertIn(f"Using existing storage account '{storage_name}'.", warnings)
+        self.assertEqual(infos, [])
         self.assertNotIn('/subscriptions/', '\n'.join(logs.output))
-        self.assertFalse(any("Using existing hosting-management identity '" in line for line in infos))
-        self.assertFalse(any("Using existing storage account '" in line for line in infos))
         self.clients['identity'].user_assigned_identities.create_or_update.assert_not_called()
         self.clients['storage'].storage_accounts.begin_create.assert_not_called()
 
+        self.assignments = [
+            self._assignment('management-principal', 'Reader', _CLUSTER),
+            self._assignment('management-principal', 'Kubernetes Extension Contributor', _CLUSTER),
+            self._assignment('management-principal', 'Managed Identity Federated Identity Credential Contributor',
+                             _WORKLOAD),
+            self._assignment('workload-principal', 'Storage Blob Data Contributor', _STORAGE),
+        ]
         supplied = self._prepare()
         checked_supplied = preflight(self.cli_ctx, supplied)
-        with self.assertLogs('cli.' + _PREFIX.rstrip('.'), level='INFO') as supplied_logs:
+        with mock.patch(_PREFIX + 'logger') as provision_logger:
             provision(self.cli_ctx, checked_supplied, self.tags, request=supplied)
-        self.assertFalse(any(line.startswith('WARNING:') for line in supplied_logs.output))
-        self.assertTrue(any("Using existing hosting-management identity 'management'" in line
-                            for line in supplied_logs.output))
-        self.assertTrue(any("Using existing storage account 'storage'" in line
-                            for line in supplied_logs.output))
+        provision_logger.warning.assert_not_called()
+        provision_logger.info.assert_not_called()
 
     def test_assignment_names_are_stable_across_retries(self):
         preparation = self._prepare(False, False, False)

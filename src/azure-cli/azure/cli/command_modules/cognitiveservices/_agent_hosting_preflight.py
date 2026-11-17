@@ -162,52 +162,35 @@ def _read_account(client, account):
 
 
 def _validate_existing_account(existing, request, resources):
+    account_name = _resource_name(request.account_id)
     properties = getattr(existing, 'properties', None)
     configurations = getattr(properties, 'agent_hosting_configurations', None) if properties else None
     if not configurations:
         raise ValidationError(
-            f'Account {request.account_id} already exists without agent hosting. '
-            'Agent hosting can only be configured when the Account is created.')
+            f"Account '{account_name}' already exists without agent hosting, "
+            'which can only be set during creation.')
     if _normalize_location(getattr(existing, 'location', None)) != _normalize_location(request.location):
         raise ValidationError(
-            f'Account {request.account_id} already exists in location {getattr(existing, "location", None)}. '
+            f"Account '{account_name}' already exists in location {getattr(existing, 'location', None)}. "
             f'Use the existing location instead of {request.location}.')
+    mismatch_error = (
+        f"Account '{account_name}' already exists with a different agent hosting configuration "
+        'and cannot be modified.')
     if not isinstance(configurations, (list, tuple)) or len(configurations) != 1 or configurations[0] is None:
-        raise ValidationError(
-            f'Account {request.account_id} has an incompatible agent hosting configuration. '
-            'Updating or removing agentHostingConfigurations is not supported.')
-
-    expected = {
-        'name': 'default',
-        'hosting_type': 'ManagedCluster',
-        'cluster_resource_id': resources.cluster,
-        'storage_account_resource_id': resources.storage,
-        'hosting_management_identity_resource_id': resources.management_identity,
-        'workload_identity_resource_id': resources.workload_identity,
-    }
+        raise ValidationError(mismatch_error)
     configuration = configurations[0]
-    resource_ids = {
-        'cluster_resource_id',
-        'storage_account_resource_id',
-        'hosting_management_identity_resource_id',
-        'workload_identity_resource_id',
-    }
-    mismatches = []
-    for field, expected_value in expected.items():
-        actual = getattr(configuration, field, None)
-        if field in resource_ids:
-            matches = (
-                isinstance(actual, str) and
-                _normalize_resource_id(actual) == _normalize_resource_id(expected_value)
-            )
-        else:
-            matches = actual == expected_value
-        if not matches:
-            mismatches.append(field)
-    if mismatches:
-        raise ValidationError(
-            f'Account {request.account_id} has an incompatible agent hosting configuration '
-            f'({", ".join(mismatches)}). Updating or removing agentHostingConfigurations is not supported.')
+    resource_ids = (
+        ('cluster_resource_id', resources.cluster),
+        ('storage_account_resource_id', resources.storage),
+        ('hosting_management_identity_resource_id', resources.management_identity),
+        ('workload_identity_resource_id', resources.workload_identity),
+    )
+    if (getattr(configuration, 'name', None) != 'default' or
+            getattr(configuration, 'hosting_type', None) != 'ManagedCluster' or
+            any(not isinstance(getattr(configuration, field, None), str) or
+                _normalize_resource_id(getattr(configuration, field)) != _normalize_resource_id(expected)
+                for field, expected in resource_ids)):
+        raise ValidationError(mismatch_error)
 
 
 def _normalize_resource_id(value):
@@ -299,19 +282,16 @@ def _raise_if_preflight_failed(checks):
     failed = [check for check in checks if check['mandatory'] and check['status'] in ('FAIL', 'UNVERIFIED')]
     if not failed:
         return
-    lines, recommendations = [], []
+    lines = []
     for check in failed:
-        name, observed, remediation = check['name'], check['observed'], check['remediation']
+        name, observed = check['name'], check['observed']
         label = f"Role '{name[:-11]}'" if name.endswith(' validation') else name
         if isinstance(observed, (list, tuple)):
             observed = ', '.join(str(item) for item in observed) or 'None'
         lines.append(f"  - {label} ('{_resource_name(check['scope'])}'): {observed} (expected {check['expected']})")
-        if remediation and remediation != 'None' and remediation not in recommendations:
-            recommendations.append(remediation)
-    recommendations.append(f'See {_PREFLIGHT_DOC_URL} for more details.')
     raise ValidationError(
         'BYO AKS preflight failed. No Azure resources were written:\n' + '\n'.join(lines),
-        recommendation=recommendations,
+        recommendation=f'See {_PREFLIGHT_DOC_URL} for more details.',
     )
 
 
