@@ -230,6 +230,12 @@ parameters:
 examples:
   - name: Update sku and tags.
     text: az cognitiveservices account update --name myresource -g cognitive-services-resource-group --sku S0 --tags external-app=chatbot-HR azure-web-app-bot=HR-external azure-app-service=HR-external-app-service
+  - name: Set the Application Insights connection for cost-control telemetry.
+    text: >
+        az cognitiveservices account update --resource-group myResourceGroup --name myAccount
+        --cost-control-connections app-insights-connection-id=/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.CognitiveServices/accounts/myAccount/connections/myAppInsights
+  - name: Remove the Application Insights connection for cost-control telemetry.
+    text: az cognitiveservices account update --resource-group myResourceGroup --name myAccount --cost-control-connections null
 """
 
 helps[
