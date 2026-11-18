@@ -712,6 +712,7 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account update') as c:
         c.argument(
             'cost_control_connections',
+            options_list=['--cost-control-connections', '--cost-control-conn'],
             validator=validate_cost_control_connections,
             is_preview=True,
             help='Cost-control telemetry connections. Use app-insights-connection-id=RESOURCE_ID for the full '

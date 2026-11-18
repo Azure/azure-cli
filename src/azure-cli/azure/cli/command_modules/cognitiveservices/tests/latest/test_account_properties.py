@@ -23,7 +23,7 @@ class CognitiveServicesAccountCostControlUnitTests(unittest.TestCase):
         'providers/Microsoft.CognitiveServices/accounts/my-account/connections/telemetry'
     )
 
-    def _invoke_update(self, connection_value=None, include_sku=True):
+    def _invoke_update(self, connection_value=None, include_sku=True, option='--cost-control-connections'):
         credential = mock.Mock(spec=['get_token'])
         credential.get_token.return_value = AccessToken('test-token', 4102444800)
         transport = mock.MagicMock(spec=HttpTransport)
@@ -45,7 +45,7 @@ class CognitiveServicesAccountCostControlUnitTests(unittest.TestCase):
         if include_sku:
             args.extend(['--sku', 'S0'])
         if connection_value is not None:
-            args.extend(['--cost-control-connections', connection_value])
+            args.extend([option, connection_value])
 
         with CognitiveServicesManagementClient(
                 credential, '00000000-0000-0000-0000-000000000000', transport=transport) as client, \
@@ -79,6 +79,19 @@ class CognitiveServicesAccountCostControlUnitTests(unittest.TestCase):
                 })
                 self.assertEqual(payload['sku']['name'], 'S0')
                 self.assertEqual(payload['tags'], {'environment': 'test'})
+
+    def test_cognitiveservices_account_update_cost_control_connections_short_option(self):
+        for value, expected in (
+                (f'app-insights-connection-id={self.CONNECTION_ID}', self.CONNECTION_ID),
+                ('null', None)):
+            with self.subTest(value=value):
+                exit_code, errors, transport = self._invoke_update(value, option='--cost-control-conn')
+                self.assertEqual(exit_code, 0, errors)
+                transport.send.assert_called_once()
+                payload = json.loads(transport.send.call_args.args[0].body)
+                self.assertEqual(payload['properties']['costControlConnections'], {
+                    'appInsightsConnectionId': expected,
+                })
 
     def test_cognitiveservices_account_update_omits_unspecified_cost_control_connections(self):
         exit_code, errors, transport = self._invoke_update()
@@ -119,6 +132,7 @@ class CognitiveServicesAccountCostControlUnitTests(unittest.TestCase):
             DummyCli().invoke(['cognitiveservices', 'account', 'update', '--help'])
         self.assertEqual(exit_context.exception.code, 0, output.getvalue())
         self.assertIn('--cost-control-connections', output.getvalue())
+        self.assertRegex(output.getvalue(), r'(?<!\S)--cost-control-conn(?=\s|$)')
         self.assertIn('app-insights-connection-id', output.getvalue())
 
 
