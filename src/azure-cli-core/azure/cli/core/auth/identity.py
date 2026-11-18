@@ -147,7 +147,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             Identity._service_principal_store_instance = ServicePrincipalStore(store)
         return Identity._service_principal_store_instance
 
-    def login_with_auth_code(self, scopes, claims_challenge=None):
+    def login_with_auth_code(self, scopes, claims_challenge=None, login_hint=None):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
 
@@ -166,7 +166,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
         # on port 8400 from the old design. However, ADFS only allows port 8400.
         result = self._msal_app.acquire_token_interactive(
-            scopes, prompt='select_account', port=8400 if self._is_adfs else None,
+            # select_account overrides login_hint in MSAL's broker flow.
+            scopes, prompt=None if login_hint else 'select_account', login_hint=login_hint,
+            port=8400 if self._is_adfs else None,
             success_template=success_template, error_template=error_template,
             parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
             enable_msa_passthrough=True,

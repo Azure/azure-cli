@@ -329,10 +329,12 @@ class TestProfile(unittest.TestCase):
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False)
+        subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False,
+                             login_hint="user@contoso.com")
 
         # assert
-        login_with_auth_code_mock.assert_called_once()
+        login_with_auth_code_mock.assert_called_once_with(
+            mock.ANY, scopes=mock.ANY, claims_challenge=None, login_hint="user@contoso.com")
         get_user_credential_mock.assert_called()
         self.assertEqual(self.subscription1_with_tenant_info_output, subs)
 
@@ -373,7 +375,8 @@ class TestProfile(unittest.TestCase):
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
+        subs = profile.login(True, None, None, False, None, use_device_code=False, allow_no_subscriptions=False,
+                             login_hint="user@contoso.com")
 
         # assert
         login_with_device_code_mock.assert_called_once()

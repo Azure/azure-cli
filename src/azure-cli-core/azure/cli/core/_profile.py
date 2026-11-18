@@ -154,7 +154,8 @@ class Profile:
               show_progress=False,
               claims_challenge=None,
               skip_subscription_discovery=False,
-              subscription=None):
+              subscription=None,
+              login_hint=None):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
@@ -174,9 +175,12 @@ class Profile:
                 use_device_code = True
 
             if use_device_code:
+                if login_hint:
+                    logger.warning('Login hints are not supported by device code flow. The hint will be ignored.')
                 user_identity = identity.login_with_device_code(scopes=scopes, claims_challenge=claims_challenge)
             else:
-                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge)
+                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge,
+                                                              login_hint=login_hint)
         else:
             if not is_service_principal:
                 user_identity = identity.login_with_username_password(username, password, scopes=scopes)

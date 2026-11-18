@@ -45,6 +45,20 @@ with open(TEST_CERT) as f:
 
 class TestIdentity(unittest.TestCase):
 
+    @mock.patch('azure.cli.core.auth.identity.check_result')
+    def test_login_with_auth_code_hint(self, check_result_mock):
+        for hint, prompt in [(None, 'select_account'), ('user@contoso.com', None)]:
+            with self.subTest(hint=hint):
+                identity = Identity('https://login.microsoftonline.com')
+                identity._msal_app_instance = mock.MagicMock()
+                result = identity.login_with_auth_code(['scope'], claims_challenge='claims', login_hint=hint)
+                kwargs = identity._msal_app.acquire_token_interactive.call_args.kwargs
+                self.assertEqual(hint, kwargs['login_hint'])
+                self.assertEqual(prompt, kwargs['prompt'])
+                self.assertEqual('claims', kwargs['claims_challenge'])
+                check_result_mock.assert_called_with(identity._msal_app.acquire_token_interactive.return_value)
+                self.assertIs(result, check_result_mock.return_value)
+
     @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
     @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
     @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
