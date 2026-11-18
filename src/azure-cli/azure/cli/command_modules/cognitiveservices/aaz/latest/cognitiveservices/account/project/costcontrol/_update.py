@@ -190,7 +190,7 @@ class Update(AAZCommand):
             options=["event-grid-connection-id"],
             help="The full resource ID of the Cognitive Services Event Grid connection used to publish this notification.",
             fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.CognitiveServices/accounts/connections/{}",
+                template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.CognitiveServices/accounts/{}/connections/{}",
             ),
         )
         _element.operator = AAZStrArg(
