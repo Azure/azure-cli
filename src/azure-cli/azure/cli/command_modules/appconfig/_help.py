@@ -173,6 +173,9 @@ long-summary: |
   Legacy .NET feature-management and KVSet schemas are not supported. Read-only etag and last_modified
   properties are ignored. Labels default to null unless --label or --preserve-labels is specified.
   This command requires the enhanced feature flag client introduced with the enhanced-feature-flag command group.
+  Default-profile filter parameters support native JSON values, including targeting audiences.
+  Transfers stop on the first failure and report completed, failed and unattempted operations.
+  Completed changes are not rolled back; strict deletions begin only after all writes succeed.
 examples:
   - name: Import Microsoft Feature Management flags from JSON.
     text: az appconfig enhanced-feature-flag import -n MyAppConfiguration -s file --path flags.json --format json
@@ -200,6 +203,9 @@ long-summary: |
   If --label is omitted, only flags with the null label are exported. Use --label "*" for all labels.
   Store transfers use the null destination label unless
   --dest-label or --preserve-labels is specified. Existing matching destination flags are not rewritten.
+  Default-profile exports decode JSON-encoded filter parameters into native values.
+  Store transfers stop on the first failure and report completed, failed and unattempted operations.
+  Completed changes are not rolled back.
 examples:
   - name: Export enhanced flags with all labels to JSON.
     text: az appconfig enhanced-feature-flag export -n MyAppConfiguration -d file --path flags.json --format json --profile appconfig/ffset --label "*"

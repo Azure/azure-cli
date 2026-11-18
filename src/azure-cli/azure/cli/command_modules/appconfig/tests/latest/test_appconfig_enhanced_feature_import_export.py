@@ -7,13 +7,17 @@ import json
 import os
 from contextlib import redirect_stdout
 from datetime import datetime, timezone
-from io import StringIO
+from io import BytesIO, StringIO
 from tempfile import TemporaryDirectory
 from unittest import TestCase
 from unittest.mock import Mock, patch
+from urllib.parse import unquote, urlsplit
 
 import yaml
-from azure.appconfiguration import FeatureFlag
+from requests import Response
+from urllib3.response import HTTPResponse
+
+from azure.appconfiguration import FeatureFlag, FeatureFlagClient
 from azure.core import MatchConditions
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import (
@@ -245,6 +249,78 @@ class EnhancedFeatureImportExportTests(TestCase):
         self.assertTrue(flag.enabled)
         self.assertIsNone(flag.label)
 
+    def test_default_profile_filter_fixture_round_trip_through_sdk_requests(self):
+        fixture = os.path.join(os.path.dirname(__file__), "enhanced-feature-flags-default-filters.json")
+        with open(fixture, encoding="utf-8") as source:
+            application = json.load(source)
+        expected_flags = application["feature_management"]["feature_flags"]
+        for format_ in ("json", "yaml"):
+            with self.subTest(format_=format_):
+                stored = []
+
+                def send(method, url, **kwargs):
+                    self.assertEqual("PUT", method)
+                    resource = json.loads(kwargs["data"])
+                    resource["name"] = unquote(urlsplit(url).path.rsplit("/", 1)[1])
+                    stored.append(resource)
+                    response = Response()
+                    response.status_code = 200
+                    response.headers["Content-Type"] = "application/json"
+                    response._content = json.dumps(resource).encode("utf-8")
+                    response.raw = HTTPResponse(body=BytesIO(response.content), preload_content=False)
+                    return response
+
+                with patch("requests.Session.request", side_effect=send), FeatureFlagClient.from_connection_string(
+                        "Endpoint=https://example.azconfig.io;Id=test;Secret=c2VjcmV0") as client:
+                    self.client.list_feature_flags.return_value = []
+                    self.client.set_feature_flag.side_effect = client.set_feature_flag
+                    self.write_file(application, format_)
+                    transfers.import_feature_flags(None, "file", path=self.path, format_=format_, yes=True)
+                    self.assertEqual(2, len(stored))
+                    for expected, resource in zip(expected_flags, stored):
+                        parameters = resource["conditions"]["filters"][0]["parameters"]
+                        self.assertTrue(all(isinstance(value, str) for value in parameters.values()))
+                        self.assertEqual(expected["conditions"]["client_filters"][0]["parameters"],
+                                         {key: json.loads(value) for key, value in parameters.items()})
+
+                    self.client.list_feature_flags.return_value = [FeatureFlag.from_dict(flag) for flag in stored]
+                    transfers.export_feature_flags(None, "file", path=self.path, format_=format_, yes=True)
+                    with open(self.path, encoding="utf-8") as source:
+                        exported = json.load(source) if format_ == "json" else yaml.safe_load(source)
+                    self.assertEqual(application, exported)
+
+                    self.client.list_feature_flags.return_value = []
+                    transfers.import_feature_flags(None, "file", path=self.path, format_=format_, yes=True)
+                    self.assertEqual(stored[:2], stored[2:])
+
+    def test_default_profile_filter_parameters_preserve_value_types_and_ffset_encoding(self):
+        parameters = {str(index): value for index, value in enumerate((
+            None, False, True, 0, 1.5, [], {}, [1, False], {"nested": [None, "text"]},
+            "", "text", "2026-01-01T00:00:00Z", "50", "true", "null", '{"key":1}', '"quoted"',
+        ))}
+        entry = {"id": "Custom", "enabled": True, "conditions": {"client_filters": [
+            {"name": "Custom", "parameters": parameters}
+        ]}}
+        self.write_file({"feature_management": {"feature_flags": [entry]}})
+        transfers.import_feature_flags(None, "file", path=self.path, format_="json", yes=True)
+        flag = self.client.set_feature_flag.call_args.args[0]
+        encoded = flag.conditions.filters[0].parameters.copy()
+        self.client.list_feature_flags.return_value = [flag]
+        transfers.export_feature_flags(None, "file", path=self.path, format_="json", yes=True)
+        with open(self.path, encoding="utf-8") as source:
+            exported = json.load(source)["feature_management"]["feature_flags"][0]
+        self.assertEqual(entry, exported)
+        for key, value in exported["conditions"]["client_filters"][0]["parameters"].items():
+            self.assertIs(type(parameters[key]), type(value))
+        self.assertEqual(encoded, flag.conditions.filters[0].parameters)
+
+        transfers.export_feature_flags(None, "file", path=self.path, format_="json",
+                                       profile=ImportExportProfiles.FFSET, yes=True)
+        self.client.list_feature_flags.return_value = []
+        self.import_file(yes=True)
+        written = self.client.set_feature_flag.call_args.args[0]
+        self.assertEqual(encoded, written.conditions.filters[0].parameters)
+
     def test_default_profile_import_defaults_missing_enabled_to_false(self):
         self.write_file({"feature_management": {"feature_flags": [{"id": "Beta"}]}})
         transfers.import_feature_flags(None, "file", path=self.path, format_="json", yes=True)
@@ -255,7 +331,7 @@ class EnhancedFeatureImportExportTests(TestCase):
 
     def test_default_profile_imports_percentile_bounds_from_existing_fixture(self):
         path = os.path.join(os.path.dirname(__file__), "import_features_new_fm_schema.json")
-        flags = transfers._read_flags(path, "json", ImportExportProfiles.DEFAULT)
+        flags = transfers._load_flags_from_file(path, "json", ImportExportProfiles.DEFAULT)
         with open(path, encoding="utf-8") as source:
             expected = json.load(source)["feature_management"]["feature_flags"]
         self.assertEqual(len(expected), len(flags))
@@ -276,7 +352,7 @@ class EnhancedFeatureImportExportTests(TestCase):
         ], converted["allocation"]["percentile"])
         self.assertEqual(resource, transfers._serialize_flag(flag))
         self.write_file({"feature_management": {"feature_flags": [converted]}})
-        imported = transfers._read_flags(self.path, "json", ImportExportProfiles.DEFAULT)
+        imported = transfers._load_flags_from_file(self.path, "json", ImportExportProfiles.DEFAULT)
         self.assertEqual(resource["allocation"], transfers._serialize_flag(imported[0])["allocation"])
 
     def test_invalid_percentile_allocations_are_rejected_before_connecting(self):
@@ -372,7 +448,7 @@ class EnhancedFeatureImportExportTests(TestCase):
                 resource = {"id": "Beta", "enabled": False,
                             "variants": [{"name": "Red", "configuration_value": value}]}
                 self.write_file({"feature_management": {"feature_flags": [resource]}})
-                flags = transfers._read_flags(self.path, "json", ImportExportProfiles.DEFAULT)
+                flags = transfers._load_flags_from_file(self.path, "json", ImportExportProfiles.DEFAULT)
                 self.assertEqual(resource, transfers._to_feature_management(flags[0]))
 
     def test_default_profile_rejects_duplicate_names_without_overwriting_file(self):
@@ -399,6 +475,9 @@ class EnhancedFeatureImportExportTests(TestCase):
             {"id": "Beta", "enabled": "true"},
             {"id": "Beta", "conditions": {"filters": []}},
             {"id": "Beta", "conditions": {"client_filters": "invalid"}},
+            {"id": "Beta", "conditions": {"client_filters": [True]}},
+            {"id": "Beta", "conditions": {"client_filters": [{"name": "Custom", "parameters": []}]}},
+            {"id": "Beta", "conditions": {"client_filters": [{"name": "Custom", "parameters": "invalid"}]}},
             {"id": "Beta", "variants": [True]},
             {"id": "Beta", "variants": [{"name": "Red", "value": "raw"}]},
             {"id": "Beta", "variants": [{"name": "Red", "content_type": "text/plain"}]},
@@ -658,6 +737,52 @@ class EnhancedFeatureImportExportTests(TestCase):
         self.client.list_feature_flags.side_effect = HttpResponseError(message="forbidden")
         with self.assertRaises(AzureResponseError):
             self.import_file(yes=True)
+
+    def test_failed_write_reports_partial_outcomes_and_skips_strict_deletions(self):
+        resources = [{"name": name, "label": label, "enabled": True}
+                     for name, label in (("First", None), ("Second", "test"), ("Third", "production"))]
+        self.write_file(resources)
+        self.client.list_feature_flags.return_value = [FeatureFlag(name="Old", label="test", etag="old")]
+        self.client.set_feature_flag.side_effect = [None, HttpResponseError(message="conflict")]
+        with self.assertRaises(AzureResponseError) as error:
+            self.import_file(preserve_labels=True, strict=True, yes=True)
+        self.assertIn("conflict", str(error.exception))
+        report = json.loads(str(error.exception).split("Transfer outcomes: ", 1)[1])
+        self.assertEqual({
+            "completed": [{"operation": "set", "name": "First", "label": None}],
+            "failed": {"operation": "set", "name": "Second", "label": "test"},
+            "unattempted": [
+                {"operation": "set", "name": "Third", "label": "production"},
+                {"operation": "delete", "name": "Old", "label": "test"},
+            ],
+        }, report)
+        self.assertEqual(["First", "Second"],
+                         [call.args[0].name for call in self.client.set_feature_flag.call_args_list])
+        self.client.delete_feature_flag.assert_not_called()
+        self.assertTrue(all(call.kwargs["match_condition"] == MatchConditions.IfMissing
+                            for call in self.client.set_feature_flag.call_args_list))
+
+    def test_failed_strict_deletion_reports_completed_and_unattempted_operations(self):
+        self.write_file([{"name": "New", "enabled": True}])
+        self.client.list_feature_flags.return_value = [
+            FeatureFlag(name=name, label="test", etag=name) for name in ("First", "Second", "Third")]
+        self.client.delete_feature_flag.side_effect = [None, HttpResponseError(message="conflict")]
+        with self.assertRaises(AzureResponseError) as error:
+            self.import_file(label="test", strict=True, yes=True)
+        report = json.loads(str(error.exception).split("Transfer outcomes: ", 1)[1])
+        self.assertEqual({
+            "completed": [
+                {"operation": "set", "name": "New", "label": "test"},
+                {"operation": "delete", "name": "First", "label": "test"},
+            ],
+            "failed": {"operation": "delete", "name": "Second", "label": "test"},
+            "unattempted": [{"operation": "delete", "name": "Third", "label": "test"}],
+        }, report)
+        self.assertEqual(["First", "Second"],
+                         [call.kwargs["name"] for call in self.client.delete_feature_flag.call_args_list])
+        self.assertTrue(all(call.kwargs["match_condition"] == MatchConditions.IfNotModified and
+                            call.kwargs["etag"] == call.kwargs["name"]
+                            for call in self.client.delete_feature_flag.call_args_list))
 
     def test_file_write_error_is_reported(self):
         self.client.list_feature_flags.return_value = [FeatureFlag.from_dict(self.resource)]

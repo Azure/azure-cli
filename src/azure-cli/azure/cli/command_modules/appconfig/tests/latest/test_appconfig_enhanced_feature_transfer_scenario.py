@@ -95,7 +95,7 @@ class AppConfigEnhancedFeatureTransferScenarioTest(ScenarioTest):
     def test_azconfig_enhanced_feature_import_export_profiles(self, resource_group, location):
         source_endpoint = self._create_store("fftransfersrc", resource_group, location)
         destination_endpoint = self._create_store("fftransferdst", resource_group, location)
-        fixture = os.path.join(TEST_DIR, "enhanced-feature-flags-test.json")
+        fixture = os.path.join(TEST_DIR, "enhanced-feature-flags-ffset-without-profile.json")
         with TemporaryDirectory(prefix="ff-transfer-", dir=TEST_DIR) as directory:
             default_json = os.path.join(directory, "default.json")
             default_yaml = os.path.join(directory, "default.yaml")

@@ -57,7 +57,7 @@ def _validate_profile(profile, mode):
     return profile or ImportExportProfiles.DEFAULT
 
 
-def _convert_percentile_bounds(allocation, bounds):
+def _rename_percentile_bound_keys(allocation, bounds):
     if not isinstance(allocation, dict):
         return
     percentiles = allocation.get("percentile", [])
@@ -77,6 +77,7 @@ def _convert_percentile_bounds(allocation, bounds):
 
 
 def _to_feature_management(flag):
+    """Convert an SDK FeatureFlag to a feature_management.feature_flags entry."""
     data = _serialize_flag(flag)
     data["id"] = data.pop("name")
     data.pop("label", None)
@@ -84,7 +85,8 @@ def _to_feature_management(flag):
     conditions = data.get("conditions")
     if conditions is not None and "filters" in conditions:
         conditions["client_filters"] = conditions.pop("filters")
-    _convert_percentile_bounds(data.get("allocation"), (("percentile_from", "from"), ("percentile_to", "to")))
+        _convert_filter_parameters(conditions["client_filters"], _decode_filter_parameter)
+    _rename_percentile_bound_keys(data.get("allocation"), (("percentile_from", "from"), ("percentile_to", "to")))
     for variant in data.get("variants", []):
         content_type = variant.pop("content_type", None)
         if "value" in variant:
@@ -101,6 +103,7 @@ def _to_feature_management(flag):
 
 
 def _from_feature_management(entry):
+    """Convert a feature_management.feature_flags entry to an SDK resource dictionary."""
     if any(key in entry for key in ("name", "label", "tags")):
         raise FileOperationError("Default-profile feature flags use 'id' and do not support resource names, labels or tags. Use '--profile appconfig/ffset' for /ff resources.")
     resource = deepcopy(entry)
@@ -112,11 +115,48 @@ def _from_feature_management(entry):
             raise FileOperationError("Default-profile conditions use 'client_filters', not 'filters'.")
         if "client_filters" in conditions:
             conditions["filters"] = conditions.pop("client_filters")
-    _convert_percentile_bounds(resource.get("allocation"), (("from", "percentile_from"), ("to", "percentile_to")))
+            _convert_filter_parameters(conditions["filters"], _encode_filter_parameter)
+    _rename_percentile_bound_keys(resource.get("allocation"), (("from", "percentile_from"), ("to", "percentile_to")))
     variants = resource.get("variants")
     if isinstance(variants, list):
         resource["variants"] = [_from_feature_management_variant(variant) for variant in variants]
     return resource
+
+
+def _decode_filter_parameter(value):
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        # Plain string parameters, such as TimeWindow dates, are also valid.
+        return value
+
+
+def _encode_filter_parameter(value):
+    if isinstance(value, str):
+        try:
+            json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    # Quote JSON-looking strings too, so decoding does not change their type.
+    try:
+        return json.dumps(value, ensure_ascii=False, allow_nan=False)
+    except (TypeError, ValueError) as exception:
+        raise FileOperationError("Feature filter parameters must contain valid JSON values.") from exception
+
+
+def _convert_filter_parameters(filters, convert):
+    if filters is None:
+        return
+    if not isinstance(filters, list):
+        raise FileOperationError("Feature flag filters must be an array.")
+    for filter_ in filters:
+        if not isinstance(filter_, dict):
+            raise FileOperationError("Feature flag filters must be objects.")
+        parameters = filter_.get("parameters")
+        if parameters is not None:
+            if not isinstance(parameters, dict):
+                raise FileOperationError("Feature filter parameters must be an object.")
+            filter_["parameters"] = {key: convert(value) for key, value in parameters.items()}
 
 
 def _from_feature_management_variant(variant):
@@ -134,7 +174,7 @@ def _from_feature_management_variant(variant):
     return variant
 
 
-def _serialize_file(flags, profile):
+def _build_export_document(flags, profile):
     if profile == ImportExportProfiles.FFSET:
         return {"profile": ImportExportProfiles.FFSET, "items": [_serialize_flag(flag) for flag in flags]}
     names = set()
@@ -148,7 +188,7 @@ def _serialize_file(flags, profile):
     return {"feature_management": {"feature_flags": data}}
 
 
-def _validate_round_trip(source, serialized, path):
+def _validate_imported_fields_preserved(source, serialized, path):
     if isinstance(source, dict):
         if not isinstance(serialized, dict):
             raise FileOperationError("Invalid enhanced feature flag property '{}'.".format(path))
@@ -156,17 +196,18 @@ def _validate_round_trip(source, serialized, path):
             if value is not None:
                 if key not in serialized:
                     raise FileOperationError("Unsupported enhanced /ff property '{}.{}'.".format(path, key))
-                _validate_round_trip(value, serialized[key], "{}.{}".format(path, key))
+                _validate_imported_fields_preserved(value, serialized[key], "{}.{}".format(path, key))
     elif isinstance(source, list):
         if not isinstance(serialized, list) or len(source) != len(serialized):
             raise FileOperationError("Invalid enhanced feature flag property '{}'.".format(path))
         for index, value in enumerate(source):
-            _validate_round_trip(value, serialized[index], "{}[{}]".format(path, index))
+            _validate_imported_fields_preserved(value, serialized[index], "{}[{}]".format(path, index))
     elif source != serialized:
         raise FileOperationError("Invalid enhanced feature flag property '{}'.".format(path))
 
 
-def _validate_transfer(mode, path, format_, store, label, preserve_labels, dry_run, yes):
+def _validate_transfer_options(mode, path, format_, store, label, preserve_labels, dry_run, yes):
+    """Check CLI options for file/store and store/store feature flag transfers."""
     if mode not in ("file", "appconfig"):
         raise InvalidArgumentValueError("Enhanced feature flags support only 'file' and 'appconfig' transfers.")
     if mode == "file":
@@ -189,7 +230,7 @@ def _validate_transfer(mode, path, format_, store, label, preserve_labels, dry_r
         raise MutuallyExclusiveArgumentError("The '--dry-run' and '--yes' options cannot be specified together.")
 
 
-def _read_flags(path, format_, profile):
+def _load_flags_from_file(path, format_, profile):
     try:
         with open(path, encoding="utf-8-sig") as source:
             data = parse_json_with_comments(source.read()) if format_ == "json" else yaml.safe_load(source)
@@ -214,11 +255,11 @@ def _read_flags(path, format_, profile):
             raise FileOperationError("Enhanced feature flag at index {} must be an object.".format(index))
         if profile == ImportExportProfiles.DEFAULT:
             entry = _from_feature_management(entry)
-        flags.append(_deserialize_flag(entry, index))
+        flags.append(_resource_dict_to_sdk_flag(entry, index))
     return flags
 
 
-def _deserialize_flag(entry, index):
+def _resource_dict_to_sdk_flag(entry, index):
     name = entry.get("name")
     if not isinstance(name, str) or not name or any(character in name for character in ("%", ":")):
         raise FileOperationError("Enhanced feature flag at index {} must have a valid literal 'name'.".format(index))
@@ -235,7 +276,7 @@ def _deserialize_flag(entry, index):
     try:
         resource = {key: value for key, value in entry.items() if key not in ("last_modified", "etag")}
         flag = FeatureFlag.from_dict(resource)
-        _validate_round_trip(resource, _serialize_flag(flag), name)
+        _validate_imported_fields_preserved(resource, _serialize_flag(flag), name)
         return flag
     except (TypeError, ValueError, KeyError) as exception:
         raise FileOperationError("Invalid enhanced feature flag at index {}. {}".format(index, exception)) from exception
@@ -252,7 +293,7 @@ def _list_flags(client, feature_name=None, label=None, tags=None):
         raise AzureResponseError("Failed to read enhanced feature flags. " + str(exception)) from exception
 
 
-def _prepare_flags(flags, label, tags, preserve_labels):
+def _build_destination_flags(flags, label, tags, preserve_labels):
     result = []
     identities = set()
     for flag in flags:
@@ -293,15 +334,31 @@ def _transfer_flags(client, flags, label, preserve_labels, import_mode, strict, 
     if not print_preview(diff, "file", yes=yes, strict=strict, title="Enhanced Feature Flags") or dry_run:
         return
     user_confirmation("Are you sure you want to apply these enhanced feature flag changes?", yes)
-    try:
-        for flag, old in writes:
-            client.set_feature_flag(flag, match_condition=MatchConditions.IfNotModified if old else MatchConditions.IfMissing,
-                                    etag=old.etag if old else None)
-        for flag in deletions:
-            client.delete_feature_flag(name=flag.name, label=flag.label, etag=flag.etag,
-                                       match_condition=MatchConditions.IfNotModified)
-    except HttpResponseError as exception:
-        raise AzureResponseError("Failed to transfer enhanced feature flags. " + str(exception)) from exception
+    _apply_flag_changes(client, writes, deletions)
+
+
+def _apply_flag_changes(client, writes, deletions):
+    operations = [("set", flag, old) for flag, old in writes]
+    operations.extend(("delete", flag, None) for flag in deletions)
+    outcomes = [{"operation": operation, "name": flag.name, "label": flag.label}
+                for operation, flag, _ in operations]
+    for index, (operation, flag, old) in enumerate(operations):
+        try:
+            if operation == "set":
+                client.set_feature_flag(
+                    flag, match_condition=MatchConditions.IfNotModified if old else MatchConditions.IfMissing,
+                    etag=old.etag if old else None)
+            else:
+                client.delete_feature_flag(name=flag.name, label=flag.label, etag=flag.etag,
+                                           match_condition=MatchConditions.IfNotModified)
+        except HttpResponseError as exception:
+            report = {"completed": outcomes[:index], "failed": outcomes[index],
+                      "unattempted": outcomes[index + 1:]}
+            raise AzureResponseError(
+                "Failed to transfer enhanced feature flags. {} Transfer outcomes: {}".format(
+                    exception, json.dumps(report, ensure_ascii=False)),
+                recommendation="Check the destination before retrying. Completed changes have not been rolled back."
+            ) from exception
 
 
 def import_feature_flags(cmd, source, name=None, connection_string=None, auth_mode="key", endpoint=None,  # pylint: disable=too-many-locals
@@ -310,8 +367,8 @@ def import_feature_flags(cmd, source, name=None, connection_string=None, auth_mo
                          src_name=None, src_connection_string=None, src_endpoint=None, src_auth_mode="key",
                          src_feature_name=None, src_label=None, src_tags=None, profile=None):
     _validate_profile(profile, source)
-    _validate_transfer(source, path, format_, (src_name, src_connection_string, src_endpoint),
-                       label, preserve_labels, dry_run, yes)
+    _validate_transfer_options(source, path, format_, (src_name, src_connection_string, src_endpoint),
+                               label, preserve_labels, dry_run, yes)
     if strict and source != "file":
         raise InvalidArgumentValueError("'--strict' can only be used when importing from a file.")
     if source == "file" and (src_feature_name is not None or src_label is not None or src_tags is not None):
@@ -319,11 +376,11 @@ def import_feature_flags(cmd, source, name=None, connection_string=None, auth_mo
     if import_mode not in (ImportMode.ALL, ImportMode.IGNORE_MATCH):
         raise InvalidArgumentValueError("Import mode must be 'all' or 'ignore-match'.")
     if source == "file":
-        flags = _read_flags(path, format_, profile)
+        flags = _load_flags_from_file(path, format_, profile)
     else:
         source_client = _get_client(cmd, src_name, src_connection_string, src_auth_mode, src_endpoint)
         flags = _list_flags(source_client, src_feature_name, src_label, src_tags)
-    flags = _prepare_flags(flags, label, tags, preserve_labels)
+    flags = _build_destination_flags(flags, label, tags, preserve_labels)
     client = _get_client(cmd, name, connection_string, auth_mode, endpoint)
     _transfer_flags(client, flags, label, preserve_labels, import_mode, strict, yes, dry_run)
 
@@ -334,14 +391,14 @@ def export_feature_flags(cmd, destination, name=None, connection_string=None, au
                          dest_endpoint=None, dest_auth_mode="key", dest_label=None, dest_tags=None,
                          preserve_labels=False, profile=None):
     profile = _validate_profile(profile, destination)
-    _validate_transfer(destination, path, format_, (dest_name, dest_connection_string, dest_endpoint),
-                       dest_label, preserve_labels, dry_run, yes)
+    _validate_transfer_options(destination, path, format_, (dest_name, dest_connection_string, dest_endpoint),
+                               dest_label, preserve_labels, dry_run, yes)
     if destination == "file" and (dest_label is not None or dest_tags is not None or preserve_labels):
         raise InvalidArgumentValueError("Destination overrides are only supported for store transfers. Use '--profile appconfig/ffset' to preserve source labels and tags in a file.")
     client = _get_client(cmd, name, connection_string, auth_mode, endpoint)
     flags = _list_flags(client, feature_name, label, tags)
     if destination == "appconfig":
-        flags = _prepare_flags(flags, dest_label, dest_tags, preserve_labels)
+        flags = _build_destination_flags(flags, dest_label, dest_tags, preserve_labels)
         destination_client = _get_client(cmd, dest_name, dest_connection_string, dest_auth_mode, dest_endpoint)
         _transfer_flags(destination_client, flags, dest_label, preserve_labels, ImportMode.IGNORE_MATCH,
                         False, yes, dry_run)
@@ -349,7 +406,7 @@ def export_feature_flags(cmd, destination, name=None, connection_string=None, au
     if not flags:
         logger.warning("Source configuration is empty. No changes will be made.")
         return
-    data = _serialize_file(flags, profile)
+    data = _build_export_document(flags, profile)
     print_preview({"add": data["items"] if profile == ImportExportProfiles.FFSET else data["feature_management"]["feature_flags"]},
                   "file", yes=yes, title="Enhanced Feature Flags")
     if dry_run:
