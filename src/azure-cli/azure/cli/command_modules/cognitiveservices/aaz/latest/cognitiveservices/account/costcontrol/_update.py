@@ -23,6 +23,15 @@ class Update(AAZCommand):
     :example: Update the account's cap to $1500 per the previously set period
         az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --amount 1500
 
+    :example: Update the account's cap to $1500 per the previously set period, if the account entity tag matches the given one. Note the required forward slash before the quotation marks around the entity tag.
+        az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --amount 1500 --if-match \\"bb926e0d-880b-4d60-8d59-9a341fa826a2.additional-info\\"
+
+    :example: Update the account's budget end date
+        az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --set properties.timePeriod.endDate="2028-12-01T00:00:00Z"
+
+    :example: Update the account's budget notification threshold to 90%
+        az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --set properties.notifications.usageAlert.threshold=90
+
     :example: Example using full settings (filters, grouping, alert and block)
         az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --if-none-match * --grouping "[{name:agent,type:AdditionalInfoKey}]" --category Cost --amount 1000 --time-grain Monthly --time-period "{start-date:'2026-11-15T00:00:00Z',end-date:'2027-11-15T00:00:00Z'}" --filter "{and:[{additional-info:{name:project,operator:In,values:[production]}},{additional-info:{name:agent,operator:In,values:[customer-support,order-assistant]}},{additional-info:{name:deployment,operator:In,values:[customer-support-model]}}]}" --notifications "{usage-alert:{event-grid-connection-id:/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/foundry-resource-group/providers/Microsoft.CognitiveServices/accounts/foundry-account/connections/budget-alerts,threshold-type:Percentage,threshold:80,enabled:True,operator:GreaterThanOrEqualTo}}" --provider-properties "{actions:{stop-requests:{type:Block,threshold-type:Percentage,threshold:100,operator:GreaterThanOrEqualTo}}}"
     """
