@@ -11,6 +11,7 @@ import time
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from knack.util import CLIError
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
+from .batch_request_matcher import register_batch_body_matcher
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
@@ -22,6 +23,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             BatchAccountKeyReplacer(),
             StorageSASReplacer()
         ])
+        register_batch_body_matcher(self.vcr)
 
     def _get_test_data_file(self, filename):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
