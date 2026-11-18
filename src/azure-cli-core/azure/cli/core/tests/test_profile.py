@@ -7,6 +7,7 @@
 import base64
 import json
 import datetime
+import os
 import unittest
 from copy import deepcopy
 from unittest import mock
@@ -373,9 +374,11 @@ class TestProfile(unittest.TestCase):
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
+        with mock.patch.dict(os.environ, {'CODESPACES': 'false', 'AZURE_CORE_ENABLE_BROKER_ON_WSL': 'false'}):
+            subs = profile.login(True, None, None, False, None, allow_no_subscriptions=False)
 
         # assert
+        can_launch_browser_mock.assert_called_once()
         login_with_device_code_mock.assert_called_once()
         self.assertEqual(self.subscription1_with_tenant_info_output, subs)
 
@@ -399,11 +402,50 @@ class TestProfile(unittest.TestCase):
 
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock)
-        subs = profile.login(True, None, None, False, None, use_device_code=True, allow_no_subscriptions=False)
+        subs = profile.login(True, None, None, False, None, allow_no_subscriptions=False)
 
         # assert
+        is_github_codespaces_mock.assert_called_once()
         login_with_device_code_mock.assert_called_once()
         self.assertEqual(self.subscription1_with_tenant_info_output, subs)
+
+    @mock.patch('azure.cli.core._profile.is_github_codespaces', return_value=False)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', return_value=False)
+    @mock.patch('azure.cli.core.util.is_wsl', return_value=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity._msal_app', new_callable=mock.PropertyMock)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    def test_login_without_browser_on_wsl(self, _, msal_app, is_wsl, can_launch_browser, is_codespaces):
+        from azure.cli.core.auth.identity import Identity
+
+        cases = [
+            # WSL, MSAL broker enabled, explicit device code, Codespaces, uses interactive auth
+            (True, True, False, False, True),
+            (True, False, False, False, False),
+            (True, True, True, False, False),
+            (False, True, False, False, False),
+            (True, True, False, True, False),
+        ]
+        with mock.patch.dict(os.environ, {'AZURE_CORE_ENABLE_BROKER_ON_WSL': 'true'}):
+            for wsl, broker_enabled, explicit_device_code, codespaces, interactive in cases:
+                with self.subTest(wsl=wsl, broker_enabled=broker_enabled, device_code=explicit_device_code,
+                                  codespaces=codespaces):
+                    msal_app.reset_mock()
+                    can_launch_browser.reset_mock()
+                    msal_app.return_value._enable_broker = broker_enabled
+                    is_wsl.return_value = wsl
+                    is_codespaces.return_value = codespaces
+                    profile = Profile(cli_ctx=DummyCli(), storage={'subscriptions': None})
+                    with mock.patch.object(Identity, 'login_with_auth_code',
+                                           return_value=self.user_identity_mock) as auth_code, \
+                            mock.patch.object(Identity, 'login_with_device_code',
+                                              return_value=self.user_identity_mock) as device_code:
+                        profile.login(True, None, None, False, self.tenant_id,
+                                      use_device_code=explicit_device_code, skip_subscription_discovery=True)
+
+                    self.assertEqual(auth_code.call_count, int(interactive))
+                    self.assertEqual(device_code.call_count, int(not interactive))
+                    self.assertEqual(msal_app.call_count, int(wsl and not explicit_device_code and not codespaces))
+                    self.assertEqual(can_launch_browser.call_count, int(not explicit_device_code and not codespaces))
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
@@ -1462,6 +1504,18 @@ class TestProfile(unittest.TestCase):
             cli.config.remove_option('core', 'enable_broker_on_mac')
         _, kwargs = identity_mock.call_args
         self.assertEqual(kwargs['enable_broker_on_mac'], True)
+
+    @mock.patch('azure.cli.core.auth.identity.Identity', autospec=True)
+    def test_create_identity_instance_wsl_broker_is_opt_in(self, identity_mock):
+        cli = DummyCli()
+        with mock.patch.dict(os.environ):
+            os.environ.pop('AZURE_CORE_ENABLE_BROKER_ON_WSL', None)
+            _create_identity_instance(cli, authority='https://login.microsoftonline.com')
+            self.assertFalse(identity_mock.call_args.kwargs['enable_broker_on_wsl'])
+
+            os.environ['AZURE_CORE_ENABLE_BROKER_ON_WSL'] = 'true'
+            _create_identity_instance(cli, authority='https://login.microsoftonline.com')
+            self.assertTrue(identity_mock.call_args.kwargs['enable_broker_on_wsl'])
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)

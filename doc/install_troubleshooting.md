@@ -5,6 +5,34 @@ Before posting an issue, please review our list of [common issues](https://githu
 
 These are issues we have closed because we cannot address them within the CLI due to platform or language limitations.
 
+Opting in to broker authentication on WSL
+-----------------------------------------
+
+Azure CLI on Windows Subsystem for Linux (WSL) does not use a broker by default. The Linux package does not bundle the optional Microsoft Authentication Library (MSAL) broker runtime.
+
+1. Run `az --version` inside WSL and find the **Python location** and **msal** version in its output. Install the broker extra for that MSAL version using that exact Python executable, not the Windows Python or an unrelated WSL `pip`. For example, with MSAL 1.39.0:
+
+   ```bash
+   /path/to/azure-cli/python -m pip install 'msal[broker]==1.39.0'
+   ```
+
+   The interpreter needs `pip`, permission to install packages, and a compatible runtime wheel. If your CLI package's environment cannot be modified, use a CLI installation in a writable Python environment with `pip`; installing the extra into a different interpreter will not enable broker support for your current CLI.
+
+2. Make sure a Secret Service keyring is available and unlocked in the WSL session running Azure CLI. See the [MSAL WSL setup guide](https://learn.microsoft.com/en-us/entra/msal/python/advanced/linux-broker-py-wsl) for supported WSL versions and keyring setup.
+
+3. Enable the broker and sign in:
+
+   ```bash
+   az config set core.enable_broker_on_wsl=true
+   az login
+   ```
+
+   When MSAL enables the WSL broker, `az login` can open its sign-in prompt without a Linux browser. `az login --use-device-code` still explicitly selects device-code sign-in, but does not disable broker initialization.
+
+If MSAL reports that the broker runtime is missing, verify that you installed the extra into the CLI's Python environment. If the runtime is installed but reports a missing shared library, install the package that provides it. On Ubuntu 24.04, `libwebkit2gtk-4.1-0` provides `libwebkit2gtk-4.1.so.0` and `libubsan1` provides `libubsan.so.1`. These libraries let the runtime load; the sign-in prompt still uses the Windows broker, not a Linux browser.
+
+MSAL does not automatically fall back when the runtime is missing. To opt out, run `az config set core.enable_broker_on_wsl=false` and unset `AZURE_CORE_ENABLE_BROKER_ON_WSL` if it is set.
+
 
 lsb_release does not return the correct base distribution version
 -----------------------------------------------------------------

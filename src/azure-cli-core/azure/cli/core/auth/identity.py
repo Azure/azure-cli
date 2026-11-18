@@ -58,7 +58,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     _service_principal_store_instance = None
 
     def __init__(self, authority, tenant_id=None, client_id=None, encrypt=False, use_msal_http_cache=True,
-                 enable_broker_on_windows=None, enable_broker_on_mac=None, instance_discovery=None):
+                 enable_broker_on_windows=None, enable_broker_on_mac=None, instance_discovery=None,
+                 enable_broker_on_wsl=None):
         """
         :param authority: Authentication authority endpoint. For example,
             - AAD: https://login.microsoftonline.com
@@ -75,6 +76,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         self._use_msal_http_cache = use_msal_http_cache
         self._enable_broker_on_windows = enable_broker_on_windows
         self._enable_broker_on_mac = enable_broker_on_mac
+        self._enable_broker_on_wsl = enable_broker_on_wsl
         self._instance_discovery = instance_discovery
 
         # Build the authority in MSAL style
@@ -112,10 +114,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     @property
     def _msal_public_app_kwargs(self):
         """kwargs for creating PublicClientApplication."""
-        # enable_broker_on_windows and enable_broker_on_mac can only be used on PublicClientApplication.
         return {**self._msal_app_kwargs,
                 "enable_broker_on_windows": self._enable_broker_on_windows,
                 "enable_broker_on_mac": self._enable_broker_on_mac,
+                "enable_broker_on_wsl": self._enable_broker_on_wsl,
                 "enable_pii_log": True}
 
     @property
@@ -126,6 +128,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if not self._msal_app_instance:
             self._msal_app_instance = PublicClientApplication(self.client_id, **self._msal_public_app_kwargs)
         return self._msal_app_instance
+
+    def is_wsl_broker_enabled(self):
+        from azure.cli.core.util import is_wsl
+
+        # MSAL exposes no public broker-state API. Check its decision after initialization,
+        # since it can turn off broker use even when the CLI setting is enabled.
+        # pylint: disable-next=protected-access
+        return bool(self._enable_broker_on_wsl and is_wsl() and self._msal_app._enable_broker)
 
     def _load_msal_token_cache(self):
         # Store for user token persistence
