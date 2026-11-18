@@ -11337,9 +11337,10 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
         raise CLIError(error_message)
 
     obj = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account)  # pylint: disable=no-member
-    try:
-        keys = [obj.keys_property[0].value, obj.keys_property[1].value]  # pylint: disable=no-member
-    except AttributeError:
+    storage_keys = getattr(obj, 'keys', None) or getattr(obj, 'keys_property', None)
+    if storage_keys:
+        keys = [key.value for key in storage_keys]
+    else:
         # Older API versions have a slightly different structure
         keys = [obj.key1, obj.key2]  # pylint: disable=no-member
 

@@ -30,6 +30,7 @@ from azure.cli.command_modules.appservice.custom import (
     update_container_settings_functionapp,
     list_function_keys,
     migrate_consumption_to_flex,
+    _validate_and_get_connection_string,
     _upgrade_consumption_to_flex_in_place,
     _build_flex_function_app_config,
     _prepare_flex_deployment_storage,
@@ -257,6 +258,26 @@ class TestFlexAppHealthCheck(unittest.TestCase):
 
 
 class TestFunctionappMocked(unittest.TestCase):
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_mgmt_service_client')
+    def test_validate_and_get_connection_string_with_current_storage_keys(self, get_mgmt_service_client):
+        storage_client = get_mgmt_service_client.return_value
+        storage_client.storage_accounts.get_properties.return_value = SimpleNamespace(
+            primary_endpoints=SimpleNamespace(blob='blob', queue='queue', table='table'),
+            sku=SimpleNamespace(name='Standard_LRS')
+        )
+        storage_client.storage_accounts.list_keys.return_value = SimpleNamespace(
+            keys=[SimpleNamespace(value='key1'), SimpleNamespace(value='key2')]
+        )
+        cli_ctx = SimpleNamespace(cloud=SimpleNamespace(
+            suffixes=SimpleNamespace(storage_endpoint='core.windows.net')))
+
+        result = _validate_and_get_connection_string(cli_ctx, 'resource-group', 'storage-account')
+
+        self.assertEqual(
+            'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;'
+            'AccountName=storage-account;AccountKey=key1',
+            result)
+
     def setUp(self):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
