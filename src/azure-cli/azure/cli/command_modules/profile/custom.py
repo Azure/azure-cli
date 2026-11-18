@@ -11,6 +11,7 @@ from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core._profile import Profile
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
 from azure.cli.core.util import in_cloud_console
 
 logger = get_logger(__name__)
@@ -142,7 +143,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
           # Managed identity
           identity=False, client_id=None, object_id=None, resource_id=None,
           # Subscription discovery and default subscription selection control
-          skip_subscription_discovery=False, subscription=None):
+          skip_subscription_discovery=False, subscription=None, no_prompt=False):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -153,6 +154,8 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
                        'Use --client-id, --object-id or --resource-id instead.')
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
+    if no_prompt and use_device_code:
+        raise MutuallyExclusiveArgumentError("'--no-prompt' and '--use-device-code' cannot be used together.")
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
@@ -189,6 +192,11 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
 
     if username:
         if not (password or client_assertion or certificate):
+            if no_prompt:
+                raise RequiredArgumentMissingError(
+                    "An explicit password or service principal credential is required with '--username' "
+                    "when '--no-prompt' is specified.",
+                    recommendation="For user SSO, omit '--username' to use an existing sign-in.")
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -208,7 +216,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     from azure.cli.core.telemetry import set_login_experience_v2
     set_login_experience_v2(login_experience_v2)
 
-    can_show_selector = (interactive and sys.stdin.isatty() and sys.stdout.isatty() and
+    can_show_selector = (interactive and not no_prompt and sys.stdin.isatty() and sys.stdout.isatty() and
                          login_experience_v2)
     is_subscription_filter = bool(subscription or skip_subscription_discovery)
 
@@ -225,7 +233,8 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         show_progress=can_show_selector and not skip_subscription_discovery,
         claims_challenge=claims_challenge,
         skip_subscription_discovery=skip_subscription_discovery,
-        subscription=subscription
+        subscription=subscription,
+        no_prompt=no_prompt
     )
 
     # Filtered path (--subscription or --skip): show selector only when multiple matches

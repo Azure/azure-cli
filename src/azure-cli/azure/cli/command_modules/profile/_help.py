@@ -14,6 +14,9 @@ long-summary: >-
     By default, this command logs in with a user account.
     Azure CLI uses Web Account Manager (WAM) on Windows, and browser-based login on Linux and macOS by default.
     If WAM or a web browser is not available, Azure CLI will fall back to device code login.
+    Specify --no-prompt to try signing in without a browser, account picker, or terminal prompt.
+    This requires an existing session or cached token, and fails if interaction is needed.
+    Without a broker, exactly one account must be present in the MSAL cache.
 
 
     [WARNING] Authentication with username and password in the command line is strongly discouraged.
@@ -35,6 +38,8 @@ long-summary: >-
 examples:
     - name: Log in interactively.
       text: az login
+    - name: Log in silently using an existing user session, failing if interaction is required.
+      text: az login --no-prompt
     - name: Log in with username and password. This doesn't work with Microsoft accounts or accounts that have two-factor authentication enabled. Use -p=secret if the first character of the password is '-'.
       text: az login --username johndoe@contoso.com --password VerySecret
     - name: Log in with a service principal using client secret. Use --password=secret if the first character of the password is '-'.
