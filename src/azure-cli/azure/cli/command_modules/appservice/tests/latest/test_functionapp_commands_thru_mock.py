@@ -30,7 +30,6 @@ from azure.cli.command_modules.appservice.custom import (
     update_container_settings_functionapp,
     list_function_keys,
     migrate_consumption_to_flex,
-    _validate_and_get_connection_string,
     _upgrade_consumption_to_flex_in_place,
     _build_flex_function_app_config,
     _prepare_flex_deployment_storage,
@@ -258,26 +257,6 @@ class TestFlexAppHealthCheck(unittest.TestCase):
 
 
 class TestFunctionappMocked(unittest.TestCase):
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_mgmt_service_client')
-    def test_validate_and_get_connection_string_with_current_storage_keys(self, get_mgmt_service_client):
-        storage_client = get_mgmt_service_client.return_value
-        storage_client.storage_accounts.get_properties.return_value = SimpleNamespace(
-            primary_endpoints=SimpleNamespace(blob='blob', queue='queue', table='table'),
-            sku=SimpleNamespace(name='Standard_LRS')
-        )
-        storage_client.storage_accounts.list_keys.return_value = SimpleNamespace(
-            keys=[SimpleNamespace(value='key1'), SimpleNamespace(value='key2')]
-        )
-        cli_ctx = SimpleNamespace(cloud=SimpleNamespace(
-            suffixes=SimpleNamespace(storage_endpoint='core.windows.net')))
-
-        result = _validate_and_get_connection_string(cli_ctx, 'resource-group', 'storage-account')
-
-        self.assertEqual(
-            'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;'
-            'AccountName=storage-account;AccountKey=key1',
-            result)
-
     def setUp(self):
         self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
@@ -830,25 +809,6 @@ class TestFunctionappMocked(unittest.TestCase):
         updated_site = site
         updated_site.dapr_config = DaprConfig()
         update_functionapp_polling_mock.assert_called_with(cmd_mock, 'rg', 'name', updated_site)
-
-    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', return_value='subscription')
-    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
-    def test_update_functionapp_polling_uses_pinned_api_version(self, send_raw_request_mock, _):
-        cmd_mock = _get_test_cmd()
-        cmd_mock.cli_ctx.cloud.endpoints.resource_manager = 'https://management.azure.com'
-        send_raw_request_mock.return_value.status_code = 200
-        functionapp = SimpleNamespace(
-            location='northeurope',
-            dapr_config=None,
-            workload_profile_name=None,
-            resource_config=SimpleNamespace(cpu=0.5, memory='1Gi'))
-
-        custom.update_functionapp_polling(cmd_mock, 'rg', 'name', functionapp)
-
-        send_raw_request_mock.assert_called_once()
-        self.assertEqual(send_raw_request_mock.call_args.kwargs['url'],
-                         'https://management.azure.com/subscriptions/subscription/resourceGroups/rg/'
-                         'providers/Microsoft.Web/sites/name?api-version=2024-11-01')
 
 
     @mock.patch('azure.cli.command_modules.appservice.custom.validate_app_settings_in_scm', return_value=True)

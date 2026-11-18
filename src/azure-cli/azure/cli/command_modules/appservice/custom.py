@@ -10271,10 +10271,10 @@ def should_enable_distributed_tracing(consumption_plan_location, flexconsumption
 
 def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
     sub_id = get_subscription_id(cmd.cli_ctx)
-    # Pin the API version because newer Web SDK configuration objects no longer
-    # expose the protected _config.api_version attribute.
-    api_version = '2024-11-01'
+    # pylint: disable-next=protected-access
+    api_version = client._config.api_version
     base_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'.format(
         sub_id,
         resource_group_name,
@@ -11337,10 +11337,9 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
         raise CLIError(error_message)
 
     obj = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account)  # pylint: disable=no-member
-    storage_keys = getattr(obj, 'keys', None) or getattr(obj, 'keys_property', None)
-    if storage_keys:
-        keys = [key.value for key in storage_keys]
-    else:
+    try:
+        keys = [obj.keys_property[0].value, obj.keys_property[1].value]  # pylint: disable=no-member
+    except AttributeError:
         # Older API versions have a slightly different structure
         keys = [obj.key1, obj.key2]  # pylint: disable=no-member
 
