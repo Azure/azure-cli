@@ -12655,7 +12655,8 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
         })
         patch_settings = 'osProfile.windowsConfiguration.patchSettings'
 
-        self.cmd('vm create -g {rg} -n {vm} --location {loc} --image Win2022Datacenter '
+        self.cmd('vm create -g {rg} -n {vm} --location {loc} '
+                 '--image MicrosoftWindowsServer:WindowsServer:2022-datacenter-g2:latest '
                  '--size Standard_D2ds_v6 --security-type Standard --enable-agent --enable-auto-update '
                  '--patch-mode AutomaticByOS --admin-username azureuser --admin-password {password} '
                  '--nsg-rule NONE --public-ip-address ""')
