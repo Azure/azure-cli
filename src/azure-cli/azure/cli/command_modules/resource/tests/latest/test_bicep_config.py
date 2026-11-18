@@ -11,6 +11,8 @@ from unittest import mock
 
 from azure.cli.core.azclierror import FileOperationError, ValidationError
 from azure.cli.command_modules.resource._bicep_config import (
+    _load_bicep_config,
+    _strip_json_comments,
     find_bicep_config_file,
     resolve_bicep_version_constraint,
 )
@@ -101,9 +103,99 @@ class TestBicepConfig(unittest.TestCase):
                           '\n"url": "https://example.com/*literal*/", "escaped": "a\\"//b"\n}// eof')
         self.assertEqual("0.31.92", resolve_bicep_version_constraint(os.path.join(self.root, "main.bicep")))
 
+    def test_comment_scanner_preserves_strings_and_handles_comment_variants(self):
+        expected = {
+            "bicep": {"version": "0.31.92"},
+            "strings": ['https://example.com/*literal*/', 'a"//b', '\\', '\\"/*literal*/', '/*!literal*/'],
+        }
+        config = json.dumps(expected)
+        for newline in ("\n", "\r", "\r\n"):
+            with self.subTest(newline=newline):
+                contents = (
+                    "/* leading */" + newline + "// line comment" + newline +
+                    config.replace('"bicep":', '"bicep": /*! inline */ /** adjacent */') +
+                    newline + "/* multiline" + newline + "comment */ // eof"
+                )
+                path = self.write_config("bicepconfig.json", contents)
+                self.assertEqual(expected, _load_bicep_config(path))
+
+    def test_comment_scanner_preserves_positions_and_token_boundaries(self):
+        contents = '{/*x\r\ny*/"x": 1/*gap*/2}// eof'
+        expected = '{   \r\n   "x": 1       2}      '
+        self.assertEqual(expected, _strip_json_comments(contents))
+        with self.assertRaises(json.JSONDecodeError) as error:
+            json.loads(_strip_json_comments(contents))
+        self.assertEqual(contents.index("2"), error.exception.pos)
+
+    def test_unterminated_block_comments_report_config_path(self):
+        for comment in ("/*", "/**", "/*! notice", "/* unterminated *", "/* // not a line comment"):
+            with self.subTest(comment=comment):
+                self.write_config("bicepconfig.json", '{"bicep": {"version": "0.31.92"}}' + comment)
+                with self.assertRaisesRegex(ValidationError, "bicepconfig.json.*Unterminated block comment"):
+                    resolve_bicep_version_constraint(os.path.join(self.root, "main.bicep"))
+
+    def test_empty_adjacent_and_mixed_comments(self):
+        for contents in (
+                '/**//**/{"bicep"/**/:/**/{"version"/**/:/**/"0.31.92"/**/}/**/}/**/',
+                '// " /* not a block comment\n{"bicep": {"version": "0.31.92"}}// /*',
+                '/* " // /* not nested */{"bicep": {"version": "0.31.92"}}',
+                '{"bicep": {"version": "0.31.92"}, "values": [/*first*/1,/**/2/*last*/]}'):
+            with self.subTest(contents=contents):
+                self.write_config("bicepconfig.json", contents)
+                self.assertEqual("0.31.92",
+                                 resolve_bicep_version_constraint(os.path.join(self.root, "main.bicep")))
+
+    def test_backslash_sequences_do_not_change_string_or_comment_boundaries(self):
+        for count in range(6):
+            with self.subTest(backslashes=count):
+                expected = {
+                    "bicep": {"version": "0.31.92"},
+                    "escaped": "\\" * count + '"//literal/*literal*/',
+                    "ending": "text" + "\\" * count,
+                }
+                contents = json.dumps(expected)[:-1] + '/* actual comment */}// eof'
+                path = self.write_config("bicepconfig.json", contents)
+                self.assertEqual(expected, _load_bicep_config(path))
+
+    def test_comments_are_parsed_in_each_inheritance_layer(self):
+        self.write_config("bicepconfig.json",
+                          '{"extends": /* base path */ "shared/base.json" /* leaf */}')
+        self.write_config(os.path.join("shared", "base.json"),
+                          '// base\n{"extends": "version.json", "bicep": {"version": null}}')
+        self.write_config(os.path.join("shared", "version.json"),
+                          '/*! inherited settings */{"bicep": {"version": ">=0.31, <1"}}// eof')
+        self.assertEqual(">=0.31, <1",
+                         resolve_bicep_version_constraint(os.path.join(self.root, "main.bicep")))
+        self.write_config(os.path.join("shared", "version.json"), '{"bicep": {}} /* unfinished')
+        with self.assertRaisesRegex(ValidationError, r"version.json.*Unterminated block comment"):
+            resolve_bicep_version_constraint(os.path.join(self.root, "main.bicep"))
+
+    def test_comment_removal_does_not_make_invalid_json_valid(self):
+        for contents in (
+                '{"x": -/*gap*/1}', '{"x": 1/*gap*/.5}', '{"x": 1e/*gap*/2}',
+                '{"x": tr/*gap*/ue}', '{"x": nu/*gap*/ll}', '{"bi/*gap*/cep": 1,}',
+                '{"x": [1,/*gap*/]}', '{"x": 1,/*gap*/}', '{"x": "a"/*gap*/"b"}',
+                '{"x": 1}/', '{"x": 1}/*closed*/ */', '// only a comment', '/* only a comment */',
+                '{"x": "unfinished' + "\\"):
+            with self.subTest(contents=contents):
+                path = self.write_config("bicepconfig.json", contents)
+                with self.assertRaisesRegex(ValidationError, "Unable to parse Bicep configuration"):
+                    _load_bicep_config(path)
+
+    def test_unterminated_strings_are_left_for_json_validation(self):
+        for contents in ('{"x": "unfinished // literal', '{"x": "unfinished /* literal',
+                         '{"x": "escaped quote \\" // literal'):
+            with self.subTest(contents=contents):
+                self.assertEqual(contents, _strip_json_comments(contents))
+                path = self.write_config("bicepconfig.json", contents)
+                with self.assertRaisesRegex(ValidationError, "Unterminated string"):
+                    _load_bicep_config(path)
+
     def test_invalid_json_and_config_shapes_raise(self):
         for config in ('{"bicep":', '{"bicep": {},}', '{} /* unterminated', '{"x": 1/*comment*/2}',
-                       '{"x": NaN}', '[]', 'null', '{"bicep": 42}', '{"bicep": {"version": 42}}',
+                       '{"x": NaN}', '{"x": Infinity}', '{"x": -Infinity}', "{'x': 1}", '{x: 1}',
+                       '{"x": "unterminated // text}', '{"x": "unterminated /* text}',
+                       '{"x": "literal\nnewline"}', '[]', 'null', '{"bicep": 42}', '{"bicep": {"version": 42}}',
                        '{"extends": []}'):
             with self.subTest(config=config):
                 self.write_config("bicepconfig.json", config)

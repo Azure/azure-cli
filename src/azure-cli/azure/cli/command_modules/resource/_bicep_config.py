@@ -20,7 +20,6 @@ _check_version_config_key = "check_version"
 _check_version_config_default_value = True
 
 _max_config_chain_depth = 64
-_json_comment_pattern = re.compile(r'"(?:\\.|[^"\\])*"|//[^\r\n]*|/\*.*?\*/|/\*', re.DOTALL)
 
 
 def get_use_binary_from_path_config(cli_ctx):
@@ -122,16 +121,47 @@ def _merge_config_value(base, derived):
     return derived
 
 
-def _load_bicep_config(config_file):
-    def replace_comment(match):
-        token = match.group()
-        if token.startswith('"'):
-            return token
-        if token == "/*":
-            raise ValueError("Unterminated block comment.")
-        # Preserve whitespace so comments cannot join JSON tokens or change line numbers.
-        return re.sub(r"[^\r\n]", " ", token)
+def _strip_json_comments(contents):
+    """Replace comments with whitespace without changing strings or source positions."""
+    result = list(contents)
+    index = 0
+    in_string = False
+    while index < len(contents):
+        char = contents[index]
+        if in_string:
+            if char == "\\":
+                index += 2
+                continue
+            if char == '"':
+                in_string = False
+            index += 1
+            continue
+        if char == '"':
+            in_string = True
+            index += 1
+            continue
 
+        if contents.startswith("//", index):
+            end = index + 2
+            while end < len(contents) and contents[end] not in "\r\n":
+                end += 1
+        elif contents.startswith("/*", index):
+            end = contents.find("*/", index + 2)
+            if end == -1:
+                raise ValueError("Unterminated block comment.")
+            end += 2
+        else:
+            index += 1
+            continue
+
+        for position in range(index, end):
+            if contents[position] not in "\r\n":
+                result[position] = " "
+        index = end
+    return "".join(result)
+
+
+def _load_bicep_config(config_file):
     def reject_constant(value):
         raise ValueError(f"Invalid JSON value '{value}'.")
 
@@ -144,7 +174,7 @@ def _load_bicep_config(config_file):
         raise ValidationError(f"Unable to decode Bicep configuration '{config_file}': {err}") from err
 
     try:
-        contents = _json_comment_pattern.sub(replace_comment, contents)
+        contents = _strip_json_comments(contents)
         parsed = json.loads(contents, parse_constant=reject_constant)
     except ValueError as err:
         raise ValidationError(f"Unable to parse Bicep configuration '{config_file}': {err}") from err
