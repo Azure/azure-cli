@@ -831,6 +831,25 @@ class TestFunctionappMocked(unittest.TestCase):
         updated_site.dapr_config = DaprConfig()
         update_functionapp_polling_mock.assert_called_with(cmd_mock, 'rg', 'name', updated_site)
 
+    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', return_value='subscription')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_update_functionapp_polling_uses_pinned_api_version(self, send_raw_request_mock, _):
+        cmd_mock = _get_test_cmd()
+        cmd_mock.cli_ctx.cloud.endpoints.resource_manager = 'https://management.azure.com'
+        send_raw_request_mock.return_value.status_code = 200
+        functionapp = SimpleNamespace(
+            location='northeurope',
+            dapr_config=None,
+            workload_profile_name=None,
+            resource_config=SimpleNamespace(cpu=0.5, memory='1Gi'))
+
+        custom.update_functionapp_polling(cmd_mock, 'rg', 'name', functionapp)
+
+        send_raw_request_mock.assert_called_once()
+        self.assertEqual(send_raw_request_mock.call_args.kwargs['url'],
+                         'https://management.azure.com/subscriptions/subscription/resourceGroups/rg/'
+                         'providers/Microsoft.Web/sites/name?api-version=2024-11-01')
+
 
     @mock.patch('azure.cli.command_modules.appservice.custom.validate_app_settings_in_scm', return_value=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')

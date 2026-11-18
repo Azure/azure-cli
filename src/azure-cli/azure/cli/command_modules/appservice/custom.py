@@ -10271,10 +10271,10 @@ def should_enable_distributed_tracing(consumption_plan_location, flexconsumption
 
 def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    client = web_client_factory(cmd.cli_ctx)
     sub_id = get_subscription_id(cmd.cli_ctx)
-    # pylint: disable-next=protected-access
-    api_version = client._config.api_version
+    # Pin the API version because newer Web SDK configuration objects no longer
+    # expose the protected _config.api_version attribute.
+    api_version = '2024-11-01'
     base_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'.format(
         sub_id,
         resource_group_name,
