@@ -4052,7 +4052,7 @@ def add_hostname(cmd, resource_group_name, name, hostname, location=None):
     custom_domains = get_custom_domains(cmd, resource_group_name, name, location, None)
     existing_hostname = list(filter(lambda c: safe_get(c, "name", default=[]) == standardized_hostname, custom_domains))
     if len(existing_hostname) > 0:
-        raise InvalidArgumentValueError("'{standardized_hostname}' already exists in container app '{name}'.")
+        raise InvalidArgumentValueError(f"'{standardized_hostname}' already exists in container app '{name}'.")
     new_domain = deepcopy(ContainerAppCustomDomainModel)
     new_domain["name"] = standardized_hostname
     new_domain["bindingType"] = "Disabled"
