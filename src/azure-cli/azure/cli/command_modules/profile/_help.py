@@ -31,6 +31,19 @@ long-summary: >-
     To log in with a managed identity, specify --identity.
 
 
+    Default login targets can be configured with login.tenant and login.subscription.
+    To skip subscription discovery, set login.skip_subscription_discovery=true and
+    specify a tenant (with login.tenant or --tenant). With a subscription ID (GUID),
+    CLI retrieves only that subscription. Without a subscription, CLI creates a
+    tenant-level account without querying subscriptions.
+    The corresponding AZURE_LOGIN_TENANT, AZURE_LOGIN_SUBSCRIPTION and
+    AZURE_LOGIN_SKIP_SUBSCRIPTION_DISCOVERY environment variables also work.
+    Command-line tenant and subscription values take precedence over login config.
+    Managed identity login ignores these defaults.
+    A successful login with login.subscription selects the active subscription for
+    subsequent commands; it does not change the defaults.subscription config setting.
+
+
     For more details, see https://learn.microsoft.com/cli/azure/authenticate-azure-cli
 examples:
     - name: Log in interactively.
