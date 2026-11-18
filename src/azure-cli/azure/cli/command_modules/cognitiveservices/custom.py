@@ -22,6 +22,7 @@ import azure.core.rest
 from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku, \
     VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
     AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
+    CostControlConnections, \
     Identity, ResourceIdentityType as IdentityType, UserAssignedIdentity, \
     ManagedClusterAgentHostingConfiguration, \
     Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
@@ -275,6 +276,7 @@ def update(
     encryption=None,
     allow_project_management=None,
     kind=None,
+    cost_control_connections=None,
 ):
     """
     Update an Azure Cognitive Services account.
@@ -300,6 +302,9 @@ def update(
         properties.user_owned_storage = json.loads(storage)
     if encryption is not None:
         properties.encryption = json.loads(encryption)
+    if cost_control_connections is not None:
+        # A mapping preserves an explicit null when removing the connection.
+        properties.cost_control_connections = CostControlConnections(cost_control_connections)
 
     if kind is not None:
         if sa is None:
