@@ -1,7 +1,8 @@
 # Secure Executable Invocation (Preventing Binary Planting)
 
-On Windows, a bare executable name (`cmd.exe`, `az`, `docker`, `git`, `gh`, `kubectl`, ...) is looked up in the
-**current working directory first**, both by `CreateProcess` (`shell=False`) and by `cmd.exe` (`shell=True`).
+On Windows, a bare executable name (`cmd.exe`, `az`, `docker`, `git`, `gh`, `kubectl`, `reg.exe`, `setx.exe`, ...)
+is looked up in the **current working directory first**, both by `CreateProcess` (`shell=False`) and by
+`cmd.exe` (`shell=True`).
 If a user runs a command from an untrusted directory (e.g. a cloned repo) containing a planted binary, Azure CLI
 would execute it ([CWE-427](https://cwe.mitre.org/data/definitions/427.html)).
 
@@ -41,7 +42,7 @@ To run `az` itself (a batch script, `az.cmd`, on Windows), resolve both `cmd.exe
 
 1. Find bare-name spawns in your module:
    ```bash
-   grep -rnE "(subprocess\.(run|call|check_call|check_output|Popen)|run_cmd)\(\s*\[?['\"](cmd\.exe|docker|git|gh|kubectl)" src/azure-cli/azure/cli/command_modules/<module>
+   grep -rnE "(subprocess\.(run|call|check_call|check_output|Popen)|run_cmd)\(\s*\[?['\"](cmd\.exe|docker|git|gh|kubectl|open|xdg-open|reg|setx)" src/azure-cli/azure/cli/command_modules/<module>
    ```
 2. Replace each bare name with `get_safe_executable_path('<name>')` and handle `None`.
 3. Pass arguments as a list and drop `shell=True`.
