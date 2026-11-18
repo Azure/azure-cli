@@ -114,7 +114,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.mgmt.core.polling.arm_polling import ARMPolling
-from azure.cli.core.util import in_cloud_console, sdk_no_wait
+from azure.cli.core.util import get_safe_executable_path, in_cloud_console, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
 from humanfriendly.terminal.spinners import Spinner
@@ -2065,11 +2065,12 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 
         # Check if kubeconfig requires kubelogin with devicecode and convert it
         if uses_kubelogin_devicecode(kubeconfig):
-            if which("kubelogin"):
+            kubelogin_path = get_safe_executable_path("kubelogin")
+            if kubelogin_path:
                 try:
                     # Run kubelogin convert-kubeconfig -l azurecli
                     subprocess.run(
-                        ["kubelogin", "convert-kubeconfig", "-l", "azurecli"],
+                        [kubelogin_path, "convert-kubeconfig", "-l", "azurecli"],
                         cwd=os.path.dirname(path),
                         check=True,
                     )
