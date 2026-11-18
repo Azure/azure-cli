@@ -556,7 +556,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.assertIn("Network policy ('cluster')", str(caught.exception))
         self.assertNotIn('/subscriptions/', str(caught.exception))
         self.assertEqual(caught.exception.recommendations,
-                         ['See https://aka.ms/byo-aks-fulfill-cluster-requirements for more details.'])
+                         ['See https://aka.ms/byo-aks-onboarding-prerequisites for more details.'])
         self.clients['aks'].managed_clusters.get.assert_called_once()
         self._assert_no_writes()
 
@@ -572,7 +572,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
                 warning.assert_not_called()
                 self.assertIn("Network policy ('cluster')", str(caught.exception))
                 self.assertEqual(caught.exception.recommendations,
-                                 ['See https://aka.ms/byo-aks-fulfill-cluster-requirements for more details.'])
+                                 ['See https://aka.ms/byo-aks-onboarding-prerequisites for more details.'])
                 self._assert_no_writes()
 
     def test_kubenet_is_rejected_even_with_overlay(self):
@@ -621,11 +621,17 @@ class AgentHostingPreparationTests(unittest.TestCase):
         self.storage['properties'].update(
             allowSharedKeyAccess=True, allowBlobPublicAccess=True,
             publicNetworkAccess=None, networkAcls=None, primaryEndpoints=None)
-        self.storage['sku']['name'] = 'Standard_LRS'
         preparation = self._prepare()
         with mock.patch(_PREFLIGHT_PREFIX + 'logger.warning') as warning:
-            checked = preflight(self.cli_ctx, preparation)
+            preflight(self.cli_ctx, preparation)
         warning.assert_not_called()
+
+        self.storage['sku']['name'] = 'Standard_LRS'
+        with mock.patch(_PREFLIGHT_PREFIX + 'logger.warning') as warning:
+            checked = preflight(self.cli_ctx, preparation)
+        warning.assert_called_once_with(
+            "Storage account '%s' uses %s; ZRS or GZRS is recommended when available.",
+            'storage', 'Standard_LRS')
         checks = {check['name']: check for check in checked.checks}
         for removed in ('Storage shared keys', 'Storage anonymous Blob',
                         'Storage Blob endpoint', 'Storage public-network baseline'):
@@ -679,7 +685,7 @@ class AgentHostingPreparationTests(unittest.TestCase):
         warning.assert_not_called()
         self.assertIn("Identity ('management'): Forbidden", str(caught.exception))
         self.assertEqual(caught.exception.recommendations,
-                         ['See https://aka.ms/byo-aks-fulfill-cluster-requirements for more details.'])
+                         ['See https://aka.ms/byo-aks-onboarding-prerequisites for more details.'])
         self._assert_no_writes()
 
     def test_preflight_returns_results_without_mutating_request(self):

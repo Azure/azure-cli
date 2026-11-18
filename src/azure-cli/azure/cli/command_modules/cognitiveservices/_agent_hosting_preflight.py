@@ -52,7 +52,7 @@ _ROLE_IDS = {
 }
 
 
-_PREFLIGHT_DOC_URL = 'https://aka.ms/byo-aks-fulfill-cluster-requirements'
+_PREFLIGHT_DOC_URL = 'https://aka.ms/byo-aks-onboarding-prerequisites'
 
 
 @dataclass(frozen=True)
@@ -523,8 +523,8 @@ def _check_storage(storage, scope, location, checks):
     sku = str(_enum_value(storage.sku.name)) if storage.sku and storage.sku.name else ''
     zone_redundant = sku.endswith(('ZRS', 'GZRS'))
     if sku and not zone_redundant:
-        logger.info("Storage account '%s' uses %s; ZRS or GZRS is recommended when available.",
-                    _resource_name(scope), sku)
+        logger.warning("Storage account '%s' uses %s; ZRS or GZRS is recommended when available.",
+                       _resource_name(scope), sku)
     _report(checks, 'Storage redundancy', scope, 'PASS' if sku else 'UNVERIFIED',
             sku or 'missing SKU', 'ZRS or GZRS recommended',
             'None' if zone_redundant else 'Use ZRS or GZRS when available.', mandatory=False)

@@ -124,8 +124,8 @@ def _ensure_grant(client, grant, principal):
             try:
                 existing = _find_grant(client, grant, principal, exact_scope=True)
             except AzureError as read_error:
-                logger.warning("Could not verify conflicting '%s' role assignment for '%s' on '%s': %s",
-                               grant.name, identity_name, scope_name, read_error)
+                logger.info("Could not verify conflicting '%s' role assignment for '%s' on '%s': %s",
+                            grant.name, identity_name, scope_name, read_error)
                 existing = None
             if existing is not None:
                 return
