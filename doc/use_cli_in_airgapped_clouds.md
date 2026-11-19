@@ -19,11 +19,12 @@ Package | Download Address | Install Command
 --- | --- | ---
 DEB | https://packages.microsoft.com/repos/azure-cli/pool/main/a/azure-cli/ | dpkg -i azure-cli_<version\>-1~<distro\>_all.deb
 RPM | https://packages.microsoft.com/yumrepos/azure-cli/ | rpm -ivh --nodeps azure-cli-<version\>-*.rpm
-MSI | https://azurecliprod.blob.core.windows.net/msi/azure-cli-<version\>.msi | Start-Process msiexec.exe -Wait -ArgumentList '/I azure-cli-<version\>.msi'  
+MSI (x64) | https://azurecliprod.blob.core.windows.net/msi/azure-cli-<version\>-x64.msi | Start-Process msiexec.exe -Wait -ArgumentList '/I azure-cli-<version\>-x64.msi'
 
 **Note**:
 1. Replace `<version>` with the actual CLI version you need to use, such as `2.15.1`. On Ubuntu/Debian, replace `<distro>` with the result of the `lsb_release -cs` command, such as `bionic`.
 2. The CLI RPM package depends on a `python3` package and you'll need to install it separately while DEB and MSI packages already have a bundled Python in them.
+3. Current Windows releases require 64-bit Windows. The x64 MSI naming convention is available from Azure CLI 2.51.0; use a compatible version rather than the older example above.
 
 If you need to install and use Azure CLI in your pipeline, you could upload the Azure CLI package in a storage account that is accessible in the airgapped cloud, then you can download the package from the storage account and install it in your pipeline scripts. For instance, an Azure CLI deb package can be downloaded and installed with the following command:
 

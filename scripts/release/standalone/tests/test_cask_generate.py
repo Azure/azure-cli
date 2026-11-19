@@ -9,6 +9,7 @@ import importlib.util
 import io
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -27,13 +28,12 @@ _spec.loader.exec_module(generator)
 class TestCaskGenerate(unittest.TestCase):
 
     def setUp(self):
-        directory = tempfile.TemporaryDirectory(prefix="cask validation ")
+        directory = tempfile.TemporaryDirectory(prefix="cask validation ", dir=ROOT)
         self.addCleanup(directory.cleanup)
         self.output = Path(directory.name) / "azure-cli.rb"
         self.values = {
             "version": "2.85.0",
             "arm64_macos_sha": "a" * 64,
-            "x86_64_macos_sha": "b" * 64,
             "arm64_linux_sha": "c" * 64,
             "x86_64_linux_sha": "d" * 64,
             "github_repo": "Azure/homebrew-azure-cli",
@@ -64,6 +64,24 @@ class TestCaskGenerate(unittest.TestCase):
         self.assertIn("#{arch}", expected)
         self.validate()
 
+    def test_only_retained_platform_hashes_and_macos_only_arch_restriction(self):
+        self.generate()
+        content = self.output.read_text()
+        self.assertNotIn("{{", content)
+        self.assertNotIn(":no_check", content)
+        self.assertNotIn('intel:        "', content)
+        hashes = re.findall(r'^\s*(?:sha256 )?(\w+):\s+"([0-9a-f]{64})"', content, flags=re.MULTILINE)
+        self.assertEqual(dict(hashes), {
+            "arm": self.values["arm64_macos_sha"],
+            "arm64_linux": self.values["arm64_linux_sha"],
+            "x86_64_linux": self.values["x86_64_linux_sha"],
+        })
+        self.assertIn('arch arm: "arm64", intel: "x86_64"', content)
+        restriction = "  on_macos do\n    depends_on arch: :arm64\n  end\n"
+        self.assertIn(restriction, content)
+        self.assertNotIn("depends_on arch:", content.replace(restriction, ""))
+        self.assertEqual(content.count("depends_on arch:"), 1)
+
     def test_ci_forks_and_prerelease_versions_remain_supported(self):
         for repo in ("Azure/azure-cli", "test-owner/azure-cli-fork"):
             with self.subTest(repo=repo):
@@ -89,7 +107,7 @@ class TestCaskGenerate(unittest.TestCase):
             "python_version": ("3.14#{1+1}", "3.14\n", "python@3.14", "3.14.0"),
             "version": ("2.85.0#{1+1}", "2.85.0\n", "2.85", "2.85.0\""),
         }
-        for name in ("arm64_macos_sha", "x86_64_macos_sha", "arm64_linux_sha", "x86_64_linux_sha"):
+        for name in ("arm64_macos_sha", "arm64_linux_sha", "x86_64_linux_sha"):
             invalid[name] = ("a" * 63, "a" * 65, "g" * 64, "a" * 64 + "\n")
         for name, values in invalid.items():
             for value in values:
@@ -109,6 +127,11 @@ class TestCaskGenerate(unittest.TestCase):
             original.replace("https://github.com/", "file:///tmp/"),
             original.replace("a" * 64, "invalid-checksum"),
             original.replace("#{arch}", "#{1+1}"),
+            original.replace("  on_macos do\n    depends_on arch: :arm64\n  end\n",
+                             "  depends_on arch: :arm64\n"),
+            original.replace("    depends_on arch: :arm64\n", ""),
+            original.replace('  sha256 arm:', '  sha256 intel: "' + "b" * 64 + '",\n         arm:'),
+            original.replace("d" * 64, "{{ x86_64_linux_sha }}"),
         )
         for content in tampered:
             with self.subTest(content=content):
@@ -132,6 +155,29 @@ class TestCaskGenerate(unittest.TestCase):
             with patch.dict(os.environ, {"GITHUB_REPO": "Azure/repo#{1+1}"}):
                 with self.assertRaises(SystemExit):
                     generator.generate_cask(args)
+
+    def test_generation_cli_requires_only_three_hashes_and_ignores_retired_environment(self):
+        command = [sys.executable, str(SCRIPT), "--template", str(TEMPLATE), "--output", str(self.output)]
+        for name, value in self.values.items():
+            command.extend(["--" + name.replace("_", "-"), value])
+        with patch.dict(os.environ, {"X86_64_MACOS_SHA": "retired-value"}):
+            result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=10, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.validate()
+        self.assertNotIn("retired-value", self.output.read_text())
+        result = subprocess.run(
+            command + ["--x86-64-macos-sha", "b" * 64],
+            cwd=ROOT, capture_output=True, text=True, timeout=10, check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unrecognized arguments: --x86-64-macos-sha", result.stderr)
+
+    def test_each_retained_hash_is_required_even_with_retired_environment(self):
+        for name in ("arm64_macos_sha", "arm64_linux_sha", "x86_64_linux_sha"):
+            with self.subTest(field=name), patch.dict(os.environ, {"X86_64_MACOS_SHA": "b" * 64}, clear=True):
+                with self.assertRaisesRegex(SystemExit, "Missing required value: " + name):
+                    self.generate(**{name: None})
+                self.assertFalse(self.output.exists())
 
     def test_validation_cli_success_and_failure(self):
         self.generate()

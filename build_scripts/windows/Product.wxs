@@ -19,16 +19,6 @@
   <?define UpgradeCode = "90762fec-9554-4729-a107-c6a8ea316698" ?>
   <?define Architecture = "64-bit" ?>
 
-  <?elseif $(var.Platform) = "x86" ?>
-  <?define AzureCliRegistryGuid = "BDEEE50E-70D3-4990-BFF9-FCF8114AA701" ?>
-  <?define AzureCliSystemPathGuid = "3B60CA67-DB92-465A-BC96-3CA6CAEFF41B" ?>
-  <?define AzureCliVersionGuid = "A5647E93-02B7-4CED-802A-DDD7416E0231" ?>
-  <?define ProgramFilesFolder = "ProgramFilesFolder" ?>
-  <?define RemoveAzureCLIFolderGuid = "6AF97701-6A7A-4292-95D6-ED34CD4C97C0" ?>
-  <?define RemoveCLIFolderGuid = "24DA394D-B03D-4623-A0D9-852DB51EF9F4" ?>
-  <?define UpgradeCode = $(var.UpgradeCode32) ?>
-  <?define Architecture = "32-bit" ?>
-
   <?else ?>
   <?error Unsupported platform "$(var.Platform)" ?>
   <?endif ?>
@@ -53,16 +43,12 @@
       <RemoveExistingProducts Before="InstallInitialize" />
     </InstallExecuteSequence>
 
-    <!-- New product architectures should upgrade the original x86 product - even of the same version. -->
-    <?if $(var.UpgradeCode) != $(var.UpgradeCode32) ?>
+    <!-- Preserve migration and downgrade detection for the retired x86 product. -->
     <Upgrade Id="$(var.UpgradeCode32)">
       <UpgradeVersion Property="WIX_X86_UPGRADE_DETECTED" Maximum="$(var.ProductVersion)" IncludeMaximum="yes" MigrateFeatures="yes" />
       <UpgradeVersion Property="WIX_X86_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
     </Upgrade>
     <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT (WIX_DOWNGRADE_DETECTED OR WIX_X86_DOWNGRADE_DETECTED)</Condition>
-    <?else ?>
-    <Condition Message="A newer version of $(var.ProductName) is already installed.">NOT WIX_DOWNGRADE_DETECTED</Condition>
-    <?endif ?>
 
     <Media Id="1" Cabinet="WindowsAzureCLI.cab" EmbedCab="yes" CompressionLevel="high" />
 

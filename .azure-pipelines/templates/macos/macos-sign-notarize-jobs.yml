@@ -13,7 +13,6 @@
 #
 # Artifacts Published:
 #   - macos-cli-signed-notarized-arm64
-#   - macos-cli-signed-notarized-x86_64
 
 parameters:
   - name: TarballBuildId
@@ -37,16 +36,13 @@ parameters:
   - name: MacosArm64Image
     type: string
     default: 'macos-15-arm64'
-  - name: MacosIntelImage
-    type: string
-    default: 'macos-15'
   - name: ESRPServiceConnection
     type: string
     default: 'ame_esrp_connection'
 
 jobs:
 # ============================================================================
-# JOB: DOWNLOAD AND ANALYZE (Both Architectures via Matrix)
+# JOB: DOWNLOAD AND ANALYZE (ARM64)
 # ============================================================================
 - job: DownloadAnalyze
   displayName: 'macOS | Download and Analyze'
@@ -57,9 +53,6 @@ jobs:
       ARM64:
         Architecture: 'arm64'
         vmImageName: '${{ parameters.MacosArm64Image }}'
-      Intel:
-        Architecture: 'x86_64'
-        vmImageName: '${{ parameters.MacosIntelImage }}'
   pool:
     vmImage: $(vmImageName)
   
@@ -152,7 +145,7 @@ jobs:
     displayName: 'Publish unsigned contents ($(Architecture))'
 
 # ============================================================================
-# JOB: SIGN BINARIES (Both Architectures via Matrix) - Windows Agent for ESRP
+# JOB: SIGN BINARIES (ARM64) - Windows Agent for ESRP
 # ============================================================================
 - job: SignBinaries
   displayName: 'macOS | ESRP Sign Binaries'
@@ -162,8 +155,6 @@ jobs:
     matrix:
       ARM64:
         Architecture: 'arm64'
-      Intel:
-        Architecture: 'x86_64'
   pool:
     vmImage: 'windows-latest'
   timeoutInMinutes: 30
@@ -291,7 +282,7 @@ jobs:
     displayName: 'Publish signed binaries ($(Architecture))'
 
 # ============================================================================
-# JOB: CREATE NOTARIZATION BUNDLE (Both Architectures via Matrix)
+# JOB: CREATE NOTARIZATION BUNDLE (ARM64)
 # ============================================================================
 - job: CreateNotarizeBundle
   displayName: 'macOS | Create Notarization Bundle'
@@ -304,9 +295,6 @@ jobs:
       ARM64:
         Architecture: 'arm64'
         vmImageName: '${{ parameters.MacosArm64Image }}'
-      Intel:
-        Architecture: 'x86_64'
-        vmImageName: '${{ parameters.MacosIntelImage }}'
   pool:
     vmImage: $(vmImageName)
   
@@ -398,7 +386,7 @@ jobs:
     displayName: 'Publish notarization bundle ($(Architecture))'
 
 # ============================================================================
-# JOB: NOTARIZE WITH APPLE (Both Architectures via Matrix) - Windows Agent for ESRP
+# JOB: NOTARIZE WITH APPLE (ARM64) - Windows Agent for ESRP
 # ============================================================================
 - job: Notarize
   displayName: 'macOS | ESRP Notarize with Apple'
@@ -410,8 +398,6 @@ jobs:
     matrix:
       ARM64:
         Architecture: 'arm64'
-      Intel:
-        Architecture: 'x86_64'
   pool:
     vmImage: 'windows-latest'
   timeoutInMinutes: 60
@@ -473,7 +459,7 @@ jobs:
     displayName: 'Publish notarized bundle ($(Architecture))'
 
 # ============================================================================
-# JOB: CREATE FINAL TARBALL (Both Architectures via Matrix)
+# JOB: CREATE FINAL TARBALL (ARM64)
 # ============================================================================
 - job: CreateMacOSFinalTarball
   displayName: 'macOS | Create Final Tarball'
@@ -487,9 +473,6 @@ jobs:
       ARM64:
         Architecture: 'arm64'
         vmImageName: '${{ parameters.MacosArm64Image }}'
-      Intel:
-        Architecture: 'x86_64'
-        vmImageName: '${{ parameters.MacosIntelImage }}'
   pool:
     vmImage: $(vmImageName)
   

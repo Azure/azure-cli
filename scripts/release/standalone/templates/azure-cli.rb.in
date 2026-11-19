@@ -4,7 +4,6 @@ cask "azure-cli" do
 
   version "{{ version }}"
   sha256 arm:          "{{ arm64_macos_sha }}",
-         intel:        "{{ x86_64_macos_sha }}",
          arm64_linux:  "{{ arm64_linux_sha }}",
          x86_64_linux: "{{ x86_64_linux_sha }}"
 
@@ -19,6 +18,10 @@ cask "azure-cli" do
   end
 
   depends_on formula: "python@{{ python_version }}"
+
+  on_macos do
+    depends_on arch: :arm64
+  end
 
   binary "bin/az"
   bash_completion "completions/bash/az"

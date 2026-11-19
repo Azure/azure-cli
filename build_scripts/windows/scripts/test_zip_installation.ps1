@@ -2,6 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+if ($env:PLATFORM -and $env:PLATFORM -cne 'x64') {
+    throw "Unsupported PLATFORM '$env:PLATFORM'. Only x64 is supported."
+}
+
 Set-PSDebug -Trace 1
 
 Write-Output "Extracting zip to $env:SYSTEM_ARTIFACTSDIRECTORY\zip\"
