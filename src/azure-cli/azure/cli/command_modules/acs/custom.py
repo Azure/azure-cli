@@ -2068,13 +2068,13 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
             kubelogin_path = which("kubelogin")
             if kubelogin_path:
                 try:
-                    # Run kubelogin convert-kubeconfig -l azurecli
+                    # Resolve directory symlinks after merging has rejected a symlink file.
                     subprocess.run(
                         [
                             os.path.abspath(kubelogin_path),
                             "convert-kubeconfig",
                             "-l", "azurecli",
-                            "--kubeconfig", os.path.abspath(path),
+                            "--kubeconfig", os.path.realpath(path),
                         ],
                         check=True,
                     )

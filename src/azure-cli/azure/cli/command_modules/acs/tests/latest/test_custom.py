@@ -2379,7 +2379,7 @@ class AksGetCredentialsTest(unittest.TestCase):
                 which.assert_called_once_with("kubelogin")
                 run.assert_called_once_with(
                     [os.path.abspath(kubelogin_path), "convert-kubeconfig", "-l", "azurecli",
-                     "--kubeconfig", os.path.abspath(selected_path)],
+                     "--kubeconfig", os.path.realpath(selected_path)],
                     check=True,
                 )
 
@@ -2417,6 +2417,73 @@ class AksGetCredentialsTest(unittest.TestCase):
                 config = yaml.safe_load(stream)
             self.assertEqual(config["users"][0]["user"]["exec"]["args"][-1], "azurecli")
             with open(unrelated_path) as stream:
+                self.assertEqual(stream.read(), self.kubeconfig)
+
+    @unittest.skipIf(os.name == "nt", "Requires directory symlinks.")
+    def test_aks_get_credentials_converts_symlink_parent_path(self):
+        def convert(args, check):
+            self.assertTrue(check)
+            path = args[args.index("--kubeconfig") + 1]
+            with open(path, "r+") as stream:
+                content = stream.read()
+                stream.seek(0)
+                stream.write(content.replace("devicecode", "azurecli"))
+                stream.truncate()
+
+        with tempfile.TemporaryDirectory() as directory:
+            real_directory = os.path.join(directory, "actual")
+            nested_directory = os.path.join(real_directory, "nested")
+            os.makedirs(nested_directory)
+            os.symlink(nested_directory, os.path.join(directory, "linked"), target_is_directory=True)
+            original_directory = os.getcwd()
+            try:
+                os.chdir(directory)
+                for source in ("relative", "absolute", "environment"):
+                    filename = source + "-config"
+                    selected_path = os.path.join("linked", "..", filename)
+                    if source != "relative":
+                        selected_path = os.path.join(directory, selected_path)
+                    output_path = os.path.join(real_directory, filename)
+                    unrelated_path = os.path.join(directory, filename)
+                    with open(unrelated_path, "w") as stream:
+                        stream.write(self.kubeconfig)
+                    path = (os.path.join(os.path.expanduser("~"), ".kube", "config")
+                            if source == "environment" else selected_path)
+                    with (
+                        self.subTest(source=source),
+                        mock.patch.dict(os.environ, {"KUBECONFIG": selected_path}),
+                        mock.patch.object(acs_custom, "which", return_value=os.path.join(directory, "kubelogin")),
+                        mock.patch.object(acs_custom.subprocess, "run", side_effect=convert),
+                    ):
+                        acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=path)
+
+                        with open(output_path) as stream:
+                            config = yaml.safe_load(stream)
+                        self.assertEqual(config["users"][0]["user"]["exec"]["args"][-1], "azurecli")
+                        with open(unrelated_path) as stream:
+                            self.assertEqual(stream.read(), self.kubeconfig)
+            finally:
+                os.chdir(original_directory)
+
+    @unittest.skipIf(os.name == "nt", "Requires file symlinks.")
+    def test_aks_get_credentials_rejects_symlink_file_before_conversion(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target_path = os.path.join(directory, "target")
+            link_path = os.path.join(directory, "config")
+            with open(target_path, "w") as stream:
+                stream.write(self.kubeconfig)
+            os.symlink(target_path, link_path)
+            with (
+                mock.patch.object(acs_custom, "which") as which,
+                mock.patch.object(acs_custom.subprocess, "run") as run,
+            ):
+                with self.assertRaisesRegex(CLIError, "symbolic link"):
+                    acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=link_path)
+
+            which.assert_not_called()
+            run.assert_not_called()
+            self.assertTrue(os.path.islink(link_path))
+            with open(target_path) as stream:
                 self.assertEqual(stream.read(), self.kubeconfig)
 
     def test_aks_get_credentials_stdout_skips_conversion(self):
