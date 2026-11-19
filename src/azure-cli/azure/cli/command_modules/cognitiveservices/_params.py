@@ -16,6 +16,7 @@ from azure.cli.core.commands.parameters import (
     get_location_type,
 )
 from azure.cli.core.util import shell_safe_json_parse, CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tag
 from azure.cli.core.decorators import Completer
@@ -99,6 +100,40 @@ def validate_api_properties(ns):
                 )
             ns.api_properties = result
             return
+
+
+def validate_cost_control_connections(ns):
+    value = ns.cost_control_connections
+    if value is None:
+        return
+
+    valid_keys = ('app-insights-connection-id', 'appInsightsConnectionId', 'app_insights_connection_id')
+    error = ('--cost-control-connections requires app-insights-connection-id=RESOURCE_ID, '
+             'JSON with appInsightsConnectionId, or null to remove the connection.')
+    if value.strip().lower() == 'null':
+        connection_id = None
+    elif value.lstrip().startswith('{'):
+        connections = shell_safe_json_parse(value)
+        if not isinstance(connections, dict) or len(connections) != 1:
+            raise InvalidArgumentValueError(error)
+        key, connection_id = next(iter(connections.items()))
+        if key not in valid_keys:
+            raise InvalidArgumentValueError(error)
+    else:
+        key, separator, connection_id = value.partition('=')
+        if not separator or key not in valid_keys:
+            raise InvalidArgumentValueError(error)
+
+    if isinstance(connection_id, str):
+        connection_id = connection_id.strip()
+        if connection_id.lower() == 'null':
+            connection_id = None
+        elif not connection_id:
+            raise InvalidArgumentValueError(error)
+    elif connection_id is not None:
+        raise InvalidArgumentValueError(error)
+
+    ns.cost_control_connections = {'appInsightsConnectionId': connection_id}
 
 
 def _is_suspected_json(string):
@@ -673,6 +708,17 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account create') as c:
         c.argument('assign_identity', help='Generate and assign an Azure Active Directory Identity for this account.')
         c.argument('yes', action='store_true', help='Do not prompt for terms confirmation')
+
+    with self.argument_context('cognitiveservices account update') as c:
+        c.argument(
+            'cost_control_connections',
+            options_list=['--cost-control-connections', '--cost-control-conn'],
+            validator=validate_cost_control_connections,
+            is_preview=True,
+            help='Cost-control telemetry connections. Use app-insights-connection-id=RESOURCE_ID for the full '
+                 'resource ID of an Application Insights connection, or null to remove it. '
+                 'Also accepts JSON with the appInsightsConnectionId property.',
+        )
 
     with self.argument_context('cognitiveservices account update', arg_group="AI Services") as c:
         c.argument('kind',
