@@ -276,6 +276,69 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
         self.assertEqual(self.ns.storage_account_type, 'existing')
 
 
+class TestVMVMSSDefaultImage(unittest.TestCase):
+
+    @staticmethod
+    def _set_ns(**kwargs):
+        ns = argparse.Namespace(
+            image=None, os_type=None, use_unmanaged_disk=False,
+            attach_os_disk=None, storage_account=None, storage_container_name=None, os_disk_name=None,
+            plan_name=None, plan_product=None, plan_publisher=None,
+            enable_secure_boot=None, enable_vtpm=None, security_type=None,
+            storage_sku=None, ultra_ssd_enabled=None,
+            data_disk_sizes_gb=None, os_caching=None, data_caching=None,
+            size='Standard_D2s_v3')
+        vars(ns).update(kwargs)
+        return ns
+
+    @mock.patch('azure.cli.command_modules.vm._validators._show_vm_image',
+                return_value={'osDiskImage': {'operatingSystem': 'Windows'}})
+    def test_vm_vmss_default_image(self, _):
+        for for_scale_set in (False, True):
+            with self.subTest(for_scale_set=for_scale_set):
+                ns = self._set_ns()
+                _validate_vm_create_storage_profile(_get_test_cmd(), ns, for_scale_set=for_scale_set)
+
+                self.assertEqual(ns.image,
+                                 'MicrosoftWindowsServer:WindowsServer:2025-datacenter-azure-edition:latest')
+                self.assertEqual((ns.os_publisher, ns.os_offer, ns.os_sku, ns.os_version),
+                                 ('MicrosoftWindowsServer', 'WindowsServer', '2025-datacenter-azure-edition', 'latest'))
+                self.assertEqual(ns.os_type, 'windows')
+                self.assertEqual(ns.security_type, 'TrustedLaunch')
+                self.assertIs(ns.enable_secure_boot, True)
+                self.assertIs(ns.enable_vtpm, True)
+
+    @mock.patch('azure.cli.command_modules.vm._validators._show_vm_image',
+                return_value={'osDiskImage': {'operatingSystem': 'Windows'}})
+    def test_vm_vmss_default_image_preserves_security_overrides(self, _):
+        for for_scale_set in (False, True):
+            for overrides, expected in (
+                    ({'enable_secure_boot': False}, ('TrustedLaunch', False, True)),
+                    ({'enable_vtpm': False}, ('TrustedLaunch', True, False)),
+                    ({'security_type': 'Standard', 'enable_secure_boot': False, 'enable_vtpm': False},
+                     ('Standard', False, False))):
+                with self.subTest(for_scale_set=for_scale_set, overrides=overrides):
+                    ns = self._set_ns(**overrides)
+                    _validate_vm_create_storage_profile(_get_test_cmd(), ns, for_scale_set=for_scale_set)
+
+                    self.assertEqual((ns.security_type, ns.enable_secure_boot, ns.enable_vtpm), expected)
+
+    @mock.patch('azure.cli.command_modules.vm._validators._show_vm_image',
+                return_value={'osDiskImage': {'operatingSystem': 'Windows'}})
+    def test_vm_vmss_explicit_image_is_preserved(self, _):
+        image = 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest'
+        for for_scale_set in (False, True):
+            with self.subTest(for_scale_set=for_scale_set):
+                ns = self._set_ns(image=image)
+                _validate_vm_create_storage_profile(_get_test_cmd(), ns, for_scale_set=for_scale_set)
+
+                self.assertEqual(ns.image, image)
+                self.assertEqual(ns.os_sku, '2022-datacenter-azure-edition')
+                self.assertIsNone(ns.security_type)
+                self.assertIsNone(ns.enable_secure_boot)
+                self.assertIsNone(ns.enable_vtpm)
+
+
 class TestVMDefaultAuthType(unittest.TestCase):
 
     @staticmethod
