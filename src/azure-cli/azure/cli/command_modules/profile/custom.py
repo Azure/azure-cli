@@ -11,6 +11,7 @@ from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core._profile import Profile
+from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.core.util import in_cloud_console
 
 logger = get_logger(__name__)
@@ -142,7 +143,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
           # Managed identity
           identity=False, client_id=None, object_id=None, resource_id=None,
           # Subscription discovery and default subscription selection control
-          skip_subscription_discovery=False, subscription=None):
+          skip_subscription_discovery=False, subscription=None,
+          # Interactive browser flow
+          redirect_port=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -153,6 +156,13 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
                        'Use --client-id, --object-id or --resource-id instead.')
     if any([password, service_principal, username, identity]) and use_device_code:
         raise CLIError("usage error: '--use-device-code' is not applicable with other arguments")
+    if redirect_port is not None and not 1 <= redirect_port <= 65535:
+        raise InvalidArgumentValueError('Value for --redirect-port must be between 1 and 65535.')
+    if redirect_port is not None and use_device_code:
+        raise MutuallyExclusiveArgumentError('Arguments --redirect-port and --use-device-code cannot be used together.')
+    if redirect_port is not None and any([password, service_principal, username, identity]):
+        raise MutuallyExclusiveArgumentError(
+            'Argument --redirect-port cannot be used with --username, --password, --service-principal, or --identity.')
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
@@ -220,6 +230,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         tenant,
         scopes=scopes,
         use_device_code=use_device_code,
+        redirect_port=redirect_port,
         allow_no_subscriptions=allow_no_subscriptions,
         use_cert_sn_issuer=use_cert_sn_issuer,
         show_progress=can_show_selector and not skip_subscription_discovery,
