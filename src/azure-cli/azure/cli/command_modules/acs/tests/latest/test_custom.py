@@ -2359,7 +2359,7 @@ class AksGetCredentialsTest(unittest.TestCase):
         nested_path = os.path.join("config dir", "config")
         absolute_path = os.path.abspath(nested_path)
         default_path = os.path.join(os.path.expanduser("~"), ".kube", "config")
-        kubelogin_path = os.path.join("tools", "kubelogin")
+        kubelogin_path = os.path.abspath(os.path.join("tools", "kubelogin"))
         for path, environment, selected_path in (
             ("config", "inherited-config", "config"),
             (nested_path, "inherited-config", nested_path),
@@ -2370,23 +2370,95 @@ class AksGetCredentialsTest(unittest.TestCase):
                 self.subTest(path=path),
                 mock.patch.dict(os.environ, {"KUBECONFIG": environment}),
                 mock.patch.object(acs_custom, "_print_or_merge_credentials") as merge,
-                mock.patch.object(acs_custom, "which", return_value=kubelogin_path) as which,
+                mock.patch("azure.cli.core.util.get_safe_executable_path", return_value=kubelogin_path) as resolve,
                 mock.patch.object(acs_custom.subprocess, "run") as run,
             ):
                 acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=path)
 
                 merge.assert_called_once_with(selected_path, self.kubeconfig, False, None)
-                which.assert_called_once_with("kubelogin")
+                resolve.assert_called_once_with("kubelogin")
                 run.assert_called_once_with(
-                    [os.path.abspath(kubelogin_path), "convert-kubeconfig", "-l", "azurecli",
+                    [kubelogin_path, "convert-kubeconfig", "-l", "azurecli",
                      "--kubeconfig", os.path.realpath(selected_path)],
                     check=True,
                 )
 
+    @unittest.skipIf(os.name == "nt", "Requires directory symlinks.")
+    def test_aks_get_credentials_preserves_executable_symlink_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            actual_directory = os.path.join(directory, "actual")
+            nested_directory = os.path.join(actual_directory, "nested")
+            os.makedirs(nested_directory)
+            for parent in (actual_directory, directory):
+                tools_directory = os.path.join(parent, "tools")
+                os.mkdir(tools_directory)
+                executable = os.path.join(tools_directory, "kubelogin")
+                with open(executable, "w"):
+                    pass
+                os.chmod(executable, 0o700)
+            os.symlink(nested_directory, os.path.join(directory, "linked"), target_is_directory=True)
+            search_path = os.path.join(directory, "linked", "..", "tools")
+            with (
+                mock.patch.dict(os.environ, {"PATH": search_path}),
+                mock.patch.object(acs_custom, "_print_or_merge_credentials"),
+                mock.patch.object(acs_custom.subprocess, "run") as run,
+            ):
+                acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="config")
+
+            executable = run.call_args.args[0][0]
+            self.assertTrue(os.path.samefile(executable, os.path.join(actual_directory, "tools", "kubelogin")))
+            self.assertFalse(os.path.samefile(executable, os.path.join(directory, "tools", "kubelogin")))
+
+    def test_aks_get_credentials_ignores_working_directory_executable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            working_directory = os.path.join(directory, "work")
+            tools_directory = os.path.join(directory, "tools")
+            executable_name = "kubelogin.exe" if os.name == "nt" else "kubelogin"
+            for executable_directory in (working_directory, tools_directory):
+                os.mkdir(executable_directory)
+                executable = os.path.join(executable_directory, executable_name)
+                with open(executable, "w"):
+                    pass
+                os.chmod(executable, 0o700)
+
+            original_directory = os.getcwd()
+            try:
+                os.chdir(working_directory)
+                for entry in ("", ".", working_directory):
+                    for trusted in (True, False):
+                        search_path = [entry, tools_directory] if trusted else [entry]
+                        with (
+                            self.subTest(entry=entry, trusted=trusted),
+                            mock.patch.dict(os.environ, {
+                                "PATH": os.pathsep.join(search_path),
+                                "PATHEXT": ".exe",
+                                "SystemRoot": os.path.join(directory, "system"),
+                            }),
+                            mock.patch.object(acs_custom, "_print_or_merge_credentials"),
+                            mock.patch.object(acs_custom.subprocess, "run") as run,
+                            mock.patch.object(acs_custom, "logger") as logger,
+                        ):
+                            acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="config")
+
+                            if trusted:
+                                run.assert_called_once_with(
+                                    [os.path.join(tools_directory, executable_name),
+                                     "convert-kubeconfig", "-l", "azurecli",
+                                     "--kubeconfig", os.path.realpath("config")],
+                                    check=True,
+                                )
+                            else:
+                                run.assert_not_called()
+                                self.assertIn("Please install kubelogin", logger.warning.call_args.args[0])
+            finally:
+                os.chdir(original_directory)
+
     @unittest.skipIf(os.name == "nt", "Requires a POSIX executable script.")
     def test_aks_get_credentials_converts_relative_file(self):
         with tempfile.TemporaryDirectory() as directory:
-            kubelogin_path = os.path.join(directory, "kubelogin")
+            tools_directory = os.path.join(directory, "tools")
+            os.mkdir(tools_directory)
+            kubelogin_path = os.path.join(tools_directory, "kubelogin")
             unrelated_path = os.path.join(directory, "unrelated-config")
             selected_path = os.path.join(directory, "config")
             with open(kubelogin_path, "w") as stream:
@@ -2406,7 +2478,7 @@ class AksGetCredentialsTest(unittest.TestCase):
             try:
                 os.chdir(directory)
                 with mock.patch.dict(os.environ, {
-                    "PATH": directory + os.pathsep + os.environ.get("PATH", ""),
+                    "PATH": tools_directory + os.pathsep + os.environ.get("PATH", ""),
                     "KUBECONFIG": unrelated_path,
                 }):
                     acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="config")
@@ -2452,7 +2524,8 @@ class AksGetCredentialsTest(unittest.TestCase):
                     with (
                         self.subTest(source=source),
                         mock.patch.dict(os.environ, {"KUBECONFIG": selected_path}),
-                        mock.patch.object(acs_custom, "which", return_value=os.path.join(directory, "kubelogin")),
+                        mock.patch("azure.cli.core.util.get_safe_executable_path",
+                                   return_value=os.path.join(directory, "kubelogin")),
                         mock.patch.object(acs_custom.subprocess, "run", side_effect=convert),
                     ):
                         acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=path)
@@ -2474,13 +2547,13 @@ class AksGetCredentialsTest(unittest.TestCase):
                 stream.write(self.kubeconfig)
             os.symlink(target_path, link_path)
             with (
-                mock.patch.object(acs_custom, "which") as which,
+                mock.patch("azure.cli.core.util.get_safe_executable_path") as resolve,
                 mock.patch.object(acs_custom.subprocess, "run") as run,
             ):
                 with self.assertRaisesRegex(CLIError, "symbolic link"):
                     acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=link_path)
 
-            which.assert_not_called()
+            resolve.assert_not_called()
             run.assert_not_called()
             self.assertTrue(os.path.islink(link_path))
             with open(target_path) as stream:
@@ -2489,13 +2562,13 @@ class AksGetCredentialsTest(unittest.TestCase):
     def test_aks_get_credentials_stdout_skips_conversion(self):
         with (
             mock.patch("sys.stdout", new_callable=io.StringIO) as stdout,
-            mock.patch.object(acs_custom, "which") as which,
+            mock.patch("azure.cli.core.util.get_safe_executable_path") as resolve,
             mock.patch.object(acs_custom.subprocess, "run") as run,
         ):
             acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="-")
 
         self.assertEqual(stdout.getvalue(), self.kubeconfig + "\n")
-        which.assert_not_called()
+        resolve.assert_not_called()
         run.assert_not_called()
 
     def test_aks_get_credentials_other_auth_skips_conversion(self):
@@ -2504,24 +2577,25 @@ class AksGetCredentialsTest(unittest.TestCase):
         )
         with (
             mock.patch.object(acs_custom, "_print_or_merge_credentials"),
-            mock.patch.object(acs_custom, "which") as which,
+            mock.patch("azure.cli.core.util.get_safe_executable_path") as resolve,
             mock.patch.object(acs_custom.subprocess, "run") as run,
         ):
             acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="config")
 
-        which.assert_not_called()
+        resolve.assert_not_called()
         run.assert_not_called()
 
     def test_aks_get_credentials_conversion_failures_warn(self):
+        executable = os.path.abspath(os.path.join("tools", "kubelogin"))
         for kubelogin_path, error, message in (
             (None, None, "Please install kubelogin"),
-            ("kubelogin", subprocess.CalledProcessError(1, ["kubelogin"]), "Failed to convert kubeconfig"),
-            ("kubelogin", OSError("Cannot execute kubelogin"), "Error running kubelogin"),
+            (executable, subprocess.CalledProcessError(1, [executable]), "Failed to convert kubeconfig"),
+            (executable, OSError("Cannot execute kubelogin"), "Error running kubelogin"),
         ):
             with (
                 self.subTest(message=message),
                 mock.patch.object(acs_custom, "_print_or_merge_credentials"),
-                mock.patch.object(acs_custom, "which", return_value=kubelogin_path),
+                mock.patch("azure.cli.core.util.get_safe_executable_path", return_value=kubelogin_path),
                 mock.patch.object(acs_custom.subprocess, "run", side_effect=error) as run,
                 mock.patch.object(acs_custom, "logger") as logger,
             ):

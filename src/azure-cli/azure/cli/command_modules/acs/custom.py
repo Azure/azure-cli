@@ -2017,6 +2017,8 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                             '~'), '.kube', 'config'),
                         overwrite_existing=False, context_name=None, public_fqdn=False,
                         credential_format=None):
+    from azure.cli.core.util import get_safe_executable_path
+
     credentialResults = None
     serverType = None
     if public_fqdn:
@@ -2065,13 +2067,13 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 
         # Check if kubeconfig requires kubelogin with devicecode and convert it
         if path != "-" and uses_kubelogin_devicecode(kubeconfig):
-            kubelogin_path = which("kubelogin")
+            kubelogin_path = get_safe_executable_path("kubelogin")
             if kubelogin_path:
                 try:
                     # Resolve directory symlinks after merging has rejected a symlink file.
                     subprocess.run(
                         [
-                            os.path.abspath(kubelogin_path),
+                            kubelogin_path,
                             "convert-kubeconfig",
                             "-l", "azurecli",
                             "--kubeconfig", os.path.realpath(path),
