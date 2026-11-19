@@ -78,6 +78,18 @@ def get_target_resource_name(cmd):
     return target
 
 
+def block_retired_containerapp_connection_create(cmd):
+    '''Block creating new Service Connector connections on Azure Container Apps.
+    Service Connector (preview) on Azure Container Apps has been retired.
+    See https://github.com/microsoft/azure-container-apps/issues/1566
+    '''
+    if 'create' in cmd.name and get_source_resource_name(cmd) == RESOURCE.ContainerApp:
+        raise ValidationError(
+            "Service Connector (preview) on Azure Container Apps has been retired. "
+            "'az containerapp connection create' is no longer supported. "
+            "For more information, see https://github.com/microsoft/azure-container-apps/issues/1566.")
+
+
 def get_resource_type_by_id(resource_id):
     '''Get source or target resource type by resource id
     '''
@@ -930,6 +942,8 @@ def validate_local_params(cmd, namespace):
 def validate_params(cmd, namespace):
     '''Validate command parameters
     '''
+    block_retired_containerapp_connection_create(cmd)
+
     def _validate_and_apply(validate, apply):
         missing_args = validate(cmd, namespace)
         if missing_args:
@@ -961,6 +975,8 @@ def validate_params(cmd, namespace):
 
 
 def validate_kafka_params(cmd, namespace):
+    block_retired_containerapp_connection_create(cmd)
+
     def _validate_and_apply(validate, apply):
         missing_args = validate(cmd, namespace)
         if missing_args:
