@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2026-05-01"],
         ]
     }
 
@@ -98,6 +98,11 @@ class Update(AAZCommand):
             options=["--capacity"],
             help="Number of instances to use with the application gateway.",
             nullable=True,
+        )
+        _args_schema.deployment_tier = AAZStrArg(
+            options=["--deployment-tier"],
+            help="Deployment tier for Standard_v2 and WAF_v2 SKUs. Omit to preserve the existing value. The service validates SKU compatibility and tier transitions.",
+            enum={"Standard": "Standard", "NetworkIsolated": "NetworkIsolated", "Accelerated": "Accelerated", "Elastic": "Elastic"},
         )
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
@@ -758,7 +763,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -838,6 +843,9 @@ class Update(AAZCommand):
             properties.default_predefined_ssl_policy = AAZStrType(
                 serialized_name="defaultPredefinedSslPolicy",
                 flags={"read_only": True},
+            )
+            properties.deployment_tier = AAZStrType(
+                serialized_name="deploymentTier",
             )
             properties.enable_fips = AAZBoolType(
                 serialized_name="enableFips",
@@ -2277,7 +2285,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-05-01",
                     required=True,
                 ),
             }
@@ -2369,6 +2377,9 @@ class Update(AAZCommand):
             properties.default_predefined_ssl_policy = AAZStrType(
                 serialized_name="defaultPredefinedSslPolicy",
                 flags={"read_only": True},
+            )
+            properties.deployment_tier = AAZStrType(
+                serialized_name="deploymentTier",
             )
             properties.enable_fips = AAZBoolType(
                 serialized_name="enableFips",
@@ -3774,6 +3785,7 @@ class Update(AAZCommand):
                 properties.set_prop("advancedRoutingMaps", AAZListType, ".advanced_routing_maps")
                 properties.set_prop("autoscaleConfiguration", AAZObjectType)
                 properties.set_prop("customErrorConfigurations", AAZListType, ".custom_error_configurations")
+                properties.set_prop("deploymentTier", AAZStrType, ".deployment_tier")
                 properties.set_prop("enableFips", AAZBoolType, ".enable_fips")
                 properties.set_prop("enableHttp2", AAZBoolType, ".http2")
                 properties.set_prop("entraJWTValidationConfigs", AAZListType, ".entra_jwt_validation_configs")
