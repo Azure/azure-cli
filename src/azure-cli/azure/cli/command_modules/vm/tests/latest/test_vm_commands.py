@@ -12827,6 +12827,36 @@ class VMSSReimageScenarioTest(ScenarioTest):
 
 
 class VMSSHKeyScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_clear_tags_', location='westus')
+    def test_vm_ssh_key_clear_tags(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'key': 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+N4unGvv6pXPYebWiQ6Ak618DjYm5g6d2ECnq/1F0x generated-by-azure',
+            'empty_tag': "{owner:''}",
+        })
+        self.cmd('sshkey create -g {rg} -n key --location {loc} --public-key "{key}" '
+                 '--tags "{empty_tag}"')
+        self.cmd('sshkey show -g {rg} -n key', checks=[
+            self.check('tags', {'owner': ''}),
+            self.check('publicKey', '{key}'),
+        ])
+
+        self.cmd('sshkey update -g {rg} -n key --tags owner=cli purpose=regression')
+        self.cmd('sshkey show -g {rg} -n key', checks=[
+            self.check('tags', {'owner': 'cli', 'purpose': 'regression'}),
+        ])
+        self.cmd('sshkey update -g {rg} -n key --tags "{{}}"')
+        cleared = self.cmd('sshkey show -g {rg} -n key', checks=[
+            self.check('publicKey', '{key}'),
+        ]).get_output_in_json()
+        self.assertEqual(cleared.get('tags') or {}, {})
+
+        self.cmd('sshkey update -g {rg} -n key --tags "{empty_tag}"')
+        self.cmd('sshkey show -g {rg} -n key', checks=[
+            self.check('tags', {'owner': ''}),
+            self.check('publicKey', '{key}'),
+        ])
+
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_ssh_key_', location='westus')
     def test_vm_ssh_key(self, resource_group, resource_group_location):
