@@ -169,12 +169,12 @@ class Profile:
                 logger.info('No web browser is available. Fall back to device code.')
                 use_device_code = True
 
-            if not use_device_code and is_github_codespaces():
-                logger.info('GitHub Codespaces is detected. Fall back to device code.')
-                use_device_code = True
-
             if use_device_code:
                 user_identity = identity.login_with_device_code(scopes=scopes, claims_challenge=claims_challenge)
+            elif is_github_codespaces():
+                logger.info('GitHub Codespaces is detected. Use Codespaces browser auth code flow.')
+                user_identity = identity.login_with_auth_code_for_codespaces(scopes=scopes,
+                                                                             claims_challenge=claims_challenge)
             else:
                 user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge)
         else:
