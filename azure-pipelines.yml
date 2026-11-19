@@ -555,7 +555,7 @@ jobs:
       versionSpec: '$(python.version)'
   - bash: |
       set -e
-      python -m pip install docutils requests packaging tomli
+      python -m pip install docutils requests packaging tomli pyyaml
       python -B -m unittest discover -s tools/automation/tests -t tools -p 'test_*.py' -v
       python -B scripts/ci/check_package_versions.py
     displayName: Validate source metadata and packaging automation
