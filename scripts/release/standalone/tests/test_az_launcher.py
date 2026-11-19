@@ -42,7 +42,7 @@ MISSING_CASK_PYTHON = (
 class TestAzLauncher(unittest.TestCase):
 
     def setUp(self):
-        temporary_directory = tempfile.TemporaryDirectory(prefix="az launcher ")
+        temporary_directory = tempfile.TemporaryDirectory(prefix="az launcher ", dir=builder.PROJECT_ROOT)
         self.addCleanup(temporary_directory.cleanup)
         self.root = Path(temporary_directory.name).resolve()
         self.tools = self.root / "tools"

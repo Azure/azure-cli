@@ -13,21 +13,23 @@ if "%CLI_VERSION%"=="" (
     echo Please set the CLI_VERSION environment variable, e.g. 2.0.13
     goto ERROR
 )
-@REM ARCH can be x86 or x64
+@REM Only x64 builds are supported.
 if "%ARCH%"=="" (
-    set ARCH=x86
+    set ARCH=x64
 )
 @REM TARGET can be msi or zip
 if "%TARGET%"=="" (
     set TARGET=msi
 )
 
-if "%ARCH%"=="x86" (
-    set PYTHON_ARCH=win32
-) else if "%ARCH%"=="x64" (
+if "%ARCH%"=="x64" (
     set PYTHON_ARCH=amd64
 ) else (
-    echo Please set ARCH to "x86" or "x64"
+    echo Unsupported ARCH "%ARCH%". Only x64 is supported; Windows x86 builds are retired.
+    goto ERROR
+)
+if not "%TARGET%"=="msi" if not "%TARGET%"=="zip" (
+    echo Unsupported TARGET "%TARGET%". Please set TARGET to "msi" or "zip".
     goto ERROR
 )
 set PYTHON_VERSION=3.14.10
@@ -150,6 +152,12 @@ if not exist %PYTHON_DIR% (
     popd
 )
 set PYTHON_EXE=%PYTHON_DIR%\python.exe
+"%PYTHON_EXE%" -I "%~dp0validate_python.py" "%PYTHON_VERSION%"
+if %errorlevel% neq 0 (
+    echo Invalid embedded Python cache at "%PYTHON_DIR%". Expected x64 Python %PYTHON_VERSION%.
+    echo Move that directory aside and retry to download a fresh interpreter.
+    goto ERROR
+)
 "%PYTHON_EXE%" -Im pip --version
 if %errorlevel% neq 0 goto ERROR
 
