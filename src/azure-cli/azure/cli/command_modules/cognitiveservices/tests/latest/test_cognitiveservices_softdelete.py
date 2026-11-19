@@ -8,13 +8,14 @@ import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.cli.testsdk.scenario_tests.decorators import live_only
 from knack.util import CLIError
 
 
 class CognitiveServicesDeleteTests(ScenarioTest):
     @ResourceGroupPreparer()
     @AllowLargeResponse()
-    def test_cognitiveservices_softdelete(self, resource_group):
+    def test_cognitiveservices_account_softdelete_recover_and_purge(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
         customdomain = self.create_random_name(prefix='csclitest', length=16)
 
@@ -56,10 +57,32 @@ class CognitiveServicesDeleteTests(ScenarioTest):
 
         self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.cmd('az cognitiveservices account purge --location {location} -n {sname} -g {rg}')
-        deleted_accounts = self.cmd('az cognitiveservices account list-deleted --query "[?name==`{sname}`]"').get_output_in_json()
 
+    # Live-only, without recording: we do not want to record "az cognitiveservices account list-deleted", 
+    # because it is common for a subscription to have a huge number of deleted accounts that have not yet been purged.
+    @live_only()
+    @ResourceGroupPreparer()
+    def test_cognitiveservices_account_purged_not_in_list_deleted(self, resource_group):
+        sname = self.create_random_name(prefix='cs_cli_test_', length=16)
+        customdomain = self.create_random_name(prefix='csclitest', length=16)
+
+        self.disable_recording = True
+        self.kwargs.update({
+            'sname': sname,
+            'kind': 'FormRecognizer',
+            'sku': 'S0',
+            'location': 'southcentralus',
+            'customdomain': customdomain
+        })
+
+        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --custom-domain {customdomain} --yes',
+                 checks=[self.check('name', '{sname}')])
+        self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
+        self.cmd('az cognitiveservices account purge --location {location} -n {sname} -g {rg}')
+
+        deleted_accounts = self.cmd('az cognitiveservices account list-deleted --query "[?name==`{sname}`]"').get_output_in_json()
         self.assertEqual(len(deleted_accounts), 0)
-        
+
 
 if __name__ == '__main__':
     unittest.main()
