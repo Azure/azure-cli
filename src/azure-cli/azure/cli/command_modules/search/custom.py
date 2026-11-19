@@ -5,7 +5,7 @@
 from knack.log import get_logger
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import (UnrecognizedArgumentError, MutuallyExclusiveArgumentError,
-                                       RequiredArgumentMissingError)
+                                       RequiredArgumentMissingError, ArgumentUsageError)
 from .aaz.latest.search.service import Create as _SearchServiceCreate, Update as _SearchServiceUpdate
 
 logger = get_logger(__name__)
@@ -49,13 +49,30 @@ class SearchServiceCreate(_SearchServiceCreate):
         return args_schema
 
     def pre_operations(self):
-        from azure.cli.core.aaz import has_value
+        from azure.cli.core.aaz import has_value, AAZUndefined
         import re
         args = self.ctx.args
 
         if args.hosting_mode == "highDensity" and args.sku != "standard3":
             raise UnrecognizedArgumentError(
                 "SearchService.HostingMode: highDensity is only allowed when sku is standard3")
+
+        # The serverless SKU auto-scales and does not accept replicaCount, partitionCount or hostingMode.
+        # These arguments default to 1/"default", so the AAZ-generated command would otherwise always
+        # serialize them and the service rejects the request with HTTP 400. Unset them for serverless.
+        if has_value(args.sku) and args.sku == "serverless":
+            if has_value(args.replica_count) and args.replica_count != 1:
+                raise ArgumentUsageError(
+                    "SearchService.ReplicaCount: --replica-count is not applicable to the serverless SKU")
+            if has_value(args.partition_count) and args.partition_count != 1:
+                raise ArgumentUsageError(
+                    "SearchService.PartitionCount: --partition-count is not applicable to the serverless SKU")
+            if has_value(args.hosting_mode) and args.hosting_mode != "default":
+                raise ArgumentUsageError(
+                    "SearchService.HostingMode: --hosting-mode is not applicable to the serverless SKU")
+            args.replica_count = AAZUndefined
+            args.partition_count = AAZUndefined
+            args.hosting_mode = AAZUndefined
 
         if has_value(args.ip_rules):
             ip_rules = re.split(';|,', args.ip_rules.to_serialized_data())
