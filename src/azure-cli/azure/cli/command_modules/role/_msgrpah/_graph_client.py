@@ -219,6 +219,16 @@ class GraphClient:
         result = self._send("GET", "/servicePrincipals/{id}/owners".format(id=id))
         return result
 
+    def service_principal_owner_add(self, id, body):
+        # https://learn.microsoft.com/en-us/graph/api/serviceprincipal-post-owners
+        result = self._send("POST", "/servicePrincipals/{id}/owners/$ref".format(id=id), body=body)
+        return result
+
+    def service_principal_owner_remove(self, id, owner_id):
+        # https://learn.microsoft.com/en-us/graph/api/serviceprincipal-delete-owners
+        result = self._send("DELETE", "/servicePrincipals/{id}/owners/{owner_id}/$ref".format(id=id, owner_id=owner_id))
+        return result
+
     def owned_objects_list(self):
         # https://learn.microsoft.com/en-us/graph/api/user-list-ownedobjects
         result = self._send("GET", "/me/ownedObjects")
