@@ -2760,7 +2760,7 @@ def _extract_aks_desktop_archive(archive_path, destination):
 
 
 def _check_aks_desktop_dependencies(executable: str) -> None:
-    from azure.cli.core.util import get_safe_executable_path, run_cmd
+    from azure.cli.core.util import run_cmd
 
     try:
         ldd = get_safe_executable_path('ldd')

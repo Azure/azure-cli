@@ -101,7 +101,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.cli = MockCLI()
         # Synthetic archives contain fake executable bytes: never inspect them with host ldd.
         for target, result in (
-            ('azure.cli.core.util.get_safe_executable_path', '/usr/bin/ldd'),
+            ('azure.cli.command_modules.acs.custom.get_safe_executable_path', '/usr/bin/ldd'),
             ('azure.cli.core.util.run_cmd', subprocess.CompletedProcess([], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)', '')),
         ):
             patcher = mock.patch(target, return_value=result)
@@ -1254,7 +1254,7 @@ class AcsCustomCommandTest(unittest.TestCase):
     def test_aks_install_desktop_dependency_inspection_arguments(self):
         environment = {'LC_ALL': 'fr_FR.UTF-8', 'LD_LIBRARY_PATH': '/custom/lib', 'PATH': '/usr/bin'}
         with mock.patch.dict(os.environ, environment, clear=True), \
-                mock.patch('azure.cli.core.util.get_safe_executable_path', return_value='/usr/bin/ldd') as resolve, \
+                mock.patch.object(acs_custom, 'get_safe_executable_path', return_value='/usr/bin/ldd') as resolve, \
                 mock.patch('azure.cli.core.util.run_cmd', return_value=subprocess.CompletedProcess(
                     [], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)\n', '')) as run, \
                 mock.patch.object(acs_custom.logger, 'warning') as warning:
@@ -1286,7 +1286,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                 archive_path = os.path.join(temp_dir, 'installer.tar.gz')
                 self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
                 with mock.patch('os.path.expanduser', return_value=temp_dir), \
-                        mock.patch('azure.cli.core.util.get_safe_executable_path', return_value=resolver), \
+                        mock.patch.object(acs_custom, 'get_safe_executable_path', return_value=resolver), \
                         mock.patch('azure.cli.core.util.run_cmd',
                                    **({'side_effect': result} if isinstance(result, Exception)
                                       else {'return_value': result})) as run, \
