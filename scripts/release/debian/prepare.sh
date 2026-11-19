@@ -105,6 +105,9 @@ ${TAB}dh \$@ --sourcedirectory $source_dir
 override_dh_clean:
 ${TAB}dh_clean --exclude=__pycache__
 
+override_dh_shlibdeps:
+${TAB}dh_shlibdeps --exclude=*/site-packages/pymsalruntime/*
+
 override_dh_install:
 ${TAB}mkdir -p debian/azure-cli/opt/az
 ${TAB}cp -a python_env/* debian/azure-cli/opt/az
