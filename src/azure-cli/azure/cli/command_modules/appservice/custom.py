@@ -6733,10 +6733,10 @@ def connect_to_plan_instance(cmd, resource_group_name, name, instance_name,
     if not password_value:
         raise UnclassifiedUserFault("Double check that the app service plan is set with rdp-enabled and try again.")
 
+    _copy_string_to_clipboard(password_value)
     logger.warning("Use the following credentials to login:")
     logger.warning("RDP username: Administrator")
     logger.warning("RDP password: [copied to clipboard]")
-    _copy_string_to_clipboard(password_value)
 
     # 4. Invoke the Bastion RDP command
     bastion_cmd = [
@@ -6750,8 +6750,17 @@ def connect_to_plan_instance(cmd, resource_group_name, name, instance_name,
 
 
 def _copy_string_to_clipboard(string_value):
-    from azure.cli.core.util import run_cmd
-    run_cmd(["cmd.exe", "/c", "echo", "|", "set", "/p={}|".format(string_value), "clip"], check=False)
+    import subprocess
+    from azure.cli.core.util import get_safe_executable_path
+
+    clip_path = get_safe_executable_path('clip.exe')
+    if not clip_path:
+        raise ValidationError("Unable to locate clip.exe to copy the RDP password to the clipboard.")
+
+    try:
+        subprocess.run([clip_path], input=string_value.encode(), check=True)
+    except (OSError, subprocess.CalledProcessError) as ex:
+        raise CLIInternalError("Failed to copy the RDP password to the clipboard.") from ex
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):

@@ -444,7 +444,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         ])
         self.cmd('containerapp delete -g {} -n {} --yes'.format(resource_group, app1), expect_failure=False)
         self.cmd('containerapp delete -g {} -n {} --yes'.format(resource_group, app2), expect_failure=False)
-        self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env), expect_failure=False)
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env), expect_failure=False)
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
