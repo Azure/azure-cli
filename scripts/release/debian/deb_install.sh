@@ -95,6 +95,10 @@ Suites: ${CLI_REPO}
 Components: main
 Architectures: $(dpkg --print-architecture)
 Signed-by: /etc/apt/keyrings/microsoft.gpg" | tee /etc/apt/sources.list.d/azure-cli.sources
+    echo 'Package: azure-cli
+Pin: origin "packages.microsoft.com"
+Pin-Priority: 1001' \
+        > /etc/apt/preferences.d/azure-cli
     apt-get update
     set +v
 
