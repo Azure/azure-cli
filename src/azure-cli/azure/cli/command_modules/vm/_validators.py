@@ -427,7 +427,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         else:
             raise CLIError('Unrecognized image type: {}'.format(image_type))
     elif not namespace.image and not getattr(namespace, 'attach_os_disk', None):
-        namespace.image = 'MicrosoftWindowsServer:WindowsServer:2022-datacenter-azure-edition:latest'
+        namespace.image = 'MicrosoftWindowsServer:WindowsServer:2025-datacenter-azure-edition:latest'
         _parse_image_argument(cmd, namespace)
         namespace.storage_profile = StorageProfile.ManagedPirImage
         if namespace.enable_secure_boot is None:
