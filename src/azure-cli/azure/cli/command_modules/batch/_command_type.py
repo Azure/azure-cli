@@ -292,7 +292,7 @@ class BatchArgumentTree:
         :param dict kwargs: The request kwargs
         :param dict json_obj: The loaded JSON content
         """
-        from msrest.exceptions import DeserializationError
+        from azure.core.exceptions import DeserializationError
         message = "Failed to deserialized JSON file into object {}"
         try:
             def remove_none_values(d):

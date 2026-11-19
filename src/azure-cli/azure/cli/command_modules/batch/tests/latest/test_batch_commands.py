@@ -3,10 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import io
 import os
+import shlex
 import unittest
 import datetime
 import isodate
+import tempfile
 from unittest import mock
 
 import importlib
@@ -15,10 +18,13 @@ import azure.batch
 from azure.core import MatchConditions
 #from azure.batch._client import BatchClientOperationsMixin
 from azure.batch import models, BatchClient
+from azure.batch._operations._patch import BatchClientOperationsMixin
 from azure.core.credentials import AzureNamedKeyCredential
 
+from azure.cli.core.mock import DummyCli
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
+from azure.cli.core.util import rmtree_with_retry
 
 
 class TestObj:  # pylint: disable=too-few-public-methods
@@ -35,15 +41,30 @@ class TestBatchValidators(unittest.TestCase):
         obj = _validators.datetime_format("2017-01-24T15:47:24Z")
         self.assertIsInstance(obj, datetime.datetime)
 
+        # Lower case, more than 6 digits of fractional seconds, and UTC offsets are accepted
+        obj = _validators.datetime_format("2017-01-24t15:47:24.1234567z")
+        self.assertEqual(obj, datetime.datetime(2017, 1, 24, 15, 47, 24, 123456, tzinfo=datetime.timezone.utc))
+        obj = _validators.datetime_format("2017-01-24T15:47:24+05:30")
+        self.assertEqual(obj.utcoffset(), datetime.timedelta(hours=5, minutes=30))
+
         with self.assertRaises(ValueError):
             _validators.datetime_format("test")
+        with self.assertRaises(ValueError):
+            _validators.datetime_format("2017-01-24")
+        with self.assertRaises(ValueError):
+            _validators.datetime_format("2017-13-24T15:47:24Z")
 
     def test_batch_duration_format(self):
         obj = _validators.duration_format("P3Y6M4DT12H30M5S")
         self.assertIsInstance(obj, isodate.Duration)
 
+        obj = _validators.duration_format("PT15M")
+        self.assertEqual(obj, datetime.timedelta(minutes=15))
+
         with self.assertRaises(ValueError):
             _validators.duration_format("test")
+        with self.assertRaises(ValueError):
+            _validators.duration_format("1 day, 0:00:00")
 
     def test_batch_metadata_item_format(self):
         meta = _validators.metadata_item_format("name=value")
@@ -52,8 +73,8 @@ class TestBatchValidators(unittest.TestCase):
         with self.assertRaises(ValueError):
             _validators.metadata_item_format("test")
 
-        with self.assertRaises(ValueError):
-            _validators.metadata_item_format("name=value=other")
+        meta = _validators.metadata_item_format("name=value=other")
+        self.assertEqual(meta, {'name': 'name', 'value': 'value=other'})
 
     def test_batch_environment_setting_format(self):
         env = _validators.environment_setting_format("name=value")
@@ -62,8 +83,21 @@ class TestBatchValidators(unittest.TestCase):
         with self.assertRaises(ValueError):
             _validators.environment_setting_format("test")
 
+        env = _validators.environment_setting_format("CONN=Server=tcp:x;Database=y")
+        self.assertEqual(env, {'name': 'CONN', 'value': 'Server=tcp:x;Database=y'})
+
+        env = _validators.environment_setting_format("TOKEN=YWJj==")
+        self.assertEqual(env, {'name': 'TOKEN', 'value': 'YWJj=='})
+
+    def test_batch_string_dictionary_format(self):
+        result = _validators.string_dictionary_format("a=b c=d=e")
+        self.assertEqual(result, {'a': 'b', 'c': 'd=e'})
+
         with self.assertRaises(ValueError):
-            _validators.environment_setting_format("name=value=other")
+            _validators.string_dictionary_format("a=b test")
+
+        with self.assertRaises(ValueError):
+            _validators.string_dictionary_format("")
 
     def test_batch_application_package_reference_format(self):
         ref = _validators.batch_application_package_reference_format("app_1")
@@ -143,7 +177,7 @@ class TestBatchValidators(unittest.TestCase):
         self.assertFalse(hasattr(ns, 'destination'))
 
         ns.destination = os.path.dirname(__file__)
-        ns.file_name = "/wd/stdout.txt"
+        ns.file_path = "wd/stdout.txt"
         _validators.validate_file_destination(ns)
         self.assertEqual(ns.destination, os.path.join(os.path.dirname(__file__), 'stdout.txt'))
 
@@ -158,6 +192,55 @@ class TestBatchValidators(unittest.TestCase):
         ns.destination = "X:\\test.txt"
         with self.assertRaises(ValueError):
             _validators.validate_file_destination(ns)
+
+
+class TestBatchFileDownloadCommand(unittest.TestCase):
+
+    commands = ['batch task file download --job-id job1 --task-id task1',
+                'batch node file download --pool-id pool1 --node-id node1']
+
+    @staticmethod
+    def _invoke(command, destination):
+        args = command.split() + [
+            '--file-path', 'wd/path/to/file.txt', '--destination', destination,
+            '--account-name', 'test1', '--account-key', 'ZmFrZV9hY29jdW50X2tleQ==',
+            '--account-endpoint', 'https://test1.westus.batch.azure.com']
+        response = mock.Mock(status_code=200, headers={})
+        response.iter_bytes.return_value = iter([b'file content'])
+        # Mock the HTTP pipeline, so the real arguments, validators and SDK operation run without a Batch account
+        with mock.patch('azure.core.pipeline.Pipeline.run', return_value=mock.Mock(http_response=response)) as run:
+            try:
+                exit_code = DummyCli().invoke(args)
+            except SystemExit as ex:  # argument validation errors exit with code 2
+                exit_code = ex.code
+        return exit_code, run
+
+    def test_batch_file_download_to_folder(self):
+        for command in self.commands:
+            with self.subTest(command=command), tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as folder:
+                exit_code, _ = self._invoke(command, folder)
+
+                self.assertEqual(exit_code, 0)
+                self.assertEqual(os.listdir(folder), ['file.txt'])
+                with open(os.path.join(folder, 'file.txt'), 'rb') as f:
+                    self.assertEqual(f.read(), b'file content')
+
+    def test_batch_file_download_to_file(self):
+        for command in self.commands:
+            with self.subTest(command=command), tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as folder:
+                destination = os.path.join(folder, 'output.txt')
+                exit_code, _ = self._invoke(command, destination)
+
+                self.assertEqual(exit_code, 0)
+                self.assertEqual(os.listdir(folder), ['output.txt'])
+                with open(destination, 'rb') as f:
+                    self.assertEqual(f.read(), b'file content')
+
+                # An existing file is not overwritten, and nothing is downloaded
+                exit_code, run = self._invoke(command, destination)
+
+                self.assertEqual(exit_code, 2)
+                run.assert_not_called()
 
 
 class TestBatchParser(unittest.TestCase):
@@ -654,3 +737,105 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         # option = [arg for (name, arg) in args if name == 'node_reboot_option'][0]
         # self.assertIsNotNone(option.choices)
         # self.assertFalse([a for a in option.choices if "'" in a])
+
+
+class TestBatchTaskCreateCommand(unittest.TestCase):
+
+    @staticmethod
+    def _invoke(command):
+        account = ('--account-name test1 --account-key ZmFrZV9hY29jdW50X2tleQ== '
+                   '--account-endpoint https://test1.westus.batch.azure.com')
+        with mock.patch.object(BatchClient, 'create_task') as create_task, \
+                mock.patch.object(BatchClient, 'get_task', return_value=models.BatchTask({'id': 'task1'})):
+            try:
+                exit_code = DummyCli().invoke(shlex.split(f'{command} {account}'), out_file=io.StringIO())
+            except SystemExit as ex:  # argument parsing errors exit with code 2
+                exit_code = ex.code
+        return exit_code, create_task
+
+    def test_batch_task_create_environment_settings(self):
+        sql_connection = ('Server=tcp:servername.database.windows.net,1433;Initial Catalog=mydb;'
+                          'Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True')
+        exit_code, create_task = self._invoke(
+            'batch task create --job-id job1 --task-id task1 --command-line "cmd /c set" '
+            f'--environment-settings SqlConnection="{sql_connection}" LOG_LEVEL=info')
+
+        self.assertEqual(exit_code, 0)
+        create_task.assert_called_once()
+        self.assertEqual(create_task.call_args.kwargs['job_id'], 'job1')
+        self.assertEqual(create_task.call_args.kwargs['task'].as_dict(), {
+            'id': 'task1',
+            'commandLine': 'cmd /c set',
+            'environmentSettings': [
+                {'name': 'SqlConnection', 'value': sql_connection},
+                {'name': 'LOG_LEVEL', 'value': 'info'}]})
+
+        # A setting without '=' is still rejected before any request is sent
+        exit_code, create_task = self._invoke(
+            'batch task create --job-id job1 --task-id task1 --command-line "cmd /c set" '
+            '--environment-settings LOG_LEVEL')
+
+        self.assertEqual(exit_code, 2)
+        create_task.assert_not_called()
+
+
+class TestBatchPoolCreate(unittest.TestCase):
+    """Run 'az batch pool create' with the SDK's create_pool mocked, so nothing is sent to the service."""
+
+    # The "two Ubuntu 24.04 compute nodes" example in the 'az batch pool create' help
+    EXAMPLE_ARGS = ['batch', 'pool', 'create', '--id', 'mypool', '--vm-size', 'Standard_D4ds_v5',
+                    '--target-dedicated-nodes', '2', '--image', 'canonical:ubuntu-24_04-lts:server',
+                    '--node-agent-sku-id', 'batch.node.ubuntu 24.04',
+                    '--account-name', 'clibatch', '--account-key', 'BatchAccountKey']
+    ENDPOINT_ARGS = ['--account-endpoint', 'https://clibatch.eastus.batch.azure.com']
+
+    def setUp(self):
+        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config
+        environ = {name: value for name, value in os.environ.items() if not name.startswith('AZURE_BATCH_')}
+        environ_patch = mock.patch.dict(os.environ, environ, clear=True)
+        environ_patch.start()
+        self.addCleanup(environ_patch.stop)
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+
+        # The CLI builds the command's arguments from the SDK method's docstring, so the mock keeps it
+        docstring = BatchClientOperationsMixin.create_pool.__doc__
+        create_pool_patch = mock.patch.object(BatchClientOperationsMixin, 'create_pool', autospec=True,
+                                              return_value=None)
+        self.create_pool = create_pool_patch.start()
+        self.addCleanup(create_pool_patch.stop)
+        self.create_pool.__doc__ = docstring
+
+    def test_batch_pool_create_missing_endpoint(self):
+        with self.assertLogs('cli.azure.cli.core.azclierror', 'ERROR') as logs, \
+                self.assertRaises(SystemExit) as ex:
+            self.cli.invoke(self.EXAMPLE_ARGS, out_file=io.StringIO())
+        self.assertEqual(ex.exception.code, 2)
+        self.assertIn('Specify batch endpoint in command line or environment variable.',
+                      [record.getMessage() for record in logs.records])
+        self.create_pool.assert_not_called()
+
+    def test_batch_pool_create_ubuntu_example(self):
+        self.assertEqual(self.cli.invoke(self.EXAMPLE_ARGS + self.ENDPOINT_ARGS, out_file=io.StringIO()), 0)
+        self.create_pool.assert_called_once()
+        # The CLI passes the --target-dedicated-nodes value on as a string; the service accepts it
+        self.assertEqual(self.create_pool.call_args.kwargs['pool'], {
+            'id': 'mypool',
+            'vmSize': 'Standard_D4ds_v5',
+            'targetDedicatedNodes': '2',
+            'virtualMachineConfiguration': {
+                'imageReference': {'publisher': 'canonical', 'offer': 'ubuntu-24_04-lts', 'sku': 'server'},
+                'nodeAgentSKUId': 'batch.node.ubuntu 24.04'}})
+
+    def test_batch_pool_create_gallery_image(self):
+        image = ('/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myresourcegroup/providers/'
+                 'Microsoft.Compute/galleries/mygallery/images/myimage')
+        for image_id in [image, image + '/versions/1.0.0']:
+            with self.subTest(image_id=image_id):
+                args = self.EXAMPLE_ARGS + self.ENDPOINT_ARGS
+                args[args.index('--image') + 1] = image_id
+                self.assertEqual(self.cli.invoke(args, out_file=io.StringIO()), 0)
+                self.assertEqual(self.create_pool.call_args.kwargs['pool']['virtualMachineConfiguration'], {
+                    'imageReference': {'virtualMachineImageId': image_id},
+                    'nodeAgentSKUId': 'batch.node.ubuntu 24.04'})

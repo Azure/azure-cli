@@ -147,7 +147,7 @@ class Create(AAZCommand):
             options=["name"],
             help="The built-in attribute to group by. project is available only for account-owned controls.",
             required=True,
-            enum={"agent": "agent", "identityObjectId": "identityObjectId", "project": "project", "sessionId": "sessionId"},
+            enum={"agent": "agent", "project": "project", "sessionId": "sessionId"},
         )
         _element.type = AAZStrArg(
             options=["type"],
@@ -273,9 +273,9 @@ class Create(AAZCommand):
         additional_info = cls._args_cost_control_filter_create.additional_info
         additional_info.name = AAZStrArg(
             options=["name"],
-            help="The built-in attribute: agent, identityObjectId, sessionId, project, deployment, or tokenType. Resource selectors use owner-scoped short names, not Azure resource IDs. Agent selections require an explicit project filter selecting exactly one project; multiple agents in that project are supported. A project-owned control can select only its owning project. Project, agent, and deployment values must be plain names of 1-64 characters without leading or trailing whitespace, control characters, path/query/fragment separators, percent signs, or . and .. path segments. tokenType accepts input, output, or both for a Tokens budget; omission measures overall tokens.",
+            help="The built-in attribute: agent, sessionId, project, deployment, or tokenType. Resource selectors use owner-scoped short names, not Azure resource IDs. Agent selections require an explicit project filter selecting exactly one project; multiple agents in that project are supported. A project-owned control can select only its owning project. Project, agent, and deployment values must be plain names of 1-64 characters without leading or trailing whitespace, control characters, path/query/fragment separators, percent signs, or . and .. path segments. tokenType accepts input, output, or both for a Tokens budget; omission measures overall tokens.",
             required=True,
-            enum={"agent": "agent", "deployment": "deployment", "identityObjectId": "identityObjectId", "project": "project", "sessionId": "sessionId", "tokenType": "tokenType"},
+            enum={"agent": "agent", "deployment": "deployment", "project": "project", "sessionId": "sessionId", "tokenType": "tokenType"},
         )
         additional_info.operator = AAZStrArg(
             options=["operator"],
