@@ -199,7 +199,7 @@ def acr_manifest_list(cmd,
                       repo_id=None,
                       top=None,
                       orderby=None,
-                      tenant_suffix=None,
+                      suffix=None,
                       username=None,
                       password=None):
     if (repo_id and repository) or (not repo_id and not (registry_name and repository)):
@@ -211,7 +211,7 @@ def acr_manifest_list(cmd,
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -245,7 +245,7 @@ def acr_manifest_metadata_list(cmd,
                                repo_id=None,
                                top=None,
                                orderby=None,
-                               tenant_suffix=None,
+                               suffix=None,
                                username=None,
                                password=None):
     if (repo_id and repository) or (not repo_id and not (registry_name and repository)):
@@ -257,7 +257,7 @@ def acr_manifest_metadata_list(cmd,
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -279,7 +279,7 @@ def acr_manifest_deleted_list(cmd,
                               registry_name=None,
                               repository=None,
                               repo_id=None,
-                              tenant_suffix=None,
+                              suffix=None,
                               username=None,
                               password=None):
     if (repo_id and repository) or (not repo_id and not (registry_name and repository)):
@@ -291,7 +291,7 @@ def acr_manifest_deleted_list(cmd,
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -316,7 +316,7 @@ def acr_manifest_deleted_tags_list(cmd,
                                    registry_name=None,
                                    permissive_repo=None,
                                    perm_repo_id=None,
-                                   tenant_suffix=None,
+                                   suffix=None,
                                    username=None,
                                    password=None):
     if (perm_repo_id and permissive_repo) or (not perm_repo_id and not (registry_name and permissive_repo)):
@@ -335,7 +335,7 @@ def acr_manifest_deleted_tags_list(cmd,
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -366,7 +366,7 @@ def acr_manifest_deleted_restore(cmd,
                                  digest=None,
                                  force=False,
                                  yes=False,
-                                 tenant_suffix=None,
+                                 suffix=None,
                                  username=None,
                                  password=None):
     if (manifest_id and manifest_spec) or (not manifest_id and not (registry_name and manifest_spec)):
@@ -381,7 +381,7 @@ def acr_manifest_deleted_restore(cmd,
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -433,7 +433,7 @@ def acr_manifest_list_referrers(cmd,
                                 artifact_type=None,
                                 manifest_id=None,
                                 recursive=False,
-                                tenant_suffix=None,
+                                suffix=None,
                                 username=None,
                                 password=None):
     if (manifest_id and manifest_spec) or (not manifest_id and not (registry_name and manifest_spec)):
@@ -446,12 +446,12 @@ def acr_manifest_list_referrers(cmd,
 
     if not digest:
         image = repository + ':' + tag
-        repository, digest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
+        repository, digest = get_image_digest(cmd, registry_name, image, suffix, username, password)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -483,7 +483,7 @@ def acr_manifest_show(cmd,
                       manifest_spec=None,
                       manifest_id=None,
                       raw_output=None,
-                      tenant_suffix=None,
+                      suffix=None,
                       username=None,
                       password=None):
     if (manifest_id and manifest_spec) or (not manifest_id and not (registry_name and manifest_spec)):
@@ -497,7 +497,7 @@ def acr_manifest_show(cmd,
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -533,7 +533,7 @@ def acr_manifest_metadata_show(cmd,
                                registry_name=None,
                                manifest_spec=None,
                                manifest_id=None,
-                               tenant_suffix=None,
+                               suffix=None,
                                username=None,
                                password=None):
     if (manifest_id and manifest_spec) or (not manifest_id and not (registry_name and manifest_spec)):
@@ -551,7 +551,7 @@ def acr_manifest_metadata_show(cmd,
         permission=RepoAccessTokenPermission.METADATA_READ.value,
         repository=None,
         image=manifest_spec,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password)
 
@@ -560,7 +560,7 @@ def acr_manifest_metadata_update(cmd,
                                  registry_name=None,
                                  manifest_spec=None,
                                  manifest_id=None,
-                                 tenant_suffix=None,
+                                 suffix=None,
                                  username=None,
                                  password=None,
                                  delete_enabled=None,
@@ -603,7 +603,7 @@ def acr_manifest_metadata_update(cmd,
         permission=permission,
         repository=None,
         image=manifest_spec,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password)
 
@@ -612,7 +612,7 @@ def acr_manifest_delete(cmd,
                         registry_name=None,
                         manifest_spec=None,
                         manifest_id=None,
-                        tenant_suffix=None,
+                        suffix=None,
                         username=None,
                         password=None,
                         yes=False):
@@ -626,12 +626,12 @@ def acr_manifest_delete(cmd,
 
     if not digest:
         image = repository + ':' + tag
-        repository, digest = get_image_digest(cmd, registry_name, image, tenant_suffix, username, password)
+        repository, digest = get_image_digest(cmd, registry_name, image, suffix, username, password)
 
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
