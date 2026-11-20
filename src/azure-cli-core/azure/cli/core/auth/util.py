@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import base64
 import os
 from collections import namedtuple
 
@@ -125,6 +126,34 @@ def scopes_to_resource(scopes):
             return scope[:-len(s)]
 
     return scope
+
+
+def parse_claims_challenge(challenge):
+    """Parse the "claims" parameter from a WWW-Authenticate challenge and return it base64-decoded.
+
+    Example challenge with claims:
+        Bearer authorization_uri="https://login.windows-ppe.net/", error="invalid_token",
+        error_description="User session has been revoked",
+        claims="eyJhY2Nlc3NfdG9rZW4iOnsibmJmIjp7ImVzc2VudGlhbCI6dHJ1ZSwgInZhbHVlIjoiMTYwMzc0MjgwMCJ9fX0="
+
+    :return: the decoded "claims" parameter, or None if the challenge doesn't contain exactly one
+    """
+    encoded_claims = None
+    for parameter in challenge.split(","):
+        if "claims=" in parameter:
+            if encoded_claims:
+                # multiple claims challenges, e.g. for cross-tenant auth, would require special handling
+                return None
+            encoded_claims = parameter[parameter.index("=") + 1:].strip(" \"'")
+
+    if not encoded_claims:
+        return None
+
+    padding_needed = -len(encoded_claims) % 4
+    try:
+        return base64.urlsafe_b64decode(encoded_claims + "=" * padding_needed).decode()
+    except Exception:  # pylint:disable=broad-except
+        return None
 
 
 def check_result(result, tenant=None, scopes=None, claims_challenge=None):
