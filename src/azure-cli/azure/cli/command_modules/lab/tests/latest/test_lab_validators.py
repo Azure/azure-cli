@@ -7,14 +7,17 @@ import unittest
 from unittest.mock import patch
 
 from azure.mgmt.core.tools import is_valid_resource_id
-from azure.cli.core.aaz import AAZArgumentsSchema, AAZBoolArg, AAZStrArg
+from azure.cli.core.aaz import AAZArgumentsSchema, AAZBoolArg, AAZStrArg, has_value
 from azure.cli.core.azclierror import ArgumentUsageError
-from azure.cli.command_modules.lab.validators import _update_artifacts, validate_authentication_type
+from azure.cli.command_modules.lab.custom import LabVmCreate
+from azure.cli.command_modules.lab.validators import (_update_artifacts, _validate_other_parameters,
+                                                      validate_authentication_type)
 
 
 class ValidatorsCommandTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.vm_create_schema = LabVmCreate.get_arguments_schema()
         cls.jdk_artifact = {'artifact_id': '/artifactsources/public repo/artifacts/linux-java',
                             'deploymentStatusMessage': None,
                             'installTime': None,
@@ -123,6 +126,69 @@ class ValidatorsCommandTest(unittest.TestCase):
         validate_authentication_type(args, formula)
 
         self.assertEqual('supplied-password', args.password.to_serialized_data())
+
+    def test_formula_without_optional_properties(self):
+        # The service omits formula properties that are not set, such as tags and artifacts.
+        formula = {
+            'osType': 'Linux',
+            'formulaContent': {
+                'size': 'Standard_B2s'
+            }
+        }
+        for tags in (None, {'Tag': 'Value'}):
+            args = self._vm_create_args(tags=tags)
+
+            _validate_other_parameters(args, formula)
+
+            if tags:
+                self.assertEqual(tags, args.tags.to_serialized_data())
+            else:
+                self.assertFalse(has_value(args.tags))
+            self.assertFalse(has_value(args.allow_claim))
+            self.assertFalse(has_value(args.artifacts_org))
+            self.assertFalse(has_value(args.notes))
+            self.assertFalse(has_value(args.storage_type))
+            self.assertEqual('Standard_B2s', args.size.to_serialized_data())
+            self.assertEqual('Linux', args.os_type.to_serialized_data())
+
+    def test_formula_properties_are_copied(self):
+        formula = {
+            'osType': 'Windows',
+            'tags': {'Tag': 'Value'},
+            'formulaContent': {
+                'allowClaim': True,
+                'artifacts': [{'artifactId': '/artifactsources/public repo/artifacts/linux-java'}],
+                'notes': 'formula notes',
+                'size': 'Standard_B2s',
+                'storageType': 'Premium'
+            }
+        }
+        args = self._vm_create_args()
+
+        _validate_other_parameters(args, formula)
+
+        self.assertEqual({'Tag': 'Value'}, args.tags.to_serialized_data())
+        self.assertTrue(args.allow_claim.to_serialized_data())
+        self.assertEqual([{'artifact_id': '/artifactsources/public repo/artifacts/linux-java'}],
+                         args.artifacts_org.to_serialized_data())
+        self.assertEqual('formula notes', args.notes.to_serialized_data())
+        self.assertEqual('Standard_B2s', args.size.to_serialized_data())
+        self.assertEqual('Premium', args.storage_type.to_serialized_data())
+        self.assertEqual('Windows', args.os_type.to_serialized_data())
+
+    def test_formula_authentication_without_authentication_properties(self):
+        args = self._authentication_args(password='supplied-password')
+
+        validate_authentication_type(args, {'formulaContent': {'size': 'Standard_B2s'}})
+
+        self.assertEqual('password', args.authentication_type.to_serialized_data())
+        self.assertEqual('supplied-password', args.password.to_serialized_data())
+
+    def _vm_create_args(self, tags=None):
+        data = {'name': 'MyVM', 'lab_name': 'MyLab', 'resource_group': 'MyRG', 'formula': 'MyFormula'}
+        if tags is not None:
+            data['tags'] = tags
+        return self.vm_create_schema(data)
 
     @staticmethod
     def _authentication_args(password=None):
