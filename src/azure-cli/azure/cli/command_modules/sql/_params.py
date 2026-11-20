@@ -969,11 +969,11 @@ def load_arguments(self, _):
 
         c.argument('dtu',
                    arg_group=search_arg_group,
-                   help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
+                   help='Number of DTUs to match. Omit --dtu to skip this filter.')
 
         c.argument('vcores',
                    arg_group=search_arg_group,
-                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+                   help='Number of vCores to match. Omit --vcores to skip this filter.')
 
     with self.argument_context('sql db update') as c:
         c.argument('service_objective',
