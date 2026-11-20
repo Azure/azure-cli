@@ -554,6 +554,10 @@ short-summary: Get node counts for Batch pools.
 helps['batch pool reset'] = """
 type: command
 short-summary: Update the properties of a Batch pool. Unspecified properties which can be updated are reset to their defaults.
+examples:
+  - name: Set a new start task on a pool and reset other properties to their defaults.
+    text: >
+        az batch pool reset --pool-id pool1 --start-task-command-line "/bin/sh -c 'echo ready'"
 """
 
 helps['batch pool resize'] = """

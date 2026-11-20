@@ -140,7 +140,7 @@ def load_command_table(self, _):
         g.batch_command('delete', 'delete_pool')
         g.batch_command('show', 'get_pool')
         g.batch_command('set', 'update_pool')
-        g.custom_command('reset', 'replace_pool')
+        g.custom_command('reset', 'replace_pool', transform=batch_transformer.transform_result)
         g.custom_command('resize', 'resize_pool')
         g.batch_command('autoscale disable', 'disable_pool_auto_scale')
         g.batch_command('autoscale enable', 'enable_pool_auto_scale')

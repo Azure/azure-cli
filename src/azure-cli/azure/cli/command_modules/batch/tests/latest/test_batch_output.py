@@ -95,17 +95,15 @@ class TestBatchOutput(unittest.TestCase):
             ('POST', '/pools/pool1/updateproperties'): (204, None),
             ('GET', '/pools/pool1'): (200, POOL)})
 
-        # 'pool reset' prints the SDK model without the module's key changes, unlike 'pool show'
-        self.assertEqual(pool['stats']['resourceStats']['diskReadIOps'], 3000000000)
-        self.assertEqual(pool['stats']['resourceStats']['diskWriteIOps'], 2222)
-        self.assertEqual(pool['resizeErrors'], [{'code': 'AllocationFailed', 'message': 'Quota reached',
-                                                 'valuesProperty': [{'name': 'Reason', 'value': 'Quota'}]}])
-        self.assertEqual(pool['targetNodeCommunicationMode'], 'default')
-        self.assertEqual(pool['currentNodeCommunicationMode'], 'simplified')
-        self.assertEqual(pool['resourceTags'], {'tag': 'value'})
-        self.assertEqual(pool['resizeTimeout'], '0:15:00')
-        self.assertEqual(pool['virtualMachineConfiguration']['nodeAgentSkuId'], 'batch.node.ubuntu 20.04')
-        self.assertEqual(pool['virtualMachineConfiguration']['osDisk']['diskSizeGB'], 100)
+        # 'pool reset' prints the pool it reads back the same way as 'pool show'
+        self.assertEqual(pool, self._invoke('batch pool show --pool-id pool1', {('GET', '/pools/pool1'): (200, POOL)}))
+        self.assertEqual(pool['stats'], {'resourceStats': {'diskReadIops': 3000000000, 'diskWriteIops': 2222}})
+        self.assertNotIn('targetNodeCommunicationMode', pool)
+        self.assertNotIn('currentNodeCommunicationMode', pool)
+        self.assertNotIn('resourceTags', pool)
+        self.assertEqual(pool['resizeTimeout'], 'PT15M')
+        self.assertEqual(pool['virtualMachineConfiguration'],
+                         {'nodeAgentSkuId': 'batch.node.ubuntu 20.04', 'osDisk': {'diskSizeGb': 100}})
 
     def test_batch_node_show_output(self):
         node = self._invoke('batch node show --pool-id pool1 --node-id node1',
