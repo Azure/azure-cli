@@ -40,7 +40,7 @@ def bash_step(path, display_name):
 class TestReleasePipeline(unittest.TestCase):
 
     def run_with_brew_stub(self, script, **settings):
-        with tempfile.TemporaryDirectory(prefix="cask commands ") as directory:
+        with tempfile.TemporaryDirectory(prefix="cask commands ", dir=ROOT) as directory:
             root = Path(directory)
             log = root / "brew.jsonl"
             brew = root / "brew"
@@ -74,6 +74,7 @@ class TestReleasePipeline(unittest.TestCase):
             calls = [json.loads(line) for line in log.read_text().splitlines()]
             return result, calls
 
+    @unittest.skipUnless(os.name == "posix", "The executable brew stub requires POSIX shebangs.")
     def test_temporary_cleanup_is_specific_and_surfaces_failures(self):
         cleanups = [script for script, label in bash_steps(GENERATION) if label == "displayName: 'Cleanup'"]
         self.assertEqual(len(cleanups), 2)
@@ -122,9 +123,9 @@ class TestReleasePipeline(unittest.TestCase):
                     for field in ("GitHubRepo", "HomebrewTapRepo", "PythonVersion"):
                         self.assertNotIn("${{ parameters." + field + " }}", script)
                     result = subprocess.run(
-                        ["bash", "-n"], input=script, capture_output=True, text=True, timeout=10, check=False,
+                        ["bash", "-n"], input=script.encode("utf-8"), capture_output=True, timeout=10, check=False,
                     )
-                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(result.returncode, 0, result.stderr.decode("utf-8"))
                 count += 1
         self.assertGreater(count, 15)
 
@@ -133,6 +134,36 @@ class TestReleasePipeline(unittest.TestCase):
         self.assertIn("template: .azure-pipelines/templates/standalone/cask-generation-and-tests.yml", text)
         generation = GENERATION.read_text()
         self.assertIn("artifactName: 'cask-definition'", generation)
+
+    def test_macos_release_stages_are_arm64_only(self):
+        for name in ("macos-build-jobs.yml", "macos-sign-notarize-jobs.yml"):
+            text = (PIPELINES / "templates/macos" / name).read_text()
+            with self.subTest(template=name):
+                self.assertNotIn("Intel", text)
+                self.assertNotIn("x86_64", text)
+                self.assertIn("Architecture: 'arm64'", text)
+                self.assertIn("MacosArm64Image", text)
+
+    def test_cask_generation_retains_linux_architectures_and_generation_dependency(self):
+        text = GENERATION.read_text()
+        self.assertNotIn("MacosIntelImage", text)
+        self.assertNotIn("macos-x86_64", text)
+        self.assertNotIn("macos-cli-signed-notarized-x86_64", text)
+        self.assertNotIn("X86_64_MACOS", text)
+        self.assertNotIn("--x86-64-macos-sha", text)
+        self.assertIn("artifact: 'macos-cli-signed-notarized-arm64'", text)
+        for architecture in ("arm64", "x86_64"):
+            self.assertIn(f"artifact: 'linux-cli-final-{architecture}'", text)
+        generation = bash_step(GENERATION, "Generate cask definition")
+        for option in ("--arm64-macos-sha", "--arm64-linux-sha", "--x86-64-linux-sha"):
+            self.assertIn(option, generation)
+        linux = text.split("- job: TestLinuxTempTapCask\n", 1)[1].split("\n  steps:", 1)[0]
+        self.assertIn("dependsOn: TestMacOSTempTapCask", linux)
+        self.assertIn("Architecture: 'arm64'", linux)
+        self.assertIn("Architecture: 'x86_64'", linux)
+        macos = text.split("- job: TestMacOSTempTapCask\n", 1)[1].split("\n  steps:", 1)[0]
+        self.assertIn("Architecture: 'arm64'", macos)
+        self.assertNotIn("x86_64", macos)
 
     def test_unchanged_artifact_is_checked_before_staging(self):
         generation = GENERATION.read_text()
