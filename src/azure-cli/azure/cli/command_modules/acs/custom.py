@@ -2871,6 +2871,28 @@ def _launch_aks_desktop_installer(installer_path, system, version):
             'The AKS Desktop installer exited with code {}.'.format(ex.returncode))
 
 
+def _get_installed_aks_desktop_deb_version():
+    from azure.cli.core.util import get_safe_executable_path, run_cmd
+
+    try:
+        dpkg_query = get_safe_executable_path('dpkg-query')
+        if not dpkg_query:
+            return None
+        result = run_cmd([dpkg_query, '-W', '-f=${Status} ${Version}\\n', 'aks-desktop'],
+                         capture_output=True, encoding='utf-8', check=False, timeout=10)
+    except (OSError, subprocess.SubprocessError, UnicodeError) as ex:
+        logger.debug('Could not query the installed AKS Desktop Debian package: %s', ex)
+        return None
+
+    lines = result.stdout.strip().splitlines()
+    if result.returncode or len(lines) != 1:
+        return None
+    fields = lines[0].split()
+    if len(fields) == 4 and fields[1:3] == ['ok', 'installed']:
+        return fields[3]
+    return None
+
+
 def aks_install_desktop(cmd, version=None, gh_token=None):
     from azure.cli.core._environment import get_config_dir
 
@@ -2881,6 +2903,16 @@ def aks_install_desktop(cmd, version=None, gh_token=None):
     release, release_version = _get_aks_desktop_release(version, gh_token=gh_token)
     asset = _select_aks_desktop_asset(
         release, release_version, system, arch)
+    installed_version = None
+    if system == 'linux' and asset['name'].endswith('.deb'):
+        installed_version = _get_installed_aks_desktop_deb_version()
+        if installed_version:
+            # Electron's Debian build revision is independent of the release and artifact filename.
+            upstream_version = installed_version.split(':', 1)[-1].rsplit('-', 1)[0]
+            if upstream_version == release_version.replace('-', '~'):
+                logger.warning('AKS Desktop %s is already installed (Debian package version %s).',
+                               release_version, installed_version)
+                return
 
     while True:
         # GUI launchers return before the installer has finished consuming its file.
@@ -2894,6 +2926,17 @@ def aks_install_desktop(cmd, version=None, gh_token=None):
         try:
             installer_path = os.path.join(installer_dir, asset['name'])
             _download_aks_desktop_asset(asset, installer_path)
+            if installed_version:
+                from shlex import quote
+
+                keep_installer = True
+                logger.warning(
+                    'AKS Desktop Debian package %s is installed; target release is %s. '
+                    'The GUI installer may not replace an installed package. '
+                    'Installer retained at "%s". After installation, remove "%s" when no longer needed. '
+                    'Run: sudo apt install %s', installed_version, release_version,
+                    os.path.abspath(installer_path), os.path.abspath(installer_dir), quote(os.path.abspath(installer_path)))
+                return
             try:
                 _launch_aks_desktop_installer(installer_path, system, release_version)
             except (ClientRequestError, FileOperationError, OSError) as ex:
