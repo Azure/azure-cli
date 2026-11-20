@@ -105,9 +105,14 @@ def raise_subdivision_deployment_error(error_message, error_code=None):
 
 
 def handle_template_based_exception(ex):
+    from azure.core.exceptions import HttpResponseError
+
     try:
         raise CLIError(ex.inner_exception.error.message)
     except AttributeError:
+        if isinstance(ex, HttpResponseError):
+            # The SDK message includes parsed error details; the response stream may be consumed.
+            raise_subdivision_deployment_error(ex.message, ex.error.code if ex.error else None)
         if hasattr(ex, 'response'):
             raise_subdivision_deployment_error(ex.response.internal_response.text, ex.error.code if ex.error else None)
         else:
