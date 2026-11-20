@@ -20,11 +20,11 @@ class CognitiveServicesDeploymentTests(ScenarioTest):
             'sname': sname,
             'kind': 'OpenAI',
             'sku': 'S0',
-            'location': 'JAPANEAST'
+            'location': 'japaneast'
         })
 
         # test to create cognitive services account
-        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
+        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --assign-identity --yes',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
@@ -34,13 +34,13 @@ class CognitiveServicesDeploymentTests(ScenarioTest):
 
         self.assertEqual(self.cmd('az cognitiveservices account deployment list -n {sname} -g {rg}').get_output_in_json(), [])
 
-        deployment = self.cmd('az cognitiveservices account deployment create -n {sname} -g {rg} --deployment-name dpy --model-name "gpt-35-turbo" --model-version "0125" --model-format OpenAI --sku-name "Standard" --sku-capacity 1').get_output_in_json()
+        deployment = self.cmd('az cognitiveservices account deployment create -n {sname} -g {rg} --deployment-name dpy --model-name "text-embedding-3-small" --model-version "1" --model-format OpenAI --sku-name "Standard" --sku-capacity 1').get_output_in_json()
 
         deployments = self.cmd('az cognitiveservices account deployment list -n {sname} -g {rg}').get_output_in_json()
         self.assertTrue(len(deployments) > 0)
         deployment = self.cmd('az cognitiveservices account deployment show -n {sname} -g {rg} --deployment-name dpy').get_output_in_json()
         self.assertEqual(deployment['name'], 'dpy')
-        self.assertEqual(deployment['properties']['model']['name'], 'gpt-35-turbo')
+        self.assertEqual(deployment['properties']['model']['name'], 'text-embedding-3-small')
 
         self.cmd('az cognitiveservices account deployment delete -n {sname} -g {rg} --deployment-name dpy')
         self.assertEqual(self.cmd('az cognitiveservices account deployment list -n {sname} -g {rg}').get_output_in_json(), [])
