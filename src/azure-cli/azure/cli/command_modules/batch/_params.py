@@ -180,6 +180,13 @@ def load_arguments(self, _):
 
     with self.argument_context('batch location list-skus') as c:
         c.argument('location_name', get_location_type(self.cli_ctx), help='The region for which to display the available Batch VM SKUs.')
+        c.argument('filter', help='OData filter expression. Valid properties for filtering are "familyName". Default value is None.')
+
+    # azure-mgmt-batch 19.0.0 documents these as keyword arguments, which the help doesn't read
+    for command in ['application list', 'application package list', 'location list-skus',
+                    'private-endpoint-connection list', 'private-link-resource list']:
+        with self.argument_context(f'batch {command}') as c:
+            c.argument('maxresults', help='The maximum number of items to return in the response. Default value is None.')
 
     for command in ['list', 'show', 'create', 'set', 'delete', 'package']:
         with self.argument_context(f'batch application {command}') as c:
@@ -254,6 +261,11 @@ def load_arguments(self, _):
     with self.argument_context('batch private-link-resource show') as c:
         c.argument('private_link_resource_name', options_list=['--name', '-n'],
                    help='The private link resource name. This must be unique within the account.')
+
+    # azure-mgmt-batch 19.0.0 describes this as the name of a new account; keep the help it had
+    for command in ['private-endpoint-connection', 'private-link-resource']:
+        with self.argument_context(f'batch {command}') as c:
+            c.argument('account_name', help='The name of the Batch account. Required.')
 
     for command in [
         'pool delete', 'pool show', 'pool set', 'pool autoscale enable',
