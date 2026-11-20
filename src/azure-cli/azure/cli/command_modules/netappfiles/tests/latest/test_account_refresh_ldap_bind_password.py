@@ -6,7 +6,8 @@
 import time
 
 from azure.core.exceptions import HttpResponseError
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
+from azure.cli.core.azclierror import ResourceNotFoundError
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 
 LOCATION = "westus2"
@@ -31,7 +32,7 @@ LOCATION = "westus2"
 # That subnet must be delegated to Microsoft.NetApp/volumes and able to reach
 # the existing contoso.com LDAP server at 10.0.2.4.
 # The positive test assigns the existing identity to the new account,
-# configures LDAP and cleans up each created resource in a finally block,
+# configures LDAP and cleans up each attempted resource creation in a finally block,
 # including when later commands or checks fail. Cleanup waits 40 seconds before each
 # deletion during live/recording runs, with no delay during playback. Only the
 # negative test deletes its prepared resource group. The existing network
@@ -52,7 +53,6 @@ LOCATION = "westus2"
 
 
 class AzureNetAppFilesRefreshLdapBindPasswordScenarioTest(ScenarioTest):
-    @live_only()
     def test_refresh_ldap_bind_password(self):
         # ToDo: Remove all hardcoded values and replace with dynamic test setup.
         self.kwargs.update({
@@ -76,22 +76,22 @@ class AzureNetAppFilesRefreshLdapBindPasswordScenarioTest(ScenarioTest):
         self.kwargs.update({
             'identity_id': identity['id'].replace('/resourcegroups/', '/resourceGroups/', 1),
         })
-        created_resources = set()
+        attempted_resources = set()
         try:
+            attempted_resources.add('account')
             account = self.cmd(
                 "az netappfiles account create -g {rg} -a {acc_name} -l {loc} "
                 "--identity-type UserAssigned --mi-user-assigned \"{identity_id}\""
             )
-            created_resources.add('account')
             account.assert_with_checks([
                 self.check('name', '{acc_name}'),
                 self.check('identity.type', 'UserAssigned'),
             ])
+            attempted_resources.add('pool')
             pool = self.cmd(
                 "az netappfiles pool create -g {rg} -a {acc_name} -p {pool_name} -l {loc} "
                 "--service-level Premium --size 4"
             )
-            created_resources.add('pool')
             pool.assert_with_checks([self.check('name', '{acc_name}/{pool_name}')])
 
             self.cmd(
@@ -111,13 +111,13 @@ class AzureNetAppFilesRefreshLdapBindPasswordScenarioTest(ScenarioTest):
                 "az network vnet subnet show -g {network_rg} --vnet-name {vnet_name} -n {subnet_name}"
             ).get_output_in_json()
             self.kwargs['subnet_id'] = subnet['id']
+            attempted_resources.add('volume')
             volume = self.cmd(
                 "az netappfiles volume create -g {rg} --account-name {acc_name} --pool-name {pool_name} "
                 "--volume-name {vol_name} -l {loc} --creation-token {vol_name} "
                 "--service-level Premium --usage-threshold 100 --ldap-enabled true --ldap-server-type OpenLdap "
                 "--subnet \"{subnet_id}\" --vnet {vnet_name} --protocol-types NFSv3"
             )
-            created_resources.add('volume')
             volume.assert_with_checks([
                 self.check('name', '{acc_name}/{pool_name}/{vol_name}'),
                 self.check('ldapEnabled', True),
@@ -136,11 +136,17 @@ class AzureNetAppFilesRefreshLdapBindPasswordScenarioTest(ScenarioTest):
                 ('pool', "az netappfiles pool delete -g {rg} -a {acc_name} -p {pool_name} --yes"),
                 ('account', "az netappfiles account delete -g {rg} -a {acc_name} --yes"),
             ):
-                if resource in created_resources:
+                if resource in attempted_resources:
                     with self.subTest(cleanup=resource):
                         if self.is_live or self.in_recording:
                             time.sleep(40)
-                        self.cmd(command)
+                        try:
+                            self.cmd(command)
+                        except ResourceNotFoundError:
+                            pass
+                        except HttpResponseError as error:
+                            if error.status_code != 404:
+                                raise
 
     @ResourceGroupPreparer(
         name_prefix='cli_netappfiles_test_refresh_ldap_',
