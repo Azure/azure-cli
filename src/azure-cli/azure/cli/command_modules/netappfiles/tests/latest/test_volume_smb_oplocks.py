@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, live_only
 
 
 class AzureNetAppFilesSmbOplocksScenarioTest(ScenarioTest):
@@ -12,6 +12,7 @@ class AzureNetAppFilesSmbOplocksScenarioTest(ScenarioTest):
     # The account must have working AD configuration reachable from this subnet.
     # Verify oplocks are enabled at creation and can then be disabled.
     # Only the uniquely named test volume is created and deleted.
+    @live_only()
     def test_volume_create_with_smb_oplocks(self):
         self.kwargs.update({
             'rg': 'sdk-py-test-rg',

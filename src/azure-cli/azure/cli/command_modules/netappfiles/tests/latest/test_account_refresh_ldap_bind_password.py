@@ -6,7 +6,7 @@
 import time
 
 from azure.core.exceptions import HttpResponseError
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
 
 LOCATION = "westus2"
@@ -52,6 +52,7 @@ LOCATION = "westus2"
 
 
 class AzureNetAppFilesRefreshLdapBindPasswordScenarioTest(ScenarioTest):
+    @live_only()
     def test_refresh_ldap_bind_password(self):
         # ToDo: Remove all hardcoded values and replace with dynamic test setup.
         self.kwargs.update({
