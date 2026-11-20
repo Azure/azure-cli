@@ -4,11 +4,15 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=wrong-import-position
 
+import sys
+
+if __name__ == '__main__' and not (getattr(sys.flags, 'safe_path', False) or sys.flags.isolated):
+    # Remove Python's implicit import path, but retain explicit PYTHONPATH entries.
+    sys.path.pop(0)
+
 import timeit
 # Log the start time
 start_time = timeit.default_timer()
-
-import sys
 
 from azure.cli.core import telemetry
 from azure.cli.core import get_default_cli
