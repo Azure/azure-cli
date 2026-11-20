@@ -5,16 +5,22 @@
 
 import json
 from collections import OrderedDict
+from email.utils import parsedate_to_datetime
 from urllib.parse import unquote
 
-HEAD_PROPERTIES = {  # Convert response headers to properties.
-    'Last-Modified': 'lastModified',
-    'ocp-creation-time': 'creationTime',
-    'ocp-batch-file-isdirectory': 'isDirectory',
-    'ocp-batch-file-url': 'url',
-    'ocp-batch-file-mode': 'fileMode',
-    'Content-Length': 'contentLength',
-    'Content-Type': 'contentType'
+
+def _is_true(value):
+    return value.lower() == 'true'
+
+
+HEAD_PROPERTIES = {  # Convert response headers to properties, with the values' types.
+    'Last-Modified': ('lastModified', parsedate_to_datetime),
+    'ocp-creation-time': ('creationTime', parsedate_to_datetime),
+    'ocp-batch-file-isdirectory': ('isDirectory', _is_true),
+    'ocp-batch-file-url': ('url', unquote),
+    'ocp-batch-file-mode': ('fileMode', str),
+    'Content-Length': ('contentLength', int),
+    'Content-Type': ('contentType', str)
 }
 
 
@@ -49,11 +55,17 @@ def _account_key_table_format(result):
 
 
 def transform_response_headers(result):
-    """Extract and format file property headers from ClientRawResponse object"""
-    properties = {HEAD_PROPERTIES[k]: v for k, v in result.headers.items()
-                  if k in HEAD_PROPERTIES}
-    if properties.get('url'):
-        properties['url'] = unquote(properties['url'])
+    """Return the file properties from the response headers of a file properties request"""
+    headers = {name.lower(): value for name, value in result.headers.items()}  # Header names ignore case
+    properties = {}
+    for header, (name, convert) in HEAD_PROPERTIES.items():
+        value = headers.get(header.lower())
+        if value is None:
+            continue
+        try:
+            properties[name] = convert(value)
+        except (TypeError, ValueError):
+            properties[name] = value
     return properties
 
 

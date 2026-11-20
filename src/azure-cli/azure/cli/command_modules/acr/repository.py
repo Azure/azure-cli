@@ -124,13 +124,13 @@ def acr_repository_list(cmd,
                         registry_name,
                         top=None,
                         resource_group_name=None,  # pylint: disable=unused-argument
-                        tenant_suffix=None,
+                        suffix=None,
                         username=None,
                         password=None):
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         permission=RegistryAccessTokenPermission.CATALOG.value)
@@ -146,13 +146,13 @@ def acr_repository_list(cmd,
 
 def acr_repository_deleted_list(cmd,
                                 registry_name,
-                                tenant_suffix=None,
+                                suffix=None,
                                 username=None,
                                 password=None):
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         permission=RegistryAccessTokenPermission.DELETED_CATALOG.value)
@@ -170,14 +170,14 @@ def acr_repository_show_tags(cmd,
                              top=None,
                              orderby=None,
                              resource_group_name=None,  # pylint: disable=unused-argument
-                             tenant_suffix=None,
+                             suffix=None,
                              username=None,
                              password=None,
                              detail=False):
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -223,14 +223,14 @@ def acr_repository_show_manifests(cmd,
                                   top=None,
                                   orderby=None,
                                   resource_group_name=None,  # pylint: disable=unused-argument
-                                  tenant_suffix=None,
+                                  suffix=None,
                                   username=None,
                                   password=None,
                                   detail=False):
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -261,7 +261,7 @@ def acr_repository_show(cmd,
                         repository=None,
                         image=None,
                         resource_group_name=None,  # pylint: disable=unused-argument
-                        tenant_suffix=None,
+                        suffix=None,
                         username=None,
                         password=None):
     return _acr_repository_attributes_helper(
@@ -272,7 +272,7 @@ def acr_repository_show(cmd,
         permission=RepoAccessTokenPermission.METADATA_READ.value,
         repository=repository,
         image=image,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password)
 
@@ -282,7 +282,7 @@ def acr_repository_update(cmd,
                           repository=None,
                           image=None,
                           resource_group_name=None,  # pylint: disable=unused-argument
-                          tenant_suffix=None,
+                          suffix=None,
                           username=None,
                           password=None,
                           delete_enabled=None,
@@ -318,7 +318,7 @@ def acr_repository_update(cmd,
         permission=permission,
         repository=repository,
         image=image,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password)
 
@@ -330,7 +330,7 @@ def _acr_repository_attributes_helper(cmd,
                                       permission,
                                       repository=None,
                                       image=None,
-                                      tenant_suffix=None,
+                                      suffix=None,
                                       username=None,
                                       password=None):
     _validate_parameters(repository, image)
@@ -345,7 +345,7 @@ def _acr_repository_attributes_helper(cmd,
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -375,7 +375,7 @@ def acr_repository_untag(cmd,
                          registry_name,
                          image,
                          resource_group_name=None,  # pylint: disable=unused-argument
-                         tenant_suffix=None,
+                         suffix=None,
                          username=None,
                          password=None):
     repository, tag, _ = parse_image_name(image)
@@ -383,7 +383,7 @@ def acr_repository_untag(cmd,
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -402,7 +402,7 @@ def acr_repository_delete(cmd,
                           repository=None,
                           image=None,
                           resource_group_name=None,  # pylint: disable=unused-argument
-                          tenant_suffix=None,
+                          suffix=None,
                           username=None,
                           password=None,
                           yes=False):
@@ -418,7 +418,7 @@ def acr_repository_delete(cmd,
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
@@ -489,7 +489,7 @@ def _delete_manifest_confirmation(login_server,
     return manifest
 
 
-def get_image_digest(cmd, registry_name, image, tenant_suffix=None, username=None, password=None):
+def get_image_digest(cmd, registry_name, image, suffix=None, username=None, password=None):
     repository, tag, digest = parse_image_name(image, allow_digest=True)
 
     if digest:
@@ -499,7 +499,7 @@ def get_image_digest(cmd, registry_name, image, tenant_suffix=None, username=Non
     login_server, username, password = get_access_credentials(
         cmd=cmd,
         registry_name=registry_name,
-        tenant_suffix=tenant_suffix,
+        suffix=suffix,
         username=username,
         password=password,
         repository=repository,
