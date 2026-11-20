@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-08-01",
+        "version": "2026-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2026-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2026-09-01"],
         ]
     }
 
@@ -343,6 +343,13 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
+        _args_schema.smb_oplocks = AAZStrArg(
+            options=["--smb-oplocks"],
+            arg_group="Properties",
+            help="Enables or disables SMB opportunistic lock property for SMB Shares. Only applicable for SMB/DualProtocol volume",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
         _args_schema.snapshot_directory_visible = AAZBoolArg(
             options=["--snapshot-dir-visible", "--snapshot-directory-visible"],
             arg_group="Properties",
@@ -530,7 +537,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-08-01",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -637,7 +644,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-08-01",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -718,6 +725,7 @@ class Update(AAZCommand):
                 properties.set_prop("smbContinuouslyAvailable", AAZBoolType, ".smb_continuously_available")
                 properties.set_prop("smbEncryption", AAZBoolType, ".smb_encryption")
                 properties.set_prop("smbNonBrowsable", AAZStrType, ".smb_non_browsable")
+                properties.set_prop("smbOplocks", AAZStrType, ".smb_oplocks")
                 properties.set_prop("snapshotDirectoryVisible", AAZBoolType, ".snapshot_directory_visible")
                 properties.set_prop("subnetId", AAZStrType, ".subnet_id", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("throughputMibps", AAZFloatType, ".throughput_mibps", typ_kwargs={"nullable": True})
@@ -923,9 +931,6 @@ class _UpdateHelper:
             serialized_name="effectiveNetworkFeatures",
             flags={"read_only": True},
         )
-        properties.enable_subvolumes = AAZStrType(
-            serialized_name="enableSubvolumes",
-        )
         properties.encrypted = AAZBoolType(
             flags={"read_only": True},
         )
@@ -966,6 +971,9 @@ class _UpdateHelper:
         )
         properties.ldap_enabled = AAZBoolType(
             serialized_name="ldapEnabled",
+        )
+        properties.ldap_server_type = AAZStrType(
+            serialized_name="ldapServerType",
         )
         properties.maximum_number_of_files = AAZIntType(
             serialized_name="maximumNumberOfFiles",
@@ -1023,6 +1031,9 @@ class _UpdateHelper:
         )
         properties.smb_non_browsable = AAZStrType(
             serialized_name="smbNonBrowsable",
+        )
+        properties.smb_oplocks = AAZStrType(
+            serialized_name="smbOplocks",
         )
         properties.snapshot_directory_visible = AAZBoolType(
             serialized_name="snapshotDirectoryVisible",

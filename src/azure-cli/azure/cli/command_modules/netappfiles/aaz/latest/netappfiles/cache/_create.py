@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-08-01",
+        "version": "2026-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}", "2026-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}", "2026-09-01"],
         ]
     }
 
@@ -282,7 +282,7 @@ class Create(AAZCommand):
             options=["--ldap-server-type"],
             arg_group="Properties",
             help="Specifies the type of LDAP server for flexcache volume.",
-            enum={"ActiveDirectory": "ActiveDirectory", "OpenLDAP": "OpenLDAP"},
+            enum={"ActiveDirectory": "ActiveDirectory", "OpenLdap": "OpenLdap"},
         )
         _args_schema.peering_subnet_resource_id = AAZResourceIdArg(
             options=["--peering-subnet-id", "--peering-subnet-resource-id"],
@@ -341,6 +341,12 @@ class Create(AAZCommand):
             options=["--smb-non-browsable"],
             arg_group="SmbSettings",
             help="Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        _args_schema.smb_oplocks = AAZStrArg(
+            options=["--smb-oplocks"],
+            arg_group="SmbSettings",
+            help="Enables or disables SMB opportunistic lock property for SMB Shares. Only applicable for SMB/DualProtocol cache",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         return cls._args_schema
@@ -434,7 +440,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-08-01",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -530,6 +536,7 @@ class Create(AAZCommand):
                 smb_settings.set_prop("smbAccessBasedEnumeration", AAZStrType, ".smb_access_based_enumeration")
                 smb_settings.set_prop("smbEncryption", AAZStrType, ".smb_encryption")
                 smb_settings.set_prop("smbNonBrowsable", AAZStrType, ".smb_non_browsable")
+                smb_settings.set_prop("smbOplocks", AAZStrType, ".smb_oplocks")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -765,6 +772,9 @@ class Create(AAZCommand):
             )
             smb_settings.smb_non_browsable = AAZStrType(
                 serialized_name="smbNonBrowsable",
+            )
+            smb_settings.smb_oplocks = AAZStrType(
+                serialized_name="smbOplocks",
             )
 
             system_data = cls._schema_on_200_201.system_data
