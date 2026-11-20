@@ -47,6 +47,7 @@ from ._formatters import format_what_if_operation_result
 from ._stacks_formatters import DeploymentStacksWhatIfResultFormatter
 from ._bicep import (
     run_bicep_command,
+    resolve_bicep_installation,
     is_bicep_file,
     is_bicepparam_file,
     is_using_none_bicepparam_file,
@@ -391,7 +392,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         template_for_deployment = None  # Use template_link for URI-based deployments
     else:
         # This function is resource-group-specific, so we hardcode 'resourceGroup' deployment scope
-        template_content, template_obj = _process_template_file(cmd, template_file, 'resourceGroup')
+        installation = _resolve_deployment_bicep_installation(template_file, None)
+        template_content, template_obj = _process_template_file(cmd, template_file, 'resourceGroup', installation)
         template_for_deployment = _get_template_for_deployment(template_uri, None, template_file, template_content, template_obj, None)
 
     if rollback_on_error == '':
@@ -1037,6 +1039,14 @@ def _get_bicepparam_file_path(parameters):
     return bicepparam_file_path
 
 
+def _resolve_deployment_bicep_installation(template_file, parameters):
+    if _is_bicepparam_file_provided(parameters):
+        return resolve_bicep_installation(_get_bicepparam_file_path(parameters))
+    if is_bicep_file(template_file):
+        return resolve_bicep_installation(template_file)
+    return None
+
+
 def _parse_bicepparam_inline_params(parameters, template_obj):
     parsed_inline_params = {}
 
@@ -1055,15 +1065,21 @@ def _parse_bicepparam_inline_params(parameters, template_obj):
     return name_value_obj
 
 
-def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_params=None):
+def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_params=None, installation=None):
     custom_env = os.environ.copy()
     if inline_params:
         custom_env["BICEP_PARAMETERS_OVERRIDES"] = json.dumps(inline_params)
 
     if template_file:
-        build_bicepparam_output = run_bicep_command(cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"], custom_env=custom_env)
+        build_bicepparam_output = run_bicep_command(
+            cli_ctx, ["build-params", bicepparam_file, "--bicep-file", template_file, "--stdout"],
+            custom_env=custom_env, installation=installation
+        )
     else:
-        build_bicepparam_output = run_bicep_command(cli_ctx, ["build-params", bicepparam_file, "--stdout"], custom_env=custom_env)
+        build_bicepparam_output = run_bicep_command(
+            cli_ctx, ["build-params", bicepparam_file, "--stdout"],
+            custom_env=custom_env, installation=installation
+        )
 
     template_content = None
     template_spec_id = None
@@ -1078,15 +1094,30 @@ def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_param
     return template_content, template_spec_id, parameters_content
 
 
-def _parse_bicepparam_file(cmd, template_file, parameters):
-    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
+def _parse_bicepparam_file(cmd, template_file, parameters, installation=None):
+    if installation is None:
+        ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version_bicepparam_compilation = "0.14.85"
-    if not bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_bicepparam_compilation):
+    if not bicep_version_greater_than_or_equal_to(
+        cmd.cli_ctx, minimum_supported_version_bicepparam_compilation, installation=installation
+    ):
+        if installation is not None:
+            raise ArgumentUsageError(
+                f"The selected Bicep CLI {installation.version} does not support .bicepparam compilation. "
+                f"Update bicep.version to allow {minimum_supported_version_bicepparam_compilation} or later."
+            )
         raise ArgumentUsageError(f"Unable to compile .bicepparam file with the current version of Bicep CLI. Please upgrade Bicep CLI to {minimum_supported_version_bicepparam_compilation} or later.")
 
     minimum_supported_version_supplemental_param = "0.22.6"
-    if _get_parameter_count(parameters) > 1 and not bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_supplemental_param):
+    if _get_parameter_count(parameters) > 1 and not bicep_version_greater_than_or_equal_to(
+        cmd.cli_ctx, minimum_supported_version_supplemental_param, installation=installation
+    ):
+        if installation is not None:
+            raise ArgumentUsageError(
+                f"The selected Bicep CLI {installation.version} does not support supplemental parameters. "
+                f"Update bicep.version to allow {minimum_supported_version_supplemental_param} or later."
+            )
         raise ArgumentUsageError(f"Current version of Bicep CLI does not support supplemental parameters with .bicepparam file. Please upgrade Bicep CLI to {minimum_supported_version_supplemental_param} or later.")
 
     bicepparam_file = _get_bicepparam_file_path(parameters)
@@ -1102,15 +1133,19 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
 
     if using_none:
         # For 'using none', build params without --bicep-file and build template separately
-        _, _, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, None)
+        _, _, parameters_content = _build_bicepparam_file(
+            cmd.cli_ctx, bicepparam_file, None, installation=installation
+        )
         template_content = (
-            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file], installation=installation)
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
         template_spec_id = None
     else:
-        template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file)
+        template_content, template_spec_id, parameters_content = _build_bicepparam_file(
+            cmd.cli_ctx, bicepparam_file, template_file, installation=installation
+        )
 
     if _get_parameter_count(parameters) > 1:
         template_obj = None
@@ -1122,7 +1157,14 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
         inline_params = _parse_bicepparam_inline_params(parameters, template_obj)
 
         # re-invoke build-params to process inline parameters
-        template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file, inline_params)
+        if using_none:
+            _, _, parameters_content = _build_bicepparam_file(
+                cmd.cli_ctx, bicepparam_file, None, inline_params, installation=installation
+            )
+        else:
+            template_content, template_spec_id, parameters_content = _build_bicepparam_file(
+                cmd.cli_ctx, bicepparam_file, template_file, inline_params, installation=installation
+            )
 
     return template_content, template_spec_id, parameters_content
 
@@ -1157,11 +1199,13 @@ def _get_template_for_deployment(template_uri, template_spec, template_file, tem
     return template_content
 
 
-def _process_template_file(cmd, template_file, deployment_scope):
+def _process_template_file(cmd, template_file, deployment_scope, installation=None):
     """Process template file and return template_content and template_obj"""
     if is_bicep_file(template_file):
         # Get compiled JSON from bicep
-        template_content = run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+        template_content = run_bicep_command(
+            cmd.cli_ctx, ["build", "--stdout", template_file], installation=installation
+        )
         # For bicep files, parse JSON directly to avoid Azure SDK size inflation.
         # Bicep compilation outputs clean JSON without comments, so it's safe to
         # parse directly. This prevents the 4MB template size limit issue caused
@@ -1202,6 +1246,11 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     if query_string and not template_uri:
         raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
 
+    installation = (
+        _resolve_deployment_bicep_installation(template_file, parameters)
+        if not template_uri and not template_spec else None
+    )
+
     if template_uri:
         if query_string:
             template_link = TemplateLink(uri=template_uri, query_string=query_string)
@@ -1213,7 +1262,9 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         template_link = TemplateLink(id=template_spec)
         template_obj = _load_template_spec_template(cmd, template_spec)
     elif _is_bicepparam_file_provided(parameters):
-        template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(cmd, template_file, parameters)
+        template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(
+            cmd, template_file, parameters, installation=installation
+        )
         if template_spec_id:
             template_link = TemplateLink(id=template_spec_id)
             template_obj = _load_template_spec_template(cmd, template_spec_id)
@@ -1221,12 +1272,16 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
             template_obj = _remove_comments_from_json(template_content)
         else:
             # 'using none' with separate template file
-            template_content, template_obj = _process_template_file(cmd, template_file, deployment_scope)
+            template_content, template_obj = _process_template_file(
+                cmd, template_file, deployment_scope, installation=installation
+            )
 
         template_schema = template_obj.get('$schema', '')
         validate_bicep_target_scope(template_schema, deployment_scope)
     else:
-        template_content, template_obj = _process_template_file(cmd, template_file, deployment_scope)
+        template_content, template_obj = _process_template_file(
+            cmd, template_file, deployment_scope, installation=installation
+        )
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -1393,6 +1448,11 @@ def _prepare_stacks_templates_and_parameters(
         raise InvalidArgumentValueError(
             "Please enter one of the following: template file, template spec, template url, or Bicep parameters file.")
 
+    installation = (
+        _resolve_deployment_bicep_installation(template_file, parameters)
+        if not t_spec and not t_uri else None
+    )
+
     if t_spec:
         stack_properties_model.template_link = StackModels.DeploymentStacksTemplateLink(id=t_spec)
         template_obj = _load_template_spec_template(cmd, template_spec)
@@ -1407,7 +1467,9 @@ def _prepare_stacks_templates_and_parameters(
         stack_properties_model.template_link = deployment_stacks_template_link
         template_obj = _remove_comments_from_json(_urlretrieve(t_uri).decode('utf-8'), file_path=t_uri)
     elif _is_bicepparam_file_provided(parameters):
-        template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(cmd, template_file, parameters)
+        template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(
+            cmd, template_file, parameters, installation=installation
+        )
         if template_spec_id:
             template_obj = _load_template_spec_template(cmd, template_spec_id)
             stack_properties_model.template_link = StackModels.DeploymentStacksTemplateLink(id=template_spec_id)
@@ -1417,7 +1479,7 @@ def _prepare_stacks_templates_and_parameters(
         else:
             # 'using none' with separate template file
             template_content = (
-                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file], installation=installation)
                 if is_bicep_file(template_file)
                 else read_file_content(template_file)
             )
@@ -1428,7 +1490,7 @@ def _prepare_stacks_templates_and_parameters(
         validate_bicep_target_scope(template_schema, deployment_scope)
     else:
         template_content = (
-            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file], installation=installation)
             if is_bicep_file(template_file)
             else read_file_content(template_file)
         )
@@ -4427,6 +4489,7 @@ def upgrade_bicep_cli(cmd, target_platform=None):
 
 
 def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
+    installation = resolve_bicep_installation(file)
     args = ["build", file]
     if outdir:
         args += ["--outdir", outdir]
@@ -4437,13 +4500,14 @@ def build_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, no_resto
     if stdout:
         args += ["--stdout"]
 
-    output = run_bicep_command(cmd.cli_ctx, args)
+    output = run_bicep_command(cmd.cli_ctx, args, installation=installation)
 
     if stdout:
         print(output)
 
 
 def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_restore=None):
+    installation = resolve_bicep_installation(file)
     args = ["build-params", file]
     if outdir:
         args += ["--outdir", outdir]
@@ -4454,21 +4518,35 @@ def build_bicepparam_file(cmd, file, stdout=None, outdir=None, outfile=None, no_
     if stdout:
         args += ["--stdout"]
 
-    output = run_bicep_command(cmd.cli_ctx, args)
+    output = run_bicep_command(cmd.cli_ctx, args, installation=installation)
 
     if stdout:
         print(output)
 
 
+def _check_bicep_command_version(cli_ctx, minimum_version, command_name, installation):
+    supported = bicep_version_greater_than_or_equal_to(cli_ctx, minimum_version, installation=installation)
+    if not supported and installation is not None:
+        raise ValidationError(
+            f"The selected Bicep CLI {installation.version} does not support {command_name}. "
+            f"Update bicep.version to allow {minimum_version} or later."
+        )
+    return supported
+
+
 def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline=None, newline_kind=None, indent_kind=None, indent_size=None, insert_final_newline=None):
-    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
+    installation = resolve_bicep_installation(file)
+    if installation is None:
+        ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.12.1"
     kebab_case_params_supported_version = "0.26.54"
 
-    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
+    if _check_bicep_command_version(cmd.cli_ctx, minimum_supported_version, "az bicep format", installation):
         args = ["format", file]
-        use_kebab_case_params = bicep_version_greater_than_or_equal_to(cmd.cli_ctx, kebab_case_params_supported_version)
+        use_kebab_case_params = bicep_version_greater_than_or_equal_to(
+            cmd.cli_ctx, kebab_case_params_supported_version, installation=installation
+        )
         newline_kind = newline_kind or newline
 
         # Auto is no longer supported by Bicep formatter v2. Use LF as default.
@@ -4490,7 +4568,7 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
         if insert_final_newline:
             args += ["--insert-final-newline" if use_kebab_case_params else "--insertFinalNewline"]
 
-        output = run_bicep_command(cmd.cli_ctx, args)
+        output = run_bicep_command(cmd.cli_ctx, args, installation=installation)
 
         if stdout:
             print(output)
@@ -4499,49 +4577,63 @@ def format_bicep_file(cmd, file, stdout=None, outdir=None, outfile=None, newline
 
 
 def publish_bicep_file(cmd, file, target, documentationUri=None, documentation_uri=None, with_source=None, force=None):
-    ensure_bicep_installation(cmd.cli_ctx)
+    installation = resolve_bicep_installation(file)
+    if installation is None:
+        ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
     kebab_case_param_supported_version = "0.26.54"
 
-    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
+    if _check_bicep_command_version(cmd.cli_ctx, minimum_supported_version, "az bicep publish", installation):
         args = ["publish", file, "--target", target]
-        use_kebab_case_params = bicep_version_greater_than_or_equal_to(cmd.cli_ctx, kebab_case_param_supported_version)
+        use_kebab_case_params = bicep_version_greater_than_or_equal_to(
+            cmd.cli_ctx, kebab_case_param_supported_version, installation=installation
+        )
         documentation_uri = documentation_uri or documentationUri
 
         if documentation_uri:
             minimum_supported_version_for_documentationUri_parameter = "0.14.46"
-            if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_for_documentationUri_parameter):
+            if _check_bicep_command_version(
+                cmd.cli_ctx, minimum_supported_version_for_documentationUri_parameter,
+                "az bicep publish --documentation-uri", installation
+            ):
                 args += ["--documentation-uri" if use_kebab_case_params else "--documentationUri", documentation_uri]
             else:
                 logger.error("az bicep publish with --documentationUri/-d parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_documentationUri_parameter)
         if with_source:
             minimum_supported_version_for_publish_with_source = "0.23.1"
-            if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_for_publish_with_source):
+            if _check_bicep_command_version(
+                cmd.cli_ctx, minimum_supported_version_for_publish_with_source,
+                "az bicep publish --with-source", installation
+            ):
                 args += ["--with-source"]
             else:
                 logger.error("az bicep publish with --with-source/-s parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_with_source)
         if force:
             minimum_supported_version_for_publish_force = "0.17.1"
-            if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version_for_publish_force):
+            if _check_bicep_command_version(
+                cmd.cli_ctx, minimum_supported_version_for_publish_force, "az bicep publish --force", installation
+            ):
                 args += ["--force"]
             else:
                 logger.error("az bicep publish with --force parameter could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version_for_publish_force)
 
-        run_bicep_command(cmd.cli_ctx, args)
+        run_bicep_command(cmd.cli_ctx, args, installation=installation)
     else:
         logger.error("az bicep publish could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
 
 def restore_bicep_file(cmd, file, force=None):
-    ensure_bicep_installation(cmd.cli_ctx)
+    installation = resolve_bicep_installation(file)
+    if installation is None:
+        ensure_bicep_installation(cmd.cli_ctx)
 
     minimum_supported_version = "0.4.1008"
-    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
+    if _check_bicep_command_version(cmd.cli_ctx, minimum_supported_version, "az bicep restore", installation):
         args = ["restore", file]
         if force:
             args += ["--force"]
-        run_bicep_command(cmd.cli_ctx, args)
+        run_bicep_command(cmd.cli_ctx, args, installation=installation)
     else:
         logger.error("az bicep restore could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
 
@@ -4587,10 +4679,12 @@ def list_bicep_cli_versions(cmd):
 
 
 def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, stdout=None, output_format=None, include_params=None):
-    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
+    installation = resolve_bicep_installation(file)
+    if installation is None:
+        ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
-    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
+    if _check_bicep_command_version(cmd.cli_ctx, minimum_supported_version, "az bicep generate-params", installation):
         args = ["generate-params", file]
         if no_restore:
             args += ["--no-restore"]
@@ -4605,7 +4699,7 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
         if stdout:
             args += ["--stdout"]
 
-        output = run_bicep_command(cmd.cli_ctx, args)
+        output = run_bicep_command(cmd.cli_ctx, args, installation=installation)
 
         if stdout:
             print(output)
@@ -4614,17 +4708,19 @@ def generate_params_file(cmd, file, no_restore=None, outdir=None, outfile=None, 
 
 
 def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
-    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
+    installation = resolve_bicep_installation(file)
+    if installation is None:
+        ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.7.4"
-    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
+    if _check_bicep_command_version(cmd.cli_ctx, minimum_supported_version, "az bicep lint", installation):
         args = ["lint", file]
         if no_restore:
             args += ["--no-restore"]
         if diagnostics_format:
             args += ["--diagnostics-format", diagnostics_format]
 
-        output = run_bicep_command(cmd.cli_ctx, args)
+        output = run_bicep_command(cmd.cli_ctx, args, installation=installation)
 
         print(output)
     else:
@@ -4634,10 +4730,12 @@ def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
 def snapshot_bicep_file(cmd, file, mode=None, tenant_id=None, subscription_id=None,
                         management_group_id=None, location=None, resource_group=None,
                         deployment_name=None):
-    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
+    installation = resolve_bicep_installation(file)
+    if installation is None:
+        ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     minimum_supported_version = "0.41.2"
-    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
+    if _check_bicep_command_version(cmd.cli_ctx, minimum_supported_version, "az bicep snapshot", installation):
         args = ["snapshot", file]
         if mode:
             args += ["--mode", mode]
@@ -4654,7 +4752,7 @@ def snapshot_bicep_file(cmd, file, mode=None, tenant_id=None, subscription_id=No
         if deployment_name:
             args += ["--deployment-name", deployment_name]
 
-        output = run_bicep_command(cmd.cli_ctx, args)
+        output = run_bicep_command(cmd.cli_ctx, args, installation=installation)
 
         if output:
             print(output)
