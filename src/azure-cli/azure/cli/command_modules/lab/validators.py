@@ -133,7 +133,7 @@ def _validate_network_parameters(cli_ctx, args, formula=None):
                 formula['formulaContent']['labVirtualNetworkId'].split('/')[-1]
         if formula['formulaContent'].get('labSubnetName'):
             args.lab_subnet_name = args.lab_subnet_name or formula['formulaContent']['labSubnetName']
-            args.disallow_public_ip_address = formula['formulaContent']['disallowPublicIpAddress']
+            args.disallow_public_ip_address = formula['formulaContent'].get('disallowPublicIpAddress')
 
     # User did not provide vnet and not selected from formula
     if not has_value(args.vnet_name):
@@ -331,17 +331,17 @@ def _get_formula(cli_ctx, args):
 # pylint: disable=no-member
 def _validate_other_parameters(args, formula=None):
     if formula:
-        args.tags = args.tags or formula['tags']
-        if formula['formulaContent']:
+        args.tags = args.tags or formula.get('tags')
+        if formula.get('formulaContent'):
             if has_value(args.allow_claim):
                 args.allow_claim = args.allow_claim
             else:
-                args.allow_claim = formula['formulaContent']['allowClaim']
-            args.artifacts_org = args.artifacts_org or formula['formulaContent']['artifacts']
-            args.notes = args.notes or formula['formulaContent']['notes']
-            args.size = args.size or formula['formulaContent']['size']
-            args.storage_type = args.storage_type or formula['formulaContent']['storageType']
-            args.os_type = formula['osType']
+                args.allow_claim = formula['formulaContent'].get('allowClaim')
+            args.artifacts_org = args.artifacts_org or formula['formulaContent'].get('artifacts')
+            args.notes = args.notes or formula['formulaContent'].get('notes')
+            args.size = args.size or formula['formulaContent'].get('size')
+            args.storage_type = args.storage_type or formula['formulaContent'].get('storageType')
+            args.os_type = formula.get('osType')
 
 
 def validate_artifacts(cmd, args):
@@ -394,10 +394,10 @@ def _update_artifact_id(artifact_id, lab_resource_id):
 def validate_authentication_type(args, formula=None):
     if formula and formula.get('formulaContent'):
         formula_content = formula['formulaContent']
-        if formula_content['isAuthenticationWithSshKey'] is True:
+        if formula_content.get('isAuthenticationWithSshKey') is True:
             args.authentication_type = 'ssh'
             args.ssh_key = formula_content['sshKey']
-        elif formula_content['isAuthenticationWithSshKey'] is False:
+        elif formula_content.get('isAuthenticationWithSshKey') is False:
             args.user_name = formula_content['userName']
             if not has_value(args.password) and formula_content.get('password') is not None:
                 args.password = formula_content['password']
