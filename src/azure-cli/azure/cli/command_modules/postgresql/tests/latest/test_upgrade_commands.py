@@ -10,7 +10,6 @@ from unittest.mock import MagicMock, patch
 from knack.util import CLIError
 
 from azure.cli.command_modules.postgresql.commands import upgrade_commands
-from azure.cli.core.azclierror import ValidationError
 
 
 class UpgradeCommandsTest(unittest.TestCase):
@@ -63,20 +62,10 @@ class UpgradeCommandsTest(unittest.TestCase):
         self.confirmation.assert_not_called()
         self.server_factory.assert_not_called()
 
-    def test_postgres_upgrade_elastic_cluster_rejects_validate_only(self):
-        with self.assertRaises(ValidationError) as error:
-            self._upgrade(validate=True)
-
-        self.assertEqual(str(error.exception), 'Elastic cluster does not currently support this operation.')
-        self.client.begin_start_major_version_upgrade_precheck.assert_not_called()
-        self.precheck.assert_not_called()
-        self.client.begin_update.assert_not_called()
-        self.confirmation.assert_not_called()
-
-    def test_postgres_upgrade_regular_server_validate_only(self):
+    def test_postgres_upgrade_elastic_cluster_and_regular_server_validate_only(self):
         self.resolve_poller.return_value = {'name': 'precheck-id'}
 
-        for cluster in (SimpleNamespace(cluster_size=0), None):
+        for cluster in (SimpleNamespace(cluster_size=2), SimpleNamespace(cluster_size=0), None):
             with self.subTest(cluster=cluster):
                 self.server.cluster = cluster
                 self.client.begin_start_major_version_upgrade_precheck.reset_mock()
@@ -95,6 +84,21 @@ class UpgradeCommandsTest(unittest.TestCase):
                     precheck_validation_id='precheck-id',
                 )
                 self.assertIs(result, self.precheck.return_value.get.return_value)
+        self.client.begin_update.assert_not_called()
+        self.client.get.assert_not_called()
+        self.server_factory.assert_not_called()
+        self.confirmation.assert_not_called()
+        self.capabilities.assert_not_called()
+        self.replicas.assert_not_called()
+
+    def test_postgres_upgrade_validate_only_requires_precheck_id(self):
+        self.resolve_poller.return_value = {}
+
+        with self.assertRaisesRegex(CLIError, 'Failed to retrieve precheck validation id'):
+            self._upgrade(validate=True)
+
+        self.client.begin_start_major_version_upgrade_precheck.assert_called_once()
+        self.precheck.assert_not_called()
         self.client.begin_update.assert_not_called()
         self.confirmation.assert_not_called()
 
