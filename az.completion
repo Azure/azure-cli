@@ -1,19 +1,50 @@
 _az_python_argcomplete() {
     local IFS=$'\013'
     local SUPPRESS_SPACE=0
+    local STATUS
     if compopt +o nospace 2> /dev/null; then
         SUPPRESS_SPACE=1
     fi
-    COMPREPLY=( $(IFS="$IFS" \
-                  COMP_LINE="$COMP_LINE" \
-                  COMP_POINT="$COMP_POINT" \
-                  COMP_TYPE="$COMP_TYPE" \
-                  _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
-                  _ARGCOMPLETE=1 \
-                  _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
-                  "$1" 8>&1 9>&2 1>/dev/null 2>/dev/null) )
-    if [[ $? != 0 ]]; then
+    if [[ ${ARGCOMPLETE_USE_TEMPFILES:-} == 1 ]]; then
+        if COMPREPLY=( $(
+            local TMPFILE
+            local STATUS=0
+            TMPFILE=$(mktemp 2>/dev/null) || exit $?
+            IFS="$IFS" \
+                COMP_LINE="$COMP_LINE" \
+                COMP_POINT="$COMP_POINT" \
+                COMP_TYPE="$COMP_TYPE" \
+                _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
+                _ARGCOMPLETE=1 \
+                _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
+                _ARGCOMPLETE_STDOUT_FILENAME="$TMPFILE" \
+                "$1" 1>/dev/null 2>/dev/null || STATUS=$?
+            if [[ $STATUS == 0 ]]; then
+                cat "$TMPFILE" 2>/dev/null || STATUS=$?
+            fi
+            rm -f "$TMPFILE" 2>/dev/null || exit $?
+            exit "$STATUS"
+        ) ); then
+            STATUS=0
+        else
+            STATUS=$?
+        fi
+    else
+        COMPREPLY=( $(IFS="$IFS" \
+                      COMP_LINE="$COMP_LINE" \
+                      COMP_POINT="$COMP_POINT" \
+                      COMP_TYPE="$COMP_TYPE" \
+                      _ARGCOMPLETE_COMP_WORDBREAKS="$COMP_WORDBREAKS" \
+                      _ARGCOMPLETE=1 \
+                      _ARGCOMPLETE_SUPPRESS_SPACE=$SUPPRESS_SPACE \
+                      "$1" 8>&1 9>&2 1>/dev/null 2>/dev/null) )
+        STATUS=$?
+    fi
+    if [[ $STATUS != 0 ]]; then
         unset COMPREPLY
+        if [[ ${ARGCOMPLETE_USE_TEMPFILES:-} == 1 ]]; then
+            return "$STATUS"
+        fi
     elif [[ $SUPPRESS_SPACE == 1 ]] && [[ "$COMPREPLY" =~ [=/:]$ ]]; then
         compopt -o nospace
     fi
