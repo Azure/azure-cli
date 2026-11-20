@@ -4,21 +4,34 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from knack.log import get_logger
+from knack.util import CLIError
 from azure.cli.core.util import get_file_json
 from urllib.parse import urlsplit
 from azure.batch.models import (DiskEncryptionTarget)
+
+logger = get_logger(__name__)
 
 # TYPES VALIDATORS
 
 
 def datetime_format(value):
     """Validate the correct format of a datetime string and deserialize."""
-    from msrest.serialization import Deserializer
-    from msrest.exceptions import DeserializationError
+    import re
+    import isodate
+    message = "Argument {} is not a valid ISO-8601 datetime format"
+    # Same checks as msrest's Deserializer.deserialize_iso, which this used before:
+    # case-insensitive, date and time required, fractional seconds cut to 6 digits.
+    attr = value.upper()
+    if not re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}', attr):
+        raise ValueError(message.format(value))
+    attr = re.sub(r'(\.\d{6})\d+', r'\1', attr, count=1)
     try:
-        datetime_obj = Deserializer.deserialize_iso(value)
-    except DeserializationError:
-        message = "Argument {} is not a valid ISO-8601 datetime format"
+        datetime_obj = isodate.parse_datetime(attr)
+        utc_time = datetime_obj.utctimetuple()
+    except (ValueError, OverflowError):
+        raise ValueError(message.format(value))
+    if not 1 <= utc_time.tm_year <= 9999:
         raise ValueError(message.format(value))
     return datetime_obj
 
@@ -42,21 +55,21 @@ def disk_encryption_configuration_format(value):
 
 
 def duration_format(value):
-    """Validate the correct format of a timespan string and deserilize."""
-    from msrest.serialization import Deserializer
-    from msrest.exceptions import DeserializationError
+    """Validate the correct format of a timespan string. The value is passed on as typed: the SDK would write a
+    parsed duration without its years and months."""
+    import isodate
     try:
-        duration_obj = Deserializer.deserialize_duration(value)
-    except DeserializationError:
+        isodate.parse_duration(value)
+    except (ValueError, OverflowError, AttributeError):
         message = "Argument {} is not in a valid ISO-8601 duration format"
         raise ValueError(message.format(value))
-    return duration_obj
+    return value
 
 
 def metadata_item_format(value):
     """Space-separated values in 'key=value' format."""
     try:
-        data_name, data_value = value.split('=')
+        data_name, data_value = value.split('=', 1)
     except ValueError:
         message = ("Incorrectly formatted metadata. "
                    "Argument values should be in the format a=b c=d")
@@ -72,7 +85,7 @@ def string_dictionary_format(values):
     result = {}
     try:
         for value in values.split(' '):
-            k, v = value.split('=')
+            k, v = value.split('=', 1)
             result[k] = v
     except ValueError:
         message = ("Incorrectly formatted values. "
@@ -84,7 +97,7 @@ def string_dictionary_format(values):
 def environment_setting_format(value):
     """Space-separated values in 'key=value' format."""
     try:
-        env_name, env_value = value.split('=')
+        env_name, env_value = value.split('=', 1)
     except ValueError:
         message = ("Incorrectly formatted environment settings. "
                    "Argument values should be in the format a=b c=d")
@@ -204,15 +217,6 @@ def validate_json_file(namespace):
             raise ValueError(f"Invalid JSON file: {err}")
 
 
-def validate_cert_file(namespace):
-    """Validate the give cert file existing"""
-    try:
-        with open(namespace.certificate_file, "rb"):
-            pass
-    except OSError:
-        raise ValueError("Cannot access certificate file: " + namespace.certificate_file)
-
-
 def validate_options(namespace):
     """Validate any flattened request header option arguments."""
     try:
@@ -239,7 +243,7 @@ def validate_file_destination(namespace):
     file_path = path
     file_dir = os.path.dirname(path)
     if os.path.isdir(path):
-        file_name = os.path.basename(namespace.file_name)
+        file_name = os.path.basename(namespace.file_path)
         file_path = os.path.join(path, file_name)
     elif not os.path.isdir(file_dir):
         try:
@@ -282,13 +286,6 @@ def validate_pool_settings(namespace, _):
 
         if namespace.auto_scale_formula:
             namespace.enable_auto_scale = True
-
-
-def validate_cert_settings(namespace):
-    """Custom parsing for certificate commands - adds default thumbprint
-    algorithm.
-    """
-    namespace.thumbprint_algorithm = 'sha1'
 
 
 def validate_client_parameters(cmd, namespace):
@@ -341,3 +338,27 @@ def validate_client_parameters(cmd, namespace):
 
     if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'aad':
         namespace.account_key = None
+
+
+def validate_retained_data_option(namespace, _=None):
+    """Warn that the value 'retaineddata' will be removed, only when it is used, as an option or in the
+    --json-file body (see _breaking_change.py)."""
+    body = getattr(namespace, 'json_file', None)
+    if isinstance(body, str):
+        try:
+            body = get_file_json(body)
+        except (OSError, ValueError, CLIError):
+            body = None  # the --json-file handling reports the error
+    if not isinstance(body, dict):
+        body = {}
+    for name, rest_name in (('node_deallocation_option', 'nodeDeallocationOption'),
+                            ('node_reboot_option', 'nodeRebootOption')):
+        if not hasattr(namespace, name):
+            continue
+        value = getattr(namespace, name) or body.get(rest_name)
+        if isinstance(value, str) and value.lower() == 'retaineddata':
+            from azure.cli.core.breaking_change import print_conditional_breaking_change
+            from azure.cli.command_modules.batch._breaking_change import RETAINED_DATA_TAG
+            print_conditional_breaking_change(None, RETAINED_DATA_TAG, command_name=namespace.command,
+                                              custom_logger=logger)
+            return

@@ -378,6 +378,33 @@ examples:
     text: az mysql flexible-server delete --resource-group testGroup --name testserver --yes
 """
 
+helps['mysql flexible-server rename'] = """
+type: command
+short-summary: Submit a request to rename an existing MySQL flexible server.
+long-summary: >
+    This preview operation requires rename support to be enabled by the service. It renames the existing server
+    within the same subscription, resource group, and location; it does not create a replacement server.
+    The server's resource ID and fully qualified domain name change. Update connection strings and references
+    to the old resource ID, including infrastructure-as-code state such as Terraform state, after completion.
+    Do not assume the old endpoint remains available or that the operation has no downtime.
+    For a primary or replica, verify replication and dependent resource references after the rename.
+    Availability and restrictions for replication topologies, high availability, and networking are service-controlled.
+    Return immediately after submission without polling for completion. Output contains statusCode (the initial
+    HTTP status), content (the initial response body as text), and azureAsyncOperation (the Azure-AsyncOperation
+    response header, or null if absent). The same output is returned with --no-wait.
+    Acceptance does not mean the rename has completed. Poll the returned URL using az rest --method get --url URL
+    until status is Succeeded, Failed, or Canceled. After Succeeded, verify the destination server and replicas.
+    If the service omits the operation URL, inspect the destination server before considering the rename complete.
+    If the command is interrupted, check the operation and destination server before retrying.
+examples:
+  - name: Submit a rename and return the initial HTTP response and operation URL.
+    text: az mysql flexible-server rename --resource-group testGroup --name oldserver --new-name newserver
+  - name: Submit a rename without prompting for confirmation, using the optional compatibility flag.
+    text: az mysql flexible-server rename --resource-group testGroup --name oldserver --new-name newserver --no-wait --yes
+  - name: Rename a server identified by its resource ID.
+    text: az mysql flexible-server rename --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testGroup/providers/Microsoft.DBforMySQL/flexibleServers/oldserver --new-name newserver
+"""
+
 helps['mysql flexible-server restore'] = """
 type: command
 short-summary: Restore a flexible server from backup.

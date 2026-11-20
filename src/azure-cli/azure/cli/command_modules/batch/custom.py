@@ -6,7 +6,7 @@
 import configparser
 from knack.log import get_logger
 
-from msrest.exceptions import DeserializationError
+from azure.core.exceptions import DeserializationError
 
 from azure.mgmt.batch import BatchManagementClient
 from azure.core import MatchConditions
@@ -152,7 +152,8 @@ def assign_batch_identity(cmd, client, resource_group_name, account_name, mi_sys
         my_dict = {mi_user_assigned: useridentity}
         identity = BatchAccountIdentity(type=ResourceIdentityType.USER_ASSIGNED, user_assigned_identities=my_dict)
 
-    parameters = BatchAccountUpdateParameters(identity=identity)
+    # Leave public network access as it is: azure-mgmt-batch sends 'Enabled' when it isn't set
+    parameters = BatchAccountUpdateParameters(identity=identity, public_network_access=None)
 
     client.update(resource_group_name=resource_group_name, account_name=account_name, parameters=parameters)
 
@@ -180,7 +181,8 @@ def remove_batch_identity(cmd, client, resource_group_name, account_name, mi_sys
                                            if batch_account.identity.type == ResourceIdentityType.USER_ASSIGNED
                                            else ResourceIdentityType.SYSTEM_ASSIGNED)
 
-    parameters = BatchAccountUpdateParameters(identity=batch_account.identity)
+    # Leave public network access as it is: azure-mgmt-batch sends 'Enabled' when it isn't set
+    parameters = BatchAccountUpdateParameters(identity=batch_account.identity, public_network_access=None)
 
     client.update(resource_group_name=resource_group_name, account_name=account_name, parameters=parameters)
 
@@ -270,7 +272,9 @@ def update_network_profile(cmd, client, resource_group_name=None, account_name=N
 
         networkprofile.node_management_access.default_action = default_action
 
-    parameters = BatchAccountUpdateParameters(network_profile=networkprofile)
+    # The network profile only takes effect when public network access is enabled
+    parameters = BatchAccountUpdateParameters(public_network_access=PublicNetworkAccessType.ENABLED,
+                                              network_profile=networkprofile)
 
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
@@ -307,7 +311,7 @@ def add_network_rule(cmd, client, resource_group_name=None, account_name=None, p
             networkprofile.node_management_access.ip_rules = []
         networkprofile.node_management_access.ip_rules.append(IPRule(value=ip_address))
 
-    # Not sure if i want to enable public_network_access as part of this
+    # The network profile only takes effect when public network access is enabled
     parameters = BatchAccountUpdateParameters(public_network_access=PublicNetworkAccessType.ENABLED,
                                               network_profile=networkprofile)
 
@@ -347,7 +351,7 @@ def delete_network_rule(cmd, client, resource_group_name=None, account_name=None
             if iprule.value == ip_address:
                 networkprofile.node_management_access.ip_rules.remove(iprule)
 
-    # Not sure if i want to enable public_network_access as part of this
+    # The network profile only takes effect when public network access is enabled
     parameters = BatchAccountUpdateParameters(public_network_access=PublicNetworkAccessType.ENABLED,
                                               network_profile=networkprofile)
 

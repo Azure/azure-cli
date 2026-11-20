@@ -20,8 +20,20 @@ class Update(AAZCommand):
 
     Omitting properties preserves all existing cost control properties; setting properties to null or an empty object ({}) clears them all. A non-empty properties object updates selected fields, preserving omitted fields; a successful update that leaves the cost control unchanged retains its entity tag. The complete merged result may contain at most one notification, including disabled notifications, and one Block action. Exceeding either limit returns HTTP 400 without changing the stored definition.
 
-    :example: Create or replace an account cost budget
-        az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --if-none-match * --grouping "[{name:agent,type:AdditionalInfoKey}]" --category Cost --amount 1000 --time-grain Monthly --time-period "{start-date:'2026-11-15T00:00:00Z',end-date:'2027-11-15T00:00:00Z'}" --filter "{and:[{additionalInfo:{name:project,operator:In,values:[production]}},{additionalInfo:{name:agent,operator:In,values:[customer-support,order-assistant]}},{additionalInfo:{name:deployment,operator:In,values:[customer-support-model]}}]}" --notifications "{usageAlert:{eventGridConnectionId:/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/foundry-resource-group/providers/Microsoft.CognitiveServices/accounts/foundry-account/connections/budget-alerts,thresholdType:Percentage,threshold:80,enabled:True,operator:GreaterThanOrEqualTo}}" --provider-properties "{actions:{stopRequests:{type:Block,thresholdType:Percentage,threshold:100,operator:GreaterThanOrEqualTo}}}"
+    :example: Update the account's cap to $1500 per the previously set period
+        az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --amount 1500
+
+    :example: Update the account's cap to $1500 per the previously set period, if the account entity tag matches the given one. Note the required forward slash before the quotation marks around the entity tag.
+        az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --amount 1500 --if-match \\"bb926e0d-880b-4d60-8d59-9a341fa826a2.additional-info\\"
+
+    :example: Update the account's budget end date
+        az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --set properties.timePeriod.endDate="2028-12-01T00:00:00Z"
+
+    :example: Update the account's budget notification threshold to 90%
+        az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --set properties.notifications.usageAlert.threshold=90
+
+    :example: Example using full settings (filters, grouping, alert and block)
+        az cognitiveservices account costcontrol update --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --grouping "[{name:agent,type:AdditionalInfoKey}]" --category Cost --amount 1000 --time-grain Monthly --time-period "{start-date:'2026-11-15T00:00:00Z',end-date:'2027-11-15T00:00:00Z'}" --filter "{and:[{additional-info:{name:project,operator:In,values:[production]}},{additional-info:{name:agent,operator:In,values:[customer-support,order-assistant]}},{additional-info:{name:deployment,operator:In,values:[customer-support-model]}}]}" --notifications "{usage-alert:{event-grid-connection-id:/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/foundry-resource-group/providers/Microsoft.CognitiveServices/accounts/foundry-account/connections/budget-alerts,threshold-type:Percentage,threshold:80,enabled:True,operator:GreaterThanOrEqualTo}}" --provider-properties "{actions:{stop-requests:{type:Block,threshold-type:Percentage,threshold:100,operator:GreaterThanOrEqualTo}}}"
     """
 
     _aaz_info = {
@@ -157,7 +169,7 @@ class Update(AAZCommand):
         _element.name = AAZStrArg(
             options=["name"],
             help="The built-in attribute to group by. project is available only for account-owned controls.",
-            enum={"agent": "agent", "identityObjectId": "identityObjectId", "project": "project", "sessionId": "sessionId"},
+            enum={"agent": "agent", "project": "project", "sessionId": "sessionId"},
         )
         _element.type = AAZStrArg(
             options=["type"],
@@ -280,8 +292,8 @@ class Update(AAZCommand):
         additional_info = cls._args_cost_control_filter_update.additional_info
         additional_info.name = AAZStrArg(
             options=["name"],
-            help="The built-in attribute: agent, identityObjectId, sessionId, project, deployment, or tokenType. Resource selectors use owner-scoped short names, not Azure resource IDs. Agent selections require an explicit project filter selecting exactly one project; multiple agents in that project are supported. A project-owned control can select only its owning project. Project, agent, and deployment values must be plain names of 1-64 characters without leading or trailing whitespace, control characters, path/query/fragment separators, percent signs, or . and .. path segments. tokenType accepts input, output, or both for a Tokens budget; omission measures overall tokens.",
-            enum={"agent": "agent", "deployment": "deployment", "identityObjectId": "identityObjectId", "project": "project", "sessionId": "sessionId", "tokenType": "tokenType"},
+            help="The built-in attribute: agent, sessionId, project, deployment, or tokenType. Resource selectors use owner-scoped short names, not Azure resource IDs. Agent selections require an explicit project filter selecting exactly one project; multiple agents in that project are supported. A project-owned control can select only its owning project. Project, agent, and deployment values must be plain names of 1-64 characters without leading or trailing whitespace, control characters, path/query/fragment separators, percent signs, or . and .. path segments. tokenType accepts input, output, or both for a Tokens budget; omission measures overall tokens.",
+            enum={"agent": "agent", "deployment": "deployment", "project": "project", "sessionId": "sessionId", "tokenType": "tokenType"},
         )
         additional_info.operator = AAZStrArg(
             options=["operator"],

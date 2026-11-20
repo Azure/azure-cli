@@ -207,6 +207,7 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
     def test_validate_source_url_requires_valid_account_name_for_same_account(self, _):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
         for account_name in (None, 'same@attacker.example:443/'):
             with self.subTest(account_name=account_name):
                 ns = Namespace(
@@ -216,9 +217,13 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
                     account_name=account_name, account_key='key', sas_token=None,
                     container_name='dst', share_name=None)
 
-                validate_source_url(MockCmd(self.cli), ns)
-
-                self.assertFalse(ns.source_is_validated_same_account)
+                if account_name is None:
+                    validate_source_url(MockCmd(self.cli), ns)
+                    self.assertFalse(ns.source_is_validated_same_account)
+                else:
+                    with self.assertRaisesRegex(InvalidArgumentValueError, 'Invalid source storage account name'):
+                        validate_source_url(MockCmd(self.cli), ns)
+                    self.assertIsNone(ns.source_url)
 
     def test_get_not_none_validator(self):
         from azure.cli.core.azclierror import InvalidArgumentValueError
@@ -253,6 +258,136 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
         with self.assertRaisesRegex(InvalidArgumentValueError, 'please specify one of --file and --data'):
             validate_upload_blob(Namespace(file_path=None, data=None))
+
+
+@mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+@mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value='queried_key')
+@mock.patch('azure.cli.command_modules.storage.util.create_short_lived_blob_sas_v2', return_value='blob_sas')
+@mock.patch('azure.cli.command_modules.storage.util.create_short_lived_file_sas_v2', return_value='file_sas')
+class TestCopySourceAccountNameValidation(unittest.TestCase):
+    INVALID_NAMES = ('evil.example/x?', 'evil.example', 'user@evil.example', 'evil.example:443', 'evil\\x', 'ev il')
+
+    def setUp(self):
+        self.cli = MockCLI()
+
+    @staticmethod
+    def _blob_source_namespace(**kwargs):
+        values = dict(copy_source=None, source_container='src', source_blob='input', source_snapshot=None,
+                      source_account_name=None, source_account_key=None, source_sas=None,
+                      account_name='destaccount', account_key='key', sas_token=None)
+        values.update(kwargs)
+        return Namespace(**values)
+
+    @staticmethod
+    def _source_namespace(**kwargs):
+        values = dict(copy_source=None, source_url=None, source_container='src', source_blob='input',
+                      source_snapshot=None, source_share=None, source_path=None, file_snapshot=None,
+                      source_account_name=None, source_account_key=None, source_sas=None, token_credential=None,
+                      account_name='destaccount', account_key='key', sas_token=None,
+                      container_name='dst', share_name=None)
+        values.update(kwargs)
+        return Namespace(**values)
+
+    def _validators(self):
+        return ((process_blob_source_uri, self._blob_source_namespace, 'copy_source'),
+                (validate_source_uri, self._source_namespace, 'copy_source'),
+                (validate_source_url, self._source_namespace, 'source_url'))
+
+    def test_rejects_invalid_source_account_names(self, *mocks):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        query_account_key = mocks[2]
+        for validator, make_namespace, result_attr in self._validators():
+            for name in self.INVALID_NAMES:
+                for kwargs in ({'source_account_name': name},
+                               {'source_account_name': name, 'source_account_key': 'source_key'},
+                               {'source_account_name': name, 'source_sas': 'sig=source'},
+                               # same account: the name comes from --account-name or a connection string
+                               {'account_name': name}):
+                    with self.subTest(validator=validator.__name__, **kwargs):
+                        ns = make_namespace(**kwargs)
+                        with self.assertRaisesRegex(InvalidArgumentValueError,
+                                                    'Invalid source storage account name') as ctx:
+                            validator(MockCmd(self.cli), ns)
+                        self.assertNotIn(name, str(ctx.exception))
+                        self.assertIsNone(getattr(ns, result_attr))
+        query_account_key.assert_not_called()
+
+    def test_builds_source_url_for_valid_account_names(self, *_):
+        for validator, make_namespace, result_attr in self._validators():
+            for kwargs, account in (({'source_account_name': 'srcaccount', 'source_account_key': 'k'}, 'srcaccount'),
+                                    ({'source_account_name': 'MySrc-Account', 'source_sas': 'sig=s'},
+                                     'MySrc-Account'),
+                                    ({}, 'destaccount')):
+                with self.subTest(validator=validator.__name__, **kwargs):
+                    ns = make_namespace(**kwargs)
+                    validator(MockCmd(self.cli), ns)
+                    self.assertTrue(getattr(ns, result_attr).startswith(
+                        'https://{}.blob.{}/src/input'.format(account, self.cli.cloud.suffixes.storage_endpoint)))
+
+
+@mock.patch('azure.cli.command_modules.storage._validators.validate_client_parameters')
+class TestUnrecognizedStorageUrlValidation(unittest.TestCase):
+    URLS = ('http://127.0.0.1:10000/devstoreaccount1/c?sig=topsecret',
+            'https://acct.privatelink.blob.core.windows.net/c?sig=topsecret',
+            'https://acct.z22.blob.storage.azure.net/c?sig=topsecret',
+            'https://evil.example\\.file.core.windows.net/c?sig=topsecret',
+            'https://acct.blob.core.windows.net./c?sig=topsecret')
+
+    def setUp(self):
+        self.cli = MockCLI()
+
+    def _assert_rejected(self, validator, ns, arg_name):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaisesRegex(InvalidArgumentValueError,
+                                    'The {} URL is not a recognized Azure Storage'.format(arg_name)) as ctx:
+            validator(MockCmd(self.cli), ns)
+        self.assertNotIn('topsecret', str(ctx.exception))
+        self.assertNotIn('topsecret', str(ctx.exception.recommendations))
+        self.assertIn(self.cli.cloud.suffixes.storage_endpoint, str(ctx.exception.recommendations))
+
+    def test_blob_batch_container_url(self, validate_client):
+        from azure.cli.command_modules.storage._validators import _process_blob_batch_container_parameters
+        for url in self.URLS:
+            with self.subTest(url=url):
+                self._assert_rejected(_process_blob_batch_container_parameters,
+                                      Namespace(source=url, account_name=None, sas_token=None), '--source')
+                self._assert_rejected(
+                    lambda cmd, ns: _process_blob_batch_container_parameters(cmd, ns, source=False),
+                    Namespace(destination=url, account_name=None, sas_token=None), '--destination')
+        validate_client.assert_not_called()
+
+    def test_file_batch_urls(self, _):
+        import tempfile
+        from azure.cli.command_modules.storage._validators import (process_file_batch_source_parameters,
+                                                                   process_file_upload_batch_parameters)
+        with tempfile.TemporaryDirectory() as source_dir:
+            for url in self.URLS:
+                with self.subTest(url=url):
+                    self._assert_rejected(process_file_batch_source_parameters,
+                                          Namespace(source=url, account_name=None), '--source')
+                    self._assert_rejected(process_file_upload_batch_parameters,
+                                          Namespace(source=source_dir, destination=url, account_name=None),
+                                          '--destination')
+
+    def test_copy_source_uri(self, _):
+        for url in self.URLS:
+            with self.subTest(url=url):
+                ns = Namespace(account_name='storagename', account_key='key', connection_string=None, sas_token=None,
+                               source_account_key=None, source_account_name=None, source_container=None,
+                               source_sas=None, source_share=None, source_uri=url, destination_container='c',
+                               destination_share=None)
+                self._assert_rejected(get_source_file_or_blob_service_client_track2, ns, '--source-uri')
+
+    def test_recognized_urls_and_names_still_accepted(self, _):
+        from azure.cli.command_modules.storage._validators import (_process_blob_batch_container_parameters,
+                                                                   process_file_batch_source_parameters)
+        ns = Namespace(source='https://MyAcct.blob.core.windows.net/c?sig=s', account_name=None, sas_token=None)
+        _process_blob_batch_container_parameters(MockCmd(self.cli), ns)
+        self.assertEqual((ns.account_name, ns.source_container_name, ns.sas_token), ('MyAcct', 'c', 'sig=s'))
+
+        ns = Namespace(source='myshare', account_name=None)
+        process_file_batch_source_parameters(MockCmd(self.cli), ns)
+        self.assertEqual((ns.account_name, ns.share_name), (None, 'myshare'))
 
 
 class TestClientParametersValidator(unittest.TestCase):
@@ -297,6 +432,48 @@ class TestClientParametersValidator(unittest.TestCase):
         ns = self._create_namespace()
         self._validate(ns, AZURE_STORAGE_SERVICE_ENDPOINT=self.local_url)
         self.assertEqual(ns.account_url, self.local_url)
+
+    @mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value='queried_key')
+    def test_invalid_account_name_rejected_before_key_lookup(self, query_account_key):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        name = 'https://myaccount.blob.core.windows.net/?sv=2025&sig=topsecret'
+        for kwargs in ({'account_name': name}, {'account_name': name, 'auth_mode': 'key'},
+                       {'connection_string': 'AccountName=' + name}):
+            with self.subTest(**kwargs):
+                with mock.patch.dict('os.environ', {}, clear=True), \
+                        mock.patch('azure.cli.command_modules.storage._validators.logger') as logger, \
+                        self.assertRaisesRegex(InvalidArgumentValueError, 'Invalid storage account name') as ctx:
+                    validate_client_parameters(MockCmd(self.cli), self._create_namespace(**kwargs))
+                self.assertNotIn('topsecret', str(ctx.exception))
+                self.assertNotIn('topsecret', str(logger.mock_calls))
+        query_account_key.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value='queried_key')
+    def test_invalid_account_name_with_custom_endpoint_skips_key_lookup(self, query_account_key):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        ns = self._create_namespace(account_name='odd.name', account_url='https://storage.contoso.example')
+        with mock.patch.dict('os.environ', {}, clear=True), \
+                self.assertRaisesRegex(InvalidArgumentValueError, 'There are no credentials provided'):
+            validate_client_parameters(MockCmd(self.cli), ns)
+        query_account_key.assert_not_called()
+
+        # a custom endpoint with credentials is unaffected by the account name check
+        ns = self._create_namespace(account_name='odd.name', account_url='https://storage.contoso.example',
+                                    sas_token='?sig=s')
+        with mock.patch.dict('os.environ', {}, clear=True):
+            validate_client_parameters(MockCmd(self.cli), ns)
+        self.assertEqual((ns.account_name, ns.sas_token), ('odd.name', 'sig=s'))
+        query_account_key.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value='queried_key')
+    def test_valid_account_name_still_queries_key(self, query_account_key):
+        for name, expected in (('MyAccount', 'MyAccount'), ('myaccount-secondary', 'myaccount')):
+            with self.subTest(name=name):
+                ns = self._create_namespace(account_name=name)
+                with mock.patch.dict('os.environ', {}, clear=True):
+                    validate_client_parameters(MockCmd(self.cli), ns)
+                self.assertEqual((ns.account_name, ns.account_key), (expected, 'queried_key'))
+                query_account_key.assert_called_with(mock.ANY, expected)
 
     def _create_namespace(self, **kwargs):
         ns = Namespace(account_name=None, account_url=None, account_key=None, sas_token=None,
@@ -361,7 +538,7 @@ class TestGetSourceClientValidator(unittest.TestCase):
 
     def test_validate_with_source_uri_blob(self):
         # source given in form of uri, source_container parsed from uri, source and dest account are the same
-        ns = self._create_namespace(source_uri='https://storage_name.blob.core.windows.net/container2',
+        ns = self._create_namespace(source_uri='https://storagename.blob.core.windows.net/container2',
                                     destination_container='container1')
         with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
             get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
@@ -371,12 +548,12 @@ class TestGetSourceClientValidator(unittest.TestCase):
 
     def test_validate_with_different_source_uri_sas_blob(self):
         # source given in form of uri, source_container parsed from uri, source and dest account are different
-        ns = self._create_namespace(source_uri='https://other_name.blob.core.windows.net/container2?some_sas_token',
+        ns = self._create_namespace(source_uri='https://othername.blob.core.windows.net/container2?some_sas_token',
                                     destination_container='container1')
         get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_container, 'container2')
         self.assertIsNotNone(ns.source_client)
-        self.assertEqual(ns.source_client.account_name, 'other_name')
+        self.assertEqual(ns.source_client.account_name, 'othername')
 
     def test_validate_with_share_name_file(self):
         # source share name given, validator does not change namespace aside from ensuring source-client none
@@ -388,7 +565,7 @@ class TestGetSourceClientValidator(unittest.TestCase):
 
     def test_validate_with_source_uri_file(self):
         # source given in form of uri, source_share parsed from uri, source and dest account are the same
-        ns = self._create_namespace(source_uri='https://storage_name.file.core.windows.net/share2',
+        ns = self._create_namespace(source_uri='https://storagename.file.core.windows.net/share2',
                                     destination_share='share1')
         with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
             get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
@@ -397,12 +574,23 @@ class TestGetSourceClientValidator(unittest.TestCase):
 
     def test_validate_with_different_source_uri_sas_file(self):
         # source given in form of uri, source_share parsed from uri, source and dest account are different
-        ns = self._create_namespace(source_uri='https://other_name.file.core.windows.net/share2?some_sas_token',
+        ns = self._create_namespace(source_uri='https://othername.file.core.windows.net/share2?some_sas_token',
                                     destination_share='share1')
         get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_share, 'share2')
         self.assertIsNotNone(ns.source_client)
-        self.assertEqual(ns.source_client.account_name, 'other_name')
+        self.assertEqual(ns.source_client.account_name, 'othername')
+
+    def test_validate_invalid_source_account_name_before_key_lookup(self):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        name = 'https://src.blob.core.windows.net/?sig=topsecret'
+        ns = self._create_namespace(source_account_name=name, source_container='container2',
+                                    destination_container='container1')
+        with mock.patch('azure.cli.command_modules.storage._validators._query_account_key') as query_account_key, \
+                self.assertRaisesRegex(InvalidArgumentValueError, 'Invalid source storage account name') as ctx:
+            get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
+        query_account_key.assert_not_called()
+        self.assertNotIn('topsecret', str(ctx.exception))
 
     def test_validate_negatives(self):
         # bad argument combinations

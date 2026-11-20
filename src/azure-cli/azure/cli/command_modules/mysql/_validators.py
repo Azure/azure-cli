@@ -421,6 +421,18 @@ def firewall_rule_name_validator(ns):
                               "and no more than 80 characters in length. ")
 
 
+def validate_server_rename(namespace):
+    ids = getattr(namespace, '_ids', None)
+    if ids:
+        if len(ids) != 1:
+            raise InvalidArgumentValueError('Specify exactly one MySQL flexible server resource ID to rename.')
+        parts = parse_resource_id(ids[0])
+        if (parts.get('namespace', '').lower() != 'microsoft.dbformysql' or
+                parts.get('type', '').lower() != 'flexibleservers' or
+                parts.get('child_name_1')):
+            raise InvalidArgumentValueError('--ids must identify a MySQL flexible server, not another resource type.')
+
+
 def validate_server_name(db_context, server_name, type_):
     client = db_context.cf_availability(db_context.cmd.cli_ctx, '_')
 
