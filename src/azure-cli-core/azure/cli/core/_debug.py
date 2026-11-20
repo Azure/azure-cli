@@ -22,7 +22,7 @@ def change_ssl_cert_verification(client):
                        DISABLE_VERIFY_VARIABLE_NAME)
         os.environ[ADAL_PYTHON_SSL_NO_VERIFY] = '1'
         client.config.connection.verify = False
-    elif REQUESTS_CA_BUNDLE in os.environ:
+    elif os.environ.get(REQUESTS_CA_BUNDLE):
         ca_bundle_file = os.environ[REQUESTS_CA_BUNDLE]
         if not os.path.isfile(ca_bundle_file):
             raise CLIError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')
@@ -38,7 +38,7 @@ def change_ssl_cert_verification_track2():
                        DISABLE_VERIFY_VARIABLE_NAME)
         os.environ[ADAL_PYTHON_SSL_NO_VERIFY] = '1'
         client_kwargs['connection_verify'] = False
-    elif REQUESTS_CA_BUNDLE in os.environ:
+    elif os.environ.get(REQUESTS_CA_BUNDLE):
         ca_bundle_file = os.environ[REQUESTS_CA_BUNDLE]
         if not os.path.isfile(ca_bundle_file):
             raise CLIError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')
