@@ -2063,20 +2063,24 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
             path, kubeconfig, overwrite_existing, context_name)
 
         # Check if kubeconfig requires kubelogin with devicecode and convert it
-        if uses_kubelogin_devicecode(kubeconfig):
+        if path != "-" and uses_kubelogin_devicecode(kubeconfig):
             kubelogin_path = get_safe_executable_path("kubelogin")
             if kubelogin_path:
                 try:
-                    # Run kubelogin convert-kubeconfig -l azurecli
+                    # Resolve directory symlinks after merging has rejected a symlink file.
                     subprocess.run(
-                        [kubelogin_path, "convert-kubeconfig", "-l", "azurecli"],
-                        cwd=os.path.dirname(path),
+                        [
+                            kubelogin_path,
+                            "convert-kubeconfig",
+                            "-l", "azurecli",
+                            "--kubeconfig", os.path.realpath(path),
+                        ],
                         check=True,
                     )
                     logger.warning("Converted kubeconfig to use Azure CLI authentication.")
                 except subprocess.CalledProcessError as e:
                     logger.warning("Failed to convert kubeconfig with kubelogin: %s", str(e))
-                except Exception as e:  # pylint: disable=broad-except
+                except OSError as e:
                     logger.warning("Error running kubelogin: %s", str(e))
             else:
                 logger.warning(

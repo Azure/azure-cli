@@ -9,6 +9,7 @@ import hashlib
 import io
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -2495,6 +2496,208 @@ class AksExternalToolsTest(unittest.TestCase):
                     manual.assert_called_once_with(r'C:\Tools\bin', 'kubectl')
 
 
+class AksGetCredentialsTest(unittest.TestCase):
+    def setUp(self):
+        self.cmd = mock.Mock()
+        self.cmd.cli_ctx.cloud.profile = "latest"
+        self.kubeconfig = yaml.safe_dump({
+            "apiVersion": "v1",
+            "kind": "Config",
+            "clusters": [{"name": "cluster", "cluster": {"server": "https://example.com"}}],
+            "contexts": [{"name": "cluster", "context": {"cluster": "cluster", "user": "cluster-user"}}],
+            "current-context": "cluster",
+            "users": [{
+                "name": "cluster-user",
+                "user": {"exec": {"command": "kubelogin", "args": ["get-token", "--login", "devicecode"]}},
+            }],
+        })
+        self.client = mock.Mock()
+        self.client.list_cluster_user_credentials.return_value.kubeconfigs = [
+            mock.Mock(value=self.kubeconfig.encode("utf-8")),
+        ]
+
+    def test_aks_get_credentials_converts_selected_file(self):
+        nested_path = os.path.join("config dir", "config")
+        absolute_path = os.path.abspath(nested_path)
+        default_path = os.path.join(os.path.expanduser("~"), ".kube", "config")
+        kubelogin_path = os.path.abspath(os.path.join("tools", "kubelogin"))
+        for path, environment, selected_path in (
+            ("config", "inherited-config", "config"),
+            (nested_path, "inherited-config", nested_path),
+            (absolute_path, "inherited-config", absolute_path),
+            (default_path, os.pathsep.join(("env-config", "unused-config")), "env-config"),
+        ):
+            with (
+                self.subTest(path=path),
+                mock.patch.dict(os.environ, {"KUBECONFIG": environment}),
+                mock.patch.object(acs_custom, "_print_or_merge_credentials") as merge,
+                mock.patch.object(acs_custom, "get_safe_executable_path", return_value=kubelogin_path) as resolve,
+                mock.patch.object(acs_custom.subprocess, "run") as run,
+            ):
+                acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=path)
+
+                merge.assert_called_once_with(selected_path, self.kubeconfig, False, None)
+                resolve.assert_called_once_with("kubelogin")
+                run.assert_called_once_with(
+                    [kubelogin_path, "convert-kubeconfig", "-l", "azurecli",
+                     "--kubeconfig", os.path.realpath(selected_path)],
+                    check=True,
+                )
+
+    @unittest.skipIf(os.name == "nt", "Requires a POSIX executable script.")
+    def test_aks_get_credentials_converts_relative_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            tools_directory = os.path.join(directory, "tools")
+            os.mkdir(tools_directory)
+            kubelogin_path = os.path.join(tools_directory, "kubelogin")
+            unrelated_path = os.path.join(directory, "unrelated-config")
+            selected_path = os.path.join(directory, "config")
+            with open(kubelogin_path, "w") as stream:
+                stream.write(
+                    "#!{}\n"
+                    "import os, sys\n"
+                    "from pathlib import Path\n"
+                    "path = (sys.argv[sys.argv.index('--kubeconfig') + 1] if '--kubeconfig' in sys.argv\n"
+                    "        else os.environ['KUBECONFIG'])\n"
+                    "config = Path(path)\n"
+                    "config.write_text(config.read_text().replace('devicecode', 'azurecli'))\n".format(sys.executable)
+                )
+            os.chmod(kubelogin_path, 0o700)
+            with open(unrelated_path, "w") as stream:
+                stream.write(self.kubeconfig)
+            original_directory = os.getcwd()
+            try:
+                os.chdir(directory)
+                with mock.patch.dict(os.environ, {
+                    "PATH": tools_directory + os.pathsep + os.environ.get("PATH", ""),
+                    "KUBECONFIG": unrelated_path,
+                }):
+                    acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="config")
+            finally:
+                os.chdir(original_directory)
+
+            with open(selected_path) as stream:
+                config = yaml.safe_load(stream)
+            self.assertEqual(config["users"][0]["user"]["exec"]["args"][-1], "azurecli")
+            with open(unrelated_path) as stream:
+                self.assertEqual(stream.read(), self.kubeconfig)
+
+    @unittest.skipIf(os.name == "nt", "Requires directory symlinks.")
+    def test_aks_get_credentials_converts_symlink_parent_path(self):
+        def convert(args, check):
+            self.assertTrue(check)
+            path = args[args.index("--kubeconfig") + 1]
+            with open(path, "r+") as stream:
+                content = stream.read()
+                stream.seek(0)
+                stream.write(content.replace("devicecode", "azurecli"))
+                stream.truncate()
+
+        with tempfile.TemporaryDirectory() as directory:
+            real_directory = os.path.join(directory, "actual")
+            nested_directory = os.path.join(real_directory, "nested")
+            os.makedirs(nested_directory)
+            os.symlink(nested_directory, os.path.join(directory, "linked"), target_is_directory=True)
+            original_directory = os.getcwd()
+            try:
+                os.chdir(directory)
+                for source in ("relative", "absolute", "environment"):
+                    filename = source + "-config"
+                    selected_path = os.path.join("linked", "..", filename)
+                    if source != "relative":
+                        selected_path = os.path.join(directory, selected_path)
+                    output_path = os.path.join(real_directory, filename)
+                    unrelated_path = os.path.join(directory, filename)
+                    with open(unrelated_path, "w") as stream:
+                        stream.write(self.kubeconfig)
+                    path = (os.path.join(os.path.expanduser("~"), ".kube", "config")
+                            if source == "environment" else selected_path)
+                    with (
+                        self.subTest(source=source),
+                        mock.patch.dict(os.environ, {"KUBECONFIG": selected_path}),
+                        mock.patch.object(acs_custom, "get_safe_executable_path",
+                                          return_value=os.path.join(directory, "kubelogin")),
+                        mock.patch.object(acs_custom.subprocess, "run", side_effect=convert),
+                    ):
+                        acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=path)
+
+                        with open(output_path) as stream:
+                            config = yaml.safe_load(stream)
+                        self.assertEqual(config["users"][0]["user"]["exec"]["args"][-1], "azurecli")
+                        with open(unrelated_path) as stream:
+                            self.assertEqual(stream.read(), self.kubeconfig)
+            finally:
+                os.chdir(original_directory)
+
+    @unittest.skipIf(os.name == "nt", "Requires file symlinks.")
+    def test_aks_get_credentials_rejects_symlink_file_before_conversion(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target_path = os.path.join(directory, "target")
+            link_path = os.path.join(directory, "config")
+            with open(target_path, "w") as stream:
+                stream.write(self.kubeconfig)
+            os.symlink(target_path, link_path)
+            with (
+                mock.patch.object(acs_custom, "get_safe_executable_path") as resolve,
+                mock.patch.object(acs_custom.subprocess, "run") as run,
+            ):
+                with self.assertRaisesRegex(CLIError, "symbolic link"):
+                    acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=link_path)
+
+            resolve.assert_not_called()
+            run.assert_not_called()
+            self.assertTrue(os.path.islink(link_path))
+            with open(target_path) as stream:
+                self.assertEqual(stream.read(), self.kubeconfig)
+
+    def test_aks_get_credentials_stdout_skips_conversion(self):
+        with (
+            mock.patch("sys.stdout", new_callable=io.StringIO) as stdout,
+            mock.patch.object(acs_custom, "get_safe_executable_path") as resolve,
+            mock.patch.object(acs_custom.subprocess, "run") as run,
+        ):
+            acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="-")
+
+        self.assertEqual(stdout.getvalue(), self.kubeconfig + "\n")
+        resolve.assert_not_called()
+        run.assert_not_called()
+
+    def test_aks_get_credentials_other_auth_skips_conversion(self):
+        self.client.list_cluster_user_credentials.return_value.kubeconfigs[0].value = (
+            self.kubeconfig.replace("devicecode", "azurecli").encode("utf-8")
+        )
+        with (
+            mock.patch.object(acs_custom, "_print_or_merge_credentials"),
+            mock.patch.object(acs_custom, "get_safe_executable_path") as resolve,
+            mock.patch.object(acs_custom.subprocess, "run") as run,
+        ):
+            acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="config")
+
+        resolve.assert_not_called()
+        run.assert_not_called()
+
+    def test_aks_get_credentials_conversion_failures_warn(self):
+        executable = os.path.abspath(os.path.join("tools", "kubelogin"))
+        for kubelogin_path, error, message in (
+            (None, None, "Please install kubelogin"),
+            (executable, subprocess.CalledProcessError(1, [executable]), "Failed to convert kubeconfig"),
+            (executable, OSError("Cannot execute kubelogin"), "Error running kubelogin"),
+        ):
+            with (
+                self.subTest(message=message),
+                mock.patch.object(acs_custom, "_print_or_merge_credentials"),
+                mock.patch.object(acs_custom, "get_safe_executable_path", return_value=kubelogin_path),
+                mock.patch.object(acs_custom.subprocess, "run", side_effect=error) as run,
+                mock.patch.object(acs_custom, "logger") as logger,
+            ):
+                acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="config")
+
+                logger.warning.assert_called_once()
+                self.assertIn(message, logger.warning.call_args[0][0])
+                if kubelogin_path is None:
+                    run.assert_not_called()
+
+
 class AksGetCredentialsExecutableTest(unittest.TestCase):
     def setUp(self):
         self.cmd = mock.Mock()
@@ -2546,8 +2749,8 @@ class AksGetCredentialsExecutableTest(unittest.TestCase):
                             if trusted_directory:
                                 run.assert_called_once_with(
                                     [os.path.join(tools_directory, executable_name),
-                                     "convert-kubeconfig", "-l", "azurecli"],
-                                    cwd=os.path.dirname(config_path),
+                                     "convert-kubeconfig", "-l", "azurecli",
+                                     "--kubeconfig", os.path.realpath(config_path)],
                                     check=True,
                                 )
                             else:
@@ -2574,8 +2777,8 @@ class AksGetCredentialsExecutableTest(unittest.TestCase):
                 )
 
                 run.assert_called_once_with(
-                    [kubelogin_path, "convert-kubeconfig", "-l", "azurecli"],
-                    cwd="configs",
+                    [kubelogin_path, "convert-kubeconfig", "-l", "azurecli",
+                     "--kubeconfig", os.path.realpath(os.path.join("configs", "config"))],
                     check=True,
                 )
                 logger.warning.assert_called_once()
