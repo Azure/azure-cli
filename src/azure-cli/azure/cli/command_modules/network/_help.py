@@ -4829,6 +4829,8 @@ examples:
     text: az network private-endpoint-connection list -g MyResourceGroup -n MySA --type Microsoft.Storage/storageAccounts
   - name: List all private endpoint connections for a keyvault.
     text: az network private-endpoint-connection list -g MyResourceGroup -n MyKV --type Microsoft.Keyvault/vaults
+  - name: List all private endpoint connections for a DataReplication vault.
+    text: az network private-endpoint-connection list -g MyResourceGroup -n MyVault --type Microsoft.DataReplication/replicationVaults
   - name: List all private endpoint connections for an ACR.
     text: az network private-endpoint-connection list --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002
 """
@@ -4846,6 +4848,8 @@ examples:
     text: az network private-link-resource list -g MyResourceGroup -n MySA --type Microsoft.Storage/storageAccounts
   - name: List all private link resources for a keyvault.
     text: az network private-link-resource list -g MyResourceGroup -n MyKV --type Microsoft.Keyvault/vaults
+  - name: List all private link resources for a DataReplication vault.
+    text: az network private-link-resource list -g MyResourceGroup -n MyVault --type Microsoft.DataReplication/replicationVaults
   - name: List all private link resources for an ACR.
     text: az network private-link-resource list --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002
 """
