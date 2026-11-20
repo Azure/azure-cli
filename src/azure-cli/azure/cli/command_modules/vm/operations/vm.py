@@ -160,7 +160,28 @@ class VMCreate(_VMCreate):
 
 
 class VMPatch(_VMPatch):
+    _arguments_schema = None
+    _args_schema = None
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZStrArg(registered=False)
+        return args_schema
+
     class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
+        @property
+        def content(self):
+            from azure.cli.core.aaz import has_value
+
+            content = super().content
+            if has_value(self.ctx.args.identity_type):
+                # Preserve the combined type without resending unchanged user identities.
+                content.setdefault('identity', {})['type'] = self.ctx.args.identity_type.to_serialized_data()
+            return content
+
         # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
         @classmethod
         def _build_schema_on_200(cls):

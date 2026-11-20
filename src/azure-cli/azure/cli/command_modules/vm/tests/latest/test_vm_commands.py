@@ -6569,7 +6569,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
 class MSIScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_msi')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_msi', location='westcentralus')
     def test_vm_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
 
@@ -6585,17 +6585,17 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 '
+            self.cmd('vm create -g {rg} -n {vm1} --image Ubuntu2204 --assign-identity --admin-username admin123 '
                      '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --scope {scope}')
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 '
+            self.cmd('vm create -g {rg} -n {vm1} --image Ubuntu2204 --assign-identity --admin-username admin123 '
                      '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --role Contributor')
 
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create a linux vm with default configuration
-            self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 '
-                     '--admin-password PasswordPassword1! --scope {scope} --role Contributor --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE', checks=[
+            self.cmd('vm create -g {rg} -n {vm1} --image Ubuntu2204 --assign-identity --admin-username admin123 '
+                     '--admin-password PasswordPassword1! --scope {scope} --role Contributor --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v4', checks=[
                 self.check('identity.role', 'Contributor'),
                 self.check('identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])
@@ -6606,15 +6606,15 @@ class MSIScenarioTest(ScenarioTest):
 
             # create a windows vm with reader role on the linux vm
             result = self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter --assign-identity --scope {vm1_id} --role reader '
-                              '--admin-username admin123 --admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE', checks=[
+                              '--admin-username admin123 --admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v4', checks=[
                 self.check('identity.role', 'reader'),
                 self.check('identity.scope', '{vm1_id}'),
             ])
             uuid.UUID(result.get_output_in_json()['identity']['systemAssignedIdentity'])
 
             # create a linux vm w/o identity and later enable it
-            vm3_result = self.cmd('vm create -g {rg} -n {vm3} --image Debian:debian-10:10:latest --admin-username admin123 '
-                                  '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+            vm3_result = self.cmd('vm create -g {rg} -n {vm3} --image Ubuntu2204 --admin-username admin123 '
+                                  '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v4').get_output_in_json()
             self.assertIsNone(vm3_result.get('identity'))
 
             with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
@@ -6630,7 +6630,7 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vm identity remove -g {rg} -n {vm3}')
             self.cmd('vm identity show -g {rg} -n {vm3}', checks=self.is_empty())
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_msi')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_msi', location='westcentralus')
     def test_vmss_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
 
@@ -6644,21 +6644,21 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 '
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Ubuntu2204 --instance-count 1 '
                      '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} '
-                     '--orchestration-mode Uniform --vm-sku Standard_D2s_v3')
+                     '--orchestration-mode Uniform --vm-sku Standard_D2s_v4')
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 '
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Ubuntu2204 --instance-count 1 '
                      '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! '
-                     '--role Contributor --orchestration-mode Uniform --vm-sku Standard_D2s_v3')
+                     '--role Contributor --orchestration-mode Uniform --vm-sku Standard_D2s_v4')
 
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 '
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Ubuntu2204 --instance-count 1 '
                      '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} '
                      '--role Contributor --orchestration-mode Uniform --lb-sku Standard '
-                     '--vm-sku Standard_D2s_v3', checks=[
+                     '--vm-sku Standard_D2s_v4', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
                 self.check('vmss.identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])
@@ -6667,17 +6667,17 @@ class MSIScenarioTest(ScenarioTest):
             result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 '
                               '--assign-identity --scope {vmss1_id} --role reader --admin-username admin123 '
                               '--admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard '
-                              '--vm-sku Standard_D2s_v3', checks=[
+                              '--vm-sku Standard_D2s_v4', checks=[
                 self.check('vmss.identity.role', 'reader'),
                 self.check('vmss.identity.scope', '{vmss1_id}'),
             ]).get_output_in_json()
             uuid.UUID(result['vmss']['identity']['systemAssignedIdentity'])
 
             # create a linux vm w/o identity and later enable it
-            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 '
+            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Ubuntu2204 --instance-count 1 '
                               '--admin-username admin123 --admin-password PasswordPassword1! '
                               '--orchestration-mode Uniform --lb-sku Standard '
-                              '--vm-sku Standard_D2s_v3').get_output_in_json()['vmss']
+                              '--vm-sku Standard_D2s_v4').get_output_in_json()['vmss']
             self.assertIsNone(result.get('identity'))
 
             with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
@@ -6697,7 +6697,7 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss identity remove -g {rg} -n {vmss3}', checks=self.is_empty())
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
+    @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope', location='westcentralus')
     def test_vm_msi_no_scope(self, resource_group):
 
         self.kwargs.update({
@@ -6710,8 +6710,8 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         # create a linux vm with identity but w/o a role assignment (--scope "")
-        self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 '
-                 '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms', checks=[
+        self.cmd('vm create -g {rg} -n {vm1} --image Ubuntu2204 --assign-identity --admin-username admin123 '
+                 '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v4', checks=[
             self.check('identity.scope', None),
             self.check('identity.role', None),
         ])
@@ -6721,24 +6721,24 @@ class MSIScenarioTest(ScenarioTest):
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # create a vmss with identity but w/o a role assignment (--scope "")
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Ubuntu2204 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v4 --instance-count 1', checks=[
             self.check('vmss.identity.scope', None),
         ])
 
         # create a vm w/o identity
-        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --admin-username admin123 --admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE  --size Standard_B2ms')
+        self.cmd('vm create -g {rg} -n {vm2} --image Ubuntu2204 --admin-username admin123 --admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE  --size Standard_D2s_v4')
         # assign identity but w/o a role assignment
         self.cmd('vm identity assign -g {rg} -n {vm2}', checks=[
             self.check('scope', None),
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image Debian:debian-10:10:latest --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Ubuntu2204 --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v4 --instance-count 1')
         self.cmd('vmss identity assign -g {rg} -n {vmss2}', checks=[
             self.check('scope', None),
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(random_name_length=20)
+    @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
     def test_vm_explicit_msi(self, resource_group):
 
         self.kwargs.update({
@@ -6760,8 +6760,8 @@ class MSIScenarioTest(ScenarioTest):
 
         # create a vm with only user assigned identity
         result = self.cmd(
-            'vm create -g {rg} -n vm2 --image Debian11 --assign-identity {emsi} '
-            '--generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms', checks=[
+            'vm create -g {rg} -n vm2 --image Ubuntu2204 --assign-identity {emsi} '
+            '--generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v4', checks=[
             self.check('identity.role', None),
             self.check('identity.scope', None),
         ]).get_output_in_json()
@@ -6775,7 +6775,7 @@ class MSIScenarioTest(ScenarioTest):
         self.assertFalse(result['identity']['systemAssignedIdentity'])
 
         # create a vm with system + user assigned identities
-        result = self.cmd('vm create -g {rg} -n {vm} --image Debian11 --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms').get_output_in_json()
+        result = self.cmd('vm create -g {rg} -n {vm} --image Ubuntu2204 --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v4').get_output_in_json()
         emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
         result = self.cmd('vm identity show -g {rg} -n {vm}', checks=[
@@ -6825,10 +6825,10 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vmss with system + user assigned identities
-        result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest '
+        result = self.cmd('vmss create -g {rg} -n {vmss} --image Ubuntu2204 '
                           '--assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 '
                           '--generate-ssh-keys --admin-username ubuntuadmin --orchestration-mode Uniform '
-                          '--lb-sku Standard --vm-sku Standard_D2s_v3').get_output_in_json()
+                          '--lb-sku Standard --vm-sku Standard_D2s_v4').get_output_in_json()
         emsis = [x.lower() for x in result['vmss']['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
 
@@ -6958,6 +6958,176 @@ class MSIScenarioTest(ScenarioTest):
             self.check('type', 'SystemAssigned'),
             self.check('userAssignedIdentities', None),
         ])
+
+
+class VMIdentityAssignmentRestrictedCallerScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_identity_assign_rbac_', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_identity_assign_rbac_ids_', location='westcentralus',
+                           parameter_name='identity_resource_group',
+                           parameter_name_for_location='identity_resource_group_location', key='identity_rg')
+    def test_vm_vmss_identity_assign_restricted_caller(
+            self, resource_group, resource_group_location, identity_resource_group):
+        from azure.cli.core._profile import Profile
+        from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
+        from azure.cli.core.auth.msal_credentials import ServicePrincipalCredential
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'caller': self.create_random_name('cli-identity-rbac-', 32),
+            'scope': '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group),
+            'ssh_key': TEST_SSH_KEY_PUB.strip(),
+        })
+        identities = [
+            self.cmd('identity create -g {identity_rg} -l {loc} -n identity-' + suffix).get_output_in_json()['id']
+            for suffix in ('a', 'b')
+        ]
+        self.kwargs['identity_a'], self.kwargs['identity_b'] = identities
+        principal = self.cmd('ad sp create-for-rbac --name {caller}').get_output_in_json()
+        self.addCleanup(self.cmd, 'ad app delete --id ' + principal['appId'])
+        self.kwargs['principal_id'] = self.cmd('ad sp show --id ' + principal['appId']).get_output_in_json()['id']
+
+        # Keep A outside the caller's Contributor scope; grant assignment permission only on B.
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --assignee-object-id {principal_id} '
+                     '--assignee-principal-type ServicePrincipal --role Contributor --scope {scope}')
+            self.cmd('role assignment create --assignee-object-id {principal_id} '
+                     '--assignee-principal-type ServicePrincipal --role "Managed Identity Operator" '
+                     '--scope {identity_b}')
+
+        self.cmd('vm create -g {rg} -l {loc} -n vm1 --image Ubuntu2204 '
+                 '--admin-username azureuser --ssh-key-value "{ssh_key}" '
+                 '--public-ip-address "" --assign-identity {identity_a} '
+                 '--size Standard_D2s_v4 --nsg-rule NONE')
+        self.cmd('vmss create -g {rg} -l {loc} -n vmss1 --image Ubuntu2204 '
+                 '--admin-username azureuser --ssh-key-value "{ssh_key}" '
+                 '--public-ip-address "" --assign-identity {identity_a} '
+                 '--vm-sku Standard_D2s_v4 --instance-count 0 --orchestration-mode Uniform '
+                 '--upgrade-policy-mode Manual --load-balancer ""')
+
+        credential, subscription_id, tenant_id = Profile(cli_ctx=self.cli_ctx).get_login_credentials()
+        if self.in_recording:
+            credential = CredentialAdaptor(ServicePrincipalCredential(
+                principal['appId'], principal['password'],
+                authority=self.cli_ctx.cloud.endpoints.active_directory.rstrip('/') + '/' + principal['tenant']))
+
+        # Override only this test's credentials, without changing the signed-in CLI account.
+        with mock.patch.object(Profile, 'get_login_credentials',
+                               return_value=(credential, subscription_id, tenant_id)):
+            for resource_type, name in (('vm', 'vm1'), ('vmss', 'vmss1')):
+                with self.subTest(resource_type=resource_type):
+                    command = resource_type + ' identity assign -g {rg} -n ' + name
+                    show_command = resource_type + ' identity show -g {rg} -n ' + name
+                    previous = self.cmd(show_command).get_output_in_json()
+                    self.assertEqual(previous['type'], 'UserAssigned')
+                    self.assertEqual({key.lower() for key in previous['userAssignedIdentities']},
+                                     {identities[0].lower()})
+                    with self.assertRaisesRegex(HttpResponseError, 'LinkedAuthorizationFailed') as error:
+                        self.cmd(command + ' --identities {identity_a}')
+                    self.assertIn(identities[0].lower(), str(error.exception).lower())
+
+                    result = self.cmd(command + ' --identities {identity_b}').get_output_in_json()
+                    current = self.cmd(show_command).get_output_in_json()
+                    users = {key.lower(): value for key, value in current['userAssignedIdentities'].items()}
+                    self.assertEqual(set(users), {identity.lower() for identity in identities})
+                    self.assertEqual(current['type'], 'UserAssigned')
+                    self.assertEqual(result['userAssignedIdentities'], current['userAssignedIdentities'])
+                    for identity, value in previous['userAssignedIdentities'].items():
+                        self.assertEqual(users[identity.lower()], value)
+
+
+class VMIdentityAssignmentLiveScenarioTest(LiveScenarioTest):
+
+    # These scenarios check preservation, not permissions under a restricted caller.
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_identity_patch_', location='westcentralus')
+    def test_vm_identity_assign_preserves_existing_identities(self, resource_group):
+        identity_ids = [
+            self.cmd('identity create -g {rg} -n identity-' + suffix).get_output_in_json()['id']
+            for suffix in ('a', 'b', 'c')
+        ]
+        self.kwargs.update({
+            'resource': 'vm1',
+            'identity_a': identity_ids[0],
+            'ssh_key': TEST_SSH_KEY_PUB.strip(),
+        })
+        self.cmd('vm create -g {rg} -n {resource} --image Ubuntu2204 '
+                 '--admin-username azureuser --ssh-key-value "{ssh_key}" '
+                 '--public-ip-address "" --assign-identity {identity_a} '
+                 '--size Standard_D2s_v4 --nsg-rule NONE')
+        self._test_identity_assign_preserves_existing_identities('vm', identity_ids)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_identity_patch_', location='eastus2')
+    def test_vmss_identity_assign_preserves_existing_identities(self, resource_group):
+        identity_ids = [
+            self.cmd('identity create -g {rg} -n identity-' + suffix).get_output_in_json()['id']
+            for suffix in ('a', 'b', 'c')
+        ]
+        self.kwargs.update({
+            'resource': 'vmss1',
+            'identity_a': identity_ids[0],
+            'ssh_key': TEST_SSH_KEY_PUB.strip(),
+        })
+        self.cmd('vmss create -g {rg} -n {resource} --image Ubuntu2204 '
+                 '--admin-username azureuser --ssh-key-value "{ssh_key}" '
+                 '--public-ip-address "" --assign-identity {identity_a} '
+                 '--vm-sku Standard_D2s_v5 --instance-count 0 --orchestration-mode Uniform '
+                 '--upgrade-policy-mode Manual --load-balancer ""')
+        self._test_identity_assign_preserves_existing_identities('vmss', identity_ids)
+
+    def _test_identity_assign_preserves_existing_identities(self, resource_type, identity_ids):
+        initial = self.cmd(resource_type + ' identity show -g {rg} -n {resource}').get_output_in_json()
+        self.assertEqual({key.lower() for key in initial['userAssignedIdentities']}, {identity_ids[0].lower()})
+        self.assertEqual(initial['type'], 'UserAssigned')
+
+        # Add B without resending A or enabling a system identity.
+        with_user_identity = self._assign_identity_and_check(
+            resource_type, identity_ids[1], 'UserAssigned', initial)
+        # Enable the system identity without dropping or resending A and B.
+        with_system_identity = self._assign_identity_and_check(
+            resource_type, None, 'SystemAssigned,UserAssigned', with_user_identity)
+        # Add C while preserving the system identity and previously attached user identities.
+        self._assign_identity_and_check(
+            resource_type, identity_ids[2], 'SystemAssigned,UserAssigned', with_system_identity)
+
+    def _assign_identity_and_check(self, resource_type, requested, identity_type, previous):
+        from azure.cli.core.aaz._client import AAZBaseClient
+
+        assign_command = resource_type + ' identity assign -g {rg} -n {resource}'
+        if requested:
+            assign_command += ' --identities ' + requested
+        # Inspect the real outgoing request while still allowing the live Azure call.
+        with mock.patch.object(AAZBaseClient, 'send_request', autospec=True,
+                               side_effect=AAZBaseClient.send_request) as send_request:
+            result = self.cmd(assign_command).get_output_in_json()
+
+        patches = [call.kwargs['request'] for call in send_request.call_args_list
+                   if call.kwargs['request'].method == 'PATCH']
+        self.assertEqual(len(patches), 1)
+        sent_identity = json.loads(patches[0].data)['identity']
+        self.assertEqual(sent_identity['type'].replace(' ', ''), identity_type)
+        expected_ids = {key.lower() for key in previous['userAssignedIdentities']}
+        if requested:
+            self.assertEqual(
+                {key.lower(): value for key, value in sent_identity['userAssignedIdentities'].items()},
+                {requested.lower(): {}})
+            expected_ids.add(requested.lower())
+        else:
+            self.assertNotIn('userAssignedIdentities', sent_identity)
+
+        # Verify the service kept existing identities, not just the assignment response.
+        current = self.cmd(resource_type + ' identity show -g {rg} -n {resource}').get_output_in_json()
+        current_users = {key.lower(): value for key, value in current['userAssignedIdentities'].items()}
+        self.assertEqual(set(current_users), expected_ids)
+        self.assertEqual(result['userAssignedIdentities'], current['userAssignedIdentities'])
+        self.assertEqual(current['type'].replace(' ', ''), identity_type)
+        for identity, value in previous['userAssignedIdentities'].items():
+            self.assertEqual(current_users[identity.lower()], value)
+        if 'SystemAssigned' in identity_type:
+            self.assertTrue(current['principalId'])
+            self.assertEqual(result['systemAssignedIdentity'], current['principalId'])
+        if previous.get('principalId'):
+            self.assertEqual(current['principalId'], previous['principalId'])
+        return current
 
 
 class VMLiveScenarioTest(LiveScenarioTest):

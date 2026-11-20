@@ -828,9 +828,33 @@ def show_vmss_identity(cmd, resource_group_name, vm_name):
     return vm.get("identity", {}) if vm else None
 
 
+def _build_identity_assignment_args(existing_identity_type, external_identities, enable_local_identity):
+    if existing_identity_type == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+        identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+    elif existing_identity_type == IdentityType.SYSTEM_ASSIGNED.value and external_identities:
+        identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+    elif existing_identity_type == IdentityType.USER_ASSIGNED.value and enable_local_identity:
+        identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+    elif external_identities and enable_local_identity:
+        identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+    elif external_identities:
+        identity_types = IdentityType.USER_ASSIGNED.value
+    else:
+        identity_types = IdentityType.SYSTEM_ASSIGNED.value
+
+    command_args = {
+        'identity_type': identity_types,
+        'mi_user_assigned': list(dict.fromkeys(external_identities)),
+    }
+    if identity_types in (IdentityType.SYSTEM_ASSIGNED.value,
+                          IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value):
+        command_args['mi_system_assigned'] = "True"
+    return command_args
+
+
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role=None,
                        identity_role_id=None, identity_scope=None):
-    identity, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
+    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
     command_args = {'resource_group': resource_group_name, 'vm_name': vm_name}
 
@@ -838,36 +862,8 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         return get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
     def setter(vm, external_identities=external_identities):
-        if vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
-        elif vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED.value and external_identities:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
-        elif vm.get('identity', {}).get('type', None) == IdentityType.USER_ASSIGNED.value and enable_local_identity:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
-        elif external_identities and enable_local_identity:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
-        elif external_identities:
-            identity_types = IdentityType.USER_ASSIGNED.value
-        else:
-            identity_types = IdentityType.SYSTEM_ASSIGNED.value
-
-        if identity_types == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
-            command_args['mi_system_assigned'] = "True"
-            command_args['mi_user_assigned'] = []
-        elif identity_types == IdentityType.USER_ASSIGNED.value:
-            command_args['mi_user_assigned'] = []
-        else:
-            command_args['mi_system_assigned'] = "True"
-            command_args['mi_user_assigned'] = []
-
-        if vm.get('identity', {}).get('userAssignedIdentities', None):
-            for key in vm.get('identity').get('userAssignedIdentities').keys():
-                command_args['mi_user_assigned'].append(key)
-
-        if identity.get('userAssignedIdentities'):
-            for key in identity.get('userAssignedIdentities', {}).keys():
-                if key not in command_args['mi_user_assigned']:
-                    command_args['mi_user_assigned'].append(key)
+        command_args.update(_build_identity_assignment_args(
+            (vm.get('identity') or {}).get('type'), external_identities, enable_local_identity))
 
         from .operations.vm import VMPatch
         update_vm_identity = VMPatch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
@@ -3657,7 +3653,7 @@ def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
 # region VirtualMachineScaleSets
 def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=None, identity_role=None,
                          identity_role_id=None, identity_scope=None):
-    identity, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
+    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
     from ._vm_utils import assign_identity as assign_identity_helper, UpgradeMode
 
     command_args = {'resource_group': resource_group_name, 'vm_scale_set_name': vmss_name}
@@ -3666,36 +3662,8 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
         return get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
 
     def setter(vmss, external_identities=external_identities):
-        if vmss.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
-        elif vmss.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED.value and external_identities:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
-        elif vmss.get('identity', {}).get('type', None) == IdentityType.USER_ASSIGNED.value and enable_local_identity:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
-        elif external_identities and enable_local_identity:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
-        elif external_identities:
-            identity_types = IdentityType.USER_ASSIGNED.value
-        else:
-            identity_types = IdentityType.SYSTEM_ASSIGNED.value
-
-        if identity_types == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
-            command_args['mi_system_assigned'] = "True"
-            command_args['mi_user_assigned'] = []
-        elif identity_types == IdentityType.USER_ASSIGNED.value:
-            command_args['mi_user_assigned'] = []
-        else:
-            command_args['mi_system_assigned'] = "True"
-            command_args['mi_user_assigned'] = []
-
-        if vmss.get('identity', {}).get('userAssignedIdentities', None):
-            for key in vmss.get('identity').get('userAssignedIdentities').keys():
-                command_args['mi_user_assigned'].append(key)
-
-        if identity.get('userAssignedIdentities'):
-            for key in identity.get('userAssignedIdentities', {}).keys():
-                if key not in command_args['mi_user_assigned']:
-                    command_args['mi_user_assigned'].append(key)
+        command_args.update(_build_identity_assignment_args(
+            (vmss.get('identity') or {}).get('type'), external_identities, enable_local_identity))
 
         from .operations.vmss import VMSSPatch
         update_vmss_identity = VMSSPatch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
