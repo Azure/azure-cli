@@ -101,7 +101,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.cli = MockCLI()
         # Synthetic archives contain fake executable bytes: never inspect them with host ldd.
         for target, result in (
-            ('azure.cli.core.util.get_safe_executable_path', '/usr/bin/ldd'),
+            ('azure.cli.command_modules.acs.custom.get_safe_executable_path', '/usr/bin/ldd'),
             ('azure.cli.core.util.run_cmd', subprocess.CompletedProcess([], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)', '')),
         ):
             patcher = mock.patch(target, return_value=result)
@@ -1254,7 +1254,7 @@ class AcsCustomCommandTest(unittest.TestCase):
     def test_aks_install_desktop_dependency_inspection_arguments(self):
         environment = {'LC_ALL': 'fr_FR.UTF-8', 'LD_LIBRARY_PATH': '/custom/lib', 'PATH': '/usr/bin'}
         with mock.patch.dict(os.environ, environment, clear=True), \
-                mock.patch('azure.cli.core.util.get_safe_executable_path', return_value='/usr/bin/ldd') as resolve, \
+                mock.patch.object(acs_custom, 'get_safe_executable_path', return_value='/usr/bin/ldd') as resolve, \
                 mock.patch('azure.cli.core.util.run_cmd', return_value=subprocess.CompletedProcess(
                     [], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)\n', '')) as run, \
                 mock.patch.object(acs_custom.logger, 'warning') as warning:
@@ -1286,7 +1286,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                 archive_path = os.path.join(temp_dir, 'installer.tar.gz')
                 self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
                 with mock.patch('os.path.expanduser', return_value=temp_dir), \
-                        mock.patch('azure.cli.core.util.get_safe_executable_path', return_value=resolver), \
+                        mock.patch.object(acs_custom, 'get_safe_executable_path', return_value=resolver), \
                         mock.patch('azure.cli.core.util.run_cmd',
                                    **({'side_effect': result} if isinstance(result, Exception)
                                       else {'return_value': result})) as run, \
@@ -2332,6 +2332,94 @@ class AcsCustomCommandTest(unittest.TestCase):
         instance = _update_upgrade_settings(MockCmd(self.cli), instance, enable_force_upgrade=True, disable_force_upgrade=False, upgrade_override_until="2024-01-01T13:00:00Z")
         self.assertTrue(instance.upgrade_settings.override_settings.force_upgrade)
         self.assertEqual(instance.upgrade_settings.override_settings.until, parse("2024-01-01T13:00:00Z"))
+
+
+class AksGetCredentialsExecutableTest(unittest.TestCase):
+    def setUp(self):
+        self.cmd = mock.Mock()
+        self.cmd.cli_ctx.cloud.profile = "latest"
+        kubeconfig = yaml.safe_dump({
+            "users": [{
+                "user": {"exec": {"command": "kubelogin", "args": ["get-token", "--login", "devicecode"]}},
+            }],
+        })
+        self.client = mock.Mock()
+        self.client.list_cluster_user_credentials.return_value.kubeconfigs = [
+            mock.Mock(value=kubeconfig.encode("utf-8")),
+        ]
+
+    def test_aks_get_credentials_ignores_working_directory_executable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            working_directory = os.path.join(directory, "work")
+            tools_directory = os.path.join(directory, "tools")
+            executable_name = "kubelogin.exe" if os.name == "nt" else "kubelogin"
+            for executable_directory in (working_directory, tools_directory):
+                os.mkdir(executable_directory)
+                executable_path = os.path.join(executable_directory, executable_name)
+                with open(executable_path, "w"):
+                    pass
+                os.chmod(executable_path, 0o700)
+
+            original_directory = os.getcwd()
+            try:
+                os.chdir(working_directory)
+                for path_entry in ("", ".", working_directory):
+                    for trusted_directory in (tools_directory, None):
+                        search_path = [path_entry]
+                        if trusted_directory:
+                            search_path.append(trusted_directory)
+                        with (
+                            self.subTest(path_entry=path_entry, trusted_directory=trusted_directory),
+                            mock.patch.dict(os.environ, {
+                                "PATH": os.pathsep.join(search_path),
+                                "PATHEXT": ".exe",
+                                "SystemRoot": os.path.join(directory, "system"),
+                            }),
+                            mock.patch.object(acs_custom, "_print_or_merge_credentials"),
+                            mock.patch.object(acs_custom.subprocess, "run") as run,
+                            mock.patch.object(acs_custom, "logger") as logger,
+                        ):
+                            config_path = os.path.join("configs", "config")
+                            acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=config_path)
+
+                            if trusted_directory:
+                                run.assert_called_once_with(
+                                    [os.path.join(tools_directory, executable_name),
+                                     "convert-kubeconfig", "-l", "azurecli"],
+                                    cwd=os.path.dirname(config_path),
+                                    check=True,
+                                )
+                            else:
+                                run.assert_not_called()
+                                self.assertIn("Please install kubelogin", logger.warning.call_args[0][0])
+            finally:
+                os.chdir(original_directory)
+
+    def test_aks_get_credentials_conversion_failures_warn(self):
+        kubelogin_path = os.path.abspath(os.path.join("tools", "kubelogin"))
+        for error, message in (
+            (subprocess.CalledProcessError(1, [kubelogin_path]), "Failed to convert kubeconfig"),
+            (OSError("Cannot execute kubelogin"), "Error running kubelogin"),
+        ):
+            with (
+                self.subTest(message=message),
+                mock.patch.object(acs_custom, "_print_or_merge_credentials"),
+                mock.patch.object(acs_custom, "get_safe_executable_path", return_value=kubelogin_path),
+                mock.patch.object(acs_custom.subprocess, "run", side_effect=error) as run,
+                mock.patch.object(acs_custom, "logger") as logger,
+            ):
+                acs_custom.aks_get_credentials(
+                    self.cmd, self.client, "rg", "cluster", path=os.path.join("configs", "config")
+                )
+
+                run.assert_called_once_with(
+                    [kubelogin_path, "convert-kubeconfig", "-l", "azurecli"],
+                    cwd="configs",
+                    check=True,
+                )
+                logger.warning.assert_called_once()
+                self.assertIn(message, logger.warning.call_args[0][0])
+
 
 class TestAKSCommand(unittest.TestCase):
     def setUp(self):
