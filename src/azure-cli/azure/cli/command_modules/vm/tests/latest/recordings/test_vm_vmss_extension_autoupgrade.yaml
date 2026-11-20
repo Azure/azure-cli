@@ -15190,6 +15190,93 @@ interactions:
     body: null
     headers:
       Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Compute/virtualMachines/vm1000002?api-version=2026-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vm1000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Compute/virtualMachines/vm1000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"identity\": {\r\n    \"type\": \"SystemAssigned\",\r\n
+        \   \"principalId\": \"790ab855-19fa-48fb-bab9-4c9a4046f5a2\",\r\n    \"tenantId\":
+        \"ed94de55-1f87-4278-9651-525e7ba467d6\"\r\n  },\r\n  \"properties\": {\r\n
+        \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"vmId\": \"7cadb1ba-f002-4889-812d-0db5467ef2f0\",\r\n
+        \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
+        \"canonical\",\r\n        \"offer\": \"0001-com-ubuntu-server-focal\",\r\n
+        \       \"sku\": \"20_04-lts-gen2\",\r\n        \"version\": \"latest\",\r\n
+        \       \"exactVersion\": \"20.04.202505200\"\r\n      },\r\n      \"osDisk\":
+        {\r\n        \"osType\": \"Linux\",\r\n        \"name\": \"vm1000002_OsDisk_1_63fbe82de9c6449ea15f5f0a74381c36\",\r\n
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
+        \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Compute/disks/vm1000002_OsDisk_1_63fbe82de9c6449ea15f5f0a74381c36\"\r\n
+        \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
+        30\r\n      },\r\n      \"dataDisks\": [],\r\n      \"diskControllerType\":
+        \"SCSI\"\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm1000002\",\r\n
+        \     \"adminUsername\": \"azureuser\",\r\n      \"linuxConfiguration\": {\r\n
+        \       \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\":
+        true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\",\r\n
+        \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
+        \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
+        true\r\n    },\r\n    \"securityProfile\": {\r\n      \"uefiSettings\": {\r\n
+        \       \"secureBootEnabled\": true,\r\n        \"vTpmEnabled\": true\r\n
+        \     },\r\n      \"securityType\": \"TrustedLaunch\"\r\n    },\r\n    \"networkProfile\":
+        {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Network/networkInterfaces/vm1000002VMNic\"}]},\r\n
+        \   \"timeCreated\": \"2026-05-07T07:51:58.7197975+00:00\"\r\n  },\r\n  \"etag\":
+        \"\\\"2\\\"\",\r\n  \"resources\": [\r\n    {\r\n      \"name\": \"GuestAttestation\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Compute/virtualMachines/vm1000002/extensions/GuestAttestation\",\r\n
+        \     \"type\": \"Microsoft.Compute/virtualMachines/extensions\",\r\n      \"location\":
+        \"eastus\",\r\n      \"properties\": {\r\n        \"autoUpgradeMinorVersion\":
+        true,\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"enableAutomaticUpgrade\":
+        true,\r\n        \"publisher\": \"Microsoft.Azure.Security.LinuxAttestation\",\r\n
+        \       \"type\": \"GuestAttestation\",\r\n        \"typeHandlerVersion\":
+        \"1.0\"\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3127'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 07 May 2026 07:55:31 GMT
+      etag:
+      - '"2"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGetSubscriptionMaximum;23997,Microsoft.Compute/LowCostGetResource;27
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 2B2F61C3E3CA46908CD516E9EC75D521 Ref B: SG2AA1040520042 Ref C: 2026-05-07T07:55:31Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
       - '*/*'
       Accept-Encoding:
       - gzip, deflate
@@ -15350,6 +15437,93 @@ interactions:
       - '3749'
       x-msedge-ref:
       - 'Ref A: F5706D71B922488ABB399203493B2434 Ref B: SG2AA1040512025 Ref C: 2026-05-07T07:56:04Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Compute/virtualMachines/vm2000003?api-version=2026-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vm2000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Compute/virtualMachines/vm2000003\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"identity\": {\r\n    \"type\": \"SystemAssigned\",\r\n
+        \   \"principalId\": \"c8a79030-ee52-4881-9aba-53922efa5981\",\r\n    \"tenantId\":
+        \"ed94de55-1f87-4278-9651-525e7ba467d6\"\r\n  },\r\n  \"properties\": {\r\n
+        \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_D2s_v3\"\r\n    },\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"vmId\": \"ccdb1f8a-dc46-4866-9071-3f8c1133b12a\",\r\n
+        \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
+        \"canonical\",\r\n        \"offer\": \"0001-com-ubuntu-server-focal\",\r\n
+        \       \"sku\": \"20_04-lts-gen2\",\r\n        \"version\": \"latest\",\r\n
+        \       \"exactVersion\": \"20.04.202505200\"\r\n      },\r\n      \"osDisk\":
+        {\r\n        \"osType\": \"Linux\",\r\n        \"name\": \"vm2000003_OsDisk_1_129a906a88db45899526463794e60456\",\r\n
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
+        \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Compute/disks/vm2000003_OsDisk_1_129a906a88db45899526463794e60456\"\r\n
+        \       },\r\n        \"deleteOption\": \"Detach\",\r\n        \"diskSizeGB\":
+        30\r\n      },\r\n      \"dataDisks\": [],\r\n      \"diskControllerType\":
+        \"SCSI\"\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm2000003\",\r\n
+        \     \"adminUsername\": \"azureuser\",\r\n      \"linuxConfiguration\": {\r\n
+        \       \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\":
+        true,\r\n        \"patchSettings\": {\r\n          \"patchMode\": \"ImageDefault\",\r\n
+        \         \"assessmentMode\": \"ImageDefault\"\r\n        }\r\n      },\r\n
+        \     \"secrets\": [],\r\n      \"allowExtensionOperations\": true,\r\n      \"requireGuestProvisionSignal\":
+        true\r\n    },\r\n    \"securityProfile\": {\r\n      \"uefiSettings\": {\r\n
+        \       \"secureBootEnabled\": true,\r\n        \"vTpmEnabled\": true\r\n
+        \     },\r\n      \"securityType\": \"TrustedLaunch\"\r\n    },\r\n    \"networkProfile\":
+        {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Network/networkInterfaces/vm2000003VMNic\"}]},\r\n
+        \   \"timeCreated\": \"2026-05-07T07:54:16.1775515+00:00\"\r\n  },\r\n  \"etag\":
+        \"\\\"2\\\"\",\r\n  \"resources\": [\r\n    {\r\n      \"name\": \"GuestAttestation\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_vm_vmss_extension_autoupgrade_000001/providers/Microsoft.Compute/virtualMachines/vm2000003/extensions/GuestAttestation\",\r\n
+        \     \"type\": \"Microsoft.Compute/virtualMachines/extensions\",\r\n      \"location\":
+        \"eastus\",\r\n      \"properties\": {\r\n        \"autoUpgradeMinorVersion\":
+        true,\r\n        \"provisioningState\": \"Succeeded\",\r\n        \"enableAutomaticUpgrade\":
+        false,\r\n        \"publisher\": \"Microsoft.Azure.Security.LinuxAttestation\",\r\n
+        \       \"type\": \"GuestAttestation\",\r\n        \"typeHandlerVersion\":
+        \"1.0\"\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3128'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 07 May 2026 07:56:05 GMT
+      etag:
+      - '"2"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGetSubscriptionMaximum;23997,Microsoft.Compute/LowCostGetResource;27
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 2B2F61C3E3CA46908CD516E9EC75D521 Ref B: SG2AA1040520042 Ref C: 2026-05-07T07:55:31Z'
     status:
       code: 200
       message: ''
