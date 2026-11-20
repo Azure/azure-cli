@@ -326,7 +326,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         imds_access_control_profile_reference_id=None, key_incarnation_id=None, add_proxy_agent_extension=None,
         disk_iops_read_write=None, disk_mbps_read_write=None, zone_movement=None,
         os_disk_storage_fault_domain_alignment=None, data_disk_storage_fault_domain_alignment=None,
-        preferred_size=None):
+        preferred_size=None, imds_use_local_file_rules=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -742,6 +742,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         imds['mode'] = imds_mode
         imds['inVMAccessControlProfileReferenceId'] = imds_access_control_profile_reference_id
 
+    if imds_use_local_file_rules is not None:
+        imds['useLocalFileRules'] = imds_use_local_file_rules
+
     if wire_server:
         proxy_agent_settings['wireServer'] = wire_server
 
@@ -1105,7 +1108,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
                         exclude_zones=None, max_zone_count=None, instance_percent_policy=None,
                         max_instance_percent=None, data_disk_storage_fault_domain_alignment=None,
-                        os_disk_storage_fault_domain_alignment=None, zonal_platform_fault_domain_align_mode=None):
+                        os_disk_storage_fault_domain_alignment=None, zonal_platform_fault_domain_align_mode=None,
+                        imds_use_local_file_rules=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1694,6 +1698,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if imds_mode is not None or imds_access_control_profile_reference_id is not None:
         imds['mode'] = imds_mode
         imds['inVMAccessControlProfileReferenceId'] = imds_access_control_profile_reference_id
+
+    if imds_use_local_file_rules is not None:
+        imds['useLocalFileRules'] = imds_use_local_file_rules
 
     if wire_server:
         proxy_agent_settings['wireServer'] = wire_server

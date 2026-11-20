@@ -13429,6 +13429,43 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.addProxyAgentExtension', False),
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_imds_local_rules_', location='eastus2')
+    def test_vm_vmss_imds_use_local_file_rules(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vm': self.create_random_name('vm', 10),
+            'vmss': self.create_random_name('vmss', 10),
+            'ssh_key': TEST_SSH_KEY_PUB.strip()
+        })
+        self.cmd('vm create -g {rg} -n {vm} --location {loc} '
+                 '--image Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest '
+                 '--size Standard_D2s_v6 --admin-username azureuser --ssh-key-values "{ssh_key}" '
+                 '--public-ip-address "" --nsg-rule NONE --enable-proxy-agent --add-proxy-agent-extension '
+                 '--imds-mode Audit --imds-use-local-file-rules --wire-server-mode Audit '
+                 '--wire-server-use-local-file-rules')
+        self.cmd('vmss create -g {rg} -n {vmss} --location {loc} '
+                 '--image Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest '
+                 '--vm-sku Standard_D2s_v6 --orchestration-mode Flexible --instance-count 1 '
+                 '--admin-username azureuser --ssh-key-values "{ssh_key}" '
+                 '--public-ip-address "" --load-balancer "" --nsg "" '
+                 '--enable-proxy-agent --add-proxy-agent-extension --imds-mode Audit '
+                 '--imds-use-local-file-rules --wire-server-mode Audit --wire-server-use-local-file-rules')
+
+        for command, path in (('vm', 'securityProfile.proxyAgentSettings'),
+                              ('vmss', 'virtualMachineProfile.securityProfile.proxyAgentSettings')):
+            self.kwargs.update(command=command, name=self.kwargs[command])
+            self.cmd('{command} show -g {rg} -n {name}', checks=[
+                self.check(path + '.imds.useLocalFileRules', True)
+            ])
+            for value in (False, True):
+                self.kwargs['value'] = str(value).lower()
+                self.cmd('{command} update -g {rg} -n {name} --imds-use-local-file-rules {value}')
+                self.cmd('{command} show -g {rg} -n {name}', checks=[
+                    self.check(path + '.imds.useLocalFileRules', value),
+                    self.check(path + '.imds.mode', 'Audit'),
+                    self.check(path + '.wireServer.useLocalFileRules', True)
+                ])
+
     @ResourceGroupPreparer(name_prefix='cli_vm_vmss_wire_server_local_rules_', location='eastus2')
     def test_vm_vmss_wire_server_use_local_file_rules(self, resource_group):
         self.kwargs.update({
