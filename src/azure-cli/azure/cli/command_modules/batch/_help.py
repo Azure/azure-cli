@@ -158,6 +158,7 @@ examples:
 helps['batch account network-profile set'] = """
 type: command
 short-summary: Set the Network profile for Batch account.
+long-summary: The network profile only takes effect when public network access is enabled, so this command also sets public network access to Enabled.
 examples:
   - name: Set the BatchAccount network-profile to the Allow
     text: >
@@ -181,6 +182,7 @@ examples:
 helps['batch account network-profile network-rule add'] = """
 type: command
 short-summary: Add a Network rule from a Network Profile.
+long-summary: The network profile only takes effect when public network access is enabled, so this command also sets public network access to Enabled.
 examples:
   - name: Add ip address to BatchAccount network rule
     text: >
@@ -190,6 +192,7 @@ examples:
 helps['batch account network-profile network-rule delete'] = """
 type: command
 short-summary: Delete a Network rule from a Network Profile.
+long-summary: The network profile only takes effect when public network access is enabled, so this command also sets public network access to Enabled.
 examples:
   - name: Delete ip address from BatchAccount network rule
     text: >
