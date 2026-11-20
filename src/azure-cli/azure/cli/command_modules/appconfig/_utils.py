@@ -19,9 +19,31 @@ from azure.cli.core.azclierror import (AzCLIError,
 from azure.core.pipeline.policies import RetryPolicy
 from azure.core.pipeline.transport import RequestsTransport  # pylint: disable=no-name-in-module
 from ._client_factory import cf_configstore
-from ._constants import HttpHeaders, FeatureFlagConstants
+from ._constants import HttpHeaders, FeatureFlagConstants, ImportExportProfiles
 
 logger = get_logger(__name__)
+
+
+def resolve_import_profile(data, profile, supported_profiles):
+    if profile is not None:
+        embedded_profile = data.get("profile") if isinstance(data, dict) and isinstance(data.get("items"), list) else None
+        if embedded_profile in (
+                ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET, ImportExportProfiles.FFSET
+        ) and embedded_profile != profile:
+            raise InvalidArgumentValueError(
+                "The specified profile '{}' conflicts with the file profile '{}'.".format(profile, embedded_profile))
+        return profile
+    if isinstance(data, dict) and isinstance(data.get("items"), list):
+        embedded_profile = data.get("profile")
+        if embedded_profile not in (
+                ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET, ImportExportProfiles.FFSET):
+            return ImportExportProfiles.DEFAULT
+        if embedded_profile not in supported_profiles:
+            raise InvalidArgumentValueError(
+                "The file contains an unsupported import profile. Supported profiles: {}.".format(
+                    ", ".join(supported_profiles)))
+        return embedded_profile
+    return ImportExportProfiles.DEFAULT
 
 
 def construct_connection_string(cmd, config_store_name):

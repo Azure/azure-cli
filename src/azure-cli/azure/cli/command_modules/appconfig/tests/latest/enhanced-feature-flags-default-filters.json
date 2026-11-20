@@ -1,0 +1,44 @@
+{
+  "feature_management": {
+    "feature_flags": [
+      {
+        "id": "CliTargeting",
+        "enabled": true,
+        "conditions": {
+          "client_filters": [
+            {
+              "name": "Microsoft.Targeting",
+              "parameters": {
+                "Audience": {
+                  "Users": ["TestUser"],
+                  "Groups": [
+                    {"Name": "TestGroup", "RolloutPercentage": 75}
+                  ],
+                  "DefaultRolloutPercentage": 10,
+                  "Exclusion": {
+                    "Users": ["ExcludedUser"],
+                    "Groups": ["ExcludedGroup"]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "CliPercentage",
+        "enabled": true,
+        "conditions": {
+          "client_filters": [
+            {
+              "name": "Microsoft.Percentage",
+              "parameters": {
+                "Value": 50
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

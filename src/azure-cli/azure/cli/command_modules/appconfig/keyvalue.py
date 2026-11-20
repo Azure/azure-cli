@@ -9,6 +9,7 @@ import json
 import time
 import sys
 import uuid
+from types import SimpleNamespace
 
 from itertools import chain
 
@@ -82,7 +83,7 @@ def import_config(cmd,
                   format_=None,
                   separator=None,
                   depth=None,
-                  profile=ImportExportProfiles.DEFAULT,
+                  profile=None,
                   strict=False,
                   # from-configstore parameters
                   src_name=None,
@@ -105,8 +106,14 @@ def import_config(cmd,
     dest_features = []
     dest_kvs = []
     source = source.lower()
-    profile = profile.lower()
     format_ = format_.lower() if format_ else None
+    from ._validators import validate_import_profile
+    arguments = SimpleNamespace(profile=profile.lower() if profile else profile, source=source,
+                                format_=format_, path=path, content_type=content_type, label=label,
+                                separator=separator, depth=depth, prefix=prefix,
+                                skip_features=skip_features, tags=tags)
+    validate_import_profile(arguments)
+    profile = arguments.profile or ImportExportProfiles.DEFAULT
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
