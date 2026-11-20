@@ -205,6 +205,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'DefaultOutputType',
                               lambda: _get_config().get('core', 'output', fallback='unknown'))
         set_custom_properties(result, 'EnvironmentVariables', _get_env_string)
+        set_custom_properties(result, 'Agent', _get_agent)
         set_custom_properties(result, 'Locale',
                               lambda: '{},{}'.format(locale.getlocale()[0], locale.getlocale()[1]))
         set_custom_properties(result, 'StartTime', str(self.start_time))
@@ -699,6 +700,27 @@ def _get_user_azure_id():
         return _get_profile().get_current_account_user()
     except CLIError:
         return ''
+
+
+def _get_agent():
+    # This advertised surface wins even when it hosts another agent. Exact equality
+    # also rejects oversized values without parsing or retaining a version.
+    if os.getenv('AI_AGENT') == 'github_copilot_vscode_agent':
+        return 'copilot-vscode'
+
+    # Never return environment content: these inherited signals are only usage hints.
+    signals = (
+        (os.getenv('CLAUDE_CODE_CHILD_SESSION') == '1', 'claude-code'),
+        (os.getenv('COPILOT_CLI') == '1', 'copilot-cli'),
+        (os.getenv('COPILOT_AGENT') == '1', 'copilot-vscode'),
+        (os.getenv('CODEX_CI') == '1', 'codex'),
+        (bool(os.getenv('CURSOR_AGENT')), 'cursor'),
+        (os.getenv('GEMINI_CLI') == '1', 'gemini-cli'),
+    )
+    agents = {name for matched, name in signals if matched}
+    if len(agents) > 1:
+        return 'multiple'
+    return next(iter(agents)) if agents else 'unknown'
 
 
 def _get_env_string():
