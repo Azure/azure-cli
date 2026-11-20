@@ -17,6 +17,7 @@ from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from .batch_preparers import BatchMgmtScenarioMixin
+from .batch_request_matcher import register_batch_body_matcher
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
@@ -28,6 +29,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
             BatchAccountKeyReplacer(),
             StorageSASReplacer()
         ])
+        register_batch_body_matcher(self.vcr)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='eastus2')
@@ -118,6 +120,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         super().__init__(method_name, recording_processors=[
             StorageSASReplacer()
         ])
+        register_batch_body_matcher(self.vcr)
 
 
     @ResourceGroupPreparer(location='eastus2')
@@ -372,6 +375,7 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
 
     def __init__(self, method_name):
         super().__init__(method_name)
+        register_batch_body_matcher(self.vcr)
 
     # Note for this test to run you subscrition needs to give access to batch https://learn.microsoft.com/azure/batch/batch-account-create-portal#allow-batch-to-access-the-subscription
     @ResourceGroupPreparer(location='eastus2')

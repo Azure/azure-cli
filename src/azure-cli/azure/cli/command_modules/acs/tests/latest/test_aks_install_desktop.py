@@ -58,7 +58,8 @@ class AKSInstallDesktopScenarioTest(ScenarioTest):
         self._patch(mock.patch('platform.system', return_value='Linux'))
         self._patch(mock.patch('platform.machine', return_value='aarch64'))
         # Stub inspection at the process boundary: the archive executable is synthetic.
-        self._patch(mock.patch('azure.cli.core.util.get_safe_executable_path', return_value='/usr/bin/ldd'))
+        self._patch(mock.patch('azure.cli.command_modules.acs.custom.get_safe_executable_path',
+                               return_value='/usr/bin/ldd'))
         self.inspection = self._patch(mock.patch('azure.cli.core.util.run_cmd', return_value=subprocess.CompletedProcess(
             [], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)', '')))
         self.popen = self._patch(mock.patch('subprocess.Popen'))

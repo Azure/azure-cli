@@ -102,7 +102,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.cli = MockCLI()
         # Synthetic archives contain fake executable bytes: never inspect them with host ldd.
         for target, result in (
-            ('azure.cli.core.util.get_safe_executable_path', '/usr/bin/ldd'),
+            ('azure.cli.command_modules.acs.custom.get_safe_executable_path', '/usr/bin/ldd'),
             ('azure.cli.core.util.run_cmd', subprocess.CompletedProcess([], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)', '')),
         ):
             patcher = mock.patch(target, return_value=result)
@@ -1187,7 +1187,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                 mock_connect.assert_not_called()
 
     @mock.patch.dict(os.environ, {'DISPLAY': ':0'})
-    @mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open')
+    @mock.patch('azure.cli.command_modules.acs.custom.get_safe_executable_path', return_value='/usr/bin/xdg-open')
     @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
                 return_value={'ID': 'ubuntu', 'ID_LIKE': 'debian'})
     def test_aks_install_desktop_selects_native_linux_package(self, _, __):
@@ -1219,12 +1219,12 @@ class AcsCustomCommandTest(unittest.TestCase):
             with self.subTest(environment=environment, distro=distro, launcher=launcher, assets=assets,
                               prefer_deb=prefer_deb), mock.patch.dict(os.environ, environment, clear=True), \
                     mock.patch('platform.freedesktop_os_release', return_value=distro), \
-                    mock.patch('shutil.which', return_value=launcher):
+                    mock.patch.object(acs_custom, 'get_safe_executable_path', return_value=launcher):
                 self.assertEqual(_select_aks_desktop_asset(
                     {'assets': assets}, '0.9.1', 'linux', 'arm64', prefer_deb=prefer_deb), expected)
         with mock.patch.dict(os.environ, {'DISPLAY': ':0'}), \
                 mock.patch('platform.freedesktop_os_release', return_value={'ID': 'debian'}), \
-                mock.patch('shutil.which', return_value='/usr/bin/xdg-open'):
+                mock.patch.object(acs_custom, 'get_safe_executable_path', return_value='/usr/bin/xdg-open'):
             with self.assertRaisesRegex(ClientRequestError, 'multiple artifacts'):
                 _select_aks_desktop_asset({'assets': [deb, deb, archive]}, '0.9.1', 'linux', 'arm64')
             armv7_archive = {'name': 'aks-desktop-0.9.1-linux-armv7l.tar.gz'}
@@ -1255,7 +1255,7 @@ class AcsCustomCommandTest(unittest.TestCase):
     def test_aks_install_desktop_dependency_inspection_arguments(self):
         environment = {'LC_ALL': 'fr_FR.UTF-8', 'LD_LIBRARY_PATH': '/custom/lib', 'PATH': '/usr/bin'}
         with mock.patch.dict(os.environ, environment, clear=True), \
-                mock.patch('azure.cli.core.util.get_safe_executable_path', return_value='/usr/bin/ldd') as resolve, \
+                mock.patch.object(acs_custom, 'get_safe_executable_path', return_value='/usr/bin/ldd') as resolve, \
                 mock.patch('azure.cli.core.util.run_cmd', return_value=subprocess.CompletedProcess(
                     [], 0, 'libc.so.6 => /lib/libc.so.6 (0x1)\n', '')) as run, \
                 mock.patch.object(acs_custom.logger, 'warning') as warning:
@@ -1287,7 +1287,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                 archive_path = os.path.join(temp_dir, 'installer.tar.gz')
                 self._write_aks_desktop_archive(archive_path, [('aks-desktop', tarfile.REGTYPE, '')])
                 with mock.patch('os.path.expanduser', return_value=temp_dir), \
-                        mock.patch('azure.cli.core.util.get_safe_executable_path', return_value=resolver), \
+                        mock.patch.object(acs_custom, 'get_safe_executable_path', return_value=resolver), \
                         mock.patch('azure.cli.core.util.run_cmd',
                                    **({'side_effect': result} if isinstance(result, Exception)
                                       else {'return_value': result})) as run, \
@@ -1324,7 +1324,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                     mock.patch.dict(os.environ, environment, clear=True), mock.patch(
                         'azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
                         return_value=os_release), mock.patch(
-                            'azure.cli.command_modules.acs.custom.shutil.which', return_value=launcher):
+                            'azure.cli.command_modules.acs.custom.get_safe_executable_path', return_value=launcher):
                 asset = _select_aks_desktop_asset(release, '0.9.1', 'linux', 'x64')
                 self.assertEqual(asset['name'], expected)
 
@@ -1341,7 +1341,7 @@ class AcsCustomCommandTest(unittest.TestCase):
         mock_os_release.assert_called_once_with()
 
     @mock.patch.dict(os.environ, {'DISPLAY': ':0'})
-    @mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open')
+    @mock.patch('azure.cli.command_modules.acs.custom.get_safe_executable_path', return_value='/usr/bin/xdg-open')
     @mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
                 return_value={'ID': 'debian'})
     def test_aks_install_desktop_missing_deb_uses_archive(self, mock_os_release, mock_which):
@@ -2030,11 +2030,21 @@ class AcsCustomCommandTest(unittest.TestCase):
             ('linux', 'aks-desktop_0.9.1-1_arm64.deb', ['xdg-open']),
         ]
         for system, installer, launcher in cases:
-            with self.subTest(system=system), mock.patch('azure.cli.core.util.run_cmd') as inspection:
-                _launch_aks_desktop_installer(installer, system, '0.9.1')
-                mock_run.assert_called_once_with(launcher + [installer], check=True)
-                inspection.assert_not_called()
+            resolved_launcher = os.path.abspath(os.path.join('trusted tools', launcher[0])) if launcher else None
+            with (
+                self.subTest(system=system),
+                mock.patch.object(acs_custom, 'get_safe_executable_path', return_value=resolved_launcher) as resolve,
+                mock.patch('azure.cli.core.util.run_cmd') as inspection,
+            ):
                 mock_run.reset_mock()
+                _launch_aks_desktop_installer(installer, system, '0.9.1')
+                expected = [resolved_launcher, installer] if launcher else [installer]
+                mock_run.assert_called_once_with(expected, check=True)
+                if launcher:
+                    resolve.assert_called_once_with(launcher[0])
+                else:
+                    resolve.assert_not_called()
+                inspection.assert_not_called()
 
     def test_aks_install_desktop_retains_gui_installer(self):
         cases = [
@@ -2044,13 +2054,14 @@ class AcsCustomCommandTest(unittest.TestCase):
         for system, arch, name, launcher in cases:
             with self.subTest(system=system), tempfile.TemporaryDirectory() as config_dir:
                 paths = []
+                resolved_launcher = os.path.abspath(os.path.join('trusted tools', launcher))
 
                 def download(asset, path):
                     with open(path, 'wb') as output:
                         output.write(b'installer')
 
                 def launch(args, check):
-                    self.assertEqual(args[0], launcher)
+                    self.assertEqual(args[0], resolved_launcher)
                     self.assertTrue(check)
                     self.assertTrue(os.path.isfile(args[1]))
                     paths.append(args[1])
@@ -2063,7 +2074,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                                return_value=({'assets': [{'name': name}]}, '0.9.1')),
                     mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
                                return_value={'ID': 'debian'}),
-                    mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/usr/bin/xdg-open'),
+                    mock.patch.object(acs_custom, 'get_safe_executable_path', return_value=resolved_launcher),
                     mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset', side_effect=download),
                     mock.patch('azure.cli.command_modules.acs.custom.subprocess.run', side_effect=launch),
                 ):
@@ -2112,7 +2123,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                                    return_value=({'assets': assets}, '0.9.1')) as release,
                         mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
                                    return_value={'ID': 'ubuntu'}),
-                        mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/bin/xdg-open'),
+                        mock.patch.object(acs_custom, 'get_safe_executable_path', return_value='/bin/xdg-open'),
                         mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset',
                                    side_effect=download),
                         mock.patch('azure.cli.command_modules.acs.custom.subprocess.run',
@@ -2138,7 +2149,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                                           else 'xdg-open', str(cm.exception))
                             popen.assert_not_called()
                         release.assert_called_once()
-                        run.assert_called_once_with(['xdg-open', paths[0]], check=True)
+                        run.assert_called_once_with(['/bin/xdg-open', paths[0]], check=True)
                     self.assertEqual([os.path.basename(path) for path in paths],
                                      [deb] if archive_result == 'missing' else [deb, archive])
                     for path in paths:
@@ -2162,7 +2173,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                                return_value=({'assets': [asset, {'name': archive}]}, '0.9.1')),
                     mock.patch('azure.cli.command_modules.acs.custom.platform.freedesktop_os_release',
                                return_value={'ID': 'debian'}),
-                    mock.patch('azure.cli.command_modules.acs.custom.shutil.which', return_value='/bin/xdg-open'),
+                    mock.patch.object(acs_custom, 'get_safe_executable_path', return_value='/bin/xdg-open'),
                     mock.patch('urllib.request.build_opener') as opener,
                     mock.patch('azure.cli.command_modules.acs.custom._launch_aks_desktop_installer') as launch,
                 ):
@@ -2194,6 +2205,7 @@ class AcsCustomCommandTest(unittest.TestCase):
                     mock.patch('azure.cli.command_modules.acs.custom._get_aks_desktop_release',
                                return_value=({'assets': [{'name': 'aks-desktop-0.9.1-mac-arm64.dmg'}]}, '0.9.1')),
                     mock.patch('azure.cli.command_modules.acs.custom._download_aks_desktop_asset', side_effect=download),
+                    mock.patch.object(acs_custom, 'get_safe_executable_path', return_value='/usr/bin/open'),
                     mock.patch('azure.cli.command_modules.acs.custom.subprocess.run',
                                side_effect=ClientRequestError('launch failed')),
                 ):
@@ -2335,6 +2347,155 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(instance.upgrade_settings.override_settings.until, parse("2024-01-01T13:00:00Z"))
 
 
+class AksExternalToolsTest(unittest.TestCase):
+    def test_aks_kubectl_ignores_working_directory(self):
+        cmd = mock.Mock()
+        cmd.get_models.return_value = ManagedClusterAddonProfile
+        client = mock.Mock()
+        client.get.return_value.kubernetes_version = '1.18.0'
+        client.get.return_value.addon_profiles = {
+            CONST_KUBE_DASHBOARD_ADDON_NAME: ManagedClusterAddonProfile(enabled=True),
+        }
+        version = {'clientVersion': {'minor': '32'},
+                   'serverVersion': {'minor': '32', 'gitVersion': 'v1.32.0'}}
+        mkstemp = tempfile.mkstemp
+        with tempfile.TemporaryDirectory() as directory:
+            working_directory = os.path.join(directory, 'work')
+            tools_directory = os.path.join(directory, 'tools')
+            executable_name = 'kubectl.exe' if os.name == 'nt' else 'kubectl'
+            for executable_directory in (working_directory, tools_directory):
+                os.mkdir(executable_directory)
+                executable = os.path.join(executable_directory, executable_name)
+                with open(executable, 'w'):
+                    pass
+                os.chmod(executable, 0o700)
+
+            original_directory = os.getcwd()
+            try:
+                os.chdir(working_directory)
+                for command in ('browse', 'check-acr'):
+                    handler = acs_custom.aks_browse if command == 'browse' else acs_custom.aks_check_acr
+                    arguments = {'disable_browser': True} if command == 'browse' else {'acr': 'registry.azurecr.io'}
+                    for entry in ('', '.', working_directory):
+                        for trusted in (True, False):
+                            search_path = [entry, tools_directory] if trusted else [entry]
+                            with (
+                                self.subTest(command=command, entry=entry, trusted=trusted),
+                                mock.patch.dict(os.environ, {
+                                    'PATH': os.pathsep.join(search_path),
+                                    'PATHEXT': '.exe',
+                                    'SystemRoot': os.path.join(directory, 'system'),
+                                }),
+                                mock.patch.object(acs_custom, 'aks_get_credentials') as credentials,
+                                mock.patch.object(acs_custom.tempfile, 'mkstemp',
+                                                  side_effect=lambda: mkstemp(dir=directory)),
+                                mock.patch.object(acs_custom, 'in_cloud_console', return_value=False),
+                                mock.patch.object(acs_custom, 'get_cmd_test_hook_data', return_value=None),
+                                mock.patch.object(acs_custom.subprocess, 'Popen') as popen,
+                                mock.patch.object(acs_custom.subprocess, 'check_output') as output,
+                                mock.patch('sys.stdout', new_callable=io.StringIO),
+                            ):
+                                popen.return_value.communicate.return_value = (json.dumps(version).encode(), None)
+                                output.side_effect = ['pod/dashboard', '9090', ''] if command == 'browse' else None
+                                output.return_value = 'ok'
+
+                                if trusted:
+                                    handler(cmd, client, 'rg', 'cluster', **arguments)
+                                    expected = os.path.join(tools_directory, executable_name)
+                                    self.assertTrue(output.called)
+                                    for call in output.call_args_list + popen.call_args_list:
+                                        self.assertEqual(call.args[0][0], expected)
+                                else:
+                                    error = FileOperationError if command == 'browse' else ValidationError
+                                    with self.assertRaisesRegex(error, 'Can not find kubectl'):
+                                        handler(cmd, client, 'rg', 'cluster', **arguments)
+                                    credentials.assert_not_called()
+                                    output.assert_not_called()
+                                    popen.assert_not_called()
+            finally:
+                os.chdir(original_directory)
+
+    def test_aks_desktop_missing_launchers_do_not_spawn(self):
+        for system, installer, launcher in (
+            ('mac', 'installer.dmg', 'open'),
+            ('linux', 'installer.deb', 'xdg-open'),
+        ):
+            with (
+                self.subTest(system=system),
+                mock.patch.object(acs_custom, 'get_safe_executable_path', return_value=None),
+                mock.patch.object(acs_custom.subprocess, 'run') as run,
+            ):
+                with self.assertRaisesRegex(FileOperationError, launcher):
+                    _launch_aks_desktop_installer(installer, system, '0.9.1')
+                run.assert_not_called()
+
+    def test_aks_windows_path_tools_do_not_use_shell(self):
+        reg = os.path.abspath(os.path.join('trusted tools', 'reg.exe'))
+        setx = os.path.abspath(os.path.join('trusted tools', 'setx.exe'))
+        install_dir = r'C:\Tools & SDK (preview)\bin'
+        for suffix in ('', ';'):
+            user_path = r'C:\User Tools;%USERPROFILE%\bin' + suffix
+            with (
+                self.subTest(suffix=suffix),
+                mock.patch.object(acs_custom, 'get_safe_executable_path',
+                                  side_effect={'reg.exe': reg, 'setx.exe': setx}.get) as resolve,
+                mock.patch.object(acs_custom.subprocess, 'run') as run,
+                mock.patch.object(acs_custom, 'log_windows_successful_installation_warning') as success,
+                mock.patch.object(acs_custom, 'log_windows_post_installation_manual_steps_warning') as manual,
+            ):
+                run.return_value.stdout = '    path    REG_EXPAND_SZ    ' + user_path
+                acs_custom.append_install_dir_to_windows_user_path(install_dir, 'kubectl')
+
+                self.assertEqual(resolve.call_args_list, [mock.call('reg.exe'), mock.call('setx.exe')])
+                expected_path = user_path + ('' if suffix else ';') + install_dir + suffix
+                self.assertEqual(run.call_args_list, [
+                    mock.call([reg, 'query', r'HKCU\Environment', '/v', 'path'],
+                              check=True, capture_output=True, text=True),
+                    mock.call([setx, 'path', expected_path], check=True, capture_output=True),
+                ])
+                success.assert_called_once_with(install_dir)
+                manual.assert_not_called()
+
+    def test_aks_windows_path_missing_tools_warn(self):
+        install_dir = r'C:\Tools\bin'
+        for missing in ('reg.exe', 'setx.exe'):
+            with (
+                self.subTest(missing=missing),
+                mock.patch.object(acs_custom, 'get_safe_executable_path',
+                                  side_effect=lambda name, missing=missing: None if name == missing else
+                                  os.path.abspath(os.path.join('tools', name))),
+                mock.patch.object(acs_custom.subprocess, 'run') as run,
+                mock.patch.object(acs_custom, 'log_windows_successful_installation_warning') as success,
+                mock.patch.object(acs_custom, 'log_windows_post_installation_manual_steps_warning') as manual,
+            ):
+                run.return_value.stdout = r'    path    REG_SZ    C:\Existing'
+                acs_custom.append_install_dir_to_windows_user_path(install_dir, 'kubectl')
+
+                self.assertEqual(run.call_count, 0 if missing == 'reg.exe' else 1)
+                success.assert_not_called()
+                manual.assert_called_once_with(install_dir, 'kubectl')
+
+    def test_aks_windows_path_failures_warn(self):
+        for failed_tool in ('reg.exe', 'setx.exe'):
+            errors = [OSError('Cannot launch tool'), subprocess.CalledProcessError(1, [failed_tool])]
+            if failed_tool == 'reg.exe':
+                errors.append(UnicodeDecodeError('utf-8', b'\xff', 0, 1, 'Invalid output'))
+            for error in errors:
+                with (
+                    self.subTest(failed_tool=failed_tool, error=error),
+                    mock.patch.object(acs_custom, 'get_safe_executable_path',
+                                      side_effect=lambda name: os.path.abspath(os.path.join('tools', name))),
+                    mock.patch.object(acs_custom.subprocess, 'run') as run,
+                    mock.patch.object(acs_custom, 'log_windows_successful_installation_warning') as success,
+                    mock.patch.object(acs_custom, 'log_windows_post_installation_manual_steps_warning') as manual,
+                ):
+                    result = mock.Mock(stdout=r'    path    REG_SZ    C:\Existing')
+                    run.side_effect = [error] if failed_tool == 'reg.exe' else [result, error]
+                    acs_custom.append_install_dir_to_windows_user_path(r'C:\Tools\bin', 'kubectl')
+                    success.assert_not_called()
+                    manual.assert_called_once_with(r'C:\Tools\bin', 'kubectl')
+
+
 class AksGetCredentialsTest(unittest.TestCase):
     def setUp(self):
         self.cmd = mock.Mock()
@@ -2359,7 +2520,7 @@ class AksGetCredentialsTest(unittest.TestCase):
         nested_path = os.path.join("config dir", "config")
         absolute_path = os.path.abspath(nested_path)
         default_path = os.path.join(os.path.expanduser("~"), ".kube", "config")
-        kubelogin_path = os.path.join("tools", "kubelogin")
+        kubelogin_path = os.path.abspath(os.path.join("tools", "kubelogin"))
         for path, environment, selected_path in (
             ("config", "inherited-config", "config"),
             (nested_path, "inherited-config", nested_path),
@@ -2370,15 +2531,15 @@ class AksGetCredentialsTest(unittest.TestCase):
                 self.subTest(path=path),
                 mock.patch.dict(os.environ, {"KUBECONFIG": environment}),
                 mock.patch.object(acs_custom, "_print_or_merge_credentials") as merge,
-                mock.patch.object(acs_custom, "which", return_value=kubelogin_path) as which,
+                mock.patch.object(acs_custom, "get_safe_executable_path", return_value=kubelogin_path) as resolve,
                 mock.patch.object(acs_custom.subprocess, "run") as run,
             ):
                 acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=path)
 
                 merge.assert_called_once_with(selected_path, self.kubeconfig, False, None)
-                which.assert_called_once_with("kubelogin")
+                resolve.assert_called_once_with("kubelogin")
                 run.assert_called_once_with(
-                    [os.path.abspath(kubelogin_path), "convert-kubeconfig", "-l", "azurecli",
+                    [kubelogin_path, "convert-kubeconfig", "-l", "azurecli",
                      "--kubeconfig", os.path.realpath(selected_path)],
                     check=True,
                 )
@@ -2386,7 +2547,9 @@ class AksGetCredentialsTest(unittest.TestCase):
     @unittest.skipIf(os.name == "nt", "Requires a POSIX executable script.")
     def test_aks_get_credentials_converts_relative_file(self):
         with tempfile.TemporaryDirectory() as directory:
-            kubelogin_path = os.path.join(directory, "kubelogin")
+            tools_directory = os.path.join(directory, "tools")
+            os.mkdir(tools_directory)
+            kubelogin_path = os.path.join(tools_directory, "kubelogin")
             unrelated_path = os.path.join(directory, "unrelated-config")
             selected_path = os.path.join(directory, "config")
             with open(kubelogin_path, "w") as stream:
@@ -2406,7 +2569,7 @@ class AksGetCredentialsTest(unittest.TestCase):
             try:
                 os.chdir(directory)
                 with mock.patch.dict(os.environ, {
-                    "PATH": directory + os.pathsep + os.environ.get("PATH", ""),
+                    "PATH": tools_directory + os.pathsep + os.environ.get("PATH", ""),
                     "KUBECONFIG": unrelated_path,
                 }):
                     acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="config")
@@ -2452,7 +2615,8 @@ class AksGetCredentialsTest(unittest.TestCase):
                     with (
                         self.subTest(source=source),
                         mock.patch.dict(os.environ, {"KUBECONFIG": selected_path}),
-                        mock.patch.object(acs_custom, "which", return_value=os.path.join(directory, "kubelogin")),
+                        mock.patch.object(acs_custom, "get_safe_executable_path",
+                                          return_value=os.path.join(directory, "kubelogin")),
                         mock.patch.object(acs_custom.subprocess, "run", side_effect=convert),
                     ):
                         acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=path)
@@ -2474,13 +2638,13 @@ class AksGetCredentialsTest(unittest.TestCase):
                 stream.write(self.kubeconfig)
             os.symlink(target_path, link_path)
             with (
-                mock.patch.object(acs_custom, "which") as which,
+                mock.patch.object(acs_custom, "get_safe_executable_path") as resolve,
                 mock.patch.object(acs_custom.subprocess, "run") as run,
             ):
                 with self.assertRaisesRegex(CLIError, "symbolic link"):
                     acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=link_path)
 
-            which.assert_not_called()
+            resolve.assert_not_called()
             run.assert_not_called()
             self.assertTrue(os.path.islink(link_path))
             with open(target_path) as stream:
@@ -2489,13 +2653,13 @@ class AksGetCredentialsTest(unittest.TestCase):
     def test_aks_get_credentials_stdout_skips_conversion(self):
         with (
             mock.patch("sys.stdout", new_callable=io.StringIO) as stdout,
-            mock.patch.object(acs_custom, "which") as which,
+            mock.patch.object(acs_custom, "get_safe_executable_path") as resolve,
             mock.patch.object(acs_custom.subprocess, "run") as run,
         ):
             acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="-")
 
         self.assertEqual(stdout.getvalue(), self.kubeconfig + "\n")
-        which.assert_not_called()
+        resolve.assert_not_called()
         run.assert_not_called()
 
     def test_aks_get_credentials_other_auth_skips_conversion(self):
@@ -2504,24 +2668,25 @@ class AksGetCredentialsTest(unittest.TestCase):
         )
         with (
             mock.patch.object(acs_custom, "_print_or_merge_credentials"),
-            mock.patch.object(acs_custom, "which") as which,
+            mock.patch.object(acs_custom, "get_safe_executable_path") as resolve,
             mock.patch.object(acs_custom.subprocess, "run") as run,
         ):
             acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path="config")
 
-        which.assert_not_called()
+        resolve.assert_not_called()
         run.assert_not_called()
 
     def test_aks_get_credentials_conversion_failures_warn(self):
+        executable = os.path.abspath(os.path.join("tools", "kubelogin"))
         for kubelogin_path, error, message in (
             (None, None, "Please install kubelogin"),
-            ("kubelogin", subprocess.CalledProcessError(1, ["kubelogin"]), "Failed to convert kubeconfig"),
-            ("kubelogin", OSError("Cannot execute kubelogin"), "Error running kubelogin"),
+            (executable, subprocess.CalledProcessError(1, [executable]), "Failed to convert kubeconfig"),
+            (executable, OSError("Cannot execute kubelogin"), "Error running kubelogin"),
         ):
             with (
                 self.subTest(message=message),
                 mock.patch.object(acs_custom, "_print_or_merge_credentials"),
-                mock.patch.object(acs_custom, "which", return_value=kubelogin_path),
+                mock.patch.object(acs_custom, "get_safe_executable_path", return_value=kubelogin_path),
                 mock.patch.object(acs_custom.subprocess, "run", side_effect=error) as run,
                 mock.patch.object(acs_custom, "logger") as logger,
             ):
@@ -2531,6 +2696,93 @@ class AksGetCredentialsTest(unittest.TestCase):
                 self.assertIn(message, logger.warning.call_args[0][0])
                 if kubelogin_path is None:
                     run.assert_not_called()
+
+
+class AksGetCredentialsExecutableTest(unittest.TestCase):
+    def setUp(self):
+        self.cmd = mock.Mock()
+        self.cmd.cli_ctx.cloud.profile = "latest"
+        kubeconfig = yaml.safe_dump({
+            "users": [{
+                "user": {"exec": {"command": "kubelogin", "args": ["get-token", "--login", "devicecode"]}},
+            }],
+        })
+        self.client = mock.Mock()
+        self.client.list_cluster_user_credentials.return_value.kubeconfigs = [
+            mock.Mock(value=kubeconfig.encode("utf-8")),
+        ]
+
+    def test_aks_get_credentials_ignores_working_directory_executable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            working_directory = os.path.join(directory, "work")
+            tools_directory = os.path.join(directory, "tools")
+            executable_name = "kubelogin.exe" if os.name == "nt" else "kubelogin"
+            for executable_directory in (working_directory, tools_directory):
+                os.mkdir(executable_directory)
+                executable_path = os.path.join(executable_directory, executable_name)
+                with open(executable_path, "w"):
+                    pass
+                os.chmod(executable_path, 0o700)
+
+            original_directory = os.getcwd()
+            try:
+                os.chdir(working_directory)
+                for path_entry in ("", ".", working_directory):
+                    for trusted_directory in (tools_directory, None):
+                        search_path = [path_entry]
+                        if trusted_directory:
+                            search_path.append(trusted_directory)
+                        with (
+                            self.subTest(path_entry=path_entry, trusted_directory=trusted_directory),
+                            mock.patch.dict(os.environ, {
+                                "PATH": os.pathsep.join(search_path),
+                                "PATHEXT": ".exe",
+                                "SystemRoot": os.path.join(directory, "system"),
+                            }),
+                            mock.patch.object(acs_custom, "_print_or_merge_credentials"),
+                            mock.patch.object(acs_custom.subprocess, "run") as run,
+                            mock.patch.object(acs_custom, "logger") as logger,
+                        ):
+                            config_path = os.path.join("configs", "config")
+                            acs_custom.aks_get_credentials(self.cmd, self.client, "rg", "cluster", path=config_path)
+
+                            if trusted_directory:
+                                run.assert_called_once_with(
+                                    [os.path.join(tools_directory, executable_name),
+                                     "convert-kubeconfig", "-l", "azurecli",
+                                     "--kubeconfig", os.path.realpath(config_path)],
+                                    check=True,
+                                )
+                            else:
+                                run.assert_not_called()
+                                self.assertIn("Please install kubelogin", logger.warning.call_args[0][0])
+            finally:
+                os.chdir(original_directory)
+
+    def test_aks_get_credentials_conversion_failures_warn(self):
+        kubelogin_path = os.path.abspath(os.path.join("tools", "kubelogin"))
+        for error, message in (
+            (subprocess.CalledProcessError(1, [kubelogin_path]), "Failed to convert kubeconfig"),
+            (OSError("Cannot execute kubelogin"), "Error running kubelogin"),
+        ):
+            with (
+                self.subTest(message=message),
+                mock.patch.object(acs_custom, "_print_or_merge_credentials"),
+                mock.patch.object(acs_custom, "get_safe_executable_path", return_value=kubelogin_path),
+                mock.patch.object(acs_custom.subprocess, "run", side_effect=error) as run,
+                mock.patch.object(acs_custom, "logger") as logger,
+            ):
+                acs_custom.aks_get_credentials(
+                    self.cmd, self.client, "rg", "cluster", path=os.path.join("configs", "config")
+                )
+
+                run.assert_called_once_with(
+                    [kubelogin_path, "convert-kubeconfig", "-l", "azurecli",
+                     "--kubeconfig", os.path.realpath(os.path.join("configs", "config"))],
+                    check=True,
+                )
+                logger.warning.assert_called_once()
+                self.assertIn(message, logger.warning.call_args[0][0])
 
 
 class TestAKSCommand(unittest.TestCase):
