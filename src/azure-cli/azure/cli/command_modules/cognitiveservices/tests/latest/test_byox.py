@@ -11,7 +11,7 @@ from azure.cli.testsdk.decorators import serial_test
 
 class CognitiveServicesByoxTests(ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(parameter_name='storage_account', allow_shared_key_access=True)    
+    @StorageAccountPreparer(parameter_name='storage_account', allow_shared_key_access=True, kind='StorageV2')
     def test_cognitiveservices_user_owned_storage(self, resource_group, storage_account):
         
         # The subscription we are running in requires the byoxPreview feature registered.
