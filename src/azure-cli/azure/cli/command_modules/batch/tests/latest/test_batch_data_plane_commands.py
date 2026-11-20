@@ -462,7 +462,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.batch_cmd('batch job set --job-id {j_id} --on-all-tasks-complete badValue ')
 
         # test patch job
-        self.batch_cmd('batch job set --job-id {j_id} --job-max-wall-clock-time P1279DT12H30M5S '
+        self.batch_cmd('batch job set --job-id {j_id} --job-max-wall-clock-time P3Y6M4DT12H30M5S '
                        '--on-all-tasks-complete terminatejob')
         self.batch_cmd('batch job show --job-id {j_id}').assert_with_checks([
             self.check('onAllTasksComplete', 'terminatejob'),
