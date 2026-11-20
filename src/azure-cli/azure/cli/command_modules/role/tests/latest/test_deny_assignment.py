@@ -7,9 +7,12 @@
 # These tests require a subscription with the UserAssignedDenyAssignment feature flag enabled.
 
 import unittest
+from unittest import mock
 
 from knack.util import CLIError
 
+from azure.cli.command_modules.role.custom import create_deny_assignment
+from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk import LiveScenarioTest
 
 
@@ -51,6 +54,78 @@ class DenyAssignmentShowValidationTest(unittest.TestCase):
         from azure.cli.command_modules.role.custom import show_deny_assignment
         with self.assertRaisesRegex(CLIError, 'Please provide --id, or both --name and --scope'):
             show_deny_assignment(cmd=None)
+
+
+class DenyAssignmentCreateTest(unittest.TestCase):
+
+    def setUp(self):
+        self.args = {
+            'cmd': mock.Mock(cli_ctx=DummyCli()),
+            'scope': '/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/test-group',
+            'deny_assignment_name': 'Test deny assignment',
+            'actions': ['Microsoft.Resources/subscriptions/resourceGroups/write'],
+            'assignment_name': '00000000-0000-0000-0000-000000000002',
+        }
+        patcher = mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
+        self.client_factory = patcher.start()
+        self.addCleanup(patcher.stop)
+        self.create = self.client_factory.return_value.deny_assignments.create_or_update
+        self.create.return_value = mock.sentinel.deny_assignment
+
+    def test_deny_assignment_create_everyone_optional_exclusions(self):
+        excluded_id = '00000000-0000-0000-0000-000000000003'
+        cases = [
+            ({}, []),
+            ({'exclude_principal_ids': []}, []),
+            ({'exclude_principal_ids': [excluded_id], 'exclude_principal_types': ['User']},
+             [{'id': excluded_id, 'type': 'User'}]),
+        ]
+        for arguments, expected_exclusions in cases:
+            with self.subTest(arguments=arguments):
+                self.create.reset_mock()
+                result = create_deny_assignment(**self.args, **arguments)
+
+                self.assertIs(result, mock.sentinel.deny_assignment)
+                self.create.assert_called_once()
+                request = self.create.call_args.kwargs
+                self.assertEqual(request['scope'], self.args['scope'])
+                self.assertEqual(request['deny_assignment_id'], self.args['assignment_name'])
+                properties = request['parameters'].as_dict()['properties']
+                self.assertEqual(properties['principals'], [
+                    {'id': '00000000-0000-0000-0000-000000000000', 'type': 'SystemDefined'}
+                ])
+                self.assertEqual(properties['excludePrincipals'], expected_exclusions)
+                self.assertEqual(properties['permissions'][0]['actions'], self.args['actions'])
+
+    def test_deny_assignment_create_per_principal_optional_exclusions(self):
+        principal_id = '00000000-0000-0000-0000-000000000003'
+        excluded_id = '00000000-0000-0000-0000-000000000004'
+        for excluded_ids in (None, [excluded_id]):
+            with self.subTest(excluded_ids=excluded_ids):
+                self.create.reset_mock()
+                create_deny_assignment(
+                    **self.args, principal_id=principal_id, principal_type='ServicePrincipal',
+                    exclude_principal_ids=excluded_ids)
+
+                self.create.assert_called_once()
+                properties = self.create.call_args.kwargs['parameters'].as_dict()['properties']
+                self.assertEqual(properties['principals'], [{'id': principal_id, 'type': 'ServicePrincipal'}])
+                expected_exclusions = [{'id': excluded_id, 'type': 'ServicePrincipal'}] if excluded_ids else []
+                self.assertEqual(properties['excludePrincipals'], expected_exclusions)
+
+    def test_deny_assignment_create_invalid_principal_arguments(self):
+        principal_id = '00000000-0000-0000-0000-000000000003'
+        cases = [
+            ({'principal_id': principal_id}, '--principal-type is required'),
+            ({'principal_type': 'User'}, '--principal-object-id is required'),
+            ({'exclude_principal_ids': [principal_id], 'exclude_principal_types': ['User', 'ServicePrincipal']},
+             '--exclude-principal-types must have the same number of entries'),
+        ]
+        for arguments, expected_error in cases:
+            with self.subTest(arguments=arguments):
+                with self.assertRaisesRegex(CLIError, expected_error):
+                    create_deny_assignment(**self.args, **arguments)
+                self.client_factory.assert_not_called()
 
 
 class DenyAssignmentCrudTest(LiveScenarioTest):
@@ -171,16 +246,6 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
                 '--name "Test" '
                 '--scope /subscriptions/{sub} '
                 '--exclude-principal-ids 00000000-0000-0000-0000-000000000001'
-            )
-
-    def test_deny_assignment_create_validation_no_exclusions_everyone_mode(self):
-        """Should fail if no excluded principals are provided in Everyone mode."""
-        with self.assertRaises(SystemExit):
-            self.cmd(
-                'role deny-assignment create '
-                '--name "Test" '
-                '--scope /subscriptions/{sub} '
-                '--actions "Microsoft.Authorization/roleAssignments/write"'
             )
 
     def test_deny_assignment_create_validation_read_action(self):

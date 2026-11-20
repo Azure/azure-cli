@@ -751,8 +751,8 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
     """Create a user-assigned deny assignment.
 
     Two modes are supported:
-    - Everyone mode (default): Denies actions for all principals at the scope. Requires at least one
-      excluded principal via --exclude-principal-ids.
+    - Everyone mode (default): Denies actions for all principals at the scope. Excluded principals
+      are optional.
     - Per-principal mode: Denies actions for a specific User or ServicePrincipal. Specify the target
       with --principal-object-id and --principal-type. Excluded principals are optional in this mode.
 
@@ -790,12 +790,6 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
         if principal_type == 'Group':
             raise CLIError('Group type principals are not permitted for user-assigned deny assignments. '
                            'Use User or ServicePrincipal instead.')
-    elif not exclude_principal_ids:
-        # Everyone mode requires at least one exclusion
-        raise CLIError('At least one excluded principal is required via --exclude-principal-ids '
-                       'when using Everyone mode (no --principal-object-id specified). '
-                       'User-assigned deny assignments that deny Everyone require at least one exclusion.')
-
     if exclude_principal_ids and exclude_principal_types \
             and len(exclude_principal_types) != len(exclude_principal_ids):
         raise CLIError('--exclude-principal-types must have the same number of entries as --exclude-principal-ids.')
