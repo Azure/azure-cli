@@ -13,18 +13,13 @@ class CognitiveServicesByoxTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account', allow_shared_key_access=True, kind='StorageV2')
     def test_cognitiveservices_user_owned_storage(self, resource_group, storage_account):
-        
-        # The subscription we are running in requires the byoxPreview feature registered.
-        # How to request it: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/bring-your-own-storage-speech-resource?tabs=azure-cli#request-access-to-byos-for-your-azure-subscriptions
-        reg = self.cmd('az feature show --name byoxPreview --namespace  Microsoft.CognitiveServices',
-                                    checks=[self.check('properties.state', 'Registered')])
-            
+
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
         self.kwargs.update({
             'sname': sname,
             'kind': 'SpeechServices',
             'sku': 'S0',
-            'location': 'WESTEUROPE',
+            'location': 'westeurope',
             'stgname': storage_account,
         })
 
