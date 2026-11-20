@@ -1387,9 +1387,9 @@ def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
 
 
 def get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name):
-    from .operations.vm import VMShow
+    from .operations.vm import VMShowForUpdate
 
-    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+    vm = VMShowForUpdate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "vm_name": vm_name
     })
