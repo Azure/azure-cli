@@ -1505,8 +1505,8 @@ def load_arguments(self, _):
         c.argument('hyper_v_generation', arg_type=get_enum_type(HyperVGenerationTypes), help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
         c.argument('minimum_cpu_core', type=int, arg_group='Recommendation', help='minimum cpu cores')
         c.argument('maximum_cpu_core', type=int, arg_group='Recommendation', help='maximum cpu cores')
-        c.argument('minimum_memory', type=int, arg_group='Recommendation', help='minimum memory in MB')
-        c.argument('maximum_memory', type=int, arg_group='Recommendation', help='maximum memory in MB')
+        c.argument('minimum_memory', type=int, arg_group='Recommendation', help='minimum memory in GB')
+        c.argument('maximum_memory', type=int, arg_group='Recommendation', help='maximum memory in GB')
 
         c.argument('plan_publisher', help='plan publisher', arg_group='Purchase plan')
         c.argument('plan_name', help='plan name', arg_group='Purchase plan')
