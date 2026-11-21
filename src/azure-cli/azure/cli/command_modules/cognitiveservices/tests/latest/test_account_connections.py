@@ -49,7 +49,7 @@ class CognitiveServicesAccountConnectionsTests(ScenarioTest):
                          self.check('sku.name', '{sku}'),
                          self.check('properties.allowProjectManagement', True)])
 
-        acctconn = self.cmd('az cognitiveservices account connection create -n {sname} -g {rg} --connection-name {connname} --file {connfile}',
+        acctconn = self.cmd('az cognitiveservices account connection create -n {sname} -g {rg} --connection-name {connname} --file "{connfile}"',
                            checks=[
                                self.check('properties.authType', 'ManagedIdentity'),
                                self.check('properties.category', "ContainerRegistry"),
