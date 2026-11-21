@@ -4,13 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import io
+import json
 import os
 import shlex
 import unittest
 import datetime
-import isodate
 import tempfile
 from unittest import mock
+from urllib.parse import quote
 
 import importlib
 import inspect
@@ -18,11 +19,13 @@ import azure.batch
 from azure.core import MatchConditions
 #from azure.batch._client import BatchClientOperationsMixin
 from azure.batch import models, BatchClient
+from azure.batch._operations._patch import BatchClientOperationsMixin
 from azure.core.credentials import AzureNamedKeyCredential
 
 from azure.cli.core.mock import DummyCli
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
+from azure.cli.core.util import rmtree_with_retry
 
 
 class TestObj:  # pylint: disable=too-few-public-methods
@@ -53,11 +56,9 @@ class TestBatchValidators(unittest.TestCase):
             _validators.datetime_format("2017-13-24T15:47:24Z")
 
     def test_batch_duration_format(self):
-        obj = _validators.duration_format("P3Y6M4DT12H30M5S")
-        self.assertIsInstance(obj, isodate.Duration)
-
-        obj = _validators.duration_format("PT15M")
-        self.assertEqual(obj, datetime.timedelta(minutes=15))
+        # A valid duration is passed on as typed, so its years and months reach the service
+        for value in ['P3Y6M4DT12H30M5S', 'P1M', 'PT15M', 'PT0H20M', 'PT0S']:
+            self.assertEqual(_validators.duration_format(value), value)
 
         with self.assertRaises(ValueError):
             _validators.duration_format("test")
@@ -239,6 +240,63 @@ class TestBatchFileDownloadCommand(unittest.TestCase):
 
                 self.assertEqual(exit_code, 2)
                 run.assert_not_called()
+
+
+class TestBatchFileShowCommand(unittest.TestCase):
+    """Run 'az batch task file show' and 'az batch node file show' with the HTTP call mocked."""
+
+    ACCOUNT_ARGS = ['--account-name', 'test1', '--account-key', 'ZmFrZV9hY29jdW50X2tleQ==',
+                    '--account-endpoint', 'https://test1.westus.batch.azure.com']
+    # The service returns the file properties as response headers, with these names and formats
+    HEADERS = {
+        'content-length': '17',
+        'content-type': 'text/plain',
+        'last-modified': 'Tue, 17 Nov 2026 09:30:00 GMT',
+        'ocp-creation-time': 'Tue, 17 Nov 2026 08:00:00 GMT',
+        'ocp-batch-file-isdirectory': 'False',
+        'ocp-batch-file-mode': '0o100644',
+        'etag': '0x8DE24A1B2C3D4E5',
+        'request-id': '00000000-0000-0000-0000-000000000000',
+    }
+    # Command: the file URL that the service returns, URL-encoded, in 'ocp-batch-file-url'
+    COMMANDS = {
+        'batch task file show --job-id job1 --task-id task1 --file-path wd/stdout.txt':
+            'https://test1.westus.batch.azure.com/jobs/job1/tasks/task1/files/wd/stdout.txt',
+        'batch node file show --pool-id pool1 --node-id node1 --file-path startup/stdout.txt':
+            'https://test1.westus.batch.azure.com/pools/pool1/nodes/node1/files/startup/stdout.txt',
+    }
+
+    def setUp(self):
+        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config
+        environ = {name: value for name, value in os.environ.items() if not name.startswith('AZURE_BATCH_')}
+        environ_patch = mock.patch.dict(os.environ, environ, clear=True)
+        environ_patch.start()
+        self.addCleanup(environ_patch.stop)
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+
+    def test_batch_file_show(self):
+        for command, url in self.COMMANDS.items():
+            with self.subTest(command=command):
+                headers = dict(self.HEADERS, **{'ocp-batch-file-url': quote(url, safe='')})
+                response = mock.Mock(spec=['status_code', 'headers'], status_code=200, headers=headers)
+                out = io.StringIO()
+                with mock.patch('azure.core.pipeline.Pipeline.run',
+                                return_value=mock.Mock(http_response=response)) as run:
+                    exit_code = self.cli.invoke(command.split() + self.ACCOUNT_ARGS, out_file=out)
+
+                self.assertEqual(exit_code, 0)
+                self.assertEqual(run.call_args.args[0].method, 'HEAD')
+                self.assertNotIn('raw', run.call_args.kwargs)
+                self.assertEqual(json.loads(out.getvalue()), {
+                    'contentLength': 17,
+                    'contentType': 'text/plain',
+                    'creationTime': '2026-11-17T08:00:00+00:00',
+                    'fileMode': '0o100644',
+                    'isDirectory': False,
+                    'lastModified': '2026-11-17T09:30:00+00:00',
+                    'url': url})
 
 
 class TestBatchParser(unittest.TestCase):
@@ -775,3 +833,143 @@ class TestBatchTaskCreateCommand(unittest.TestCase):
 
         self.assertEqual(exit_code, 2)
         create_task.assert_not_called()
+
+
+class TestBatchDurationOptions(unittest.TestCase):
+    """Run commands that take ISO 8601 durations with the HTTP call mocked, and check the values they send."""
+
+    ENDPOINT = 'https://test1.westus.batch.azure.com'
+    ACCOUNT_ARGS = ['--account-name', 'test1', '--account-key', 'ZmFrZV9hY29jdW50X2tleQ==',
+                    '--account-endpoint', ENDPOINT]
+    # Command: (request that carries the durations, where each duration is in its JSON body: value sent)
+    COMMANDS = {
+        'batch job create --id job1 --pool-id pool1 --job-max-wall-clock-time P1M':
+            ('POST /jobs', {'constraints.maxWallClockTime': 'P1M'}),
+        'batch job set --job-id job1 --job-max-wall-clock-time P3Y6M4DT12H30M5S':
+            ('PATCH /jobs/job1', {'constraints.maxWallClockTime': 'P3Y6M4DT12H30M5S'}),
+        'batch task create --job-id job1 --task-id task1 --command-line "cmd /c dir" '
+        '--max-wall-clock-time P3Y6M4DT12H30M5S --retention-time P1Y':
+            ('POST /jobs/job1/tasks', {'constraints.maxWallClockTime': 'P3Y6M4DT12H30M5S',
+                                       'constraints.retentionTime': 'P1Y'}),
+        'batch task reset --job-id job1 --task-id task1 --max-wall-clock-time PT0H20M '
+        '--retention-time P3Y6M4DT12H30M5S':
+            ('PUT /jobs/job1/tasks/task1', {'constraints.maxWallClockTime': 'PT0H20M',
+                                            'constraints.retentionTime': 'P3Y6M4DT12H30M5S'}),
+        'batch pool create --id pool1 --vm-size Standard_D4ds_v5 --image canonical:ubuntu-24_04-lts:server '
+        '--node-agent-sku-id "batch.node.ubuntu 24.04" --upgrade-policy-mode rolling '
+        '--pause-time-between-batches PT0S':
+            ('POST /pools', {'upgradePolicy.rollingUpgradePolicy.pauseTimeBetweenBatches': 'PT0S'}),
+    }
+
+    def setUp(self):
+        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config
+        environ = {name: value for name, value in os.environ.items() if not name.startswith('AZURE_BATCH_')}
+        environ_patch = mock.patch.dict(os.environ, environ, clear=True)
+        environ_patch.start()
+        self.addCleanup(environ_patch.stop)
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+
+    @staticmethod
+    def _response(request, **_):
+        # A create answers 201 and the rest 200; 'batch task create' then reads the new task
+        response = mock.Mock(status_code=201 if request.method == 'POST' else 200, headers={})
+        response.json.return_value = {'id': 'task1'}
+        return mock.Mock(http_response=response)
+
+    def _invoke(self, command):
+        """Run the command; return its exit code and the JSON body of each request it sends, by method and path."""
+        with mock.patch('azure.core.pipeline.Pipeline.run', side_effect=self._response) as run:
+            try:
+                exit_code = self.cli.invoke(shlex.split(command) + self.ACCOUNT_ARGS, out_file=io.StringIO())
+            except SystemExit as ex:  # argument validation errors exit with code 2
+                exit_code = ex.code
+        bodies = {}
+        for call in run.call_args_list:
+            request = call.args[0]
+            path = request.url.split('?')[0][len(self.ENDPOINT):]
+            bodies[f'{request.method} {path}'] = json.loads(request.content) if request.content else None
+        return exit_code, bodies
+
+    def test_batch_duration_options_sent_as_typed(self):
+        for command, (request, durations) in self.COMMANDS.items():
+            with self.subTest(command=command):
+                exit_code, bodies = self._invoke(command)
+
+                self.assertEqual(exit_code, 0)
+                self.assertIn(request, bodies)
+                for path, value in durations.items():
+                    sent = bodies[request]
+                    for key in path.split('.'):
+                        sent = sent[key]
+                    self.assertEqual(sent, value, path)
+
+    def test_batch_duration_option_invalid(self):
+        # A value that isn't an ISO 8601 duration is still rejected before any request is sent
+        exit_code, bodies = self._invoke('batch job set --job-id job1 --job-max-wall-clock-time "1 day"')
+
+        self.assertEqual(exit_code, 2)
+        self.assertEqual(bodies, {})
+
+
+class TestBatchPoolCreate(unittest.TestCase):
+    """Run 'az batch pool create' with the SDK's create_pool mocked, so nothing is sent to the service."""
+
+    # The "two Ubuntu 24.04 compute nodes" example in the 'az batch pool create' help
+    EXAMPLE_ARGS = ['batch', 'pool', 'create', '--id', 'mypool', '--vm-size', 'Standard_D4ds_v5',
+                    '--target-dedicated-nodes', '2', '--image', 'canonical:ubuntu-24_04-lts:server',
+                    '--node-agent-sku-id', 'batch.node.ubuntu 24.04',
+                    '--account-name', 'clibatch', '--account-key', 'BatchAccountKey']
+    ENDPOINT_ARGS = ['--account-endpoint', 'https://clibatch.eastus.batch.azure.com']
+
+    def setUp(self):
+        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config
+        environ = {name: value for name, value in os.environ.items() if not name.startswith('AZURE_BATCH_')}
+        environ_patch = mock.patch.dict(os.environ, environ, clear=True)
+        environ_patch.start()
+        self.addCleanup(environ_patch.stop)
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+
+        # The CLI builds the command's arguments from the SDK method's docstring, so the mock keeps it
+        docstring = BatchClientOperationsMixin.create_pool.__doc__
+        create_pool_patch = mock.patch.object(BatchClientOperationsMixin, 'create_pool', autospec=True,
+                                              return_value=None)
+        self.create_pool = create_pool_patch.start()
+        self.addCleanup(create_pool_patch.stop)
+        self.create_pool.__doc__ = docstring
+
+    def test_batch_pool_create_missing_endpoint(self):
+        with self.assertLogs('cli.azure.cli.core.azclierror', 'ERROR') as logs, \
+                self.assertRaises(SystemExit) as ex:
+            self.cli.invoke(self.EXAMPLE_ARGS, out_file=io.StringIO())
+        self.assertEqual(ex.exception.code, 2)
+        self.assertIn('Specify batch endpoint in command line or environment variable.',
+                      [record.getMessage() for record in logs.records])
+        self.create_pool.assert_not_called()
+
+    def test_batch_pool_create_ubuntu_example(self):
+        self.assertEqual(self.cli.invoke(self.EXAMPLE_ARGS + self.ENDPOINT_ARGS, out_file=io.StringIO()), 0)
+        self.create_pool.assert_called_once()
+        # The CLI passes the --target-dedicated-nodes value on as a string; the service accepts it
+        self.assertEqual(self.create_pool.call_args.kwargs['pool'], {
+            'id': 'mypool',
+            'vmSize': 'Standard_D4ds_v5',
+            'targetDedicatedNodes': '2',
+            'virtualMachineConfiguration': {
+                'imageReference': {'publisher': 'canonical', 'offer': 'ubuntu-24_04-lts', 'sku': 'server'},
+                'nodeAgentSKUId': 'batch.node.ubuntu 24.04'}})
+
+    def test_batch_pool_create_gallery_image(self):
+        image = ('/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myresourcegroup/providers/'
+                 'Microsoft.Compute/galleries/mygallery/images/myimage')
+        for image_id in [image, image + '/versions/1.0.0']:
+            with self.subTest(image_id=image_id):
+                args = self.EXAMPLE_ARGS + self.ENDPOINT_ARGS
+                args[args.index('--image') + 1] = image_id
+                self.assertEqual(self.cli.invoke(args, out_file=io.StringIO()), 0)
+                self.assertEqual(self.create_pool.call_args.kwargs['pool']['virtualMachineConfiguration'], {
+                    'imageReference': {'virtualMachineImageId': image_id},
+                    'nodeAgentSKUId': 'batch.node.ubuntu 24.04'})

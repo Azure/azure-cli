@@ -114,7 +114,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.mgmt.core.polling.arm_polling import ARMPolling
-from azure.cli.core.util import in_cloud_console, sdk_no_wait
+from azure.cli.core.util import get_safe_executable_path, in_cloud_console, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError as ResourceNotFoundErrorAzCore
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
 from humanfriendly.terminal.spinners import Spinner
@@ -357,14 +357,13 @@ def _aks_browse(
         return return_msg
 
     # otherwise open the kube-dashboard addon
-    # Resolve kubectl to an absolute path from PATH so subprocess does not
+    # Resolve kubectl to a trusted absolute path so subprocess does not
     # fall back to searching the current working directory (Windows
     # CreateProcess), which could execute a repo-controlled kubectl(.exe)
     # against the temporary kubeconfig.
-    kubectl_path = which('kubectl')
+    kubectl_path = get_safe_executable_path('kubectl')
     if not kubectl_path:
         raise FileOperationError('Can not find kubectl executable in PATH')
-    kubectl_path = os.path.abspath(kubectl_path)
 
     fd, browse_path = tempfile.mkstemp()
     try:
@@ -2065,11 +2064,12 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
 
         # Check if kubeconfig requires kubelogin with devicecode and convert it
         if uses_kubelogin_devicecode(kubeconfig):
-            if which("kubelogin"):
+            kubelogin_path = get_safe_executable_path("kubelogin")
+            if kubelogin_path:
                 try:
                     # Run kubelogin convert-kubeconfig -l azurecli
                     subprocess.run(
-                        ["kubelogin", "convert-kubeconfig", "-l", "azurecli"],
+                        [kubelogin_path, "convert-kubeconfig", "-l", "azurecli"],
                         cwd=os.path.dirname(path),
                         check=True,
                     )
@@ -2338,14 +2338,13 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 
 def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
-    # Resolve kubectl to an absolute path from PATH. Passing a bare "kubectl"
+    # Resolve kubectl to a trusted absolute path. Passing a bare "kubectl"
     # to subprocess lets Windows CreateProcess search the current working
     # directory first, allowing a repo-controlled kubectl(.exe) to run and read
     # the temporary kubeconfig credentials. Always invoke the resolved path.
-    kubectl_path = which("kubectl")
+    kubectl_path = get_safe_executable_path("kubectl")
     if not kubectl_path:
         raise ValidationError("Can not find kubectl executable in PATH")
-    kubectl_path = os.path.abspath(kubectl_path)
 
     return_msg = None
     fd, browse_path = tempfile.mkstemp()
@@ -2599,7 +2598,7 @@ def _select_aks_desktop_asset(release, version, system, arch, prefer_deb=True):
         except OSError:
             os_release = {}
         distro_ids = {os_release.get('ID'), *os_release.get('ID_LIKE', '').split()}
-        if distro_ids.intersection(('debian', 'ubuntu')) and shutil.which('xdg-open'):
+        if distro_ids.intersection(('debian', 'ubuntu')) and get_safe_executable_path('xdg-open'):
             names.insert(0, 'aks-desktop_{}-1_{}.deb'.format(version, deb_arch))
 
     assets = release.get('assets') or []
@@ -2759,7 +2758,7 @@ def _extract_aks_desktop_archive(archive_path, destination):
 
 
 def _check_aks_desktop_dependencies(executable: str) -> None:
-    from azure.cli.core.util import get_safe_executable_path, run_cmd
+    from azure.cli.core.util import run_cmd
 
     try:
         ldd = get_safe_executable_path('ldd')
@@ -2856,10 +2855,13 @@ def _launch_aks_desktop_installer(installer_path, system, version):
     try:
         if system == 'win':
             subprocess.run([installer_path], check=True)
-        elif system == 'mac':
-            subprocess.run(['open', installer_path], check=True)
-        elif installer_path.endswith('.deb'):
-            subprocess.run(['xdg-open', installer_path], check=True)
+        elif system == 'mac' or installer_path.endswith('.deb'):
+            launcher_name = 'open' if system == 'mac' else 'xdg-open'
+            launcher = get_safe_executable_path(launcher_name)
+            if not launcher:
+                raise FileOperationError(
+                    "The required installer launcher '{}' was not found.".format(launcher_name))
+            subprocess.run([launcher, installer_path], check=True)
         else:
             executable = _install_aks_desktop_archive(installer_path, version)
             subprocess.Popen([executable])
@@ -2948,14 +2950,16 @@ def get_arch_for_cli_binary():
 
 # get the user path environment variable
 def get_windows_user_path():
-    reg_query_exp = "reg query HKCU\\Environment /v path"
+    reg = get_safe_executable_path("reg.exe")
+    if not reg:
+        raise FileOperationError("Can not find reg.exe executable in PATH")
     reg_regex_exp = r"REG\w+"
     try:
-        reg_result = subprocess.run(reg_query_exp.split(
-            " "), shell=True, check=True, capture_output=True, text=True)
-    except Exception as e:
+        reg_result = subprocess.run(
+            [reg, "query", "HKCU\\Environment", "/v", "path"], check=True, capture_output=True, text=True)
+    except (OSError, subprocess.CalledProcessError, UnicodeError) as e:
         raise CLIInternalError(
-            "failed to perfrom reg query, error: {}".format(e))
+            "Failed to query the Windows user PATH: {}".format(e))
     raw_user_path = reg_result.stdout.strip()
     # find the identifier where the user's path really starts
     m = re.search(reg_regex_exp, raw_user_path)
@@ -2973,7 +2977,7 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
     try:
         user_path = get_windows_user_path()
 
-    except Exception as e:  # pylint: disable=broad-exception-caught
+    except (CLIInternalError, FileOperationError) as e:
         logger.debug("failed to get user path, error: %s", e)
         log_windows_post_installation_manual_steps_warning(
             install_dir, binary_name)
@@ -2985,13 +2989,16 @@ def append_install_dir_to_windows_user_path(install_dir, binary_name):
         return
     # keep user path style (with or without semicolon at the end)
     flag = user_path.endswith(";")
-    setxexp = ["setx", "path", "{}{}{}{}".format(
-        user_path, "" if flag else ";", install_dir, ";" if flag else "")]
     try:
-        subprocess.run(setxexp, shell=True, check=True, capture_output=True)
+        setx = get_safe_executable_path("setx.exe")
+        if not setx:
+            raise FileOperationError("Can not find setx.exe executable in PATH")
+        setxexp = [setx, "path", "{}{}{}{}".format(
+            user_path, "" if flag else ";", install_dir, ";" if flag else "")]
+        subprocess.run(setxexp, check=True, capture_output=True)
         log_windows_successful_installation_warning(install_dir)
 
-    except Exception as e:  # pylint: disable=broad-exception-caught
+    except (FileOperationError, OSError, subprocess.CalledProcessError) as e:
         logger.debug("failed to set user path, error: %s", e)
         log_windows_post_installation_manual_steps_warning(
             install_dir, binary_name)

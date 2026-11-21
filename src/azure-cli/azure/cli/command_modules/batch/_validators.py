@@ -55,14 +55,15 @@ def disk_encryption_configuration_format(value):
 
 
 def duration_format(value):
-    """Validate the correct format of a timespan string and deserilize."""
+    """Validate the correct format of a timespan string. The value is passed on as typed: the SDK would write a
+    parsed duration without its years and months."""
     import isodate
     try:
-        duration_obj = isodate.parse_duration(value)
+        isodate.parse_duration(value)
     except (ValueError, OverflowError, AttributeError):
         message = "Argument {} is not in a valid ISO-8601 duration format"
         raise ValueError(message.format(value))
-    return duration_obj
+    return value
 
 
 def metadata_item_format(value):
@@ -216,15 +217,6 @@ def validate_json_file(namespace):
             raise ValueError(f"Invalid JSON file: {err}")
 
 
-def validate_cert_file(namespace):
-    """Validate the give cert file existing"""
-    try:
-        with open(namespace.certificate_file, "rb"):
-            pass
-    except OSError:
-        raise ValueError("Cannot access certificate file: " + namespace.certificate_file)
-
-
 def validate_options(namespace):
     """Validate any flattened request header option arguments."""
     try:
@@ -294,13 +286,6 @@ def validate_pool_settings(namespace, _):
 
         if namespace.auto_scale_formula:
             namespace.enable_auto_scale = True
-
-
-def validate_cert_settings(namespace):
-    """Custom parsing for certificate commands - adds default thumbprint
-    algorithm.
-    """
-    namespace.thumbprint_algorithm = 'sha1'
 
 
 def validate_client_parameters(cmd, namespace):

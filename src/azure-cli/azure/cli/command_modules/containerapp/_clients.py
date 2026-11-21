@@ -16,7 +16,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-CURRENT_API_VERSION = "2025-07-01"
+CURRENT_API_VERSION = "2026-07-01"
 POLLING_TIMEOUT = 1200  # how many seconds before exiting
 POLLING_SECONDS = 2  # how many seconds between requests
 POLLING_TIMEOUT_FOR_MANAGED_CERTIFICATE = 1500  # how many seconds before exiting
@@ -79,6 +79,7 @@ def poll_status(cmd, request_url):  # pylint: disable=inconsistent-return-statem
 
 
 def poll_results(cmd, request_url):  # pylint: disable=inconsistent-return-statements
+    """Poll until the result is ready, raising an error if the operation times out."""
     if not request_url:
         raise AzureResponseError(f"Http response lack of necessary header: '{HEADER_LOCATION}'")
 
@@ -96,6 +97,8 @@ def poll_results(cmd, request_url):  # pylint: disable=inconsistent-return-state
         start = time.time()
 
     animation.flush()
+    if r.status_code == 202:
+        raise AzureResponseError(f"Operation did not complete within {POLLING_TIMEOUT} seconds.")
     if r.text:
         return json.loads(r.text)
 

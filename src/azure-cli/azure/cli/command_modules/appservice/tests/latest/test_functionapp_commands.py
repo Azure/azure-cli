@@ -32,6 +32,28 @@ LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastasia'
 WINDOWS_ASP_LOCATION_CHINACLOUD_WEBAPP = 'chinaeast'
+STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS = {'Az.Sec.DisableLocalAuth.Storage::Skip': 'true'}
+
+
+def _create_containerapp_managed_environment(test, resource_group, environment_name, location, display_location):
+    vnet_name = test.create_random_name('containerappvnet', 24)
+    test.cmd('network vnet create --address-prefixes 14.0.0.0/23 -g {} -n {} -l {}'
+             .format(resource_group, vnet_name, location))
+    subnet_id = test.cmd(
+        'network vnet subnet create --address-prefixes 14.0.0.0/23 '
+        '--delegations Microsoft.App/environments -n infrastructure -g {} --vnet-name {}'
+        .format(resource_group, vnet_name)
+    ).get_output_in_json()['id']
+
+    return test.cmd(
+        'containerapp env create --name {} --resource-group {} --location {} '
+        '--logs-destination none --infrastructure-subnet-resource-id {}'
+        .format(environment_name, resource_group, location, subnet_id)
+    ).assert_with_checks([
+        JMESPathCheck('name', environment_name),
+        JMESPathCheck('resourceGroup', resource_group),
+        JMESPathCheck('location', display_location)
+    ])
 
 
 class StorageSasSignatureReplacer(RecordingProcessor):
@@ -537,7 +559,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 class FunctionWorkloadProfile(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='northeurope')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
         
         functionapp_name = self.create_random_name(
@@ -692,7 +714,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
 
 
 class FunctionappDaprConfig(ScenarioTest):
-    @ResourceGroupPreparer(location='northeurope')
+    @ResourceGroupPreparer(location='northeurope', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_enable_dapr(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -701,8 +723,8 @@ class FunctionappDaprConfig(ScenarioTest):
             'managedenvironment', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
-            .format(managed_environment_name, resource_group))
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'northeurope', 'North Europe')
 
         self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --functions-version 4 --runtime dotnet-isolated --runtime-version 10 --enable-dapr false'.format(
             resource_group,
@@ -2054,7 +2076,7 @@ class FunctionAppFlex(LiveScenarioTest):
 
 class FunctionAppManagedEnvironment(ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='eastus', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -2063,11 +2085,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'containerappmanagedenvironment', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
-        .format(managed_environment_name, resource_group)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'East US')])
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'eastus', 'East US')
 
         self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
@@ -2078,7 +2097,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
 
         self.assertTrue('ftpPublishingUrl' not in r)
 
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='eastus', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_existing_app_insights(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -2088,11 +2107,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         )
         app_insights_key = '00000000-0000-0000-0000-123456789123'
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
-        .format(managed_environment_name, resource_group)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'East US')])
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'eastus', 'East US')
 
         self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --app-insights-key {} --functions-version 4'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name, app_insights_key)).assert_with_checks([
@@ -2103,7 +2119,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             JMESPathCheck("[?name=='APPINSIGHTS_INSTRUMENTATIONKEY'].value|[0]", app_insights_key)])
 
     @ResourceGroupPreparer(location='southcentralus')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_consumption_plan_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
@@ -2122,7 +2138,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                     .format(resource_group, functionapp_name, 'southcentralus', storage_account, managed_environment_name))
             
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     @VirtualNetworkPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_create_with_appcontainer_managed_environment_vnet_config_error(self, resource_group, storage_account, virtual_network):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
@@ -2132,13 +2148,13 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'France Central')])
+                     JMESPathCheck('location', 'East US')])
 
         with self.assertRaises(ArgumentUsageError):
             self.cmd('functionapp create -g {} -n {} -s {} --vnet {} --subnet {}  --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, storage_account, virtual_network, "default", managed_environment_name))
 
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='eastus', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     @VirtualNetworkPreparer(location='eastus')
     def test_functionapp_create_with_appcontainer_managed_environment_add_vnet_error(self, resource_group, storage_account, virtual_network):
@@ -2147,11 +2163,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         subnet_name = self.create_random_name('swiftsubnet', 24)
         vnet_name = self.create_random_name('swiftname', 24)
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
-        .format(managed_environment_name, resource_group)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'East US')])
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'eastus', 'East US')
 
         self.cmd(
             'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
@@ -2164,17 +2177,14 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'
             .format(resource_group, functionapp_name, virtual_network, "default"))
 
-    @ResourceGroupPreparer(location='southcentralus')
+    @ResourceGroupPreparer(location='southcentralus', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_remove_vnet_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location southcentralus --logs-destination none'
-        .format(managed_environment_name, resource_group)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'South Central US')])
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'southcentralus', 'South Central US')
 
         self.cmd(
             'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
@@ -2184,17 +2194,14 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('functionapp vnet-integration remove -g {} -n {}'.format(resource_group, functionapp_name))
 
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='eastus', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_list_vnet_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location eastus --logs-destination none'
-        .format(managed_environment_name, resource_group)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'East US')])
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'eastus', 'East US')
 
         self.cmd(
             'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
@@ -2204,18 +2211,15 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name))
 
-    @ResourceGroupPreparer(location='northeurope')
+    @ResourceGroupPreparer(location='northeurope', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_delete_functions(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         function_name = self.create_random_name('functionappwindowsruntimefunctions', 40)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
-        .format(managed_environment_name, resource_group)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'North Europe')])
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'northeurope', 'North Europe')
 
         self.cmd(
             'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
@@ -2229,7 +2233,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             .format(resource_group, functionapp_name, function_name))
 
     @ResourceGroupPreparer(location='eastus2')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_appcontainer_managed_environment_plan_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
@@ -2252,18 +2256,15 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name))
 
-    @ResourceGroupPreparer(location='northeurope')
+    @ResourceGroupPreparer(location='northeurope', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_config_with_appcontainer_managed_environment_error(self, resource_group, storage_account):
 
         functionapp_name = self.create_random_name('functionapp', 32)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
-        .format(managed_environment_name, resource_group)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'North Europe')])
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'northeurope', 'North Europe')
         self.cmd(
             'functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
             .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
@@ -2278,7 +2279,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp config show -g {} -n {}'
             .format(resource_group, functionapp_name))
 
-    @ResourceGroupPreparer(location='northeurope')
+    @ResourceGroupPreparer(location='northeurope', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_with_replicas(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -2287,11 +2288,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'containerappmanagedenvironment', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
-        .format(managed_environment_name, resource_group)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'North Europe')])
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'northeurope', 'North Europe')
 
         self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4 --min-replicas 1 --max-replicas 10'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
@@ -2317,7 +2315,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime dotnet --functions-version 4 --min-replicas 1'
                     .format(resource_group, functionapp_name, plan_name, storage_account))
 
-    @ResourceGroupPreparer(location='northeurope')
+    @ResourceGroupPreparer(location='northeurope', additional_tags=STORAGE_LOCAL_AUTH_POLICY_SKIP_TAGS)
     @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_container_config_set_replicas(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -2326,11 +2324,8 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'containerappmanagedenvironment', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location northeurope --logs-destination none'
-        .format(managed_environment_name, resource_group)).assert_with_checks([
-                     JMESPathCheck('name', managed_environment_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'North Europe')])
+        _create_containerapp_managed_environment(
+            self, resource_group, managed_environment_name, 'northeurope', 'North Europe')
 
         self.cmd('functionapp create -g {} -n {} -s {} --image mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated10.0 --environment {} --runtime dotnet-isolated --runtime-version 10 --functions-version 4'
                  .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
@@ -2348,7 +2343,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
         
     @ResourceGroupPreparer(location='westeurope')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_registry_server_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 30)
@@ -2368,7 +2363,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                     .format(resource_group, functionapp_name, storage_account, managed_environment_name))
             
     @ResourceGroupPreparer(location='southcentralus')
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_registry_username_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 30)
@@ -2388,7 +2383,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                     .format(resource_group, functionapp_name, storage_account, managed_environment_name))
             
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
     def test_functionapp_create_registry_password_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 30)

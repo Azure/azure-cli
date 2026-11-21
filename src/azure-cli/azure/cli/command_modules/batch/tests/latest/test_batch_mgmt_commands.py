@@ -3,12 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import io
 import tempfile
 import time
+import unittest
+from unittest import mock
+
+from azure.mgmt.batch.models import BatchAccount, BatchAccountIdentity
+from azure.cli.core.mock import DummyCli
+from azure.cli.core.util import rmtree_with_retry
+from azure.cli.command_modules.batch import _client_factory
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from .batch_preparers import BatchMgmtScenarioMixin
+from .batch_request_matcher import register_batch_body_matcher
 
 from .recording_processors import BatchAccountKeyReplacer, StorageSASReplacer
 
@@ -20,6 +29,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
             BatchAccountKeyReplacer(),
             StorageSASReplacer()
         ])
+        register_batch_body_matcher(self.vcr)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='eastus2')
@@ -110,6 +120,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         super().__init__(method_name, recording_processors=[
             StorageSASReplacer()
         ])
+        register_batch_body_matcher(self.vcr)
 
 
     @ResourceGroupPreparer(location='eastus2')
@@ -364,6 +375,7 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
 
     def __init__(self, method_name):
         super().__init__(method_name)
+        register_batch_body_matcher(self.vcr)
 
     # Note for this test to run you subscrition needs to give access to batch https://learn.microsoft.com/azure/batch/batch-account-create-portal#allow-batch-to-access-the-subscription
     @ResourceGroupPreparer(location='eastus2')
@@ -410,3 +422,56 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {byos_n} --yes')
         #self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
+
+class TestBatchAccountPublicNetworkAccess(unittest.TestCase):
+    """Run the commands that update a Batch account with its management client mocked, and check whether the
+    update they send sets public network access."""
+
+    USER_IDENTITY = ('/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/'
+                     'Microsoft.ManagedIdentity/userAssignedIdentities/identity1')
+
+    def setUp(self):
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+        self.client = mock.Mock()
+        self.client.get.side_effect = self._account
+        self.client.update.side_effect = self._account
+        factory_patch = mock.patch.object(_client_factory, 'mgmt_batch_account_client_factory',
+                                          return_value=self.client)
+        factory_patch.start()
+        self.addCleanup(factory_patch.stop)
+
+    @staticmethod
+    def _account(*_, **__):
+        """An account with public network access disabled, new for each request"""
+        return BatchAccount(location='eastus', public_network_access='Disabled',
+                            identity=BatchAccountIdentity(type='SystemAssigned'))
+
+    def _update_sent(self, command):
+        """Run the command and return the body of the account update it sends."""
+        self.client.update.reset_mock()
+        self.assertEqual(self.cli.invoke(command.split(), out_file=io.StringIO()), 0)
+        self.client.update.assert_called_once()
+        return self.client.update.call_args.kwargs['parameters'].serialize()
+
+    def test_batch_account_identity_keeps_public_network_access(self):
+        for command in ['batch account identity assign -g rg -n acc --system-assigned',
+                        f'batch account identity assign -g rg -n acc --user-assigned {self.USER_IDENTITY}',
+                        'batch account identity remove -g rg -n acc --system-assigned --yes']:
+            with self.subTest(command=command):
+                body = self._update_sent(command)
+                self.assertIn('identity', body)
+                self.assertNotIn('publicNetworkAccess', body.get('properties', {}))
+
+    def test_batch_account_network_profile_enables_public_network_access(self):
+        # The network profile only takes effect when public network access is enabled
+        for command in ['batch account network-profile set -g rg -n acc --profile BatchAccount --default-action Deny',
+                        'batch account network-profile network-rule add -g rg -n acc --profile BatchAccount '
+                        '--ip-address 1.2.3.4',
+                        'batch account network-profile network-rule delete -g rg -n acc --profile BatchAccount '
+                        '--ip-address 1.2.3.4 --yes']:
+            with self.subTest(command=command):
+                body = self._update_sent(command)
+                self.assertIn('networkProfile', body['properties'])
+                self.assertEqual(body['properties']['publicNetworkAccess'], 'Enabled')
