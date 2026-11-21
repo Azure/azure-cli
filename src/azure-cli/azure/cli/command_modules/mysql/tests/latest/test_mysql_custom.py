@@ -170,6 +170,11 @@ class _FakeArgumentContext:
         if args:
             settings['arg_type'] = args[0]
         self.registrations.append((self.command_name, argument_name, settings))
+
+    def extra(self, argument_name, *args, **settings):
+        self.argument(argument_name, *args, **settings)
+
+
 class _FakeAdvancedThreatProtectionClient:
 
     def begin_update(self, resource_group_name, server_name, advanced_threat_protection_name, parameters):

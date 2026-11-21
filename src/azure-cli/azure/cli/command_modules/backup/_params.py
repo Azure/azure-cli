@@ -21,8 +21,8 @@ from azure.cli.command_modules.backup._validators import \
 # ARGUMENT DEFINITIONS
 
 allowed_container_types = ['AzureIaasVM']
-allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'SAPASE', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase', 'SAPAseDatabase', 'SAPHanaDBInstance']
-allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPAseDatabase', 'SAPHanaDatabase', 'SQLDataBase', 'SAPHanaDBInstance']
+allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'SAPASE', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase', 'SAPAseDatabase', 'SAPHanaDBInstance', 'SQLInstance']
+allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPAseDatabase', 'SAPHanaDatabase', 'SQLDataBase', 'SAPHanaDBInstance', 'SQLInstance']
 allowed_container_registration_workload_types = allowed_azure_workload_types + ['AzureFileShare']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
 allowed_extended_backup_management_types = allowed_backup_management_types + ['MAB']
@@ -40,7 +40,7 @@ allowed_disk_access_options = ['EnablePrivateAccessForAllDisks', 'EnablePublicAc
 
 backup_management_type_help = """Specify the backup management type. Define how Azure Backup manages the backup of entities within the ARM resource. For eg: AzureWorkloads refers to workloads installed within Azure VMs, AzureStorage refers to entities within Storage account. Required only if friendly name is used as Container name."""
 container_name_help = """Name of the backup container. Accepts 'Name' or 'FriendlyName' from the output of az backup container list command. If 'FriendlyName' is passed then BackupManagementType is required."""
-workload_type_help = """Specify the type of applications within the Resource which should be discovered and protected by Azure Backup. 'MSSQL' and 'SQLDataBase' can be used interchangeably for SQL in Azure VM, as can 'SAPHANA' and 'SAPHanaDatabase' for SAP HANA in Azure VM."""
+workload_type_help = """Specify the type of applications within the Resource which should be discovered and protected by Azure Backup. 'MSSQL' and 'SQLDataBase' can be used interchangeably for SQL databases in Azure VM. Use 'SQLInstance' for SQL instance snapshot protection. 'SAPHANA' and 'SAPHanaDatabase' are interchangeable for SAP HANA in Azure VM."""
 protectable_item_type_help = """Specify the type of items within the Resource which should be discovered and protected by Azure Backup. 'HANAInstance' and 'SAPHanaSystem' can be used interchangeably."""
 restore_mode_help = """Specify the restore mode."""
 resolve_conflict_help = "Instruction if there's a conflict with the restored data."
@@ -48,7 +48,7 @@ resource_id_help = """ID of the Azure Resource containing items to be protected 
 policy_help = """JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object."""
 target_server_type_help = """Specify the type of the server which should be discovered."""
 protectable_item_name_type_help = """Specify the resource name to be protected by Azure Backup service."""
-backup_type_help = """'Full, Differential, Log, CopyOnlyFull' for backup Item type 'MSSQL'. 'Full, Differential' for backup item type 'SAPHANA'."""
+backup_type_help = """'Full, Differential, Log, CopyOnlyFull' for backup item type 'MSSQL'. 'SnapshotFull' for 'SQLInstance'. 'Full, Differential' for backup item type 'SAPHANA'."""
 retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). In case of VM and AzureFileShare a default value of 30 days is taken. For MSSQL workload, retain-until min value is 2 days and max value is 99 years for backup-type 'CopyOnlyFull'. For MSSQL and SAPHANA, retain-until min value is 45 days and max value is 99 years for backup-type 'Full'. For any other backup-type, retain-until value is overriden by Policy. If not specified, a default value of 30 days will be taken for backup-type 'CopyOnlyFull', and a value of 45 days for backup-type 'Full' and no default value for other backup types."""
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
@@ -208,6 +208,7 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('backup_management_type', backup_management_type)
         c.argument('resource_id', resource_id_type)
+        c.argument('container_subscription_id', options_list=['--container-subscription-id', '--container-sub-id'], help='Subscription containing the VM to discover. The vault remains in the subscription selected by --subscription.')
         c.argument('workload_type', container_registration_workload_type)
         c.argument('storage_account', options_list=['--storage-account'],
                    help='Name of the storage account to register for Azure Files backup.')
@@ -310,6 +311,8 @@ def load_arguments(self, _):
         c.argument('target_tier', target_tier_type)
         c.argument('tier', tier_type)
         c.argument('recommended_for_archive', action="store_true", help='Use this flag to retrieve recommended archivable recoverypoints.')
+        c.argument('restore_point_query_type', options_list=['--restore-point-query-type', '--rp-query-type'], arg_type=get_enum_type(['Full', 'Log', 'Differential', 'FullAndDifferential', 'All', 'Incremental', 'SnapshotFull', 'SnapshotCopyOnlyFull', 'Snapshot', 'FullDifferentialAndSnapshot']), help='Filter AzureWorkload recovery points by backup type.')
+        c.argument('get_latest_recovery_point_only', options_list=['--get-latest-recovery-point-only', '--latest-rp-only'], arg_type=get_three_state_flag(), help='Return only the latest matching AzureWorkload recovery point.')
 
     with self.argument_context('backup recoverypoint move') as c:
         c.argument('vault_name', vault_name_type, id_part=None)
@@ -328,6 +331,9 @@ def load_arguments(self, _):
         c.argument('container_name', container_name_type)
         c.argument('workload_type', workload_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list recoverypoints in secondary region.')
+        c.argument('recovery_mode', arg_type=get_enum_type(['SnapshotAttachAndRecover']), help='Query database log ranges on top of an instance snapshot.')
+        c.argument('base_snapshot_recovery_point_id', options_list=['--base-snapshot-recovery-point-id', '--base-snapshot-rp-id'], help='Name of the base instance snapshot recovery point.')
+        c.argument('base_recovery_point_datasource_id', options_list=['--base-recovery-point-datasource-id', '--base-datasource-id'], help='ProtectedItemDataSourceId of the base SQL instance, not the child database.')
 
     with self.argument_context('backup recoverypoint show') as c:
         c.argument('name', rp_name_type, options_list=['--name', '-n'], help='Name of the recovery point. You can use the backup recovery point list command to get the name of a backed up item.', id_part='child_name_4')
@@ -408,6 +414,9 @@ def load_arguments(self, _):
             c.argument('protectable_item_name', protectable_item_name_type)
             c.argument('server_name', options_list=['--server-name'], help='Parent Server name of the item.')
             c.argument('workload_type', workload_type)
+
+    with self.argument_context('backup protection enable-for-azurewl') as c:
+        c.argument('child_database_names', nargs='+', help='Databases to protect under a SQL instance snapshot policy.')
 
     # Protectable-item
     with self.argument_context('backup protectable-item') as c:
@@ -527,8 +536,10 @@ def load_arguments(self, _):
         c.argument('target_vault_name', options_list=['--target-vault-name'], help="""Specify the vault name of target item for Cross Region Restore. Default value will be same as --vault-name if not specified.""")
         c.argument('target_subscription_id', help="""Specify the subscription of the target item for Cross Subscription Restore. Defaulted to source subscription if not specified.""")
         c.argument('attach_and_mount', arg_type=get_three_state_flag(), help='Specify attach and mount value for HANA Snapshot restores.')
-        c.argument('identity_arm_id', help='Set Identity ARM ID for HANA Snapshot restores.')
-        c.argument('snapshot_instance_resource_group', options_list=['--snapshot-rg'], help="""Specify the resource group for HANA Snapshot Instance restores. If not provided, the default value will be fetched from the target container details.""")
+        c.argument('identity_arm_id', help='ARM ID of the user-assigned managed identity for SQL or HANA snapshot restores.')
+        c.argument('snapshot_instance_resource_group', options_list=['--snapshot-rg'], help="""Resource group for restored snapshot disks. Required for SQL snapshot restores; defaults to the target container resource group for HANA.""")
+        c.argument('recovery_mode', arg_type=get_enum_type(['SnapshotAttachAndRecover', 'SnapshotAttach']), help='SQL snapshot recovery mode. SnapshotAttach attaches disks without recovering databases.')
+        c.argument('no_recovery_mode', action='store_true', help='Leave restored SQL databases in the restoring state.')
 
     # Job
     with self.argument_context('backup job') as c:

@@ -17,14 +17,14 @@ from azure.cli.core.aaz import *
 class FileServiceUsage(AAZCommand):
     """Get the usage of file service in storage account including account limits, file share limits and constants used in recommendations and bursting formula.
 
-    :example: Get file service usage for the storage account, only works for provisioned v2
-        az storage account file-service-usage --account-name sa1 -g rg1
+    :example: GetFileServiceUsage
+        az storage account file-service-usage --resource-group res4410 --account-name sto8607
     """
 
     _aaz_info = {
-        "version": "2024-01-01",
+        "version": "2026-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.storage/storageaccounts/{}/fileservices/{}/usages/{}", "2024-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.storage/storageaccounts/{}/fileservices/default/usages/default", "2026-06-01"],
         ]
     }
 
@@ -44,14 +44,6 @@ class FileServiceUsage(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.file_services_name = AAZStrArg(
-            options=["--file-services-name"],
-            help="The name of the file Service within the specified storage account. File Service Name must be \"default\"",
-            required=True,
-            id_part="child_name_1",
-            default="default",
-            enum={"default": "default"},
-        )
         _args_schema.account_name = AAZStrArg(
             options=["--account-name"],
             help="The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.",
@@ -61,17 +53,6 @@ class FileServiceUsage(AAZCommand):
                 pattern="^[a-z0-9]+$",
                 max_length=24,
                 min_length=3,
-            ),
-        )
-        _args_schema.file_service_usages_name = AAZStrArg(
-            options=["-n", "--name", "--file-service-usages-name"],
-            help="The name of the file service usage. File Service Usage Name must be \"default\"",
-            required=True,
-            id_part="child_name_2",
-            default="default",
-            enum={"default": "default"},
-            fmt=AAZStrArgFormat(
-                pattern="^[a-z][a-z0-9]*$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -110,7 +91,7 @@ class FileServiceUsage(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices/{FileServicesName}/usages/{fileServiceUsagesName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Storage/storageAccounts/{accountName}/fileServices/default/usages/default",
                 **self.url_parameters
             )
 
@@ -126,15 +107,7 @@ class FileServiceUsage(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "FileServicesName", self.ctx.args.file_services_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "accountName", self.ctx.args.account_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "fileServiceUsagesName", self.ctx.args.file_service_usages_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -152,7 +125,7 @@ class FileServiceUsage(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-01-01",
+                    "api-version", "2026-06-01",
                     required=True,
                 ),
             }
@@ -182,9 +155,7 @@ class FileServiceUsage(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZObjectType(
-                flags={"read_only": True},
-            )
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
             _schema_on_200.id = AAZStrType(
@@ -193,7 +164,9 @@ class FileServiceUsage(AAZCommand):
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType(
+            _schema_on_200.properties = AAZObjectType()
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
                 flags={"read_only": True},
             )
             _schema_on_200.type = AAZStrType(
@@ -237,6 +210,14 @@ class FileServiceUsage(AAZCommand):
             )
 
             file_share_limits = cls._schema_on_200.properties.file_share_limits
+            file_share_limits.guardrail_bandwidth_scalar = AAZFloatType(
+                serialized_name="guardrailBandwidthScalar",
+                flags={"read_only": True},
+            )
+            file_share_limits.guardrail_io_scalar = AAZFloatType(
+                serialized_name="guardrailIOScalar",
+                flags={"read_only": True},
+            )
             file_share_limits.max_provisioned_bandwidth_mi_b_per_sec = AAZIntType(
                 serialized_name="maxProvisionedBandwidthMiBPerSec",
                 flags={"read_only": True},
@@ -301,14 +282,32 @@ class FileServiceUsage(AAZCommand):
             storage_account_usage = cls._schema_on_200.properties.storage_account_usage
             storage_account_usage.live_shares = AAZObjectType(
                 serialized_name="liveShares",
-                flags={"read_only": True},
             )
             _FileServiceUsageHelper._build_schema_account_usage_elements_read(storage_account_usage.live_shares)
             storage_account_usage.soft_deleted_shares = AAZObjectType(
                 serialized_name="softDeletedShares",
-                flags={"read_only": True},
             )
             _FileServiceUsageHelper._build_schema_account_usage_elements_read(storage_account_usage.soft_deleted_shares)
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             return cls._schema_on_200
 
@@ -327,9 +326,7 @@ class _FileServiceUsageHelper:
             _schema.provisioned_storage_gi_b = cls._schema_account_usage_elements_read.provisioned_storage_gi_b
             return
 
-        cls._schema_account_usage_elements_read = _schema_account_usage_elements_read = AAZObjectType(
-            flags={"read_only": True}
-        )
+        cls._schema_account_usage_elements_read = _schema_account_usage_elements_read = AAZObjectType()
 
         account_usage_elements_read = _schema_account_usage_elements_read
         account_usage_elements_read.file_share_count = AAZIntType(

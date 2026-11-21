@@ -83,7 +83,7 @@ from .utils import (_normalize_sku,
                     _remove_list_duplicates, get_raw_functionapp,
                     register_app_provider,
                     is_sku_tier_enabled_for_managed_instance,
-                    get_site_server_farm_id)
+                    get_site_server_farm_id, get_linux_runtime_list_command)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability,
                            get_regional_site_availability, get_profile_username,
@@ -308,7 +308,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             match = helper.resolve(runtime, is_linux)
             if not match:
                 error_message = ("Linux Runtime '{}' is not supported. "
-                                 "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                                 "Run '{}' for supported runtimes."
+                                 .format(runtime.replace('|', ':'), get_linux_runtime_list_command(runtime)))
                 if enriched_errors:
                     raise_enriched_webapp_create_error(
                         resource_group_name=resource_group_name,
@@ -4573,8 +4574,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             helper = _StackRuntimeHelper(cmd, linux=config_is_linux, windows=not config_is_linux)
             match = helper.resolve(runtime, linux=config_is_linux)
             if not match:
-                raise ValidationError("Linux Runtime '{}' is not supported."
-                                      "Run 'az webapp list-runtimes --os-type linux' to cross check".format(runtime))
+                raise ValidationError("Linux Runtime '{}' is not supported. Run '{}' for supported runtimes."
+                                      .format(runtime.replace('|', ':'),
+                                              get_linux_runtime_list_command(runtime)))
             helper.get_site_config_setter(match, linux=config_is_linux)(cmd=cmd, stack=match, site_config=configs)
         else:
             helper = _StackRuntimeHelper(cmd, linux=config_is_linux, windows=not config_is_linux)
@@ -5765,11 +5767,18 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None,
                             enriched_errors=False):
+    if hyper_v and is_managed_instance:
+        raise MutuallyExclusiveArgumentError(
+            '--hyper-v and --is-managed-instance cannot be used together because Windows Containers '
+            'are not supported in Managed Instance on Azure App Service.')
+
     if is_linux is None:
-        is_linux = not hyper_v
-    elif is_linux and hyper_v:
-        raise MutuallyExclusiveArgumentError('--hyper-v creates a Windows container plan and cannot be combined '
-                                             'with --is-linux true. Omit --is-linux or use "--is-linux false".')
+        is_linux = not (hyper_v or is_managed_instance)
+    elif is_linux and (hyper_v or is_managed_instance):
+        windows_plan_argument = '--hyper-v' if hyper_v else '--is-managed-instance'
+        raise MutuallyExclusiveArgumentError(
+            '{} creates a Windows plan and cannot be combined with --is-linux true. '
+            'Omit --is-linux or use "--is-linux false".'.format(windows_plan_argument))
 
     if sku is None:
         sku = 'P0V3' if is_linux else 'B1'
@@ -6724,10 +6733,10 @@ def connect_to_plan_instance(cmd, resource_group_name, name, instance_name,
     if not password_value:
         raise UnclassifiedUserFault("Double check that the app service plan is set with rdp-enabled and try again.")
 
+    _copy_string_to_clipboard(password_value)
     logger.warning("Use the following credentials to login:")
     logger.warning("RDP username: Administrator")
     logger.warning("RDP password: [copied to clipboard]")
-    _copy_string_to_clipboard(password_value)
 
     # 4. Invoke the Bastion RDP command
     bastion_cmd = [
@@ -6741,8 +6750,17 @@ def connect_to_plan_instance(cmd, resource_group_name, name, instance_name,
 
 
 def _copy_string_to_clipboard(string_value):
-    from azure.cli.core.util import run_cmd
-    run_cmd(["cmd.exe", "/c", "echo", "|", "set", "/p={}|".format(string_value), "clip"], check=False)
+    import subprocess
+    from azure.cli.core.util import get_safe_executable_path
+
+    clip_path = get_safe_executable_path('clip.exe')
+    if not clip_path:
+        raise ValidationError("Unable to locate clip.exe to copy the RDP password to the clipboard.")
+
+    try:
+        subprocess.run([clip_path], input=string_value.encode(), check=True)
+    except (OSError, subprocess.CalledProcessError) as ex:
+        raise CLIInternalError("Failed to copy the RDP password to the clipboard.") from ex
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
@@ -9094,7 +9112,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 'os': stack.os,
                 'runtime': stack.runtime_family,
                 'version': stack.version_label or '',
-                'config': stack.display_name,
+                'config': stack.display_name.replace(self.DEFAULT_DELIMETER, ':'),
                 'support': support_status,
                 'end_of_life': stack.eol_date or '-',
             })
@@ -13681,6 +13699,11 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
         raise ValidationError('Could not detect runtime. Please specify using the --runtime flag.')
 
     if not _runtime_supports_github_actions(cmd=cmd, runtime_string=app_runtime_string, is_linux=is_linux):
+        if is_linux:
+            raise ValidationError("Runtime '{}' is not supported for GitHub Actions deployments. "
+                                  "Run '{}' to inspect available web app runtimes."
+                                  .format(app_runtime_string.replace('|', ':'),
+                                          get_linux_runtime_list_command(app_runtime_string)))
         raise ValidationError("Runtime %s is not supported for GitHub Actions deployments." % app_runtime_string)
 
     # Get workflow template

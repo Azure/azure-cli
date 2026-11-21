@@ -47,6 +47,38 @@ class TestStacksWhatIfResultFormatter(unittest.TestCase):
         self.assertEqual(
             expected_no_color_result, DeploymentStacksWhatIfResultFormatter(enable_color=False).format(what_if_result))
 
+    def test_array_paths_with_leading_underscore(self):
+        """Service may return array indices as "_0" instead of "0" (issue #34372)."""
+        what_if_json = self._get_stacks_what_if_json("what-if-1.json")
+
+        def underscore_array_indices(obj, in_array_children=False):
+            if isinstance(obj, dict):
+                out = {}
+                for key, value in obj.items():
+                    if key == "children" and obj.get("changeType") == "Array":
+                        out[key] = [underscore_array_indices(child, True) for child in value]
+                    else:
+                        out[key] = underscore_array_indices(value, False)
+                path = out.get("path")
+                if in_array_children and isinstance(path, str) and path.isdigit():
+                    out["path"] = "_" + path
+                return out
+            if isinstance(obj, list):
+                return [underscore_array_indices(item, in_array_children) for item in obj]
+            return obj
+
+        what_if_result = StackModels.DeploymentStacksWhatIfResult(
+            underscore_array_indices(what_if_json))
+        formatted = DeploymentStacksWhatIfResultFormatter(enable_color=False).format(what_if_result)
+
+        # Must not crash, and indices should still print as bare digits.
+        self.assertIn("DenySettings.ArrayOfMixed:", formatted)
+        self.assertIn("  ~ 0:", formatted)
+        self.assertIn("  + 1:", formatted)
+        self.assertIn("  - 2:", formatted)
+        self.assertNotIn("  ~ _0:", formatted)
+        self.assertNotIn("  + _1:", formatted)
+
     def _get_stacks_what_if_result(self, file_name: str):
         return StackModels.DeploymentStacksWhatIfResult(self._get_stacks_what_if_json(file_name))
 

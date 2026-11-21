@@ -8,7 +8,7 @@ from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.batch import _client_factory as factories
 from azure.cli.command_modules.batch._validators import (
-    validate_pool_settings, validate_options)
+    validate_pool_settings, validate_options, validate_retained_data_option)
 from azure.cli.command_modules.batch._exception_handler import batch_exception_handler
 from azure.cli.command_modules.batch._format import (
     job_list_table_format,
@@ -186,8 +186,8 @@ def load_command_table(self, _):
         g.batch_command('user reset', 'replace_node_user')
         g.batch_command('show', 'get_node')
         g.batch_command('list', 'list_nodes')
-        g.batch_command('reboot', 'reboot_node')
-        g.batch_command('delete', 'remove_nodes')
+        g.batch_command('reboot', 'reboot_node', validator=validate_retained_data_option)
+        g.batch_command('delete', 'remove_nodes', validator=validate_retained_data_option)
         g.batch_command('scheduling disable', 'disable_node_scheduling')
         g.batch_command('scheduling enable', 'enable_node_scheduling')
         g.batch_command('remote-login-settings show', 'get_node_remote_login_settings')

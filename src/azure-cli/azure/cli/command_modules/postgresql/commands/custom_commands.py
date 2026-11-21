@@ -79,7 +79,10 @@ def flexible_server_create(cmd, client,
                            federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
                            immutable_backup=None,
-                           storage_type=None, iops=None, throughput=None, cluster_size=None, database_name=None, yes=False):
+                           database_name=None, fips_mode=None,
+                           storage_type=None, iops=None, throughput=None, cluster_size=None,
+                           auto_grow_max_threshold_mb=None, auto_grow_increment_percent=None,
+                           yes=False):
 
     if not check_resource_group(resource_group_name):
         resource_group_name = None
@@ -124,6 +127,8 @@ def flexible_server_create(cmd, client,
                            tier=tier, sku_name=sku_name,
                            storage_gb=storage_gb,
                            auto_grow=auto_grow,
+                           auto_grow_max_threshold_mb=auto_grow_max_threshold_mb,
+                           auto_grow_increment_percent=auto_grow_increment_percent,
                            storage_type=storage_type,
                            iops=iops, throughput=throughput,
                            zonal_resiliency=zonal_resiliency,
@@ -162,7 +167,11 @@ def flexible_server_create(cmd, client,
         subnet=subnet,
         yes=yes)
 
-    storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow, tier=performance_tier, type=storage_type, iops=iops, throughput=throughput)
+    storage = postgresql_flexibleservers.models.Storage(
+        storage_size_gb=storage_gb, auto_grow=auto_grow,
+        auto_grow_max_threshold_mb=auto_grow_max_threshold_mb,
+        auto_grow_increment_percent=auto_grow_increment_percent,
+        tier=performance_tier, type=storage_type, iops=iops, throughput=throughput)
 
     backup = postgresql_flexibleservers.models.Backup(backup_retention_days=backup_retention,
                                                       geo_redundant_backup=geo_redundant_backup,
@@ -205,7 +214,8 @@ def flexible_server_create(cmd, client,
                                    identity=identity,
                                    data_encryption=data_encryption,
                                    auth_config=auth_config,
-                                   cluster=cluster)
+                                   cluster=cluster,
+                                   fips_mode=fips_mode)
 
     # Add Microsoft Entra Admin
     if is_microsoft_entra_auth_enabled and admin_name is not None or admin_id is not None:
@@ -240,7 +250,8 @@ def flexible_server_create(cmd, client,
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
-                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config, cluster):
+                   storage, backup, network, version, high_availability, availability_zone, identity, data_encryption, auth_config, cluster,
+                   fips_mode=None):
     validate_resource_group(resource_group_name)
 
     logging_name, server_client = db_context.logging_name, db_context.server_client
@@ -267,6 +278,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         data_encryption=data_encryption,
         auth_config=auth_config,
         cluster=cluster,
+        fips_mode=fips_mode,
         create_mode="Create")
 
     return resolve_poller(
@@ -454,7 +466,9 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        auto_grow=None,
                                        performance_tier=None,
                                        iops=None, throughput=None,
-                                       cluster_size=None, yes=False):
+                                       auto_grow_max_threshold_mb=None, auto_grow_increment_percent=None,
+                                       cluster_size=None, fips_mode=None,
+                                       yes=False):
 
     # validator
     location = ''.join(instance.location.lower().split())
@@ -477,6 +491,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            sku_name=sku_name,
                            storage_gb=storage_gb,
                            auto_grow=auto_grow,
+                           auto_grow_max_threshold_mb=auto_grow_max_threshold_mb,
+                           auto_grow_increment_percent=auto_grow_increment_percent,
                            iops=iops,
                            throughput=throughput,
                            zonal_resiliency=zonal_resiliency,
@@ -522,6 +538,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     if auto_grow:
         instance.storage.auto_grow = auto_grow
+
+    if auto_grow_max_threshold_mb is not None:
+        instance.storage.auto_grow_max_threshold_mb = auto_grow_max_threshold_mb
+
+    if auto_grow_increment_percent is not None:
+        instance.storage.auto_grow_increment_percent = auto_grow_increment_percent
 
     instance.storage.tier = performance_tier if performance_tier else None
 
@@ -588,6 +610,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                             data_encryption=data_encryption,
                             auth_config=auth_config,
                             cluster=instance.cluster,
+                            fips_mode=fips_mode,
                             tags=tags)
 
     # High availability can't be updated with existing properties

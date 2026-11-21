@@ -1645,21 +1645,30 @@ def get_safe_executable_path(executable):
 
     search_dirs = os.environ.get('PATH', os.defpath).split(os.pathsep)
     names = [executable]
-    if sys.platform.startswith('win'):
+    is_windows_platform = sys.platform.startswith('win')
+    if is_windows_platform:
         system_root = os.environ.get('SystemRoot', r'C:\Windows')
         search_dirs = [os.path.join(system_root, 'System32'), system_root] + search_dirs
         exts = [ext for ext in os.environ.get('PATHEXT', '.COM;.EXE;.BAT;.CMD').split(os.pathsep) if ext]
-        if os.path.splitext(executable)[1].upper() not in (ext.upper() for ext in exts):
+        if not os.path.splitext(executable)[1]:
             names = [executable + ext for ext in exts]
 
     for directory in (d.strip('"') for d in search_dirs):
         # Relative entries ('', '.') resolve against the CWD as well.
-        if not os.path.isabs(directory) or not os.path.isdir(directory) or os.path.samefile(directory, cwd):
+        if not os.path.isabs(directory) or (is_windows_platform and not os.path.splitdrive(directory)[0]):
             continue
-        for name in names:
-            path = os.path.join(directory, name)
-            if os.path.isfile(path) and os.access(path, os.X_OK):
+        try:
+            if not os.path.isdir(directory) or os.path.samefile(directory, cwd):
+                continue
+            for name in names:
+                path = os.path.join(directory, name)
+                if not os.path.isfile(path) or not os.access(path, os.X_OK):
+                    continue
+                if os.path.samefile(os.path.dirname(os.path.realpath(path)), cwd):
+                    continue
                 return path
+        except (OSError, ValueError) as ex:
+            logger.debug("Skipping executable lookup in '%s': unable to verify path safety: %s", directory, ex)
     return None
 
 

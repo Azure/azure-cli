@@ -1,0 +1,1418 @@
+interactions:
+- request:
+    body: '{"sku": {"name": "S0"}, "kind": "AIServices", "location": "westus2", "properties":
+      {"customSubDomainName": "cli-costcontrol-000004", "allowProjectManagement":
+      true}, "identity": {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '205'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --kind --sku --location --yes --assign-identity --allow-project-management
+        --custom-domain
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002?api-version=2026-09-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002","name":"test-account-000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"2f001c52-0000-0800-0000-6aea5eed0000\"","location":"westus2","sku":{"name":"S0"},"kind":"AIServices","properties":{"internalId":"6b88473b23ac4d0182df277eac643278","dateCreated":"2026-11-03T22:23:41.6192651Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"documentTranslation.post","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"POST"}]},{"key":"documentTranslation.get","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"GET"}]},{"key":"documentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"*"}]},{"key":"textTranslation","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"translator/text/*","method":"*"}]},{"key":"singledocumentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document:translate","method":"*"}]},{"key":"batchDocumentTranslation.post","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"POST"}]},{"key":"batchDocumentTranslation.get","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"GET"}]},{"key":"batchDocumentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health","method":"*"},{"path":"text/analytics/v3.2-preview.1/health","method":"*"},{"path":"text/analytics/v3.2-preview.2/health","method":"*"}]},{"key":"textAnalytics.languagedetection","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"text/analytics/v3.1/languages","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.march.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.march.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"textAnalytics.analyze.internal.evaluation","renewalPeriod":60,"count":150,"matchPatterns":[{"path":"TextAnalytics/ct-evaluation","method":"*"}]},{"key":"token","renewalPeriod":1,"count":50,"matchPatterns":[{"path":"sts/v1.0/*","method":"*"}]},{"key":"speech.synthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/synthesize","method":"*"}]},{"key":"speech.customvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/customvoicesynthesize","method":"*"}]},{"key":"speech.neuralvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/neuralvoicesynthesize","method":"*"}]},{"key":"speech.customneuralvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/customneuralvoicesynthesize","method":"*"}]},{"key":"speech.personalvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/personalvoicesynthesize","method":"*"}]},{"key":"speech.liveavatarconnect","renewalPeriod":60,"count":2,"matchPatterns":[{"path":"speech/liveavatarconnect","method":"*"}]},{"key":"speech.livecustomavatarconnect","renewalPeriod":60,"count":200,"matchPatterns":[{"path":"speech/livecustomavatarconnect","method":"*"}]},{"key":"speech.batchavatarcreate","renewalPeriod":60,"count":2,"matchPatterns":[{"path":"avatar/batchsyntheses/*","method":"PUT"}]},{"key":"speech.speechtotext","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"speechtotext/*","method":"*"}]},{"key":"speech.batchtexttospeechcreate","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"texttospeech/batchsyntheses/*","method":"PUT"}]},{"key":"speech.texttospeech","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"texttospeech/*","method":"*"}]},{"key":"speech.customvoice","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"customvoice/*","method":"*"}]},{"key":"speech.speakerrecognitionv2","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"speaker/*","method":"*"},{"path":"speaker-recognition/*","method":"*"}]},{"key":"speech.speakerrecognitionv1","renewalPeriod":1,"count":5,"matchPatterns":[{"path":"spid/*","method":"*"}]},{"key":"voicelive.realtime","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"voice-live/realtime","method":"*"},{"path":"voice-agent/realtime","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:analyze","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/operations/{operationId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}","method":"GET"},{"path":"documentintelligence/documentClassifiers/{classifierId}","method":"GET"},{"path":"documentintelligence/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"},{"path":"documentintelligence/documentModels","method":"GET"},{"path":"documentintelligence/operations","method":"GET"},{"path":"documentintelligence/info","method":"GET"},{"path":"documentintelligence/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"},{"path":"documentintelligence/documentModels:authorizeCopy","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:copyTo","method":"POST"},{"path":"documentintelligence/documentModels:build","method":"POST"},{"path":"documentintelligence/documentModels:compose","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}","method":"DELETE"},{"path":"documentintelligence/documentClassifiers:build","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"formrecognizer.chat.build","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"documentintelligence/chat:build","method":"POST"}]},{"key":"formrecognizer.chat.complete","renewalPeriod":60,"count":5,"matchPatterns":[{"path":"documentintelligence/chat/{chatId}:complete","method":"POST"}]},{"key":"vision.recognizeText","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"vision/recognizeText","method":"POST"},{"path":"vision/textOperations/*","method":"GET"},{"path":"vision/read/*","method":"*"}]},{"key":"vision","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"vision/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"ContentSafety.List","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/blocklists*","method":"*"}]},{"key":"ContentSafety.TextGroundedDetection","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectGroundedness*","method":"*"}]},{"key":"ContentSafety.TextShieldPrompt","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:shieldPrompt*","method":"*"}]},{"key":"ContentSafety.TextDetectIncidents","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectIncidents*","method":"*"}]},{"key":"ContentSafety.TextAnalyzeCustomCategory","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:analyzeCustomCategory*","method":"*"}]},{"key":"ContentSafety.TextAutoReview","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:autoReview*","method":"*"}]},{"key":"ContentSafety.GPTFeature","renewalPeriod":10,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectungroundedness*","method":"*"}]},{"key":"ContentSafety.TextJailbreak","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectJailbreak*","method":"*"}]},{"key":"ContentSafety.TextProtectedMaterial","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectProtectedMaterial*","method":"*"}]},{"key":"ContentSafety.UnifiedModerate","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/content:unifiedModerate*","method":"*"}]},{"key":"ContentSafety.TextIncidentResponse","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/incidents*","method":"*"}]},{"key":"ContentSafety.TextAutoReviewers","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/autoReviewers*","method":"*"}]},{"key":"ContentSafety.TextCustomCategories","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/categories*","method":"*"}]},{"key":"ContentSafety.Text","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text*","method":"*"}]},{"key":"ContentSafety.ImageWithText","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/imageWithText*","method":"*"}]},{"key":"ContentSafety.ImageDetectIncidents","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image:detectIncidents*","method":"*"}]},{"key":"ContentSafety.ImageIncidentResponse","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image/incidents*","method":"*"}]},{"key":"ContentSafety.Image","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image*","method":"*"}]},{"key":"ContentSafety.Project","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/projects*","method":"*"}]},{"key":"ContentSafety.Metrics","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/metrics*","method":"*"}]},{"key":"ContentSafety.Feature","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/whitelist*","method":"*"}]},{"key":"ContentSafetyInternal.Metrics","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/internal/metrics*","method":"*"}]},{"key":"ContentSafetyInternal.Feature","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/internal/whitelist*","method":"*"}]},{"key":"ContentSafety.Provenance.ClientWatermarkRegistration","renewalPeriod":10,"count":2,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance/client-watermark:register","method":"POST"}]},{"key":"contentunderstanding.analyze","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}:analyze","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:analyzeBinary","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:analyzeInline","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:analyzeBinaryInline","method":"POST"},{"path":"contentunderstanding/classifiers/{classifierId}:classify","method":"POST"}]},{"key":"contentunderstanding.get.object","renewalPeriod":1,"count":50,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/operations/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{operationId}/files/{path}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{resultId}/*","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/results/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/results/{operationId}/images/{imageId}","method":"GET"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"GET"},{"path":"contentunderstanding/classifierResults/{operationId}","method":"GET"},{"path":"contentunderstanding/defaults","method":"GET"}]},{"key":"contentunderstanding.list.object","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"contentunderstanding/analyzers","method":"GET"},{"path":"contentunderstanding/classifiers","method":"GET"}]},{"key":"contentunderstanding.analyzer.management","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}","method":"PUT"},{"path":"contentunderstanding/analyzers/{analyzerId}","method":"DELETE"},{"path":"contentunderstanding/analyzers/{analyzerId}","method":"PATCH"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"PUT"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"DELETE"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"PATCH"},{"path":"contentunderstanding/analyzers/{analyzerId}:grantCopyAuthorization","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:copy","method":"POST"},{"path":"contentunderstanding/defaults","method":"PATCH"},{"path":"contentunderstanding/analyzerResults/{operationId}","method":"DELETE"}]},{"key":"contentunderstanding.labeling","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"contentunderstanding/labelingProjects","method":"GET"},{"path":"contentunderstanding/labelingProjects/*","method":"*"},{"path":"contentunderstanding/classificationProjects","method":"GET"},{"path":"contentunderstanding/classificationProjects/*","method":"*"}]},{"key":"contentunderstanding.face","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"contentunderstanding/personDirectories","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons/{personId}","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces/{faceId}","method":"*"},{"path":"contentunderstanding/faces:detect","method":"*"},{"path":"contentunderstanding/faces:compare","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons:identify","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces:find","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons/{personId}:verify","method":"*"}]},{"key":"mai","renewalPeriod":1,"count":30000,"matchPatterns":[{"path":"/mai","method":"*"}]},{"key":"models","renewalPeriod":1,"count":30000,"matchPatterns":[{"path":"/models","method":"*"}]},{"key":"openai.dalle.post","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"dalle/*","method":"POST"},{"path":"openai/images/*","method":"POST"}]},{"key":"openai.dalle.other","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"dalle/*","method":"*"},{"path":"openai/operations/images/*","method":"*"}]},{"key":"openai.assistants.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/assistants","method":"GET"}]},{"key":"openai.threads.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/threads","method":"GET"}]},{"key":"openai.vectorstores.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/vector_stores","method":"GET"}]},{"key":"openai.vectorstores.post","renewalPeriod":1,"count":60,"matchPatterns":[{"path":"openai/vector_stores","method":"POST"},{"path":"openai/vector_stores/*","method":"POST"}]},{"key":"openai.assistants.default","renewalPeriod":60,"count":6000,"matchPatterns":[{"path":"openai/assistants","method":"*"},{"path":"openai/assistants/*","method":"*"},{"path":"openai/threads","method":"*"},{"path":"openai/threads/*","method":"*"},{"path":"openai/vector_stores","method":"*"},{"path":"openai/vector_stores/*","method":"*"}]},{"key":"openai.responses.default","renewalPeriod":1,"count":100000,"matchPatterns":[{"path":"openai/responses","method":"*"},{"path":"openai/responses/*","method":"*"}]},{"key":"openai.moderations.post","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/v1/moderations","method":"POST"},{"path":"openai/v1/moderations/exp/m4","method":"POST"},{"path":"openai/v1/moderations/exp/safeberry","method":"POST"},{"path":"openai/v1/safeberry/moderations","method":"POST"}]},{"key":"openai","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"openai/*","method":"*"}]},{"key":"api.projects.default","renewalPeriod":1,"count":1000000,"matchPatterns":[{"path":"api/projects/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"customSubDomainName":"cli-costcontrol-000004","allowProjectManagement":true,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"EnabledApimVnet","value":"true"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"TrustedServices","value":"Microsoft.CognitiveServices,Microsoft.MachineLearningServices,Microsoft.Search,Microsoft.VideoIndexer"},{"name":"NetworkSecurityPerimeter"},{"name":"MaxFineTuneCount","value":"100"},{"name":"MaxRunningFineTuneCount","value":"2"},{"name":"MaxUserFileCount","value":"50"},{"name":"MaxTrainingFileSize","value":"512000000"},{"name":"MaxUserFileImportDurationInHours","value":"1"},{"name":"MaxFineTuneJobDurationInHours","value":"720"},{"name":"MaxRunningGlobalStandardFineTuneCount","value":"1"},{"name":"RaiMonitor"},{"name":"CustomerManagedAmlWorkspace"},{"name":"v1GA"},{"name":"useEndpointRateLimiter","value":"Enabled"},{"name":"FinetunedModelRouterEndpoint"},{"name":"FinetunedModelRouterScoreThreshold","value":"0.171"},{"name":"quotaRefundsEnabled","value":"false"},{"name":"audio","value":"true"},{"name":"imageGenerations","value":"true"},{"name":"chatCompletion","value":"true"},{"name":"fineTune","value":"true"},{"name":"imageEdits","value":"true"},{"name":"realtimeTranscription","value":"true"},{"name":"Container","value":"ContentSafety.*,ContentSafety.TextAnalyze,ContentSafety.ImageAnalyze,ContentSafety.Jailbreak,ContentSafety.jailbreakanalyze,ComputerVision.*,FormRecognizer.*,FormRecognizer.Forms,FormRecognizer.FormRecognizerCustomSupervised,FormRecognizer.FormRecognizerLayout,FormRecognizer.formrecognizerreadlayout,FormRecognizer.FormRecognizerId,FormRecognizer.FormRecognizerInvoice,FormRecognizer.FormRecognizerReceipt,FormRecognizer.FormRecognizerBusinessCard,FormRecognizer.FormRecognizerRead,FormRecognizer.FormRecognizerKvp,SpeechServices.*,SpeechServices.CustomSpeechToText,SpeechServices.NeuralTextToSpeechOnPrem,SpeechServices.DPP,SpeechServices.SpeechToText,TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview,TextAnalytics.SentimentONNX,TextAnalytics.SummarizationFrontend,TextAnalytics.SummarizationWorker,TextAnalytics.CluRuntime,TextAnalytics.CluContainer,TextAnalytics.PII,TextAnalytics.NER"},{"name":"DynamicThrottling"},{"name":"Cloud","value":"TextAnalytics.CustomText,TextAnalytics.ConversationalLU,TextAnalytics.Healthcare,TextAnalytics.Analyze,TextAnalytics.AnalyzeText,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"a365LoggingEnabled":true,"a365Status":"Enabled","provisioningState":"Creating"},"identity":{"principalId":"b555aaa3-d0d5-4398-a244-55ba9aef6b99","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:23:39.8486666Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:23:39.8486666Z"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/e261d2e1-d321-4f51-8be6-045d04186d3f?api-version=2017-04-18&t=639293414222236612&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=Kel4xpVKvXiWF6EUhQQFWJlsdihDOHMCLuE-Ut1aEXtL7F2DTJOiEG0n02uFLKBqX5iMaqPLYrz_lL9arjd_Qs_1MDg01HGqtlyAxbYfkRkC6pk_jKaK4buxEZemILQ9oHN4eRu-a7OzvRFoBSQNcC_pwcAnpZN0SekstZdy2KM1aHw3EoZ0Lk2ET24ipuqujShdvXHCKYAvfkc6bQTDHrxbouFQRJka-oAl4KgCs-LWQqk9Fn4LRpPxNgcKpCxHscrwyzVDsqKAabGA-rWqQ0Ok2LocZ9kWrH_Gz2DPBtQiMnddDD9qIcoQl-C6YiAJBfc9xzIXB_elqbqVhR-KLQ&h=7zZj9P_BkbhWaFs223zHiw89VeGIgi443r77sRoIZtc
+      cache-control:
+      - no-cache
+      content-length:
+      - '26431'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:23:41 GMT
+      etag:
+      - '"2f001c52-0000-0800-0000-6aea5eed0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '1384'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/237f380d-72e3-4837-a648-77ee8f3a9933
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 076728F82ADF451AAB887BD979392AE0 Ref B: MWH011020807062 Ref C: 2026-11-03T22:23:39Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --kind --sku --location --yes --assign-identity --allow-project-management
+        --custom-domain
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/e261d2e1-d321-4f51-8be6-045d04186d3f?api-version=2017-04-18&t=639293414222236612&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=Kel4xpVKvXiWF6EUhQQFWJlsdihDOHMCLuE-Ut1aEXtL7F2DTJOiEG0n02uFLKBqX5iMaqPLYrz_lL9arjd_Qs_1MDg01HGqtlyAxbYfkRkC6pk_jKaK4buxEZemILQ9oHN4eRu-a7OzvRFoBSQNcC_pwcAnpZN0SekstZdy2KM1aHw3EoZ0Lk2ET24ipuqujShdvXHCKYAvfkc6bQTDHrxbouFQRJka-oAl4KgCs-LWQqk9Fn4LRpPxNgcKpCxHscrwyzVDsqKAabGA-rWqQ0Ok2LocZ9kWrH_Gz2DPBtQiMnddDD9qIcoQl-C6YiAJBfc9xzIXB_elqbqVhR-KLQ&h=7zZj9P_BkbhWaFs223zHiw89VeGIgi443r77sRoIZtc
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/e261d2e1-d321-4f51-8be6-045d04186d3f","name":"e261d2e1-d321-4f51-8be6-045d04186d3f","status":"Creating","startTime":"2026-11-03T22:23:41Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '271'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:23:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '8'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/35123c98-b794-4a06-bad6-b79a2698f777
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 2C900ACB09D94B57A96491F7C53C6075 Ref B: MWH011020807062 Ref C: 2026-11-03T22:23:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --kind --sku --location --yes --assign-identity --allow-project-management
+        --custom-domain
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/e261d2e1-d321-4f51-8be6-045d04186d3f?api-version=2017-04-18&t=639293414222236612&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=Kel4xpVKvXiWF6EUhQQFWJlsdihDOHMCLuE-Ut1aEXtL7F2DTJOiEG0n02uFLKBqX5iMaqPLYrz_lL9arjd_Qs_1MDg01HGqtlyAxbYfkRkC6pk_jKaK4buxEZemILQ9oHN4eRu-a7OzvRFoBSQNcC_pwcAnpZN0SekstZdy2KM1aHw3EoZ0Lk2ET24ipuqujShdvXHCKYAvfkc6bQTDHrxbouFQRJka-oAl4KgCs-LWQqk9Fn4LRpPxNgcKpCxHscrwyzVDsqKAabGA-rWqQ0Ok2LocZ9kWrH_Gz2DPBtQiMnddDD9qIcoQl-C6YiAJBfc9xzIXB_elqbqVhR-KLQ&h=7zZj9P_BkbhWaFs223zHiw89VeGIgi443r77sRoIZtc
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/e261d2e1-d321-4f51-8be6-045d04186d3f","name":"e261d2e1-d321-4f51-8be6-045d04186d3f","status":"Creating","startTime":"2026-11-03T22:23:41Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '271'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '8'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/d603fa93-ccf6-4eb0-9895-5c8c6ad7f65f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 6C66702A5AE34EFE8B78BF16A1D7BA96 Ref B: MWH011020807062 Ref C: 2026-11-03T22:24:13Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --kind --sku --location --yes --assign-identity --allow-project-management
+        --custom-domain
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/e261d2e1-d321-4f51-8be6-045d04186d3f?api-version=2017-04-18&t=639293414222236612&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=Kel4xpVKvXiWF6EUhQQFWJlsdihDOHMCLuE-Ut1aEXtL7F2DTJOiEG0n02uFLKBqX5iMaqPLYrz_lL9arjd_Qs_1MDg01HGqtlyAxbYfkRkC6pk_jKaK4buxEZemILQ9oHN4eRu-a7OzvRFoBSQNcC_pwcAnpZN0SekstZdy2KM1aHw3EoZ0Lk2ET24ipuqujShdvXHCKYAvfkc6bQTDHrxbouFQRJka-oAl4KgCs-LWQqk9Fn4LRpPxNgcKpCxHscrwyzVDsqKAabGA-rWqQ0Ok2LocZ9kWrH_Gz2DPBtQiMnddDD9qIcoQl-C6YiAJBfc9xzIXB_elqbqVhR-KLQ&h=7zZj9P_BkbhWaFs223zHiw89VeGIgi443r77sRoIZtc
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/e261d2e1-d321-4f51-8be6-045d04186d3f","name":"e261d2e1-d321-4f51-8be6-045d04186d3f","status":"Succeeded","startTime":"2026-11-03T22:23:41Z","endTime":"2026-11-03T22:24:17Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '305'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '12'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/9f8e7727-03bd-4de7-8924-98966ca20c00
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 069FC66515C54218970D5438AF683ECB Ref B: MWH011020807062 Ref C: 2026-11-03T22:24:43Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --kind --sku --location --yes --assign-identity --allow-project-management
+        --custom-domain
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002?api-version=2026-09-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002","name":"test-account-000002","type":"Microsoft.CognitiveServices/accounts","etag":"\"2f006c52-0000-0800-0000-6aea5f110000\"","location":"westus2","sku":{"name":"S0"},"kind":"AIServices","properties":{"endpoint":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","internalId":"6b88473b23ac4d0182df277eac643278","dateCreated":"2026-11-03T22:23:41.6192651Z","apiProperties":{"qnaAzureSearchEndpointKey":null},"callRateLimit":{"rules":[{"key":"documentTranslation.post","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"POST"}]},{"key":"documentTranslation.get","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"GET"}]},{"key":"documentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/text/batch/*","method":"*"}]},{"key":"textTranslation","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"translator/text/*","method":"*"}]},{"key":"singledocumentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document:translate","method":"*"}]},{"key":"batchDocumentTranslation.post","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"POST"}]},{"key":"batchDocumentTranslation.get","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"GET"}]},{"key":"batchDocumentTranslation.default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"translator/document/*","method":"*"}]},{"key":"textAnalytics.analyze","renewalPeriod":60,"count":300,"matchPatterns":[{"path":"text/analytics/v3.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.1/analyze/*","method":"*"},{"path":"text/analytics/v3.2-preview.2/analyze/*","method":"*"}]},{"key":"textAnalytics.healthcare","renewalPeriod":60,"count":300,"matchPatterns":[{"path":"text/analytics/v3.1/entities/health","method":"*"},{"path":"text/analytics/v3.2-preview.1/health","method":"*"},{"path":"text/analytics/v3.2-preview.2/health","method":"*"}]},{"key":"textAnalytics.languagedetection","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"text/analytics/v3.1/languages","method":"*"}]},{"key":"textAnalytics","renewalPeriod":60,"count":1000,"matchPatterns":[{"path":"text/analytics/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.march.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.march.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/authoring/analyze-text/projects/*","method":"*"}]},{"key":"textAnalytics.authoring.customtext.internal.getcalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.internal.updatecalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-text/internal/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.march.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/authoring/analyze-conversations/projects/*","method":"*"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.getCalls","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"GET"}]},{"key":"textAnalytics.unifiedAuthoring.clu.internal.updateCalls","renewalPeriod":60,"count":10,"matchPatterns":[{"path":"language/analyze-conversations/internal/projects/*","method":"*"}]},{"key":"textAnalytics.analyze.internal.autoTagging","renewalPeriod":60,"count":150,"matchPatterns":[{"path":"TextAnalytics/ct-auto-tagging","method":"*"}]},{"key":"textAnalytics.analyze.internal.evaluation","renewalPeriod":60,"count":150,"matchPatterns":[{"path":"TextAnalytics/ct-evaluation","method":"*"}]},{"key":"token","renewalPeriod":1,"count":50,"matchPatterns":[{"path":"sts/v1.0/*","method":"*"}]},{"key":"speech.synthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/synthesize","method":"*"}]},{"key":"speech.customvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/customvoicesynthesize","method":"*"}]},{"key":"speech.neuralvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/neuralvoicesynthesize","method":"*"}]},{"key":"speech.customneuralvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/customneuralvoicesynthesize","method":"*"}]},{"key":"speech.personalvoicesynthesize","renewalPeriod":1,"count":200,"matchPatterns":[{"path":"speech/personalvoicesynthesize","method":"*"}]},{"key":"speech.liveavatarconnect","renewalPeriod":60,"count":2,"matchPatterns":[{"path":"speech/liveavatarconnect","method":"*"}]},{"key":"speech.livecustomavatarconnect","renewalPeriod":60,"count":200,"matchPatterns":[{"path":"speech/livecustomavatarconnect","method":"*"}]},{"key":"speech.batchavatarcreate","renewalPeriod":60,"count":2,"matchPatterns":[{"path":"avatar/batchsyntheses/*","method":"PUT"}]},{"key":"speech.speechtotext","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"speechtotext/*","method":"*"}]},{"key":"speech.batchtexttospeechcreate","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"texttospeech/batchsyntheses/*","method":"PUT"}]},{"key":"speech.texttospeech","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"texttospeech/*","method":"*"}]},{"key":"speech.customvoice","renewalPeriod":10,"count":100,"matchPatterns":[{"path":"customvoice/*","method":"*"}]},{"key":"speech.speakerrecognitionv2","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"speaker/*","method":"*"},{"path":"speaker-recognition/*","method":"*"}]},{"key":"speech.speakerrecognitionv1","renewalPeriod":1,"count":5,"matchPatterns":[{"path":"spid/*","method":"*"}]},{"key":"voicelive.realtime","renewalPeriod":60,"count":100,"matchPatterns":[{"path":"voice-live/realtime","method":"*"},{"path":"voice-agent/realtime","method":"*"}]},{"key":"formrecognizer.analyze","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"formrecognizer/custom/models/{id}/analyze","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/businessCard/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/idDocument/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/invoice/analyze","method":"POST"},{"path":"formrecognizer/layout/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/analyze","method":"POST"},{"path":"formrecognizer/prebuilt/receipt/asyncBatchAnalyze","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:analyze","method":"POST"},{"path":"formrecognizer/read","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}:analyze","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:analyze","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}:analyze","method":"POST"}]},{"key":"formrecognizer.get.object","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/businessCard/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/idDocument/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/invoice/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/prebuilt/receipt/operations/{operationId}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/layout/analyzeResults/{resultId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}/copyResults/{resultId}","method":"GET"},{"path":"formrecognizer/operations/{operationId}","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"GET"},{"path":"formrecognizer/custom/models/{id}","method":"GET"},{"path":"formrecognizer/documentModels/{modelId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"GET"},{"path":"formrecognizer/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}/analyzeResults/{resultId}","method":"GET"},{"path":"documentintelligence/operations/{operationId}","method":"GET"},{"path":"documentintelligence/documentModels/{modelId}","method":"GET"},{"path":"documentintelligence/documentClassifiers/{classifierId}","method":"GET"},{"path":"documentintelligence/documentClassifiers/{classifierId}/analyzeResults/{resultId}","method":"GET"}]},{"key":"formrecognizer.list.objects","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/operations","method":"GET"},{"path":"formrecognizer/info","method":"GET"},{"path":"formrecognizer/documentModels","method":"GET"},{"path":"formrecognizer/custom/models","method":"GET"},{"path":"formrecognizer/documentClassifiers","method":"GET"},{"path":"documentintelligence/documentModels","method":"GET"},{"path":"documentintelligence/operations","method":"GET"},{"path":"documentintelligence/info","method":"GET"},{"path":"documentintelligence/documentClassifiers","method":"GET"}]},{"key":"formrecognizer.model.management","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"formrecognizer/custom/models","method":"POST"},{"path":"formrecognizer/custom/models/compose","method":"POST"},{"path":"formrecognizer/custom/models/copyAuthorization","method":"POST"},{"path":"formrecognizer/custom/models/{id}","method":"DELETE"},{"path":"formrecognizer/custom/models/{id}/keys","method":"GET"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/custom/models/{modelId}/copy","method":"POST"},{"path":"formrecognizer/documentModels/{modelId}:copyTo","method":"POST"},{"path":"formrecognizer/documentModels:authorizeCopy","method":"POST"},{"path":"formrecognizer/documentModels:build","method":"POST"},{"path":"formrecognizer/documentModels:compose","method":"POST"},{"path":"formrecognizer/custom/train","method":"POST"},{"path":"formrecognizer/custom/models/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentModels/{modelId}","method":"DELETE"},{"path":"formrecognizer/documentClassifiers:build","method":"POST"},{"path":"formrecognizer/documentClassifiers/{classifierId}","method":"DELETE"},{"path":"documentintelligence/documentModels:authorizeCopy","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}:copyTo","method":"POST"},{"path":"documentintelligence/documentModels:build","method":"POST"},{"path":"documentintelligence/documentModels:compose","method":"POST"},{"path":"documentintelligence/documentModels/{modelId}","method":"DELETE"},{"path":"documentintelligence/documentClassifiers:build","method":"POST"},{"path":"documentintelligence/documentClassifiers/{classifierId}","method":"DELETE"}]},{"key":"formrecognizer.chat.build","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"documentintelligence/chat:build","method":"POST"}]},{"key":"formrecognizer.chat.complete","renewalPeriod":60,"count":5,"matchPatterns":[{"path":"documentintelligence/chat/{chatId}:complete","method":"POST"}]},{"key":"vision.recognizeText","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"vision/recognizeText","method":"POST"},{"path":"vision/textOperations/*","method":"GET"},{"path":"vision/read/*","method":"*"}]},{"key":"vision","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"vision/*","method":"*"}]},{"key":"container.billing","renewalPeriod":10,"count":500,"matchPatterns":[{"path":"billing/*","method":"*"}]},{"key":"ContentSafety.List","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/blocklists*","method":"*"}]},{"key":"ContentSafety.TextGroundedDetection","renewalPeriod":1,"count":50,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectGroundedness*","method":"*"}]},{"key":"ContentSafety.TextShieldPrompt","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:shieldPrompt*","method":"*"}]},{"key":"ContentSafety.TextDetectIncidents","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectIncidents*","method":"*"}]},{"key":"ContentSafety.TextAnalyzeCustomCategory","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:analyzeCustomCategory*","method":"*"}]},{"key":"ContentSafety.TextAutoReview","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:autoReview*","method":"*"}]},{"key":"ContentSafety.GPTFeature","renewalPeriod":10,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectungroundedness*","method":"*"}]},{"key":"ContentSafety.TextJailbreak","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectJailbreak*","method":"*"}]},{"key":"ContentSafety.TextProtectedMaterial","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text:detectProtectedMaterial*","method":"*"}]},{"key":"ContentSafety.UnifiedModerate","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/content:unifiedModerate*","method":"*"}]},{"key":"ContentSafety.TextIncidentResponse","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/incidents*","method":"*"}]},{"key":"ContentSafety.TextAutoReviewers","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/autoReviewers*","method":"*"}]},{"key":"ContentSafety.TextCustomCategories","renewalPeriod":1,"count":5,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text/categories*","method":"*"}]},{"key":"ContentSafety.Text","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/text*","method":"*"}]},{"key":"ContentSafety.ImageWithText","renewalPeriod":1,"count":10,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/imageWithText*","method":"*"}]},{"key":"ContentSafety.ImageDetectIncidents","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image:detectIncidents*","method":"*"}]},{"key":"ContentSafety.ImageIncidentResponse","renewalPeriod":10,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image/incidents*","method":"*"}]},{"key":"ContentSafety.Image","renewalPeriod":10,"count":1000,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/image*","method":"*"}]},{"key":"ContentSafety.Project","renewalPeriod":1,"count":30,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/projects*","method":"*"}]},{"key":"ContentSafety.Metrics","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/metrics*","method":"*"}]},{"key":"ContentSafety.Feature","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/whitelist*","method":"*"}]},{"key":"ContentSafetyInternal.Metrics","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/internal/metrics*","method":"*"}]},{"key":"ContentSafetyInternal.Feature","renewalPeriod":1,"count":100,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/internal/whitelist*","method":"*"}]},{"key":"ContentSafety.Provenance.ClientWatermarkRegistration","renewalPeriod":10,"count":2,"dynamicThrottlingEnabled":true,"matchPatterns":[{"path":"contentsafety/provenance/client-watermark:register","method":"POST"}]},{"key":"contentunderstanding.analyze","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}:analyze","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:analyzeBinary","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:analyzeInline","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:analyzeBinaryInline","method":"POST"},{"path":"contentunderstanding/classifiers/{classifierId}:classify","method":"POST"}]},{"key":"contentunderstanding.get.object","renewalPeriod":1,"count":50,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/operations/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{operationId}/files/{path}","method":"GET"},{"path":"contentunderstanding/analyzerResults/{resultId}/*","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/results/{operationId}","method":"GET"},{"path":"contentunderstanding/analyzers/{analyzerId}/results/{operationId}/images/{imageId}","method":"GET"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"GET"},{"path":"contentunderstanding/classifierResults/{operationId}","method":"GET"},{"path":"contentunderstanding/defaults","method":"GET"}]},{"key":"contentunderstanding.list.object","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"contentunderstanding/analyzers","method":"GET"},{"path":"contentunderstanding/classifiers","method":"GET"}]},{"key":"contentunderstanding.analyzer.management","renewalPeriod":1,"count":15,"matchPatterns":[{"path":"contentunderstanding/analyzers/{analyzerId}","method":"PUT"},{"path":"contentunderstanding/analyzers/{analyzerId}","method":"DELETE"},{"path":"contentunderstanding/analyzers/{analyzerId}","method":"PATCH"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"PUT"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"DELETE"},{"path":"contentunderstanding/classifiers/{classifierId}","method":"PATCH"},{"path":"contentunderstanding/analyzers/{analyzerId}:grantCopyAuthorization","method":"POST"},{"path":"contentunderstanding/analyzers/{analyzerId}:copy","method":"POST"},{"path":"contentunderstanding/defaults","method":"PATCH"},{"path":"contentunderstanding/analyzerResults/{operationId}","method":"DELETE"}]},{"key":"contentunderstanding.labeling","renewalPeriod":1,"count":100,"matchPatterns":[{"path":"contentunderstanding/labelingProjects","method":"GET"},{"path":"contentunderstanding/labelingProjects/*","method":"*"},{"path":"contentunderstanding/classificationProjects","method":"GET"},{"path":"contentunderstanding/classificationProjects/*","method":"*"}]},{"key":"contentunderstanding.face","renewalPeriod":1,"count":10,"matchPatterns":[{"path":"contentunderstanding/personDirectories","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons/{personId}","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces/{faceId}","method":"*"},{"path":"contentunderstanding/faces:detect","method":"*"},{"path":"contentunderstanding/faces:compare","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons:identify","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/faces:find","method":"*"},{"path":"contentunderstanding/personDirectories/{personDirectoryId}/persons/{personId}:verify","method":"*"}]},{"key":"mai","renewalPeriod":1,"count":30000,"matchPatterns":[{"path":"/mai","method":"*"}]},{"key":"models","renewalPeriod":1,"count":30000,"matchPatterns":[{"path":"/models","method":"*"}]},{"key":"openai.dalle.post","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"dalle/*","method":"POST"},{"path":"openai/images/*","method":"POST"}]},{"key":"openai.dalle.other","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"dalle/*","method":"*"},{"path":"openai/operations/images/*","method":"*"}]},{"key":"openai.assistants.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/assistants","method":"GET"}]},{"key":"openai.threads.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/threads","method":"GET"}]},{"key":"openai.vectorstores.list","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/vector_stores","method":"GET"}]},{"key":"openai.vectorstores.post","renewalPeriod":1,"count":60,"matchPatterns":[{"path":"openai/vector_stores","method":"POST"},{"path":"openai/vector_stores/*","method":"POST"}]},{"key":"openai.assistants.default","renewalPeriod":60,"count":6000,"matchPatterns":[{"path":"openai/assistants","method":"*"},{"path":"openai/assistants/*","method":"*"},{"path":"openai/threads","method":"*"},{"path":"openai/threads/*","method":"*"},{"path":"openai/vector_stores","method":"*"},{"path":"openai/vector_stores/*","method":"*"}]},{"key":"openai.responses.default","renewalPeriod":1,"count":100000,"matchPatterns":[{"path":"openai/responses","method":"*"},{"path":"openai/responses/*","method":"*"}]},{"key":"openai.moderations.post","renewalPeriod":60,"count":120,"matchPatterns":[{"path":"openai/v1/moderations","method":"POST"},{"path":"openai/v1/moderations/exp/m4","method":"POST"},{"path":"openai/v1/moderations/exp/safeberry","method":"POST"},{"path":"openai/v1/safeberry/moderations","method":"POST"}]},{"key":"openai","renewalPeriod":1,"count":30,"matchPatterns":[{"path":"openai/*","method":"*"}]},{"key":"api.projects.default","renewalPeriod":1,"count":1000000,"matchPatterns":[{"path":"api/projects/*","method":"*"}]},{"key":"default","renewalPeriod":1,"count":20,"matchPatterns":[{"path":"*","method":"*"}]}]},"isMigrated":false,"customSubDomainName":"cli-costcontrol-000004","amlWorkspace":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.MachineLearningServices/workspaces/test-account-000002@AML","internalId":"6b88473b-23ac-4d01-82df-277eac643278","amlWorkspace":"test-account-000002@AML"},"allowProjectManagement":true,"privateEndpointConnections":[],"publicNetworkAccess":"Enabled","capabilities":[{"name":"VirtualNetworks"},{"name":"EnabledApimVnet","value":"true"},{"name":"CustomerManagedKey"},{"name":"CustomerManagedStorage"},{"name":"TrustedServices","value":"Microsoft.CognitiveServices,Microsoft.MachineLearningServices,Microsoft.Search,Microsoft.VideoIndexer"},{"name":"NetworkSecurityPerimeter"},{"name":"MaxFineTuneCount","value":"100"},{"name":"MaxRunningFineTuneCount","value":"2"},{"name":"MaxUserFileCount","value":"50"},{"name":"MaxTrainingFileSize","value":"512000000"},{"name":"MaxUserFileImportDurationInHours","value":"1"},{"name":"MaxFineTuneJobDurationInHours","value":"720"},{"name":"MaxRunningGlobalStandardFineTuneCount","value":"1"},{"name":"RaiMonitor"},{"name":"CustomerManagedAmlWorkspace"},{"name":"v1GA"},{"name":"useEndpointRateLimiter","value":"Enabled"},{"name":"FinetunedModelRouterEndpoint"},{"name":"FinetunedModelRouterScoreThreshold","value":"0.171"},{"name":"quotaRefundsEnabled","value":"false"},{"name":"audio","value":"true"},{"name":"imageGenerations","value":"true"},{"name":"chatCompletion","value":"true"},{"name":"fineTune","value":"true"},{"name":"imageEdits","value":"true"},{"name":"realtimeTranscription","value":"true"},{"name":"Container","value":"ContentSafety.*,ContentSafety.TextAnalyze,ContentSafety.ImageAnalyze,ContentSafety.Jailbreak,ContentSafety.jailbreakanalyze,ComputerVision.*,FormRecognizer.*,FormRecognizer.Forms,FormRecognizer.FormRecognizerCustomSupervised,FormRecognizer.FormRecognizerLayout,FormRecognizer.formrecognizerreadlayout,FormRecognizer.FormRecognizerId,FormRecognizer.FormRecognizerInvoice,FormRecognizer.FormRecognizerReceipt,FormRecognizer.FormRecognizerBusinessCard,FormRecognizer.FormRecognizerRead,FormRecognizer.FormRecognizerKvp,SpeechServices.*,SpeechServices.CustomSpeechToText,SpeechServices.NeuralTextToSpeechOnPrem,SpeechServices.DPP,SpeechServices.SpeechToText,TextAnalytics.*,TextAnalytics.Healthcare,TextAnalytics.Keyphrase,TextAnalytics.KeyphraseV2,TextAnalytics.KeyPhraseONNX,TextAnalytics.LanguageFastText,TextAnalytics.Language,TextAnalytics.LanguageV2,TextAnalytics.Sentiment,TextAnalytics.SentimentV2,TextAnalytics.SentimentV3,TextAnalytics.SentimentV3Preview,TextAnalytics.SentimentONNX,TextAnalytics.SummarizationFrontend,TextAnalytics.SummarizationWorker,TextAnalytics.CluRuntime,TextAnalytics.CluContainer,TextAnalytics.PII,TextAnalytics.NER"},{"name":"DynamicThrottling"},{"name":"Cloud","value":"TextAnalytics.CustomText,TextAnalytics.ConversationalLU,TextAnalytics.Healthcare,TextAnalytics.Analyze,TextAnalytics.AnalyzeText,QuestionAnswer.AllApis,LanguageService.QuestionAnsweringApis"}],"endpoints":{"AI
+        Foundry API":"https://cli-costcontrol-000004.services.ai.azure.com/","Azure
+        AI Model Inference API (UDP)":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","ProjectA
+        APIs":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","MAAP
+        Managed Deployments API":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","fal.ai
+        Inference API":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","OpenAI
+        Language Model Instance API":"https://cli-costcontrol-000004.openai.azure.com/","OpenAI
+        Dall-E API":"https://cli-costcontrol-000004.openai.azure.com/","OpenAI Sora
+        API":"https://cli-costcontrol-000004.openai.azure.com/","OpenAI Moderations
+        API":"https://cli-costcontrol-000004.openai.azure.com/","OpenAI Whisper API":"https://cli-costcontrol-000004.openai.azure.com/","OpenAI
+        Model Scaleset API":"https://cli-costcontrol-000004.openai.azure.com/","OpenAI
+        Realtime API":"https://cli-costcontrol-000004.openai.azure.com/","Token Service
+        API":"https://cli-costcontrol-000004.openai.azure.com/","Metering and Throttling
+        API":"https://cli-costcontrol-000004.openai.azure.com/","Azure OpenAI Legacy
+        API - Latest moniker":"https://cli-costcontrol-000004.openai.azure.com/","OpenAI
+        Response API on Websocket":"https://cli-costcontrol-000004.openai.azure.com/","OpenAI
+        Realtime Translation WebSocket API":"https://cli-costcontrol-000004.openai.azure.com/","OpenAI
+        Realtime Live WebSocket API":"https://cli-costcontrol-000004.openai.azure.com/","Azure
+        AI Model Inference API":"https://cli-costcontrol-000004.services.ai.azure.com/","Cohere
+        AI API":"https://cli-costcontrol-000004.services.ai.azure.com/","Mistral AI
+        API":"https://cli-costcontrol-000004.services.ai.azure.com/","Azure MAI Model
+        Inference API":"https://cli-costcontrol-000004.services.ai.azure.com/","Azure
+        MAI Model Inference API v1.0":"https://cli-costcontrol-000004.services.ai.azure.com/","Azure
+        MAI Realtime API v1.0":"https://cli-costcontrol-000004.services.ai.azure.com/","Content
+        Understanding":"https://cli-costcontrol-000004.services.ai.azure.com/","Content
+        Safety":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Container":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Computer
+        Vision":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","FormRecognizer":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Custom Speech":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Speech to Text v3.2_internal.1":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Custom Voice":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Custom Voice Trial":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Video
+        Translation":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Audio Content Creation":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services TTS Player":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Podcast":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Custom Avatar":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Batch Avatar":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Batch Text to Speech":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Speech
+        Services Speech to Text (Standard)":"https://westus2.stt.speech.microsoft.com","Speech
+        Services Text to Speech (Neural)":"https://westus2.tts.speech.microsoft.com","Voice
+        Agent Realtime API":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Voice
+        Live Realtime API":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Voice
+        Live Media Gateway Calls API":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Voice
+        Live Capabilities API":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Voice
+        Live Media Gateway Calls HTTP API":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Voice
+        Live SIP API":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Voice
+        Live SIP Calls API":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Token":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Text
+        Analytics":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","QnAMaker":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","QuestionAnswering":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","LUIS.Authoring":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Custom
+        Text Authoring":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Conversational
+        Language Understanding Authoring":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Custom
+        Question Answering Authoring":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Custom
+        Question Answering":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Language":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","Language
+        Remote MCP Server":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","TextTranslation-Global":"https://api.cognitive.microsofttranslator.com/","TextTranslation":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","DocumentTranslation":"https://cli-costcontrol-000004.cognitiveservices.azure.com/","CustomTranslator":"https://cli-costcontrol-000004.cognitiveservices.azure.com/"},"a365LoggingEnabled":true,"a365Status":"Enabled","provisioningState":"Succeeded"},"identity":{"principalId":"b555aaa3-d0d5-4398-a244-55ba9aef6b99","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:23:39.8486666Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:23:39.8486666Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '32315'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:42 GMT
+      etag:
+      - '"2f006c52-0000-0800-0000-6aea5f110000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '80'
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: D62CF69DC29249DD91EFCAF19A89EF8F Ref B: MWH011020807062 Ref C: 2026-11-03T22:24:43Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"displayName": "Cost control CRUD test"}, "location": "westus2",
+      "identity": {"type": "SystemAssigned"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '120'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --name --project-name --location --assign-identity --display-name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003?api-version=2026-09-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003","name":"test-account-000002/test-project-000003","type":"Microsoft.CognitiveServices/accounts/projects","etag":"\"2b00c793-0000-0800-0000-6aea5f2e0000\"","location":"westus2","kind":"AIServices","properties":{"endpoints":{"AI
+        Foundry API":"https://cli-costcontrol-000004.services.ai.azure.com/api/projects/test-project-000003"},"displayName":"Cost
+        control CRUD test","amlWorkspace":{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.MachineLearningServices/workspaces/test-account-000002@test-project-000003@AML","internalId":"617acfa2-065c-4fe0-a23c-ccd51c02163e","amlWorkspace":"test-account-000002@test-project-000003@AML"},"isDefault":true,"internalId":"617acfa2065c4fe0a23cccd51c02163e","provisioningState":"Succeeded"},"identity":{"principalId":"aa89c813-17f1-4f24-822d-cfbdd7d57714","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","type":"SystemAssigned"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:44.4337555Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:44.4337555Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1399'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:45 GMT
+      etag:
+      - '"2b00c793-0000-0800-0000-6aea5f2e0000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '982'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/d8580304-e5c0-4941-988c-50a4d1914476
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 6C6EEE1BB1A742618D993FD7467512DA Ref B: CO6AA3150217025 Ref C: 2026-11-03T22:24:44Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"amount": 1000000.0, "category": "Tokens", "timeGrain":
+      "Monthly", "timePeriod": {"endDate": "2027-11-01T00:00:00.000Z", "startDate":
+      "2026-11-01T00:00:00.000Z"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '179'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name --category
+        --amount --time-grain --time-period
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-1","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":1000000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:46.9606183Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:46.9606183Z"},"etag":"\"3e65c554-8d6d-49d4-aceb-ec12416f1fed.additional-info\""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '807'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:46 GMT
+      etag:
+      - '"3e65c554-8d6d-49d4-aceb-ec12416f1fed.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '111'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/13091644-c87a-4ad4-b34f-b50d55d1db51
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 07C24081EB624A60B36716BF3045FF7D Ref B: CO6AA3150217023 Ref C: 2026-11-03T22:24:46Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"amount": 2000000.0, "category": "Tokens", "timeGrain":
+      "Monthly", "timePeriod": {"endDate": "2027-11-01T00:00:00.000Z", "startDate":
+      "2026-11-01T00:00:00.000Z"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '179'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name --category
+        --amount --time-grain --time-period
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-2?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-2","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-2","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":2000000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:47.7167373Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:47.7167373Z"},"etag":"\"a671e2ba-9fec-4b23-9d10-5cba76e701eb.additional-info\""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '807'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:47 GMT
+      etag:
+      - '"a671e2ba-9fec-4b23-9d10-5cba76e701eb.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '92'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/f620fc94-a64d-40f2-8583-a785203fc625
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 76CA7D22F05B4E1083B3B466C6915DA7 Ref B: CO6AA3150218025 Ref C: 2026-11-03T22:24:47Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --account-name --project-name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-1","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":1000000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:46.9606183Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:46.9606183Z"},"etag":"\"3e65c554-8d6d-49d4-aceb-ec12416f1fed.additional-info\""},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-2","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-2","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":2000000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:47.7167373Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:47.7167373Z"},"etag":"\"a671e2ba-9fec-4b23-9d10-5cba76e701eb.additional-info\""}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1627'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:47 GMT
+      etag:
+      - '"2b00cd93-0000-0800-0000-6aea5f2f0000.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '26'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/07759dbd-fb00-4206-8bb4-3bd66977c57c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 0A04F913BA7E433681D6178D5CDA3148 Ref B: MWH011020806034 Ref C: 2026-11-03T22:24:48Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol head
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: HEAD
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1?api-version=2026-11-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:48 GMT
+      etag:
+      - '"3e65c554-8d6d-49d4-aceb-ec12416f1fed.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '19'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/1d2925c1-3e18-4730-87f7-0e1487bea3f5
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: BF2CA869FED846B5BC174F03AA9DF005 Ref B: CO6AA3150218029 Ref C: 2026-11-03T22:24:48Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-1","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":1000000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:46.9606183Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:46.9606183Z"},"etag":"\"3e65c554-8d6d-49d4-aceb-ec12416f1fed.additional-info\""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '807'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:48 GMT
+      etag:
+      - '"3e65c554-8d6d-49d4-aceb-ec12416f1fed.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '27'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/70806294-2e73-495b-a1c4-0abe165747bf
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 4504536176FE4931A3228BC6935CF17C Ref B: MWH011020809062 Ref C: 2026-11-03T22:24:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name --amount
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-1","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":1000000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:46.9606183Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:46.9606183Z"},"etag":"\"3e65c554-8d6d-49d4-aceb-ec12416f1fed.additional-info\""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '807'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:49 GMT
+      etag:
+      - '"3e65c554-8d6d-49d4-aceb-ec12416f1fed.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '16'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/65b42667-ec67-44ce-ae40-bf013fb29df0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 15A147F0FA5D4610936708FD09212AE0 Ref B: MWH011020809040 Ref C: 2026-11-03T22:24:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"amount": 1500000.0, "category": "Tokens", "provider":
+      "Microsoft.CognitiveServices", "timeGrain": "Monthly", "timePeriod": {"endDate":
+      "2027-11-01T00:00:00Z", "startDate": "2026-11-01T00:00:00Z"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '214'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name --amount
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-1","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":1500000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:46.9606183Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:50.0656086Z"},"etag":"\"f7119d83-f8b3-45d5-9203-8e5dc9cc1771.additional-info\""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '807'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:49 GMT
+      etag:
+      - '"f7119d83-f8b3-45d5-9203-8e5dc9cc1771.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '113'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/a58cb859-15ec-4185-a9e7-299f6a09e281
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 7BF836AD332143DC8FA9ABBAE96BBCB9 Ref B: MWH011020809040 Ref C: 2026-11-03T22:24:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-1","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":1500000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:46.9606183Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:50.0656086Z"},"etag":"\"f7119d83-f8b3-45d5-9203-8e5dc9cc1771.additional-info\""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '807'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:49 GMT
+      etag:
+      - '"f7119d83-f8b3-45d5-9203-8e5dc9cc1771.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '20'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/9a669cf5-4ff1-4be1-90bb-b3ac230d37f7
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 1F55234E56B9428B9B8FE511BC789920 Ref B: MWH011020806062 Ref C: 2026-11-03T22:24:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-2?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-2","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-2","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":2000000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:47.7167373Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:47.7167373Z"},"etag":"\"a671e2ba-9fec-4b23-9d10-5cba76e701eb.additional-info\""}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '807'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:51 GMT
+      etag:
+      - '"a671e2ba-9fec-4b23-9d10-5cba76e701eb.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '18'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/ef924860-2cff-42de-b1df-6f0dabdece6d
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 7690BDF5C04C481DA1B067616EEFD410 Ref B: CO6AA3150217049 Ref C: 2026-11-03T22:24:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name --yes
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-1?api-version=2026-11-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 03 Nov 2026 22:24:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '95'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/8b1656f0-89d5-4043-88b1-ab9bf445bf0a
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 2F4C865E4DF14631B9501DC4C0804C38 Ref B: CO6AA3150218009 Ref C: 2026-11-03T22:24:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --account-name --project-name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-2","type":"Microsoft.CognitiveServices/accounts/projects/costControls","name":"test-2","properties":{"provider":"Microsoft.CognitiveServices","category":"Tokens","amount":2000000,"timeGrain":"Monthly","timePeriod":{"startDate":"2026-11-01T00:00:00Z","endDate":"2027-11-01T00:00:00Z"}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-11-03T22:24:47.7167373Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-11-03T22:24:47.7167373Z"},"etag":"\"a671e2ba-9fec-4b23-9d10-5cba76e701eb.additional-info\""}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '819'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:51 GMT
+      etag:
+      - '"2b00e293-0000-0800-0000-6aea5f330000.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '24'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/18370bb5-1696-4573-b154-935fe4de2458
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: AD17A9014A354DDC8F51762DED0AF0E9 Ref B: MWH011020806040 Ref C: 2026-11-03T22:24:52Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group --account-name --project-name --cost-control-name --yes
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls/test-2?api-version=2026-11-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 03 Nov 2026 22:24:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '88'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/a8f4eb8c-b279-4948-919c-65230702a034
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 9B2A0563318E418A970EB40A73802372 Ref B: CO6AA3150217031 Ref C: 2026-11-03T22:24:52Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project costcontrol list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --account-name --project-name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003/costControls?api-version=2026-11-15-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:52 GMT
+      etag:
+      - '"2b00e693-0000-0800-0000-6aea5f350000.additional-info"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - x-ms-cost-control-contract
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '13'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/445bdb52-11b1-4d06-9f2f-a55ad16ec068
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 7510DB0B679B44929F9D12C916CC591D Ref B: CO6AA3150219009 Ref C: 2026-11-03T22:24:53Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account project delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group --name --project-name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002/projects/test-project-000003?api-version=2026-09-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 03 Nov 2026 22:24:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '4906'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/23047860-71b0-4e02-8d0a-99035808fe3e
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: 14351B86AD99407E8FB7ADE4CF4F63AB Ref B: MWH011020807042 Ref C: 2026-11-03T22:24:54Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dcohen-az-cli-project-costcontrol-rg-000001/providers/Microsoft.CognitiveServices/accounts/test-account-000002?api-version=2026-09-15-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6?api-version=2017-04-18&t=639293415003541711&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=hVl70jXOHbi_SCyLANyFCfa-Wj4-Q7Uxg5Rmfqzv1xgiAZXGlvW3BYq3UzP5HFkN63iWZc_L8ND57KJanZkJP_qfWfenUsNYBwl011o0YbkKCS5fWPbZFtvRyBNow4qXoPTxfzKWAI16V8uuOC0PTvNLA4nXhsZV8IBSyk9tmq9-XFC_Fjzw0vhQSRZ-01PXcGi_YQKC8BjnGsMboem5WkMVHx0Q0iGx8O9AZtKkaGPWgHSTlM_OkqyLf90LIgo_oGTvSR8QbJ5y7aVlEdJ0xABdbdX2xRLD_GVh4-4fBwoScSnjCFpHiwpx87VAn9UyoQI47On70R3B56t3N4BqYg&h=fa5bvXmIDOrdpCfiegQtGUXzJIiorZJlNF6oWpeE6_Q
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 03 Nov 2026 22:24:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6?api-version=2017-04-18&operationResultResponseType=Location&t=639293415003541711&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=TqL5CGNIGA8FNaqq9sWGxQXbpZjBrmfbiBYo2NG4mWSnSwUS9IhBo-ucUE_5BYxdH9FJLQGMhNlN_fyGLOg8lVfcf9LcYU_NM2FmwMHKviulG1iA8FeaUJKnvRN9LLeJReDMVjvlNg-ZZbdlWlWayUgACzvtBiOZOwHzYDyZ9bzWyvVly_dOZ1FNbLfOMrTEWIDwWnIdQrzDjIZfQrS4QUBRwyF4c6AdFHUp6EOFqe8E87R7zNsTdeYZYgMaofjSSbbzEMKXwSoypcktRWAuFl9t-mkPnLybaJS8MzuJISxlV9noKqY4ltvhc44OLZP3NLJi9_N6tS3McV7TyZtaPg&h=fa5bvXmIDOrdpCfiegQtGUXzJIiorZJlNF6oWpeE6_Q
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '226'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/a33c6d8b-e58f-4bd0-be47-0ac7405f9dc8
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: A5C6B1FAABA74AEA951D6B4DBBF6C1A0 Ref B: CO6AA3150218009 Ref C: 2026-11-03T22:24:59Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6?api-version=2017-04-18&t=639293415003541711&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=hVl70jXOHbi_SCyLANyFCfa-Wj4-Q7Uxg5Rmfqzv1xgiAZXGlvW3BYq3UzP5HFkN63iWZc_L8ND57KJanZkJP_qfWfenUsNYBwl011o0YbkKCS5fWPbZFtvRyBNow4qXoPTxfzKWAI16V8uuOC0PTvNLA4nXhsZV8IBSyk9tmq9-XFC_Fjzw0vhQSRZ-01PXcGi_YQKC8BjnGsMboem5WkMVHx0Q0iGx8O9AZtKkaGPWgHSTlM_OkqyLf90LIgo_oGTvSR8QbJ5y7aVlEdJ0xABdbdX2xRLD_GVh4-4fBwoScSnjCFpHiwpx87VAn9UyoQI47On70R3B56t3N4BqYg&h=fa5bvXmIDOrdpCfiegQtGUXzJIiorZJlNF6oWpeE6_Q
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6","name":"8b05134b-89d2-4162-b9a3-7d6a5c94acb6","status":"Deleting","startTime":"2026-11-03T22:25:00Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '271'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:24:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '10'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/4e805dd3-bcab-4898-83c2-b84e69f9f0e8
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: FF28936DD439463C9C0D4458EE7508E6 Ref B: CO6AA3150218009 Ref C: 2026-11-03T22:25:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6?api-version=2017-04-18&t=639293415003541711&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=hVl70jXOHbi_SCyLANyFCfa-Wj4-Q7Uxg5Rmfqzv1xgiAZXGlvW3BYq3UzP5HFkN63iWZc_L8ND57KJanZkJP_qfWfenUsNYBwl011o0YbkKCS5fWPbZFtvRyBNow4qXoPTxfzKWAI16V8uuOC0PTvNLA4nXhsZV8IBSyk9tmq9-XFC_Fjzw0vhQSRZ-01PXcGi_YQKC8BjnGsMboem5WkMVHx0Q0iGx8O9AZtKkaGPWgHSTlM_OkqyLf90LIgo_oGTvSR8QbJ5y7aVlEdJ0xABdbdX2xRLD_GVh4-4fBwoScSnjCFpHiwpx87VAn9UyoQI47On70R3B56t3N4BqYg&h=fa5bvXmIDOrdpCfiegQtGUXzJIiorZJlNF6oWpeE6_Q
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6","name":"8b05134b-89d2-4162-b9a3-7d6a5c94acb6","status":"Deleting","startTime":"2026-11-03T22:25:00Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '271'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:25:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '12'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/6ed079e0-b197-4179-b46a-43a9394fbb51
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 5BF28E26A13545E8A629440E0AC1F7BD Ref B: CO6AA3150218009 Ref C: 2026-11-03T22:25:30Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6?api-version=2017-04-18&t=639293415003541711&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=hVl70jXOHbi_SCyLANyFCfa-Wj4-Q7Uxg5Rmfqzv1xgiAZXGlvW3BYq3UzP5HFkN63iWZc_L8ND57KJanZkJP_qfWfenUsNYBwl011o0YbkKCS5fWPbZFtvRyBNow4qXoPTxfzKWAI16V8uuOC0PTvNLA4nXhsZV8IBSyk9tmq9-XFC_Fjzw0vhQSRZ-01PXcGi_YQKC8BjnGsMboem5WkMVHx0Q0iGx8O9AZtKkaGPWgHSTlM_OkqyLf90LIgo_oGTvSR8QbJ5y7aVlEdJ0xABdbdX2xRLD_GVh4-4fBwoScSnjCFpHiwpx87VAn9UyoQI47On70R3B56t3N4BqYg&h=fa5bvXmIDOrdpCfiegQtGUXzJIiorZJlNF6oWpeE6_Q
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6","name":"8b05134b-89d2-4162-b9a3-7d6a5c94acb6","status":"Deleting","startTime":"2026-11-03T22:25:00Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '271'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:26:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '8'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/578eb4d1-f098-4e2e-a1c9-19d24bb81348
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 26290301A12C4EE0ABF8F9DD6054EC04 Ref B: CO6AA3150218009 Ref C: 2026-11-03T22:26:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      CommandName:
+      - cognitiveservices account delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - AZURECLI/2.92.0 (MSI) azsdk-python-core/1.39.0 Python/3.14.3 (Windows-11-10.0.26300-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6?api-version=2017-04-18&t=639293415003541711&c=MIIIJzCCBw-gAwIBAgIRAKX75XrmIgSzvHkZO1LNLU0wDQYJKoZIhvcNAQELBQAwNjE0MDIGA1UEAxMrQ0NNRSBHMSBUTFMgUlNBIDIwNDggU0hBMjU2IDIwNDkgV0NVUyBDQSAwMTAeFw0yNjEwMzAyMDMzMzJaFw0yNzAxMjYwMjMzMzJaMEAxPjA8BgNVBAMTNWFzeW5jb3BlcmF0aW9uc2lnbmluZ2NlcnRpZmljYXRlLm1hbmFnZW1lbnQuYXp1cmUuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmZzd488HZ0-GC9ZEjIJnDv7eqlsceSxzsSMegycwT8l0ia-n3h7A2ufarkhE5QF03oec2YTHvg_KmdFyF23fMwGVvtiJY4S7rw1qvvvrZ3aObM7enULiaUoObVVWoqz261s2UW49Ek3f01JVtLJN6goZQ2MBtawVP3etYQckA41UAiazaDFG8-Vy8AzeB3pxl15ffQWX7Xczuk68J-nDHIRh1CMHyCdDCscf1xrz1uAd8BwqoQmPZrbNZHU-hGCnIbZa2KQKswSI85iiw8aeU9yKCl4Dl5e2zSWsUaDn21DNzFhdIZPm49_0VkPKV8WEeym4r5C6OKv2Me64oCr6QIDAQABo4IFJDCCBSAwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMAwGA1UdEwEB_wQCMAAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA4GA1UdDwEB_wQEAwIFoDAdBgNVHQ4EFgQUkQFLuTaeU575QV1TXwEUr9Q4etgwHwYDVR0jBBgwFoAUFNI34PbWfX7djbq6ZasElCXglh0wggH7BgNVHR8EggHyMIIB7jB7oHmgd4Z1aHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMH2ge6B5hndodHRwOi8vc2Vjb25kYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0Y2VudHJhbHVzL2NybHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS8xMS9jdXJyZW50LmNybDBsoGqgaIZmaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3dlc3RjZW50cmFsdXMvY3Jscy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIGBoH-gfYZ7aHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxLzExL2N1cnJlbnQuY3JsMIICAAYIKwYBBQUHAQEEggHyMIIB7jB-BggrBgEFBQcwAoZyaHR0cDovL3ByaW1hcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3RjZW50cmFsdXMvY2FjZXJ0cy9jY21ld2VzdGNlbnRyYWx1c3BraS9jY21ld2VzdGNlbnRyYWx1c2ljYTAxL2NlcnQuY2VyMIGABggrBgEFBQcwAoZ0aHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdGNlbnRyYWx1cy9jYWNlcnRzL2NjbWV3ZXN0Y2VudHJhbHVzcGtpL2NjbWV3ZXN0Y2VudHJhbHVzaWNhMDEvY2VydC5jZXIwbwYIKwYBBQUHMAKGY2h0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0Y2VudHJhbHVzL2NhY2VydHMvY2NtZXdlc3RjZW50cmFsdXNwa2kvY2NtZXdlc3RjZW50cmFsdXNpY2EwMS9jZXJ0LmNlcjB4BggrBgEFBQcwAoZsaHR0cDovL2NjbWV3ZXN0Y2VudHJhbHVzcGtpLndlc3RjZW50cmFsdXMucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdGNlbnRyYWx1c2ljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAzg-bbZgla1KOrmtKGzjVZJ58H49wdDyW7obqMYbgwxgMXiDZSQd0xZPEb94JP-ILK8fdJjIAfDwBkS2-OaPj8PdpSERBvIQZS2Mrbol9LRWSWeRUGERtWoxeUuCPtQbWF9kVrL3JtMgx47zgouiwvWBkzQVOPnvl_sAXbvbaxGF02OS_Cnxodi1CHIHa3uo8-FspE-31fm9V2q3l3x2TAB-12iSlGUM_k1KHPRJwF-JXF3ikk0EzCxVv3AvuAOVKQlX7iOb-jwqWpten_Eq-BNbCgar1OSg_yDqqeS_FZB7SHtUz1QyiBnMHl8u4PhkrSOG0tnoYAdtsMP9ddRT9n&s=hVl70jXOHbi_SCyLANyFCfa-Wj4-Q7Uxg5Rmfqzv1xgiAZXGlvW3BYq3UzP5HFkN63iWZc_L8ND57KJanZkJP_qfWfenUsNYBwl011o0YbkKCS5fWPbZFtvRyBNow4qXoPTxfzKWAI16V8uuOC0PTvNLA4nXhsZV8IBSyk9tmq9-XFC_Fjzw0vhQSRZ-01PXcGi_YQKC8BjnGsMboem5WkMVHx0Q0iGx8O9AZtKkaGPWgHSTlM_OkqyLf90LIgo_oGTvSR8QbJ5y7aVlEdJ0xABdbdX2xRLD_GVh4-4fBwoScSnjCFpHiwpx87VAn9UyoQI47On70R3B56t3N4BqYg&h=fa5bvXmIDOrdpCfiegQtGUXzJIiorZJlNF6oWpeE6_Q
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.CognitiveServices/locations/westus2/operationResults/8b05134b-89d2-4162-b9a3-7d6a5c94acb6","name":"8b05134b-89d2-4162-b9a3-7d6a5c94acb6","status":"Succeeded","startTime":"2026-11-03T22:25:00Z","endTime":"2026-11-03T22:26:03Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '305'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 03 Nov 2026 22:26:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-envoy-upstream-service-time:
+      - '9'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=644a5b64-0c15-4aa4-91b4-220ef886a553/westus2/31d2da02-9e4a-48ef-9110-8e5c9660e8d7
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8BC75759DFA14056800BB1040F36D442 Ref B: CO6AA3150218009 Ref C: 2026-11-03T22:26:31Z'
+    status:
+      code: 200
+      message: OK
+version: 1

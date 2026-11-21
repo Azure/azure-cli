@@ -223,6 +223,7 @@ class ContainerAppEnvironment(Resource):
                 resource_group_name=self.resource_group.name,
                 logs_key=self.logs_key,
                 logs_customer_id=self.logs_customer_id,
+                logs_destination="log-analytics",
                 disable_warnings=True,
             )
             self.exists = True
@@ -239,6 +240,7 @@ class ContainerAppEnvironment(Resource):
                         resource_group_name=self.resource_group.name,
                         logs_key=self.logs_key,
                         logs_customer_id=self.logs_customer_id,
+                        logs_destination="log-analytics",
                         disable_warnings=True,
                     )
 
@@ -444,7 +446,11 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
                 _, stderr = process.communicate()
                 if process.returncode != 0:
                     docker_push_error = stderr.decode('utf-8')
-                    if not forced_acr_login and ".azurecr.io/" in image_name and "unauthorized: authentication required" in docker_push_error:
+                    authentication_required = any(message in docker_push_error for message in (
+                        "unauthorized: authentication required",
+                        "error from registry: authentication required",
+                    ))
+                    if not forced_acr_login and ".azurecr.io/" in image_name and authentication_required:
                         # Couldn't push to ACR because the user isn't authenticated. Let's try to login to ACR and retrigger the docker push
                         logger.warning(
                             f"The current user isn't authenticated to the {self.acr.name} ACR instance. Triggering an ACR login and retrying to push the image...")
@@ -497,7 +503,9 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
             raise ValidationError(f"Unable to run 'pack config' command to set default builder: {ex}") from ex
 
         # Run 'pack build' to produce a runnable application image for the Container App
-        command = [pack_exec_path, 'build', image_name, '--builder', builder_image_name, '--path', source]
+        # The builder's bundled lifecycle cannot export images to modern Docker daemons.
+        command = [pack_exec_path, 'build', image_name, '--builder', builder_image_name, '--path', source,
+                   '--lifecycle-image', 'buildpacksio/lifecycle:0.21.28']
         buildpack_run_tag = get_latest_buildpack_run_tag("aspnet", "7.0")
         if buildpack_run_tag is not None:
             buildpack_run_image = f"mcr.microsoft.com/oryx/builder:{buildpack_run_tag}"
@@ -888,12 +896,20 @@ def _get_env_and_group_from_log_analytics(
 
 
 def _get_acr_from_image(cmd, app):
-    if app.image is not None and "azurecr.io" in app.image:
-        app.registry_server = app.image.split("/")[
-            0
-        ]  # TODO what if this conflicts with registry_server param?
-        parsed = urlparse(app.image)
-        registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
+    if app.image is not None:
+        registry_server = app.image.split("/", 1)[0]
+        if not is_acr_url(registry_server):
+            return
+        registry_name = get_acr_name(registry_server)
+        registry_parts = registry_name.split(".")
+        if len(registry_parts) == 3 and registry_parts[2].lower() == "geo":
+            registry_name, region, _ = registry_parts
+            if not region.isascii() or not region.isalnum():
+                return
+        if not registry_name.isascii() or not registry_name.isalnum():
+            return
+        registry_name = registry_name.lower()
+        app.registry_server = registry_server
         if app.registry_user is None or app.registry_pass is None:
             logger.info(
                 "No credential was provided to access Azure Container Registry. Trying to look up..."
@@ -976,6 +992,14 @@ def _get_registry_details(cmd, app: "ContainerApp", source):
         parsed = urlparse(app.registry_server)
         registry_name = (parsed.netloc if parsed.scheme else parsed.path).split(".")[0]
         if app.registry_user is None or app.registry_pass is None:
+            acr_suffix = cmd.cli_ctx.cloud.suffixes.acr_login_server_endpoint
+            server = (parsed.netloc if parsed.scheme else parsed.path).lower()
+            if not server.endswith(acr_suffix) or "." in server[:-len(acr_suffix)]:
+                raise ValidationError(
+                    f"Registry server '{app.registry_server}' is not an Azure Container Registry. Use "
+                    "--registry-server, or pass --registry-username and --registry-password."
+                )
+            registry_name = server[:-len(acr_suffix)]
             registry_rg = _set_acr_creds(cmd, app, registry_name)
         else:
             registry_rg = _get_acr_rg(app)

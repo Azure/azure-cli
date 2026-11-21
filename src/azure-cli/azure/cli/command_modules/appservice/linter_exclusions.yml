@@ -1,6 +1,14 @@
 ---
 # exclusions for the vm module
 
+# Existing ASE async commands predate Active Backup; adding wait support is separate work.
+appservice ase:
+    rule_exclusions:
+        - require_wait_command_if_no_wait
+# Preserve existing plan async behavior; the new plan silo group already has wait support.
+appservice plan:
+    rule_exclusions:
+        - require_wait_command_if_no_wait
 appservice list-locations:
   parameters:
     managed_instance_enabled:
@@ -9,6 +17,23 @@ appservice list-locations:
 appservice plan managed-instance instance connect:
     rule_exclusions:
         - missing_command_test_coverage
+    parameters:
+        bastion_resource_group_name:
+            # Bastion can be in a different resource group; preserve the existing option.
+            rule_exclusions:
+                - parameter_should_not_end_in_resource_group
+# Existing Static Web Apps async commands are outside the Active Backup feature.
+staticwebapp:
+    rule_exclusions:
+        - require_wait_command_if_no_wait
+# Existing hostname async commands are outside the Active Backup feature.
+staticwebapp hostname:
+    rule_exclusions:
+        - require_wait_command_if_no_wait
+# Existing API key reset async behavior is outside the Active Backup feature.
+staticwebapp secrets:
+    rule_exclusions:
+        - require_wait_command_if_no_wait
 webapp auth update:
     parameters:
         action:
@@ -17,10 +42,40 @@ webapp auth update:
         enabled:
             rule_exclusions:
             - missing_parameter_help
+webapp config access-restriction add:
+    parameters:
+        vnet_resource_group:
+            # The VNet can be in a different resource group; preserve the existing option.
+            rule_exclusions:
+                - parameter_should_not_end_in_resource_group
+webapp config snapshot restore:
+    parameters:
+        source_resource_group:
+            # Distinguish the snapshot source from the target app without renaming an existing option.
+            rule_exclusions:
+                - parameter_should_not_end_in_resource_group
 webapp deployment slot list:
     rule_exclusions:
         - no_ids_for_list_commands
 functionapp deployment slot list:
     rule_exclusions:
         - no_ids_for_list_commands
+functionapp config access-restriction add:
+    parameters:
+        vnet_resource_group:
+            # The VNet can be in a different resource group; preserve the existing option.
+            rule_exclusions:
+                - parameter_should_not_end_in_resource_group
+functionapp flex-migration revert:
+    parameters:
+        source_resource_group:
+            # Preserve the existing option identifying the function app being reverted.
+            rule_exclusions:
+                - parameter_should_not_end_in_resource_group
+functionapp flex-migration start:
+    parameters:
+        source_resource_group:
+            # Distinguish source and target function app groups without renaming an existing option.
+            rule_exclusions:
+                - parameter_should_not_end_in_resource_group
 ...

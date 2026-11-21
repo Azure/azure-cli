@@ -2107,6 +2107,9 @@ class WAFCreate(_WAFCreate):
 
     def pre_operations(self):
         args = self.ctx.args
+        if has_value(args.managed_rules):
+            return
+
         managed_rule_set = {
             "rule_set_type": args.rule_set_type,
             "rule_set_version": args.rule_set_version

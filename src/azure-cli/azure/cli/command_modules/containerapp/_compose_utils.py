@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, no-else-return, duplicate-string-formatting-argument, expression-not-assigned, too-many-locals, logging-fstring-interpolation, arguments-differ, abstract-method, logging-format-interpolation, broad-except
 
+import os
+
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_choice_list
 
@@ -209,6 +212,47 @@ def resolve_registry_from_cli_args(registry_server, registry_user, registry_pass
         elif registry_user is not None and registry_pass is None:
             registry_pass = prompt("Please enter the registry's password: ")
     return (registry_server, registry_user, registry_pass)
+
+
+def _resolve_compose_file_path(file_path, project_directory, field):
+    if not isinstance(file_path, str) or not file_path or os.path.isabs(file_path) or os.path.splitdrive(file_path)[0]:
+        raise InvalidArgumentValueError(
+            f"'{field}' must be a relative file path within the Compose file's directory.")
+
+    try:
+        resolved_path = os.path.realpath(os.path.join(project_directory, file_path), strict=True)
+        if os.path.normcase(os.path.commonpath([project_directory, resolved_path])) != os.path.normcase(project_directory):
+            raise InvalidArgumentValueError(
+                f"'{field}' must reference a file within the Compose file's directory.")
+    except (OSError, ValueError) as ex:
+        raise InvalidArgumentValueError(f"Unable to resolve the file referenced by '{field}': {ex}") from ex
+
+    if not os.path.isfile(resolved_path):
+        raise InvalidArgumentValueError(f"'{field}' must reference a regular file.")
+    return resolved_path
+
+
+def validate_compose_file_paths(compose_file, compose_file_path):
+    project_directory = os.path.realpath(os.path.dirname(os.path.abspath(compose_file_path)))
+    validated_secrets = set()
+    for service_name, service in compose_file.services.items():
+        if service.env_file is not None:
+            service.env_file[:] = [
+                _resolve_compose_file_path(file_path, project_directory, f"services.{service_name}.env_file")
+                for file_path in service.env_file
+            ]
+        for secret in service.secrets or []:
+            if secret.source in validated_secrets:
+                continue
+            if compose_file.secrets is None or secret.source not in compose_file.secrets:
+                raise InvalidArgumentValueError(
+                    f"Service '{service_name}' references an undefined secret '{secret.source}'.")
+            secret_config = compose_file.secrets[secret.source]
+            if secret_config is not None and secret_config.file is not None:
+                resolved_path = _resolve_compose_file_path(
+                    secret_config.file, project_directory, f"secrets.{secret.source}.file")
+                secret_config.file = type(secret_config.file)(resolved_path)
+            validated_secrets.add(secret.source)
 
 
 def resolve_environment_from_service(service):

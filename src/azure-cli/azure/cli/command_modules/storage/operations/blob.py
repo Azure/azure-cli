@@ -12,7 +12,8 @@ from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import AzureResponseError, FileOperationError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_blob_objects,
                                                     collect_files_track2, mkdir_p, guess_content_type,
-                                                    normalize_blob_file_path, check_precondition_success)
+                                                    normalize_blob_file_path, check_precondition_success,
+                                                    get_safe_download_path)
 from azure.core import MatchConditions
 from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, HttpResponseError
 
@@ -85,7 +86,12 @@ def get_immutability_policy(client, container_name, account_name, if_match=None,
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,
                         metadata=None, public_access=None, fail_on_exist=False,
                         default_encryption_scope=None, deny_encryption_scope_override=None, enable_vlw=None,
-                        enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None):
+                        enable_nfs_v3_root_squash=None, enable_nfs_v3_all_squash=None,
+                        blob_access_point_configuration_name=None, blob_access_point_configuration_unique_id=None):
+    if blob_access_point_configuration_unique_id is not None and not blob_access_point_configuration_name:
+        from azure.cli.core.azclierror import RequiredArgumentMissingError
+        raise RequiredArgumentMissingError(
+            'Specify --blob-access-point-configuration-name when using --blob-access-point-configuration-unique-id.')
     if fail_on_exist and container_rm_exists(client, resource_group_name=resource_group_name,
                                              account_name=account_name, container_name=container_name):
         raise CLIError('The specified container already exists.')
@@ -101,6 +107,12 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
         ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
                                                         resource_type=ResourceType.MGMT_STORAGE)
         blob_container.immutable_storage_with_versioning = ImmutableStorageWithVersioning(enabled=enable_vlw)
+    if blob_access_point_configuration_name is not None:
+        BlobAccessPointConfigurationConnection = cmd.get_models(
+            'BlobAccessPointConfigurationConnection', resource_type=ResourceType.MGMT_STORAGE)
+        blob_container.blob_access_point_configuration = BlobAccessPointConfigurationConnection(
+            blob_access_point_configuration_name=blob_access_point_configuration_name,
+            blob_access_point_configuration_unique_id=blob_access_point_configuration_unique_id)
     return client.create(resource_group_name=resource_group_name, account_name=account_name,
                          container_name=container_name, blob_container=blob_container)
 
@@ -445,19 +457,10 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
 
 def _get_blob_download_path(destination, normalized_blob_name, blob_name):
     """Build the local path for a blob, ensuring it cannot escape the destination directory."""
-    # Blob names are arbitrary server-controlled strings (e.g. '../../.ssh/authorized_keys', or 'C:/x' on Windows).
-    # Only accept names that normalize to a plain relative path (no drive, root or leading '.'/'..'); joining such a
-    # path onto the destination cannot leave it, without relying on case-insensitive path comparisons (Windows
-    # directories can be case-sensitive). Existing symlinks/junctions under the destination are followed on purpose,
-    # preserving user-created layouts.
-    relative_path = os.path.normpath(normalized_blob_name)
-    first_component = relative_path.split(os.path.sep)[0]
-    if os.path.splitdrive(relative_path)[0] or first_component in ('', os.path.curdir, os.path.pardir):
-        raise FileOperationError('Blob "{}" cannot be downloaded because its name resolves to a path outside the '
-                                 'destination directory "{}". Use the `--pattern` parameter to exclude it, or use '
-                                 'the `storage blob download` command to download it to an explicit file path.'
-                                 .format(blob_name, destination))
-    return os.path.join(destination, relative_path)
+    return get_safe_download_path(
+        destination, normalized_blob_name, blob_name, item_type='Blob',
+        recommendation='Use the `--pattern` parameter to exclude it, or use the `storage blob download` command to '
+                       'download it to an explicit file path.')
 
 
 # pylint: disable=unused-argument
@@ -1183,7 +1186,18 @@ def exists(client, container_name, blob_name, snapshot, timeout):
 def incremental_copy_start(client, cmd, copy_source=None, metadata=None,
                            destination_if_modified_since=None, destination_if_unmodified_since=None,
                            destination_if_match=None, destination_if_none_match=None, **kwargs):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     from ..aaz.latest.storage.blob.incremental_copy import Start
+    from ..storage_url_helpers import is_valid_hostname_label
+
+    # The SDK derives account_name from the endpoint host without validating it, and the request below rebuilds the
+    # host from it (unescaped) and authenticates with the logged-in account, so it must be a single hostname label.
+    # The endpoint is deliberately not echoed, as it may contain credentials (userinfo or a SAS).
+    if not is_valid_hostname_label(client.account_name):
+        raise InvalidArgumentValueError(
+            'Cannot determine a valid storage account name from the configured blob endpoint.',
+            recommendation='Use --account-name, or a connection string or endpoint of the form '
+                           'https://<account>.blob.<storage-endpoint-suffix>.')
 
     cmd_args = {
         "x_ms_version": "2025-07-05",
