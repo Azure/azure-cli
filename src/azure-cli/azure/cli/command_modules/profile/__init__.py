@@ -5,7 +5,7 @@
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.commands.parameters import get_enum_type
+from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
 
 from azure.cli.command_modules.profile._format import transform_account_list
 import azure.cli.command_modules.profile._help  # pylint: disable=unused-import
@@ -86,6 +86,18 @@ class ProfileCommandsLoader(AzCommandsLoader):
                             'certificate rolls.')
             c.argument('client_assertion', options_list=['--federated-token'],
                        help='Federated token that can be used for OIDC token exchange.')
+            c.argument('federated_identity', options_list=['--federated-identity'], arg_type=get_three_state_flag(),
+                       help='Acquire and automatically refresh the OIDC federated token from the CI/CD provider '
+                            '(GitHub Actions or Azure DevOps). Avoids the AADSTS700024 error on long-running '
+                            'tasks. Cannot be combined with --federated-token or --federated-token-callback.')
+            c.argument('federated_token_callback',
+                       options_list=['--federated-token-callback', '--federated-token-cmd'],
+                       help='A command that prints a fresh OIDC federated token to stdout. Azure CLI runs it on '
+                            'demand to refresh the token, so it works with any CI/CD provider. The command runs '
+                            'without a shell (arguments are parsed with POSIX rules; on Windows use forward '
+                            'slashes or escape backslashes). To use pipes or redirection, point to a script '
+                            'file or wrap it, e.g. "bash -c \'...\'". Cannot be combined with --federated-token '
+                            'or --federated-identity.')
 
             # Managed identity
             c.argument('identity', options_list=('-i', '--identity'), action='store_true',
