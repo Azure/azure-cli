@@ -120,7 +120,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
             c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry.{suffix}".format(suffix=default_allow_suffix))
             c.argument('allow_trusted_services', get_three_state_flag(), help="Allow trusted Azure Services to access network restricted registries. For more information, please visit https://aka.ms/acr/trusted-services.{suffix}".format(suffix=default_allow_suffix))
-            c.argument('regional_endpoints', arg_type=get_enum_type(RegionalEndpoints), is_preview=True, help="Indicates whether or not regional endpoints should be enabled for the registry.")
+            c.argument('regional_endpoints', arg_type=get_enum_type(RegionalEndpoints), help="Indicates whether or not regional endpoints should be enabled for the registry.")
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group="Permissions and Role Assignment") as c:
@@ -183,7 +183,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr login') as c:
         c.argument('expose_token', options_list=['--expose-token', '-t'], help='Expose refresh token instead of automatically logging in through Docker CLI', action='store_true')
-        c.argument("endpoint", completer=get_location_completion_list, type=get_location_name_type(self.cli_ctx), is_preview=True, help="Log in to a specific regional endpoint of the container registry. Specify the region name (e.g., eastus, westus2). Only applicable when regional endpoints are enabled.")
+        c.argument("endpoint", completer=get_location_completion_list, type=get_location_name_type(self.cli_ctx), help="Log in to a specific regional endpoint of the container registry. Specify the region name (e.g., eastus, westus2). Only applicable when regional endpoints are enabled.")
 
     with self.argument_context('acr repository') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
