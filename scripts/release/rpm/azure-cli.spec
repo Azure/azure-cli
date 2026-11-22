@@ -70,11 +70,12 @@ rm %{buildroot}%{cli_lib_dir}/pyvenv.cfg
 mkdir -p %{buildroot}%{_bindir}
 python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)
 # We make %{python_cmd} the default executable, but if there is a more precise match, such as python3.9, we prefer that.
+# Use -c to remove the implicit working-directory import path even on Python versions without -P.
 printf "#!/usr/bin/env bash
 bin_dir=\`cd \"\$(dirname \"\$BASH_SOURCE[0]\")\"; pwd\`
 python_cmd=%{python_cmd}
 if command -v ${python_version} &>/dev/null; then python_cmd=${python_version}; fi
-AZ_INSTALLER=RPM PYTHONPATH=\"\$bin_dir/../lib64/az/lib/${python_version}/site-packages\" \$python_cmd -sm azure.cli \"\$@\"
+AZ_INSTALLER=RPM PYTHONPATH=\"\$bin_dir/../lib64/az/lib/${python_version}/site-packages\" exec \$python_cmd -sc \"import sys; sys.path.pop(0) if sys.path and sys.path[0] == '' else None; import runpy; runpy.run_module('azure.cli', run_name='__main__', alter_sys=True)\" \"\$@\"
 " > %{buildroot}%{_bindir}/az
 rm %{buildroot}%{cli_lib_dir}/bin/python* %{buildroot}%{cli_lib_dir}/bin/pip*
 

@@ -98,7 +98,11 @@ class TestAzLauncher(unittest.TestCase):
     def _assert_python(self, result, python, install_dir, installer="HOMEBREW_CASK", args=(), exit_code=0):
         self.assertEqual(result.returncode, exit_code, result.stderr)
         self.assertEqual(result.stderr, b"")
-        expected = (str(python), installer, str(install_dir / SITE_PACKAGES_PATH), "-sm", "azure.cli", *args)
+        bootstrap = (
+            "import sys; sys.path.pop(0) if sys.path and sys.path[0] == '' else None; "
+            "import runpy; runpy.run_module('azure.cli', run_name='__main__', alter_sys=True)"
+        )
+        expected = (str(python), installer, str(install_dir / SITE_PACKAGES_PATH), "-sc", bootstrap, *args)
         self.assertEqual(result.stdout, b"".join(os.fsencode(value) + b"\0" for value in expected))
 
     def _assert_error(self, result, message):

@@ -445,6 +445,11 @@ jobs:
         
         docker load < $TAR_FILE
         docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && tdnf list --installed && sleep 5"
+        docker run --rm \
+          -e AZ_LAUNCHER_TEST_EXECUTABLE=/usr/bin/az \
+          -e AZ_LAUNCHER_TEST_DEVICE_LOGIN=1 \
+          -v "$PWD/scripts/release/standalone/tests/test_az_entrypoints.py:/azure-cli/scripts/release/standalone/tests/test_az_entrypoints.py:ro" "$IMAGE_NAME" \
+          /usr/bin/python3 /azure-cli/scripts/release/standalone/tests/test_az_entrypoints.py TestInstalledAzEntrypoints -v
       displayName: 'Bash Script'
 
 - job: BuildPythonWheel

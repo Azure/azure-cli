@@ -276,6 +276,14 @@ jobs:
 
   - bash: |
       set -euo pipefail
+      export AZ_LAUNCHER_TEST_EXECUTABLE="$(command -v az)"
+      python3 scripts/release/standalone/tests/test_az_entrypoints.py TestInstalledAzEntrypoints -v
+    displayName: 'Test installed cask import isolation'
+    env:
+      AZ_LAUNCHER_TEST_DEVICE_LOGIN: '1'
+
+  - bash: |
+      set -euo pipefail
       echo "=== Cleanup ($(Architecture)) ==="
       
       # Uninstall the cask

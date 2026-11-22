@@ -70,4 +70,5 @@ fi
 
 export PYTHONPATH="$AZURE_CLI_SITE_PACKAGES"
 export AZ_INSTALLER="$INSTALLER"
-exec "$PYTHON" -sm azure.cli "$@"
+# Remove the implicit working-directory import path without ignoring PYTHONPATH.
+exec "$PYTHON" -sc "import sys; sys.path.pop(0) if sys.path and sys.path[0] == '' else None; import runpy; runpy.run_module('azure.cli', run_name='__main__', alter_sys=True)" "$@"

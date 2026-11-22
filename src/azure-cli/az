@@ -5,7 +5,7 @@ import os
 
 dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'src')
 
-if os.environ.get('PYTHONPATH') is None:
+if not os.environ.get('PYTHONPATH'):
     os.environ['PYTHONPATH'] = dir
 else:
     os.environ['PYTHONPATH'] = os.pathsep.join([
@@ -16,4 +16,10 @@ else:
 if os.environ.get('AZ_INSTALLER') is None:
     os.environ['AZ_INSTALLER'] = 'PIP'
 
-os.execl(sys.executable, sys.executable, '-m', 'azure.cli', *sys.argv[1:])
+# Remove the implicit working-directory import path before loading any modules.
+os.execl(
+    sys.executable, sys.executable, '-c',
+    "import sys; sys.path.pop(0) if sys.path and sys.path[0] == '' else None; "
+    "import runpy; runpy.run_module('azure.cli', run_name='__main__', alter_sys=True)",
+    *sys.argv[1:]
+)

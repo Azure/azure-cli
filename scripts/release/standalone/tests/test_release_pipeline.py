@@ -142,6 +142,18 @@ class TestReleasePipeline(unittest.TestCase):
             generation.index('url \\"file://$(Pipeline.Workspace)/linux-cli-final'),
         )
 
+    def test_installed_cli_import_checks_cover_release_artifacts(self):
+        self.assertIn("displayName: 'Test installed cask import isolation'", GENERATION.read_text())
+        cask_script = bash_step(GENERATION, "Test installed cask import isolation")
+        self.assertIn('AZ_LAUNCHER_TEST_EXECUTABLE="$(command -v az)"', cask_script)
+        self.assertIn("test_az_entrypoints.py TestInstalledAzEntrypoints -v", cask_script)
+        self.assertIn("AZ_LAUNCHER_TEST_DEVICE_LOGIN: '1'", GENERATION.read_text())
+        docker_script = (ROOT / "azure-pipelines.yml").read_text()
+        self.assertIn("-e AZ_LAUNCHER_TEST_EXECUTABLE=/usr/bin/az", docker_script)
+        self.assertIn("-e AZ_LAUNCHER_TEST_DEVICE_LOGIN=1", docker_script)
+        self.assertIn('test_az_entrypoints.py:ro" "$IMAGE_NAME"', docker_script)
+        self.assertIn("test_az_entrypoints.py TestInstalledAzEntrypoints -v", docker_script)
+
 
 if __name__ == "__main__":
     unittest.main()
