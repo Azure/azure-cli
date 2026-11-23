@@ -478,3 +478,39 @@ class TestBatchAccountPublicNetworkAccess(unittest.TestCase):
                 body = self._update_sent(command)
                 self.assertIn('networkProfile', body['properties'])
                 self.assertEqual(body['properties']['publicNetworkAccess'], 'Enabled')
+
+
+class TestBatchAccountRequestBodies(unittest.TestCase):
+    """Run `batch account create` and `batch account set` with their management client mocked, and check the bodies
+    they send when no account property is given. They match what the CLI sent with azure-mgmt-batch 17.3.0, which
+    left out an empty 'properties' object."""
+
+    def setUp(self):
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+        self.client = mock.Mock()
+        self.client.update.return_value = BatchAccount(location='eastus')
+        factory_patch = mock.patch.object(_client_factory, 'mgmt_batch_account_client_factory',
+                                          return_value=self.client)
+        factory_patch.start()
+        self.addCleanup(factory_patch.stop)
+
+    def _sent(self, command, operation):
+        """Run the command and return the body it sends with the given client operation."""
+        self.assertEqual(self.cli.invoke(command.split(), out_file=io.StringIO()), 0)
+        getattr(self.client, operation).assert_called_once()
+        return getattr(self.client, operation).call_args.kwargs['parameters'].as_dict()
+
+    def test_batch_account_create_without_account_properties(self):
+        self.assertEqual(self._sent('batch account create -g rg -n acc -l eastus --no-wait', 'begin_create'),
+                         {'location': 'eastus'})
+
+    def test_batch_account_create_with_identity_and_tags(self):
+        # The identity and tags aren't account properties
+        self.assertEqual(self._sent('batch account create -g rg -n acc -l eastus --mi-system-assigned true --tags a=b '
+                                    '--no-wait', 'begin_create'),
+                         {'location': 'eastus', 'identity': {'type': 'SystemAssigned'}, 'tags': {'a': 'b'}})
+
+    def test_batch_account_set_tags(self):
+        self.assertEqual(self._sent('batch account set -g rg -n acc --tags x=y', 'update'), {'tags': {'x': 'y'}})
