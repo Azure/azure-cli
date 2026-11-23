@@ -36,6 +36,12 @@ MAX_TASKS_PER_REQUEST = 100
 AUTO_STORAGE_AUTHENTICATION_MODE = AutoStorageAuthenticationMode.STORAGE_KEYS
 
 
+def _given(**values):
+    """The values that are set. azure-mgmt-batch 19.0.0 adds an empty 'properties' object to the request when an
+    account property is passed as None; 17.3.0 left it out."""
+    return {name: value for name, value in values.items() if value is not None}
+
+
 def transfer_doc(source_func, *additional_source_funcs):
     def _decorator(func):
         func.__doc__ = source_func.__doc__
@@ -105,10 +111,10 @@ def create_account(client,
         key_vault_properties=encryption_key_identifier) if encryption_key_source else None
     parameters = BatchAccountCreateParameters(location=location,
                                               tags=tags,
-                                              auto_storage=properties,
-                                              public_network_access=public_network_access,
-                                              encryption=encryption,
-                                              identity=identity)
+                                              identity=identity,
+                                              **_given(auto_storage=properties,
+                                                       public_network_access=public_network_access,
+                                                       encryption=encryption))
     if keyvault:
         parameters.key_vault_reference = {'id': keyvault, 'url': keyvault_url}
         parameters.pool_allocation_mode = 'UserSubscription'
@@ -138,9 +144,9 @@ def update_account(client, resource_group_name, account_name,
 
     parameters = BatchAccountUpdateParameters(
         tags=tags,
-        encryption=encryption,
-        public_network_access=public_network_access,
-        auto_storage=properties)
+        **_given(encryption=encryption,
+                 public_network_access=public_network_access,
+                 auto_storage=properties))
 
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
