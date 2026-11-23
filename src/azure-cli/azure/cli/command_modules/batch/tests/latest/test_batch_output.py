@@ -46,8 +46,9 @@ class TestBatchOutput(unittest.TestCase):
     code turn a service response into the printed JSON, as they do for customers."""
 
     def setUp(self):
-        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config
-        environ = {name: value for name, value in os.environ.items() if not name.startswith('AZURE_BATCH_')}
+        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config, and warnings are shown
+        environ = {name: value for name, value in os.environ.items()
+                   if not name.startswith('AZURE_BATCH_') and name != 'AZURE_CORE_ONLY_SHOW_ERRORS'}
         environ_patch = mock.patch.dict(os.environ, environ, clear=True)
         environ_patch.start()
         self.addCleanup(environ_patch.stop)
