@@ -22,9 +22,9 @@ class ResetSmbPassword(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-08-01",
+        "version": "2026-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}/resetsmbpassword", "2026-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}/resetsmbpassword", "2026-09-01"],
         ]
     }
 
@@ -170,7 +170,7 @@ class ResetSmbPassword(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-08-01",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -409,6 +409,9 @@ class ResetSmbPassword(AAZCommand):
             )
             smb_settings.smb_non_browsable = AAZStrType(
                 serialized_name="smbNonBrowsable",
+            )
+            smb_settings.smb_oplocks = AAZStrType(
+                serialized_name="smbOplocks",
             )
 
             system_data = cls._schema_on_200.system_data
