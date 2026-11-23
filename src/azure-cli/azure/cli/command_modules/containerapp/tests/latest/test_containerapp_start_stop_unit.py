@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from unittest.mock import ANY, Mock, call, patch
+from unittest.mock import ANY, MagicMock, Mock, patch
 
 from azure.cli.command_modules.containerapp import _clients
 from azure.cli.command_modules.containerapp.commands import load_command_table
@@ -36,27 +36,22 @@ class ContainerAppStartStopTests(unittest.TestCase):
                 self.assertEqual(result, {"name": "app"})
                 send_request.assert_called_once_with(self.cmd.cli_ctx, "POST", request_url)
 
-    def test_start_waits_for_async_operation(self):
+    def test_start_and_stop_wait_for_async_operation(self):
         operation_url = "https://management.azure.com/operations/123"
-        response = Mock(status_code=202, headers={"azure-asyncoperation": operation_url})
-        final_response = Mock()
-        final_response.json.return_value = {"name": "app"}
-        request_url = "{}/start?api-version={}".format(
-            self.resource_url, _clients.ContainerAppClient.api_version)
-        resource_url = "{}?api-version={}".format(
-            self.resource_url, _clients.ContainerAppClient.api_version)
+        for operation in ("start", "stop"):
+            with self.subTest(operation=operation):
+                response = Mock(status_code=202, headers={"azure-asyncoperation": operation_url})
+                request_url = "{}/{}?api-version={}".format(
+                    self.resource_url, operation, _clients.ContainerAppClient.api_version)
 
-        with patch.object(_clients, "get_subscription_id", return_value="subscription"), \
-                patch.object(_clients, "send_raw_request", side_effect=[response, final_response]) as send_request, \
-                patch.object(_clients, "poll_status") as poll_status:
-            result = _clients.ContainerAppClient.start(self.cmd, "group", "app")
+                with patch.object(_clients, "get_subscription_id", return_value="subscription"), \
+                        patch.object(_clients, "send_raw_request", return_value=response) as send_request, \
+                        patch.object(_clients, "poll_status") as poll_status:
+                    result = getattr(_clients.ContainerAppClient, operation)(self.cmd, "group", "app")
 
-        self.assertEqual(result, {"name": "app"})
-        poll_status.assert_called_once_with(self.cmd, operation_url)
-        send_request.assert_has_calls([
-            call(self.cmd.cli_ctx, "POST", request_url),
-            call(self.cmd.cli_ctx, "GET", resource_url),
-        ])
+                self.assertIsNone(result)
+                poll_status.assert_called_once_with(self.cmd, operation_url)
+                send_request.assert_called_once_with(self.cmd.cli_ctx, "POST", request_url)
 
     def test_stop_waits_for_location_result(self):
         operation_url = "https://management.azure.com/operations/123"
@@ -74,18 +69,8 @@ class ContainerAppStartStopTests(unittest.TestCase):
         poll_results.assert_called_once_with(self.cmd, operation_url)
         send_request.assert_called_once_with(self.cmd.cli_ctx, "POST", request_url)
 
-    def test_async_operation_does_not_fetch_app_after_completion(self):
-        response = Mock(status_code=202, headers={"azure-asyncoperation": "https://management.azure.com/operations/123"})
-        with patch.object(_clients, "get_subscription_id", return_value="subscription"), \
-                patch.object(_clients, "send_raw_request", return_value=response) as send_request, \
-                patch.object(_clients, "poll_status"):
-            result = _clients.ContainerAppClient.start(self.cmd, "group", "app")
-
-        self.assertIsNone(result)
-        send_request.assert_called_once()
-
     def test_start_and_stop_register_sensitive_value_transform(self):
-        loader = Mock()
+        loader = MagicMock()
         group = Mock()
         loader.command_group.return_value.__enter__.return_value = group
 
