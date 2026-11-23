@@ -2770,6 +2770,230 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 0))
 
 
+class NetworkAuthenticationPolicyScenarioTest(ScenarioTest):
+    _ISSUER = 'https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/'
+    _CLIENT_ID = '11111111-1111-1111-1111-111111111111'
+
+    def _jwt_props(self, audience='api://11111111-1111-1111-1111-111111111111'):
+        return ("{issuer:'" + self._ISSUER + "',client-id:" + self._CLIENT_ID +
+                ",jwks-uri:'" + self._ISSUER + "discovery/v2.0/keys',audience:'" + audience + "'}")
+
+    def _signin_props(self, secret_url):
+        return ("{issuer:'" + self._ISSUER + "',client-id:" + self._CLIENT_ID + ",client-secret:'" + secret_url +
+                "',scope:[openid,profile],session-timeout:'3600',session-cookie-name:MyAuthCookie}")
+
+    @staticmethod
+    def _auth_configs(name, policy_id):
+        return '[{name:' + name + ',authentication-policy:{id:' + policy_id + '}}]'
+
+    @ResourceGroupPreparer(name_prefix='cli_test_authentication_policy_', location='westus')
+    def test_network_authentication_policy(self, resource_group):
+        self.kwargs.update({
+            'jwt': 'jwtpolicy',
+            'signin': 'signinpolicy',
+            'jwt_props': self._jwt_props(),
+            'signin_props': self._signin_props('https://myvault.vault.azure.net/secrets/mysecret'),
+            'audience2': 'api://22222222-2222-2222-2222-222222222222',
+        })
+        self.kwargs['id1'] = self.cmd('identity create -g {rg} -n id1').get_output_in_json()['id']
+        self.kwargs['id2'] = self.cmd('identity create -g {rg} -n id2').get_output_in_json()['id']
+
+        # JWT validation policy, --user-trust-provider-type defaults to entra
+        self.cmd('network authentication-policy create -g {rg} -n {jwt} --auth-props "{jwt_props}" '
+                 '--on-unauth-req deny --tags env=test', checks=[
+                     self.check('name', '{jwt}'),
+                     self.check('type', 'Microsoft.Network/authenticationPolicies'),
+                     self.check('properties.provisioningState', 'Succeeded'),
+                     self.check('properties.userTrustProviderType', 'entra'),
+                     self.check('properties.onUnauthenticatedRequest', 'deny'),
+                     self.check('properties.authenticationProperties.issuer', self._ISSUER),
+                     self.check('properties.authenticationProperties.clientId', self._CLIENT_ID),
+                     self.check('properties.authenticationProperties.jwksUri', self._ISSUER + 'discovery/v2.0/keys'),
+                     self.check('properties.authenticationProperties.audience',
+                                'api://11111111-1111-1111-1111-111111111111'),
+                     self.check('tags.env', 'test'),
+                     self.check('identity', None),
+                 ])
+
+        # user sign-in policy with a user-assigned identity, --on-unauth-req defaults to authenticate
+        self.cmd('network authentication-policy create -g {rg} -n {signin} --auth-props "{signin_props}" '
+                 '--trust-provider-type entra --mi-user-assigned {id1} --no-wait')
+        self.cmd('network authentication-policy wait -g {rg} -n {signin} --created')
+        self.cmd('network authentication-policy show -g {rg} -n {signin}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('properties.userTrustProviderType', 'entra'),
+            self.check('properties.onUnauthenticatedRequest', 'authenticate'),
+            self.check('properties.authenticationProperties.clientSecret',
+                       'https://myvault.vault.azure.net/secrets/mysecret'),
+            self.check('properties.authenticationProperties.scope', ['openid', 'profile']),
+            self.check('properties.authenticationProperties.sessionTimeout', '3600'),
+            self.check('properties.authenticationProperties.sessionCookieName', 'MyAuthCookie'),
+            self.check('identity.type', 'userAssigned'),
+            self.check('length(identity.userAssignedIdentities)', 1),
+        ])
+
+        self.cmd('network authentication-policy update -g {rg} -n {jwt} --auth-props "audience=\'{audience2}\'" '
+                 '--on-unauth-req allow --user-trust-provider-type entra --tags env=prod', checks=[
+                     self.check('properties.onUnauthenticatedRequest', 'allow'),
+                     self.check('properties.authenticationProperties.audience', '{audience2}'),
+                     self.check('properties.authenticationProperties.clientId', self._CLIENT_ID),
+                     self.check('properties.authenticationProperties.jwksUri', self._ISSUER + 'discovery/v2.0/keys'),
+                     self.check('tags.env', 'prod'),
+                 ])
+        self.cmd('network authentication-policy update -g {rg} -n {signin} '
+                 '--auth-props "session-timeout=\'7200\'" "scope=[openid,profile,email]" --on-unauth-req deny', checks=[
+                     self.check('properties.onUnauthenticatedRequest', 'deny'),
+                     self.check('properties.authenticationProperties.sessionTimeout', '7200'),
+                     self.check('properties.authenticationProperties.scope', ['openid', 'profile', 'email']),
+                     self.check('properties.authenticationProperties.clientSecret',
+                                'https://myvault.vault.azure.net/secrets/mysecret'),
+                     self.check('length(identity.userAssignedIdentities)', 1),
+                 ])
+        self.cmd('network authentication-policy show -g {rg} -n {jwt}', checks=[
+            self.check('name', '{jwt}'),
+            self.check('properties.authenticationProperties.audience', '{audience2}'),
+        ])
+        self.cmd('network authentication-policy list -g {rg}', checks=self.check('length(@)', 2))
+        self.cmd('network authentication-policy list', checks=self.check("length([?resourceGroup=='{rg}'])", 2))
+
+        # user-assigned identities
+        self.cmd('network authentication-policy identity assign -g {rg} -n {jwt} --user-assigned {id2}', checks=[
+            self.check('type', 'userAssigned'),
+            self.check('length(userAssignedIdentities)', 1),
+        ])
+        self.cmd('network authentication-policy identity assign -g {rg} -n {signin} --mi-user-assigned {id2}',
+                 checks=self.check('length(userAssignedIdentities)', 2))
+        self.cmd('network authentication-policy identity show -g {rg} -n {signin}', checks=[
+            self.check('type', 'userAssigned'),
+            self.check('length(userAssignedIdentities)', 2),
+        ])
+        self.cmd('network authentication-policy identity remove -g {rg} -n {signin} --user-assigned {id2}', checks=[
+            self.check('type', 'userAssigned'),
+            self.check('length(userAssignedIdentities)', 1),
+        ])
+        self.cmd('network authentication-policy identity remove -g {rg} -n {jwt} --user-assigned {id2}',
+                 checks=self.check('type', 'none'))
+
+        self.cmd('network authentication-policy delete -g {rg} -n {jwt} --yes')
+        self.cmd('network authentication-policy delete -g {rg} -n {signin} --yes')
+        self.cmd('network authentication-policy list -g {rg}', checks=self.check('length(@)', 0))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_authentication_policy_', location='westus')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ap-', location='westus',
+                      additional_params='--enable-rbac-authorization false')
+    def test_network_ag_authentication_policy(self, resource_group):
+        self.kwargs.update({
+            'ag': 'ag1',
+            'ip': 'pip1',
+            'cert_path': os.path.join(TEST_DIR, 'TestCert.pfx'),
+            'jwt': 'jwtpolicy',
+            'signin': 'signinpolicy',
+            'jwt_props': self._jwt_props(),
+            'cs': 'network application-gateway advanced-routing-set',
+            'map': 'network application-gateway advanced-routing-map',
+            'pool': 'appGatewayBackendPool',
+            'settings': 'appGatewayBackendHttpSettings',
+            'conds': '[{condition-type:Header,property-name:x-env,property-values:[canary]}]',
+        })
+        identity = self.cmd('identity create -g {rg} -n id1').get_output_in_json()
+        self.kwargs.update({'id1': identity['id'], 'principal': identity['principalId']})
+
+        # the application gateway reads the client secret of user sign-in policies from Key Vault
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {principal} --secret-permissions get')
+        secret_id = self.cmd('keyvault secret set --vault-name {kv} -n clientsecret --value dummy-client-secret'
+                             ).get_output_in_json()['id']
+        self.kwargs['signin_props'] = self._signin_props(secret_id.rsplit('/', 1)[0])
+
+        # authentication policies can only be bound to v2 gateways and routing rules with HTTPS listeners
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 '
+                 '--cert-file "{cert_path}" --cert-password password --identity {id1} --priority 1001')
+
+        self.kwargs['jwt_id'] = self.cmd('network authentication-policy create -g {rg} -n {jwt} '
+                                         '--auth-props "{jwt_props}"').get_output_in_json()['id']
+        self.kwargs['signin_id'] = self.cmd('network authentication-policy create -g {rg} -n {signin} '
+                                            '--auth-props "{signin_props}" --mi-user-assigned {id1}'
+                                            ).get_output_in_json()['id']
+        self.kwargs.update({
+            'basic_jwt': self._auth_configs('ac-basic', self.kwargs['jwt_id']),
+            'basic_signin': self._auth_configs('ac-basic', self.kwargs['signin_id']),
+            'map_default': self._auth_configs('ac-map-default', self.kwargs['jwt_id']),
+            'map_rule_signin': self._auth_configs('ac-map-rule', self.kwargs['signin_id']),
+            'map_rule1_jwt': self._auth_configs('ac-map-rule1', self.kwargs['jwt_id']),
+        })
+
+        # basic request routing rule
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} -n port2 --port 8443')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n listener2 '
+                 '--frontend-port port2 --ssl-cert {ag}SslCert')
+        self.cmd('network application-gateway rule create -g {rg} --gateway-name {ag} -n rule2 --http-listener listener2 '
+                 '--priority 200 --auth-configs "{basic_jwt}"')
+        self.cmd('network application-gateway rule show -g {rg} --gateway-name {ag} -n rule2', checks=[
+            self.check('length(authConfigs)', 1),
+            self.check('authConfigs[0].name', 'ac-basic'),
+            self.check('authConfigs[0].authenticationPolicy.id', '{jwt_id}'),
+        ])
+        self.cmd('network application-gateway rule update -g {rg} --gateway-name {ag} -n rule2 '
+                 '--auth-configs "{basic_signin}"', checks=[
+                     self.check('authConfigs[0].name', 'ac-basic'),
+                     self.check('authConfigs[0].authenticationPolicy.id', '{signin_id}'),
+                 ])
+
+        # advanced routing map, which must be reachable from a routing rule with an HTTPS listener
+        self.cmd('{cs} create -g {rg} --gateway-name {ag} -n cs1 --routing-conditions "{conds}"')
+        self.cmd('{map} create -g {rg} --gateway-name {ag} -n map1 --default-address-pool {pool} '
+                 '--default-http-settings {settings} --priority 10 --condition-set cs1 --address-pool {pool} '
+                 '--http-settings {settings}')
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} -n port3 --port 9443')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n listener3 '
+                 '--frontend-port port3 --ssl-cert {ag}SslCert')
+        self.cmd('network application-gateway rule create -g {rg} --gateway-name {ag} -n rule3 --http-listener listener3 '
+                 '--rule-type AdvancedRouting --advanced-routing-map map1 --priority 300')
+
+        # default rule of the advanced routing map
+        self.cmd('{map} update -g {rg} --gateway-name {ag} -n map1 --default-auth-configs "{map_default}"', checks=[
+            self.check('length(properties.defaultAuthConfigs)', 1),
+            self.check('properties.defaultAuthConfigs[0].name', 'ac-map-default'),
+            self.check('properties.defaultAuthConfigs[0].authenticationPolicy.id', '{jwt_id}'),
+        ])
+        # specific advanced routing rules
+        self.cmd('{map} rule create -g {rg} --gateway-name {ag} --map-name map1 -n r2 --priority 20 --condition-set cs1 '
+                 '--address-pool {pool} --http-settings {settings} --auth-configs "{map_rule_signin}"', checks=[
+                     self.check('length(properties.authConfigs)', 1),
+                     self.check('properties.authConfigs[0].name', 'ac-map-rule'),
+                     self.check('properties.authConfigs[0].authenticationPolicy.id', '{signin_id}'),
+                 ])
+        self.cmd('{map} rule update -g {rg} --gateway-name {ag} --map-name map1 -n rule1 '
+                 '--auth-configs "{map_rule1_jwt}"', checks=[
+                     self.check('properties.authConfigs[0].name', 'ac-map-rule1'),
+                     self.check('properties.authConfigs[0].authenticationPolicy.id', '{jwt_id}'),
+                 ])
+        self.cmd('{map} show -g {rg} --gateway-name {ag} -n map1', checks=[
+            self.check('properties.defaultAuthConfigs[0].authenticationPolicy.id', '{jwt_id}'),
+            self.check("properties.advancedRoutingRules[?name=='rule1'].properties.authConfigs[0].name | [0]",
+                       'ac-map-rule1'),
+            self.check("properties.advancedRoutingRules[?name=='r2'].properties.authConfigs[0].name | [0]",
+                       'ac-map-rule'),
+        ])
+
+        # policies that are still bound to the gateway cannot be deleted
+        self.cmd('network authentication-policy delete -g {rg} -n {jwt} --yes', expect_failure=True)
+
+        # unbind the policies
+        self.cmd('{map} rule update -g {rg} --gateway-name {ag} --map-name map1 -n rule1 --auth-configs null',
+                 checks=self.check('properties.authConfigs', None))
+        self.cmd('{map} rule update -g {rg} --gateway-name {ag} --map-name map1 -n r2 --auth-configs null',
+                 checks=self.check('properties.authConfigs', None))
+        self.cmd('{map} update -g {rg} --gateway-name {ag} -n map1 --default-auth-configs null',
+                 checks=self.check('properties.defaultAuthConfigs', None))
+        self.cmd('network application-gateway rule update -g {rg} --gateway-name {ag} -n rule2 --auth-configs null',
+                 checks=self.check('authConfigs', None))
+
+        self.cmd('network authentication-policy delete -g {rg} -n {jwt} --yes')
+        self.cmd('network authentication-policy delete -g {rg} -n {signin} --yes')
+        self.cmd('network authentication-policy list -g {rg}', checks=self.check('length(@)', 0))
+
+
 class NetworkAppGatewayRewriteRuleset(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_rewrite_rulesets')
