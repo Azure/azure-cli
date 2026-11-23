@@ -547,7 +547,8 @@ class AzureSearchServicesTests(ScenarioTest):
                  checks=[self.check('name', '{name}'),
                          self.check('knowledgeRetrieval', '{knowledge_retrieval}')])
 
-        self.cmd('az search service wait -n {name} -g {rg} --custom "knowledgeRetrieval==\'{knowledge_retrieval}\'"'
+        self.cmd('az search service wait -n {name} -g {rg}'
+                 ' --custom "properties.knowledgeRetrieval==\'{knowledge_retrieval}\'"'
                  ' --timeout 60 --interval 5')
 
         self.cmd(
