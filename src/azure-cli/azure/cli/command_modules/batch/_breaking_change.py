@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.breaking_change import (AzCLIOtherChange, register_command_deprecate,
-                                            register_conditional_breaking_change)
+                                            register_conditional_breaking_change, register_output_breaking_change)
 
 # The target version of every pre-announcement in this file: the CLI's breaking change release in June 2027.
 # The messages are custom, so they include it too, as TARGET_TEXT.
@@ -17,6 +17,14 @@ register_command_deprecate(
     message=f"This command has been deprecated and will be removed in {TARGET_TEXT}. The Azure Batch "
             "service retired the pool usage metrics API on September 30, 2024, so this command always returns an "
             "error. For more information, see https://github.com/Azure/Batch/issues/140."
+)
+
+register_output_breaking_change(
+    'batch pool reset',
+    description="'az batch pool reset' will print the pool in the same format as 'az batch pool show'",
+    target_version=TARGET_VERSION,
+    guide=f"Update scripts that read this output before {TARGET_TEXT}; 'az batch pool show' already prints that "
+          "format"
 )
 
 # Printed by validate_retained_data_option only when the value 'retaineddata' is used
