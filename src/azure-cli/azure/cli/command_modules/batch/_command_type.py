@@ -292,7 +292,7 @@ class BatchArgumentTree:
         :param dict kwargs: The request kwargs
         :param dict json_obj: The loaded JSON content
         """
-        from msrest.exceptions import DeserializationError
+        from azure.core.exceptions import DeserializationError
         message = "Failed to deserialized JSON file into object {}"
         try:
             def remove_none_values(d):
@@ -478,13 +478,11 @@ class AzureBatchDataPlaneCommand:
                         continue
             self.filter_args(kwargs)
             # Make request
-            if self._head_cmd:
-                kwargs['raw'] = True
             result = _get_operation()(client, **kwargs)
 
             # Head output
             if self._head_cmd:
-                return result
+                return transformers.transform_response_headers(result)
 
             # File download
             if stream_output:
@@ -958,7 +956,8 @@ class AzureBatchDataPlaneCommand:
                                                    type=file_type,
                                                    validator=validators.validate_file_destination,
                                                    help=docstring)))
-        if return_type == 'None' and handler.__name__.startswith('get'):
+        # The file properties operations return the service's HTTP response, whose headers hold the properties
+        if return_type == 'HttpResponse' and handler.__name__.startswith('get'):
             self._head_cmd = True
         if self.confirmation:
             param = CONFIRM_PARAM_NAME

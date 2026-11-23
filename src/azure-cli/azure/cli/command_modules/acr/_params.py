@@ -40,6 +40,7 @@ from ._validators import (
     validate_set_secret,
     validate_retention_days,
     validate_registry_name,
+    validate_suffix,
     validate_expiration_time,
     validate_manifest_id,
     validate_repo_id,
@@ -89,7 +90,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. It should be specified in lower case. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
-        c.argument('tenant_suffix', options_list=['--suffix'], help="The tenant suffix in registry login server. You may specify '--suffix tenant' if your registry login server is in the format 'registry-tenant.azurecr.io'. Applicable if you\'re accessing the registry from a different subscription or you have permission to access images but not the permission to manage the registry resource.")
+        c.argument('suffix', options_list=['--suffix'], validator=validate_suffix, help="The suffix in the registry login server, such as a tenant suffix or domain name label (DNL) hash. Specify '--suffix tenant' for 'registry-tenant.azurecr.io' or '--suffix hash' for 'registry-hash.azurecr.io'. Applicable if you\'re accessing the registry from a different subscription or you have permission to access images but not the permission to manage the registry resource.")
         c.argument('sku', help='The SKU of the container registry', arg_type=get_enum_type(['Basic', 'Standard', 'Premium']))
         c.argument('admin_enabled', help='Indicates whether the admin user is enabled', arg_type=get_three_state_flag())
         c.argument('password_name', help='The name of password to regenerate', arg_type=get_enum_type(PasswordName))
@@ -119,7 +120,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
             c.argument('public_network_enabled', get_three_state_flag(), help="Allow public network access for the container registry.{suffix}".format(suffix=default_allow_suffix))
             c.argument('allow_trusted_services', get_three_state_flag(), help="Allow trusted Azure Services to access network restricted registries. For more information, please visit https://aka.ms/acr/trusted-services.{suffix}".format(suffix=default_allow_suffix))
-            c.argument('regional_endpoints', arg_type=get_enum_type(RegionalEndpoints), is_preview=True, help="Indicates whether or not regional endpoints should be enabled for the registry.")
+            c.argument('regional_endpoints', arg_type=get_enum_type(RegionalEndpoints), help="Indicates whether or not regional endpoints should be enabled for the registry.")
 
     for scope in ['acr create', 'acr update']:
         with self.argument_context(scope, arg_group="Permissions and Role Assignment") as c:
@@ -182,7 +183,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr login') as c:
         c.argument('expose_token', options_list=['--expose-token', '-t'], help='Expose refresh token instead of automatically logging in through Docker CLI', action='store_true')
-        c.argument("endpoint", completer=get_location_completion_list, type=get_location_name_type(self.cli_ctx), is_preview=True, help="Log in to a specific regional endpoint of the container registry. Specify the region name (e.g., eastus, westus2). Only applicable when regional endpoints are enabled.")
+        c.argument("endpoint", completer=get_location_completion_list, type=get_location_name_type(self.cli_ctx), help="Log in to a specific regional endpoint of the container registry. Specify the region name (e.g., eastus, westus2). Only applicable when regional endpoints are enabled.")
 
     with self.argument_context('acr repository') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
@@ -581,7 +582,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('sync_message_ttl', help='Determine how long the sync messages will be kept in the cloud. Uses ISO 8601 duration format.', required=False, default="P2D")
         c.argument('notifications', options_list=['--notifications'], nargs='+', help='List of artifact pattern for which notifications need to be generated. Use the format "--notifications [PATTERN1 PATTERN2 ...]".')
         c.argument('garbage_collection_enabled', options_list=['--gc-enabled'],
-                   help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag(), required=False, default="true")
+                   help='Indicate whether garbage collection is enabled. It is enabled by default.', arg_type=get_three_state_flag(), required=False, default=True)
         c.argument('garbage_collection_schedule', options_list=['--gc-schedule'],
                    help='Used to determine garbage collection schedule. Uses cron expression to determine the schedule. If not specified, garbage collection is set to run once a day.', required=False, default="0 0 * * *")
         c.argument('identity', help='Resource ID of a user-assigned managed identity to authenticate the connected registry with its parent. Required when --auth-type is ManagedIdentity.')

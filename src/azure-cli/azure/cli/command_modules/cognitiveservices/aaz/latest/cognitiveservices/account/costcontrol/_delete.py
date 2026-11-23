@@ -19,8 +19,11 @@ from azure.cli.core.aaz import *
 class Delete(AAZCommand):
     """Delete an account-owned cost control.
 
-    :example: Delete a budget conditionally
-        az cognitiveservices account costcontrol delete --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --if-match "00000000-0000-0000-0000-000000000001"
+    :example: Delete a budget
+        az cognitiveservices account costcontrol delete --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents
+
+    :example: Delete a budget if the account entity tag matches the given one. Note the required forward slash before the quotation marks around the entity tag.
+        az cognitiveservices account costcontrol delete --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --if-match \\"c6d292d2-521f-4f7f-ab38-1be7e4a56e9e.additional-info\\"
     """
 
     _aaz_info = {

@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-08-01",
+        "version": "2026-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2026-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2026-09-01"],
         ]
     }
 
@@ -215,12 +215,6 @@ class Create(AAZCommand):
             options=["delete-base-snapshot"],
             help="If enabled (true) the snapshot the volume was created from will be automatically deleted after the volume create operation has finished.  Defaults to false",
         )
-        _element.enable_subvolumes = AAZStrArg(
-            options=["enable-subvolumes"],
-            help="Flag indicating whether subvolume operations are enabled on the volume",
-            default="Disabled",
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
         _element.encryption_key_source = AAZStrArg(
             options=["encryption-key-source"],
             help="Source of key used to encrypt data in volume. Applicable if NetApp account has encryption.keySource = 'Microsoft.KeyVault'. Possible values (case-insensitive) are: 'Microsoft.NetApp, Microsoft.KeyVault'",
@@ -254,6 +248,11 @@ class Create(AAZCommand):
             options=["ldap-enabled"],
             help="Specifies whether LDAP is enabled or not for a given NFS volume.",
             default=False,
+        )
+        _element.ldap_server_type = AAZStrArg(
+            options=["ldap-server-type"],
+            help="Specifies the type of LDAP server for a given NFS volume.",
+            enum={"ActiveDirectory": "ActiveDirectory", "OpenLdap": "OpenLdap"},
         )
         _element.network_features = AAZStrArg(
             options=["network-features"],
@@ -304,6 +303,11 @@ class Create(AAZCommand):
         _element.smb_non_browsable = AAZStrArg(
             options=["smb-non-browsable"],
             help="Enables non-browsable property for SMB Shares. Only applicable for SMB/DualProtocol volume",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+        _element.smb_oplocks = AAZStrArg(
+            options=["smb-oplocks"],
+            help="Enables or disables SMB opportunistic lock property for SMB Shares. Only applicable for SMB/DualProtocol volume",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _element.snapshot_directory_visible = AAZBoolArg(
@@ -658,7 +662,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-08-01",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -734,7 +738,6 @@ class Create(AAZCommand):
                 properties.set_prop("defaultGroupQuotaInKiBs", AAZIntType, ".default_group_quota_in_ki_bs")
                 properties.set_prop("defaultUserQuotaInKiBs", AAZIntType, ".default_user_quota_in_ki_bs")
                 properties.set_prop("deleteBaseSnapshot", AAZBoolType, ".delete_base_snapshot")
-                properties.set_prop("enableSubvolumes", AAZStrType, ".enable_subvolumes")
                 properties.set_prop("encryptionKeySource", AAZStrType, ".encryption_key_source")
                 properties.set_prop("exportPolicy", AAZObjectType, ".export_policy")
                 properties.set_prop("isDefaultQuotaEnabled", AAZBoolType, ".is_default_quota_enabled")
@@ -742,6 +745,7 @@ class Create(AAZCommand):
                 properties.set_prop("kerberosEnabled", AAZBoolType, ".kerberos_enabled")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
                 properties.set_prop("ldapEnabled", AAZBoolType, ".ldap_enabled")
+                properties.set_prop("ldapServerType", AAZStrType, ".ldap_server_type")
                 properties.set_prop("networkFeatures", AAZStrType, ".network_features")
                 properties.set_prop("placementRules", AAZListType, ".placement_rules")
                 properties.set_prop("protocolTypes", AAZListType, ".protocol_types")
@@ -752,6 +756,7 @@ class Create(AAZCommand):
                 properties.set_prop("smbContinuouslyAvailable", AAZBoolType, ".smb_continuously_available")
                 properties.set_prop("smbEncryption", AAZBoolType, ".smb_encryption")
                 properties.set_prop("smbNonBrowsable", AAZStrType, ".smb_non_browsable")
+                properties.set_prop("smbOplocks", AAZStrType, ".smb_oplocks")
                 properties.set_prop("snapshotDirectoryVisible", AAZBoolType, ".snapshot_directory_visible")
                 properties.set_prop("snapshotId", AAZStrType, ".snapshot_id", typ_kwargs={"nullable": True})
                 properties.set_prop("subnetId", AAZStrType, ".subnet_id", typ_kwargs={"flags": {"required": True}})
@@ -995,9 +1000,6 @@ class Create(AAZCommand):
                 serialized_name="effectiveNetworkFeatures",
                 flags={"read_only": True},
             )
-            properties.enable_subvolumes = AAZStrType(
-                serialized_name="enableSubvolumes",
-            )
             properties.encrypted = AAZBoolType(
                 flags={"read_only": True},
             )
@@ -1038,6 +1040,9 @@ class Create(AAZCommand):
             )
             properties.ldap_enabled = AAZBoolType(
                 serialized_name="ldapEnabled",
+            )
+            properties.ldap_server_type = AAZStrType(
+                serialized_name="ldapServerType",
             )
             properties.maximum_number_of_files = AAZIntType(
                 serialized_name="maximumNumberOfFiles",
@@ -1095,6 +1100,9 @@ class Create(AAZCommand):
             )
             properties.smb_non_browsable = AAZStrType(
                 serialized_name="smbNonBrowsable",
+            )
+            properties.smb_oplocks = AAZStrType(
+                serialized_name="smbOplocks",
             )
             properties.snapshot_directory_visible = AAZBoolType(
                 serialized_name="snapshotDirectoryVisible",

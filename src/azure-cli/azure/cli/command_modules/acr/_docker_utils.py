@@ -411,7 +411,7 @@ def _get_token_with_username_and_password(login_server,
 
 def _get_credentials(cmd,  # pylint: disable=too-many-statements
                      registry_name,
-                     tenant_suffix,
+                     suffix,
                      username,
                      password,
                      only_refresh_token,
@@ -422,7 +422,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                      resource_group_name=None):
     """Try to get AAD authorization tokens or admin user credentials.
     :param str registry_name: The name of container registry
-    :param str tenant_suffix: The registry login server tenant suffix
+    :param str suffix: The registry login server suffix, such as a tenant suffix or DNL hash
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
@@ -439,10 +439,10 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     try:
         registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
         login_server = registry.login_server
-        if tenant_suffix:
+        if suffix:
             logger.warning(
                 "Obtained registry login server '%s' from service. The specified suffix '%s' is ignored.",
-                login_server, tenant_suffix)
+                login_server, suffix)
     except (ResourceNotFound, CLIError) as e:
         resource_not_found = str(e)
         logger.debug("Could not get registry from service. Exception: %s", resource_not_found)
@@ -453,7 +453,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
         if not login_server_suffix:
             raise
         login_server = '{}{}{}'.format(
-            registry_name, '-{}'.format(tenant_suffix) if tenant_suffix else '', login_server_suffix).lower()
+            registry_name, '-{}'.format(suffix) if suffix else '', login_server_suffix).lower()
 
     # Validate the login server is reachable
     url = 'https://' + login_server + '/v2/'
@@ -543,7 +543,7 @@ def raise_toomanyrequests_error(error):
 
 def get_login_credentials(cmd,
                           registry_name,
-                          tenant_suffix=None,
+                          suffix=None,
                           username=None,
                           password=None,
                           resource_group_name=None):
@@ -554,7 +554,7 @@ def get_login_credentials(cmd,
     """
     return _get_credentials(cmd,
                             registry_name,
-                            tenant_suffix,
+                            suffix,
                             username,
                             password,
                             only_refresh_token=True,
@@ -564,7 +564,7 @@ def get_login_credentials(cmd,
 
 def get_access_credentials(cmd,
                            registry_name,
-                           tenant_suffix=None,
+                           suffix=None,
                            username=None,
                            password=None,
                            repository=None,
@@ -581,7 +581,7 @@ def get_access_credentials(cmd,
     """
     return _get_credentials(cmd,
                             registry_name,
-                            tenant_suffix,
+                            suffix,
                             username,
                             password,
                             only_refresh_token=False,

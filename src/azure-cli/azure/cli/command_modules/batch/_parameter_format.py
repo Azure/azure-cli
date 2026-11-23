@@ -86,7 +86,6 @@ IGNORE_PARAMETERS = [
     'network_configuration.public_ip_address_configuration',
     'network_configuration.subnet_id',
     'enable_auto_scale',
-    'cloud_service_configuration.target_os_version',
     'pool.auto_scale_evaluation_interval',
     # 'pool.start_task.environment_settings',
     # 'pool.start_task.max_task_retry_count',

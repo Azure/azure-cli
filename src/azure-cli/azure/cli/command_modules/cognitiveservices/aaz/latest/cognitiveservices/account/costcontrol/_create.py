@@ -20,8 +20,14 @@ class Create(AAZCommand):
 
     Create an account-owned cost control. The definition may contain at most one notification, including disabled notifications, and one Block action. Exceeding either limit returns HTTP 400 without persisting the request.
 
-    :example: Create or replace an account cost budget
-        az cognitiveservices account costcontrol create --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --if-none-match * --grouping "[{name:agent,type:AdditionalInfoKey}]" --category Cost --amount 1000 --time-grain Monthly --time-period "{start-date:'2026-11-15T00:00:00Z',end-date:'2027-11-15T00:00:00Z'}" --filter "{and:[{additionalInfo:{name:project,operator:In,values:[production]}},{additionalInfo:{name:agent,operator:In,values:[customer-support,order-assistant]}},{additionalInfo:{name:deployment,operator:In,values:[customer-support-model]}}]}" --notifications "{usageAlert:{eventGridConnectionId:/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/foundry-resource-group/providers/Microsoft.CognitiveServices/accounts/foundry-account/connections/budget-alerts,thresholdType:Percentage,threshold:80,enabled:True,operator:GreaterThanOrEqualTo}}" --provider-properties "{actions:{stopRequests:{type:Block,thresholdType:Percentage,threshold:100,operator:GreaterThanOrEqualTo}}}"
+    :example: Cap the whole Foundry resource at $1000 a month and block at 100%
+        az cognitiveservices account costcontrol create --resource-group foundry-resource-group --account-name foundry-account --cost-control-name monthly-cap --category Cost --amount 1000 --time-grain Monthly --time-period "{start-date:'2026-12-01T00:00:00Z',end-date:'2027-12-01T00:00:00Z'}" --provider-properties "{actions:{block-at-100:{type:Block,threshold-type:Percentage,threshold:100,operator:GreaterThanOrEqualTo}}}"
+
+    :example: Cap at $1000 a month, alert at 80% but do not block
+        az cognitiveservices account costcontrol create --resource-group foundry-resource-group --account-name foundry-account --cost-control-name monthly-cap --category Cost --amount 1000 --time-grain Monthly --time-period "{start-date:'2026-12-01T00:00:00Z',end-date:'2027-12-01T00:00:00Z'}" --notifications "{usage-alert:{event-grid-connection-id:/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/foundry-resource-group/providers/Microsoft.CognitiveServices/accounts/foundry-account/connections/budget-alerts,threshold-type:Percentage,threshold:80,enabled:true,operator:GreaterThanOrEqualTo}}"
+
+    :example: Example using full settings (filters, grouping, alert and block)
+        az cognitiveservices account costcontrol create --resource-group foundry-resource-group --account-name foundry-account --cost-control-name production-agents --if-none-match * --grouping "[{name:agent,type:AdditionalInfoKey}]" --category Cost --amount 1000 --time-grain Monthly --time-period "{start-date:'2026-11-15T00:00:00Z',end-date:'2027-11-15T00:00:00Z'}" --filter "{and:[{additional-info:{name:project,operator:In,values:[production]}},{additional-info:{name:agent,operator:In,values:[customer-support,order-assistant]}},{additional-info:{name:deployment,operator:In,values:[customer-support-model]}}]}" --notifications "{usage-alert:{event-grid-connection-id:/subscriptions/00000000-1111-2222-3333-444444444444/resourceGroups/foundry-resource-group/providers/Microsoft.CognitiveServices/accounts/foundry-account/connections/budget-alerts,threshold-type:Percentage,threshold:80,enabled:True,operator:GreaterThanOrEqualTo}}" --provider-properties "{actions:{stop-requests:{type:Block,threshold-type:Percentage,threshold:100,operator:GreaterThanOrEqualTo}}}"
     """
 
     _aaz_info = {
@@ -147,7 +153,7 @@ class Create(AAZCommand):
             options=["name"],
             help="The built-in attribute to group by. project is available only for account-owned controls.",
             required=True,
-            enum={"agent": "agent", "identityObjectId": "identityObjectId", "project": "project", "sessionId": "sessionId"},
+            enum={"agent": "agent", "project": "project", "sessionId": "sessionId"},
         )
         _element.type = AAZStrArg(
             options=["type"],
@@ -273,9 +279,9 @@ class Create(AAZCommand):
         additional_info = cls._args_cost_control_filter_create.additional_info
         additional_info.name = AAZStrArg(
             options=["name"],
-            help="The built-in attribute: agent, identityObjectId, sessionId, project, deployment, or tokenType. Resource selectors use owner-scoped short names, not Azure resource IDs. Agent selections require an explicit project filter selecting exactly one project; multiple agents in that project are supported. A project-owned control can select only its owning project. Project, agent, and deployment values must be plain names of 1-64 characters without leading or trailing whitespace, control characters, path/query/fragment separators, percent signs, or . and .. path segments. tokenType accepts input, output, or both for a Tokens budget; omission measures overall tokens.",
+            help="The built-in attribute: agent, sessionId, project, deployment, or tokenType. Resource selectors use owner-scoped short names, not Azure resource IDs. Agent selections require an explicit project filter selecting exactly one project; multiple agents in that project are supported. A project-owned control can select only its owning project. Project, agent, and deployment values must be plain names of 1-64 characters without leading or trailing whitespace, control characters, path/query/fragment separators, percent signs, or . and .. path segments. tokenType accepts input, output, or both for a Tokens budget; omission measures overall tokens.",
             required=True,
-            enum={"agent": "agent", "deployment": "deployment", "identityObjectId": "identityObjectId", "project": "project", "sessionId": "sessionId", "tokenType": "tokenType"},
+            enum={"agent": "agent", "deployment": "deployment", "project": "project", "sessionId": "sessionId", "tokenType": "tokenType"},
         )
         additional_info.operator = AAZStrArg(
             options=["operator"],

@@ -1724,7 +1724,9 @@ examples:
 helps['vm list-skus'] = """
 type: command
 short-summary: Get details for compute-related resource SKUs.
-long-summary: This command incorporates subscription level restriction, offering the most accurate information.
+long-summary: >
+    This command incorporates subscription-level restrictions, offering the most accurate information.
+    Specify --location to filter SKUs on the server and avoid downloading SKUs for all regions.
 examples:
   - name: List all SKUs in the West US region.
     text: az vm list-skus -l westus

@@ -24,16 +24,15 @@ LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 
 
 class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, kind='StorageV2')
     def test_functionapp_access_restriction_show(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4 --runtime dotnet-isolated --runtime-version 10', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -50,16 +49,15 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, kind='StorageV2')
     def test_functionapp_access_restriction_set_simple(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4 --runtime dotnet-isolated --runtime-version 10', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -69,7 +67,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
 
         self.cmd('functionapp config access-restriction set -g {rg} -n {app_name} --default-action Deny', checks=[
             JMESPathCheck('ipSecurityRestrictionsDefaultAction', 'Deny'),
-            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', 'Deny')
         ])
 
         self.cmd('functionapp config access-restriction set -g {rg} -n {app_name} --default-action Allow --scm-default-action Deny', checks=[
@@ -82,16 +80,15 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', 'Deny')
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, kind='StorageV2')
     def test_functionapp_access_restriction_set_complex(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4 --runtime dotnet-isolated --runtime-version 10', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -103,17 +100,16 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(random_name_length=17, parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     # random_name_length is temporary until the bug fix in the API is deployed successfully & then should be removed.
-    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, kind='StorageV2')
     def test_functionapp_access_restriction_add(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4 --runtime dotnet-isolated --runtime-version 10', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -125,16 +121,15 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, kind='StorageV2')
     def test_functionapp_access_restriction_add_ip_address_validation(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4 --runtime dotnet-isolated --runtime-version 10', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -181,16 +176,15 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, kind='StorageV2')
     def test_functionapp_access_restriction_remove(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4 --runtime dotnet-isolated --runtime-version 10', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -208,16 +202,15 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, kind='StorageV2')
     def test_functionapp_access_restriction_add_scm(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4 --runtime dotnet-isolated --runtime-version 10', checks=[
             JMESPathCheck('state', 'Running')
         ])
 
@@ -229,16 +222,15 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
-    @unittest.skip('Recorded runtime reached end-of-life on 2026-11-10; update runtime and re-record.')
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP, kind='StorageV2')
     def test_functionapp_access_restriction_remove_scm(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
             'loc': location
         })
 
-        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4', checks=[
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa} --functions-version 4 --runtime dotnet-isolated --runtime-version 10', checks=[
             JMESPathCheck('state', 'Running')
         ])
 

@@ -8,9 +8,29 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.cloud import HARD_CODED_CLOUD_LIST
-from azure.cli.command_modules.acr._validators import validate_registry_name
+from azure.cli.command_modules.acr._validators import validate_registry_name, validate_suffix
 
 class AcrValidatorsTests(unittest.TestCase):  
+    def test_suffix_valid_inputs(self):
+        for suffix in (None, 'a', '1', 'microsoft', 'Tenant-123', 'a--b', 'a' * 100):
+            with self.subTest(suffix=suffix):
+                namespace = SimpleNamespace(suffix=suffix)
+                validate_suffix(namespace)
+                self.assertEqual(namespace.suffix, suffix)
+
+    def test_suffix_invalid_inputs(self):
+        invalid_suffixes = [
+            '', ' ', 'tenant name', ' tenant', 'tenant ', 'tenant\n', 'tenant\r', 'tenant\t',
+            'tenant\x00', 'tenant/path', 'tenant\\path', 'tenant?query', 'tenant#fragment',
+            'tenant@host', 'tenant:443', 'tenant.example.invalid/path', 'tenant%2fpath',
+            'tenant.example', 'tenant.', '.tenant', '[tenant]', 'tenant_name',
+            '-tenant', 'tenant-', '-', 't\u00e9nant', 'tenant\u2028', 'tenant!name',
+        ]
+        for suffix in invalid_suffixes:
+            with self.subTest(suffix=suffix):
+                with self.assertRaisesRegex(InvalidArgumentValueError, '--suffix'):
+                    validate_suffix(SimpleNamespace(suffix=suffix))
+
     def test_registry_name_with_dnl_suffix_loginserver(self):
         namespace = SimpleNamespace(
             **{

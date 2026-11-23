@@ -344,6 +344,24 @@ class TestVMDefaultAuthType(unittest.TestCase):
         self.assertEqual(ns.authentication_type, 'ssh')
         self.assertEqual(ns.ssh_dest_key_path, '/home/{}/.ssh/authorized_keys'.format(test_user))
 
+    @mock.patch('azure.cli.command_modules.vm._validators.validate_ssh_key')
+    def test_linux_mixed_case_admin_username(self, mock_validate_ssh_key):
+        for authentication_type in (None, 'ssh', 'password', 'all'):
+            with self.subTest(authentication_type=authentication_type):
+                ns = self._new_linux_ns(authentication_type)
+                ns.admin_username = 'AzureUser'
+                mock_validate_ssh_key.reset_mock()
+
+                _validate_vm_vmss_create_auth(ns)
+
+                self.assertEqual(ns.admin_username, 'AzureUser')
+                self.assertEqual(ns.authentication_type, authentication_type or 'ssh')
+                if ns.authentication_type == 'password':
+                    mock_validate_ssh_key.assert_not_called()
+                else:
+                    mock_validate_ssh_key.assert_called_once_with(ns, None)
+                    self.assertEqual(ns.ssh_dest_key_path, '/home/AzureUser/.ssh/authorized_keys')
+
     def test_linux_with_password(self):
         ns = TestVMDefaultAuthType._set_ns()
         ns.os_type = "LINux"
