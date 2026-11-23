@@ -3,13 +3,96 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import unittest
+import io
 import os
+import unittest
+from contextlib import redirect_stderr, redirect_stdout
+from unittest import mock
 
+from azure.cli.core.mock import DummyCli
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+
+
+class CognitiveServicesProjectArgumentTests(unittest.TestCase):
+
+    def test_project_name_aliases_for_project_commands(self):
+        """Verify project and project-connection commands expose both project-name options.
+
+        For every command that accepts a project name, load its help and confirm it
+        documents ``--project-name`` and ``-p``. Parse representative arguments with
+        each spelling and check they populate the same project and account values.
+        """
+        prefix = ['cognitiveservices', 'account', 'project']
+        cases = (
+            ('create', ('--location', 'eastus')),
+            ('delete', ()),
+            ('show', ()),
+            ('update', ()),
+            ('connection create', ('--connection-name', 'my-conn', '--file', 'connection.json')),
+            ('connection delete', ('--connection-name', 'my-conn')),
+            ('connection show', ('--connection-name', 'my-conn')),
+            ('connection list', ()),
+            ('connection update', ('--connection-name', 'my-conn', '--set', 'properties.description=value')),
+        )
+        for suffix, extra_args in cases:
+            with self.subTest(command=suffix):
+                command = prefix + suffix.split()
+                cli = DummyCli()
+                output = io.StringIO()
+                with mock.patch('azure.cli.core.extension.get_extensions', return_value=[]), \
+                        redirect_stdout(output), redirect_stderr(output), self.assertRaises(SystemExit) as exc:
+                    cli.invoke(command + ['--help'])
+
+                self.assertEqual(exc.exception.code, 0, output.getvalue())
+                self.assertRegex(output.getvalue(), r'(?m)^\s+--project-name\s+-p\b')
+                parser = cli.invocation.parser.subparser_map[' '.join(command)]
+                for option in ('--project-name', '-p'):
+                    with self.subTest(option=option):
+                        args = parser.parse_args(
+                            ['-g', 'my-rg', '-n', 'my-account', option, 'my-project', *extra_args])
+                        self.assertEqual(args.project_name, 'my-project')
+                        self.assertEqual(args.account_name, 'my-account')
+
+    def test_project_name_aliases_reach_sdk(self):
+        """Verify either project-name option routes the selected project to the SDK.
+
+        Invoke project update and project-connection create once with
+        ``--project-name`` and once with ``-p``. Mock the management client and
+        confirm each command succeeds and passes the expected project name and
+        resource arguments to its SDK operation.
+        """
+        prefix = ['cognitiveservices', 'account', 'project']
+        connection_file = os.path.join(
+            TEST_DIR, 'data', 'cogsvc_connection_container_registry_managed_identity.yaml')
+        cases = (
+            (['update', '--description', 'changed'], 'projects', 'begin_update',
+             ('my-rg', 'my-account', 'my-project')),
+            (['connection', 'create', '--connection-name', 'my-conn', '--file', connection_file],
+             'project_connections', 'create', ('my-rg', 'my-account', 'my-project', 'my-conn')),
+        )
+        for command, client_name, method_name, expected_args in cases:
+            for option in ('--project-name', '-p'):
+                with self.subTest(command=command, option=option):
+                    cli = DummyCli()
+                    output = io.StringIO()
+                    with mock.patch(
+                            'azure.cli.command_modules.cognitiveservices._client_factory.'
+                            'get_cognitiveservices_management_client') as factory, \
+                            mock.patch('azure.cli.core.extension.get_extensions', return_value=[]), \
+                            redirect_stdout(output), redirect_stderr(output):
+                        operation = getattr(getattr(factory.return_value, client_name), method_name)
+                        operation.return_value = None
+                        exit_code = cli.invoke(
+                            prefix + command + ['-g', 'my-rg', '-n', 'my-account',
+                                                option, 'my-project', '--output', 'none'])
+
+                    self.assertEqual(exit_code, 0, output.getvalue())
+                    operation.assert_called_once()
+                    self.assertEqual(operation.call_args.args[:len(expected_args)], expected_args)
+
 
 class CognitiveServicesProjectConnectionsTests(ScenarioTest):
 
@@ -44,7 +127,7 @@ class CognitiveServicesProjectConnectionsTests(ScenarioTest):
                          self.check('properties.allowProjectManagement', True),
                          self.check('properties.customSubDomainName', '{customdomain}')])
 
-        prj = self.cmd('az cognitiveservices account project create -n {sname} -g {rg} --project-name {pname} --location {location} --assign-identity --display-name "{projdisplayname}"',
+        prj = self.cmd('az cognitiveservices account project create -n {sname} -g {rg} -p {pname} --location {location} --assign-identity --display-name "{projdisplayname}"',
                             checks=[self.check('properties.provisioningState', 'Succeeded'),
                                     self.check('properties.displayName', '{projdisplayname}')]).get_output_in_json()
 
@@ -57,7 +140,7 @@ class CognitiveServicesProjectConnectionsTests(ScenarioTest):
                             checks=[self.check('properties.provisioningState', 'Succeeded'),
                                     self.check('properties.description', '{projdisplayname}')]).get_output_in_json()
 
-        acctconn = self.cmd('az cognitiveservices account project connection create -n {sname} -g {rg} --project-name {pname} --connection-name {connname} --file {connfile}',
+        acctconn = self.cmd('az cognitiveservices account project connection create -n {sname} -g {rg} -p {pname} --connection-name {connname} --file "{connfile}"',
                            checks=[
                                self.check('properties.authType', 'ManagedIdentity'),
                                self.check('properties.category', "ContainerRegistry"),
