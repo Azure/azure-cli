@@ -379,10 +379,10 @@ def delete_network_rule(cmd, client, resource_group_name=None, account_name=None
 def update_application(client,
                        resource_group_name, account_name, application_name, allow_updates=None,
                        display_name=None, default_version=None):
-    parameters = Application(
-        allow_updates=allow_updates,
-        display_name=display_name,
-        default_version=default_version)
+    # As with 17.3.0: --allow-updates goes out as a boolean, true for any value given
+    parameters = Application(**_given(allow_updates=None if allow_updates is None else bool(allow_updates),
+                                      display_name=display_name,
+                                      default_version=default_version))
     return client.update(resource_group_name=resource_group_name,
                          account_name=account_name,
                          application_name=application_name,
