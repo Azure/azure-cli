@@ -9,7 +9,7 @@ import time
 import unittest
 from unittest import mock
 
-from azure.mgmt.batch.models import BatchAccount, BatchAccountIdentity
+from azure.mgmt.batch.models import Application, BatchAccount, BatchAccountIdentity
 from azure.cli.core.mock import DummyCli
 from azure.cli.core.util import rmtree_with_retry
 from azure.cli.command_modules.batch import _client_factory
@@ -514,3 +514,43 @@ class TestBatchAccountRequestBodies(unittest.TestCase):
 
     def test_batch_account_set_tags(self):
         self.assertEqual(self._sent('batch account set -g rg -n acc --tags x=y', 'update'), {'tags': {'x': 'y'}})
+
+
+class TestBatchApplicationRequestBodies(unittest.TestCase):
+    """Run `batch application set` with its management client mocked, and check the bodies it sends. They match what
+    the CLI sent with azure-mgmt-batch 17.3.0: no empty 'properties' object, and --allow-updates as a boolean."""
+
+    def setUp(self):
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+        self.client = mock.Mock()
+        self.client.update.return_value = Application()
+        factory_patch = mock.patch.object(_client_factory, 'mgmt_application_client_factory',
+                                          return_value=self.client)
+        factory_patch.start()
+        self.addCleanup(factory_patch.stop)
+        # The commands' validator reads the account to check that it has auto-storage
+        validator_client = mock.Mock()
+        validator_client.batch_account.get.return_value = mock.Mock(auto_storage=mock.Mock(storage_account_id='sa'))
+        validator_patch = mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client',
+                                     return_value=validator_client)
+        validator_patch.start()
+        self.addCleanup(validator_patch.stop)
+
+    def _sent(self, options):
+        """Run `batch application set` with the given options and return the body it sends."""
+        command = 'batch application set -g rg -n acc --application-name app' + options
+        self.assertEqual(self.cli.invoke(command.split(), out_file=io.StringIO()), 0)
+        self.client.update.assert_called_once()
+        return self.client.update.call_args.kwargs['parameters'].as_dict()
+
+    def test_batch_application_set_without_options(self):
+        self.assertEqual(self._sent(''), {})
+
+    def test_batch_application_set_allow_updates(self):
+        self.assertEqual(self._sent(' --allow-updates true'), {'properties': {'allowUpdates': True}})
+
+    def test_batch_application_set_default_version_and_display_name(self):
+        self.assertEqual(self._sent(' --default-version 1.0 --display-name app1'),
+                         {'properties': {'defaultVersion': '1.0', 'displayName': 'app1'}})
