@@ -21,6 +21,7 @@ from ._utils import (get_vnet_location,
                      load_cert_file,
                      safe_set,
                      get_default_workload_profiles,
+                     validate_environment_mode_and_workload_profiles_compatible,
                      _azure_monitor_quickstart, safe_get)
 from ._client_factory import handle_raw_exception, handle_non_404_status_code_exception
 from .base_resource import BaseResource
@@ -114,6 +115,14 @@ class ContainerAppEnvDecorator(BaseResource):
     def get_argument_max_nodes(self):
         return self.get_param("max_nodes")
 
+    def get_argument_environment_mode(self):
+        return self.get_param("environment_mode")
+
+    def set_up_environment_mode(self):
+        environment_mode = self.get_argument_environment_mode()
+        if environment_mode:
+            safe_set(self.managed_env_def, "properties", "environmentMode", value=environment_mode)
+
     def set_up_peer_to_peer_encryption(self):
         is_p2p_encryption_enabled = self.get_argument_p2p_encryption_enabled()
         is_mtls_enabled = self.get_argument_mtls_enabled()
@@ -133,10 +142,22 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
     def get_argument_enable_workload_profiles(self):
         return self.get_param("enable_workload_profiles")
 
+    def get_effective_workload_profiles(self):
+        environment_mode = self.get_argument_environment_mode()
+        if environment_mode:
+            return environment_mode.lower() != "consumptiononly"
+        return self.get_argument_enable_workload_profiles()
+
     def get_argument_infrastructure_resource_group(self):
         return self.get_param("infrastructure_resource_group")
 
     def validate_arguments(self):
+        safe_params = self.cmd.cli_ctx.data.get('safe_params', [])
+        workload_profiles = self.get_argument_enable_workload_profiles() if (
+            '-w' in safe_params or '--enable-workload-profiles' in safe_params) else None
+        validate_environment_mode_and_workload_profiles_compatible(
+            self.get_argument_environment_mode(), workload_profiles)
+
         location = self.get_argument_location()
         if self.get_argument_zone_redundant():
             if not self.get_argument_infrastructure_subnet_resource_id():
@@ -166,7 +187,10 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
             if not self.get_argument_infrastructure_subnet_resource_id():
                 raise RequiredArgumentMissingError("Cannot use --infrastructure-resource-group/-i without "
                                                    "--infrastructure-subnet-resource-id/-s")
-            if not self.get_argument_enable_workload_profiles():
+            if not self.get_effective_workload_profiles():
+                if self.get_argument_environment_mode():
+                    raise RequiredArgumentMissingError("Cannot use --infrastructure-resource-group/-i with "
+                                                       "--environment-mode ConsumptionOnly")
                 raise RequiredArgumentMissingError("Cannot use --infrastructure-resource-group/-i without "
                                                    "--enable-workload-profiles/-w")
 
@@ -197,6 +221,7 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         self.managed_env_def["properties"]["zoneRedundant"] = self.get_argument_zone_redundant()
 
         self.set_up_workload_profiles()
+        self.set_up_environment_mode()
 
         # Custom domains
         if self.get_argument_hostname():
@@ -221,7 +246,7 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         self.set_up_infrastructure_resource_group()
 
     def set_up_infrastructure_resource_group(self):
-        if self.get_argument_enable_workload_profiles() and self.get_argument_infrastructure_subnet_resource_id() is not None:
+        if self.get_effective_workload_profiles() and self.get_argument_infrastructure_subnet_resource_id() is not None:
             self.managed_env_def["properties"]["InfrastructureResourceGroup"] = self.get_argument_infrastructure_resource_group()
 
     def set_up_workload_profiles(self):
@@ -233,13 +258,17 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
                                                     name=self.get_argument_name())
         except Exception as e:
             handle_non_404_status_code_exception(e)
-        if self.get_argument_enable_workload_profiles():
+        if self.get_effective_workload_profiles():
             if existing_environment and safe_get(existing_environment, "properties", "workloadProfiles") is None:
                 # check if input params include -w/--enable-workload-profiles
-                if self.cmd.cli_ctx.data.get('safe_params') and ('-w' in self.cmd.cli_ctx.data.get(
-                        'safe_params') or '--enable-workload-profiles' in self.cmd.cli_ctx.data.get('safe_params')):
+                safe_params = self.cmd.cli_ctx.data.get('safe_params', [])
+                if self.get_argument_environment_mode() or '-w' in safe_params or '--enable-workload-profiles' in safe_params:
                     raise ValidationError(
                         f"Existing environment {self.get_argument_name()} cannot enable workload profiles. If you want to use Consumption and Dedicated environment, please create a new one.")
+                return
+
+            if existing_environment and self.get_argument_environment_mode():
+                self.managed_env_def["properties"]["workloadProfiles"] = existing_environment["properties"]["workloadProfiles"]
                 return
 
             self.managed_env_def["properties"]["workloadProfiles"] = get_default_workload_profiles(self.cmd, self.get_argument_location())
@@ -332,6 +361,7 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
 
         # dapr
         self.set_up_dapr()
+        self.set_up_environment_mode()
 
     def set_up_app_log_configuration(self):
         logs_destination = self.get_argument_logs_destination()
