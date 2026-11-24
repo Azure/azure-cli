@@ -3,6 +3,84 @@
 Release History
 ===============
 
+2.94.0
+++++++
+
+**ACR**
+
+* `az acr login`: Validate `--suffix` before constructing the registry endpoint (#34431)
+* Remove regional endpoints from preview (#34468)
+* `az acr connected-registry create`: Fix garbage collection default to serialize as a JSON boolean (#34439)
+
+**AKS**
+
+* `az aks get-credentials`, `az aks check-acr`: Fix kubelogin executable lookup (#34445)
+* `az aks browse`, `az aks check-acr`: Use trusted kubectl executable paths (#34446)
+* `az aks install-cli`, `az aks install-desktop`: Resolve external tools safely and avoid shell invocation (#34446)
+* `az aks get-credentials`: Fix automatic kubelogin conversion for custom kubeconfig paths (#34442)
+
+**App Service**
+
+* `az appservice plan managed-instance instance connect`: Use secure executable invocation (#34436)
+
+**Batch**
+
+* `az batch task create`: Allow `=` in `--environment-settings` values (#34321)
+* `az batch pool create`: Allow `=` in `--metadata` and `--start-task-environment-settings` values (#34321)
+* `az batch task file download`, `az batch node file download`: Fix `AttributeError` when `--destination` is an existing folder (#34385)
+* `az batch pool create`: Update help for `--image` and remove Cloud Services Configuration text (#34322)
+* `az batch pool supported-images list`: Add examples (#34322)
+* `az batch task file show`, `az batch node file show`: Fix `AttributeError` on every call (#34451)
+* `az batch account identity assign`, `az batch account identity remove`: Fix public network access being turned on (#34452)
+* `az batch`: Fix duration options such as `--max-wall-clock-time` losing years and months (#34450)
+
+**Cognitive Services**
+
+* `az cognitiveservices account costcontrol` and `az cognitiveservices account project costcontrol`: Add examples (#34456)
+* `az cognitiveservices account create`: Refine BYO AKS preflight and provisioning (#34408)
+
+**Compute**
+
+* `az vm list-skus`: Filter SKUs by location on the server to avoid downloading all regions (#34396)
+* `az vm/vmss create`: Allow uppercase characters in Linux admin usernames (#34438)
+
+**Container app**
+
+* [BREAKING CHANGE] `az containerapp env create`: Change the default value of `--logs-destination` from `log-analytics` to `azure-monitor` (#34228)
+* `az containerapp`: Update to API version 2026-07-01 (#34395)
+
+**MySQL**
+
+* `az mysql flexible-server rename`: Add server rename support (#34240)
+
+**NetAppFiles**
+
+* `az netappfiles volume create`: Add ldap-server-type option (#34474)
+* `az netappfiles volume create`: Add smb-oplocks option to support enabling and disabling oplocks on SMB shares (#34474)
+* `az netappfiles volume update`: Add smb-oplocks option to support enabling and disabling oplocks on SMB shares (#34474)
+* `az netappfiles cache create`: Add smb-oplocks option to support enabling and disabling oplocks on SMB shares (#34474)
+* `az netappfiles cache update`: Add smb-oplocks option to support enabling and disabling oplocks on SMB shares (#34474)
+
+**Network**
+
+* `az network authentication-policy`: Add command group to support authentication policy (#34447)
+
+**Search**
+
+* [BREAKING CHANGE] `az search service create/update`: Remove the `serviceLevelEncryptionKey` option of `--encryption-with-cmk`, which is not part of the GA API (#34277)
+* `az search service create/update`: Add support for API version 2026-11-01 (#34277)
+
+**SQL**
+
+* `az sql db audit-policy update/show`, `az sql server audit-policy update/show`: Add `--required-fields` to configure selective-fields auditing with Azure Monitor targets (#34348)
+
+**Storage**
+
+* `az storage`: Validate that storage account names are a single hostname label before building service endpoints (#34381)
+* `az storage file download-batch`: Ensure downloaded files stay within the destination directory (#34381)
+* `az storage blob download-batch`, `az storage blob upload-batch`, `az storage blob delete-batch`, `az storage file download-batch`, `az storage file upload-batch`: Give a clear error when a storage URL is not a recognized account URL for the current cloud (#34381)
+* `az storage blob copy start`: `az storage blob incremental-copy start`, `az storage file copy start`: Validate source account names (#34381)
+
 2.93.0
 ++++++
 
