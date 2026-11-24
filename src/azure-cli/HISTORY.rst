@@ -9,7 +9,7 @@ Release History
 **ACR**
 
 * `az acr login`: Validate `--suffix` before constructing the registry endpoint (#34431)
-* Remove regional endpoints from preview (#34468)
+* `az acr create`, `az acr update`, `az acr login`: Remove the `--regional-endpoints`/`--endpoint` preview designation now that the feature is generally available (#34468)
 * `az acr connected-registry create`: Fix garbage collection default to serialize as a JSON boolean (#34439)
 
 **AKS**
@@ -79,7 +79,7 @@ Release History
 * `az storage`: Validate that storage account names are a single hostname label before building service endpoints (#34381)
 * `az storage file download-batch`: Ensure downloaded files stay within the destination directory (#34381)
 * `az storage blob download-batch`, `az storage blob upload-batch`, `az storage blob delete-batch`, `az storage file download-batch`, `az storage file upload-batch`: Give a clear error when a storage URL is not a recognized account URL for the current cloud (#34381)
-* `az storage blob copy start`: `az storage blob incremental-copy start`, `az storage file copy start`: Validate source account names (#34381)
+* `az storage blob copy start`, `az storage blob incremental-copy start`, `az storage file copy start`: Validate source account names (#34381)
 
 2.93.0
 ++++++
