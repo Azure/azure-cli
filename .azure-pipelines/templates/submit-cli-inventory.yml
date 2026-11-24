@@ -2,3 +2,5 @@ steps:
 - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
   displayName: Submit CLI runtime inventory to Component Governance
   condition: and(succeeded(), eq(variables['scanCliRuntime'], 'true'))
+  inputs:
+    sourceScanPath: $(Build.SourcesDirectory)/cg-runtime-inventory

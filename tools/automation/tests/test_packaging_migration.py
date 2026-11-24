@@ -49,6 +49,32 @@ class PackageFixture(unittest.TestCase):
         return self.root / folder
 
 
+class RuntimeInventoryTests(PackageFixture):
+    def setUp(self):
+        super().setUp()
+        script = Path(__file__).resolve().parents[3] / 'scripts/ci/install_with_cg_report.py'
+        spec = importlib.util.spec_from_file_location('install_with_cg_report', script)
+        self.installer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.installer)
+
+    def test_install_includes_new_local_projects_but_not_the_test_sdk(self):
+        cli = self.package('azure-cli')
+        new_package = self.package('new-cli-package')
+        sdk = self.package('azure-cli-testsdk')
+        with mock.patch.object(self.installer.subprocess, 'run') as run:
+            self.installer.install_with_report(self.root)
+        command = run.call_args.args[0]
+        self.assertIn(str(cli), command)
+        self.assertIn(str(new_package), command)
+        self.assertNotIn(str(sdk), command)
+
+    def test_missing_local_cli_fails_before_pip_can_fetch_it(self):
+        with mock.patch.object(self.installer.subprocess, 'run') as run:
+            with self.assertRaisesRegex(ValueError, 'Missing local azure-cli'):
+                self.installer.install_with_report(self.root)
+            run.assert_not_called()
+
+
 class FullTestPackageDataTests(unittest.TestCase):
     def test_sql_snapshot_powershell_fixture_is_packaged(self):
         root = Path(__file__).resolve().parents[3]

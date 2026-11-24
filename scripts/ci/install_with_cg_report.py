@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 """Install the CLI under test and provide its resolved pip inventory to CG."""
 
 import platform
@@ -6,9 +11,13 @@ import sys
 from pathlib import Path
 
 
-def main():
-    root = Path(__file__).resolve().parents[2]
+def install_with_report(root):
     src = root / "src"
+    projects = sorted(manifest.parent for manifest in src.rglob("pyproject.toml")
+                      if "azure-cli-testsdk" not in manifest.relative_to(src).parts)
+    if src / "azure-cli" not in projects:
+        raise ValueError("Missing local azure-cli project; refusing to resolve azure-cli from an index")
+
     system = platform.system()
     platform_file = "windows" if system == "Windows" else system
     pins = src / "azure-cli" / f"requirements.py3.{platform_file}.txt"
@@ -25,9 +34,9 @@ def main():
         sys.executable, "-m", "pip", "install", "--ignore-installed",
         "--report", str(inventory / "component-detection-pip-report.json"),
         "-r", str(requirements), "-r", str(pins),
-        str(src / "azure-cli"), str(src / "azure-cli-core"), str(src / "azure-cli-telemetry"),
+        *map(str, projects),
     ], check=True)
 
 
 if __name__ == "__main__":
-    main()
+    install_with_report(Path(__file__).resolve().parents[2])
