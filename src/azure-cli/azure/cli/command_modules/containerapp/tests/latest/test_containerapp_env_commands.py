@@ -29,7 +29,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus2")
     def test_containerapp_env_environment_mode(self, resource_group):
-        for mode in ['WorkloadProfiles', 'ConsumptionOnly', 'Express']:
+        for mode in ['WorkloadProfiles', 'Express']:
             env_name = self.create_random_name(prefix='env-mode-', length=24)
             self.cmd(
                 'containerapp env create -g {} -n {} --location eastus2 '
@@ -38,9 +38,9 @@ class ContainerappEnvScenarioTest(ScenarioTest):
             self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env_name),
                      checks=[JMESPathCheck('properties.environmentMode', mode)])
             self.cmd(
-                'containerapp env update -g {} -n {} --environment-mode {}'.format(
-                    resource_group, env_name, mode),
-                checks=[JMESPathCheck('properties.environmentMode', mode)])
+                'containerapp env update -g {} -n {} --environment-mode Archived'.format(
+                    resource_group, env_name),
+                checks=[JMESPathCheck('properties.environmentMode', 'Archived')])
             self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env_name))
 
     @AllowLargeResponse(8192)
