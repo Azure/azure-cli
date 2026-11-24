@@ -12,7 +12,11 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 del baseline_deps.txt
 
 Rem Install everything from our repository first.
-call .\scripts\install_full.bat
+if /i "%CLI_CG_REPORT%"=="true" (
+    python .\scripts\ci\install_with_cg_report.py
+) else (
+    call .\scripts\install_full.bat
+)
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 pip check

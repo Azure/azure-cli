@@ -15,7 +15,11 @@ pip check
 rm baseline_deps.txt
 
 # Install everything from our repository first.
-${REPO_ROOT}/scripts/install_full.sh
+if [[ "${CLI_CG_REPORT:-}" == [Tt][Rr][Uu][Ee] ]]; then
+    python "${REPO_ROOT}/scripts/ci/install_with_cg_report.py"
+else
+    ${REPO_ROOT}/scripts/install_full.sh
+fi
 
 pip check
 

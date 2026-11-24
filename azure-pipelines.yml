@@ -23,6 +23,8 @@ variables:
   value: false
 - name: ComponentDetection.ForceScan
   value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+- name: scanCliRuntime
+  value: $[or(eq(variables['Build.Reason'], 'PullRequest'), in(variables['Build.SourceBranch'], 'refs/heads/dev', 'refs/heads/release'))]
 
 # Standalone tarball and Cask parameters
 - name: standalone_python_version
@@ -158,6 +160,10 @@ jobs:
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
+    env:
+      CLI_CG_REPORT: $(scanCliRuntime)
+
+  - template: .azure-pipelines/templates/submit-cli-inventory.yml
 
 - job: VerifyDarwinRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Darwin.txt'
@@ -173,6 +179,10 @@ jobs:
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
+    env:
+      CLI_CG_REPORT: $(scanCliRuntime)
+
+  - template: .azure-pipelines/templates/submit-cli-inventory.yml
 
 - job: VerifyWindowsRequirements
   displayName: 'Verify src/azure-cli/requirements.*.Windows.txt'
@@ -190,6 +200,10 @@ jobs:
     inputs:
       filename: ./scripts/ci/dependency_check.bat
     displayName: 'Verify src/azure-cli/requirements.py3.Windows.txt'
+    env:
+      CLI_CG_REPORT: $(scanCliRuntime)
+
+  - template: .azure-pipelines/templates/submit-cli-inventory.yml
 
 - job: VerifyVersions
   displayName: Verify Command Module Versions

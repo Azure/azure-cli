@@ -19,6 +19,14 @@ Keep [pytest constraints](pytest-constraints.txt) available when breaking-change
 
 ## Verified pipeline references
 
+On PR builds (any target) and existing `dev` and `release` runs, each native
+platform requirements job installs the checked-out CLI with that platform's pins
+and records the resolved packages. Its explicit Component Governance task reads
+`cg-runtime-inventory/component-detection-pip-report.json` beside `requirements.txt`.
+Verify the task log says it used the pre-generated report and check the snapshot
+for that build and phase. This is the tested runtime inventory, not an SBOM of
+the final installer. Release triggers and production classification are unchanged.
+
 These are **YAML-backed definitions**, not the classic pipelines that still need inventory. Definitions were checked on 2026-11-09 in the `azclitools` organization, project `5147fa83-336e-44ef-bbe0-c86b8ae86cbb`.
 
 | Pipeline | Definition | Source |
