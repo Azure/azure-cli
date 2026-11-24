@@ -23,6 +23,10 @@ Release History
 
 * `az appservice plan managed-instance instance connect`: Use secure executable invocation (#34436)
 
+**ARM**
+
+* `az bicep`: Support configuration-based compiler version pinning with inherited configuration (#34423)
+
 **Batch**
 
 * `az batch task create`: Allow `=` in `--environment-settings` values (#34321)
