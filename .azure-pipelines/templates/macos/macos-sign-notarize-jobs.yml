@@ -10,6 +10,7 @@
 #   - condition: Job execution condition
 #   - dependsOn: Jobs this depends on
 #   - PythonVersion: Homebrew Python version for verification
+#   - WindowsPool: 1ES Windows agent pool for the ESRP sign/notarize jobs
 #
 # Artifacts Published:
 #   - macos-cli-signed-notarized-arm64
@@ -39,6 +40,9 @@ parameters:
   - name: ESRPServiceConnection
     type: string
     default: 'ame_esrp_connection'
+  - name: WindowsPool
+    type: string
+    default: 'pool-windows-2022'
 
 jobs:
 # ============================================================================
@@ -156,7 +160,7 @@ jobs:
       ARM64:
         Architecture: 'arm64'
   pool:
-    vmImage: 'windows-latest'
+    name: ${{ parameters.WindowsPool }}
   timeoutInMinutes: 30
   
   steps:
@@ -399,7 +403,7 @@ jobs:
       ARM64:
         Architecture: 'arm64'
   pool:
-    vmImage: 'windows-latest'
+    name: ${{ parameters.WindowsPool }}
   timeoutInMinutes: 60
   
   steps:

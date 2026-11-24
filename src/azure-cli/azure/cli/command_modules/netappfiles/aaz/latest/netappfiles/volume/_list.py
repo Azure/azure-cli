@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-08-01",
+        "version": "2026-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes", "2026-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes", "2026-09-01"],
         ]
     }
 
@@ -138,7 +138,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-08-01",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -273,9 +273,6 @@ class List(AAZCommand):
                 serialized_name="effectiveNetworkFeatures",
                 flags={"read_only": True},
             )
-            properties.enable_subvolumes = AAZStrType(
-                serialized_name="enableSubvolumes",
-            )
             properties.encrypted = AAZBoolType(
                 flags={"read_only": True},
             )
@@ -316,6 +313,9 @@ class List(AAZCommand):
             )
             properties.ldap_enabled = AAZBoolType(
                 serialized_name="ldapEnabled",
+            )
+            properties.ldap_server_type = AAZStrType(
+                serialized_name="ldapServerType",
             )
             properties.maximum_number_of_files = AAZIntType(
                 serialized_name="maximumNumberOfFiles",
@@ -373,6 +373,9 @@ class List(AAZCommand):
             )
             properties.smb_non_browsable = AAZStrType(
                 serialized_name="smbNonBrowsable",
+            )
+            properties.smb_oplocks = AAZStrType(
+                serialized_name="smbOplocks",
             )
             properties.snapshot_directory_visible = AAZBoolType(
                 serialized_name="snapshotDirectoryVisible",

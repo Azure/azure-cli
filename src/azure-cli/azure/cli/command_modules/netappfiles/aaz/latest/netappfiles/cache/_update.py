@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-08-01",
+        "version": "2026-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}", "2026-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}", "2026-09-01"],
         ]
     }
 
@@ -265,6 +265,13 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
+        _args_schema.smb_oplocks = AAZStrArg(
+            options=["--smb-oplocks"],
+            arg_group="SmbSettings",
+            help="Enables or disables SMB opportunistic lock property for SMB Shares. Only applicable for SMB/DualProtocol cache",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -353,7 +360,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-08-01",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -460,7 +467,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-08-01",
+                    "api-version", "2026-09-01",
                     required=True,
                 ),
             }
@@ -567,6 +574,7 @@ class Update(AAZCommand):
                 smb_settings.set_prop("smbAccessBasedEnumeration", AAZStrType, ".smb_access_based_enumeration")
                 smb_settings.set_prop("smbEncryption", AAZStrType, ".smb_encryption")
                 smb_settings.set_prop("smbNonBrowsable", AAZStrType, ".smb_non_browsable")
+                smb_settings.set_prop("smbOplocks", AAZStrType, ".smb_oplocks")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -811,6 +819,9 @@ class _UpdateHelper:
         )
         smb_settings.smb_non_browsable = AAZStrType(
             serialized_name="smbNonBrowsable",
+        )
+        smb_settings.smb_oplocks = AAZStrType(
+            serialized_name="smbOplocks",
         )
 
         system_data = _schema_cache_read.system_data

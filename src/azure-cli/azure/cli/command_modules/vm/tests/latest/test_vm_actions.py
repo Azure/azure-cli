@@ -152,19 +152,23 @@ class TestActions(unittest.TestCase):
 
     def test_validate_admin_username_linux(self):
         # pylint: disable=line-too-long
-        err_invalid_char = r'admin user name cannot contain upper case character A-Z, special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
+        err_invalid_char = r'admin user name cannot contain special characters \/"[]:|<>+=;,?*@#()! or start with $ or -'
 
         self._verify_username_with_ex('!@#', 'linux', err_invalid_char)
         self._verify_username_with_ex('gue[', 'linux', err_invalid_char)
-        self._verify_username_with_ex('Aguest', 'linux', err_invalid_char)
+        self._verify_username_with_ex('Azure@User', 'linux', err_invalid_char)
         self._verify_username_with_ex('-gguest', 'linux', err_invalid_char)
+        self._verify_username_with_ex('$AzureUser', 'linux', err_invalid_char)
         self._verify_username_with_ex('', 'linux', 'admin user name can not be empty')
         self._verify_username_with_ex('guest', 'linux',
                                       "This user name 'guest' meets the general requirements, but is specifically disallowed for this image. Please try a different value.")
+        for username in ('root', 'Root', 'ROOT'):
+            with self.subTest(username=username):
+                self._verify_username_with_ex(username, 'linux', 'specifically disallowed for this image')
 
-        _validate_admin_username('g-uest1', 'linux')
-        _validate_admin_username('guest1', 'linux')
-        _validate_admin_username('guest1.', 'linux')
+        for username in ('g-uest1', 'guest1', 'guest1.', 'AzureUser', 'Aguest', 'AZUREUSER'):
+            with self.subTest(username=username):
+                self.assertEqual(_validate_admin_username(username, 'linux'), username)
 
     def test_validate_admin_username_windows(self):
         # pylint: disable=line-too-long
