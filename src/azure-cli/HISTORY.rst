@@ -67,8 +67,8 @@ Release History
 
 **Search**
 
-* [BREAKING CHANGE] `az search service create/update`: Remove the `serviceLevelEncryptionKey` option of `--encryption-with-cmk`, which is not part of the GA API (#34277)
 * `az search service create/update`: Add support for API version 2026-11-01 (#34277)
+* `az search service create/update`: `--encryption-with-cmk service-level-encryption-key` is not yet available in API version 2026-11-01; using it now raises a clear error instead of being silently accepted (#34277)
 
 **SQL**
 
