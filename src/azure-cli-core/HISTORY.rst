@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.94.0
+++++++
+* Fix empty `REQUESTS_CA_BUNDLE` values causing invalid-file-path errors (#34459)
+
 2.93.0
 ++++++
 * Upgrade bundled Python to 3.14.10 for Windows and Debian packages (#34326)
