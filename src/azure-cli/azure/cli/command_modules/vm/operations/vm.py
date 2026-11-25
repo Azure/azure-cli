@@ -803,6 +803,8 @@ def convert_show_result_to_snake_case(result):
     if "inVMAccessControlProfileReferenceId" in imds:
         imds["in_vm_access_control_profile_reference_id"] = imds["inVMAccessControlProfileReferenceId"]
         imds.pop("inVMAccessControlProfileReferenceId")
+    if "useLocalFileRules" in imds:
+        imds["use_local_file_rules"] = imds.pop("useLocalFileRules")
 
     wire_server = proxy_agent_settings.get("wire_server", {}) or {}
     if "inVMAccessControlProfileReferenceId" in wire_server:
