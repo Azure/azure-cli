@@ -81,6 +81,13 @@ jobs:
       echo "Python: $PYTHON"
       echo "Architecture: $ARCH"
       $PYTHON --version
+      brew list --versions "python@$RELEASE_PYTHON_VERSION"
+      if command -v rustc >/dev/null; then
+        rustc --version
+        cargo --version
+      else
+        echo "Rust toolchain not present; source builds requiring Rust will fail."
+      fi
       
       $PYTHON scripts/release/standalone/build_binary_tar_gz.py \
         --platform-tag macos-$ARCH \
@@ -97,6 +104,7 @@ jobs:
     displayName: 'Build Azure CLI Tarball'
     env:
       PYTHON_MAJOR_MINOR: ${{ parameters.PythonVersion }}
+      RELEASE_PYTHON_VERSION: ${{ parameters.PythonVersion }}
   
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'Generate SBOM'
@@ -126,7 +134,8 @@ jobs:
     vmImage: $(vmImageName)
   
   steps:
-  - checkout: none
+  - checkout: self
+    fetchDepth: 1
   
   - download: current
     artifact: 'macos-cli-build-unsigned-$(Architecture)'
@@ -182,39 +191,10 @@ jobs:
       "$EXTRACT_DIR/bin/az" version
 
       echo "=== Verifying packaged cryptography ==="
-      "$AZ_PYTHON" -S - "$EXTRACT_DIR/libexec/lib/python$RELEASE_PYTHON_VERSION/site-packages" <<'PY'
-      import sys
-      from pathlib import Path
-
-      packages = Path(sys.argv[1]).resolve(strict=True)
-      sys.path.insert(0, str(packages))
-
-      import cryptography
-      from cryptography.hazmat.backends.openssl.backend import backend
-      from cryptography.hazmat.primitives import hashes, serialization
-      from cryptography.hazmat.primitives.asymmetric import padding, rsa
-      from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-
-      assert Path(cryptography.__file__).resolve().is_relative_to(packages)
-      print(f"cryptography {cryptography.__version__}: {cryptography.__file__}")
-      print(backend.openssl_version_text())
-
-      message = b"Azure CLI cryptography smoke test"
-      key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-      pem = key.private_bytes(serialization.Encoding.PEM,
-                              serialization.PrivateFormat.PKCS8,
-                              serialization.NoEncryption())
-      key = serialization.load_pem_private_key(pem, password=None)
-      signature = key.sign(message, padding.PKCS1v15(), hashes.SHA256())
-      key.public_key().verify(signature, message, padding.PKCS1v15(), hashes.SHA256())
-      print("RSA key generation, PEM round-trip and signature verification passed")
-
-      cipher = AESGCM(AESGCM.generate_key(bit_length=256))
-      nonce = b"\x00" * 12
-      ciphertext = cipher.encrypt(nonce, message, b"azure-cli")
-      assert cipher.decrypt(nonce, ciphertext, b"azure-cli") == message
-      print("AES-GCM encryption/decryption passed")
-      PY
+      "$AZ_PYTHON" -S scripts/release/standalone/verify_crypto.py \
+        --packages "$EXTRACT_DIR/libexec/lib/python$RELEASE_PYTHON_VERSION/site-packages" \
+        --architecture "$ARCH" \
+        --python-formula "python@$RELEASE_PYTHON_VERSION"
       
       echo ""
       echo "Azure CLI works correctly on $ARCH"
