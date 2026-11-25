@@ -299,7 +299,9 @@ class TestServicePrincipalAuth(unittest.TestCase):
         }
 
         # get_msal_client_credential wraps the command as a refreshing callable (not a static string).
-        client_credential = sp_auth.get_msal_client_credential()
+        with mock.patch('azure.cli.core.auth.identity.get_safe_executable_path',
+                        return_value='/safe/my-get-token-command'):
+            client_credential = sp_auth.get_msal_client_credential()
         assert callable(client_credential['client_assertion'])
 
     @mock.patch('subprocess.run')
@@ -307,12 +309,13 @@ class TestServicePrincipalAuth(unittest.TestCase):
         run_mock.return_value = mock.MagicMock(stdout='fresh_token\n', stderr='')
         sp_auth = ServicePrincipalAuth.build_from_credential(
             'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token --audience x'})
-        callback = sp_auth.get_msal_client_credential()['client_assertion']
+        with mock.patch('azure.cli.core.auth.identity.get_safe_executable_path', return_value='/safe/get-token'):
+            callback = sp_auth.get_msal_client_credential()['client_assertion']
 
         # The callable runs the user command and returns its trimmed stdout each time MSAL calls it.
         assert callback() == 'fresh_token'
         # The command is split into an argv list and run WITHOUT a shell (no shell=True kwarg).
-        assert run_mock.call_args.args[0] == ['get-token', '--audience', 'x']
+        assert run_mock.call_args.args[0] == ['/safe/get-token', '--audience', 'x']
         assert 'shell' not in run_mock.call_args.kwargs
 
     def test_federated_token_callback_no_shell_interpretation(self):
@@ -321,8 +324,10 @@ class TestServicePrincipalAuth(unittest.TestCase):
             'tenant1', 'sp_id1', {'client_assertion_callback': "get-token ; rm -rf /"})
         with mock.patch('subprocess.run') as run_mock:
             run_mock.return_value = mock.MagicMock(stdout='tok\n', stderr='')
-            sp_auth.get_msal_client_credential()['client_assertion']()
-        assert run_mock.call_args.args[0] == ['get-token', ';', 'rm', '-rf', '/']
+            with mock.patch('azure.cli.core.auth.identity.get_safe_executable_path',
+                            return_value='/safe/get-token'):
+                sp_auth.get_msal_client_credential()['client_assertion']()
+        assert run_mock.call_args.args[0] == ['/safe/get-token', ';', 'rm', '-rf', '/']
 
     def test_federated_token_callback_quoted_argument(self):
         # A quoted argument containing spaces must reach the program without the surrounding quotes.
@@ -330,16 +335,55 @@ class TestServicePrincipalAuth(unittest.TestCase):
             'tenant1', 'sp_id1', {'client_assertion_callback': 'mytool --aud "api://x y"'})
         with mock.patch('subprocess.run') as run_mock:
             run_mock.return_value = mock.MagicMock(stdout='tok\n', stderr='')
-            sp_auth.get_msal_client_credential()['client_assertion']()
-        assert run_mock.call_args.args[0] == ['mytool', '--aud', 'api://x y']
+            with mock.patch('azure.cli.core.auth.identity.get_safe_executable_path', return_value='/safe/mytool'):
+                sp_auth.get_msal_client_credential()['client_assertion']()
+        assert run_mock.call_args.args[0] == ['/safe/mytool', '--aud', 'api://x y']
+
+    def test_federated_token_callback_invalid_command_syntax(self):
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token "unterminated'})
+        with self.assertRaisesRegex(CLIError, 'invalid command'):
+            sp_auth.get_msal_client_credential()
+
+    def test_federated_token_callback_executable_resolution_failure(self):
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token'})
+        with mock.patch('azure.cli.core.auth.identity.get_safe_executable_path', return_value=None):
+            with self.assertRaisesRegex(CLIError, 'trusted PATH location'):
+                sp_auth.get_msal_client_credential()
 
     @mock.patch('subprocess.run')
     def test_federated_token_callback_empty_output(self, run_mock):
         run_mock.return_value = mock.MagicMock(stdout='   \n', stderr='')
         sp_auth = ServicePrincipalAuth.build_from_credential(
             'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token'})
-        callback = sp_auth.get_msal_client_credential()['client_assertion']
+        with mock.patch('azure.cli.core.auth.identity.get_safe_executable_path', return_value='/safe/get-token'):
+            callback = sp_auth.get_msal_client_credential()['client_assertion']
         with self.assertRaisesRegex(CLIError, 'produced no output'):
+            callback()
+
+    @mock.patch('subprocess.run')
+    def test_federated_token_callback_non_zero_exit_hides_stderr(self, run_mock):
+        import subprocess
+        run_mock.side_effect = subprocess.CalledProcessError(
+            returncode=42, cmd=['/safe/get-token'], stderr='Authorization: Bearer secret-token')
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token'})
+        with mock.patch('azure.cli.core.auth.identity.get_safe_executable_path', return_value='/safe/get-token'):
+            callback = sp_auth.get_msal_client_credential()['client_assertion']
+        with self.assertRaisesRegex(CLIError, 'exited with code 42') as ex:
+            callback()
+        assert 'secret-token' not in str(ex.exception)
+
+    @mock.patch('subprocess.run')
+    def test_federated_token_callback_timeout(self, run_mock):
+        import subprocess
+        run_mock.side_effect = subprocess.TimeoutExpired(cmd=['/safe/get-token'], timeout=30)
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token'})
+        with mock.patch('azure.cli.core.auth.identity.get_safe_executable_path', return_value='/safe/get-token'):
+            callback = sp_auth.get_msal_client_credential()['client_assertion']
+        with self.assertRaisesRegex(CLIError, 'timed out'):
             callback()
 
     def test_federated_token_callback_is_thread_safe(self):
@@ -360,7 +404,8 @@ class TestServicePrincipalAuth(unittest.TestCase):
 
         sp_auth = ServicePrincipalAuth.build_from_credential(
             'tenant1', 'sp_id1', {'client_assertion_callback': 'get-token'})
-        callback = sp_auth.get_msal_client_credential()['client_assertion']
+        with mock.patch('azure.cli.core.auth.identity.get_safe_executable_path', return_value='/safe/get-token'):
+            callback = sp_auth.get_msal_client_credential()['client_assertion']
 
         with mock.patch('subprocess.run', side_effect=fake_run):
             threads = [threading.Thread(target=callback) for _ in range(8)]

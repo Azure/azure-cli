@@ -491,6 +491,47 @@ _federated_id_token_lock = threading.Lock()
 # long-running CI job instead of hanging the whole token acquisition indefinitely.
 _OIDC_HTTP_TIMEOUT = (10, 30)
 
+# Timeout (seconds) for a user callback command that fetches a federated token. The callback runs under
+# a lock, so a stuck command would otherwise block all concurrent token acquisitions.
+_OIDC_CALLBACK_PROCESS_TIMEOUT = 30
+
+
+def get_safe_executable_path(executable):
+    """Resolve an executable path while avoiding current-directory lookup for bare names."""
+    if os.path.dirname(executable):
+        return executable
+    try:
+        cwd = os.getcwd()
+    except OSError:
+        return None
+
+    search_dirs = os.environ.get('PATH', os.defpath).split(os.pathsep)
+    names = [executable]
+    is_windows_platform = sys.platform.startswith('win')
+    if is_windows_platform:
+        system_root = os.environ.get('SystemRoot', r'C:\Windows')
+        search_dirs = [os.path.join(system_root, 'System32'), system_root] + search_dirs
+        exts = [ext for ext in os.environ.get('PATHEXT', '.COM;.EXE;.BAT;.CMD').split(os.pathsep) if ext]
+        if not os.path.splitext(executable)[1]:
+            names = [executable + ext for ext in exts]
+
+    for directory in (d.strip('"') for d in search_dirs):
+        if not os.path.isabs(directory) or (is_windows_platform and not os.path.splitdrive(directory)[0]):
+            continue
+        try:
+            if not os.path.isdir(directory) or os.path.samefile(directory, cwd):
+                continue
+            for name in names:
+                path = os.path.join(directory, name)
+                if not os.path.isfile(path) or not os.access(path, os.X_OK):
+                    continue
+                if os.path.samefile(os.path.dirname(os.path.realpath(path)), cwd):
+                    continue
+                return path
+        except (OSError, ValueError) as ex:
+            logger.debug("Skipping executable lookup in '%s': unable to verify path safety: %s", directory, ex)
+    return None
+
 
 def get_federated_id_token():
     """Acquire a fresh OIDC ID token from the current CI/CD provider.
@@ -637,9 +678,17 @@ def _build_command_assertion_callback(command):
     import shlex
     # POSIX parsing on every platform so quoted arguments containing spaces are handled correctly and
     # consistently. The trade-off is that backslashes are escape characters (see the Windows note above).
-    args = shlex.split(command, posix=True)
+    try:
+        args = shlex.split(command, posix=True)
+    except ValueError as ex:
+        raise CLIError('--federated-token-callback: invalid command: {}'.format(ex)) from None
     if not args:
         raise CLIError('--federated-token-callback: the command is empty.')
+    executable = get_safe_executable_path(args[0])
+    if not executable:
+        raise CLIError("--federated-token-callback: command not found in a trusted PATH location: '{}'".format(
+            args[0])) from None
+    args[0] = executable
 
     # MSAL may invoke the client_assertion callback from concurrent token requests; serialize the command
     # execution so two requests don't run the callback command at the same time.
@@ -649,12 +698,18 @@ def _build_command_assertion_callback(command):
         import subprocess
         with lock:
             try:
-                result = subprocess.run(args, capture_output=True, text=True, check=True)
+                result = subprocess.run(args, capture_output=True, text=True, check=True,
+                                        timeout=_OIDC_CALLBACK_PROCESS_TIMEOUT)
             except FileNotFoundError:
-                raise CLIError("--federated-token-callback: command not found: '{}'".format(args[0]))
+                raise CLIError("--federated-token-callback: command not found: '{}'".format(args[0])) from None
+            except subprocess.TimeoutExpired:
+                raise CLIError('--federated-token-callback: command timed out after {} seconds.'.format(
+                    _OIDC_CALLBACK_PROCESS_TIMEOUT)) from None
             except subprocess.CalledProcessError as ex:
-                raise CLIError('--federated-token-callback command exited with code {}: {}'.format(
-                    ex.returncode, (ex.stderr or '').strip()))
+                # Do not include stderr in the error message: it may contain sensitive values printed by
+                # helper commands (for example, raw tokens in verbose HTTP output).
+                raise CLIError('--federated-token-callback command exited with code {}.'.format(
+                    ex.returncode)) from None
             id_token = result.stdout.strip()
         if not id_token:
             raise CLIError('--federated-token-callback command produced no output on stdout.')
