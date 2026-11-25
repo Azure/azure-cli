@@ -10,6 +10,7 @@ import sys
 import threading
 
 from azure.cli.core._environment import get_config_dir
+from azure.cli.core.util import get_safe_executable_path
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
@@ -494,43 +495,6 @@ _OIDC_HTTP_TIMEOUT = (10, 30)
 # Timeout (seconds) for a user callback command that fetches a federated token. The callback runs under
 # a lock, so a stuck command would otherwise block all concurrent token acquisitions.
 _OIDC_CALLBACK_PROCESS_TIMEOUT = 30
-
-
-def get_safe_executable_path(executable):
-    """Resolve an executable path while avoiding current-directory lookup for bare names."""
-    if os.path.dirname(executable):
-        return executable
-    try:
-        cwd = os.getcwd()
-    except OSError:
-        return None
-
-    search_dirs = os.environ.get('PATH', os.defpath).split(os.pathsep)
-    names = [executable]
-    is_windows_platform = sys.platform.startswith('win')
-    if is_windows_platform:
-        system_root = os.environ.get('SystemRoot', r'C:\Windows')
-        search_dirs = [os.path.join(system_root, 'System32'), system_root] + search_dirs
-        exts = [ext for ext in os.environ.get('PATHEXT', '.COM;.EXE;.BAT;.CMD').split(os.pathsep) if ext]
-        if not os.path.splitext(executable)[1]:
-            names = [executable + ext for ext in exts]
-
-    for directory in (d.strip('"') for d in search_dirs):
-        if not os.path.isabs(directory) or (is_windows_platform and not os.path.splitdrive(directory)[0]):
-            continue
-        try:
-            if not os.path.isdir(directory) or os.path.samefile(directory, cwd):
-                continue
-            for name in names:
-                path = os.path.join(directory, name)
-                if not os.path.isfile(path) or not os.access(path, os.X_OK):
-                    continue
-                if os.path.samefile(os.path.dirname(os.path.realpath(path)), cwd):
-                    continue
-                return path
-        except (OSError, ValueError) as ex:
-            logger.debug("Skipping executable lookup in '%s': unable to verify path safety: %s", directory, ex)
-    return None
 
 
 def get_federated_id_token():
