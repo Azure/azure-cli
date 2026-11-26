@@ -941,7 +941,7 @@ CMD ["python", "app.py"]
                             '-a {account} '
                             '--project-name {project} '
                             '--name {agent} '
-                            '--source {source_dir} '
+                            '--source "{source_dir}" '
                             '--registry {registry} '
                             '--build-remote',
                             checks=[

@@ -2711,7 +2711,15 @@ def project_create(
     if user_assigned_identity is None:
         assign_identity = True
     project.identity = compose_identity(system_assigned=assign_identity, user_assigned_identity=user_assigned_identity)
-    return client.begin_create(resource_group_name, account_name, project_name, project, polling=no_wait)
+    from azure.core.exceptions import HttpResponseError
+    # azure-mgmt-cognitiveservices 15.0.0b6 accepted 201; 15.1.0b1 only accepts 200/202 and rejects 201.
+    # Handle that exception until the service is fixed to return 202 instead of 201.
+    try:
+        return client.begin_create(resource_group_name, account_name, project_name, project, polling=no_wait)
+    except HttpResponseError as ex:
+        if ex.response is not None and ex.response.status_code == 201:
+            return Project(ex.response.json())
+        raise
 
 
 def project_update(

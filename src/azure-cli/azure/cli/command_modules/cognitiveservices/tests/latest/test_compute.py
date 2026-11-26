@@ -167,6 +167,20 @@ class CognitiveServicesComputeScenarioTests(ScenarioTest):
     the compute commands, and tear the account down. No persistent resources.
     """
 
+    def _create_account(self):
+        # Use az resource create because az cognitiveservices account create does not
+        # expose disableLocalAuth, which some subscription policies require to be true
+        # when creating accounts for compute tests.
+        self.cmd(
+            'az resource create -n {sname} -g {rg} '
+            '--resource-type Microsoft.CognitiveServices/accounts --api-version 2026-11-15-preview '
+            '--is-full-object --properties '
+            '\'{{"location":"{location}","kind":"{kind}","sku":{{"name":"{sku}"}},'
+            '"identity":{{"type":"SystemAssigned"}},'
+            '"properties":{{"allowProjectManagement":true,"disableLocalAuth":true}}}}\'',
+            checks=[self.check('name', '{sname}'), self.check('properties.disableLocalAuth', True)],
+        )
+
     @ResourceGroupPreparer(name_prefix='clitest_cs_compute', location='westcentralus')
     def test_cognitiveservices_compute_list_empty(self, resource_group):
         """Fresh account -> `compute list` returns an empty array."""
@@ -177,12 +191,7 @@ class CognitiveServicesComputeScenarioTests(ScenarioTest):
             'location': 'westcentralus',
         })
 
-        self.cmd(
-            'az cognitiveservices account create -n {sname} -g {rg} '
-            '--kind {kind} --sku {sku} -l {location} --yes '
-            '--assign-identity --allow-project-management true',
-            checks=[self.check('name', '{sname}')],
-        )
+        self._create_account()
 
         self.cmd(
             'az cognitiveservices account compute list -n {sname} -g {rg}',
@@ -204,12 +213,7 @@ class CognitiveServicesComputeScenarioTests(ScenarioTest):
             'instance_type': 'Standard_D64_v3',
         })
 
-        self.cmd(
-            'az cognitiveservices account create -n {sname} -g {rg} '
-            '--kind {kind} --sku {sku} -l {location} --yes '
-            '--assign-identity --allow-project-management true',
-            checks=[self.check('name', '{sname}')],
-        )
+        self._create_account()
 
         # Fire compute create with --no-wait so the test does not block for the
         # ~10 min provisioning window while recording. Poll via `show` below.
