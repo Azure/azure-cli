@@ -165,12 +165,12 @@ class Profile:
 
         user_identity = None
         if interactive:
-            if not use_device_code and not can_launch_browser():
-                logger.info('No web browser is available. Fall back to device code.')
-                use_device_code = True
-
             if not use_device_code and is_github_codespaces():
                 logger.info('GitHub Codespaces is detected. Fall back to device code.')
+                use_device_code = True
+
+            if not use_device_code and not can_launch_browser() and not identity.is_wsl_broker_enabled():
+                logger.info('No web browser or WSL broker is available. Fall back to device code.')
                 use_device_code = True
 
             if use_device_code:
@@ -977,6 +977,8 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
     enable_broker_on_windows = cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
     # On macOS, broker authentication is opt-in. Use core.enable_broker_on_mac=true to enable it.
     enable_broker_on_mac = cli_ctx.config.getboolean('core', 'enable_broker_on_mac', fallback=False)
+    # On WSL, broker authentication is opt-in and requires the optional MSAL broker runtime.
+    enable_broker_on_wsl = cli_ctx.config.getboolean('core', 'enable_broker_on_wsl', fallback=False)
     from .telemetry import set_broker_info
     set_broker_info(enable_broker_on_windows, enable_broker_on_mac)
 
@@ -988,4 +990,5 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
                     use_msal_http_cache=use_msal_http_cache,
                     enable_broker_on_windows=enable_broker_on_windows,
                     enable_broker_on_mac=enable_broker_on_mac,
+                    enable_broker_on_wsl=enable_broker_on_wsl,
                     instance_discovery=instance_discovery)
