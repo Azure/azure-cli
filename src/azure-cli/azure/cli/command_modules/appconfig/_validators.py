@@ -380,6 +380,19 @@ def validate_feature_key(namespace):
 
 
 def validate_import_profile(namespace):
+    if namespace.source == 'file' and namespace.format_ == 'json' and namespace.path:
+        from ._kv_import_helpers import __read_with_appropriate_encoding
+        from ._utils import resolve_import_profile
+        from azure.cli.core.azclierror import FileOperationError
+        try:
+            data = __read_with_appropriate_encoding(namespace.path, "json")
+        except ValueError as exception:
+            raise FileOperationError(
+                "The input is not a well formatted json file.\nException: {}".format(exception)) from exception
+        except OSError as exception:
+            raise FileOperationError("File is not available.") from exception
+        namespace.profile = resolve_import_profile(
+            data, namespace.profile, (ImportExportProfiles.DEFAULT, ImportExportProfiles.KVSET))
     if namespace.profile == ImportExportProfiles.KVSET:
         if namespace.source != 'file':
             raise InvalidArgumentValueError("Import profile '{}' can only be used when importing from a JSON file.".format(ImportExportProfiles.KVSET))
