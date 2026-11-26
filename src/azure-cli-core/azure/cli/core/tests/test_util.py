@@ -412,6 +412,111 @@ class TestUtils(unittest.TestCase):
             request = send_mock.call_args[0][1]
             self.assertEqual(request.headers['User-Agent'], get_az_rest_user_agent() + ' env-ua ARG-UA')
 
+    def test_send_raw_request_claims_challenge(self):
+        import base64
+        import io
+        from requests.structures import CaseInsensitiveDict
+        from azure.cli.core.azclierror import HTTPError
+        from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+
+        def _response(status_code, www_authenticate=None, history=None):
+            response = mock.MagicMock()
+            response.status_code = status_code
+            response.ok = status_code < 400
+            response.reason = 'Unauthorized' if status_code == 401 else 'OK'
+            response.text = ''
+            response.headers = CaseInsensitiveDict()
+            if www_authenticate:
+                response.headers['WWW-Authenticate'] = www_authenticate
+            response.history = history or []
+            return response
+
+        def _token(token):
+            return ('Bearer', token, None), None, None
+
+        claims = '{"access_token":{"nbf":{"essential":true,"value":"1603742800"}}}'
+        encoded_claims = base64.urlsafe_b64encode(claims.encode()).decode().rstrip('=')
+        challenge = ('Bearer realm="", authorization_uri="https://login.microsoftonline.com/common/oauth2/authorize", '
+                     'error="insufficient_claims", claims="{}"'.format(encoded_claims))
+        graph_resource = 'https://graph.microsoft.com/'
+        graph_url = 'https://graph.microsoft.com/v1.0/me'
+
+        # Create the CLI before HTTP is mocked, because its initialization can check for updates.
+        # Other tests can change the active cloud, so set the cloud explicitly.
+        cli_ctx = DummyCli()
+        cli_ctx.cloud = AZURE_PUBLIC_CLOUD
+        cli_ctx.data = {'command': 'rest', 'safe_params': []}
+
+        with mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True) as get_raw_token_mock, \
+                mock.patch('requests.Session.send', autospec=True) as send_mock:
+            # A claims challenge is answered once, with a new token
+            get_raw_token_mock.side_effect = [_token('old-token'), _token('new-token')]
+            send_mock.side_effect = [_response(401, challenge), _response(200)]
+            send_raw_request(cli_ctx, 'GET', graph_url)
+            self.assertEqual(send_mock.call_count, 2)
+            get_raw_token_mock.assert_called_with(mock.ANY, graph_resource, claims_challenge=claims)
+            self.assertEqual(send_mock.call_args[0][1].headers['Authorization'], 'Bearer new-token')
+
+            # The retry keeps the subscription of an ARM request
+            subscription_id = '00000001-0000-0000-0000-000000000000'
+            arm_url = 'https://management.azure.com/subscriptions/{}/resourcegroups?api-version=2021-04-01'.format(
+                subscription_id)
+            get_raw_token_mock.reset_mock()
+            send_mock.reset_mock()
+            get_raw_token_mock.side_effect = [_token('old-token'), _token('new-token')]
+            send_mock.side_effect = [_response(401, challenge), _response(200)]
+            send_raw_request(cli_ctx, 'GET', arm_url)
+            get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/',
+                                                  claims_challenge=claims, subscription=subscription_id)
+
+            # A second claims challenge is not answered
+            get_raw_token_mock.reset_mock()
+            send_mock.reset_mock()
+            get_raw_token_mock.side_effect = [_token('old-token'), _token('new-token')]
+            send_mock.side_effect = [_response(401, challenge), _response(401, challenge)]
+            with self.assertRaises(HTTPError):
+                send_raw_request(cli_ctx, 'GET', graph_url)
+            self.assertEqual(send_mock.call_count, 2)
+
+            # A claims challenge after a redirect is not answered
+            get_raw_token_mock.reset_mock()
+            send_mock.reset_mock()
+            get_raw_token_mock.side_effect = [_token('token')]
+            send_mock.side_effect = [_response(401, challenge, history=[_response(303)])]
+            with self.assertRaises(HTTPError):
+                send_raw_request(cli_ctx, 'POST', graph_url, body='{}')
+            self.assertEqual(send_mock.call_count, 1)
+            get_raw_token_mock.assert_called_once_with(mock.ANY, graph_resource)
+
+            # A claims challenge for a file-like body is not answered, because the first send consumed it
+            get_raw_token_mock.reset_mock()
+            send_mock.reset_mock()
+            get_raw_token_mock.side_effect = [_token('token')]
+            send_mock.side_effect = [_response(401, challenge)]
+            with self.assertRaises(HTTPError):
+                send_raw_request(cli_ctx, 'PUT', graph_url, body=io.BytesIO(b'content'))
+            self.assertEqual(send_mock.call_count, 1)
+            get_raw_token_mock.assert_called_once_with(mock.ANY, graph_resource)
+
+            # A 401 without claims is not retried
+            get_raw_token_mock.reset_mock()
+            send_mock.reset_mock()
+            get_raw_token_mock.side_effect = [_token('token')]
+            send_mock.side_effect = [_response(401, 'Bearer error="invalid_token"')]
+            with self.assertRaises(HTTPError):
+                send_raw_request(cli_ctx, 'GET', graph_url)
+            self.assertEqual(send_mock.call_count, 1)
+            get_raw_token_mock.assert_called_once_with(mock.ANY, graph_resource)
+
+            # A claims challenge for an Authorization header given by the caller is not answered
+            get_raw_token_mock.reset_mock()
+            send_mock.reset_mock()
+            send_mock.side_effect = [_response(401, challenge)]
+            with self.assertRaises(HTTPError):
+                send_raw_request(cli_ctx, 'GET', graph_url, headers=['Authorization=Bearer my-token'])
+            self.assertEqual(send_mock.call_count, 1)
+            get_raw_token_mock.assert_not_called()
+
     def test_is_same_origin(self):
         endpoint = 'https://management.azure.com/'
 

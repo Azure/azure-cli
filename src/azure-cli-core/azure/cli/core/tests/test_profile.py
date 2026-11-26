@@ -53,11 +53,13 @@ class MsalCredentialStub:
         # to avoid interference from other tests.
         self.acquire_token_scopes = None
         self.acquire_token_data=None
+        self.acquire_token_claims_challenge = None
         super().__init__()
 
     def acquire_token(self, scopes, **kwargs):
         self.acquire_token_scopes = scopes
         self.acquire_token_data = kwargs.get('data')
+        self.acquire_token_claims_challenge = kwargs.get('claims_challenge')
         return {
             'access_token': MOCK_ACCESS_TOKEN,
             'token_type': 'Bearer',
@@ -1089,6 +1091,12 @@ class TestProfile(unittest.TestCase):
         # subscription shouldn't be set
         self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
+
+        # Test get_raw_token with claims_challenge
+        self.assertIsNone(credential_mock_temp.acquire_token_claims_challenge)
+        claims = '{"access_token":{"nbf":{"essential":true,"value":"1603742800"}}}'
+        profile.get_raw_token(resource=self.adal_resource, claims_challenge=claims)
+        self.assertEqual(credential_mock_temp.acquire_token_claims_challenge, claims)
 
     @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_credential')
