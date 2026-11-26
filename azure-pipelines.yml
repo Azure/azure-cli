@@ -236,6 +236,12 @@ jobs:
     inputs:
       artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
+  - task: UseDotNet@2
+    displayName: Install .NET 8 SDK
+    inputs:
+      packageType: sdk
+      version: 8.0.x
+
   - script: |
       set ARCH=$(Platform)
       set TARGET=msi
@@ -327,6 +333,11 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/msi'
       artifactName: msi-$(Platform)
+
+  - task: PowerShell@2
+    displayName: Upgrade from Previous Release
+    inputs:
+      filePath: build_scripts\windows\scripts\test_msi_upgrade.ps1
 
   - task: PowerShell@2
     displayName: Install and Load CLI
