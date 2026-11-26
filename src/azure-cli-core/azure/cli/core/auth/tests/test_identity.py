@@ -280,9 +280,29 @@ class TestServicePrincipalAuth(unittest.TestCase):
 
         # ... but get_msal_client_credential resolves the sentinel to the refreshing callback (not a string),
         # so MSAL fetches a fresh ID token on every acquisition.
-        client_credential = sp_auth.get_msal_client_credential()
-        assert client_credential == {'client_assertion': get_federated_id_token}
-        assert callable(client_credential['client_assertion'])
+        with mock.patch('azure.cli.core.auth.identity.get_federated_id_token', return_value='fresh_token') as m:
+            client_credential = sp_auth.get_msal_client_credential()
+            assert callable(client_credential['client_assertion'])
+            assert client_credential['client_assertion']() == 'fresh_token'
+            m.assert_called_once_with('api://AzureADTokenExchange')
+
+    def test_service_principal_auth_federated_identity_custom_audience(self):
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1',
+            {'client_assertion': FEDERATED_IDENTITY, 'federated_identity_audience': 'api://custom-audience'})
+
+        entry = sp_auth.get_entry_to_persist()
+        assert entry == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'client_assertion': FEDERATED_IDENTITY,
+            'federated_identity_audience': 'api://custom-audience'
+        }
+
+        with mock.patch('azure.cli.core.auth.identity.get_federated_id_token', return_value='fresh_token') as m:
+            callback = sp_auth.get_msal_client_credential()['client_assertion']
+            assert callback() == 'fresh_token'
+            m.assert_called_once_with('api://custom-audience')
 
     def test_build_credential(self):
         # client_secret
@@ -311,6 +331,14 @@ class TestServicePrincipalAuth(unittest.TestCase):
         # client_assertion
         cred = ServicePrincipalAuth.build_credential(client_assertion="test_jwt")
         assert cred == {"client_assertion": "test_jwt"}
+
+        # client_assertion with custom federated identity audience
+        cred = ServicePrincipalAuth.build_credential(
+            client_assertion=FEDERATED_IDENTITY, federated_identity_audience='api://custom-audience')
+        assert cred == {
+            "client_assertion": FEDERATED_IDENTITY,
+            "federated_identity_audience": "api://custom-audience"
+        }
 
 
 
@@ -387,10 +415,26 @@ class TestFederatedIdentity(unittest.TestCase):
         called_url = post_mock.call_args.args[0]
         # Trailing slash on the request URI is trimmed; api-version and service connection are appended.
         assert called_url == ('https://vstoken.dev.azure.com/org'
-                              '?api-version=7.1&serviceConnectionId=sc-guid')
+                              '?api-version=7.1&serviceConnectionId=sc-guid&audience=api%3A%2F%2FAzureADTokenExchange')
         headers = post_mock.call_args.kwargs['headers']
         assert headers['Authorization'] == 'bearer system_access_token'
         assert headers['X-TFS-FedAuthRedirect'] == 'Suppress'
+
+    @mock.patch.dict(os.environ, {
+        'ARM_OIDC_REQUEST_URL': 'https://vstoken.dev.azure.com/org/?api-version=7.1',
+        'ARM_OIDC_REQUEST_TOKEN': 'request_token',
+        'ARM_OIDC_AZURE_SERVICE_CONNECTION_ID': 'sc-guid'
+    }, clear=True)
+    @mock.patch('requests.post')
+    def test_get_federated_id_token_azure_devops_existing_query(self, post_mock):
+        post_mock.return_value = mock.MagicMock(ok=True, json=lambda: {'oidcToken': 'ado_id_token'})
+
+        token = get_federated_id_token('api://custom-audience')
+
+        assert token == 'ado_id_token'
+        called_url = post_mock.call_args.args[0]
+        assert called_url == ('https://vstoken.dev.azure.com/org'
+                              '?api-version=7.1&serviceConnectionId=sc-guid&audience=api%3A%2F%2Fcustom-audience')
 
     @mock.patch.dict(os.environ, {'SYSTEM_OIDCREQUESTURI': 'https://vstoken.dev.azure.com/org/'}, clear=True)
     def test_get_federated_id_token_azure_devops_missing_env(self):

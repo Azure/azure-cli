@@ -379,3 +379,49 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         # Selector should be shown even with 1 sub (backward compat)
         selector_mock.assert_called_once_with([sub])
         self.assertIsNone(result)
+
+
+class TestFederatedIdentityAudience(unittest.TestCase):
+    def test_federated_identity_audience_requires_federated_identity(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        with self.assertRaisesRegex(CLIError, "'--federated-identity-audience' requires '--federated-identity'"):
+            login(
+                cmd,
+                service_principal=True,
+                username='app-id',
+                tenant='tenant-id',
+                federated_identity_audience='api://custom-audience'
+            )
+
+    @mock.patch('azure.cli.core.auth.identity.ServicePrincipalAuth.build_credential', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_federated_identity_audience_passed_to_build_credential(self, profile_mock, build_credential_mock):
+        profile_instance = mock.MagicMock()
+        profile_instance.login.return_value = []
+        profile_mock.return_value = profile_instance
+        build_credential_mock.return_value = {'client_assertion': 'FEDERATED_IDENTITY'}
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.getboolean.return_value = False
+
+        login(
+            cmd,
+            service_principal=True,
+            username='app-id',
+            tenant='tenant-id',
+            federated_identity=True,
+            federated_identity_audience='api://custom-audience'
+        )
+
+        build_credential_mock.assert_called_once_with(
+            mock.ANY,
+            client_secret=None,
+            certificate=None,
+            use_cert_sn_issuer=None,
+            client_assertion='FEDERATED_IDENTITY',
+            federated_identity_audience='api://custom-audience'
+        )

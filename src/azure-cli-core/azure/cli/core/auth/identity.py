@@ -8,6 +8,7 @@ import os
 import re
 import sys
 import threading
+from functools import partial
 
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
@@ -27,6 +28,7 @@ _CLIENT_SECRET = 'client_secret'
 _CERTIFICATE = 'certificate'
 _USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 _CLIENT_ASSERTION = 'client_assertion'
+_FEDERATED_IDENTITY_AUDIENCE = 'federated_identity_audience'
 
 # For environment credential
 AZURE_AUTHORITY_HOST = "AZURE_AUTHORITY_HOST"
@@ -264,6 +266,7 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         self.use_cert_sn_issuer = None
         # federated identity credential
         self.client_assertion = None
+        self.federated_identity_audience = None
 
         # Internal attributes for certificate
         # They are computed at runtime and not persisted in the service principal entry.
@@ -301,7 +304,7 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
     @classmethod
     def build_credential(cls, client_secret=None,
                          certificate=None, use_cert_sn_issuer=None,
-                         client_assertion=None):
+                         client_assertion=None, federated_identity_audience=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
@@ -318,12 +321,14 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
                 entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
+            if federated_identity_audience:
+                entry[_FEDERATED_IDENTITY_AUDIENCE] = federated_identity_audience
         return entry
 
     def get_entry_to_persist(self):
         """Get a service principal entry that can be persisted by ServicePrincipalStore."""
         persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER,
-                          _CLIENT_ASSERTION]
+                          _CLIENT_ASSERTION, _FEDERATED_IDENTITY_AUDIENCE]
         # Only persist certain attributes whose values are not None
         return {k: v for k, v in self.__dict__.items() if k in persisted_keys and v}
 
@@ -355,9 +360,11 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         #     "client_assertion": "...a JWT with claims aud, exp, iss, jti, nbf, and sub..."
         # }
         if self.client_assertion:
-            client_credential = {
-                'client_assertion': get_federated_id_token if self.client_assertion == FEDERATED_IDENTITY
-                else self.client_assertion}
+            if self.client_assertion == FEDERATED_IDENTITY:
+                audience = self.federated_identity_audience or _AAD_TOKEN_EXCHANGE_AUDIENCE
+                client_credential = {'client_assertion': partial(get_federated_id_token, audience)}
+            else:
+                client_credential = {'client_assertion': self.client_assertion}
 
         return client_credential
 
@@ -494,7 +501,7 @@ def _first_env(*names):
     return None
 
 
-def get_federated_id_token():
+def get_federated_id_token(audience=None):
     """Acquire a fresh OIDC ID token from the current CI/CD provider.
 
     Registered as MSAL's ``client_assertion`` callback for ``--federated-identity``. Provider is detected
@@ -502,10 +509,11 @@ def get_federated_id_token():
     lock to avoid duplicate races.
     """
     with _federated_id_token_lock:
+        audience = audience or _AAD_TOKEN_EXCHANGE_AUDIENCE
         if _GITHUB_REQUEST_URL_ENV in os.environ:
-            return _get_id_token_github()
+            return _get_id_token_github(audience)
         if any(name in os.environ for name in _ADO_REQUEST_URL_ENVS):
-            return _get_id_token_azure_devops()
+            return _get_id_token_azure_devops(audience)
         raise CLIError(
             "--federated-identity: no supported CI/CD OIDC provider was detected in the environment. "
             "Only GitHub Actions and Azure DevOps are currently supported. Provide a token with "
@@ -527,7 +535,7 @@ def _oidc_http_request(method, url, headers, provider):
         raise CLIError(f'Failed to reach the {provider} OIDC endpoint: {ex}')
 
 
-def _get_id_token_github():
+def _get_id_token_github(audience):
     """Fetch a fresh OIDC ID token from the GitHub Actions token service.
 
     Valid for the lifetime of the GitHub Actions request token (currently ~6 hours after the job starts).
@@ -544,7 +552,7 @@ def _get_id_token_github():
             'Environment variable {} is not set. --federated-identity requires GitHub Actions with '
             '"id-token: write" permission granted to the workflow.'.format(ex))
 
-    audience = quote(_AAD_TOKEN_EXCHANGE_AUDIENCE)
+    audience = quote(audience)
     # Append the audience with the correct separator in case the request URL already has a query string.
     separator = '&' if '?' in request_url else '?'
     url = f'{request_url}{separator}audience={audience}'
@@ -565,7 +573,7 @@ def _get_id_token_github():
     return id_token
 
 
-def _get_id_token_azure_devops():
+def _get_id_token_azure_devops(audience):
     """Fetch a fresh OIDC ID token from Azure DevOps Pipelines.
 
     Azure DevOps issues short-lived ID tokens (~5 min) and, unlike GitHub Actions, requires a POST to the
@@ -579,7 +587,7 @@ def _get_id_token_azure_devops():
 
     https://devblogs.microsoft.com/devops/introducing-azure-devops-id-token-refresh-and-terraform-task-version-5/
     """
-    from urllib.parse import quote
+    from urllib.parse import quote, parse_qsl, urlencode, urlsplit, urlunsplit
     import requests
 
     request_url = _first_env(*_ADO_REQUEST_URL_ENVS)
@@ -597,7 +605,15 @@ def _get_id_token_azure_devops():
             'service connection ID. See https://github.com/Azure/azure-cli/issues/28708 for guidance.'
             .format(', '.join(missing)))
 
-    url = f"{request_url.rstrip('/')}?api-version=7.1&serviceConnectionId={quote(service_connection_id)}"
+    parsed = urlsplit(request_url.rstrip('/'))
+    query_pairs = parse_qsl(parsed.query, keep_blank_values=True)
+    has_api_version = any(key == 'api-version' for key, _ in query_pairs)
+    query_pairs = [(key, value) for key, value in query_pairs if key not in ('serviceConnectionId', 'audience')]
+    if not has_api_version:
+        query_pairs.append(('api-version', '7.1'))
+    query_pairs.append(('serviceConnectionId', service_connection_id))
+    query_pairs.append(('audience', audience))
+    url = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query_pairs, quote_via=quote), parsed.fragment))
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'bearer {request_token}',

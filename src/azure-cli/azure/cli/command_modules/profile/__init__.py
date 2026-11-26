@@ -90,6 +90,9 @@ class ProfileCommandsLoader(AzCommandsLoader):
                        help='Acquire and automatically refresh the OIDC federated token from the CI/CD provider '
                             '(GitHub Actions or Azure DevOps). Avoids the AADSTS700024 error on long-running '
                             'tasks. Cannot be combined with --federated-token.')
+            c.argument('federated_identity_audience', options_list=['--federated-identity-audience'],
+                       help='Audience used when requesting the federated OIDC token for --federated-identity. '
+                            'Defaults to api://AzureADTokenExchange.')
 
             # Managed identity
             c.argument('identity', options_list=('-i', '--identity'), action='store_true',
