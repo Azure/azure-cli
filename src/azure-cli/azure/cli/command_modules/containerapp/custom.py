@@ -257,6 +257,28 @@ def update_containerapp_yaml(cmd, name, resource_group_name, file_name, from_rev
         handle_raw_exception(e)
 
 
+def start_containerapp(cmd, resource_group_name, name, no_wait=False):
+    try:
+        return ContainerAppClient.start(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            name=name,
+            no_wait=no_wait)
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
+def stop_containerapp(cmd, resource_group_name, name, no_wait=False):
+    try:
+        return ContainerAppClient.stop(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            name=name,
+            no_wait=no_wait)
+    except CLIError as e:
+        handle_raw_exception(e)
+
+
 def create_containerapp(cmd,
                         name,
                         resource_group_name,
