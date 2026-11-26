@@ -496,22 +496,36 @@ _OIDC_HTTP_TIMEOUT = (10, 30)
 # a lock, so a stuck command would otherwise block all concurrent token acquisitions.
 _OIDC_CALLBACK_PROCESS_TIMEOUT = 30
 
+_PROVIDER_GITHUB = 'GitHub Actions'
+_PROVIDER_AZURE_DEVOPS = 'Azure DevOps'
+_AAD_TOKEN_EXCHANGE_AUDIENCE = 'api://AzureADTokenExchange'
+
+_GITHUB_REQUEST_URL_ENV = 'ACTIONS_ID_TOKEN_REQUEST_URL'
+_GITHUB_REQUEST_TOKEN_ENV = 'ACTIONS_ID_TOKEN_REQUEST_TOKEN'
+_ADO_REQUEST_URL_ENVS = ('ARM_OIDC_REQUEST_URL', 'SYSTEM_OIDCREQUESTURI')
+_ADO_REQUEST_TOKEN_ENVS = ('ARM_OIDC_REQUEST_TOKEN', 'SYSTEM_ACCESSTOKEN')
+_ADO_SERVICE_CONNECTION_ENV = 'ARM_OIDC_AZURE_SERVICE_CONNECTION_ID'
+
+
+def _first_env(*names):
+    for name in names:
+        value = os.environ.get(name)
+        if value:
+            return value
+    return None
+
 
 def get_federated_id_token():
     """Acquire a fresh OIDC ID token from the current CI/CD provider.
 
-    This is the dispatcher registered as MSAL's ``client_assertion`` callback. MSAL invokes it lazily every
-    time it needs a client assertion, so an expired ID token is transparently replaced with a fresh one for
-    as long as the underlying provider request token is valid. The provider is auto-detected from the
-    environment so that ``--federated-identity`` stays a single, provider-agnostic flag.
-
-    MSAL may invoke the client_assertion callback from concurrent token requests, so this is serialized with
-    a lock to avoid duplicate token fetches racing against each other.
+    Registered as MSAL's ``client_assertion`` callback for ``--federated-identity``. Provider is detected
+    from environment variables. The callback can be invoked concurrently, so access is serialized with a
+    lock to avoid duplicate races.
     """
     with _federated_id_token_lock:
-        if 'ACTIONS_ID_TOKEN_REQUEST_URL' in os.environ:
+        if _GITHUB_REQUEST_URL_ENV in os.environ:
             return _get_id_token_github()
-        if 'SYSTEM_OIDCREQUESTURI' in os.environ or 'ARM_OIDC_REQUEST_URL' in os.environ:
+        if any(name in os.environ for name in _ADO_REQUEST_URL_ENVS):
             return _get_id_token_azure_devops()
         raise CLIError(
             "--federated-identity: no supported CI/CD OIDC provider was detected in the environment. "
@@ -529,9 +543,9 @@ def _oidc_http_request(method, url, headers, provider):
     try:
         return method(url, headers=headers, timeout=_OIDC_HTTP_TIMEOUT)
     except requests.exceptions.Timeout:
-        raise CLIError('Timed out requesting an ID token from {}. Please retry.'.format(provider))
+        raise CLIError(f'Timed out requesting an ID token from {provider}. Please retry.')
     except requests.exceptions.RequestException as ex:
-        raise CLIError('Failed to reach the {} OIDC endpoint: {}'.format(provider, ex))
+        raise CLIError(f'Failed to reach the {provider} OIDC endpoint: {ex}')
 
 
 def _get_id_token_github():
@@ -544,31 +558,31 @@ def _get_id_token_github():
     import requests
 
     try:
-        request_token = os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']
-        request_url = os.environ['ACTIONS_ID_TOKEN_REQUEST_URL']
+        request_token = os.environ[_GITHUB_REQUEST_TOKEN_ENV]
+        request_url = os.environ[_GITHUB_REQUEST_URL_ENV]
     except KeyError as ex:
         raise CLIError(
             'Environment variable {} is not set. --federated-identity requires GitHub Actions with '
             '"id-token: write" permission granted to the workflow.'.format(ex))
 
-    audience = quote('api://AzureADTokenExchange')
+    audience = quote(_AAD_TOKEN_EXCHANGE_AUDIENCE)
     # Append the audience with the correct separator in case the request URL already has a query string.
     separator = '&' if '?' in request_url else '?'
-    url = '{}{}audience={}'.format(request_url, separator, audience)
+    url = f'{request_url}{separator}audience={audience}'
     headers = {
-        'Authorization': 'bearer {}'.format(request_token),
+        'Authorization': f'bearer {request_token}',
         'Accept': 'application/json; api-version=2.0',
         'Content-Type': 'application/json'
     }
-    response = _oidc_http_request(requests.get, url, headers, 'GitHub Actions')
+    response = _oidc_http_request(requests.get, url, headers, _PROVIDER_GITHUB)
     if not response.ok:
-        raise CLIError('Failed to retrieve an ID token from GitHub Actions: {} {}'.format(
-            response.status_code, response.reason))
+        raise CLIError(f'Failed to retrieve an ID token from {_PROVIDER_GITHUB}: '
+                       f'{response.status_code} {response.reason}')
     id_token = response.json().get('value')
     if not id_token:
-        raise CLIError('GitHub Actions OIDC endpoint did not return an ID token.')
+        raise CLIError(f'{_PROVIDER_GITHUB} OIDC endpoint did not return an ID token.')
     # Never log the token value itself.
-    logger.debug('Retrieved a fresh ID token from the GitHub Actions OIDC endpoint.')
+    logger.debug('Retrieved a fresh ID token from the %s OIDC endpoint.', _PROVIDER_GITHUB)
     return id_token
 
 
@@ -589,9 +603,9 @@ def _get_id_token_azure_devops():
     from urllib.parse import quote
     import requests
 
-    request_url = os.environ.get('ARM_OIDC_REQUEST_URL') or os.environ.get('SYSTEM_OIDCREQUESTURI')
-    request_token = os.environ.get('ARM_OIDC_REQUEST_TOKEN') or os.environ.get('SYSTEM_ACCESSTOKEN')
-    service_connection_id = os.environ.get('ARM_OIDC_AZURE_SERVICE_CONNECTION_ID')
+    request_url = _first_env(*_ADO_REQUEST_URL_ENVS)
+    request_token = _first_env(*_ADO_REQUEST_TOKEN_ENVS)
+    service_connection_id = os.environ.get(_ADO_SERVICE_CONNECTION_ENV)
 
     missing = [name for name, value in (
         ('ARM_OIDC_REQUEST_URL (or SYSTEM_OIDCREQUESTURI)', request_url),
@@ -604,23 +618,70 @@ def _get_id_token_azure_devops():
             'service connection ID. See https://github.com/Azure/azure-cli/issues/28708 for guidance.'
             .format(', '.join(missing)))
 
-    url = '{}?api-version=7.1&serviceConnectionId={}'.format(
-        request_url.rstrip('/'), quote(service_connection_id))
+    url = f"{request_url.rstrip('/')}?api-version=7.1&serviceConnectionId={quote(service_connection_id)}"
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'bearer {}'.format(request_token),
+        'Authorization': f'bearer {request_token}',
         # Prevents the service from responding with a redirect HTTP status code.
         'X-TFS-FedAuthRedirect': 'Suppress',
     }
-    response = _oidc_http_request(requests.post, url, headers, 'Azure DevOps')
+    response = _oidc_http_request(requests.post, url, headers, _PROVIDER_AZURE_DEVOPS)
     if not response.ok:
-        raise CLIError('Failed to retrieve an ID token from Azure DevOps: {} {}'.format(
-            response.status_code, response.reason))
+        raise CLIError(f'Failed to retrieve an ID token from {_PROVIDER_AZURE_DEVOPS}: '
+                       f'{response.status_code} {response.reason}')
     id_token = response.json().get('oidcToken')
     if not id_token:
-        raise CLIError('Azure DevOps OIDC endpoint did not return an ID token.')
+        raise CLIError(f'{_PROVIDER_AZURE_DEVOPS} OIDC endpoint did not return an ID token.')
     # Never log the token value itself.
-    logger.debug('Retrieved a fresh ID token from the Azure DevOps OIDC endpoint.')
+    logger.debug('Retrieved a fresh ID token from the %s OIDC endpoint.', _PROVIDER_AZURE_DEVOPS)
+    return id_token
+
+
+def _parse_and_resolve_callback_command(command):
+    import shlex
+
+    # POSIX parsing on every platform so quoted arguments containing spaces are handled correctly and
+    # consistently. The trade-off is that backslashes are escape characters (see the Windows note above).
+    try:
+        args = shlex.split(command, posix=True)
+    except ValueError as ex:
+        raise CLIError(f'--federated-token-callback: invalid command: {ex}') from None
+    if not args:
+        raise CLIError('--federated-token-callback: the command is empty.')
+
+    executable = get_safe_executable_path(args[0])
+    if not executable:
+        raise CLIError(
+            f"--federated-token-callback: command not found in a trusted PATH location: '{args[0]}'"
+        ) from None
+    args[0] = executable
+    return args
+
+
+def _run_callback_command(args):
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=_OIDC_CALLBACK_PROCESS_TIMEOUT
+        )
+    except FileNotFoundError:
+        raise CLIError(f"--federated-token-callback: command not found: '{args[0]}'") from None
+    except subprocess.TimeoutExpired:
+        raise CLIError(f'--federated-token-callback: command timed out after {_OIDC_CALLBACK_PROCESS_TIMEOUT} '
+                       'seconds.') from None
+    except subprocess.CalledProcessError as ex:
+        # Do not include stderr in the error message: it may contain sensitive values printed by helper
+        # commands (for example, raw tokens in verbose HTTP output).
+        raise CLIError(f'--federated-token-callback command exited with code {ex.returncode}.') from None
+
+    id_token = result.stdout.strip()
+    if not id_token:
+        raise CLIError('--federated-token-callback command produced no output on stdout.')
     return id_token
 
 
@@ -628,55 +689,18 @@ def _build_command_assertion_callback(command):
     """Wrap a user-provided command as a callable that returns a fresh federated token.
 
     This is the provider-agnostic escape hatch behind `az login --federated-token-callback`. The command
-    is expected to print a single OIDC token to stdout; MSAL invokes the returned callable whenever it
-    needs a fresh assertion, so refresh works with any CI/CD provider.
-
-    The command is parsed into an argument vector (with POSIX rules on every platform) and run WITHOUT a
-    shell (shell=False). Because the command is persisted in the service principal entry and re-executed on
-    every refresh, avoiding a shell prevents a tampered token cache from turning into arbitrary code
-    execution. Users who need shell features such as pipes or redirection should either point to a script
-    file or wrap the pipeline explicitly, e.g.
-    --federated-token-callback "bash -c 'curl ... | jq -r .value'".
-    On Windows, use forward slashes in paths or escape backslashes (POSIX parsing treats '\\' as an escape).
+    must print exactly one token to stdout. The command is parsed with POSIX rules and run without a shell.
+    On Windows, use forward slashes in paths or escape backslashes (POSIX treats '\\' as an escape).
     """
-    import shlex
-    # POSIX parsing on every platform so quoted arguments containing spaces are handled correctly and
-    # consistently. The trade-off is that backslashes are escape characters (see the Windows note above).
-    try:
-        args = shlex.split(command, posix=True)
-    except ValueError as ex:
-        raise CLIError('--federated-token-callback: invalid command: {}'.format(ex)) from None
-    if not args:
-        raise CLIError('--federated-token-callback: the command is empty.')
-    executable = get_safe_executable_path(args[0])
-    if not executable:
-        raise CLIError("--federated-token-callback: command not found in a trusted PATH location: '{}'".format(
-            args[0])) from None
-    args[0] = executable
+    args = _parse_and_resolve_callback_command(command)
 
     # MSAL may invoke the client_assertion callback from concurrent token requests; serialize the command
     # execution so two requests don't run the callback command at the same time.
     lock = threading.Lock()
 
     def get_id_token():
-        import subprocess
         with lock:
-            try:
-                result = subprocess.run(args, capture_output=True, text=True, check=True,
-                                        timeout=_OIDC_CALLBACK_PROCESS_TIMEOUT)
-            except FileNotFoundError:
-                raise CLIError("--federated-token-callback: command not found: '{}'".format(args[0])) from None
-            except subprocess.TimeoutExpired:
-                raise CLIError('--federated-token-callback: command timed out after {} seconds.'.format(
-                    _OIDC_CALLBACK_PROCESS_TIMEOUT)) from None
-            except subprocess.CalledProcessError as ex:
-                # Do not include stderr in the error message: it may contain sensitive values printed by
-                # helper commands (for example, raw tokens in verbose HTTP output).
-                raise CLIError('--federated-token-callback command exited with code {}.'.format(
-                    ex.returncode)) from None
-            id_token = result.stdout.strip()
-        if not id_token:
-            raise CLIError('--federated-token-callback command produced no output on stdout.')
+            id_token = _run_callback_command(args)
         # Never log the token value itself.
         logger.debug('Retrieved a fresh ID token from the --federated-token-callback command.')
         return id_token
