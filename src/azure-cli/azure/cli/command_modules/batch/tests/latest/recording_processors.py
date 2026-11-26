@@ -14,7 +14,8 @@ class StorageSASReplacer(RecordingProcessor):
     """Replace SAS signatures with a hard-coded value"""
 
     SIG_REPLACEMENT = 'sig=fakeSig'
-    PATTERN = r'\?sv=.*&(sig=[^&]+)&'
+    # The signature can be any parameter of the query, including the last one
+    PATTERN = r'[?&](sig=[^&"\\\s]+)'
 
     def process_request(self, request):
         request.uri = self._replace_sas(request.uri)
@@ -29,9 +30,8 @@ class StorageSASReplacer(RecordingProcessor):
         return response
 
     def _replace_sas(self, value):
-        search_result = re.search(self.PATTERN, value, re.I)
-        if search_result and search_result.group(1):
-            value = value.replace(search_result.group(1), self.SIG_REPLACEMENT)
+        for signature in set(re.findall(self.PATTERN, value, re.I)):
+            value = value.replace(signature, self.SIG_REPLACEMENT)
         return value
 
 

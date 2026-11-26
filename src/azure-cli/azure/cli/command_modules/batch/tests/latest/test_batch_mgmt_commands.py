@@ -9,7 +9,7 @@ import time
 import unittest
 from unittest import mock
 
-from azure.mgmt.batch.models import BatchAccount, BatchAccountIdentity
+from azure.mgmt.batch.models import Application, BatchAccount, BatchAccountIdentity
 from azure.cli.core.mock import DummyCli
 from azure.cli.core.util import rmtree_with_retry
 from azure.cli.command_modules.batch import _client_factory
@@ -33,7 +33,7 @@ class BatchMgmtScenarioTests(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='eastus2')
-    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor', kind='StorageV2')
     def test_batch_general_arm_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         account_name2 = self.create_random_name(prefix='clibatchtestacct', length=24)
@@ -102,15 +102,16 @@ class BatchMgmtScenarioTests(ScenarioTest):
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {acc} --yes')
         self.cmd('batch account delete -g {rg} -n {acc2} --yes')
-        self.cmd('batch account list -g {rg}').assert_with_checks(self.is_empty())
+        self.cmd('batch account show -g {rg} -n {acc}', expect_failure=True)
+        self.cmd('batch account show -g {rg} -n {acc2}', expect_failure=True)
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
             [self.greater_than('accountQuota', 0)])
 
-        self.cmd('batch location list-skus -l {loc} --query "[0:20]"').assert_with_checks([
-            self.check('length(@)', 20), # Ensure at least 20 entries
-            self.check('[?name==`Basic_A2`] | [0].familyName', 'basicAFamily'),
-            self.check('[?name==`Basic_A2`] | [0].capabilities[?name==`vCPUs`] | [0].value', 2)
+        self.cmd('batch location list-skus -l {loc}').assert_with_checks([
+            self.check('length(@) >= `20`', True),  # Ensure at least 20 entries
+            self.check('[?name==`Standard_D2s_v3`] | [0].familyName', 'standardDSv3Family'),
+            self.check('[?name==`Standard_D2s_v3`] | [0].capabilities[?name==`vCPUs`] | [0].value', 2)
         ])
 
 
@@ -122,9 +123,24 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         ])
         register_batch_body_matcher(self.vcr)
 
+    def _download_package(self):
+        """Download the newest blob of the application's packages from the account's storage account. The service
+        doesn't return a package's storageUrl any more once it's active."""
+        self.kwargs['container'] = self.cmd(
+            'storage container list --account-name {str_n} --account-key "{str_k}" '
+            '--query "[?starts_with(name, \'app-{app}-\')].name | [0]" -o tsv').output.strip()
+        self.kwargs['blob'] = self.cmd(
+            'storage blob list --account-name {str_n} --account-key "{str_k}" -c {container} '
+            '--query "sort_by(@, &properties.lastModified)[-1].name" -o tsv').output.strip()
+        _, self.kwargs['download_file_name'] = tempfile.mkstemp()
+        self.cmd('storage blob download --account-name {str_n} --account-key "{str_k}" -c {container} -n {blob} '
+                 '--file "{download_file_name}"')
+        with open(self.kwargs['download_file_name'], 'r') as f:
+            return f.read()
+
 
     @ResourceGroupPreparer(location='eastus2')
-    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor', kind='StorageV2')
     def test_batch_privateendpoint_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
@@ -173,7 +189,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(location='eastus2')
-    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor', kind='StorageV2')
     def test_batch_network_profile_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
@@ -209,7 +225,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(location='eastus2')
-    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor', kind='StorageV2')
     def test_batch_managed_identity_cmd(self, resource_group, storage_account):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
         vnet_name = self.create_random_name(prefix='clibatchtestvn', length=24)
@@ -279,8 +295,8 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
 
 
     @ResourceGroupPreparer(location='eastus2')
-    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor')
-    def test_batch_application_cmd(self, resource_group, storage_account):
+    @StorageAccountPreparer(location='eastus2', name_prefix='clibatchteststor', kind='StorageV2')
+    def test_batch_application_cmd(self, resource_group, storage_account, storage_account_info):
         account_name = self.create_random_name(prefix='clibatchtestacct', length=24)
 
         _, package_file_name = tempfile.mkstemp()
@@ -288,6 +304,7 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'str_n': storage_account,
+            'str_k': storage_account_info[1],
             'loc': 'eastus2',
             'acc': account_name,
             'app': 'testapp',
@@ -312,20 +329,13 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
             self.check('length(@)', 1),
             self.check('[0].name', '{app}')])
 
-        package_create = self.cmd('batch application package create -g {rg} -n {acc} --application-name {app}'
+        self.cmd('batch application package create -g {rg} -n {acc} --application-name {app}'
                  ' --version {app_p} --package-file "{app_f}"').assert_with_checks([
                      self.check('name', '{app_p}'),
-                     self.check('storageUrl != null', True),
                      self.check('state', 'Active')])
 
         # verify blob content
-        blob_url = package_create.get_output_in_json()['storageUrl']
-        _, download_file_name = tempfile.mkstemp()
-        self.kwargs.update({"blob_url": blob_url, "download_file_name": download_file_name})
-
-        self.cmd('storage blob download --blob-url {blob_url} --file "{download_file_name}"')
-        with open(download_file_name, 'r') as f:
-            self.assertEqual(f.read(), 'storage blob test sample file')
+        self.assertEqual(self._download_package(), 'storage blob test sample file')
 
         # test overwriting blob content
         _, package_file_name_2 = tempfile.mkstemp()
@@ -333,20 +343,13 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
             f.write('storage blob test overwrite file')
         self.kwargs.update({"package_file_name_2": package_file_name_2})
 
-        package_create = self.cmd('batch application package create -g {rg} -n {acc} --application-name {app}'
-                                  ' --version {app_p} --package-file "{package_file_name_2}"').assert_with_checks([
+        self.cmd('batch application package create -g {rg} -n {acc} --application-name {app}'
+                 ' --version {app_p} --package-file "{package_file_name_2}"').assert_with_checks([
             self.check('name', '{app_p}'),
-            self.check('storageUrl != null', True),
             self.check('state', 'Active')])
 
         # verify blob content
-        blob_url = package_create.get_output_in_json()['storageUrl']
-        _, download_file_name2 = tempfile.mkstemp()
-        self.kwargs.update({"blob_url": blob_url, "download_file_name2": download_file_name2})
-
-        self.cmd('storage blob download --blob-url {blob_url} --file "{download_file_name2}"')
-        with open(download_file_name2, 'r') as f:
-            self.assertEqual(f.read(), 'storage blob test overwrite file')
+        self.assertEqual(self._download_package(), 'storage blob test overwrite file')
 
         self.cmd('batch application package activate -g {rg} -n {acc} --application-name {app}'
                  ' --version {app_p} --format zip')
@@ -453,7 +456,7 @@ class TestBatchAccountPublicNetworkAccess(unittest.TestCase):
         self.client.update.reset_mock()
         self.assertEqual(self.cli.invoke(command.split(), out_file=io.StringIO()), 0)
         self.client.update.assert_called_once()
-        return self.client.update.call_args.kwargs['parameters'].serialize()
+        return self.client.update.call_args.kwargs['parameters'].as_dict()
 
     def test_batch_account_identity_keeps_public_network_access(self):
         for command in ['batch account identity assign -g rg -n acc --system-assigned',
@@ -475,3 +478,79 @@ class TestBatchAccountPublicNetworkAccess(unittest.TestCase):
                 body = self._update_sent(command)
                 self.assertIn('networkProfile', body['properties'])
                 self.assertEqual(body['properties']['publicNetworkAccess'], 'Enabled')
+
+
+class TestBatchAccountRequestBodies(unittest.TestCase):
+    """Run `batch account create` and `batch account set` with their management client mocked, and check the bodies
+    they send when no account property is given. They match what the CLI sent with azure-mgmt-batch 17.3.0, which
+    left out an empty 'properties' object."""
+
+    def setUp(self):
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+        self.client = mock.Mock()
+        self.client.update.return_value = BatchAccount(location='eastus')
+        factory_patch = mock.patch.object(_client_factory, 'mgmt_batch_account_client_factory',
+                                          return_value=self.client)
+        factory_patch.start()
+        self.addCleanup(factory_patch.stop)
+
+    def _sent(self, command, operation):
+        """Run the command and return the body it sends with the given client operation."""
+        self.assertEqual(self.cli.invoke(command.split(), out_file=io.StringIO()), 0)
+        getattr(self.client, operation).assert_called_once()
+        return getattr(self.client, operation).call_args.kwargs['parameters'].as_dict()
+
+    def test_batch_account_create_without_account_properties(self):
+        self.assertEqual(self._sent('batch account create -g rg -n acc -l eastus --no-wait', 'begin_create'),
+                         {'location': 'eastus'})
+
+    def test_batch_account_create_with_identity_and_tags(self):
+        # The identity and tags aren't account properties
+        self.assertEqual(self._sent('batch account create -g rg -n acc -l eastus --mi-system-assigned true --tags a=b '
+                                    '--no-wait', 'begin_create'),
+                         {'location': 'eastus', 'identity': {'type': 'SystemAssigned'}, 'tags': {'a': 'b'}})
+
+    def test_batch_account_set_tags(self):
+        self.assertEqual(self._sent('batch account set -g rg -n acc --tags x=y', 'update'), {'tags': {'x': 'y'}})
+
+
+class TestBatchApplicationRequestBodies(unittest.TestCase):
+    """Run `batch application set` with its management client mocked, and check the bodies it sends. They match what
+    the CLI sent with azure-mgmt-batch 17.3.0: no empty 'properties' object, and --allow-updates as a boolean."""
+
+    def setUp(self):
+        self.cli = DummyCli(random_config_dir=True)
+        self.addCleanup(self.cli.env_patch.stop)
+        self.addCleanup(rmtree_with_retry, self.cli.config.config_dir)
+        self.client = mock.Mock()
+        self.client.update.return_value = Application()
+        factory_patch = mock.patch.object(_client_factory, 'mgmt_application_client_factory',
+                                          return_value=self.client)
+        factory_patch.start()
+        self.addCleanup(factory_patch.stop)
+        # The commands' validator reads the account to check that it has auto-storage
+        validator_client = mock.Mock()
+        validator_client.batch_account.get.return_value = mock.Mock(auto_storage=mock.Mock(storage_account_id='sa'))
+        validator_patch = mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client',
+                                     return_value=validator_client)
+        validator_patch.start()
+        self.addCleanup(validator_patch.stop)
+
+    def _sent(self, options):
+        """Run `batch application set` with the given options and return the body it sends."""
+        command = 'batch application set -g rg -n acc --application-name app' + options
+        self.assertEqual(self.cli.invoke(command.split(), out_file=io.StringIO()), 0)
+        self.client.update.assert_called_once()
+        return self.client.update.call_args.kwargs['parameters'].as_dict()
+
+    def test_batch_application_set_without_options(self):
+        self.assertEqual(self._sent(''), {})
+
+    def test_batch_application_set_allow_updates(self):
+        self.assertEqual(self._sent(' --allow-updates true'), {'properties': {'allowUpdates': True}})
+
+    def test_batch_application_set_default_version_and_display_name(self):
+        self.assertEqual(self._sent(' --default-version 1.0 --display-name app1'),
+                         {'properties': {'defaultVersion': '1.0', 'displayName': 'app1'}})

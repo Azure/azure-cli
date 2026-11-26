@@ -29,7 +29,7 @@ def load_command_table(self, _):
 
     data_path = 'azure.batch._operations._patch#BatchClientOperationsMixin.{}'
     # data_path = 'azure.batch._client#BatchClient.{}'
-    mgmt_path = 'azure.mgmt.batch.operations._{}_operations#{}.'
+    mgmt_path = 'azure.mgmt.batch.operations#{}.'
 
     def get_data_type():
         return CliCommandType(
@@ -41,7 +41,7 @@ def load_command_table(self, _):
 
     def get_mgmt_type(name):
         return CliCommandType(
-            operations_tmpl=mgmt_path.format(name, _operation(name)) + "{}",
+            operations_tmpl=mgmt_path.format(_operation(name)) + "{}",
             client_factory=get_mgmt_factory(name),
             exception_handler=batch_exception_handler
         )
