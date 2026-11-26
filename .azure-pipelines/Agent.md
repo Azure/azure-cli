@@ -17,6 +17,14 @@ Use released package requirements, not personal-fork URLs or commit pins. Before
 
 Keep [pytest constraints](pytest-constraints.txt) available when breaking-change tests switch branches. Validate YAML parsing, embedded shell syntax, dependency resolution, `pip check`, and the affected setup/test/reporting paths. Do not equate local smoke tests with a successful full pipeline.
 
+## Component Governance runtime inventory
+
+On PR builds (any target) and existing `dev` and `release` runs, each platform requirements job uses the [reporting installer](../scripts/ci/install_with_cg_report.py) instead of `install_full`. It installs the checked-out runtime packages with that platform's pins and records what pip resolved. Use a disposable Python environment for local runs: pip's `--ignore-installed` can overwrite existing packages.
+
+After `pip check` and the CLI self-test pass **in that job**, the [explicit CG task](templates/submit-cli-inventory.yml) scans only `cg-runtime-inventory/`, where the pip report sits beside `requirements.txt`. This inventory describes the tested runtime, not the final installer. It does not replace repository-wide policy scans or change release triggers or production classification.
+
+To verify a run, look for `Using pre-generated pip report` and `Snapshot request submitted` in each platform's task log. Confirm that the scan root is the inventory directory and that the resulting snapshot is visible in CG for that build and phase.
+
 ## Verified pipeline references
 
 These are **YAML-backed definitions**, not the classic pipelines that still need inventory. Definitions were checked on 2026-11-09 in the `azclitools` organization, project `5147fa83-336e-44ef-bbe0-c86b8ae86cbb`.
