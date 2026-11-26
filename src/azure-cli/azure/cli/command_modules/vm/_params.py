@@ -1322,7 +1322,7 @@ def load_arguments(self, _):
                                'or specify individual disks. {} {}'.format(usage, allowed_values)
 
             c.argument('os_disk_name', help='The name of the new VM OS disk.')
-            c.argument('os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_type=get_enum_type(OperatingSystemTypesLower))
+            c.argument('os_type', help='Type of OS installed on a custom VHD or gallery image. Required for gallery images when the image definition cannot be read. Do not use when specifying an URN or URN alias.', arg_type=get_enum_type(OperatingSystemTypesLower))
             c.argument('storage_account', help="Only applicable when used with `--use-unmanaged-disk`. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.")
             c.argument('storage_sku', nargs='+', help=storage_sku_help)
             c.argument('storage_container_name', help="Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds")
