@@ -434,6 +434,12 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('runtime', options_list=["--runtime"], help="limit the output to a specific runtime family", arg_type=get_enum_type(['dotnet', 'node', 'php', 'python', 'java']))
         c.argument('support', options_list=["--support"], help="filter by support lifecycle status. Default: supported", arg_type=get_enum_type(['supported', 'active', 'near', 'eol', 'all']))
 
+    with self.argument_context('webapp show-runtime-version') as c:
+        c.argument('name', arg_type=webapp_name_arg_type,
+                   help='Name of the web app. You can configure the default using `az configure --defaults web=<name>`.')
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Defaults to the production slot.')
+
     with self.argument_context('functionapp list-runtimes') as c:
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
 

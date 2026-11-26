@@ -51,6 +51,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          troubleshoot_status,
                                                          troubleshoot_deployment,
                                                          show_secure_build_report,
+                                                         show_webapp_runtime_version,
                                                          _log_secure_build_report_summary,
                                                          _render_secure_build_table_report,
                                                          _terminal_hyperlink,
@@ -66,7 +67,8 @@ from azure.cli.command_modules.appservice.commands import (
     transform_site_output,
     transform_webapp_site_output,
     transform_web_output,
-    transform_runtime_list_output)
+    transform_runtime_list_output,
+    transform_runtime_version_output)
 from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
 from azure.cli.command_modules.appservice.utils import get_linux_runtime_list_command
 
@@ -4648,6 +4650,134 @@ class TestStackRuntimeJavaSELinux(unittest.TestCase):
         runtimes = _StackRuntimeHelper._get_java_runtimes_from_container_settings(settings)
         self.assertEqual({name for name, _, _ in runtimes}, self.EXPECTED)
         self.assertTrue(all(is_auto for _, _, is_auto in runtimes))
+
+
+class TestShowWebappRuntimeVersionMocked(unittest.TestCase):
+    """Tests for az webapp show-runtime-version."""
+
+    def setUp(self):
+        is_linux_patch = mock.patch(
+            'azure.cli.command_modules.appservice.custom.is_linux_webapp',
+            return_value=True)
+        client_factory_patch = mock.patch(
+            'azure.cli.command_modules.appservice.custom.web_client_factory')
+        sub_id_patch = mock.patch(
+            'azure.cli.core.commands.client_factory.get_subscription_id',
+            return_value='00000000-0000-0000-0000-000000000000')
+        cf_webapps_patch = mock.patch(
+            'azure.cli.command_modules.appservice.commands.cf_webapps')
+        self.is_linux_mock = is_linux_patch.start()
+        self.client_factory_mock = client_factory_patch.start()
+        sub_id_patch.start()
+        cf_webapps_patch.start()
+        self.addCleanup(is_linux_patch.stop)
+        self.addCleanup(client_factory_patch.stop)
+        self.addCleanup(sub_id_patch.stop)
+        self.addCleanup(cf_webapps_patch.stop)
+
+        self.mock_cmd = _get_test_cmd()
+        self.mock_cmd.cli_ctx.cloud.endpoints.resource_manager = 'https://management.azure.com/'
+
+    @staticmethod
+    def _http_error(status_code, text=''):
+        from azure.cli.core.azclierror import HTTPError
+        resp = mock.MagicMock()
+        resp.status_code = status_code
+        resp.text = text
+        return HTTPError('HTTP {}'.format(status_code), resp)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_show_webapp_runtime_version_success(self, send_raw_request_mock):
+        send_raw_request_mock.return_value = mock.MagicMock(
+            json=mock.MagicMock(return_value={'runtimeVersion': 'PYTHON-3.12.7'}))
+
+        result = show_webapp_runtime_version(self.mock_cmd, 'myRG', 'myApp')
+
+        self.assertEqual(result, {'runtimeVersion': 'PYTHON-3.12.7'})
+        send_raw_request_mock.assert_called_once_with(
+            self.mock_cmd.cli_ctx,
+            'GET',
+            'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000'
+            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/runtimeVersion?api-version=2024-11-01')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_show_webapp_runtime_version_slot(self, send_raw_request_mock):
+        send_raw_request_mock.return_value = mock.MagicMock(
+            json=mock.MagicMock(return_value={'runtimeVersion': 'NODE-20.18.1'}))
+
+        result = show_webapp_runtime_version(self.mock_cmd, 'myRG', 'myApp', slot='staging')
+
+        self.assertEqual(result, {'runtimeVersion': 'NODE-20.18.1'})
+        self.client_factory_mock.return_value.web_apps.get_slot.assert_called_once_with(
+            'myRG', 'myApp', 'staging')
+        send_raw_request_mock.assert_called_once_with(
+            self.mock_cmd.cli_ctx,
+            'GET',
+            'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000'
+            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/slots/staging'
+            '/runtimeVersion?api-version=2024-11-01')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_show_webapp_runtime_version_rejects_windows_webapp(self, send_raw_request_mock):
+        self.is_linux_mock.return_value = False
+
+        with self.assertRaises(ArgumentUsageError) as ctx:
+            show_webapp_runtime_version(self.mock_cmd, 'myRG', 'myWindowsApp')
+
+        self.assertIn('only supported for Linux web apps', str(ctx.exception))
+        send_raw_request_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_show_webapp_runtime_version_404_raises_not_found_with_recommendation(self, send_raw_request_mock):
+        send_raw_request_mock.side_effect = self._http_error(
+            404, 'Runtime version information is not available.')
+
+        with self.assertRaises(ResourceNotFoundError) as ctx:
+            show_webapp_runtime_version(self.mock_cmd, 'myRG', 'myCustomContainerApp')
+
+        self.assertIn("not available for web app 'myCustomContainerApp'", str(ctx.exception))
+        self.assertTrue(any('Custom container images' in rec for rec in ctx.exception.recommendations))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_show_webapp_runtime_version_503_raises_response_error(self, send_raw_request_mock):
+        send_raw_request_mock.side_effect = self._http_error(
+            503, 'Unable to read runtime version information.')
+
+        with self.assertRaises(AzureResponseError) as ctx:
+            show_webapp_runtime_version(self.mock_cmd, 'myRG', 'myApp', slot='staging')
+
+        self.assertIn("slot 'staging' of web app 'myApp'", str(ctx.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_show_webapp_runtime_version_empty_value_raises_not_found(self, send_raw_request_mock):
+        send_raw_request_mock.return_value = mock.MagicMock(
+            json=mock.MagicMock(return_value={'runtimeVersion': '   '}))
+
+        with self.assertRaises(ResourceNotFoundError):
+            show_webapp_runtime_version(self.mock_cmd, 'myRG', 'myApp')
+
+    def test_transform_runtime_version_output(self):
+        rows = transform_runtime_version_output({'runtimeVersion': 'PYTHON-3.12.7'})
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['RuntimeVersion'], 'PYTHON-3.12.7')
+        self.assertEqual(transform_runtime_version_output(None), [])
+
+    def cmd(self, command, expect_failure=False):
+        from azure.cli.testsdk.base import ExecutionResult
+        from azure.cli.testsdk.reverse_dependency import get_dummy_cli
+        return ExecutionResult(get_dummy_cli(), command, expect_failure=expect_failure)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_show_webapp_runtime_version_cli_invocation(self, send_raw_request_mock):
+        send_raw_request_mock.return_value = mock.MagicMock(
+            json=mock.MagicMock(return_value={'runtimeVersion': 'PYTHON-3.12.7'}))
+
+        json_res = self.cmd('webapp show-runtime-version -g myRG -n myApp --slot staging')
+        self.assertEqual(json_res.get_output_in_json(), {'runtimeVersion': 'PYTHON-3.12.7'})
+
+        table_res = self.cmd('webapp show-runtime-version -g myRG -n myApp -o table')
+        self.assertIn('RuntimeVersion', table_res.output)
+        self.assertIn('PYTHON-3.12.7', table_res.output)
 
 
 if __name__ == '__main__':
