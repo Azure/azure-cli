@@ -3,11 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import unittest
 from unittest import mock
 
+from azure.core import PipelineClient
 from knack.util import CLIError
 
+from azure.cli.command_modules.vm import custom
+from azure.cli.command_modules.vm.operations import vm as vm_operations, vmss as vmss_operations
 from azure.cli.command_modules.vm.custom import (enable_boot_diagnostics, disable_boot_diagnostics,
                                                  _merge_secrets, BootLogStreamWriter,
                                                  _get_access_extension_upgrade_info,
@@ -20,6 +24,7 @@ from azure.cli.command_modules.vm.custom import \
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.aaz._command_ctx import AAZCommandCtx
 
 
 from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm, encrypt_vmss, decrypt_vmss)
@@ -44,6 +49,122 @@ def _get_test_cmd():
     cmd.command_kwargs = {'resource_type': ResourceType.MGMT_COMPUTE, 'operation_group': 'virtual_machines'}
     cmd.cli_ctx = cli_ctx
     return cmd
+
+
+class TestIdentityAssignment(unittest.TestCase):
+
+    subscription_id = '00000000-0000-0000-0000-000000000000'
+    identity_a = ('/subscriptions/' + subscription_id +
+                  '/resourceGroups/platform/providers/Microsoft.ManagedIdentity/userAssignedIdentities/a')
+    identity_b = ('/subscriptions/' + subscription_id +
+                  '/resourceGroups/deployment/providers/Microsoft.ManagedIdentity/userAssignedIdentities/b')
+
+    def _assign_and_get_request_identity(self, resource_type, previous_identity, requested, final_identity):
+        if resource_type == 'vm':
+            handler = custom.assign_vm_identity
+            getter_name = 'get_vm_by_aaz'
+            operations = vm_operations
+            patch_name = 'VMPatch'
+            operation_type = vm_operations.VMPatch.VirtualMachinesUpdate
+        else:
+            handler = custom.assign_vmss_identity
+            getter_name = 'get_vmss_by_aaz'
+            operations = vmss_operations
+            patch_name = 'VMSSPatch'
+            operation_type = vmss_operations.VMSSPatch.VirtualMachineScaleSetsUpdate
+
+        patch_type = getattr(operations, patch_name)
+        cmd = _get_test_cmd()
+        final_resource = {'identity': final_identity}
+        with mock.patch.object(custom, getter_name, side_effect=[
+                {'identity': previous_identity}, final_resource]) as getter, \
+                mock.patch.object(operations, patch_name) as patch, \
+                mock.patch.object(custom, 'LongRunningOperation'):
+            patch.return_value.return_value.result.return_value = final_resource
+            result = handler(cmd, 'rg', 'resource', assign_identity=requested)
+
+        self.assertEqual(getter.call_count, 2)
+        self.assertEqual(result['userAssignedIdentities'], final_identity['userAssignedIdentities'])
+        self.assertEqual(result['systemAssignedIdentity'], final_identity.get('principalId', ''))
+        command_args = patch.return_value.call_args.kwargs['command_args']
+
+        # Check the real serialized request without sending HTTP or relying on recording matching.
+        with PipelineClient(base_url='https://management.azure.com') as client, \
+                mock.patch('azure.cli.core.aaz._command_ctx.Profile'), \
+                mock.patch.object(AAZCommandCtx, 'get_http_client', return_value=client), \
+                mock.patch.object(AAZCommandCtx, 'subscription_id', new_callable=mock.PropertyMock,
+                                  return_value=self.subscription_id):
+            ctx = AAZCommandCtx(cli_ctx=cmd.cli_ctx, schema=patch_type.get_arguments_schema(),
+                                command_args=command_args)
+            ctx.format_args()
+            request = operation_type(ctx).make_request()
+
+        self.assertEqual(request.method, 'PATCH')
+        return json.loads(request.data)['identity']
+
+    def test_assign_identity_sends_only_requested_user_identities(self):
+        # Resending existing A would require unrelated assignment permission when adding B.
+        for resource_type in ('vm', 'vmss'):
+            for identity_type in (None, 'UserAssigned', 'SystemAssigned', 'SystemAssigned, UserAssigned'):
+                with self.subTest(resource_type=resource_type, identity_type=identity_type):
+                    previous = {'type': identity_type} if identity_type else None
+                    users = {}
+                    if identity_type and 'UserAssigned' in identity_type:
+                        users[self.identity_a] = {'principalId': 'existing-user', 'clientId': 'existing-client'}
+                        previous['userAssignedIdentities'] = dict(users)
+                    has_system = identity_type and 'SystemAssigned' in identity_type
+                    final = {
+                        'type': 'SystemAssigned, UserAssigned' if has_system else 'UserAssigned',
+                        'userAssignedIdentities': {**users, self.identity_b: {'principalId': 'new-user'}},
+                    }
+                    if has_system:
+                        previous['principalId'] = final['principalId'] = 'existing-system'
+
+                    identity = self._assign_and_get_request_identity(
+                        resource_type, previous, [self.identity_b], final)
+
+                    self.assertEqual(identity['userAssignedIdentities'], {self.identity_b: {}})
+                    self.assertEqual(identity['type'].replace(' ', ''), final['type'].replace(' ', ''))
+
+    def test_assign_identity_enables_system_without_resending_user_identities(self):
+        # Keep the combined type even though enabling system identity submits no user IDs.
+        for resource_type in ('vm', 'vmss'):
+            for requested in (None, [], ['[system]']):
+                for identity_type in ('UserAssigned', 'SystemAssigned, UserAssigned'):
+                    with self.subTest(resource_type=resource_type, requested=requested,
+                                      identity_type=identity_type):
+                        users = {self.identity_a: {'principalId': 'existing-user'}}
+                        previous = {'type': identity_type, 'userAssignedIdentities': users}
+                        final = {
+                            'type': 'SystemAssigned, UserAssigned',
+                            'principalId': 'system-principal',
+                            'userAssignedIdentities': users,
+                        }
+                        if 'SystemAssigned' in identity_type:
+                            previous['principalId'] = final['principalId']
+
+                        identity = self._assign_and_get_request_identity(
+                            resource_type, previous, requested, final)
+
+                        self.assertEqual(identity['type'].replace(' ', ''), 'SystemAssigned,UserAssigned')
+                        self.assertNotIn('userAssignedIdentities', identity)
+
+    def test_assign_identity_keeps_explicit_existing_ids_and_deduplicates_requests(self):
+        # Existing A must still be sent when explicitly requested, unlike an untouched identity.
+        for resource_type in ('vm', 'vmss'):
+            with self.subTest(resource_type=resource_type):
+                previous = {'type': 'UserAssigned', 'userAssignedIdentities': {self.identity_a: {}}}
+                final = {
+                    'type': 'SystemAssigned, UserAssigned',
+                    'principalId': 'system-principal',
+                    'userAssignedIdentities': {self.identity_a: {}, self.identity_b: {}},
+                }
+
+                identity = self._assign_and_get_request_identity(
+                    resource_type, previous, [self.identity_a, self.identity_b, self.identity_b, '[system]'], final)
+
+                self.assertEqual(identity['userAssignedIdentities'], {self.identity_a: {}, self.identity_b: {}})
+                self.assertEqual(identity['type'].replace(' ', ''), 'SystemAssigned,UserAssigned')
 
 
 class TestVmCustom(unittest.TestCase):

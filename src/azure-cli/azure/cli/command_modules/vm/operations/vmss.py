@@ -12,7 +12,7 @@ from ..aaz.latest.vmss import (ListInstances as _VMSSListInstances,
                                Show as _VMSSShow,
                                Patch as _VMSSPatch,
                                List as _VMSSList)
-from azure.cli.core.aaz import AAZUndefined, has_value
+from azure.cli.core.aaz import AAZStrArg, AAZUndefined, has_value
 from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
@@ -105,6 +105,23 @@ class VMSSShowForUpdate(VMSSShow):
 
 
 class VMSSPatch(_VMSSPatch):
+    _arguments_schema = None
+    _args_schema = None
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.identity_type = AAZStrArg(registered=False)
+        return args_schema
+
+    class VirtualMachineScaleSetsUpdate(_VMSSPatch.VirtualMachineScaleSetsUpdate):
+        @property
+        def content(self):
+            content = super().content
+            if has_value(self.ctx.args.identity_type):
+                # Preserve the combined type without resending unchanged user identities.
+                content.setdefault('identity', {})['type'] = self.ctx.args.identity_type.to_serialized_data()
+            return content
 
     def _output(self, *args, **kwargs):
         # Resolve flatten conflict
