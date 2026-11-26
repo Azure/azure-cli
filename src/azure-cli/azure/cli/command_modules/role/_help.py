@@ -819,7 +819,7 @@ short-summary: Manage deny assignments.
 long-summary: >-
     Deny assignments block users from performing specific Azure resource actions even if a role assignment
     grants them access. User-assigned deny assignments can be created to deny write, delete, and action
-    operations at a given scope while excluding specific principals.
+    operations at a given scope, optionally excluding specific principals.
 """
 
 helps['role deny-assignment list'] = """
@@ -854,11 +854,18 @@ type: command
 short-summary: Create a user-assigned deny assignment.
 long-summary: >-
     Creates a deny assignment that blocks specific actions at the given scope. Two modes are supported:
-    (1) Everyone mode (default) — denies actions for all principals, requiring at least one excluded principal;
+    (1) Everyone mode (default) — denies actions for all principals;
     (2) Per-principal mode — denies actions for a specific User or ServicePrincipal specified via --principal-object-id.
+    Excluded principals are optional in both modes.
     DataActions are not supported, DoNotApplyToChildScopes is not supported, read actions (*/read) are not
     permitted, and Group type principals are not allowed.
 examples:
+  - name: Create a deny assignment blocking resource group writes for everyone without exclusions.
+    text: >-
+        az role deny-assignment create
+        --name "Block resource group changes"
+        --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup
+        --actions "Microsoft.Resources/subscriptions/resourceGroups/write"
   - name: Create a deny assignment blocking role assignment writes for everyone, excluding a service principal.
     text: >-
         az role deny-assignment create
