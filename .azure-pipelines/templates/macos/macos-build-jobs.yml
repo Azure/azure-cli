@@ -1,18 +1,16 @@
 # macOS Build Jobs Template
 #
-# Purpose: Build Azure CLI tar.gz for macOS (ARM64 + Intel)
+# Purpose: Build Azure CLI tar.gz for macOS ARM64
 # Usage: Can be called from main pipeline or standalone wrapper
 #
 # Parameters:
 #   - PythonVersion: Homebrew Python version (default: 3.14)
 #   - MacosArm64Image: VM image for ARM64 builds
-#   - MacosIntelImage: VM image for Intel builds
 #   - condition: Job execution condition
 #   - dependsOn: Jobs this depends on
 #
 # Artifacts Published:
 #   - macos-cli-build-unsigned-arm64
-#   - macos-cli-build-unsigned-x86_64
 
 parameters:
   - name: PythonVersion
@@ -21,9 +19,6 @@ parameters:
   - name: MacosArm64Image
     type: string
     default: 'macos-15-arm64'
-  - name: MacosIntelImage
-    type: string
-    default: 'macos-15'
   - name: condition
     type: string
     default: 'succeeded()'
@@ -33,7 +28,7 @@ parameters:
 
 jobs:
 # ============================================================================
-# JOB: BUILD MACOS CLI (ARM64 + Intel via Matrix)
+# JOB: BUILD MACOS CLI (ARM64)
 # ============================================================================
 - job: BuildMacOSCli
   displayName: 'macOS | Build CLI'
@@ -44,9 +39,6 @@ jobs:
       ARM64:
         Architecture: 'arm64'
         vmImageName: ${{ parameters.MacosArm64Image }}
-      Intel:
-        Architecture: 'x86_64'
-        vmImageName: ${{ parameters.MacosIntelImage }}
   pool:
     vmImage: $(vmImageName)
   timeoutInMinutes: 60
@@ -108,7 +100,7 @@ jobs:
     displayName: 'Publish Unsigned CLI Build ($(Architecture))'
 
 # ============================================================================
-# JOB: VERIFY MACOS CLI (ARM64 + Intel via Matrix)
+# JOB: VERIFY MACOS CLI (ARM64)
 # ============================================================================
 - job: VerifyMacOSCli
   displayName: 'macOS | Verify CLI'
@@ -119,9 +111,6 @@ jobs:
       ARM64:
         Architecture: 'arm64'
         vmImageName: ${{ parameters.MacosArm64Image }}
-      Intel:
-        Architecture: 'x86_64'
-        vmImageName: ${{ parameters.MacosIntelImage }}
   pool:
     vmImage: $(vmImageName)
   

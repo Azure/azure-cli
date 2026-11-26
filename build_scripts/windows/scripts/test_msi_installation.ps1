@@ -3,6 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+if ($env:PLATFORM -and $env:PLATFORM -cne 'x64') {
+    throw "Unsupported PLATFORM '$env:PLATFORM'. Only x64 is supported."
+}
+
 Set-PSDebug -Trace 1
 
 if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
@@ -52,11 +56,7 @@ Get-Package -Provider Programs -IncludeWindowsInstaller -Name "Microsoft Azure C
 
 # We can't restart the current shell in CI to refresh PATH, so use absolute path.
 # If we can find a way to refresh PATH in the same shell session, we can directly call az.
-if ($env:PLATFORM -eq 'x64')  {
-    $az_full_path = "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
-} else {
-    $az_full_path = "C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
-}
+$az_full_path = "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
 
 & $az_full_path --version
 

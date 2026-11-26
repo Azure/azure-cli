@@ -170,6 +170,7 @@ jobs:
     displayName: 'Use Python 3.14'
     inputs:
       versionSpec: '3.14'
+      architecture: 'arm64'
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -214,8 +215,6 @@ jobs:
   displayName: Build Windows MSI
   strategy:
     matrix:
-      x86:
-        Platform: x86
       x64:
         Platform: x64
 
@@ -306,8 +305,6 @@ jobs:
   displayName: Test MSI Installation
   strategy:
     matrix:
-      x86:
-        Platform: x86
       x64:
         Platform: x64
 
@@ -558,7 +555,7 @@ jobs:
       versionSpec: '$(python.version)'
   - bash: |
       set -e
-      python -m pip install docutils requests packaging tomli
+      python -m pip install docutils requests packaging tomli pyyaml
       python -B -m unittest discover -s tools/automation/tests -t tools -p 'test_*.py' -v
       python -B scripts/ci/check_package_versions.py
     displayName: Validate source metadata and packaging automation
@@ -631,12 +628,11 @@ jobs:
 # because ESRP resources are not available elsewhere.
 # ============================================================================
 
-# Phase 1: Build unsigned tarballs (ARM64 + Intel)
+# Phase 1: Build unsigned macOS ARM64 tarballs
 - template: .azure-pipelines/templates/macos/macos-build-jobs.yml
   parameters:
     PythonVersion: $(standalone_python_version)
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
-    MacosIntelImage: ${{ variables.macos_intel_pool }}
     condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
     dependsOn: ['ExtractMetadata']
 
@@ -653,7 +649,6 @@ jobs:
   - template: .azure-pipelines/templates/macos/macos-sign-notarize-jobs.yml
     parameters:
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
-      MacosIntelImage: ${{ variables.macos_intel_pool }}
       BundleId: 'com.microsoft.azure.cli'
       PythonVersion: $(standalone_python_version)
       ESRPServiceConnection: 'ame_esrp_connection'
@@ -666,7 +661,6 @@ jobs:
   - template: .azure-pipelines/templates/standalone/cask-generation-and-tests.yml
     parameters:
       MacosArm64Image: ${{ variables.macos_arm64_pool }}
-      MacosIntelImage: ${{ variables.macos_intel_pool }}
       LinuxArm64Pool: ${{ variables.ubuntu_arm64_pool }}
       LinuxX64Pool: ${{ variables.ubuntu_pool }}
       PythonVersion: $(standalone_python_version)

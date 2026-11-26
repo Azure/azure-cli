@@ -9,7 +9,6 @@ Usage:
     python3 scripts/release/standalone/cask_generate.py \
         --version "2.x.y" \
         --arm64-macos-sha "<macos arm64 sha256>" \
-        --x86-64-macos-sha "<macos x86_64 sha256>" \
         --arm64-linux-sha "<linux arm64 sha256>" \
         --x86-64-linux-sha "<linux x86_64 sha256>" \
         --github-repo "Azure/azure-cli" \
@@ -17,8 +16,11 @@ Usage:
         --output "azure-cli.rb"
 
 Environment variable fallbacks (used when a CLI flag is omitted):
-    VERSION, ARM64_MACOS_SHA, X86_64_MACOS_SHA, ARM64_LINUX_SHA, X86_64_LINUX_SHA,
-    GITHUB_REPO, TEMPLATE, OUTPUT
+    VERSION, ARM64_MACOS_SHA, ARM64_LINUX_SHA, X86_64_LINUX_SHA,
+    GITHUB_REPO, PYTHON_VERSION, TEMPLATE, OUTPUT
+
+Supports macOS ARM64 and Linux ARM64/x86_64. Intel macOS is retired because
+cryptography 49 and later no longer support it.
 """
 
 import argparse
@@ -31,7 +33,6 @@ DEFAULT_OUTPUT = "azure-cli.rb"
 FIELD_PATTERNS = {
     "version": r"[0-9]+\.[0-9]+\.[0-9]+(?:[a-z][a-z0-9]*)?",
     "arm64_macos_sha": r"[0-9a-fA-F]{64}",
-    "x86_64_macos_sha": r"[0-9a-fA-F]{64}",
     "arm64_linux_sha": r"[0-9a-fA-F]{64}",
     "x86_64_linux_sha": r"[0-9a-fA-F]{64}",
     "github_repo": r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9_.-]+",
@@ -70,7 +71,6 @@ def _render_template(template_path: Path, replacements: dict[str, str]) -> str:
 def generate_cask(args: argparse.Namespace) -> None:
     version = _require(_env_or_arg(args.version, "VERSION"), "version")
     arm64_macos_sha = _require(_env_or_arg(args.arm64_macos_sha, "ARM64_MACOS_SHA"), "arm64_macos_sha")
-    x86_64_macos_sha = _require(_env_or_arg(args.x86_64_macos_sha, "X86_64_MACOS_SHA"), "x86_64_macos_sha")
     arm64_linux_sha = _require(_env_or_arg(args.arm64_linux_sha, "ARM64_LINUX_SHA"), "arm64_linux_sha")
     x86_64_linux_sha = _require(_env_or_arg(args.x86_64_linux_sha, "X86_64_LINUX_SHA"), "x86_64_linux_sha")
     github_repo = _require(_env_or_arg(args.github_repo, "GITHUB_REPO"), "github_repo")
@@ -82,7 +82,6 @@ def generate_cask(args: argparse.Namespace) -> None:
     replacements = {
         "{{ version }}": version,
         "{{ arm64_macos_sha }}": arm64_macos_sha,
-        "{{ x86_64_macos_sha }}": x86_64_macos_sha,
         "{{ arm64_linux_sha }}": arm64_linux_sha,
         "{{ x86_64_linux_sha }}": x86_64_linux_sha,
         "{{ github_repo }}": github_repo,
@@ -120,7 +119,6 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="cask_generate.py")
     parser.add_argument("--version", dest="version", help="Azure CLI version")
     parser.add_argument("--arm64-macos-sha", dest="arm64_macos_sha", help="macOS ARM64 tarball SHA256")
-    parser.add_argument("--x86-64-macos-sha", dest="x86_64_macos_sha", help="macOS x86_64 tarball SHA256")
     parser.add_argument("--arm64-linux-sha", dest="arm64_linux_sha", help="Linux ARM64 tarball SHA256")
     parser.add_argument("--x86-64-linux-sha", dest="x86_64_linux_sha", help="Linux x86_64 tarball SHA256")
     parser.add_argument("--github-repo", dest="github_repo", help="GitHub repo, e.g. Azure/azure-cli")

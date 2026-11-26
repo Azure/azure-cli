@@ -6,7 +6,6 @@
 #
 # Parameters:
 #   - MacosArm64Image: VM image for ARM64 tests
-#   - MacosIntelImage: VM image for Intel tests
 #   - LinuxArm64Pool: pool for ARM64 Linux tests
 #   - LinuxX64Pool: pool for x86_64 Linux tests
 #   - PythonVersion: Homebrew Python version for testing
@@ -17,7 +16,7 @@
 #   - LinuxDependsOn: Jobs required by Linux offline-install tests
 #
 # Requires:
-#   - Artifacts: macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64,
+#   - Artifacts: macos-cli-signed-notarized-arm64,
 #     linux-cli-final-arm64, linux-cli-final-x86_64
 #
 # Produces:
@@ -27,9 +26,6 @@ parameters:
   - name: MacosArm64Image
     type: string
     default: 'macos-15-arm64'
-  - name: MacosIntelImage
-    type: string
-    default: 'macos-15'
   - name: LinuxArm64Pool
     type: string
     default: 'pool-ubuntu-latest-arm64'
@@ -60,7 +56,7 @@ parameters:
 
 jobs:
 # ============================================================================
-# JOB: GENERATE CASK AND TEST VIA TEMP HOMEBREW TAP (Both Architectures)
+# JOB: GENERATE CASK AND TEST VIA TEMP HOMEBREW TAP (macOS ARM64)
 # ============================================================================
 - job: TestMacOSTempTapCask
   displayName: 'macOS | Generate Cask and Test'
@@ -71,9 +67,6 @@ jobs:
       ARM64:
         Architecture: 'arm64'
         vmImageName: ${{ parameters.MacosArm64Image }}
-      Intel:
-        Architecture: 'x86_64'
-        vmImageName: ${{ parameters.MacosIntelImage }}
   pool:
     vmImage: $(vmImageName)
 
@@ -84,10 +77,6 @@ jobs:
   - download: current
     artifact: 'macos-cli-signed-notarized-arm64'
     displayName: 'Download signed tarball (ARM64)'
-
-  - download: current
-    artifact: 'macos-cli-signed-notarized-x86_64'
-    displayName: 'Download signed tarball (Intel)'
 
   - download: current
     artifact: 'linux-cli-final-arm64'
@@ -125,14 +114,12 @@ jobs:
       
       # Get tarballs
       ARM64_TARBALL=$(find $(Pipeline.Workspace)/macos-cli-signed-notarized-arm64 -name "azure-cli-*-macos-arm64.tar.gz" | head -1)
-      X86_64_TARBALL=$(find $(Pipeline.Workspace)/macos-cli-signed-notarized-x86_64 -name "azure-cli-*-macos-x86_64.tar.gz" | head -1)
       ARM64_LINUX_TARBALL=$(find $(Pipeline.Workspace)/linux-cli-final-arm64 -name "azure-cli-*-linux-arm64.tar.gz" | head -1)
       X86_64_LINUX_TARBALL=$(find $(Pipeline.Workspace)/linux-cli-final-x86_64 -name "azure-cli-*-linux-x86_64.tar.gz" | head -1)
       
       VERSION=$(basename "$ARM64_TARBALL" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+([a-z0-9]+)?' | head -1)
       
       ARM64_MACOS_SHA256=$(cat ${ARM64_TARBALL}.sha256 | cut -d' ' -f1)
-      X86_64_MACOS_SHA256=$(cat ${X86_64_TARBALL}.sha256 | cut -d' ' -f1)
       ARM64_LINUX_SHA256=$(cat ${ARM64_LINUX_TARBALL}.sha256 | cut -d' ' -f1)
       X86_64_LINUX_SHA256=$(cat ${X86_64_LINUX_TARBALL}.sha256 | cut -d' ' -f1)
       
@@ -140,8 +127,6 @@ jobs:
       echo "Version: $VERSION"
       echo "ARM64 tarball: $ARM64_TARBALL"
       echo "macOS ARM64 SHA256: $ARM64_MACOS_SHA256"
-      echo "x86_64 tarball: $X86_64_TARBALL"
-      echo "macOS x86_64 SHA256: $X86_64_MACOS_SHA256"
       
       # Resolve repo root
       REPO_NAME="$(Build.Repository.Name)"
@@ -167,7 +152,6 @@ jobs:
       python3 "$REPO_ROOT/scripts/release/standalone/cask_generate.py" \
         --version "$VERSION" \
         --arm64-macos-sha "$ARM64_MACOS_SHA256" \
-        --x86-64-macos-sha "$X86_64_MACOS_SHA256" \
         --arm64-linux-sha "$ARM64_LINUX_SHA256" \
         --x86-64-linux-sha "$X86_64_LINUX_SHA256" \
         --github-repo "$CASK_GITHUB_REPO" \
@@ -294,7 +278,7 @@ jobs:
     displayName: 'Cleanup'
     condition: always()
 
-  # Publish cask artifact (only from ARM64 job - cask.rb is identical for both archs)
+  # Publish the cross-platform cask from the macOS ARM64 generation job.
   - task: PublishPipelineArtifact@1
     displayName: 'Publish cask definition artifact'
     condition: and(succeeded(), eq(variables['Architecture'], 'arm64'))
@@ -393,7 +377,7 @@ jobs:
     condition: always()
 
 # ============================================================================
-# JOB: TEST OFFLINE/TARBALL INSTALLATION (Both Architectures)
+# JOB: TEST OFFLINE/TARBALL INSTALLATION (macOS ARM64)
 # ============================================================================
 - job: TestMacOSOfflineInstall
   displayName: 'macOS | Test Offline Installation'
@@ -404,9 +388,6 @@ jobs:
       ARM64:
         Architecture: 'arm64'
         vmImageName: ${{ parameters.MacosArm64Image }}
-      Intel:
-        Architecture: 'x86_64'
-        vmImageName: ${{ parameters.MacosIntelImage }}
   pool:
     vmImage: $(vmImageName)
 

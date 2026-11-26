@@ -8,7 +8,7 @@ On Windows, there is a known issue of PowerShell when calling native `.exe` exec
 
 In short, **Windows native command invoked from PowerShell will be parsed by Command Prompt again**. This behavior contradicts the doc [About Quoting Rules](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_quoting_rules).
 
-As `az` is a Command Prompt script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`), it will have issues when invoked from PowerShell. These issues don't happen when invoking a PowerShell cmdlet:
+As `az` is a Command Prompt script (at `C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd` for the x64 MSI), it will have issues when invoked from PowerShell. These issues don't happen when invoking a PowerShell cmdlet:
 
 ```powershell
 # Double quotes are preserved

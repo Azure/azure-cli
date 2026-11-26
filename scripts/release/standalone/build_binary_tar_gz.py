@@ -11,6 +11,8 @@ This build produces a lightweight tar.gz with:
 3. No bundled Python runtime embedded - relies on Homebrew Python or AZ_PYTHON environment variable.
 4. An entry script that supports Homebrew Python or AZ_PYTHON
 
+Supported platforms: macOS ARM64 and Linux ARM64/x86_64. Intel macOS is retired
+because cryptography 49 and later no longer support it.
 
 Output Structure:
 ```
@@ -83,7 +85,7 @@ REQUIREMENTS_FILES = {
 APP_NAME = "azure-cli"
 CLI_EXECUTABLE_NAME = "az"
 TARBALL_NAME_TEMPLATE_DEFAULT = "{APP_NAME}-{VERSION}-{PLATFORM_TAG}-nopython.tar.gz"
-PLATFORM_TAGS = ("linux-arm64", "linux-x86_64", "macos-arm64", "macos-x86_64")
+PLATFORM_TAGS = ("linux-arm64", "linux-x86_64", "macos-arm64")
 
 # Python version we're building for (must match Homebrew python@X.Y)
 # Can be overridden via PYTHON_MAJOR_MINOR env var
@@ -442,6 +444,10 @@ def _platform_from_tag(platform_tag: str) -> str:
 
 def _validate_build_architecture(platform_tag: str) -> None:
     """Reject releases whose tag does not match the builder's architecture."""
+    if platform_tag == "macos-x86_64":
+        raise BuildError("Intel macOS (macos-x86_64) is retired: cryptography 49+ requires macOS ARM64.")
+    if platform_tag not in PLATFORM_TAGS:
+        raise BuildError(f"Unsupported platform tag: {platform_tag}. Choose from {', '.join(PLATFORM_TAGS)}")
     expected_architecture = platform_tag.split("-", maxsplit=1)[1]
     actual_architecture = platform.machine().lower()
     aliases = {
@@ -463,7 +469,8 @@ def main() -> int:
         description="Build Azure CLI tar.gz using Homebrew Python (no bundled Python)"
     )
     parser.add_argument(
-        "--platform-tag", required=True, choices=PLATFORM_TAGS, help="Platform tag for the build"
+        "--platform-tag", required=True, metavar="{" + ",".join(PLATFORM_TAGS) + "}",
+        help="Platform tag for the build (Intel macOS is retired)",
     )
     parser.add_argument(
         "--output-dir",
