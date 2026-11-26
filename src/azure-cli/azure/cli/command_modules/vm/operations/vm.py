@@ -99,6 +99,24 @@ class VMShow(_VMShow):
         return result
 
 
+def _normalize_vm_generic_update_patch_settings(vm):
+    # AAZ omits unset optional properties, while generic --set needs a null parent.
+    os_profile = vm.get('osProfile')
+    windows_configuration = os_profile.get('windowsConfiguration') if isinstance(os_profile, dict) else None
+    patch_settings = windows_configuration.get('patchSettings') if isinstance(windows_configuration, dict) else None
+    if isinstance(patch_settings, dict):
+        patch_settings.setdefault('automaticByPlatformSettings', None)
+    return vm
+
+
+class VMShowForUpdate(VMShow):
+    """Show a VM with optional patch settings initialized for generic update."""
+
+    def _output(self, *args, **kwargs):
+        result = super()._output(*args, **kwargs)
+        return _normalize_vm_generic_update_patch_settings(result)
+
+
 class VMListSizes(_VMListSizes):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
