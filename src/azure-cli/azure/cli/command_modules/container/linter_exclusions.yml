@@ -1,0 +1,32 @@
+---
+# exclusions for the container module
+
+container:
+    rule_exclusions:
+        - require_wait_command_if_no_wait
+
+container container-group-profile:
+    rule_exclusions:
+        - require_wait_command_if_no_wait
+
+container create:
+    parameters:
+        environment_variables_file:
+            rule_exclusions:
+                - option_length_too_long
+                - missing_parameter_test_coverage
+        secure_environment_variables_file:
+            rule_exclusions:
+                - option_length_too_long
+                - missing_parameter_test_coverage
+
+container container-group-profile create:
+    parameters:
+        environment_variables_file:
+            rule_exclusions:
+                - option_length_too_long
+                - missing_parameter_test_coverage
+        secure_environment_variables_file:
+            rule_exclusions:
+                - option_length_too_long
+                - missing_parameter_test_coverage
