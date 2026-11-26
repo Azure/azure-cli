@@ -1749,6 +1749,14 @@ def get_default_workload_profile_name_from_env(cmd, env_def, resource_group):
     return env_profiles[0]["name"]
 
 
+def validate_environment_mode_and_workload_profiles_compatible(environment_mode, workload_profiles_enabled):
+    if environment_mode is not None and workload_profiles_enabled is not None:
+        if environment_mode.lower() == 'consumptiononly' and workload_profiles_enabled:
+            raise ValidationError("Cannot use '--enable-workload-profiles' with '--environment-mode ConsumptionOnly'. Please use '--environment-mode' alone.")
+        if environment_mode.lower() != 'consumptiononly' and not workload_profiles_enabled:
+            raise ValidationError("Cannot use '--enable-workload-profiles false' with '--environment-mode {}'. Please use '--environment-mode' alone.".format(environment_mode))
+
+
 def get_default_workload_profiles(cmd, location):
     profiles = [
         {

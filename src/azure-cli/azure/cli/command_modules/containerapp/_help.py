@@ -415,12 +415,28 @@ helps['containerapp env create'] = """
       text: |
           az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
               --location eastus2 --enable-workload-profiles false
+    - name: Create a workload profiles environment using environment mode.
+      text: |
+          az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
+              --location eastus2 --environment-mode WorkloadProfiles
+    - name: Create a consumption-only environment using environment mode.
+      text: |
+          az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
+              --location eastus2 --environment-mode ConsumptionOnly
+    - name: Create an Express environment using environment mode.
+      text: |
+          az containerapp env create -n MyContainerappEnvironment -g MyResourceGroup \\
+              --location eastus2 --environment-mode Express
 """
 
 
 helps['containerapp env update'] = """
     type: command
     short-summary: Update a Container Apps environment.
+    parameters:
+    - name: --environment-mode
+      short-summary: Mode of the environment, such as Express, WorkloadProfiles, or ConsumptionOnly.
+      long-summary: Only the environment mode is changed; existing apps are preserved. The service validates supported mode changes.
     examples:
     - name: Update an environment's custom domain configuration.
       text: |
