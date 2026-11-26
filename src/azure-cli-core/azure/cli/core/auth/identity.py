@@ -613,7 +613,13 @@ def _get_id_token_azure_devops(audience):
         query_pairs.append(('api-version', '7.1'))
     query_pairs.append(('serviceConnectionId', service_connection_id))
     query_pairs.append(('audience', audience))
-    url = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urlencode(query_pairs, quote_via=quote), parsed.fragment))
+    url = urlunsplit((
+        parsed.scheme,
+        parsed.netloc,
+        parsed.path,
+        urlencode(query_pairs, quote_via=quote),
+        parsed.fragment
+    ))
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'bearer {request_token}',
