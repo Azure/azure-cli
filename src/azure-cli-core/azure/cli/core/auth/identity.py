@@ -10,7 +10,6 @@ import sys
 import threading
 
 from azure.cli.core._environment import get_config_dir
-from azure.cli.core.util import get_safe_executable_path
 from knack.log import get_logger
 from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
@@ -28,7 +27,6 @@ _CLIENT_SECRET = 'client_secret'
 _CERTIFICATE = 'certificate'
 _USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 _CLIENT_ASSERTION = 'client_assertion'
-_CLIENT_ASSERTION_CALLBACK = 'client_assertion_callback'
 
 # For environment credential
 AZURE_AUTHORITY_HOST = "AZURE_AUTHORITY_HOST"
@@ -266,8 +264,6 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         self.use_cert_sn_issuer = None
         # federated identity credential
         self.client_assertion = None
-        # command that prints a fresh federated token to stdout (provider-agnostic callback)
-        self.client_assertion_callback = None
 
         # Internal attributes for certificate
         # They are computed at runtime and not persisted in the service principal entry.
@@ -305,13 +301,12 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
     @classmethod
     def build_credential(cls, client_secret=None,
                          certificate=None, use_cert_sn_issuer=None,
-                         client_assertion=None, client_assertion_callback=None):
+                         client_assertion=None):
         """Build credential from user input. The credential looks like below, but only one key can exist.
         {
             'client_secret': 'my_secret',
             'certificate': '/path/to/cert.pem',
-            'client_assertion': 'my_federated_token',
-            'client_assertion_callback': 'my-get-token-command'
+            'client_assertion': 'my_federated_token'
         }
         """
         entry = {}
@@ -323,14 +318,12 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
                 entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
-        elif client_assertion_callback:
-            entry[_CLIENT_ASSERTION_CALLBACK] = client_assertion_callback
         return entry
 
     def get_entry_to_persist(self):
         """Get a service principal entry that can be persisted by ServicePrincipalStore."""
         persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER,
-                          _CLIENT_ASSERTION, _CLIENT_ASSERTION_CALLBACK]
+                          _CLIENT_ASSERTION]
         # Only persist certain attributes whose values are not None
         return {k: v for k, v in self.__dict__.items() if k in persisted_keys and v}
 
@@ -365,16 +358,6 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
             client_credential = {
                 'client_assertion': get_federated_id_token if self.client_assertion == FEDERATED_IDENTITY
                 else self.client_assertion}
-
-        # client_assertion_callback
-        # A user-provided command that prints a fresh federated token to stdout. Wrapped as a callable so
-        # MSAL re-runs it whenever a fresh assertion is needed (provider-agnostic refresh).
-        # {
-        #     "client_assertion": <callable returning a JWT>
-        # }
-        if self.client_assertion_callback:
-            client_credential = {
-                'client_assertion': _build_command_assertion_callback(self.client_assertion_callback)}
 
         return client_credential
 
@@ -491,10 +474,6 @@ _federated_id_token_lock = threading.Lock()
 # Connect/read timeouts (seconds) for OIDC ID token requests, so a network stall fails fast on a
 # long-running CI job instead of hanging the whole token acquisition indefinitely.
 _OIDC_HTTP_TIMEOUT = (10, 30)
-
-# Timeout (seconds) for a user callback command that fetches a federated token. The callback runs under
-# a lock, so a stuck command would otherwise block all concurrent token acquisitions.
-_OIDC_CALLBACK_PROCESS_TIMEOUT = 30
 
 _PROVIDER_GITHUB = 'GitHub Actions'
 _PROVIDER_AZURE_DEVOPS = 'Azure DevOps'
@@ -635,73 +614,3 @@ def _get_id_token_azure_devops():
     # Never log the token value itself.
     logger.debug('Retrieved a fresh ID token from the %s OIDC endpoint.', _PROVIDER_AZURE_DEVOPS)
     return id_token
-
-
-def _parse_and_resolve_callback_command(command):
-    import shlex
-
-    # POSIX parsing on every platform so quoted arguments containing spaces are handled correctly and
-    # consistently. The trade-off is that backslashes are escape characters (see the Windows note above).
-    try:
-        args = shlex.split(command, posix=True)
-    except ValueError as ex:
-        raise CLIError(f'--federated-token-callback: invalid command: {ex}') from None
-    if not args:
-        raise CLIError('--federated-token-callback: the command is empty.')
-
-    executable = get_safe_executable_path(args[0])
-    if not executable:
-        raise CLIError(
-            f"--federated-token-callback: command not found in a trusted PATH location: '{args[0]}'"
-        ) from None
-    args[0] = executable
-    return args
-
-
-def _run_callback_command(args):
-    import subprocess
-
-    try:
-        result = subprocess.run(
-            args,
-            capture_output=True,
-            text=True,
-            check=True,
-            timeout=_OIDC_CALLBACK_PROCESS_TIMEOUT
-        )
-    except FileNotFoundError:
-        raise CLIError(f"--federated-token-callback: command not found: '{args[0]}'") from None
-    except subprocess.TimeoutExpired:
-        raise CLIError(f'--federated-token-callback: command timed out after {_OIDC_CALLBACK_PROCESS_TIMEOUT} '
-                       'seconds.') from None
-    except subprocess.CalledProcessError as ex:
-        # Do not include stderr in the error message: it may contain sensitive values printed by helper
-        # commands (for example, raw tokens in verbose HTTP output).
-        raise CLIError(f'--federated-token-callback command exited with code {ex.returncode}.') from None
-
-    id_token = result.stdout.strip()
-    if not id_token:
-        raise CLIError('--federated-token-callback command produced no output on stdout.')
-    return id_token
-
-
-def _build_command_assertion_callback(command):
-    """Wrap a user-provided command as a callable that returns a fresh federated token.
-
-    This is the provider-agnostic escape hatch behind `az login --federated-token-callback`. The command
-    must print exactly one token to stdout. The command is parsed with POSIX rules and run without a shell.
-    On Windows, use forward slashes in paths or escape backslashes (POSIX treats '\\' as an escape).
-    """
-    args = _parse_and_resolve_callback_command(command)
-
-    # MSAL may invoke the client_assertion callback from concurrent token requests; serialize the command
-    # execution so two requests don't run the callback command at the same time.
-    lock = threading.Lock()
-
-    def get_id_token():
-        with lock:
-            id_token = _run_callback_command(args)
-        # Never log the token value itself.
-        logger.debug('Retrieved a fresh ID token from the --federated-token-callback command.')
-        return id_token
-    return get_id_token
