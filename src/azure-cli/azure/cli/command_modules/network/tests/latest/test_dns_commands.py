@@ -4,9 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import tempfile
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
+from azure.cli.testsdk.scenario_tests.config import TestConfig as ScenarioTestConfig
 
 from azure.cli.command_modules.network.zone_file import parse_zone_file
 
@@ -142,6 +144,109 @@ class DnsZoneImportTest(ScenarioTest):
 
 
 class DnsScenarioTest(ScenarioTest):
+
+    # A missing cassette otherwise makes the test SDK attempt authenticated recording in offline CI.
+    @unittest.skipUnless(
+        ScenarioTestConfig().record_mode or os.path.exists(os.path.join(
+            TEST_DIR, 'recordings', 'test_dns_zone_export_empty_txt_recordsets.yaml')),
+        'Run this scenario live to create its recording before running it in playback.')
+    @ResourceGroupPreparer(name_prefix='cli_test_dns_export_empty_txt')
+    def test_dns_zone_export_empty_txt_recordsets(self, resource_group):
+        self.kwargs['zone'] = 'export-empty-txt.example.com'
+        self.cmd('network dns zone create -g {rg} -n {zone}')
+        self.cmd('network dns record-set txt create -g {rg} -z {zone} -n populated --ttl 3600')
+        self.cmd('network dns record-set txt add-record -g {rg} -z {zone} -n populated '
+                 '--value validation-text')
+        self.cmd('network dns record-set a add-record -g {rg} -z {zone} -n acme '
+                 '--ipv4-address 192.0.2.1 --ttl 600')
+        self.cmd('network dns record-set aaaa add-record -g {rg} -z {zone} -n ipv6 '
+                 '--ipv6-address 2001:db8::1 --ttl 900')
+        self.cmd('network dns record-set cname set-record -g {rg} -z {zone} -n www '
+                 '--cname example.com --ttl 1200')
+        long_value = ['a' * 250, 'b' * 250]
+        for name, values in [
+                ('acme', ['validation-text']),
+                ('empty-only', []),
+                ('missing-array', []),
+                ('empty-string', ['']),
+                ('mixed', ['', '-validation-text', ''.join(long_value)])]:
+            with self.subTest(recordset=name, phase='setup'):
+                self.kwargs['record_name'] = name
+                self.cmd('network dns record-set txt create -g {rg} -z {zone} -n {record_name} --ttl 3600')
+                for value in values:
+                    self.kwargs['txt_value'] = value
+                    self.cmd('network dns record-set txt add-record -g {rg} -z {zone} -n {record_name} '
+                             '--value="{txt_value}"')
+                if name == 'acme':
+                    # Mirror automation removing its last TXT value but retaining the recordset.
+                    self.cmd('network dns record-set txt remove-record -g {rg} -z {zone} -n acme '
+                             '--value validation-text --keep-empty-record-set')
+
+        with tempfile.TemporaryDirectory() as directory:
+            self.kwargs['export'] = os.path.join(directory, 'zone.txt')
+
+            before = self.cmd('network dns record-set list -g {rg} -z {zone}').get_output_in_json()
+            txt_recordsets = {record['name']: record for record in before
+                              if record['type'].endswith('/TXT')}
+            self.assertEqual(set(txt_recordsets),
+                             {'populated', 'acme', 'empty-only', 'missing-array', 'empty-string', 'mixed'})
+            for name in ['acme', 'empty-only', 'missing-array']:
+                self.assertEqual(txt_recordsets[name]['ttl'], 3600)
+                self.assertFalse(txt_recordsets[name].get('TXTRecords'))
+            for name, values in [
+                    ('populated', ['validation-text']),
+                    ('empty-string', ['']),
+                    ('mixed', ['', '-validation-text', ''.join(long_value)])]:
+                self.assertEqual(txt_recordsets[name]['ttl'], 3600)
+                self.assertCountEqual(
+                    [''.join(record['value']) for record in txt_recordsets[name]['TXTRecords']],
+                    values)
+
+            self.cmd('network dns zone export -g {rg} -n {zone} -f "{export}"')
+            with open(self.kwargs['export']) as zone_file:
+                content = zone_file.read()
+            after = self.cmd('network dns record-set list -g {rg} -z {zone}').get_output_in_json()
+
+        self.assertEqual(sorted(before, key=lambda record: record['id']),
+                         sorted(after, key=lambda record: record['id']))
+        self.assertNotIn('empty-only', content)
+        self.assertNotIn('missing-array', content)
+        self.assertNotRegex(content, r'acme\s+3600 IN TXT')
+        # The zone parser normalizes empty strings to EMPTY, so check the text directly.
+        self.assertRegex(content, r'(?m)^empty-string\s+3600 IN TXT ""$')
+        self.assertRegex(content, r'(?m)^mixed\s+3600 IN TXT ""$')
+        parsed = parse_zone_file(content, self.kwargs['zone'])
+        origin = self.kwargs['zone'] + '.'
+        self.assertEqual(parsed['populated.' + origin]['txt'][0]['txt'], ['validation-text'])
+        self.assertEqual(len(parsed['empty-string.' + origin]['txt']), 1)
+        self.assertEqual(len(parsed['mixed.' + origin]['txt']), 3)
+        self.assertCountEqual([''.join(record['txt']) for record in parsed['mixed.' + origin]['txt']],
+                              ['EMPTY', '-validation-text', ''.join(long_value)])
+        for name in ['populated', 'empty-string', 'mixed']:
+            for record in parsed[name + '.' + origin]['txt']:
+                self.assertEqual(record['ttl'], txt_recordsets[name]['ttl'])
+        ns = next(record for record in before if record['type'].endswith('/NS'))
+        self.assertCountEqual(
+            [(record['ttl'], record['host']) for record in parsed[origin]['ns']],
+            [(ns['ttl'], record['nsdname'].rstrip('.') + '.') for record in ns['NSRecords']])
+        soa = next(record for record in before if record['type'].endswith('/SOA'))
+        self.assertEqual(parsed[origin]['soa']['ttl'], soa['ttl'])
+        self.assertEqual(int(parsed[origin]['soa']['serial']), soa['SOARecord']['serialNumber'])
+        for key in ['host', 'email']:
+            self.assertEqual(parsed[origin]['soa'][key], soa['SOARecord'][key].rstrip('.') + '.')
+        for key, service_key in [
+                ('refresh', 'refreshTime'), ('retry', 'retryTime'),
+                ('expire', 'expireTime'), ('minimum', 'minimumTTL')]:
+            self.assertEqual(parsed[origin]['soa'][key], soa['SOARecord'][service_key])
+        for name, record_type, ttl, key, value in [
+                ('acme', 'a', 600, 'ip', '192.0.2.1'),
+                ('ipv6', 'aaaa', 900, 'ip', '2001:db8::1'),
+                ('www', 'cname', 1200, 'alias', 'example.com.')]:
+            record = parsed[name + '.' + origin][record_type]
+            if record_type != 'cname':
+                record = record[0]
+            self.assertEqual(record['ttl'], ttl)
+            self.assertEqual(record[key], value)
 
     @ResourceGroupPreparer(name_prefix='cli_test_dns')
     def test_dns(self, resource_group):

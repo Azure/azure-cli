@@ -2853,6 +2853,10 @@ examples:
 helps['network dns zone export'] = """
 type: command
 short-summary: Export a DNS zone as a DNS zone file.
+long-summary: >
+    Empty TXT recordsets are omitted because DNS zone files cannot represent them.
+    Importing the exported file alone cannot restore these empty recordsets.
+    TXT records containing an empty string value are preserved.
 examples:
   - name: Export a DNS zone as a DNS zone file.
     text: >
