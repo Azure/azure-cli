@@ -71,11 +71,16 @@ def verify_macos_libraries(packages, architecture, python_formula):
         print(linkage)
         load_commands = command("otool", "-l", str(binary)).splitlines()
         rpaths = []
+        install_name = None
         for index, line in enumerate(load_commands):
             if line.strip() == "cmd LC_RPATH":
                 rpaths.append(load_commands[index + 2].strip().removeprefix("path ").rsplit(" (offset ", 1)[0])
+            elif line.strip() == "cmd LC_ID_DYLIB":
+                install_name = load_commands[index + 2].strip().removeprefix("name ").rsplit(" (offset ", 1)[0]
         for line in linkage.splitlines()[1:]:
             name = line.strip().split(" (", 1)[0]
+            if name == install_name:
+                continue
             if name.startswith(("/usr/lib/", "/System/Library/")):
                 continue
             library = resolve_library(name, binary, rpaths)
