@@ -46,8 +46,9 @@ class TestBatchOutput(unittest.TestCase):
     code turn a service response into the printed JSON, as they do for customers."""
 
     def setUp(self):
-        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config
-        environ = {name: value for name, value in os.environ.items() if not name.startswith('AZURE_BATCH_')}
+        # No Batch settings from AZURE_BATCH_* environment variables or the CLI config, and warnings are shown
+        environ = {name: value for name, value in os.environ.items()
+                   if not name.startswith('AZURE_BATCH_') and name != 'AZURE_CORE_ONLY_SHOW_ERRORS'}
         environ_patch = mock.patch.dict(os.environ, environ, clear=True)
         environ_patch.start()
         self.addCleanup(environ_patch.stop)
@@ -91,10 +92,14 @@ class TestBatchOutput(unittest.TestCase):
                          {'nodeAgentSkuId': 'batch.node.ubuntu 20.04', 'osDisk': {'diskSizeGb': 100}})
 
     def test_batch_pool_reset_output(self):
-        pool = self._invoke('batch pool reset --pool-id pool1 --start-task-command-line hostname', {
-            ('POST', '/pools/pool1/updateproperties'): (204, None),
-            ('GET', '/pools/pool1'): (200, POOL)})
+        with mock.patch('sys.stderr', new_callable=io.StringIO) as stderr:
+            pool = self._invoke('batch pool reset --pool-id pool1 --start-task-command-line hostname', {
+                ('POST', '/pools/pool1/updateproperties'): (204, None),
+                ('GET', '/pools/pool1'): (200, POOL)})
 
+        # The change to the format of 'pool show' is pre-announced for 2.100.0
+        self.assertIn("The output will be changed in 2.100.0. 'az batch pool reset' will print the pool in the same "
+                      "format as 'az batch pool show'.", stderr.getvalue())
         # 'pool reset' prints the SDK model without the module's key changes, unlike 'pool show'
         self.assertEqual(pool['stats']['resourceStats']['diskReadIOps'], 3000000000)
         self.assertEqual(pool['stats']['resourceStats']['diskWriteIOps'], 2222)

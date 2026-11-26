@@ -13,7 +13,7 @@ from unittest import mock
 
 from azure.batch._operations._patch import BatchClientOperationsMixin
 from azure.cli.command_modules.batch._validators import validate_retained_data_option
-from azure.cli.core.breaking_change import ExactVersion, upcoming_breaking_changes
+from azure.cli.core.breaking_change import AzCLIOutputChange, ExactVersion, upcoming_breaking_changes
 from azure.cli.core.mock import DummyCli
 from azure.cli.core.util import rmtree_with_retry
 
@@ -27,14 +27,22 @@ class TestBatchBreakingChange(unittest.TestCase):
             self.assertEqual(sorted(upcoming_breaking_changes), [
                 'batch node delete.retaineddata',
                 'batch node reboot.retaineddata',
+                'batch pool reset',
                 'batch pool resize.retaineddata',
                 'batch pool usage-metrics list'])
-            for changes in upcoming_breaking_changes.values():
+            for name, changes in upcoming_breaking_changes.items():
                 self.assertEqual(len(changes), 1)
                 # A fixed version number: the default report skips date targets, and the next window can move
                 self.assertIsInstance(changes[0].target_version, ExactVersion)
                 self.assertEqual(changes[0].target_version.version(), '2.100.0')
-                self.assertIn('will be removed in 2.100.0 (June 2027)', changes[0].message)
+                if name != 'batch pool reset':
+                    self.assertIn('will be removed in 2.100.0 (June 2027)', changes[0].message)
+            output_change = upcoming_breaking_changes['batch pool reset'][0]
+            self.assertIsInstance(output_change, AzCLIOutputChange)
+            self.assertEqual(output_change.message,
+                             "The output will be changed in 2.100.0. 'az batch pool reset' will print the pool in the "
+                             "same format as 'az batch pool show'. Update scripts that read this output before "
+                             "2.100.0 (June 2027); 'az batch pool show' already prints that format.")
 
 
 class TestBatchRetainedDataWarning(unittest.TestCase):
