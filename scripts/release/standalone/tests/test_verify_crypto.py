@@ -49,8 +49,8 @@ class TestMacOSLibraries(unittest.TestCase):
 
     def test_declared_python_dependency_is_allowed_and_architecture_checked(self):
         run = self.run_check(str(self.library))
-        run.assert_any_call(["lipo", "-verify_arch", "x86_64", str(self.binary)], check=True)
-        run.assert_any_call(["lipo", "-verify_arch", "x86_64", str(self.library)], check=True)
+        run.assert_any_call(["lipo", str(self.binary), "-verify_arch", "x86_64"], check=True)
+        run.assert_any_call(["lipo", str(self.library), "-verify_arch", "x86_64"], check=True)
 
     def test_incidental_runner_library_is_rejected(self):
         library = self.root / "incidental.dylib"

@@ -66,7 +66,7 @@ def verify_macos_libraries(packages, architecture, python_formula):
             continue
         visited.add(binary)
         print(command("file", str(binary)))
-        subprocess.run(["lipo", "-verify_arch", architecture, str(binary)], check=True)
+        subprocess.run(["lipo", str(binary), "-verify_arch", architecture], check=True)
         linkage = command("otool", "-L", str(binary))
         print(linkage)
         load_commands = command("otool", "-l", str(binary)).splitlines()
