@@ -59,7 +59,7 @@ class Create(AAZCommand):
             help="Proceeds only if the current entity tag does not match this value. Use * to create only if absent.",
         )
         _args_schema.account_name = AAZStrArg(
-            options=["--account-name"],
+            options=["-n", "--name", "--account-name"],
             help="The name of Cognitive Services account.",
             required=True,
             fmt=AAZStrArgFormat(
@@ -69,7 +69,7 @@ class Create(AAZCommand):
             ),
         )
         _args_schema.cost_control_name = AAZStrArg(
-            options=["-n", "--name", "--cost-control-name"],
+            options=["-c", "--cost-control-name"],
             help="The cost-control name. Names contain 1-63 ASCII letters, numbers, underscores, or hyphens, including a leading underscore or hyphen.",
             required=True,
             fmt=AAZStrArgFormat(
@@ -79,7 +79,7 @@ class Create(AAZCommand):
             ),
         )
         _args_schema.project_name = AAZStrArg(
-            options=["--project-name"],
+            options=["-p", "--project-name"],
             help="The name of Cognitive Services account's project.",
             required=True,
             fmt=AAZStrArgFormat(

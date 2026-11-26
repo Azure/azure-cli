@@ -829,7 +829,8 @@ def load_arguments(self, _):
                    required=True)
 
     with self.argument_context('cognitiveservices account project') as c:
-        c.argument('project_name', help='Cognitive Services account project name')
+        c.argument('project_name', options_list=['--project-name', '-p'],
+                   help='Cognitive Services account project name')
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    completer=location_completer)
         c.argument('description', help='Description of the project.')

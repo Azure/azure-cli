@@ -47,7 +47,7 @@ class List(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.account_name = AAZStrArg(
-            options=["--account-name"],
+            options=["-n", "--name", "--account-name"],
             help="The name of Cognitive Services account.",
             required=True,
             fmt=AAZStrArgFormat(
@@ -57,7 +57,7 @@ class List(AAZCommand):
             ),
         )
         _args_schema.project_name = AAZStrArg(
-            options=["--project-name"],
+            options=["-p", "--project-name"],
             help="The name of Cognitive Services account's project.",
             required=True,
             fmt=AAZStrArgFormat(
