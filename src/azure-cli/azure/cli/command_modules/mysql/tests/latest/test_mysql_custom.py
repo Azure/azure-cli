@@ -2,8 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import json
 import unittest
 from unittest.mock import MagicMock, patch
+
+from azure.mgmt.mysqlflexibleservers._utils.model_base import SdkJSONEncoder
 
 from ... import custom
 from ..._params import load_arguments
@@ -34,6 +37,59 @@ class MysqlFlexibleServerFirewallRuleCustomTest(unittest.TestCase):
                 'endIpAddress': '203.0.113.10'
             }
         }, client.parameters.as_dict())
+
+
+class MysqlFlexibleServerDatabaseCustomTest(unittest.TestCase):
+
+    def test_database_create_sends_charset_and_collation_under_properties(self):
+        client = _FakeDatabasesClient()
+
+        custom.database_create_func(
+            client=client,
+            resource_group_name='rg',
+            server_name='server',
+            database_name='probe',
+            charset='utf8mb3',
+            collation='utf8mb3_unicode_ci')
+
+        self.assertEqual(('rg', 'server', 'probe'), client.target)
+        self.assertEqual({
+            'properties': {
+                'charset': 'utf8mb3',
+                'collation': 'utf8mb3_unicode_ci'
+            }
+        }, client.request_body)
+
+    def test_database_create_default_charset_and_collation_under_properties(self):
+        client = _FakeDatabasesClient()
+
+        custom.database_create_func(
+            client=client,
+            resource_group_name='rg',
+            server_name='server',
+            database_name='probe')
+
+        self.assertEqual({
+            'properties': {
+                'charset': 'utf8',
+                'collation': 'utf8_general_ci'
+            }
+        }, client.request_body)
+
+    def test_server_create_default_database_sends_properties(self):
+        client = _FakeDatabasesClient()
+        db_context = MagicMock(cf_db=MagicMock(return_value=client), logging_name='MySQL')
+
+        with patch.object(custom, 'resolve_poller'):
+            custom._create_database(db_context, MagicMock(), 'rg', 'server', 'flexibleserverdb')
+
+        self.assertEqual(('rg', 'server', 'flexibleserverdb'), client.target)
+        self.assertEqual({
+            'properties': {
+                'charset': 'utf8',
+                'collation': 'utf8_general_ci'
+            }
+        }, client.request_body)
 
 
 class MysqlAcceleratedLogsCustomTest(unittest.TestCase):
@@ -128,6 +184,15 @@ class _FakeFirewallRulesClient:
         self.server_name = server_name
         self.firewall_rule_name = firewall_rule_name
         self.parameters = parameters
+        return parameters
+
+
+class _FakeDatabasesClient:
+
+    def begin_create_or_update(self, resource_group_name, server_name, database_name, parameters):
+        self.target = (resource_group_name, server_name, database_name)
+        # Serialize the way the SDK builds the request body.
+        self.request_body = json.loads(json.dumps(parameters, cls=SdkJSONEncoder, exclude_readonly=True))
         return parameters
 
 
