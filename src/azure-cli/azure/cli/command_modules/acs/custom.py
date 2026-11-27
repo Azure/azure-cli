@@ -3314,8 +3314,9 @@ def aks_runcommand(cmd, client, resource_group_name, name, command_string="", co
         ]
         command_id_regex = re.compile(r"commandResults\/(\w*)\?")
         command_id = command_id_regex.findall(command_result_polling_url)[0]
-        return _aks_command_result_in_progess_helper(
-            cmd.cli_ctx, client, resource_group_name, name, command_id)
+        _aks_command_result_in_progess_helper(
+            client, resource_group_name, name, command_id)
+        return
 
     spinner = Spinner(label='Running', stream=sys.stderr, hide_cursor=False)
     progress_controller = cmd.cli_ctx.get_progress_controller(
@@ -3343,7 +3344,8 @@ def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
         resource_group_name, name, command_id)
     if commandResult is None:
         return _aks_command_result_in_progess_helper(
-            cmd.cli_ctx, client, resource_group_name, name, command_id)
+            client, resource_group_name, name, command_id,
+            return_object=_output_format_specified(cmd.cli_ctx))
     return _print_command_result(cmd.cli_ctx, commandResult)
 
 
@@ -3354,9 +3356,15 @@ def _output_format_specified(cli_ctx):
     return safe_params is None or "-o" in safe_params or "--output" in safe_params
 
 
-def _aks_command_result_in_progess_helper(cli_ctx, client, resource_group_name, name, command_id):
+def _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id, return_object=False):
+    # return_object: return the result instead of printing it, for a caller whose return value is rendered
+    # with the output format the user specified. "invoke --no-wait" cannot use it, as the return value of
+    # a command is discarded when --no-wait is set.
     # pylint: disable=unused-argument
-    def command_result_direct_response_handler(pipeline_response, *args, **kwargs):
+    def command_result_direct_response_handler(pipeline_response, deserialized, *args, **kwargs):
+        if return_object and deserialized is not None:
+            # the command finished since the caller's request: return the complete result
+            return deserialized
         deserialized_data = pipeline_response.context.get(
             "deserialized_data", {})
         if deserialized_data:
@@ -3364,9 +3372,8 @@ def _aks_command_result_in_progess_helper(cli_ctx, client, resource_group_name, 
                 "properties", {}).get("provisioningState", None)
             started_at = deserialized_data.get(
                 "properties", {}).get("startedAt", None)
-            if _output_format_specified(cli_ctx):
-                # user specified output format, honor their choice: return an object with the same keys
-                # as a finished command result, instead of printing text that the format does not apply to
+            if return_object:
+                # same keys as a finished command result, the ones that are not known yet are None
                 return {
                     "id": command_id,
                     "provisioningState": provisioning_state,

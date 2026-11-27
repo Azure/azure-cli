@@ -3027,14 +3027,15 @@ class TestAKSCommand(unittest.TestCase):
 
 class TestRunCommand(unittest.TestCase):
     @staticmethod
-    def _in_progress_client():
-        # the service answers 202 with no result object while the command is still running
+    def _in_progress_client(finished_result=None):
+        # the service answers 202 with no result object while the command is still running.
+        # finished_result: what the second request gets, when the command finished in the meantime
         def get_command_result(resource_group_name, name, command_id, cls=None):
             if cls is None:
                 return None
             response = mock.Mock(context={"deserialized_data": {
                 "properties": {"provisioningState": "Running", "startedAt": "start"}}})
-            return cls(response, None, {})
+            return cls(response, finished_result, {})
         return mock.Mock(get_command_result=get_command_result)
 
     def test_command_result_in_progress_returns_object_for_explicit_output(self):
@@ -3044,6 +3045,12 @@ class TestRunCommand(unittest.TestCase):
         self.assertEqual(result["provisioningState"], "Running")
         self.assertEqual(result["startedAt"], "start")
         self.assertIsNone(result["exitCode"])
+
+    def test_command_result_returns_result_finished_between_requests(self):
+        cmd = mock.Mock(cli_ctx=mock.Mock(data={"safe_params": ["--command-id", "--output"]}))
+        finished = mock.Mock(provisioning_state="Succeeded", exit_code=3)
+        result = acs_custom.aks_command_result(cmd, self._in_progress_client(finished), "rg", "name", "id")
+        self.assertIs(result, finished)
 
     def test_command_result_in_progress_prints_without_explicit_output(self):
         cmd = mock.Mock(cli_ctx=mock.Mock(data={"safe_params": ["--command-id"]}))
