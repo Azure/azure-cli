@@ -63,8 +63,57 @@ All Azure CLI data is stored in a large json named `Properties` in table `RawEve
     - `context.default.azurecli.environmentvariables`: It logs customer's environment variables starting with `AZURE_CLI`
     - `context.default.azurecli.extensionname`: It logs the extension name and version in the format of `{extension_name}@{extension_version}` if the command is from CLI extension.
     - `context.default.azurecli.installer`: value of os environment variable `AZ_INSTALLER`
+    - `context.default.azurecli.agent`: advertised agent context; see [Agent context](#agent-context) below. Analytics mapping and allowlisting must be confirmed by the telemetry service team.
     - `context.default.azurecli.error_type`: It logs the exception class name.
     - `context.default.azurecli.exception_name`: A supplementation for `context.default.azurecli.error_type`
+
+
+## Agent context
+
+`Context.Default.AzureCLI.Agent` is a name-only string on ordinary `azurecli/command`
+events, including commands that do not authenticate. It is independent of
+`AgenticSession`, which describes the agentic authentication path, not general agent use.
+The existing payload builder also copies this property to additional fault events;
+it does not decorate arbitrary custom/extension events. Count command events rather
+than duplicated fault metadata when measuring command usage.
+
+The initial values are `claude-code`, `copilot-cli`, `copilot-vscode`, `codex`,
+`cursor`, `gemini-cli`, `unknown` and `multiple`. Detection reads only these signals:
+
+| Environment variable | Recognized value | Agent |
+| --- | --- | --- |
+| `AI_AGENT` | Exactly `github_copilot_vscode_agent` | `copilot-vscode` |
+| `CLAUDE_CODE_CHILD_SESSION` | Exactly `1` | `claude-code` |
+| `COPILOT_CLI` | Exactly `1` | `copilot-cli` |
+| `COPILOT_AGENT` | Exactly `1` | `copilot-vscode` |
+| `CODEX_CI` | Exactly `1` | `codex` |
+| `CURSOR_AGENT` | Any nonempty value, including `0` | `cursor` |
+| `GEMINI_CLI` | Exactly `1` | `gemini-cli` |
+
+The exact recognized `AI_AGENT` value wins over every fallback. It identifies the
+advertised VS Code surface, which can host other underlying agents. Missing, empty
+or unsupported `AI_AGENT` values (including version-bearing Claude formats and
+values longer than 96 characters) fall back to the remaining six signals. Comparisons
+are case-sensitive, with no trimming or prefix matching. Zero distinct fallback
+names gives `unknown`, one gives that name, and more than one gives `multiple`.
+`CLAUDECODE` alone and generic IDE/CI markers are not used.
+
+Only constant names are emitted: no raw environment values, agent versions, account
+data, prompts, paths or session/conversation IDs are collected by this detector.
+Collection follows the existing telemetry consent and forbidden-cloud policy,
+including `core.collect_telemetry` and `AZURE_CORE_COLLECT_TELEMETRY`; disabling
+collection skips detection on the normal finalization paths as well as payload saving.
+No new network request, storage or configuration surface is introduced.
+
+Signals can be inherited, copied, stale, spoofed, absent or unavailable in some
+agent execution paths. This property does not prove AI authorship, identify a
+person or model, count agent sessions or imply authorization. `unknown` does not
+mean human use. A missing property is different from `unknown`: older clients,
+ingestion rollout, suppressed custom events and payload/upload failures can all
+cause absence. Local tests establish detection and payload behavior, not vendor
+runtime coverage or ingestion. The expected analytics spelling is
+`context.default.azurecli.agent`; its service mapping/allowlisting is not established
+by the client-side addition.
 
 
 ## Doc Sections
