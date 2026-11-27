@@ -418,7 +418,6 @@ class TestFederatedIdentityAudience(unittest.TestCase):
         )
 
         build_credential_mock.assert_called_once_with(
-            mock.ANY,
             client_secret=None,
             certificate=None,
             use_cert_sn_issuer=None,
