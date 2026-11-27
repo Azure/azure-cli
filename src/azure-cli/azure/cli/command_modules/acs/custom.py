@@ -3343,15 +3343,28 @@ def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
     commandResult = client.get_command_result(
         resource_group_name, name, command_id)
     if commandResult is None:
-        _aks_command_result_in_progess_helper(
-            client, resource_group_name, name, command_id)
-        return
+        return _aks_command_result_in_progess_helper(
+            client, resource_group_name, name, command_id,
+            return_object=_output_format_specified(cmd.cli_ctx))
     return _print_command_result(cmd.cli_ctx, commandResult)
 
 
-def _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id):
+def _output_format_specified(cli_ctx):
+    # cli_ctx.data['safe_params'] contains list of parameter name user typed in, without value.
+    # cli core also use this calculate ParameterSetName header for all http request from cli.
+    safe_params = cli_ctx.data['safe_params']
+    return safe_params is None or "-o" in safe_params or "--output" in safe_params
+
+
+def _aks_command_result_in_progess_helper(client, resource_group_name, name, command_id, return_object=False):
+    # return_object: return the result instead of printing it, for a caller whose return value is rendered
+    # with the output format the user specified. "invoke --no-wait" cannot use it, as the return value of
+    # a command is discarded when --no-wait is set.
     # pylint: disable=unused-argument
-    def command_result_direct_response_handler(pipeline_response, *args, **kwargs):
+    def command_result_direct_response_handler(pipeline_response, deserialized, *args, **kwargs):
+        if return_object and deserialized is not None:
+            # the command finished since the caller's request: return the complete result
+            return deserialized
         deserialized_data = pipeline_response.context.get(
             "deserialized_data", {})
         if deserialized_data:
@@ -3359,6 +3372,17 @@ def _aks_command_result_in_progess_helper(client, resource_group_name, name, com
                 "properties", {}).get("provisioningState", None)
             started_at = deserialized_data.get(
                 "properties", {}).get("startedAt", None)
+            if return_object:
+                # same keys as a finished command result, the ones that are not known yet are None
+                return {
+                    "id": command_id,
+                    "provisioningState": provisioning_state,
+                    "startedAt": started_at,
+                    "finishedAt": None,
+                    "exitCode": None,
+                    "logs": None,
+                    "reason": None,
+                }
             print(
                 f"command id: {command_id}, started at: {started_at}, status: {provisioning_state}")
             print(
@@ -3368,16 +3392,13 @@ def _aks_command_result_in_progess_helper(client, resource_group_name, name, com
         else:
             print(
                 f"failed to fetch command result for command id: {command_id}")
-    client.get_command_result(
+        return None
+    return client.get_command_result(
         resource_group_name, name, command_id, cls=command_result_direct_response_handler)
 
 
 def _print_command_result(cli_ctx, commandResult):
-    # cli_ctx.data['safe_params'] contains list of parameter name user typed in, without value.
-    # cli core also use this calculate ParameterSetName header for all http request from cli.
-    if (cli_ctx.data['safe_params'] is None or
-        "-o" in cli_ctx.data['safe_params'] or
-            "--output" in cli_ctx.data['safe_params']):
+    if _output_format_specified(cli_ctx):
         # user specified output format, honor their choice, return object to render pipeline
         return commandResult
 
