@@ -379,3 +379,72 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         # Selector should be shown even with 1 sub (backward compat)
         selector_mock.assert_called_once_with([sub])
         self.assertIsNone(result)
+
+
+class TestLoginFederatedCredentialProvider(unittest.TestCase):
+    def test_federated_credential_provider_with_federated_token_raises(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        with self.assertRaisesRegex(CLIError, "'--federated-token' and '--federated-credential-provider' "
+                                              "cannot be used together"):
+            login(cmd, service_principal=True, username='app-id', tenant='tenant-id',
+                  client_assertion='token', federated_credential_provider='github')
+
+    def test_federated_credential_provider_with_password_raises(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        with self.assertRaisesRegex(CLIError, "'--federated-credential-provider' cannot be used with '--password'"):
+            login(cmd, service_principal=True, username='app-id', tenant='tenant-id',
+                  password='secret', federated_credential_provider='github')
+
+    def test_federated_credential_provider_requires_service_principal(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        with self.assertRaisesRegex(CLIError, "'--federated-credential-provider' is only applicable with a "
+                                              "service principal"):
+            login(cmd, federated_credential_provider='github')
+
+    def test_federated_credential_audience_requires_github_provider(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+
+        # Without a provider, and with azure-pipelines, which sets the audience itself.
+        for provider in (None, 'azure-pipelines'):
+            with self.assertRaisesRegex(CLIError, "'--federated-credential-audience' requires "
+                                                  "'--federated-credential-provider github'"):
+                login(cmd, service_principal=True, username='app-id', tenant='tenant-id',
+                      federated_credential_provider=provider, federated_credential_audience='api://custom-audience')
+
+    @mock.patch('azure.cli.core.auth.identity.ServicePrincipalAuth.build_credential', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_federated_credential_provider_passed_to_build_credential(self, profile_mock, build_credential_mock):
+        profile_instance = mock.MagicMock()
+        profile_instance.login.return_value = []
+        profile_mock.return_value = profile_instance
+        build_credential_mock.return_value = {'federated_credential_provider': 'github'}
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.getboolean.return_value = False
+
+        login(
+            cmd,
+            service_principal=True,
+            username='app-id',
+            tenant='tenant-id',
+            federated_credential_provider='github',
+            federated_credential_audience='api://custom-audience'
+        )
+
+        build_credential_mock.assert_called_once_with(
+            client_secret=None,
+            certificate=None,
+            use_cert_sn_issuer=None,
+            client_assertion=None,
+            federated_credential_provider='github',
+            federated_credential_audience='api://custom-audience'
+        )

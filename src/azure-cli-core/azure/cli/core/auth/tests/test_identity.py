@@ -146,6 +146,25 @@ class TestIdentity(unittest.TestCase):
             'client_assertion': 'test_jwt',
         }
 
+    @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
+    @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
+    def test_login_with_service_principal_federated_credential_provider(self, init_mock, acquire_token_for_client_mock,
+                                                                        save_entry_mock):
+        acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
+
+        identity = Identity('https://login.microsoftonline.com', tenant_id='tenant1')
+        identity.login_with_service_principal("sp_id1", {'federated_credential_provider': 'github'}, "openid")
+
+        # MSAL gets a callback, not a token, so it can fetch a fresh ID token whenever it needs one.
+        assert callable(init_mock.call_args.kwargs['client_credential']['client_assertion'])
+        # Only the provider is saved; no token is written to disk.
+        assert save_entry_mock.call_args.args[0] == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'federated_credential_provider': 'github',
+        }
+
     @mock.patch("msal.application.PublicClientApplication.remove_account")
     @mock.patch("msal.application.PublicClientApplication.get_accounts")
     def test_logout_user(self, get_accounts_mock, remove_account_mock):
@@ -263,6 +282,44 @@ class TestServicePrincipalAuth(unittest.TestCase):
         client_credential = sp_auth.get_msal_client_credential()
         assert client_credential == {'client_assertion': 'test_jwt'}
 
+    def test_service_principal_auth_federated_credential_provider(self):
+        sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1',
+                                                             {'federated_credential_provider': 'azure-pipelines'})
+        assert sp_auth.federated_credential_provider == 'azure-pipelines'
+
+        # The provider is persisted, so later az processes can rebuild the callback.
+        entry = sp_auth.get_entry_to_persist()
+        assert entry == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'federated_credential_provider': 'azure-pipelines'
+        }
+
+        # MSAL gets a callback instead of a token string, so it fetches a fresh ID token on every acquisition.
+        with mock.patch('azure.cli.core.auth.identity.get_federated_id_token', return_value='fresh_token') as m:
+            client_credential = sp_auth.get_msal_client_credential()
+            assert callable(client_credential['client_assertion'])
+            assert client_credential['client_assertion']() == 'fresh_token'
+            m.assert_called_once_with('azure-pipelines', None)
+
+    def test_service_principal_auth_federated_credential_audience(self):
+        sp_auth = ServicePrincipalAuth.build_from_credential(
+            'tenant1', 'sp_id1',
+            {'federated_credential_provider': 'github', 'federated_credential_audience': 'api://custom-audience'})
+
+        entry = sp_auth.get_entry_to_persist()
+        assert entry == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'federated_credential_provider': 'github',
+            'federated_credential_audience': 'api://custom-audience'
+        }
+
+        with mock.patch('azure.cli.core.auth.identity.get_federated_id_token', return_value='fresh_token') as m:
+            callback = sp_auth.get_msal_client_credential()['client_assertion']
+            assert callback() == 'fresh_token'
+            m.assert_called_once_with('github', 'api://custom-audience')
+
     def test_build_credential(self):
         # client_secret
         cred = ServicePrincipalAuth.build_credential(client_secret="test_secret")
@@ -290,6 +347,18 @@ class TestServicePrincipalAuth(unittest.TestCase):
         # client_assertion
         cred = ServicePrincipalAuth.build_credential(client_assertion="test_jwt")
         assert cred == {"client_assertion": "test_jwt"}
+
+        # federated_credential_provider
+        cred = ServicePrincipalAuth.build_credential(federated_credential_provider='azure-pipelines')
+        assert cred == {"federated_credential_provider": "azure-pipelines"}
+
+        # federated_credential_provider with custom audience
+        cred = ServicePrincipalAuth.build_credential(
+            federated_credential_provider='github', federated_credential_audience='api://custom-audience')
+        assert cred == {
+            "federated_credential_provider": "github",
+            "federated_credential_audience": "api://custom-audience"
+        }
 
 
 class TestServicePrincipalStore(unittest.TestCase):

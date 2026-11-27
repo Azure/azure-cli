@@ -139,6 +139,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
           use_device_code=False,
           # Service principal
           service_principal=None, certificate=None, use_cert_sn_issuer=None, client_assertion=None,
+          federated_credential_provider=None, federated_credential_audience=None,
           # Managed identity
           identity=False, client_id=None, object_id=None, resource_id=None,
           # Subscription discovery and default subscription selection control
@@ -156,7 +157,21 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     if use_cert_sn_issuer and not service_principal:
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
-        raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+        raise CLIError('usage error: --service-principal --username NAME --tenant TENANT with one credential '
+                       '(--password, --certificate, --federated-token or --federated-credential-provider)')
+    if client_assertion and federated_credential_provider:
+        raise CLIError("usage error: '--federated-token' and '--federated-credential-provider' "
+                       "cannot be used together")
+    if federated_credential_provider and (password or certificate):
+        raise CLIError("usage error: '--federated-credential-provider' "
+                       "cannot be used with '--password' or '--certificate'")
+    if federated_credential_provider and not service_principal:
+        raise CLIError("usage error: '--federated-credential-provider' is only applicable with a service principal")
+    if federated_credential_audience:
+        from azure.cli.core.auth.federated_credential import PROVIDER_GITHUB
+        if federated_credential_provider != PROVIDER_GITHUB:
+            raise CLIError("usage error: '--federated-credential-audience' requires "
+                           "'--federated-credential-provider github'. Azure Pipelines sets the token audience itself.")
     if skip_subscription_discovery and not tenant:
         raise CLIError("usage error: '--skip-subscription-discovery' requires '--tenant'")
     if skip_subscription_discovery and subscription:
@@ -188,7 +203,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
     if username:
-        if not (password or client_assertion or certificate):
+        if not (password or client_assertion or certificate or federated_credential_provider):
             try:
                 password = prompt_pass('Password: ')
             except NoTTYException:
@@ -201,7 +216,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         password = ServicePrincipalAuth.build_credential(
             client_secret=password,
             certificate=certificate, use_cert_sn_issuer=use_cert_sn_issuer,
-            client_assertion=client_assertion)
+            client_assertion=client_assertion,
+            federated_credential_provider=federated_credential_provider,
+            federated_credential_audience=federated_credential_audience)
 
     login_experience_v2 = cmd.cli_ctx.config.getboolean('core', 'login_experience_v2', fallback=True)
     # Send login_experience_v2 config to telemetry

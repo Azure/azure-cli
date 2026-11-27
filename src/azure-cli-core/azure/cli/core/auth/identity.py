@@ -7,6 +7,7 @@ import json
 import os
 import re
 import sys
+from functools import partial
 
 from azure.cli.core._environment import get_config_dir
 from knack.log import get_logger
@@ -14,6 +15,7 @@ from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
 from .constants import AZURE_CLI_CLIENT_ID
+from .federated_credential import get_federated_id_token
 from .msal_credentials import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
 from .util import check_result
@@ -26,6 +28,10 @@ _CLIENT_SECRET = 'client_secret'
 _CERTIFICATE = 'certificate'
 _USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 _CLIENT_ASSERTION = 'client_assertion'
+# az login --federated-credential-provider: get the OIDC ID token from this CI/CD provider on demand, instead of
+# storing one.
+_FEDERATED_CREDENTIAL_PROVIDER = 'federated_credential_provider'
+_FEDERATED_CREDENTIAL_AUDIENCE = 'federated_credential_audience'
 
 # For environment credential
 AZURE_AUTHORITY_HOST = "AZURE_AUTHORITY_HOST"
@@ -259,6 +265,8 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         self.use_cert_sn_issuer = None
         # federated identity credential
         self.client_assertion = None
+        self.federated_credential_provider = None
+        self.federated_credential_audience = None
 
         # Internal attributes for certificate
         # They are computed at runtime and not persisted in the service principal entry.
@@ -296,12 +304,14 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
     @classmethod
     def build_credential(cls, client_secret=None,
                          certificate=None, use_cert_sn_issuer=None,
-                         client_assertion=None):
-        """Build credential from user input. The credential looks like below, but only one key can exist.
+                         client_assertion=None, federated_credential_provider=None, federated_credential_audience=None):
+        """Build credential from user input. The credential looks like below, but only one of client_secret,
+        certificate, client_assertion or federated_credential_provider can exist.
         {
             'client_secret': 'my_secret',
             'certificate': '/path/to/cert.pem',
-            'client_assertion': 'my_federated_token'
+            'client_assertion': 'my_federated_token',
+            'federated_credential_provider': 'github'
         }
         """
         entry = {}
@@ -313,11 +323,16 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
                 entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
+        elif federated_credential_provider:
+            entry[_FEDERATED_CREDENTIAL_PROVIDER] = federated_credential_provider
+            if federated_credential_audience:
+                entry[_FEDERATED_CREDENTIAL_AUDIENCE] = federated_credential_audience
         return entry
 
     def get_entry_to_persist(self):
         """Get a service principal entry that can be persisted by ServicePrincipalStore."""
-        persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER, _CLIENT_ASSERTION]
+        persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER,
+                          _CLIENT_ASSERTION, _FEDERATED_CREDENTIAL_PROVIDER, _FEDERATED_CREDENTIAL_AUDIENCE]
         # Only persist certain attributes whose values are not None
         return {k: v for k, v in self.__dict__.items() if k in persisted_keys and v}
 
@@ -350,6 +365,12 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         # }
         if self.client_assertion:
             client_credential = {'client_assertion': self.client_assertion}
+
+        # federated credential provider
+        # The client_assertion is a callable, so MSAL gets a fresh JWT from the CI/CD provider whenever it needs one.
+        if self.federated_credential_provider:
+            client_credential = {'client_assertion': partial(
+                get_federated_id_token, self.federated_credential_provider, self.federated_credential_audience)}
 
         return client_credential
 

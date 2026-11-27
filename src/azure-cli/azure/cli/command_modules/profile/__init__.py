@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
+from azure.cli.core.auth.federated_credential import PROVIDERS as FEDERATED_CREDENTIAL_PROVIDERS
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.parameters import get_enum_type
 
@@ -86,6 +87,18 @@ class ProfileCommandsLoader(AzCommandsLoader):
                             'certificate rolls.')
             c.argument('client_assertion', options_list=['--federated-token'],
                        help='Federated token that can be used for OIDC token exchange.')
+            c.argument('federated_credential_provider',
+                       options_list=['--federated-credential-provider', '--fed-cred-provider'],
+                       arg_type=get_enum_type(FEDERATED_CREDENTIAL_PROVIDERS),
+                       help="Get the OIDC federated token from this CI/CD provider and refresh it automatically, so "
+                            "long-running jobs don't fail with AADSTS700024. github: GitHub Actions; the workflow "
+                            "needs the 'id-token: write' permission. azure-pipelines: an AzureCLI@2 task with "
+                            "System.AccessToken mapped as SYSTEM_ACCESSTOKEN. Cannot be used with --federated-token.")
+            c.argument('federated_credential_audience',
+                       options_list=['--federated-credential-audience', '--fed-cred-audience'],
+                       help='Audience to request in the OIDC token. Must match the audience in the app\'s federated '
+                            'identity credential. Defaults to api://AzureADTokenExchange. Only supported with '
+                            '--federated-credential-provider github; Azure Pipelines sets the audience itself.')
 
             # Managed identity
             c.argument('identity', options_list=('-i', '--identity'), action='store_true',
