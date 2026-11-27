@@ -7,7 +7,6 @@ import json
 import os
 import re
 import sys
-import threading
 from functools import partial
 
 from azure.cli.core._environment import get_config_dir
@@ -16,6 +15,7 @@ from knack.util import CLIError
 from msal import PublicClientApplication, ConfidentialClientApplication
 
 from .constants import AZURE_CLI_CLIENT_ID
+from .federated_credential import get_federated_id_token
 from .msal_credentials import UserCredential, ServicePrincipalCredential
 from .persistence import load_persisted_token_cache, file_extensions, load_secret_store
 from .util import check_result
@@ -28,17 +28,16 @@ _CLIENT_SECRET = 'client_secret'
 _CERTIFICATE = 'certificate'
 _USE_CERT_SN_ISSUER = 'use_cert_sn_issuer'
 _CLIENT_ASSERTION = 'client_assertion'
-_FEDERATED_IDENTITY_AUDIENCE = 'federated_identity_audience'
+# az login --federated-credential-provider: get the OIDC ID token from this CI/CD provider on demand, instead of
+# storing one.
+_FEDERATED_CREDENTIAL_PROVIDER = 'federated_credential_provider'
+_FEDERATED_CREDENTIAL_AUDIENCE = 'federated_credential_audience'
 
 # For environment credential
 AZURE_AUTHORITY_HOST = "AZURE_AUTHORITY_HOST"
 AZURE_TENANT_ID = "AZURE_TENANT_ID"
 AZURE_CLIENT_ID = "AZURE_CLIENT_ID"
 AZURE_CLIENT_SECRET = "AZURE_CLIENT_SECRET"
-
-# Sentinel value persisted as the client_assertion of a service principal entry to indicate that the OIDC
-# ID token should be fetched (and refreshed) on demand from the CI/CD provider instead of being a static token.
-FEDERATED_IDENTITY = "FEDERATED_IDENTITY"
 
 WAM_PROMPT = (
     "Select the account you want to log in with. "
@@ -266,7 +265,8 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         self.use_cert_sn_issuer = None
         # federated identity credential
         self.client_assertion = None
-        self.federated_identity_audience = None
+        self.federated_credential_provider = None
+        self.federated_credential_audience = None
 
         # Internal attributes for certificate
         # They are computed at runtime and not persisted in the service principal entry.
@@ -304,12 +304,14 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
     @classmethod
     def build_credential(cls, client_secret=None,
                          certificate=None, use_cert_sn_issuer=None,
-                         client_assertion=None, federated_identity_audience=None):
-        """Build credential from user input. The credential looks like below, but only one key can exist.
+                         client_assertion=None, federated_credential_provider=None, federated_credential_audience=None):
+        """Build credential from user input. The credential looks like below, but only one of client_secret,
+        certificate, client_assertion or federated_credential_provider can exist.
         {
             'client_secret': 'my_secret',
             'certificate': '/path/to/cert.pem',
-            'client_assertion': 'my_federated_token'
+            'client_assertion': 'my_federated_token',
+            'federated_credential_provider': 'github'
         }
         """
         entry = {}
@@ -321,14 +323,16 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
                 entry[_USE_CERT_SN_ISSUER] = use_cert_sn_issuer
         elif client_assertion:
             entry[_CLIENT_ASSERTION] = client_assertion
-            if federated_identity_audience:
-                entry[_FEDERATED_IDENTITY_AUDIENCE] = federated_identity_audience
+        elif federated_credential_provider:
+            entry[_FEDERATED_CREDENTIAL_PROVIDER] = federated_credential_provider
+            if federated_credential_audience:
+                entry[_FEDERATED_CREDENTIAL_AUDIENCE] = federated_credential_audience
         return entry
 
     def get_entry_to_persist(self):
         """Get a service principal entry that can be persisted by ServicePrincipalStore."""
         persisted_keys = [_CLIENT_ID, _TENANT, _CLIENT_SECRET, _CERTIFICATE, _USE_CERT_SN_ISSUER,
-                          _CLIENT_ASSERTION, _FEDERATED_IDENTITY_AUDIENCE]
+                          _CLIENT_ASSERTION, _FEDERATED_CREDENTIAL_PROVIDER, _FEDERATED_CREDENTIAL_AUDIENCE]
         # Only persist certain attributes whose values are not None
         return {k: v for k, v in self.__dict__.items() if k in persisted_keys and v}
 
@@ -360,11 +364,13 @@ class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
         #     "client_assertion": "...a JWT with claims aud, exp, iss, jti, nbf, and sub..."
         # }
         if self.client_assertion:
-            if self.client_assertion == FEDERATED_IDENTITY:
-                audience = self.federated_identity_audience or _AAD_TOKEN_EXCHANGE_AUDIENCE
-                client_credential = {'client_assertion': partial(get_federated_id_token, audience)}
-            else:
-                client_credential = {'client_assertion': self.client_assertion}
+            client_credential = {'client_assertion': self.client_assertion}
+
+        # federated credential provider
+        # The client_assertion is a callable, so MSAL gets a fresh JWT from the CI/CD provider whenever it needs one.
+        if self.federated_credential_provider:
+            client_credential = {'client_assertion': partial(
+                get_federated_id_token, self.federated_credential_provider, self.federated_credential_audience)}
 
         return client_credential
 
@@ -473,166 +479,3 @@ def get_environment_credential():
         getenv(AZURE_TENANT_ID))
     credentials = ServicePrincipalCredential(sp_auth, authority=authority)
     return credentials
-
-
-# MSAL may invoke a client_assertion callback concurrently; this lock keeps the dispatcher fetch thread-safe.
-_federated_id_token_lock = threading.Lock()
-
-# Connect/read timeouts (seconds) for OIDC ID token requests, so a network stall fails fast on a
-# long-running CI job instead of hanging the whole token acquisition indefinitely.
-_OIDC_HTTP_TIMEOUT = (10, 30)
-
-_PROVIDER_GITHUB = 'GitHub Actions'
-_PROVIDER_AZURE_DEVOPS = 'Azure DevOps'
-_AAD_TOKEN_EXCHANGE_AUDIENCE = 'api://AzureADTokenExchange'
-
-_GITHUB_REQUEST_URL_ENV = 'ACTIONS_ID_TOKEN_REQUEST_URL'
-_GITHUB_REQUEST_TOKEN_ENV = 'ACTIONS_ID_TOKEN_REQUEST_TOKEN'
-_ADO_REQUEST_URL_ENVS = ('ARM_OIDC_REQUEST_URL', 'SYSTEM_OIDCREQUESTURI')
-_ADO_REQUEST_TOKEN_ENVS = ('ARM_OIDC_REQUEST_TOKEN', 'SYSTEM_ACCESSTOKEN')
-_ADO_SERVICE_CONNECTION_ENV = 'ARM_OIDC_AZURE_SERVICE_CONNECTION_ID'
-
-
-def _first_env(*names):
-    for name in names:
-        value = os.environ.get(name)
-        if value:
-            return value
-    return None
-
-
-def get_federated_id_token(audience=None):
-    """Acquire a fresh OIDC ID token from the current CI/CD provider.
-
-    Registered as MSAL's ``client_assertion`` callback for ``--federated-identity``. Provider is detected
-    from environment variables. The callback can be invoked concurrently, so access is serialized with a
-    lock to avoid duplicate races.
-    """
-    with _federated_id_token_lock:
-        audience = audience or _AAD_TOKEN_EXCHANGE_AUDIENCE
-        if _GITHUB_REQUEST_URL_ENV in os.environ:
-            return _get_id_token_github(audience)
-        if any(name in os.environ for name in _ADO_REQUEST_URL_ENVS):
-            return _get_id_token_azure_devops(audience)
-        raise CLIError(
-            "--federated-identity: no supported CI/CD OIDC provider was detected in the environment. "
-            "Only GitHub Actions and Azure DevOps are currently supported. Provide a token with "
-            "--federated-token instead. See https://github.com/Azure/azure-cli/issues/28708 for details.")
-
-
-def _oidc_http_request(method, url, headers, provider):
-    """Issue an OIDC ID token HTTP request with an explicit timeout.
-
-    A missing timeout would let a stalled connection hang token acquisition forever on a long-running CI
-    job, so we bound it and surface a clear error on timeout or connection failure.
-    """
-    import requests
-    try:
-        return method(url, headers=headers, timeout=_OIDC_HTTP_TIMEOUT)
-    except requests.exceptions.Timeout:
-        raise CLIError(f'Timed out requesting an ID token from {provider}. Please retry.')
-    except requests.exceptions.RequestException as ex:
-        raise CLIError(f'Failed to reach the {provider} OIDC endpoint: {ex}')
-
-
-def _get_id_token_github(audience):
-    """Fetch a fresh OIDC ID token from the GitHub Actions token service.
-
-    Valid for the lifetime of the GitHub Actions request token (currently ~6 hours after the job starts).
-    https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-cloud-providers
-    """
-    from urllib.parse import quote
-    import requests
-
-    try:
-        request_token = os.environ[_GITHUB_REQUEST_TOKEN_ENV]
-        request_url = os.environ[_GITHUB_REQUEST_URL_ENV]
-    except KeyError as ex:
-        raise CLIError(
-            'Environment variable {} is not set. --federated-identity requires GitHub Actions with '
-            '"id-token: write" permission granted to the workflow.'.format(ex))
-
-    audience = quote(audience)
-    # Append the audience with the correct separator in case the request URL already has a query string.
-    separator = '&' if '?' in request_url else '?'
-    url = f'{request_url}{separator}audience={audience}'
-    headers = {
-        'Authorization': f'bearer {request_token}',
-        'Accept': 'application/json; api-version=2.0',
-        'Content-Type': 'application/json'
-    }
-    response = _oidc_http_request(requests.get, url, headers, _PROVIDER_GITHUB)
-    if not response.ok:
-        raise CLIError(f'Failed to retrieve an ID token from {_PROVIDER_GITHUB}: '
-                       f'{response.status_code} {response.reason}')
-    id_token = response.json().get('value')
-    if not id_token:
-        raise CLIError(f'{_PROVIDER_GITHUB} OIDC endpoint did not return an ID token.')
-    # Never log the token value itself.
-    logger.debug('Retrieved a fresh ID token from the %s OIDC endpoint.', _PROVIDER_GITHUB)
-    return id_token
-
-
-def _get_id_token_azure_devops(audience):
-    """Fetch a fresh OIDC ID token from Azure DevOps Pipelines.
-
-    Azure DevOps issues short-lived ID tokens (~5 min) and, unlike GitHub Actions, requires a POST to the
-    oidctoken API authenticated with the pipeline's System.AccessToken and targeting a specific service
-    connection. Because the token refresh runs in a later `az` process, all three inputs are read from the
-    environment following the documented Azure DevOps convention:
-
-    - request URL:   ARM_OIDC_REQUEST_URL, else SYSTEM_OIDCREQUESTURI
-    - access token:  ARM_OIDC_REQUEST_TOKEN, else SYSTEM_ACCESSTOKEN (the pipeline's System.AccessToken)
-    - service conn:  ARM_OIDC_AZURE_SERVICE_CONNECTION_ID
-
-    https://devblogs.microsoft.com/devops/introducing-azure-devops-id-token-refresh-and-terraform-task-version-5/
-    """
-    from urllib.parse import quote, parse_qsl, urlencode, urlsplit, urlunsplit
-    import requests
-
-    request_url = _first_env(*_ADO_REQUEST_URL_ENVS)
-    request_token = _first_env(*_ADO_REQUEST_TOKEN_ENVS)
-    service_connection_id = os.environ.get(_ADO_SERVICE_CONNECTION_ENV)
-
-    missing = [name for name, value in (
-        ('ARM_OIDC_REQUEST_URL (or SYSTEM_OIDCREQUESTURI)', request_url),
-        ('ARM_OIDC_REQUEST_TOKEN (or SYSTEM_ACCESSTOKEN)', request_token),
-        ('ARM_OIDC_AZURE_SERVICE_CONNECTION_ID', service_connection_id)) if not value]
-    if missing:
-        raise CLIError(
-            '--federated-identity on Azure DevOps requires the environment variable(s): {}. '
-            'System.AccessToken is not exposed to scripts by default, so map it explicitly and set the '
-            'service connection ID. See https://github.com/Azure/azure-cli/issues/28708 for guidance.'
-            .format(', '.join(missing)))
-
-    parsed = urlsplit(request_url.rstrip('/'))
-    query_pairs = parse_qsl(parsed.query, keep_blank_values=True)
-    has_api_version = any(key == 'api-version' for key, _ in query_pairs)
-    query_pairs = [(key, value) for key, value in query_pairs if key not in ('serviceConnectionId', 'audience')]
-    if not has_api_version:
-        query_pairs.append(('api-version', '7.1'))
-    query_pairs.append(('serviceConnectionId', service_connection_id))
-    query_pairs.append(('audience', audience))
-    url = urlunsplit((
-        parsed.scheme,
-        parsed.netloc,
-        parsed.path,
-        urlencode(query_pairs, quote_via=quote),
-        parsed.fragment
-    ))
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'bearer {request_token}',
-        # Prevents the service from responding with a redirect HTTP status code.
-        'X-TFS-FedAuthRedirect': 'Suppress',
-    }
-    response = _oidc_http_request(requests.post, url, headers, _PROVIDER_AZURE_DEVOPS)
-    if not response.ok:
-        raise CLIError(f'Failed to retrieve an ID token from {_PROVIDER_AZURE_DEVOPS}: '
-                       f'{response.status_code} {response.reason}')
-    id_token = response.json().get('oidcToken')
-    if not id_token:
-        raise CLIError(f'{_PROVIDER_AZURE_DEVOPS} OIDC endpoint did not return an ID token.')
-    # Never log the token value itself.
-    logger.debug('Retrieved a fresh ID token from the %s OIDC endpoint.', _PROVIDER_AZURE_DEVOPS)
-    return id_token

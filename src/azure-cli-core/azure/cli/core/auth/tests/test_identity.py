@@ -9,7 +9,6 @@ import unittest
 from unittest import mock
 
 from azure.cli.core.auth.identity import (Identity, ServicePrincipalAuth, ServicePrincipalStore,
-                                          FEDERATED_IDENTITY, get_federated_id_token,
                                           _get_authority_url)
 from knack.util import CLIError
 
@@ -147,6 +146,25 @@ class TestIdentity(unittest.TestCase):
             'client_assertion': 'test_jwt',
         }
 
+    @mock.patch("azure.cli.core.auth.identity.ServicePrincipalStore.save_entry")
+    @mock.patch("msal.application.ConfidentialClientApplication.acquire_token_for_client")
+    @mock.patch("msal.application.ConfidentialClientApplication.__init__", return_value=None)
+    def test_login_with_service_principal_federated_credential_provider(self, init_mock, acquire_token_for_client_mock,
+                                                                        save_entry_mock):
+        acquire_token_for_client_mock.return_value = {'access_token': "test_token"}
+
+        identity = Identity('https://login.microsoftonline.com', tenant_id='tenant1')
+        identity.login_with_service_principal("sp_id1", {'federated_credential_provider': 'github'}, "openid")
+
+        # MSAL gets a callback, not a token, so it can fetch a fresh ID token whenever it needs one.
+        assert callable(init_mock.call_args.kwargs['client_credential']['client_assertion'])
+        # Only the provider is saved; no token is written to disk.
+        assert save_entry_mock.call_args.args[0] == {
+            'client_id': 'sp_id1',
+            'tenant': 'tenant1',
+            'federated_credential_provider': 'github',
+        }
+
     @mock.patch("msal.application.PublicClientApplication.remove_account")
     @mock.patch("msal.application.PublicClientApplication.get_accounts")
     def test_logout_user(self, get_accounts_mock, remove_account_mock):
@@ -264,45 +282,43 @@ class TestServicePrincipalAuth(unittest.TestCase):
         client_credential = sp_auth.get_msal_client_credential()
         assert client_credential == {'client_assertion': 'test_jwt'}
 
-    def test_service_principal_auth_federated_identity(self):
-        # The FEDERATED_IDENTITY sentinel is persisted like a normal client_assertion, ...
+    def test_service_principal_auth_federated_credential_provider(self):
         sp_auth = ServicePrincipalAuth.build_from_credential('tenant1', 'sp_id1',
-                                                             {'client_assertion': FEDERATED_IDENTITY})
-        assert sp_auth.client_assertion == FEDERATED_IDENTITY
+                                                             {'federated_credential_provider': 'azure-pipelines'})
+        assert sp_auth.federated_credential_provider == 'azure-pipelines'
 
-        # Verify persist entry keeps the sentinel so later processes can rebuild the callback
+        # The provider is persisted, so later az processes can rebuild the callback.
         entry = sp_auth.get_entry_to_persist()
         assert entry == {
             'client_id': 'sp_id1',
             'tenant': 'tenant1',
-            'client_assertion': FEDERATED_IDENTITY
+            'federated_credential_provider': 'azure-pipelines'
         }
 
-        # ... but get_msal_client_credential resolves the sentinel to the refreshing callback (not a string),
-        # so MSAL fetches a fresh ID token on every acquisition.
+        # MSAL gets a callback instead of a token string, so it fetches a fresh ID token on every acquisition.
         with mock.patch('azure.cli.core.auth.identity.get_federated_id_token', return_value='fresh_token') as m:
             client_credential = sp_auth.get_msal_client_credential()
             assert callable(client_credential['client_assertion'])
             assert client_credential['client_assertion']() == 'fresh_token'
-            m.assert_called_once_with('api://AzureADTokenExchange')
+            m.assert_called_once_with('azure-pipelines', None)
 
-    def test_service_principal_auth_federated_identity_custom_audience(self):
+    def test_service_principal_auth_federated_credential_audience(self):
         sp_auth = ServicePrincipalAuth.build_from_credential(
             'tenant1', 'sp_id1',
-            {'client_assertion': FEDERATED_IDENTITY, 'federated_identity_audience': 'api://custom-audience'})
+            {'federated_credential_provider': 'github', 'federated_credential_audience': 'api://custom-audience'})
 
         entry = sp_auth.get_entry_to_persist()
         assert entry == {
             'client_id': 'sp_id1',
             'tenant': 'tenant1',
-            'client_assertion': FEDERATED_IDENTITY,
-            'federated_identity_audience': 'api://custom-audience'
+            'federated_credential_provider': 'github',
+            'federated_credential_audience': 'api://custom-audience'
         }
 
         with mock.patch('azure.cli.core.auth.identity.get_federated_id_token', return_value='fresh_token') as m:
             callback = sp_auth.get_msal_client_credential()['client_assertion']
             assert callback() == 'fresh_token'
-            m.assert_called_once_with('api://custom-audience')
+            m.assert_called_once_with('github', 'api://custom-audience')
 
     def test_build_credential(self):
         # client_secret
@@ -332,126 +348,17 @@ class TestServicePrincipalAuth(unittest.TestCase):
         cred = ServicePrincipalAuth.build_credential(client_assertion="test_jwt")
         assert cred == {"client_assertion": "test_jwt"}
 
-        # client_assertion with custom federated identity audience
+        # federated_credential_provider
+        cred = ServicePrincipalAuth.build_credential(federated_credential_provider='azure-pipelines')
+        assert cred == {"federated_credential_provider": "azure-pipelines"}
+
+        # federated_credential_provider with custom audience
         cred = ServicePrincipalAuth.build_credential(
-            client_assertion=FEDERATED_IDENTITY, federated_identity_audience='api://custom-audience')
+            federated_credential_provider='github', federated_credential_audience='api://custom-audience')
         assert cred == {
-            "client_assertion": FEDERATED_IDENTITY,
-            "federated_identity_audience": "api://custom-audience"
+            "federated_credential_provider": "github",
+            "federated_credential_audience": "api://custom-audience"
         }
-
-
-
-class TestFederatedIdentity(unittest.TestCase):
-    """Tests for the OIDC federated-token dispatcher used by 'az login --federated-identity'."""
-
-    @mock.patch.dict(os.environ, {
-        'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token?foo=bar',
-        'ACTIONS_ID_TOKEN_REQUEST_TOKEN': 'request_token'
-    }, clear=True)
-    @mock.patch('requests.get')
-    def test_get_federated_id_token_github(self, get_mock):
-        get_mock.return_value = mock.MagicMock(ok=True, json=lambda: {'value': 'fresh_id_token'})
-
-        token = get_federated_id_token()
-
-        assert token == 'fresh_id_token'
-        # The audience is appended to the GitHub-provided request URL and the request token is used as bearer.
-        called_url = get_mock.call_args.args[0]
-        assert called_url.startswith('https://github.example/token?foo=bar&audience=')
-        assert 'api%3A//AzureADTokenExchange' in called_url
-        assert get_mock.call_args.kwargs['headers']['Authorization'] == 'bearer request_token'
-        # A timeout is always passed so a network stall fails fast instead of hanging the CI job.
-        assert get_mock.call_args.kwargs['timeout'] is not None
-
-    @mock.patch.dict(os.environ, {
-        'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token',
-        'ACTIONS_ID_TOKEN_REQUEST_TOKEN': 'request_token'
-    }, clear=True)
-    @mock.patch('requests.get')
-    def test_get_federated_id_token_github_timeout(self, get_mock):
-        import requests
-        get_mock.side_effect = requests.exceptions.Timeout()
-        with self.assertRaisesRegex(CLIError, 'Timed out'):
-            get_federated_id_token()
-
-    @mock.patch.dict(os.environ, {
-        'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token',
-        'ACTIONS_ID_TOKEN_REQUEST_TOKEN': 'request_token'
-    }, clear=True)
-    @mock.patch('requests.get')
-    def test_get_federated_id_token_github_url_without_query(self, get_mock):
-        # When the request URL has no existing query string, the audience must be appended with '?', not '&'.
-        get_mock.return_value = mock.MagicMock(ok=True, json=lambda: {'value': 'fresh_id_token'})
-
-        get_federated_id_token()
-
-        called_url = get_mock.call_args.args[0]
-        assert called_url.startswith('https://github.example/token?audience=')
-        assert '&audience=' not in called_url
-
-    @mock.patch.dict(os.environ, {
-        'ACTIONS_ID_TOKEN_REQUEST_URL': 'https://github.example/token',
-        'ACTIONS_ID_TOKEN_REQUEST_TOKEN': 'request_token'
-    }, clear=True)
-    @mock.patch('requests.get')
-    def test_get_federated_id_token_github_http_error(self, get_mock):
-        get_mock.return_value = mock.MagicMock(ok=False, status_code=403, reason='Forbidden')
-        with self.assertRaisesRegex(CLIError, 'Failed to retrieve an ID token'):
-            get_federated_id_token()
-
-    @mock.patch.dict(os.environ, {
-        'SYSTEM_OIDCREQUESTURI': 'https://vstoken.dev.azure.com/org/',
-        'SYSTEM_ACCESSTOKEN': 'system_access_token',
-        'ARM_OIDC_AZURE_SERVICE_CONNECTION_ID': 'sc-guid'
-    }, clear=True)
-    @mock.patch('requests.post')
-    def test_get_federated_id_token_azure_devops(self, post_mock):
-        post_mock.return_value = mock.MagicMock(ok=True, json=lambda: {'oidcToken': 'ado_id_token'})
-
-        token = get_federated_id_token()
-
-        assert token == 'ado_id_token'
-        called_url = post_mock.call_args.args[0]
-        # Trailing slash on the request URI is trimmed; api-version and service connection are appended.
-        assert called_url == ('https://vstoken.dev.azure.com/org'
-                              '?api-version=7.1&serviceConnectionId=sc-guid&audience=api%3A%2F%2FAzureADTokenExchange')
-        headers = post_mock.call_args.kwargs['headers']
-        assert headers['Authorization'] == 'bearer system_access_token'
-        assert headers['X-TFS-FedAuthRedirect'] == 'Suppress'
-
-    @mock.patch.dict(os.environ, {
-        'ARM_OIDC_REQUEST_URL': 'https://vstoken.dev.azure.com/org/?api-version=7.1',
-        'ARM_OIDC_REQUEST_TOKEN': 'request_token',
-        'ARM_OIDC_AZURE_SERVICE_CONNECTION_ID': 'sc-guid'
-    }, clear=True)
-    @mock.patch('requests.post')
-    def test_get_federated_id_token_azure_devops_existing_query(self, post_mock):
-        post_mock.return_value = mock.MagicMock(ok=True, json=lambda: {'oidcToken': 'ado_id_token'})
-
-        token = get_federated_id_token('api://custom-audience')
-
-        assert token == 'ado_id_token'
-        called_url = post_mock.call_args.args[0]
-        assert called_url == ('https://vstoken.dev.azure.com/org'
-                              '?api-version=7.1&serviceConnectionId=sc-guid&audience=api%3A%2F%2Fcustom-audience')
-
-    @mock.patch.dict(os.environ, {'SYSTEM_OIDCREQUESTURI': 'https://vstoken.dev.azure.com/org/'}, clear=True)
-    def test_get_federated_id_token_azure_devops_missing_env(self):
-        # Detected as Azure DevOps, but the access token and service connection ID are missing.
-        with self.assertRaisesRegex(CLIError, 'ARM_OIDC_AZURE_SERVICE_CONNECTION_ID'):
-            get_federated_id_token()
-
-    @mock.patch.dict(os.environ, {'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI': 'https://dev.azure.com/org'}, clear=True)
-    def test_get_federated_id_token_unsupported_provider(self):
-        # A DevOps collection URI without the OIDC request URI is not enough to attempt a refresh.
-        with self.assertRaisesRegex(CLIError, 'no supported CI/CD OIDC provider'):
-            get_federated_id_token()
-
-    @mock.patch.dict(os.environ, {}, clear=True)
-    def test_get_federated_id_token_no_provider(self):
-        with self.assertRaisesRegex(CLIError, 'no supported CI/CD OIDC provider'):
-            get_federated_id_token()
 
 
 class TestServicePrincipalStore(unittest.TestCase):
