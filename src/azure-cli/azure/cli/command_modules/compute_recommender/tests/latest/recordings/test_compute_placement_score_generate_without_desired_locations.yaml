@@ -1,0 +1,60 @@
+interactions:
+- request:
+    body: '{"desiredSizes": [{"sku": "Standard_D2_v2"}]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - compute-recommender compute-placement-score
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '45'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --location --desired-sizes
+      User-Agent:
+      - AZURECLI/2.93.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-11-10.0.26300-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/placementScores/regular/generate?api-version=2026-10-05-preview
+  response:
+    body:
+      string: '{"desiredLocations":["eastus"],"desiredSizes":[{"sku":"Standard_D2_v2"}],"desiredCount":1,"availabilityZones":false,"additionalProperties":{},"placementScores":[{"sku":"Standard_D2_v2","region":"eastus","score":"RestrictedSkuNotAvailable","placementPreference":0}]}'
+    headers:
+      api-supported-versions:
+      - 2021-06-01-preview, 2024-03-01-preview, 2024-06-01-preview, 2025-02-01-preview,
+        2025-04-01, 2025-06-05-preview, 2025-06-05, 2026-05-05-preview, 2026-09-05-preview,
+        2026-10-05-preview, 2026-11-05-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '265'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 16 Nov 2026 16:20:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - redacted
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 78C33F9C11E94F7280C85DA7EC07CCED Ref B: SN4AA2022402039 Ref C: 2026-11-16T16:20:03Z'
+    status:
+      code: 200
+      message: OK
+version: 1
