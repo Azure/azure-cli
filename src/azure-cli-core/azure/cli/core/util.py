@@ -695,6 +695,12 @@ def todict(obj, post_processor=None):
     if getattr(obj, "_is_model", False):
         result = {to_camel_case(get_backcompat_attr_name(obj, attr)): todict(getattr(obj, attr), post_processor)
                   for attr in attribute_list(obj) if hasattr(obj, attr)}
+        # Keys not backed by a declared field (e.g. models defined as `is Record<T>`) are additional
+        # properties, only reachable through the model's mapping interface
+        rest_names = {f._rest_name for f in obj._attr_to_rest_field.values()}  # pylint: disable=protected-access
+        for k in obj.keys():
+            if k not in rest_names and k not in result:
+                result[k] = todict(obj[k], post_processor)
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
         return todict(obj._asdict(), post_processor)

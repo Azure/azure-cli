@@ -888,5 +888,39 @@ class TestSafeExecutablePath(unittest.TestCase):
         resolved = get_safe_executable_path('cmd.exe')
         self.assertTrue(resolved.lower().endswith(os.path.join('system32', 'cmd.exe')))
 
+
+class TestTodictTypeSpecModel(unittest.TestCase):
+
+    def setUp(self):
+        try:
+            from azure.mgmt.resource.deploymentstacks import models
+        except ImportError:
+            self.skipTest('azure-mgmt-resource-deploymentstacks is not installed')
+        self.models = models
+
+    def test_todict_record_model(self):
+        from azure.cli.core.util import todict
+        # `DeploymentExtensionConfig is Record<DeploymentExtensionConfigItem>` declares no fields
+        config = self.models.DeploymentExtensionConfig({'foo': {'value': 'bar'}, 'num': {'value': 1}})
+        self.assertEqual(todict(config), {'foo': {'value': 'bar'}, 'num': {'value': 1}})
+
+    def test_todict_nested_model_with_additional_properties(self):
+        from azure.cli.core.util import todict
+        from azure.cli.core.commands import AzCliCommandInvoker
+        item = self.models.DeploymentExtensionConfigItem(value='bar')
+        item['extra_key'] = {'nested': True}
+        extension = self.models.DeploymentExtension(name='Kubernetes', version='1.0', config_id='id',
+                                                    config=self.models.DeploymentExtensionConfig({'foo': item}))
+        expected = {
+            'name': 'Kubernetes',
+            'version': '1.0',
+            'configId': 'id',
+            'config': {'foo': {'type': None, 'value': 'bar', 'keyVaultReference': None,
+                               'extra_key': {'nested': True}}}
+        }
+        self.assertEqual(todict(extension), expected)
+        self.assertEqual(todict(extension, AzCliCommandInvoker.remove_additional_prop_layer), expected)
+
+
 if __name__ == '__main__':
     unittest.main()
