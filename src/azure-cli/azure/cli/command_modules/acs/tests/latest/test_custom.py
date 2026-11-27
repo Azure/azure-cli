@@ -3048,6 +3048,40 @@ class TestRunCommand(unittest.TestCase):
             [get_test_data_file_path("ns.yaml"), get_test_data_file_path("dummy.json")])
         self.assertNotEqual(context, '')
 
+    @staticmethod
+    def _command_result(provisioning_state, exit_code=None):
+        return mock.Mock(
+            provisioning_state=provisioning_state, exit_code=exit_code, logs="logs", reason="reason",
+            started_at="start", finished_at="finish", id="id")
+
+    @staticmethod
+    def _cli_ctx(safe_params):
+        return mock.Mock(data={"safe_params": safe_params})
+
+    def test_print_command_result_succeeded(self):
+        result = self._command_result("Succeeded", exit_code=0)
+        self.assertIsNone(acs_custom._print_command_result(self._cli_ctx(["--command"]), result))
+
+    def test_print_command_result_exits_with_inner_exit_code(self):
+        result = self._command_result("Succeeded", exit_code=3)
+        with self.assertRaises(SystemExit) as cm:
+            acs_custom._print_command_result(self._cli_ctx(["--command"]), result)
+        self.assertEqual(cm.exception.code, 3)
+
+    def test_print_command_result_exits_when_run_command_failed(self):
+        result = self._command_result("Failed")
+        with self.assertRaises(SystemExit) as cm:
+            acs_custom._print_command_result(self._cli_ctx(["--command"]), result)
+        self.assertEqual(cm.exception.code, 1)
+
+    def test_print_command_result_in_progress(self):
+        result = self._command_result("Running")
+        self.assertIsNone(acs_custom._print_command_result(self._cli_ctx(["--command"]), result))
+
+    def test_print_command_result_returns_object_for_explicit_output(self):
+        result = self._command_result("Succeeded", exit_code=3)
+        self.assertIs(acs_custom._print_command_result(self._cli_ctx(["--command", "-o"]), result), result)
+
 
 class TestAddonConfigurationAzureBleuCloud(unittest.TestCase):
     """Test cases for AzureBleu Cloud region mapping in addon configuration."""
