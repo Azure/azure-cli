@@ -3389,13 +3389,17 @@ def _print_command_result(cli_ctx, commandResult):
             f"finished at {commandResult.finished_at} "
             f"with exitcode={commandResult.exit_code}{colorama.Style.RESET_ALL}")
         print(commandResult.logs)
+        if commandResult.exit_code:
+            # the command ran but failed inside the cluster: exit with its code,
+            # so that scripts and CI see the failure without parsing the output
+            sys.exit(commandResult.exit_code)
         return
 
     if commandResult.provisioning_state == "Failed":
         # failed, print reason in error
         print(
             f"{colorama.Fore.RED}command failed with reason: {commandResult.reason}{colorama.Style.RESET_ALL}")
-        return
+        sys.exit(1)
 
     # *-ing state
     print(f"{colorama.Fore.BLUE}command (id: {commandResult.id}) is in {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
