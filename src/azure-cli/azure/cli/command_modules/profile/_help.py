@@ -28,6 +28,11 @@ long-summary: >-
     To log in with a service principal, specify --service-principal.
 
 
+    In GitHub Actions or Azure Pipelines, use --federated-credential-provider to log in with workload identity federation.
+    Azure CLI gets a fresh OIDC token from the provider whenever it needs one,
+    so long-running jobs don't fail with AADSTS700024.
+
+
     To log in with a managed identity, specify --identity.
 
 
@@ -41,6 +46,12 @@ examples:
       text: az login --service-principal --username APP_ID --password CLIENT_SECRET --tenant TENANT_ID
     - name: Log in with a service principal using certificate.
       text: az login --service-principal --username APP_ID --certificate /path/to/cert.pem --tenant TENANT_ID
+    - name: "Log in with a service principal in GitHub Actions and refresh the OIDC token automatically. The workflow or job needs the 'id-token: write' permission."
+      text: az login --service-principal --username APP_ID --tenant TENANT_ID --federated-credential-provider github
+    - name: Log in with a service principal in GitHub Actions for Azure US Government. The audience must match the audience in the app's federated identity credential.
+      text: az login --service-principal --username APP_ID --tenant TENANT_ID --federated-credential-provider github --federated-credential-audience api://AzureADTokenExchangeUSGov
+    - name: Log in with a service principal in an Azure Pipelines AzureCLI@2 task and refresh the OIDC token automatically. Map System.AccessToken into the step's env as SYSTEM_ACCESSTOKEN. The task sets AZURESUBSCRIPTION_CLIENT_ID and AZURESUBSCRIPTION_TENANT_ID.
+      text: az login --service-principal --username APP_ID --tenant TENANT_ID --federated-credential-provider azure-pipelines
     - name: Log in with a system-assigned managed identity.
       text: az login --identity
     - name: Log in with a user-assigned managed identity's client ID.
