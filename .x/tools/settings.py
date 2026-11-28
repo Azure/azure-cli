@@ -8,6 +8,12 @@
 import re
 
 AAZ_SOURCE_REPOSITORY = 'Azure/aaz'
+AAZ_FIX_ROUTE = (
+    "Change the Azure/aaz command model and regenerate with `aaz-dev cli "
+    "regenerate`, or override the generated command in handwritten code "
+    "(`custom.py` subclass registered from `commands.py`, or `_params.py`); "
+    "never hand-edit `aaz/` output."
+)
 COMPONENT_DISPLAY_NAMES = {'vm': 'VM', 'vmss': 'VMSS', 'acr': 'ACR', 'acs': 'AKS', 'aks': 'AKS', 'keyvault': 'KeyVault', 'appservice': 'AppService', 'cosmosdb': 'Cosmos DB', 'sql': 'SQL', 'mysql': 'MySQL', 'postgres': 'PostgreSQL', 'rdbms': 'RDBMS', 'network': 'Network', 'storage': 'Storage', 'role': 'Role', 'resource': 'Resource', 'backup': 'Backup', 'batch': 'Batch', 'monitor': 'Monitor', 'iot': 'IoT', 'cdn': 'CDN', 'dns': 'DNS', 'eventhubs': 'Event Hubs', 'servicebus': 'Service Bus', 'eventgrid': 'Event Grid', 'containerapp': 'Container Apps', 'apim': 'API Management', 'appconfig': 'App Config', 'hdinsight': 'HDInsight', 'signalr': 'SignalR', 'search': 'Search', 'redis': 'Redis', 'advisor': 'Advisor', 'profile': 'Profile', 'identity': 'Identity', 'core': 'Core'}
 PR_FORMAT_DOC_URL = 'https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules#submitting-pull-requests'
 PR_TEMPLATE_URL = 'https://github.com/Azure/azure-cli/blob/dev/.github/pull_request_template.md'
@@ -18,13 +24,13 @@ _AZ_CMD_PATTERN = re.compile('\\baz\\s+([a-z][a-z0-9-]+)', 34)
 _AZ_COMMAND_ACTIONS = {'add', 'apply', 'approve', 'cancel', 'check-name', 'create', 'delete', 'disable', 'download', 'enable', 'export', 'get', 'invoke', 'list', 'login', 'logout', 'open', 'remove', 'reset', 'restart', 'restore', 'set', 'show', 'start', 'stop', 'sync', 'update', 'upgrade', 'upload', 'validate', 'wait'}
 _AZ_COMMAND_PROSE_BOUNDARIES = {'does', 'fails', 'for', 'is', 'returns', 'should', 'when', 'with'}
 _BACKTICKED_AZ_COMMAND_PATTERN = re.compile('`(az\\s+[^`]+)`', 34)
-_BEHAVIOR_SIGNAL = re.compile('(?:add_argument|register_command|command_group|custom_command|generic_update_command|AAZ|Cmdlet\\(|\\[Parameter\\b|\\b(?:GET|POST|PUT|PATCH|DELETE)\\b|api[_-]?version)', 34)
+_BEHAVIOR_SIGNAL = re.compile('(?:add_argument|register_command|command_group|custom_command|generic_update_command|AAZ|Cmdlet\\(|\\[Parameter\\b|\\bc\\.(?:argument|positional|extra|ignore)\\(|\\bg\\.(?:command|show_command|wait_command|custom_show_command|custom_wait_command|generic_wait_command)\\(|\\b(?:GET|POST|PUT|PATCH|DELETE)\\b|api[_-]?version)', re.IGNORECASE)
 _CLI_PARAMETER_PATTERN = re.compile('(?<![`A-Za-z0-9])(--[a-z0-9][a-z0-9-]*)(?![`A-Za-z0-9-])', 34)
 _EXT_PATH_PATTERN = re.compile('(?:^|[\\s/])src/([a-z0-9_-]+)(?:/|$)', 34)
 _GENERATED_FILE_PATTERNS = (re.compile('(?:^|/)generated(?:/|$)', re.IGNORECASE), re.compile('(?:^|/)aaz/[^/]+/', re.IGNORECASE), re.compile('(?:^|/)vendored_sdks?/.*(?:_client|_configuration|_serialization)\\.py$', re.IGNORECASE), re.compile('(?:^|/)vendored_sdks?/.*/models/_models.*\\.py$', re.IGNORECASE), re.compile('(?:^|/)vendored_sdks?/.*/operations/_.*\\.py$', re.IGNORECASE), re.compile('(?:^|/)(?:autorest|generated)[^/]*\\.cs$', re.IGNORECASE), re.compile('\\.generated\\.cs$', re.IGNORECASE))
 _GENERATION_SOURCE_PATTERNS = (re.compile('(?:^|/)(?:swagger|specification|specs?)(?:/|$)', re.IGNORECASE), re.compile('(?:^|/)(?:codegen|generation)(?:/|$)', re.IGNORECASE), re.compile('(?:^|/)(?:swagger|specification|codegen|generation)/.*(?:readme|autorest)\\.(?:md|ya?ml)$', re.IGNORECASE), re.compile('(?:^|/)_meta\\.(?:json|ya?ml)$', re.IGNORECASE))
 _GENERATION_SOURCE_PR = re.compile('https://github\\.com/Azure/(?:azure-rest-api-specs|aaz|aaz-dev-tools|azure-cli|azure-cli-extensions)/pull/\\d+', 34)
-_HELP_COMMAND_PATTERNS = (re.compile('(?:^|/)_help\\.py$', re.IGNORECASE), re.compile('(?:^|/)(?:commands|parameters)\\.py$', re.IGNORECASE), re.compile('(?:^|/)help/.*\\.(?:md|txt)$', re.IGNORECASE), re.compile('\\.(?:psd1|psm1)$', re.IGNORECASE), re.compile('(?:cmdlet|commands?)\\.cs$', re.IGNORECASE))
+_HELP_COMMAND_PATTERNS = (re.compile('(?:^|/)_help\\.py$', re.IGNORECASE), re.compile('(?:^|/)(?:commands|parameters)\\.py$', re.IGNORECASE), re.compile('(?:^|/)_params\\.py$', re.IGNORECASE), re.compile('(?:^|/)help/.*\\.(?:md|txt)$', re.IGNORECASE), re.compile('\\.(?:psd1|psm1)$', re.IGNORECASE), re.compile('(?:cmdlet|commands?)\\.cs$', re.IGNORECASE))
 _HISTORY_NOTES_HEADING_PATTERN = re.compile('^\\s*\\*\\*History Notes\\*\\*\\s*$', 34)
 _MARKDOWN_SECTION_BREAK_PATTERN = re.compile('^\\s*---\\s*$', 32)
 _MODULE_PATH_PATTERN = re.compile('command_modules/([a-z0-9_-]+)', 34)
@@ -46,3 +52,12 @@ _TEST_FILE_PATTERN = re.compile('(?:^|/)tests/.*?(?:^|/)?test_[^/]+\\.py$', 34)
 _TITLE_ISSUE_PATTERN = re.compile('^\\s*Fix(?:es|ed|ing)?\\s+#(\\d+)\\s*:?\\s*', 34)
 _TITLE_PREFIX_PATTERN = re.compile('^\\s*[\\[{]([^\\]}]+)[\\]}]\\s*', 32)
 _TITLE_VERB_REPLACEMENTS = {'added': 'Add', 'adding': 'Add', 'adds': 'Add', 'allowed': 'Allow', 'allowing': 'Allow', 'allows': 'Allow', 'changed': 'Change', 'changing': 'Change', 'changes': 'Change', 'collected': 'Collect', 'collecting': 'Collect', 'collects': 'Collect', 'deprecated': 'Deprecate', 'deprecating': 'Deprecate', 'deprecates': 'Deprecate', 'disabled': 'Disable', 'disabling': 'Disable', 'disables': 'Disable', 'enabled': 'Enable', 'enabling': 'Enable', 'enables': 'Enable', 'fixed': 'Fix', 'fixing': 'Fix', 'fixes': 'Fix', 'improved': 'Improve', 'improving': 'Improve', 'improves': 'Improve', 'made': 'Make', 'making': 'Make', 'makes': 'Make', 'moved': 'Move', 'moving': 'Move', 'moves': 'Move', 'renamed': 'Rename', 'renaming': 'Rename', 'renames': 'Rename', 'replaced': 'Replace', 'replacing': 'Replace', 'replaces': 'Replace', 'removed': 'Remove', 'removing': 'Remove', 'removes': 'Remove', 'supported': 'Support', 'supporting': 'Support', 'supports': 'Support', 'updated': 'Update', 'updating': 'Update', 'updates': 'Update', 'upgraded': 'Upgrade', 'upgrading': 'Upgrade', 'upgrades': 'Upgrade'}
+
+
+EXECUTION_INSTRUCTIONS = (
+    "Do not run azdev setup in this snapshot: it assumes Git metadata and a mutable developer installation.",
+    "Prefer the installed validator over rebuilding the Azure CLI development environment.",
+    "Run Flake8 with -j 1 to avoid unavailable shared-memory semaphores; keep all lint rules.",
+    "If additional diagnostics genuinely need dependencies, isolate them under TMPDIR and do not",
+    "mistake checks in that temporary environment for the required installed validation.",
+)
