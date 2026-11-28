@@ -1,0 +1,148 @@
+# Azure CLI Snap Build Pipeline Template
+#
+# Builds snap package from wheel artifacts
+#
+# Usage in azure-pipelines.yml:
+#   - template: scripts/release/snap/azure-pipelines-snap.yml
+#     parameters:
+#       multi_arch: true
+
+parameters:
+  - name: multi_arch
+    type: boolean
+    default: true
+  - name: publish_to_store
+    type: boolean
+    default: false
+  - name: release_channel
+    type: string
+    default: 'edge'
+
+jobs:
+  - job: BuildSnapPackage
+    displayName: Build Snap Package
+    dependsOn: BuildPythonWheel
+    pool:
+      name: $(ubuntu_pool)
+    timeoutInMinutes: 90
+
+    steps:
+      - checkout: self
+        fetchDepth: 1
+
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download Metadata'
+        inputs:
+          TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+          artifactName: metadata
+
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download PyPI Packages'
+        inputs:
+          TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+          artifactName: pypi
+
+      - task: Bash@3
+        displayName: 'Install Snapcraft'
+        inputs:
+          targetType: 'inline'
+          script: |
+            set -e
+            sudo snap install snapcraft --classic
+
+            # LXD only needed for single-arch local build
+            if [ "${{ parameters.multi_arch }}" != "true" ]; then
+              sudo snap install lxd
+              sudo lxd init --auto
+              sudo usermod -aG lxd $(whoami)
+            fi
+
+      - task: Bash@3
+        displayName: 'Build Snap Package'
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: $(SNAPCRAFT_STORE_CREDENTIALS)
+        inputs:
+          targetType: 'inline'
+          script: |
+            set -e
+            cd scripts/release/snap
+            chmod +x build-snap.sh
+
+            CLI_VERSION=$(cat $(Build.ArtifactStagingDirectory)/metadata/version)
+            echo "Building snap for Azure CLI version: $CLI_VERSION"
+
+            export WHEEL_DIR="$(Build.ArtifactStagingDirectory)/pypi"
+            export OUTPUT_DIR="$(Build.ArtifactStagingDirectory)/snap"
+
+            if [ "${{ parameters.multi_arch }}" = "true" ]; then
+              ./build-snap.sh "$CLI_VERSION" --multi-arch
+            else
+              sg lxd -c "./build-snap.sh $CLI_VERSION"
+            fi
+
+      - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+        displayName: 'SBOM'
+        condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
+        inputs:
+          BuildDropPath: $(Build.ArtifactStagingDirectory)/snap
+
+      - task: PublishPipelineArtifact@0
+        displayName: 'Publish Artifact: snap'
+        inputs:
+          TargetPath: $(Build.ArtifactStagingDirectory)/snap
+          ArtifactName: snap
+
+      - ${{ if eq(parameters.publish_to_store, true) }}:
+        - task: Bash@3
+          displayName: 'Publish to Snap Store'
+          env:
+            SNAPCRAFT_STORE_CREDENTIALS: $(SNAPCRAFT_STORE_CREDENTIALS)
+          inputs:
+            targetType: 'inline'
+            script: |
+              cd $(Build.ArtifactStagingDirectory)/snap
+              for snap_file in *.snap; do
+                echo "Uploading $snap_file to ${{ parameters.release_channel }}..."
+                snapcraft upload "$snap_file" --release=${{ parameters.release_channel }}
+              done
+
+  - job: TestSnapPackage
+    displayName: Test Snap Package
+    dependsOn: BuildSnapPackage
+    condition: succeeded()
+    pool:
+      name: $(ubuntu_pool)
+
+    steps:
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download Metadata'
+        inputs:
+          TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+          artifactName: metadata
+
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download Snap Package'
+        inputs:
+          TargetPath: '$(Build.ArtifactStagingDirectory)/snap'
+          artifactName: snap
+
+      - task: Bash@3
+        displayName: 'Test Snap Installation'
+        inputs:
+          targetType: 'inline'
+          script: |
+            set -e
+            CLI_VERSION=$(cat $(Build.ArtifactStagingDirectory)/metadata/version)
+
+            # Test amd64 snap (agent is amd64)
+            SNAP_FILE=$(Build.ArtifactStagingDirectory)/snap/azure-cli_${CLI_VERSION}_amd64.snap
+
+            echo "Installing snap: $SNAP_FILE"
+            sudo snap install "$SNAP_FILE" --dangerous
+
+            echo "Testing Azure CLI..."
+            azure-cli.az --version
+            azure-cli.az self-test
+
+            echo "Snap info:"
+            snap info azure-cli
