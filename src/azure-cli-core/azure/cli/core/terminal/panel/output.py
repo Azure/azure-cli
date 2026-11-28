@@ -1,0 +1,17 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+from prompt_toolkit.widgets.base import Frame, TextArea
+from prompt_toolkit.layout.dimension import D
+
+
+class OutputPanel(object):
+    def __init__(self):
+        self.container = Frame(
+            body=TextArea(text='output'),
+            width=D()
+        )
+
+    def __pt_container__(self):
+        return self.container
