@@ -704,13 +704,13 @@ def assign_identity(cmd, client, registry_name, identities, resource_group_name=
     # ensure registry.identity is set and is of type IdentityProperties
     registry.identity = registry.identity or IdentityProperties(type=ResourceIdentityType.none)
 
-    if assign_system_identity and registry.identity.type != ResourceIdentityType.system_assigned:
+    if assign_system_identity and registry.identity.type.lower() != ResourceIdentityType.system_assigned.lower():
         registry.identity.type = (ResourceIdentityType.system_assigned
-                                  if registry.identity.type == ResourceIdentityType.none
+                                  if registry.identity.type.lower() == ResourceIdentityType.none.lower()
                                   else ResourceIdentityType.system_assigned_user_assigned)
-    if assign_user_identities and registry.identity.type != ResourceIdentityType.user_assigned:
+    if assign_user_identities and registry.identity.type.lower() != ResourceIdentityType.user_assigned.lower():
         registry.identity.type = (ResourceIdentityType.user_assigned
-                                  if registry.identity.type == ResourceIdentityType.none
+                                  if registry.identity.type.lower() == ResourceIdentityType.none.lower()
                                   else ResourceIdentityType.system_assigned_user_assigned)
 
     if assign_user_identities:
@@ -742,6 +742,7 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
     if remove_system_identity:
         if registry.identity.type.lower() == ResourceIdentityType.user_assigned.lower():
             raise CLIError("The registry does not have a system identity assigned.")
+        _validate_cmk_identity_removal(registry, SYSTEM_ASSIGNED_IDENTITY_ALIAS, 'system')
         registry.identity.type = (ResourceIdentityType.none
                                   if registry.identity.type.lower() == ResourceIdentityType.system_assigned.lower()
                                   else ResourceIdentityType.user_assigned)
@@ -762,6 +763,10 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
             # remove identity if it exists even if case is different
             for existing_identity in registry.identity.user_assigned_identities.copy():
                 if existing_identity.lower() == id_to_remove.lower():
+                    identity_properties = registry.identity.user_assigned_identities[existing_identity]
+                    _validate_cmk_identity_removal(
+                        registry, existing_identity,
+                        identity_properties.client_id if identity_properties else None)
                     registry.identity.user_assigned_identities.pop(existing_identity)
                     was_removed = True
                     break
@@ -809,6 +814,34 @@ def rotate_key(cmd, client, registry_name, identity=None, key_encryption_key=Non
         registry.encryption.key_vault_properties.identity = client_id
 
     return client.begin_update(resource_group_name, registry_name, registry)
+
+
+def _validate_cmk_identity_removal(registry, identity, client_id):
+    encryption = registry.encryption
+    if not encryption or encryption.status.lower() != 'enabled':
+        return
+
+    key_vault_properties = encryption.key_vault_properties
+    if not key_vault_properties or not key_vault_properties.identity:
+        raise InvalidArgumentValueError(
+            "Cannot remove identity '{}' because the registry's encryption identity is unavailable.".format(identity),
+            recommendation="Inspect the registry's encryption settings before retrying.")
+
+    encryption_identity = key_vault_properties.identity.lower()
+    if encryption_identity == 'system' and identity != SYSTEM_ASSIGNED_IDENTITY_ALIAS:
+        return
+
+    if not client_id:
+        raise InvalidArgumentValueError(
+            "Cannot verify whether identity '{}' is used for encryption because its client ID is unavailable."
+            .format(identity),
+            recommendation="Inspect the registry's identity settings before retrying.")
+
+    if encryption_identity == client_id.lower():
+        raise InvalidArgumentValueError(
+            "Identity '{}' is used for customer-managed encryption and cannot be removed.".format(identity),
+            recommendation="Assign a replacement identity, switch encryption with "
+                           "'az acr encryption rotate-key --identity', then remove the old identity.")
 
 
 def _analyze_identities(identities):
