@@ -420,6 +420,12 @@ class AcrCommandsTests(ScenarioTest):
         # import image using no-wait
         self.cmd('acr import -n {source_registry_name} -r {resource_id} --source {source_image} --no-wait')
 
+        # --registry-tenant requires --registry to be a source registry resource ID
+        self.cmd(
+            'acr import -n {source_registry_name} -r {source_registry_name} --source {source_image} '
+            '--registry-tenant 00000000-0000-0000-0000-000000000000',
+            expect_failure=True)
+
     @AllowLargeResponse()
     @ResourceGroupPreparer()
     @record_only()
@@ -1138,4 +1144,3 @@ class AcrCommandsTests(ScenarioTest):
         with self.assertRaises(Exception) as ex:
             self.cmd('acr create -n {registry_name} -g {rg2} -l {rg_loc} --sku {sku} --dnl-scope resourcegroupreuse',
                      checks=['code','RegistryNameAlreadyInUse'])
-
