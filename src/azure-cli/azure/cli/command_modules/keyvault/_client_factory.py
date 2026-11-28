@@ -260,6 +260,7 @@ def data_plane_azure_keyvault_ekm_client(cli_ctx, command_args):
     return KeyVaultEkmClient(
         vault_url=vault_url,
         credential=credential,
+        api_version='2026-07-01-preview',
         verify_challenge_resource=False,
         **client_kwargs)
 
