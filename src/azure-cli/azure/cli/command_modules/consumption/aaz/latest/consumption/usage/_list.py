@@ -13,17 +13,29 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "consumption usage list",
-    is_preview=True,
 )
 class List(AAZCommand):
-    """List the details of Azure resource consumption, either as an invoice or within a billing period.
+    """List the usage details for the defined scope. Usage details are available via this API only for May 1, 2014 or later.
+
+    Note: Microsoft will be retiring the Consumption Usage Details API at some point in the future. We do not recommend taking a new dependency on this API. Please use the Cost Details API instead. See: https://learn.microsoft.com/en-us/rest/api/cost-management/generate-cost-details-report/create-operation
+
+    :example: List usage details for a subscription
+        az consumption usage list --scope subscriptions/00000000-0000-0000-0000-000000000000
+
+    :example: List usage details for a billing account
+        az consumption usage list --scope providers/Microsoft.Billing/billingAccounts/1234
+
+    :example: List usage details with expand and filter
+        az consumption usage list --scope subscriptions/00000000-0000-0000-0000-000000000000 --expand meterDetails,additionalInfo --filter "tags eq 'dev:tools'" --top 10
+
+    :example: List amortized-cost usage details
+        az consumption usage list --scope subscriptions/00000000-0000-0000-0000-000000000000 --metric amortizedcost
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2024-08-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.billing/billingperiods/{}/providers/microsoft.consumption/usagedetails", "2023-05-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.consumption/usagedetails", "2023-05-01"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.consumption/usagedetails", "2024-08-01"],
         ]
     }
 
@@ -44,25 +56,31 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.billing_period_name = AAZStrArg(
-            options=["-p", "--billing-period-name"],
-            help="Name of the billing period to get the usage details that associate with.",
+        _args_schema.scope = AAZStrArg(
+            options=["--scope"],
+            help="The fully qualified Azure Resource manager identifier of the resource.",
+            required=True,
         )
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
-            help="May be used to expand the properties/additionalProperties or properties/meterDetails within a list of usage details. By default, these fields are not included when listing usage details.",
+            help="May be used to expand the properties/additionalInfo or properties/meterDetails within a list of usage details. By default, these fields are not included when listing usage details.",
         )
         _args_schema.filter = AAZStrArg(
             options=["--filter"],
-            help="May be used to filter usageDetails by properties/usageEnd (Utc time), properties/usageStart (Utc time), properties/resourceGroup, properties/instanceName or properties/instanceId. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'.",
+            help="May be used to filter usageDetails by properties/resourceGroup, properties/resourceName, properties/resourceId, properties/chargeType, properties/reservationId, properties/publisherType or tags. The filter supports 'eq', 'lt', 'gt', 'le', 'ge', and 'and'. It does not currently support 'ne', 'or', or 'not'. Tag filter is a key value pair string where key and value is separated by a colon (:). PublisherType Filter accepts two values azure and marketplace and it is currently supported for Web Direct Offer Type",
+        )
+        _args_schema.metric = AAZStrArg(
+            options=["--metric"],
+            help="Allows to select different type of cost/usage records.",
+            enum={"actualcost": "actualcost", "amortizedcost": "amortizedcost", "usage": "usage"},
         )
         _args_schema.skiptoken = AAZStrArg(
             options=["--skiptoken"],
             help="Skiptoken is only used if a previous operation returned a partial result. If a previous response contains a nextLink element, the value of the nextLink element will include a skiptoken parameter that specifies a starting point to use for subsequent calls.",
         )
         _args_schema.top = AAZIntArg(
-            options=["-t", "--top"],
-            help="Maximum number of items to return. Value range: 1-1000.",
+            options=["--top"],
+            help="May be used to limit the number of results to the most recent N usageDetails.",
             fmt=AAZIntArgFormat(
                 maximum=1000,
                 minimum=1,
@@ -72,12 +90,7 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.billing_period_name) is not True
-        condition_1 = has_value(self.ctx.args.billing_period_name) and has_value(self.ctx.subscription_id)
-        if condition_0:
-            self.UsageDetailsList(ctx=self.ctx)()
-        if condition_1:
-            self.UsageDetailsListByBillingPeriod(ctx=self.ctx)()
+        self.UsageDetailsList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -101,13 +114,15 @@ class List(AAZCommand):
             session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [200]:
                 return self.on_200(session)
+            if session.http_response.status_code in [204]:
+                return self.on_204(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Consumption/usageDetails",
+                "/{scope}/providers/Microsoft.Consumption/usageDetails",
                 **self.url_parameters
             )
 
@@ -117,13 +132,14 @@ class List(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
+                    "scope", self.ctx.args.scope,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -145,7 +161,10 @@ class List(AAZCommand):
                     "$top", self.ctx.args.top,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "metric", self.ctx.args.metric,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2024-08-01",
                     required=True,
                 ),
             }
@@ -190,14 +209,21 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
+            )
+            _element.kind = AAZStrType(
+                flags={"required": True},
             )
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
             )
             _element.tags = AAZDictType(
                 flags={"read_only": True},
@@ -206,100 +232,217 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.value.Element.properties
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
+
+            disc_legacy = cls._schema_on_200.value.Element.discriminate_by("kind", "legacy")
+            disc_legacy.properties = AAZObjectType(
+                flags={"required": True, "client_flatten": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.discriminate_by("kind", "legacy").properties
             properties.account_name = AAZStrType(
                 serialized_name="accountName",
                 flags={"read_only": True},
             )
-            properties.additional_properties = AAZStrType(
-                serialized_name="additionalProperties",
+            properties.account_owner_id = AAZStrType(
+                serialized_name="accountOwnerId",
                 flags={"read_only": True},
             )
-            properties.billable_quantity = AAZFloatType(
-                serialized_name="billableQuantity",
+            properties.additional_info = AAZStrType(
+                serialized_name="additionalInfo",
                 flags={"read_only": True},
             )
-            properties.billing_period_id = AAZStrType(
-                serialized_name="billingPeriodId",
+            properties.benefit_id = AAZStrType(
+                serialized_name="benefitId",
+                flags={"read_only": True},
+            )
+            properties.benefit_name = AAZStrType(
+                serialized_name="benefitName",
+                flags={"read_only": True},
+            )
+            properties.billing_account_id = AAZStrType(
+                serialized_name="billingAccountId",
+                flags={"read_only": True},
+            )
+            properties.billing_account_name = AAZStrType(
+                serialized_name="billingAccountName",
+                flags={"read_only": True},
+            )
+            properties.billing_currency = AAZStrType(
+                serialized_name="billingCurrency",
+                flags={"read_only": True},
+            )
+            properties.billing_period_end_date = AAZStrType(
+                serialized_name="billingPeriodEndDate",
+                flags={"read_only": True},
+            )
+            properties.billing_period_start_date = AAZStrType(
+                serialized_name="billingPeriodStartDate",
+                flags={"read_only": True},
+            )
+            properties.billing_profile_id = AAZStrType(
+                serialized_name="billingProfileId",
+                flags={"read_only": True},
+            )
+            properties.billing_profile_name = AAZStrType(
+                serialized_name="billingProfileName",
+                flags={"read_only": True},
+            )
+            properties.charge_type = AAZStrType(
+                serialized_name="chargeType",
                 flags={"read_only": True},
             )
             properties.consumed_service = AAZStrType(
                 serialized_name="consumedService",
                 flags={"read_only": True},
             )
+            properties.cost = AAZFloatType(
+                flags={"read_only": True},
+            )
             properties.cost_center = AAZStrType(
                 serialized_name="costCenter",
                 flags={"read_only": True},
             )
-            properties.currency = AAZStrType(
+            properties.date = AAZStrType(
                 flags={"read_only": True},
             )
-            properties.department_name = AAZStrType(
-                serialized_name="departmentName",
+            properties.effective_price = AAZFloatType(
+                serialized_name="effectivePrice",
                 flags={"read_only": True},
             )
-            properties.instance_id = AAZStrType(
-                serialized_name="instanceId",
+            properties.frequency = AAZStrType(
                 flags={"read_only": True},
             )
-            properties.instance_location = AAZStrType(
-                serialized_name="instanceLocation",
+            properties.invoice_section = AAZStrType(
+                serialized_name="invoiceSection",
                 flags={"read_only": True},
             )
-            properties.instance_name = AAZStrType(
-                serialized_name="instanceName",
-                flags={"read_only": True},
-            )
-            properties.invoice_id = AAZStrType(
-                serialized_name="invoiceId",
-                flags={"read_only": True},
-            )
-            properties.is_estimated = AAZBoolType(
-                serialized_name="isEstimated",
+            properties.is_azure_credit_eligible = AAZBoolType(
+                serialized_name="isAzureCreditEligible",
                 flags={"read_only": True},
             )
             properties.meter_details = AAZObjectType(
                 serialized_name="meterDetails",
+                flags={"read_only": True},
             )
             properties.meter_id = AAZStrType(
                 serialized_name="meterId",
                 flags={"read_only": True},
             )
-            properties.pretax_cost = AAZFloatType(
-                serialized_name="pretaxCost",
+            properties.offer_id = AAZStrType(
+                serialized_name="offerId",
+                flags={"read_only": True},
+            )
+            properties.part_number = AAZStrType(
+                serialized_name="partNumber",
+                flags={"read_only": True},
+            )
+            properties.pay_g_price = AAZFloatType(
+                serialized_name="payGPrice",
+                flags={"read_only": True},
+            )
+            properties.plan_name = AAZStrType(
+                serialized_name="planName",
+                flags={"read_only": True},
+            )
+            properties.pricing_model = AAZStrType(
+                serialized_name="pricingModel",
                 flags={"read_only": True},
             )
             properties.product = AAZStrType(
                 flags={"read_only": True},
             )
-            properties.subscription_guid = AAZStrType(
-                serialized_name="subscriptionGuid",
+            properties.product_order_id = AAZStrType(
+                serialized_name="productOrderId",
+                flags={"read_only": True},
+            )
+            properties.product_order_name = AAZStrType(
+                serialized_name="productOrderName",
+                flags={"read_only": True},
+            )
+            properties.publisher_name = AAZStrType(
+                serialized_name="publisherName",
+                flags={"read_only": True},
+            )
+            properties.publisher_type = AAZStrType(
+                serialized_name="publisherType",
+                flags={"read_only": True},
+            )
+            properties.quantity = AAZFloatType(
+                flags={"read_only": True},
+            )
+            properties.reservation_id = AAZStrType(
+                serialized_name="reservationId",
+                flags={"read_only": True},
+            )
+            properties.reservation_name = AAZStrType(
+                serialized_name="reservationName",
+                flags={"read_only": True},
+            )
+            properties.resource_group = AAZStrType(
+                serialized_name="resourceGroup",
+                flags={"read_only": True},
+            )
+            properties.resource_id = AAZStrType(
+                serialized_name="resourceId",
+                flags={"read_only": True},
+            )
+            properties.resource_location = AAZStrType(
+                serialized_name="resourceLocation",
+                flags={"read_only": True},
+            )
+            properties.resource_name = AAZStrType(
+                serialized_name="resourceName",
+                flags={"read_only": True},
+            )
+            properties.service_info1 = AAZStrType(
+                serialized_name="serviceInfo1",
+                flags={"read_only": True},
+            )
+            properties.service_info2 = AAZStrType(
+                serialized_name="serviceInfo2",
+                flags={"read_only": True},
+            )
+            properties.subscription_id = AAZStrType(
+                serialized_name="subscriptionId",
                 flags={"read_only": True},
             )
             properties.subscription_name = AAZStrType(
                 serialized_name="subscriptionName",
                 flags={"read_only": True},
             )
-            properties.usage_end = AAZStrType(
-                serialized_name="usageEnd",
+            properties.term = AAZStrType(
                 flags={"read_only": True},
             )
-            properties.usage_quantity = AAZFloatType(
-                serialized_name="usageQuantity",
-                flags={"read_only": True},
-            )
-            properties.usage_start = AAZStrType(
-                serialized_name="usageStart",
+            properties.unit_price = AAZFloatType(
+                serialized_name="unitPrice",
                 flags={"read_only": True},
             )
 
-            meter_details = cls._schema_on_200.value.Element.properties.meter_details
+            meter_details = cls._schema_on_200.value.Element.discriminate_by("kind", "legacy").properties.meter_details
             meter_details.meter_category = AAZStrType(
                 serialized_name="meterCategory",
-                flags={"read_only": True},
-            )
-            meter_details.meter_location = AAZStrType(
-                serialized_name="meterLocation",
                 flags={"read_only": True},
             )
             meter_details.meter_name = AAZStrType(
@@ -310,178 +453,117 @@ class List(AAZCommand):
                 serialized_name="meterSubCategory",
                 flags={"read_only": True},
             )
-            meter_details.pretax_standard_rate = AAZFloatType(
-                serialized_name="pretaxStandardRate",
+            meter_details.service_family = AAZStrType(
+                serialized_name="serviceFamily",
                 flags={"read_only": True},
             )
-            meter_details.total_included_quantity = AAZFloatType(
-                serialized_name="totalIncludedQuantity",
-                flags={"read_only": True},
-            )
-            meter_details.unit = AAZStrType(
+            meter_details.unit_of_measure = AAZStrType(
+                serialized_name="unitOfMeasure",
                 flags={"read_only": True},
             )
 
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
-
-            return cls._schema_on_200
-
-    class UsageDetailsListByBillingPeriod(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Billing/billingPeriods/{billingPeriodName}/providers/Microsoft.Consumption/usageDetails",
-                **self.url_parameters
+            disc_modern = cls._schema_on_200.value.Element.discriminate_by("kind", "modern")
+            disc_modern.properties = AAZObjectType(
+                flags={"required": True, "client_flatten": True},
             )
 
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "billingPeriodName", self.ctx.args.billing_period_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "$expand", self.ctx.args.expand,
-                ),
-                **self.serialize_query_param(
-                    "$filter", self.ctx.args.filter,
-                ),
-                **self.serialize_query_param(
-                    "$skiptoken", self.ctx.args.skiptoken,
-                ),
-                **self.serialize_query_param(
-                    "$top", self.ctx.args.top,
-                ),
-                **self.serialize_query_param(
-                    "api-version", "2023-05-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
+            properties = cls._schema_on_200.value.Element.discriminate_by("kind", "modern").properties
+            properties.additional_info = AAZStrType(
+                serialized_name="additionalInfo",
                 flags={"read_only": True},
             )
-            _schema_on_200.value = AAZListType(
+            properties.benefit_id = AAZStrType(
+                serialized_name="benefitId",
                 flags={"read_only": True},
             )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
+            properties.benefit_name = AAZStrType(
+                serialized_name="benefitName",
                 flags={"read_only": True},
             )
-            _element.name = AAZStrType(
+            properties.billing_account_id = AAZStrType(
+                serialized_name="billingAccountId",
                 flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.tags = AAZDictType(
+            properties.billing_account_name = AAZStrType(
+                serialized_name="billingAccountName",
                 flags={"read_only": True},
             )
-            _element.type = AAZStrType(
+            properties.billing_currency_code = AAZStrType(
+                serialized_name="billingCurrencyCode",
                 flags={"read_only": True},
             )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.account_name = AAZStrType(
-                serialized_name="accountName",
+            properties.billing_period_end_date = AAZStrType(
+                serialized_name="billingPeriodEndDate",
                 flags={"read_only": True},
             )
-            properties.additional_properties = AAZStrType(
-                serialized_name="additionalProperties",
+            properties.billing_period_start_date = AAZStrType(
+                serialized_name="billingPeriodStartDate",
                 flags={"read_only": True},
             )
-            properties.billable_quantity = AAZFloatType(
-                serialized_name="billableQuantity",
+            properties.billing_profile_id = AAZStrType(
+                serialized_name="billingProfileId",
                 flags={"read_only": True},
             )
-            properties.billing_period_id = AAZStrType(
-                serialized_name="billingPeriodId",
+            properties.billing_profile_name = AAZStrType(
+                serialized_name="billingProfileName",
+                flags={"read_only": True},
+            )
+            properties.charge_type = AAZStrType(
+                serialized_name="chargeType",
                 flags={"read_only": True},
             )
             properties.consumed_service = AAZStrType(
                 serialized_name="consumedService",
                 flags={"read_only": True},
             )
+            properties.cost_allocation_rule_name = AAZStrType(
+                serialized_name="costAllocationRuleName",
+                flags={"read_only": True},
+            )
             properties.cost_center = AAZStrType(
                 serialized_name="costCenter",
                 flags={"read_only": True},
             )
-            properties.currency = AAZStrType(
+            properties.cost_in_billing_currency = AAZFloatType(
+                serialized_name="costInBillingCurrency",
                 flags={"read_only": True},
             )
-            properties.department_name = AAZStrType(
-                serialized_name="departmentName",
+            properties.cost_in_pricing_currency = AAZFloatType(
+                serialized_name="costInPricingCurrency",
                 flags={"read_only": True},
             )
-            properties.instance_id = AAZStrType(
-                serialized_name="instanceId",
+            properties.cost_in_usd = AAZFloatType(
+                serialized_name="costInUSD",
                 flags={"read_only": True},
             )
-            properties.instance_location = AAZStrType(
-                serialized_name="instanceLocation",
+            properties.customer_name = AAZStrType(
+                serialized_name="customerName",
+                flags={"read_only": True},
+            )
+            properties.customer_tenant_id = AAZStrType(
+                serialized_name="customerTenantId",
+                flags={"read_only": True},
+            )
+            properties.date = AAZStrType(
+                flags={"read_only": True},
+            )
+            properties.effective_price = AAZFloatType(
+                serialized_name="effectivePrice",
+                flags={"read_only": True},
+            )
+            properties.exchange_rate = AAZStrType(
+                serialized_name="exchangeRate",
+                flags={"read_only": True},
+            )
+            properties.exchange_rate_date = AAZStrType(
+                serialized_name="exchangeRateDate",
+                flags={"read_only": True},
+            )
+            properties.exchange_rate_pricing_to_billing = AAZFloatType(
+                serialized_name="exchangeRatePricingToBilling",
+                flags={"read_only": True},
+            )
+            properties.frequency = AAZStrType(
                 flags={"read_only": True},
             )
             properties.instance_name = AAZStrType(
@@ -492,22 +574,161 @@ class List(AAZCommand):
                 serialized_name="invoiceId",
                 flags={"read_only": True},
             )
-            properties.is_estimated = AAZBoolType(
-                serialized_name="isEstimated",
+            properties.invoice_section_id = AAZStrType(
+                serialized_name="invoiceSectionId",
                 flags={"read_only": True},
             )
-            properties.meter_details = AAZObjectType(
-                serialized_name="meterDetails",
+            properties.invoice_section_name = AAZStrType(
+                serialized_name="invoiceSectionName",
+                flags={"read_only": True},
+            )
+            properties.is_azure_credit_eligible = AAZBoolType(
+                serialized_name="isAzureCreditEligible",
+                flags={"read_only": True},
+            )
+            properties.market_price = AAZFloatType(
+                serialized_name="marketPrice",
+                flags={"read_only": True},
+            )
+            properties.meter_category = AAZStrType(
+                serialized_name="meterCategory",
+                flags={"read_only": True},
             )
             properties.meter_id = AAZStrType(
                 serialized_name="meterId",
                 flags={"read_only": True},
             )
-            properties.pretax_cost = AAZFloatType(
-                serialized_name="pretaxCost",
+            properties.meter_name = AAZStrType(
+                serialized_name="meterName",
+                flags={"read_only": True},
+            )
+            properties.meter_region = AAZStrType(
+                serialized_name="meterRegion",
+                flags={"read_only": True},
+            )
+            properties.meter_sub_category = AAZStrType(
+                serialized_name="meterSubCategory",
+                flags={"read_only": True},
+            )
+            properties.partner_earned_credit_applied = AAZStrType(
+                serialized_name="partnerEarnedCreditApplied",
+                flags={"read_only": True},
+            )
+            properties.partner_earned_credit_rate = AAZFloatType(
+                serialized_name="partnerEarnedCreditRate",
+                flags={"read_only": True},
+            )
+            properties.partner_name = AAZStrType(
+                serialized_name="partnerName",
+                flags={"read_only": True},
+            )
+            properties.partner_tenant_id = AAZStrType(
+                serialized_name="partnerTenantId",
+                flags={"read_only": True},
+            )
+            properties.pay_g_price = AAZFloatType(
+                serialized_name="payGPrice",
+                flags={"read_only": True},
+            )
+            properties.payg_cost_in_billing_currency = AAZFloatType(
+                serialized_name="paygCostInBillingCurrency",
+                flags={"read_only": True},
+            )
+            properties.payg_cost_in_usd = AAZFloatType(
+                serialized_name="paygCostInUSD",
+                flags={"read_only": True},
+            )
+            properties.previous_invoice_id = AAZStrType(
+                serialized_name="previousInvoiceId",
+                flags={"read_only": True},
+            )
+            properties.pricing_currency_code = AAZStrType(
+                serialized_name="pricingCurrencyCode",
+                flags={"read_only": True},
+            )
+            properties.pricing_model = AAZStrType(
+                serialized_name="pricingModel",
                 flags={"read_only": True},
             )
             properties.product = AAZStrType(
+                flags={"read_only": True},
+            )
+            properties.product_identifier = AAZStrType(
+                serialized_name="productIdentifier",
+                flags={"read_only": True},
+            )
+            properties.product_order_id = AAZStrType(
+                serialized_name="productOrderId",
+                flags={"read_only": True},
+            )
+            properties.product_order_name = AAZStrType(
+                serialized_name="productOrderName",
+                flags={"read_only": True},
+            )
+            properties.provider = AAZStrType(
+                flags={"read_only": True},
+            )
+            properties.publisher_id = AAZStrType(
+                serialized_name="publisherId",
+                flags={"read_only": True},
+            )
+            properties.publisher_name = AAZStrType(
+                serialized_name="publisherName",
+                flags={"read_only": True},
+            )
+            properties.publisher_type = AAZStrType(
+                serialized_name="publisherType",
+                flags={"read_only": True},
+            )
+            properties.quantity = AAZFloatType(
+                flags={"read_only": True},
+            )
+            properties.reseller_mpn_id = AAZStrType(
+                serialized_name="resellerMpnId",
+                flags={"read_only": True},
+            )
+            properties.reseller_name = AAZStrType(
+                serialized_name="resellerName",
+                flags={"read_only": True},
+            )
+            properties.reservation_id = AAZStrType(
+                serialized_name="reservationId",
+                flags={"read_only": True},
+            )
+            properties.reservation_name = AAZStrType(
+                serialized_name="reservationName",
+                flags={"read_only": True},
+            )
+            properties.resource_group = AAZStrType(
+                serialized_name="resourceGroup",
+                flags={"read_only": True},
+            )
+            properties.resource_location = AAZStrType(
+                serialized_name="resourceLocation",
+                flags={"read_only": True},
+            )
+            properties.resource_location_normalized = AAZStrType(
+                serialized_name="resourceLocationNormalized",
+                flags={"read_only": True},
+            )
+            properties.service_family = AAZStrType(
+                serialized_name="serviceFamily",
+                flags={"read_only": True},
+            )
+            properties.service_info1 = AAZStrType(
+                serialized_name="serviceInfo1",
+                flags={"read_only": True},
+            )
+            properties.service_info2 = AAZStrType(
+                serialized_name="serviceInfo2",
+                flags={"read_only": True},
+            )
+            properties.service_period_end_date = AAZStrType(
+                serialized_name="servicePeriodEndDate",
+                flags={"read_only": True},
+            )
+            properties.service_period_start_date = AAZStrType(
+                serialized_name="servicePeriodStartDate",
                 flags={"read_only": True},
             )
             properties.subscription_guid = AAZStrType(
@@ -518,52 +739,22 @@ class List(AAZCommand):
                 serialized_name="subscriptionName",
                 flags={"read_only": True},
             )
-            properties.usage_end = AAZStrType(
-                serialized_name="usageEnd",
+            properties.term = AAZStrType(
                 flags={"read_only": True},
             )
-            properties.usage_quantity = AAZFloatType(
-                serialized_name="usageQuantity",
+            properties.unit_of_measure = AAZStrType(
+                serialized_name="unitOfMeasure",
                 flags={"read_only": True},
             )
-            properties.usage_start = AAZStrType(
-                serialized_name="usageStart",
+            properties.unit_price = AAZFloatType(
+                serialized_name="unitPrice",
                 flags={"read_only": True},
             )
-
-            meter_details = cls._schema_on_200.value.Element.properties.meter_details
-            meter_details.meter_category = AAZStrType(
-                serialized_name="meterCategory",
-                flags={"read_only": True},
-            )
-            meter_details.meter_location = AAZStrType(
-                serialized_name="meterLocation",
-                flags={"read_only": True},
-            )
-            meter_details.meter_name = AAZStrType(
-                serialized_name="meterName",
-                flags={"read_only": True},
-            )
-            meter_details.meter_sub_category = AAZStrType(
-                serialized_name="meterSubCategory",
-                flags={"read_only": True},
-            )
-            meter_details.pretax_standard_rate = AAZFloatType(
-                serialized_name="pretaxStandardRate",
-                flags={"read_only": True},
-            )
-            meter_details.total_included_quantity = AAZFloatType(
-                serialized_name="totalIncludedQuantity",
-                flags={"read_only": True},
-            )
-            meter_details.unit = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
 
             return cls._schema_on_200
+
+        def on_204(self, session):
+            pass
 
 
 class _ListHelper:
